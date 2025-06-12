@@ -28,28 +28,20 @@ const DiscountSchema = new mongoose.Schema({
     eventId: { type: String, required: false, default: null },
     percentage: {
         type: Number,
-        required: function () {
-            return !this.eventId;
-        },
+        required: false,
     },
     minimumAmount: {
         type: Number,
-        required: function () {
-            return !this.eventId;
-        },
+        required: false,
         default: 0,
     },
     startDate: {
         type: Date,
-        required: function () {
-            return !this.eventId;
-        },
+        required: false,
     },
     endDate: {
         type: Date,
-        required: function () {
-            return !this.eventId;
-        },
+        required: false,
     },
 }, { _id: false, timestamps: true });
 

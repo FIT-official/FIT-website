@@ -3,7 +3,7 @@ import { useUser } from "@clerk/nextjs";
 import Image from "next/image"
 import { RxCross1 } from "react-icons/rx"
 import { BsPlus } from "react-icons/bs"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
     SHOP_CATEGORIES,
     SHOP_SUBCATEGORIES,
@@ -11,8 +11,9 @@ import {
     PRINT_SUBCATEGORIES,
 } from "@/lib/categories"
 import currencyCodes from "currency-codes"
+import { useRouter } from "next/navigation";
 
-function ProductForm({ mode, product = null }) {
+function ProductForm({ mode = "Create", product = null, setProduct, setMode }) {
     const { user, isLoaded } = useUser()
     const [events, setEvents] = useState([])
     const formattedMode = mode
@@ -24,20 +25,21 @@ function ProductForm({ mode, product = null }) {
         .filter((v, i, a) => a.indexOf(v) === i)
         .sort();
 
-    const [localImageFiles, setLocalImageFiles] = useState([]);
-    const [localModelFiles, setLocalModelFiles] = useState([]);
-    const [localImagePreviews, setLocalImagePreviews] = useState([]);
-    const [localModelPreviews, setLocalModelPreviews] = useState([]);
+    const imageInputRef = useRef(null);
+    const modelInputRef = useRef(null);
+    const [pendingImages, setPendingImages] = useState([]);
+    const [pendingModels, setPendingModels] = useState([]);
+    const { router } = useRouter();
 
     const defaultForm = {
         name: "",
         description: "",
-        imagePreviews: [],
-        modelUrls: [],
+        images: [],
+        downloadableAssets: [],
         productType: "shop",
         category: 0,
         subcategory: 0,
-        presentmentAmount: "",
+        presentmentAmount: 0,
         presentmentCurrency: "SGD",
         priceCredits: "",
         stock: 1,
@@ -81,29 +83,30 @@ function ProductForm({ mode, product = null }) {
                 const locale = navigator.language || navigator.languages[0] || "en-SG"
                 const mod = await import("locale-currency")
                 const detected = mod.getCurrency(locale)
-                if (detected && allCurrencies.includes(detected)) {
-                    setForm(f => ({ ...f, presentmentCurrency: detected }))
-                }
-            } catch (e) {
-                setForm(f => ({ ...f, presentmentCurrency: "SGD" }))
-            }
+                setForm(f => {
+                    // Only set if presentmentCurrency is still the default
+                    if (f.presentmentCurrency === "SGD" && detected && allCurrencies.includes(detected)) {
+                        return { ...f, presentmentCurrency: detected }
+                    }
+                    return f
+                })
+            } catch (e) { }
         }
         setCurrencyFromLocale()
     }, [])
 
     useEffect(() => {
         if (product) {
-            setForm({ ...defaultForm, ...product });
-            setLocalImagePreviews([]);
-            setLocalModelPreviews([]);
+            setForm(f => ({
+                ...defaultForm,
+                ...product,
+                presentmentAmount: product.price?.presentmentAmount ?? "",
+                presentmentCurrency: product.price?.presentmentCurrency ?? "SGD",
+                images: product.images || [],
+                downloadableAssets: product.downloadableAssets || [],
+            }));
         }
     }, [product]);
-
-    useEffect(() => {
-        return () => {
-            localImagePreviews.forEach(url => URL.revokeObjectURL(url));
-        };
-    }, [localImagePreviews]);
 
     const handleChange = e => {
         const { name, value, type, checked } = e.target;
@@ -147,39 +150,39 @@ function ProductForm({ mode, product = null }) {
     };
 
     const handleImageChange = (e) => {
-        const files = Array.from(e.target.files);
-        if (!files.length) return;
-
-        setLocalImageFiles(prev => [...prev, ...files]);
-        setLocalImagePreviews(prev => [
-            ...prev,
-            ...files.map(file => URL.createObjectURL(file))
-        ]);
+        setPendingImages(prev => [...prev, ...Array.from(e.target.files)]);
     };
 
     const handleModelChange = (e) => {
-        const files = Array.from(e.target.files);
-        if (!files.length) return;
-
-        setLocalModelFiles(prev => [...prev, ...files]);
-        setLocalModelPreviews(prev => [
-            ...prev,
-            ...files.map(file => file.name)
-        ]);
+        setPendingModels(prev => [...prev, ...Array.from(e.target.files)]);
     };
 
-    const handleRemoveImage = (idx) => {
-        setLocalImageFiles(prev => prev.filter((_, i) => i !== idx));
-        setLocalImagePreviews(prev => prev.filter((_, i) => i !== idx));
+    const handleRemoveImage = idx => {
+        if (idx < (form.images?.length || 0)) {
+            setForm(f => ({
+                ...f,
+                images: f.images.filter((_, i) => i !== idx)
+            }));
+        } else {
+            setPendingImages(pendingImages => pendingImages.filter((_, i) => i !== (idx - (form.images?.length || 0))));
+        }
+        if (imageInputRef.current) {
+            imageInputRef.current.value = "";
+        }
     };
 
-    const handleRemoveModel = (idx) => {
-        setLocalModelFiles(prev => prev.filter((_, i) => i !== idx));
-        setLocalModelPreviews(prev => prev.filter((_, i) => i !== idx));
-        setForm(f => ({
-            ...f,
-            modelUrls: f.modelUrls.filter((_, i) => i !== idx)
-        }));
+    const handleRemoveModel = idx => {
+        if (idx < (form.downloadableAssets?.length || 0)) {
+            setForm(f => ({
+                ...f,
+                downloadableAssets: f.downloadableAssets.filter((_, i) => i !== idx)
+            }));
+        } else {
+            setPendingModels(pendingModels => pendingModels.filter((_, i) => i !== (idx - (form.downloadableAssets?.length || 0))));
+        }
+        if (modelInputRef.current) {
+            modelInputRef.current.value = "";
+        }
     };
 
     const handleAddVariant = (e) => {
@@ -204,71 +207,32 @@ function ProductForm({ mode, product = null }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!isLoaded) return;
-
-        // 1. Upload images
-        let imageUrls = [];
-        if (localImageFiles.length > 0) {
+        // 1. Upload images if any new ones selected
+        let uploadedImages = [];
+        if (pendingImages.length > 0) {
             const formData = new FormData();
-            localImageFiles.forEach(file => formData.append('files', file));
-            const res = await fetch('/api/upload/images', {
-                method: 'POST',
-                body: formData,
-            });
-            const { urls } = await res.json();
-            imageUrls = urls;
+            pendingImages.forEach(file => formData.append('files', file));
+            const res = await fetch('/api/upload/images', { method: 'POST', body: formData });
+            const { files } = await res.json();
+            uploadedImages = files || [];
         }
-
-        // 2. Upload models
-        let modelUrls = [];
-        if (localModelFiles.length > 0) {
+        // 2. Upload models if any new ones selected
+        let uploadedModels = [];
+        if (pendingModels.length > 0) {
             const formData = new FormData();
-            localModelFiles.forEach(file => formData.append('files', file));
-            const res = await fetch('/api/upload/models', {
-                method: 'POST',
-                body: formData,
-            });
-            const { urls } = await res.json();
-            modelUrls = urls;
+            pendingModels.forEach(file => formData.append('files', file));
+            const res = await fetch('/api/upload/models', { method: 'POST', body: formData });
+            const { files } = await res.json();
+            uploadedModels = files || [];
         }
 
-        let finalModelUrls = [...form.modelUrls]; // existing ones
-        if (modelUrls.length > 0) {
-            finalModelUrls = [...form.modelUrls, ...modelUrls];
-        }
-
-        // If editing, delete removed images/models from S3
-        if (product) {
-            const removedImages = product.imagePreviews.filter(
-                url => !form.imagePreviews.includes(url)
-            );
-            for (const url of removedImages) {
-                await fetch("/api/upload/images", {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url }),
-                });
-            }
-
-            const removedModels = product.modelUrls.filter(
-                url => !form.modelUrls.includes(url)
-            );
-            for (const url of removedModels) {
-                await fetch("/api/upload/models", {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url }),
-                });
-            }
-        }
-
-        // 3. Prepare payload
         const payload = {
             creatorUserId: user?.id,
             creatorFullName: user?.fullName,
             name: form.name,
             description: form.description,
-            images: imageUrls,
-            downloadableAssets: finalModelUrls,
+            images: [...form.images, ...uploadedImages],
+            downloadableAssets: [...form.downloadableAssets, ...uploadedModels],
             price: {
                 presentmentCurrency: form.presentmentCurrency,
                 presentmentAmount: Number(form.presentmentAmount),
@@ -314,9 +278,15 @@ function ProductForm({ mode, product = null }) {
             } : {},
         };
 
+        const isEditing = !!(product && (product._id));
+        const method = isEditing ? "PUT" : "POST";
+        const url = isEditing
+            ? `/api/product?productId=${product._id}`
+            : "/api/product";
+
         try {
-            const res = await fetch('/api/product', {
-                method: 'POST',
+            const res = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
@@ -324,12 +294,18 @@ function ProductForm({ mode, product = null }) {
             if (!res.ok) {
                 alert(data.error || "Failed to create product");
             } else {
-                alert("Product created successfully!");
-                setForm({ ...defaultForm });
-                setLocalImageFiles([]);
-                setLocalImagePreviews([]);
-                setLocalModelFiles([]);
-                setLocalModelPreviews([]);
+                if (!res.ok) {
+                    alert(data.error || "Failed to create product");
+                } else {
+                    setPendingImages([]);
+                    setPendingModels([]);
+                    if (imageInputRef.current) imageInputRef.current.value = "";
+                    if (modelInputRef.current) modelInputRef.current.value = "";
+                    alert(isEditing ? "Product updated successfully!" : "Product created successfully!");
+                    setForm({ ...defaultForm });
+                    if (typeof setProduct === "function") setProduct(null);
+                    if (typeof setMode === "function") setMode("Create");
+                }
             }
         } catch (err) {
             alert("Network error: " + err.message);
@@ -377,31 +353,38 @@ function ProductForm({ mode, product = null }) {
                 <div className="flex flex-col gap-2 w-full">
                     <label className="flex">Product Images</label>
                     <div className=" flex gap-2 flex-wrap">
-                        {localImagePreviews.map((src, idx) => (
-                            <div key={idx} className='relative'>
-                                <Image
-                                    src={src}
-                                    alt={`Preview ${idx + 1}`}
-                                    loading="lazy"
-                                    width={80}
-                                    height={80}
-                                    quality={20}
-                                    className="w-20 h-20 object-cover rounded-sm border-[0.5px] border-text/20"
-                                />
-                                <RxCross1
-                                    className="absolute top-1 right-1 cursor-pointer  p-0.5"
-                                    size={14}
-                                    onClick={() => handleRemoveImage(idx)}
-                                />
-                            </div>
-                        ))}
+                        {[...(form.images || []), ...pendingImages].map((item, idx) => {
+                            const isPending = idx >= (form.images?.length || 0);
+                            return (
+                                <div key={idx} className='relative'>
+                                    <Image
+                                        src={
+                                            isPending
+                                                ? URL.createObjectURL(item)
+                                                : `/api/proxy?key=${encodeURIComponent(item)}`
+                                        }
+                                        alt={`Preview ${idx + 1}`}
+                                        loading="lazy"
+                                        width={80}
+                                        height={80}
+                                        quality={20}
+                                        className="w-20 h-20 object-cover rounded-sm border-[0.5px] border-text/20"
+                                    />
+                                    <RxCross1
+                                        className="absolute top-1 right-1 cursor-pointer p-0.5"
+                                        size={14}
+                                        onClick={() => handleRemoveImage(idx)}
+                                    />
+                                </div>
+                            );
+                        })}
                         <label
                             className={`w-20 h-20 flex items-center justify-center rounded-sm border border-dashed
-                            ${form.imagePreviews.length >= 7 ? "opacity-60 cursor-not-allowed " : "cursor-pointer"}
+                            ${form.images.length >= 7 ? "opacity-60 cursor-not-allowed " : "cursor-pointer"}
                         `}
                             style={{ minWidth: 80, minHeight: 80 }}
                         >
-                            {form.imagePreviews.length >= 7 ? (
+                            {form.images.length >= 7 ? (
                                 <span className="text-[10px] text-center px-1">MAX PHOTOS</span>
                             ) : (
                                 <BsPlus className="text-2xl pointer-events-none" />
@@ -412,7 +395,8 @@ function ProductForm({ mode, product = null }) {
                                 multiple
                                 onChange={handleImageChange}
                                 style={{ display: "none" }}
-                                disabled={form.imagePreviews.length >= 7}
+                                disabled={form.images.length >= 7}
+                                ref={imageInputRef}
                             />
                         </label>
                     </div>
@@ -429,19 +413,36 @@ function ProductForm({ mode, product = null }) {
                             multiple
                             onChange={handleModelChange}
                             style={{ display: "none" }}
+                            ref={modelInputRef}
                         />
                     </label>
                     <ul className="flex flex-col text-xs">
-                        {localModelPreviews.map((name, idx) => (
-                            <div className='gap-2 flex flex-row items-center justify-between' key={idx}>
-                                <li className='flex truncate' title={typeof name === "string" ? name : ""}>
-                                    {typeof name === "string"
-                                        ? (name.startsWith("http") ? name.substring(name.lastIndexOf('/') + 1) : name)
-                                        : ""}
-                                </li>
-                                <RxCross1 className='flex cursor-pointer' onClick={() => handleRemoveModel(idx)} />
-                            </div>
-                        ))}
+                        {[...(form.downloadableAssets || []), ...pendingModels].map((item, idx) => {
+                            const isPending = idx >= (form.downloadableAssets?.length || 0);
+                            return (
+                                <div className='gap-2 flex flex-row items-center justify-between' key={idx}>
+                                    <li className='flex truncate' title={isPending ? item.name : item}>
+                                        {isPending ? (
+                                            <span className="underline">{item.name}</span>
+                                        ) : (
+                                            <a
+                                                href={`/api/proxy?key=${encodeURIComponent(item)}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="underline"
+                                                download
+                                            >
+                                                {item.replace(/^models\//, "")}
+                                            </a>
+                                        )}
+                                    </li>
+                                    <RxCross1
+                                        className='flex cursor-pointer'
+                                        onClick={() => handleRemoveModel(idx)}
+                                    />
+                                </div>
+                            );
+                        })}
                     </ul>
                 </div>
 

@@ -6,18 +6,18 @@ import { auth } from "@clerk/nextjs/server";
 import { sanitizeString, isValidUrl } from "@/utils/validate";
 
 async function generateUniqueSlug(baseName) {
-    let slug = slugify(baseName);
-    let exists = await Product.findOne({ slug });
+    let baseSlug = slugify(baseName);
+    let slug = baseSlug;
     let attempt = 1;
+    let exists = await Product.findOne({ slug });
     while (exists) {
-        slug = slugify(baseName) + `-${attempt}`;
-        exists = await Product.findOne({ slug });
         attempt++;
-        if (attempt > 10) break;
+        slug = `${baseSlug}-${attempt}`;
+        exists = await Product.findOne({ slug });
+        if (attempt > 100) break; // avoid infinite loop
     }
     return slug;
 }
-
 
 export async function POST(req) {
     try {
@@ -28,16 +28,20 @@ export async function POST(req) {
         await connectToDatabase();
         const body = await req.json();
 
-        if (
-            !body.creatorUserId ||
-            !body.creatorFullName ||
-            !body.name ||
-            !body.description ||
-            !body.images ||
-            !body.price ||
-            !body.productType
-        ) {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        // Check for missing required fields and log them
+        const requiredFields = [
+            "creatorUserId",
+            "creatorFullName",
+            "name",
+            "description",
+            "images",
+            "price",
+            "productType"
+        ];
+        const missingFields = requiredFields.filter(field => !body[field]);
+        if (missingFields.length > 0) {
+            console.log("Missing required fields:", missingFields);
+            return NextResponse.json({ error: "Missing required fields", missingFields }, { status: 400 });
         }
 
         const name = sanitizeString(body.name).trim();
@@ -49,12 +53,18 @@ export async function POST(req) {
             return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
         }
 
-        if (!Array.isArray(body.images) || body.images.some(url => !isValidUrl(url))) {
+        if (
+            !Array.isArray(body.images) ||
+            body.images.some(key => typeof key !== "string" || !key.trim())
+        ) {
             return NextResponse.json({ error: "Invalid images array" }, { status: 400 });
         }
 
-        if (body.downloadableAssets && (!Array.isArray(body.downloadableAssets) || body.downloadableAssets.some(url => !isValidUrl(url)))) {
-            return NextResponse.json({ error: "Invalid downloadableAssets array" }, { status: 400 });
+        if (
+            !Array.isArray(body.downloadableAssets) ||
+            body.downloadableAssets.some(key => typeof key !== "string" || !key.trim())
+        ) {
+            return NextResponse.json({ error: "Invalid images array" }, { status: 400 });
         }
 
         if (typeof body.price !== "object" || isNaN(Number(body.price.presentmentAmount))) {
@@ -81,6 +91,90 @@ export async function POST(req) {
         }
 
         return NextResponse.json({ success: true, product }, { status: 201 });
+    } catch (err) {
+        console.error(err);
+        return NextResponse.json({ error: "Server error" }, { status: 500 });
+    }
+}
+
+export async function PUT(req) {
+    try {
+        const { userId } = await auth();
+        if (!userId)
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+        await connectToDatabase();
+        const body = await req.json();
+
+        const { searchParams } = new URL(req.url);
+        const productId = searchParams.get("productId");
+        if (!productId) {
+            return NextResponse.json({ error: "Missing productId" }, { status: 400 });
+        }
+
+
+        const requiredFields = [
+            "creatorUserId",
+            "creatorFullName",
+            "name",
+            "description",
+            "images",
+            "price",
+            "productType"
+        ];
+        const missingFields = requiredFields.filter(field => !body[field]);
+        if (missingFields.length > 0) {
+            return NextResponse.json({ error: "Missing required fields", missingFields }, { status: 400 });
+        }
+
+        const name = sanitizeString(body.name).trim();
+        const description = sanitizeString(body.description).trim();
+        const creatorFullName = sanitizeString(body.creatorFullName).trim();
+        const productType = sanitizeString(body.productType).trim();
+
+        if (!["shop", "print"].includes(productType)) {
+            return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
+        }
+
+        if (
+            !Array.isArray(body.images) ||
+            body.images.some(key => typeof key !== "string" || !key.trim())
+        ) {
+            return NextResponse.json({ error: "Invalid images array" }, { status: 400 });
+        }
+
+        if (
+            !Array.isArray(body.downloadableAssets) ||
+            body.downloadableAssets.some(key => typeof key !== "string" || !key.trim())
+        ) {
+            return NextResponse.json({ error: "Invalid images array" }, { status: 400 });
+        }
+
+        if (typeof body.price !== "object" || isNaN(Number(body.price.presentmentAmount))) {
+            return NextResponse.json({ error: "Invalid price" }, { status: 400 });
+        }
+
+        // Optionally update slug if name changed
+        let slug = body.slug;
+        if (body.name) {
+            slug = await generateUniqueSlug(name);
+        }
+
+        const update = {
+            ...body,
+            name,
+            description,
+            creatorFullName,
+            productType,
+            slug,
+        };
+
+        const updated = await Product.findByIdAndUpdate(productId, update, { new: true });
+        if (!updated) {
+            return NextResponse.json({ error: "Product not found" }, { status: 404 });
+        }
+
+        return NextResponse.json({ success: true, product: updated }, { status: 200 });
     } catch (err) {
         console.error(err);
         return NextResponse.json({ error: "Server error" }, { status: 500 });

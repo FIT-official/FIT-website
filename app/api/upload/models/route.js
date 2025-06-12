@@ -25,7 +25,7 @@ export async function POST(req) {
             return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
         }
 
-        const urls = [];
+        const filenames = [];
 
         for (const file of files) {
             if (file.size > MAX_SIZE) {
@@ -56,11 +56,10 @@ export async function POST(req) {
                 })
             );
 
-            const publicUrl = `https://${BUCKET_NAME}.s3.amazonaws.com/${filename}`;
-            urls.push(publicUrl);
+            filenames.push(filename);
         }
 
-        return NextResponse.json({ urls });
+        return NextResponse.json({ files: filenames });
     } catch (error) {
         return NextResponse.json({ error: error.message || "Model upload failed" }, { status: 500 });
     }
