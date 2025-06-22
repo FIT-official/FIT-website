@@ -3,8 +3,6 @@ import Link from 'next/link'
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useSignUp } from '@clerk/nextjs'
 import { useState } from 'react'
-import { sign } from 'crypto'
-// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 function SignUpForm({ setVerifying }) {
     const { isLoaded, signUp } = useSignUp()
@@ -16,23 +14,6 @@ function SignUpForm({ setVerifying }) {
     const [showPassword, setShowPassword] = useState(false)
     const [signUpMethod, setSignUpMethod] = useState('email')
 
-    // const signUpWith = (strategy) => {
-    //     return signUp
-    //         .authenticateWithRedirect({
-    //             strategy,
-    //             redirectUrl: '/sign-up/sso-callback',
-    //             redirectUrlComplete: '/dashboard',
-    //         })
-    //         .then((res) => {
-    //             console.log(res)
-    //         })
-    //         .catch((err) => {
-    //             // See https://clerk.com/docs/custom-flows/error-handling
-    //             // for more info on error handling
-    //             console.log(err.errors)
-    //             console.error(err, null, 2)
-    //         })
-    // }
 
     async function onSubmit(ev) {
         ev.preventDefault()

@@ -180,3 +180,48 @@ export async function PUT(req) {
         return NextResponse.json({ error: "Server error" }, { status: 500 });
     }
 }
+
+export async function GET(req) {
+    try {
+        await connectToDatabase();
+        const { searchParams } = new URL(req.url);
+
+        // Support filtering by productType
+        const productType = searchParams.get("productType");
+
+        // Support filtering by a comma-separated list of ids
+        const ids = searchParams.get("ids");
+
+        // Support filtering by a single productId
+        const productId = searchParams.get("productId");
+
+        let filter = {};
+
+        if (productType) {
+            filter.productType = productType;
+        }
+
+        if (ids) {
+            const idArr = ids.split(",").map(id => id.trim()).filter(Boolean);
+            if (idArr.length > 0) {
+                filter._id = { $in: idArr };
+            }
+        }
+
+        if (productId) {
+            filter._id = productId;
+        }
+
+        const products = await Product.find(filter).lean();
+
+        // If querying by productId, return a single product object for convenience
+        if (productId) {
+            return NextResponse.json({ product: products[0] || null }, { status: 200 });
+        }
+
+        return NextResponse.json({ products }, { status: 200 });
+    } catch (err) {
+        console.error(err);
+        return NextResponse.json({ error: "Server error" }, { status: 500 });
+    }
+}

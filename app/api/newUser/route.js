@@ -30,6 +30,7 @@ const handler = createWebhooksHandler({
                 default_payment_method: pm.id,
                 trial_period_days: 14,
                 items: [{ price: priceId }],
+                proration_behavior: 'always_invoice',
             })
 
             // console.log('Stripe subscription created:', subscription.id)
