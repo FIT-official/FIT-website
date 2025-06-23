@@ -185,14 +185,10 @@ export async function GET(req) {
     try {
         await connectToDatabase();
         const { searchParams } = new URL(req.url);
-
-        // Support filtering by productType
         const productType = searchParams.get("productType");
-
-        // Support filtering by a comma-separated list of ids
         const ids = searchParams.get("ids");
-
-        // Support filtering by a single productId
+        const productCategory = searchParams.get("productCategory");
+        const productSubCategory = searchParams.get("productSubCategory");
         const productId = searchParams.get("productId");
 
         let filter = {};
@@ -212,9 +208,17 @@ export async function GET(req) {
             filter._id = productId;
         }
 
+        if (productCategory && productSubCategory) {
+            filter.productCategory = productCategory;
+            filter.productSubCategory = productSubCategory;
+        } else if (productCategory) {
+            filter.productCategory = productCategory;
+        } else {
+            return NextResponse.json({ error: "Missing productCategory or productSubCategory" }, { status: 400 });
+        }
+
         const products = await Product.find(filter).lean();
 
-        // If querying by productId, return a single product object for convenience
         if (productId) {
             return NextResponse.json({ product: products[0] || null }, { status: 200 });
         }
