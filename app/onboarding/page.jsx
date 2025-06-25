@@ -8,6 +8,7 @@ function Onboarding() {
     const { user, isLoaded } = useUser()
     const router = useRouter()
     const [submitted, setSubmitted] = useState(false)
+    const [onboardingStage, setOnboardingStage] = useState('intro')
     const [error, setError] = useState(null)
 
     useEffect(() => {
@@ -40,12 +41,20 @@ function Onboarding() {
     }
 
     return (
-        <div className="flex flex-col h-screen w-screen items-center justify-center">
-            <div>Onboarding</div>
-            <form onSubmit={handleSubmit}>
-                <button type="submit">Submit</button>
-            </form>
-        </div>
+        <form onSubmit={handleSubmit} className='flex flex-col w-full items-center h-[92vh] justify-center border-b border-borderColor px-8 gap-4'>
+            <h1>Welcome to FIT!</h1>
+            <p className='w-2/3 text-center flex'>
+                FixItTodaySG is a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration. We offer a comprehensive suite of services including 3D printing, printer maintenance, filament supply, and electronics sourcing- catering to individuals, educators, and organisations seeking reliable prototyping and fabrication support.
+            </p>
+            {onboardingStage === 'complete' && (
+                <div className='flex w-1/3'>
+                    <button type="submit" className='authButton2'>Submit</button>
+                </div>
+            )}
+
+
+        </form>
+
     )
 }
 

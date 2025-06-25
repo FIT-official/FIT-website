@@ -41,6 +41,8 @@ export async function POST(req) {
     const domain = process.env.NGROK_URL || process.env.NEXT_PUBLIC_BASE_URL;
 
     const line_items = [];
+    const updatedCart = [];
+
     for (const item of user.cart) {
         try {
             const productResponse = await fetchProductDetails(item.productId);
@@ -58,6 +60,7 @@ export async function POST(req) {
             const royaltyFee = deliveryTypeObj?.royaltyFee || 0;
 
             let deliveryFee = royaltyFee;
+
             if (item.chosenDeliveryType === "singpost") {
                 const weight_kg = product.dimensions?.weight || 0;
                 const dimensions_mm = [
@@ -98,6 +101,13 @@ export async function POST(req) {
                     quantity: 1,
                 });
             }
+
+            updatedCart.push({
+                ...item.toObject?.() || { ...item },
+                price: price + deliveryFee,
+                basePrice: price,
+                deliveryFee,
+            });
         } catch (error) {
             console.error(
                 `Error fetching product details for ${item.productId}:`,
@@ -110,6 +120,9 @@ export async function POST(req) {
             return NextResponse.json({ error: errorMessage }, { status: 500 });
         }
     }
+
+    user.cart = updatedCart;
+    await user.save();
 
     try {
         const session = await stripe.checkout.sessions.create({

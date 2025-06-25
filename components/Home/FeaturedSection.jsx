@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react';
-import ButtonLink from './Buttons/ButtonLink'
+import ButtonLink from '../Buttons/ButtonLink';
 import { GoChevronLeft, GoChevronRight } from 'react-icons/go'
 
 function FeaturedSection() {
@@ -42,12 +42,15 @@ function FeaturedSection() {
   }, []);
 
   return (
-    <div className='flex w-full min-h-[75vh] py-20 items-center justify-center px-12 md:px-24'>
+    <div className='section'>
       <div className='flex flex-col md:flex-row w-full gap-20'>
-        <div className='flex flex-col gap-8 w-full md:w-[40%]'>
-          <h1>
-            Popular Prints
-          </h1>
+        <div className='flex flex-col gap-8 w-full md:w-[40%] mt-4'>
+          <div className='flex flex-col gap-2'>
+            <h3>Featured</h3>
+            <h1>
+              Popular Prints
+            </h1>
+          </div>
           <p className='w-full text-pretty flex'>
             Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quam eum commodi libero, dicta illum ducimus natus. Tenetur, velit eveniet inventore voluptatum magnam perspiciatis perferendis nostrum accusantium consectetur provident quidem nam.
           </p>
@@ -60,25 +63,25 @@ function FeaturedSection() {
               style={{ transform: `translateX(${idx * -420}px)` }}
             >
               {items.length > 0 ? items.map((item, index) => (
-                <div key={index} className='flex flex-col w-[400px] aspect-square bg-gray-200 p-4'>
+                <div key={index} className='flex flex-col w-[400px] aspect-square not-last-of-type:p-4'>
                   <Image src={item.imageUrl} alt={item.name} className='w-full h-48 object-cover rounded-md mb-4' />
                   <h2 className='text-lg font-semibold'>{item.name}</h2>
-                  <p className='text-sm text-gray-600'>{item.description}</p>
+                  <p className='text-sm '>{item.description}</p>
                   <span className='text-xl font-bold mt-2'>${item.price}</span>
                 </div>
               )) : (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className='flex w-[400px]  aspect-square bg-borderColor' />
+                  <div key={i} className='flex w-[400px] aspect-square bg-borderColor' />
                 ))
               )}
             </div>
           </div>
           <div className='flex gap-4 w-full md:justify-end flex-row justify-between items-center'>
-            <button onClick={prevItem} className='cursor-pointer'>
-              <GoChevronLeft size={20} />
+            <button onClick={prevItem} className='toggleXbutton'>
+              <GoChevronLeft size={24} />
             </button>
-            <button onClick={nextItem} className='cursor-pointer'>
-              <GoChevronRight size={20} />
+            <button onClick={nextItem} className='toggleXbutton'>
+              <GoChevronRight size={24} />
             </button>
           </div>
         </div>

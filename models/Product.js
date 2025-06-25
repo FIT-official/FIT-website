@@ -24,6 +24,13 @@ const ReviewSchema = new mongoose.Schema(
     { timestamps: true }
 )
 
+const SaleSchema = new mongoose.Schema(
+    {
+        userId: { type: String, required: true },
+        quantity: { type: Number, required: true, min: 1 },
+        price: { type: Number, required: true, min: 0 },
+    }, { timestamps: true })
+
 const DiscountSchema = new mongoose.Schema({
     eventId: { type: String, required: false, default: null },
     percentage: {
@@ -74,7 +81,7 @@ const ProductSchema = new mongoose.Schema(
         },
         downloads: { type: Number, default: 0 },
         prints: { type: Number, default: 0 },
-        numberSold: { type: Number, default: 0 },
+        sales: { type: [SaleSchema], default: [] },
         reviews: { type: [ReviewSchema], default: [] },
         discount: { type: DiscountSchema, default: {} },
         likes: { type: [String], default: [] },

@@ -3,21 +3,35 @@ import Link from 'next/link'
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useSignUp } from '@clerk/nextjs'
 import { useState } from 'react'
+import PasswordField from './PasswordField'
+import EmailField from './EmailField'
+import AuthDivider from './AuthDivider'
+import { FaGoogle } from 'react-icons/fa'
+import { GoChevronLeft, GoChevronRight } from 'react-icons/go'
+import Tier from './Tier'
+import { IoMdLock } from 'react-icons/io'
+import Error from './Error'
 
 function SignUpForm({ setVerifying }) {
     const { isLoaded, signUp } = useSignUp()
     const stripe = useStripe()
     const elements = useElements()
+
     const [priceId, setPriceId] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [showPassword, setShowPassword] = useState(false)
+    const [error, setError] = useState('')
+
+    const [loading, setLoading] = useState(false)
     const [signUpMethod, setSignUpMethod] = useState('email')
+    const [signUpStage, setSignUpStage] = useState('tier_selection')
 
 
-    async function onSubmit(ev) {
+    async function handleSubmit(ev) {
         ev.preventDefault()
         if (!isLoaded && !signUp) return null
+        setLoading(true);
+        setError('');
         let cardToken = ''
 
         try {
@@ -33,7 +47,7 @@ function SignUpForm({ setVerifying }) {
             console.error('Error loading card:', err)
         }
 
-        if (signUpMethod === 'other') {
+        if (signUpMethod === 'google') {
             try {
                 signUp.authenticateWithRedirect({
                     strategy: 'oauth_google',
@@ -64,169 +78,132 @@ function SignUpForm({ setVerifying }) {
             await signUp.prepareEmailAddressVerification()
             setVerifying(true)
         } catch (err) {
-            console.error('Error during sign up via email:', err)
-            // Handle error (e.g., show a notification)
+            console.error('Error during sign in:', error);
+            setError(error.message || 'An error occurred during sign in');
+        }
+        setLoading(false);
+    }
+
+    const cancelError = () => {
+        setError('');
+    };
+
+    const determineStageForward = () => {
+        if (priceId === '') {
+            setSignUpStage('first_factor')
+        } else {
+            setSignUpStage('payment')
+        }
+    }
+
+    const determineStageBack = () => {
+        if (priceId !== '') {
+            setSignUpStage('payment')
+        } else {
+            setSignUpStage('tier_selection')
         }
     }
 
     return (
-        <div className='flex items-center justify-center w-full h-full'>
-            <form onSubmit={onSubmit} className='flex flex-col gap-4'>
-                <h1 className='flex font-bold'>Create your account</h1>
-                <p className='flex'>
-                    Welcome! Please fill in the details to get started.
-                </p>
+        <form onSubmit={handleSubmit} className='flex w-full md:w-[30vw] items-center justify-center flex-col gap-4 transition-all duration-300 ease-in-out'>
+            <h1>Sign Up</h1>
+            <h3 className="text-xs uppercase mb-3 mt-2">Have an account? <span className="underline hover:text-textColor transition-colors ease-in-out duration-300">
+                <Link href='/sign-in'>
+                    Sign in
+                </Link>
+            </span>.
+            </h3>
 
-                <div className='flex gap-2'>
-                    <label>Select Sign Up Method</label>
-                    <div className="flex flex-col gap-1">
-                        <label>
-                            <input
-                                type="radio"
-                                name="method"
-                                value="email"
-                                checked={signUpMethod === "email"}
-                                onChange={(e) => setSignUpMethod(e.target.value)}
-                            />
-                            Email
-                        </label>
+            <Error error={error} setError={setError} />
 
-                        <label>
-                            <input
-                                type="radio"
-                                name="method"
-                                value="other"
-                                checked={signUpMethod === "other"}
-                                onChange={(e) => setSignUpMethod(e.target.value)}
-                            />
-                            Other
-                        </label>
+            {signUpStage === 'tier_selection' && (
+                <>
+                    {/* tier element */}
+                    <div className='flex flex-col gap-2 w-full'>
+                        <Tier value="price_1RYmL7Q8qkF9EYSx0qQSc8zE" priceId={priceId} setPriceId={setPriceId} />
+                        <Tier value="price_1RYmMAQ8qkF9EYSxkjocLoII" priceId={priceId} setPriceId={setPriceId} />
+                        <Tier value="price_1RYmMwQ8qkF9EYSxJskJvmYC" priceId={priceId} setPriceId={setPriceId} />
+                        <Tier value="price_1RYmNXQ8qkF9EYSxFGHrQ4ZB" priceId={priceId} setPriceId={setPriceId} />
+                        <Tier value="" priceId={priceId} setPriceId={setPriceId} />
                     </div>
-                </div>
-
-                {signUpMethod === 'other' ? (
-                    <button type="submit">
-                        Sign up with Google
+                    <button className='authButton2 gap-2 mt-3' type='button' onClick={determineStageForward}>
+                        Select & Continue
+                        <GoChevronRight size={20} />
                     </button>
-                ) : (
-                    <>
-                        { /* email */}
-                        <div className='flex gap-2'>
-                            <label htmlFor='emailAddress'>Email</label>
-                            <input
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value.trim().toLowerCase())}
-                                type='email'
-                                id='emailAddress'
-                                name='emailAddress'
-                                required={signUpMethod === 'email'}
-                            />
-                        </div>
+                </>
+            )}
 
-                        { /* password */}
-                        <div className='flex gap-2 items-center'>
-                            <label htmlFor='password'>Password</label>
-                            <input
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value.replace(/\s/g, ''))}
-                                type={showPassword ? 'text' : 'password'}
-                                id='password'
-                                name='password'
-                                required={signUpMethod === 'email'}
-                                autoComplete="new-password"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword((prev) => !prev)}
-                                className="text-xs px-2 py-1 border rounded"
-                                tabIndex={-1}
-                            >
-                                {showPassword ? 'Hide' : 'Show'}
-                            </button>
-                        </div>
-
-                    </>
-                )}
-
-                {/* tier element */}
-                <div className='flex gap-2'>
-                    <label>Select Tier</label>
-                    <div className="flex flex-col gap-1">
-                        <label>
-                            <input
-                                type="radio"
-                                name="tier"
-                                value=""
-                                checked={priceId === ""}
-                                onChange={(e) => setPriceId("")}
-                            />
-                            Just join as Customer (no subscription)
+            {signUpStage === 'payment' && (
+                <>
+                    <div className='flex flex-col w-full gap-2 py-8 px-8 border border-borderColor rounded-2xl bg-white text-black items-center'>
+                        <label className='flex items-center font-medium w-full'>
+                            <IoMdLock className='mr-2' size={16} />
+                            Card Details
                         </label>
-                        <label>
-                            <input
-                                type="radio"
-                                name="tier"
-                                value="price_1RYmMAQ8qkF9EYSxkjocLoII"
-                                checked={priceId === "price_1RYmMAQ8qkF9EYSxkjocLoII"}
-                                onChange={(e) => setPriceId(e.target.value)}
-                            />
-                            Basic
-                        </label>
-                        <label>
-                            <input
-                                type="radio"
-                                name="tier"
-                                value="price_1RYmL7Q8qkF9EYSx0qQSc8zE"
-                                checked={priceId === "price_1RYmL7Q8qkF9EYSx0qQSc8zE"}
-                                onChange={(e) => setPriceId(e.target.value)}
-                            />
-                            Hobbyist
-                        </label>
-                        <label>
-                            <input
-                                type="radio"
-                                name="tier"
-                                value="price_1RYmMwQ8qkF9EYSxJskJvmYC"
-                                checked={priceId === "price_1RYmMwQ8qkF9EYSxJskJvmYC"}
-                                onChange={(e) => setPriceId(e.target.value)}
-                            />
-                            Advanced
-                        </label>
-                        <label>
-                            <input
-                                type="radio"
-                                name="tier"
-                                value="price_1RYmNXQ8qkF9EYSxFGHrQ4ZB"
-                                checked={priceId === "price_1RYmNXQ8qkF9EYSxFGHrQ4ZB"}
-                                onChange={(e) => setPriceId(e.target.value)}
-                            />
-                            Professional
-                        </label>
+                        <p className='text-sm text-textColor w-full'>
+                            This card will be used for automatic billing of your subscription.
+                        </p>
+                        <CardElement className='w-full mt-4 px-4 py-2 border border-borderColor rounded-lg' required={priceId !== ''} />
+                        <p className='text-xs w-full mt-2 text-center text-lightColor '>
+                            You can cancel or change your payment method at anytime.
+                        </p>
                     </div>
-                </div>
-
-                {/* card element */}
-                {priceId && (
-                    <div className='flex flex-col gap-2 bg-white text-black'>
-                        <label>Payment details</label>
-                        <CardElement />
-                    </div>
-                )}
-
-                <div id="clerk-captcha" />
-
-                {signUpMethod === 'email' && (
-                    <div className="grid w-full gap-y-4">
-                        <button type="submit" disabled={!isLoaded}>
-                            Sign up for trial
+                    <div className='flex items-center justify-between w-full'>
+                        <button onClick={() => setSignUpStage('tier_selection')} className='toggleXbutton font-medium'>
+                            <GoChevronLeft size={24} /> Go Back
                         </button>
-                        <button variant="link" size="sm" aschild="true">
-                            <Link href="/sign-in">Already have an account? Sign in</Link>
+                        <button onClick={() => setSignUpStage('first_factor')} className='toggleXbutton  font-medium'>
+                            Continue <GoChevronRight size={24} />
                         </button>
                     </div>
-                )}
-            </form>
-        </div>
+                </>
+            )}
+
+            {signUpStage === 'first_factor' && (
+                <>
+                    <EmailField setEmail={setEmail} required={signUpMethod === 'email'} email={email} />
+
+                    <PasswordField setPassword={setPassword} required={signUpMethod === 'email'} password={password} />
+
+                    <div id="clerk-captcha" />
+
+                    <button onClick={() => setSignUpMethod('email')} type='submit' className='authButton2'>
+                        {loading && signUpMethod === 'email' ? (
+                            <>
+                                Signing In
+                                <div className='animate-spin ml-3 border-1 border-t-transparent h-3 w-3 rounded-full' />
+                            </>
+                        ) :
+                            'Sign In'
+                        }
+                    </button>
+
+                    <AuthDivider />
+
+                    <button onClick={() => setSignUpMethod('google')} type='submit' className='authButton1'>
+                        {loading && signUpMethod === 'google' ? (
+                            <>
+                                Signing In
+                                <div className='animate-spin ml-3 border-1 border-t-transparent h-3 w-3 rounded-full' />
+                            </>
+                        ) :
+                            <>
+                                Sign in with Google
+                                <FaGoogle size={16} />
+                            </>
+                        }
+
+                    </button>
+
+                    <div className='flex items-center justify-start w-full mt-3'>
+                        <button onClick={determineStageBack} type='button' className='toggleXbutton font-medium'>
+                            <GoChevronLeft size={24} /> Go Back
+                        </button>
+                    </div>
+                </>
+            )}
+        </form>
+
     )
 }
 

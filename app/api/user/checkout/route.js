@@ -1,4 +1,5 @@
 import { connectToDatabase } from "@/lib/db";
+import Product from "@/models/Product";
 import User from "@/models/User";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
@@ -23,6 +24,18 @@ export async function POST(req) {
             },
             status: "pending",
         }));
+
+        for (const item of user.cart) {
+            const product = await Product.findById(item.productId);
+            if (product) {
+                product.sales.push({
+                    userId,
+                    quantity: item.quantity,
+                    price: item.price || 0,
+                });
+                await product.save();
+            }
+        }
 
         user.orderHistory.push(...orders);
         user.cart = [];

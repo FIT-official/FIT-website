@@ -1,10 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fffefe;
+  --background: #fefefe;
   --textColor: #111111;
   --light: #67696b; 
   --borderColor: #e6e6e6;
+  --baseColor: #fcfcfc;
+  --extraLight: #c3c3c3;
 }
 
 @theme inline {
@@ -13,6 +15,8 @@
   --font-sans: var(--font-inter);
   --color-lightColor: var(--light);
   --color-borderColor: var(--borderColor);
+  --color-baseColor: var(--baseColor);
+  --color-extraLight: var(--extraLight);
 }
 
 /* @media (prefers-color-scheme: dark) {
@@ -33,11 +37,55 @@
   }
 
   h1{
-    @apply font-semibold text-4xl md:text-5xl tracking-tight text-textColor;
+    @apply font-semibold text-3xl md:text-4xl tracking-tight text-textColor;
+  }
+
+  h3{
+    @apply font-semibold text-base md:text-lg tracking-tight text-lightColor;
   }
 }
 
 
 .navbarLink{
   @apply text-lightColor hover:text-textColor duration-300 ease-in-out transition-colors text-sm font-medium;
+}
+
+.navSidebarLink{
+  @apply text-lightColor hover:text-textColor duration-300 ease-in-out transition-colors text-base font-medium;
+}
+
+.section{
+  @apply flex w-full min-h-[75vh] py-20 items-center justify-center px-12 md:px-32 border-b border-borderColor
+}
+
+.toggleXbutton{
+  @apply flex cursor-pointer text-extraLight hover:text-lightColor duration-300 ease-in-out transition-colors
+}
+
+.accountDropdownLink{
+  @apply flex flex-col gap-2 py-2 px-4 font-normal text-sm items-center text-center w-full hover:text-textColor duration-300 ease-in-out transition-colors text-lightColor;
+}
+
+.authInput{
+  @apply w-full px-4 py-2 outline-none rounded-full border border-borderColor
+}
+
+.authButton1 {
+  @apply flex w-full justify-between items-center border border-borderColor py-2 px-4 rounded-full font-medium cursor-pointer hover:bg-borderColor/30 duration-300 ease-in-out transition-colors;
+}
+
+.authButton2{
+  @apply flex w-full justify-center items-center bg-textColor text-background py-2 px-4 rounded-full font-medium cursor-pointer
+}
+
+.collectionItem{
+  @apply flex pb-10 py-5 px-4 w-full bg-borderColor/50 border border-extraLight rounded-lg font-semibold text-base transition-all duration-300 ease-in-out text-lightColor items-center justify-between hover:bg-borderColor/70 mb-2
+}
+
+.dashboardActionItem{
+  @apply my-1 gap-2 py-2 px-3 flex flex-row items-center justify-between border border-borderColor rounded-md
+}
+
+.footerLink {
+  @apply flex flex-row gap-2 items-center tracking-tight text-sm opacity-60 hover:opacity-100 ease-in-out transition-all duration-300
 }
