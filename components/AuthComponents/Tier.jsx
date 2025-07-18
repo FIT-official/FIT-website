@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react';
 import { IoIosCheckmark } from 'react-icons/io'
+import { useToast } from '../General/ToastProvider';
 
 function Tier({ value, priceId, setPriceId }) {
     const [productInfo, setProductInfo] = useState({
@@ -11,6 +12,7 @@ function Tier({ value, priceId, setPriceId }) {
         features: [],
     });
     const [loading, setLoading] = useState(true);
+    const { showToast } = useToast();
 
 
     useEffect(() => {
@@ -32,7 +34,7 @@ function Tier({ value, priceId, setPriceId }) {
                 setLoading(false);
             })
             .catch(() => {
-                console.error('Failed to fetch product info');
+                showToast('Failed to fetch product info', 'error');
                 setLoading(false);
             });
 

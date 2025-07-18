@@ -32,11 +32,16 @@ export async function POST(req) {
 
       const arrayBuffer = await file.arrayBuffer();
       let buffer = Buffer.from(arrayBuffer);
+      let sharpInstance = sharp(buffer);
+      if (file.type === "image/png") {
+        sharpInstance = sharpInstance.flatten({ background: '#e6e6e6' });
+      }
+
 
       let compressed = null;
       let quality = 80;
       for (; quality >= 30; quality -= 10) {
-        compressed = await sharp(buffer)
+        compressed = await sharpInstance
           .jpeg({ quality, mozjpeg: true })
           .toBuffer();
         if (compressed.length < 200 * 1024) break;

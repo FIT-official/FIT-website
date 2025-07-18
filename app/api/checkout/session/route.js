@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
-import { calculateSingpostRate, getDestinationZone } from "../singpostRate";
+import { calculateCartItemBreakdown } from "../calculateBreakdown";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2025-05-28.basil",
@@ -29,6 +29,7 @@ export async function POST(req) {
     const client = await clerkClient();
     const userObj = await client.users.getUser(userId);
     const stripeCustomerId = userObj.publicMetadata?.stripeCustomerId;
+    const email = userObj.emailAddresses?.[0]?.emailAddress;
 
     if (!user)
         return NextResponse.json({ error: "Cart not found" }, { status: 404 });
@@ -37,43 +38,22 @@ export async function POST(req) {
     if (!address || !address.country) {
         return NextResponse.json({ error: "Missing delivery address" }, { status: 400 });
     }
-    const destination = getDestinationZone(address.country);
-    const domain = process.env.NGROK_URL || process.env.NEXT_PUBLIC_BASE_URL;
+
+    const domain = process.env.NEXT_PUBLIC_BASE_URL;
 
     const line_items = [];
     const updatedCart = [];
 
     for (const item of user.cart) {
         try {
-            const productResponse = await fetchProductDetails(item.productId);
-            const product = productResponse.product;
-            const price = product.price?.presentmentAmount;
-            if (!price || isNaN(price)) {
-                throw new Error(
-                    `Invalid price for product ${item.productId}: ${price}`
-                );
-            }
+            const { product } = await fetchProductDetails(item.productId);
 
-            const deliveryTypeObj = (product.delivery?.deliveryTypes || []).find(
-                dt => dt.type === item.chosenDeliveryType
-            );
-            const royaltyFee = deliveryTypeObj?.royaltyFee || 0;
-
-            let deliveryFee = royaltyFee;
-
-            if (item.chosenDeliveryType === "singpost") {
-                const weight_kg = product.dimensions?.weight || 0;
-                const dimensions_mm = [
-                    (product.dimensions?.length || 0) * 10,
-                    (product.dimensions?.width || 0) * 10,
-                    (product.dimensions?.height || 0) * 10,
-                ];
-                const singpostFee = calculateSingpostRate(destination, weight_kg, dimensions_mm);
-                if (singpostFee < 0) {
-                    throw new Error("Unable to calculate SingPost fee for this item.");
-                }
-                deliveryFee += singpostFee;
-            }
+            const breakdown = await calculateCartItemBreakdown({
+                item,
+                product,
+                address,
+            });
+            const { price, deliveryFee, quantity, chosenDeliveryType } = breakdown;
 
             const unit_amount = Math.round(price * 100);
 
@@ -86,7 +66,7 @@ export async function POST(req) {
                     },
                     unit_amount,
                 },
-                quantity: item.quantity,
+                quantity,
             });
 
             if (deliveryFee > 0) {
@@ -94,7 +74,7 @@ export async function POST(req) {
                     price_data: {
                         currency: "sgd",
                         product_data: {
-                            name: `Delivery (${item.chosenDeliveryType}) for ${product.name}`,
+                            name: `Delivery (${chosenDeliveryType}) for ${product.name}`,
                         },
                         unit_amount: Math.round(deliveryFee * 100),
                     },
@@ -113,16 +93,27 @@ export async function POST(req) {
                 `Error fetching product details for ${item.productId}:`,
                 error
             );
-            const errorMessage =
-                error && typeof error === "object" && "message" in error
-                    ? error.message
-                    : "An unknown error occurred";
+            const errorMessage = error.message || "An unknown error occurred";
             return NextResponse.json({ error: errorMessage }, { status: 500 });
         }
     }
 
-    user.cart = updatedCart;
+    user.cart.forEach((item, idx) => {
+        if (updatedCart[idx]) {
+            item.price = updatedCart[idx].price;
+            item.basePrice = updatedCart[idx].basePrice;
+            item.deliveryFee = updatedCart[idx].deliveryFee;
+        }
+    });
     await user.save();
+
+    const allFree = line_items.length > 0 && line_items.every(
+        li => li.price_data.unit_amount === 0
+    );
+
+    if (allFree) {
+        return NextResponse.json({ clientSecret: null, free: true });
+    }
 
     try {
         const session = await stripe.checkout.sessions.create({
@@ -132,6 +123,7 @@ export async function POST(req) {
             ui_mode: "custom",
             return_url: `${domain}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
             customer: stripeCustomerId,
+            customer_email: email,
         });
 
         if (!session.client_secret) {

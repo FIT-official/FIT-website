@@ -21,6 +21,7 @@ export async function POST(req) {
                 quantity: item.quantity,
                 variantId: item.variantId,
                 chosenDeliveryType: item.chosenDeliveryType,
+                price: item.price,
             },
             status: "pending",
         }));

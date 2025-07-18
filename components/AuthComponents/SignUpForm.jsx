@@ -11,6 +11,7 @@ import { GoChevronLeft, GoChevronRight } from 'react-icons/go'
 import Tier from './Tier'
 import { IoMdLock } from 'react-icons/io'
 import Error from './Error'
+import { useToast } from '../General/ToastProvider'
 
 function SignUpForm({ setVerifying }) {
     const { isLoaded, signUp } = useSignUp()
@@ -26,6 +27,7 @@ function SignUpForm({ setVerifying }) {
     const [signUpMethod, setSignUpMethod] = useState('email')
     const [signUpStage, setSignUpStage] = useState('tier_selection')
 
+    const { showToast } = useToast();
 
     async function handleSubmit(ev) {
         ev.preventDefault()
@@ -44,7 +46,7 @@ function SignUpForm({ setVerifying }) {
                 cardToken = res?.token?.id || ''
             }
         } catch (error) {
-            console.error('Error loading card:', err)
+            showToast('Error loading card: ' + error, 'error');
         }
 
         if (signUpMethod === 'google') {
@@ -59,7 +61,7 @@ function SignUpForm({ setVerifying }) {
                     },
                 })
             } catch (error) {
-                console.error('Error during sign up via other:', err)
+                showToast('Error during sign up via Google: ' + error, 'error');
             }
             return
         }
@@ -83,10 +85,6 @@ function SignUpForm({ setVerifying }) {
         }
         setLoading(false);
     }
-
-    const cancelError = () => {
-        setError('');
-    };
 
     const determineStageForward = () => {
         if (priceId === '') {

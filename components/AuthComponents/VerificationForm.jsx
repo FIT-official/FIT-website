@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { IoMdLock } from 'react-icons/io'
 import CodeField from './CodeField'
 import Error from './Error'
+import { useToast } from '../General/ToastProvider'
 
 function VerificationForm() {
     const { isLoaded, signUp, setActive } = useSignUp()
@@ -13,6 +14,7 @@ function VerificationForm() {
     const [timer, setTimer] = useState(0)
     const [loading, setLoading] = useState(false)
     const RESEND_INTERVAL = 60
+    const { showToast } = useToast();
 
     async function handleVerification(e) {
         e.preventDefault()
@@ -29,7 +31,7 @@ function VerificationForm() {
                 setError('Verification failed. Please try again.')
             }
         } catch (err) {
-            console.error('Error during verification:', err)
+            showToast('Verification failed: ' + (err?.message || String(err)), 'error');
         }
         setLoading(false)
     }

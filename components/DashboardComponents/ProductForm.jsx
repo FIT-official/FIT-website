@@ -2,7 +2,7 @@
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image"
 import { RxCross1 } from "react-icons/rx"
-import { BsPlus } from "react-icons/bs"
+import { BsPlus, BsPlusCircle } from "react-icons/bs"
 import { useEffect, useRef, useState } from "react"
 import {
     SHOP_CATEGORIES,
@@ -12,8 +12,12 @@ import {
 } from "@/lib/categories"
 import currencyCodes from "currency-codes"
 import { useRouter } from "next/navigation";
+import SelectField from "./SelectField";
+import { GoChevronDown, GoChevronRight } from "react-icons/go";
+import { BiMinus } from "react-icons/bi";
+import { useToast } from "../General/ToastProvider";
 
-function ProductForm({ mode = "Create", product = null, setProduct, setMode }) {
+function ProductForm({ mode = "Create", product = null }) {
     const { user, isLoaded } = useUser()
     const [events, setEvents] = useState([])
     const formattedMode = mode
@@ -24,12 +28,21 @@ function ProductForm({ mode = "Create", product = null, setProduct, setMode }) {
         .map(c => c.code)
         .filter((v, i, a) => a.indexOf(v) === i)
         .sort();
+    const { showToast } = useToast();
 
     const imageInputRef = useRef(null);
     const modelInputRef = useRef(null);
     const [pendingImages, setPendingImages] = useState([]);
     const [pendingModels, setPendingModels] = useState([]);
-    const { router } = useRouter();
+    const [dragActive, setDragActive] = useState(false);
+
+    const [loading, setLoading] = useState(false);
+
+    const [openSection, setOpenSection] = useState({
+        details: true,
+        shipping: false,
+        pricing: false,
+    });
 
     const defaultForm = {
         name: "",
@@ -84,7 +97,6 @@ function ProductForm({ mode = "Create", product = null, setProduct, setMode }) {
                 const mod = await import("locale-currency")
                 const detected = mod.getCurrency(locale)
                 setForm(f => {
-                    // Only set if presentmentCurrency is still the default
                     if (f.presentmentCurrency === "SGD" && detected && allCurrencies.includes(detected)) {
                         return { ...f, presentmentCurrency: detected }
                     }
@@ -95,23 +107,77 @@ function ProductForm({ mode = "Create", product = null, setProduct, setMode }) {
         setCurrencyFromLocale()
     }, [])
 
+    function mapProductToForm(product, defaultForm) {
+        const deliveryTypes = {
+            selfCollect: false,
+            singpost: false,
+            privateDelivery: false,
+        };
+        let pickupLocation = "";
+        let royaltyFees = {
+            singpost: 0,
+            privateDelivery: 0,
+        };
+
+        if (product.delivery && Array.isArray(product.delivery.deliveryTypes)) {
+            product.delivery.deliveryTypes.forEach(dt => {
+                if (dt.type === "selfCollect") {
+                    deliveryTypes.selfCollect = true;
+                    pickupLocation = dt.pickupLocation || "";
+                }
+                if (dt.type === "singpost") {
+                    deliveryTypes.singpost = true;
+                    royaltyFees.singpost = dt.royaltyFee || 0;
+                }
+                if (dt.type === "privateDelivery") {
+                    deliveryTypes.privateDelivery = true;
+                    royaltyFees.privateDelivery = dt.royaltyFee || 0;
+                }
+            });
+        }
+
+        // Map discount fields safely
+        const discount = {
+            eventId: product.discount?.eventId ?? "",
+            percentage: product.discount?.percentage ?? "",
+            minimumPrice: product.discount?.minimumAmount ?? "",
+            startDate: product.discount?.startDate
+                ? new Date(product.discount.startDate).toISOString().slice(0, 10)
+                : "",
+            endDate: product.discount?.endDate
+                ? new Date(product.discount.endDate).toISOString().slice(0, 10)
+                : "",
+        };
+
+        return {
+            ...defaultForm,
+            ...product,
+            presentmentAmount: product.price?.presentmentAmount ?? "",
+            presentmentCurrency: product.price?.presentmentCurrency ?? "SGD",
+            images: product.images || [],
+            downloadableAssets: product.downloadableAssets || [],
+            deliveryTypes,
+            pickupLocation,
+            royaltyFees,
+            showDiscount: !!(
+                discount.percentage ||
+                discount.eventId ||
+                discount.minimumPrice ||
+                discount.startDate ||
+                discount.endDate
+            ),
+            discount,
+        };
+    }
+
     useEffect(() => {
         if (product) {
-            setForm(f => ({
-                ...defaultForm,
-                ...product,
-                presentmentAmount: product.price?.presentmentAmount ?? "",
-                presentmentCurrency: product.price?.presentmentCurrency ?? "SGD",
-                images: product.images || [],
-                downloadableAssets: product.downloadableAssets || [],
-            }));
+            setForm(mapProductToForm(product, defaultForm));
         }
     }, [product]);
 
     const handleChange = e => {
         const { name, value, type, checked } = e.target;
-
-        // Handle nested dimensions
         if (["length", "width", "height", "weight"].includes(name)) {
             setForm(f => ({
                 ...f,
@@ -121,7 +187,6 @@ function ProductForm({ mode = "Create", product = null, setProduct, setMode }) {
                 }
             }));
         }
-        // Handle nested royalty fees
         else if (name === "singpostRoyaltyFee") {
             setForm(f => ({
                 ...f,
@@ -207,7 +272,7 @@ function ProductForm({ mode = "Create", product = null, setProduct, setMode }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!isLoaded) return;
-        // 1. Upload images if any new ones selected
+        setLoading(true);
         let uploadedImages = [];
         if (pendingImages.length > 0) {
             const formData = new FormData();
@@ -216,7 +281,7 @@ function ProductForm({ mode = "Create", product = null, setProduct, setMode }) {
             const { files } = await res.json();
             uploadedImages = files || [];
         }
-        // 2. Upload models if any new ones selected
+
         let uploadedModels = [];
         if (pendingModels.length > 0) {
             const formData = new FormData();
@@ -228,7 +293,6 @@ function ProductForm({ mode = "Create", product = null, setProduct, setMode }) {
 
         const payload = {
             creatorUserId: user?.id,
-            creatorFullName: user?.fullName,
             name: form.name,
             description: form.description,
             images: [...form.images, ...uploadedImages],
@@ -292,662 +356,718 @@ function ProductForm({ mode = "Create", product = null, setProduct, setMode }) {
             });
             const data = await res.json();
             if (!res.ok) {
-                alert(data.error || "Failed to create product");
+                showToast(data.error || "Failed to create product", 'error');
             } else {
                 if (!res.ok) {
-                    alert(data.error || "Failed to create product");
+                    showToast(data.error || "Failed to create product", 'error');
                 } else {
                     setPendingImages([]);
                     setPendingModels([]);
+                    setLoading(false);
                     if (imageInputRef.current) imageInputRef.current.value = "";
                     if (modelInputRef.current) modelInputRef.current.value = "";
                     alert(isEditing ? "Product updated successfully!" : "Product created successfully!");
-                    setForm({ ...defaultForm });
-                    if (typeof setProduct === "function") setProduct(null);
-                    if (typeof setMode === "function") setMode("Create");
+                    if (!isEditing) {
+                        setForm({ ...defaultForm });
+                    }
                 }
             }
         } catch (err) {
+            setLoading(false);
             alert("Network error: " + err.message);
         }
     }
 
     return (
-        <div className="flex w-full flex-col justify-start items-start">
-            <h1 className="flex w-full">{formattedMode} Product</h1>
-            <form onSubmit={handleSubmit} className='flex flex-col w-full items-center justify-center gap-4'>
+        <form onSubmit={handleSubmit} className='flex flex-col w-full items-center justify-center gap-4'>
+            <h1 className="flex w-full mb-4">{formattedMode} Product</h1>
 
-                {/* product name */}
-                <div className="flex flex-col gap-2 w-full">
-                    <label htmlFor="name">Product Name</label>
-                    <input
-                        id="name"
-                        name="name"
-                        type="text"
-                        required
-                        value={form.name}
-                        onChange={handleChange}
-                        className="border"
-                        placeholder="Enter product name"
-                    />
-                </div>
+            <div className="flex flex-col w-full border border-borderColor rounded-lg">
+                <button type="button" className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer"
+                    onClick={() => setOpenSection(s => ({ ...s, details: !s.details }))}
+                >
+                    Product Details
+                    {openSection.details ? <GoChevronDown /> : <GoChevronRight />}
+                </button>
+                <div
+                    className="formDrawer flex flex-col w-full items-center justify-center p-4 gap-6"
+                    style={{
+                        maxHeight: openSection.details ? 2000 : 0,
+                        opacity: openSection.details ? 1 : 0,
+                        pointerEvents: openSection.details ? 'auto' : 'none'
+                    }}
+                >
+                    {/* product name */}
+                    <div className="flex flex-col gap-2 w-full">
+                        <label htmlFor="name" className="formLabel">Product Name</label>
+                        <input
+                            id="name"
+                            name="name"
+                            type="text"
+                            required
+                            value={form.name}
+                            onChange={handleChange}
+                            className="formInput"
+                            placeholder="Enter product name"
+                        />
+                    </div>
 
-                {/* product desc */}
-                <div className="flex flex-col gap-2  w-full">
-                    <label className="flex">Product Description</label>
-                    <textarea
-                        id="description"
-                        name="description"
-                        rows={4}
-                        maxLength={1000}
-                        required
-                        value={form.description}
-                        onChange={handleChange}
-                        className="border"
-                        placeholder="Enter product description"
-                        wrap="hard"
-                    />
-                </div>
+                    {/* product desc */}
+                    <div className="flex flex-col gap-2  w-full">
+                        <label className="formLabel">Product Description</label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            rows={4}
+                            maxLength={1000}
+                            required
+                            value={form.description}
+                            onChange={handleChange}
+                            className="formInput"
+                            placeholder="Enter product description"
+                            wrap="hard"
+                        />
+                    </div>
 
-                {/* product images */}
-                <div className="flex flex-col gap-2 w-full">
-                    <label className="flex">Product Images</label>
-                    <div className=" flex gap-2 flex-wrap">
-                        {[...(form.images || []), ...pendingImages].map((item, idx) => {
-                            const isPending = idx >= (form.images?.length || 0);
-                            return (
-                                <div key={idx} className='relative'>
-                                    <Image
-                                        src={
-                                            isPending
-                                                ? URL.createObjectURL(item)
-                                                : `/api/proxy?key=${encodeURIComponent(item)}`
-                                        }
-                                        alt={`Preview ${idx + 1}`}
-                                        loading="lazy"
-                                        width={80}
-                                        height={80}
-                                        quality={20}
-                                        className="w-20 h-20 object-cover rounded-sm border-[0.5px] border-text/20"
-                                    />
-                                    <RxCross1
-                                        className="absolute top-1 right-1 cursor-pointer p-0.5"
-                                        size={14}
-                                        onClick={() => handleRemoveImage(idx)}
-                                    />
-                                </div>
-                            );
-                        })}
-                        <label
-                            className={`w-20 h-20 flex items-center justify-center rounded-sm border border-dashed
+                    {/* product images */}
+                    <div className="flex flex-col gap-2 w-full">
+                        <label className="formLabel">Product Images</label>
+                        <div className=" flex gap-2 flex-wrap">
+                            {[...(form.images || []), ...pendingImages].map((item, idx) => {
+                                const isPending = idx >= (form.images?.length || 0);
+                                return (
+                                    <div key={idx} className='relative'>
+                                        <Image
+                                            src={
+                                                isPending
+                                                    ? URL.createObjectURL(item)
+                                                    : `/api/proxy?key=${encodeURIComponent(item)}`
+                                            }
+                                            alt={`Preview ${idx + 1}`}
+                                            loading="lazy"
+                                            width={80}
+                                            height={80}
+                                            quality={20}
+                                            className="w-20 h-20 object-cover rounded-sm border border-borderColor"
+                                        />
+                                        <RxCross1
+                                            className="absolute top-1 right-1 cursor-pointer p-0.5"
+                                            size={14}
+                                            onClick={() => handleRemoveImage(idx)}
+                                        />
+                                    </div>
+                                );
+                            })}
+                            <label
+                                className={`w-20 h-20 flex items-center justify-center rounded-sm border border-dashed border-borderColor text-extraLight
                             ${form.images.length >= 7 ? "opacity-60 cursor-not-allowed " : "cursor-pointer"}
                         `}
-                            style={{ minWidth: 80, minHeight: 80 }}
-                        >
-                            {form.images.length >= 7 ? (
-                                <span className="text-[10px] text-center px-1">MAX PHOTOS</span>
-                            ) : (
-                                <BsPlus className="text-2xl pointer-events-none" />
-                            )}
-                            <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={handleImageChange}
-                                style={{ display: "none" }}
-                                disabled={form.images.length >= 7}
-                                ref={imageInputRef}
-                            />
-                        </label>
-                    </div>
-                </div>
-
-                {/* downloadable assets (3D models) */}
-                <div className='flex flex-col gap-2 w-full'>
-                    <label className="flex option-primary">Downloadable Assets (3D Models)</label>
-                    <label className="button-tertiary cursor-pointer w-fit">
-                        Choose Files
-                        <input
-                            type="file"
-                            accept=".obj,.glb,.gltf,.stl,.blend,.fbx,.zip,.rar,.7z"
-                            multiple
-                            onChange={handleModelChange}
-                            style={{ display: "none" }}
-                            ref={modelInputRef}
-                        />
-                    </label>
-                    <ul className="flex flex-col text-xs">
-                        {[...(form.downloadableAssets || []), ...pendingModels].map((item, idx) => {
-                            const isPending = idx >= (form.downloadableAssets?.length || 0);
-                            return (
-                                <div className='gap-2 flex flex-row items-center justify-between' key={idx}>
-                                    <li className='flex truncate' title={isPending ? item.name : item}>
-                                        {isPending ? (
-                                            <span className="underline">{item.name}</span>
-                                        ) : (
-                                            <a
-                                                href={`/api/proxy?key=${encodeURIComponent(item)}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="underline"
-                                                download
-                                            >
-                                                {item.replace(/^models\//, "")}
-                                            </a>
-                                        )}
-                                    </li>
-                                    <RxCross1
-                                        className='flex cursor-pointer'
-                                        onClick={() => handleRemoveModel(idx)}
-                                    />
-                                </div>
-                            );
-                        })}
-                    </ul>
-                </div>
-
-                {/* dimensions */}
-                <div className="flex flex-col gap-2 w-full">
-                    <label className="flex">Product Dimensions</label>
-                    <div className="flex flex-row items-center justify-between">
-                        <div className="flex flex-col gap-1">
-                            <label htmlFor="length">Length (cm)</label>
-                            <input
-                                id="length"
-                                name="length"
-                                type="float"
-                                min={0}
-                                onChange={handleChange}
-                                value={form.dimensions.length}
-                                className="border"
-                                placeholder="Enter length"
-                            />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <label htmlFor="width">Width (cm)</label>
-                            <input
-                                id="width"
-                                name="width"
-                                type="float"
-                                min={0}
-                                onChange={handleChange}
-                                value={form.dimensions.width}
-                                className="border"
-                                placeholder="Enter width"
-                            />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <label htmlFor="height">Height (cm)</label>
-                            <input
-                                id="height"
-                                name="height"
-                                type="float"
-                                min={0}
-                                onChange={handleChange}
-                                value={form.dimensions.height}
-                                className="border"
-                                placeholder="Enter height"
-                            />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <label htmlFor="weight">Weight (kg)</label>
-                            <input
-                                id="weight"
-                                name="weight"
-                                type="float"
-                                min={0}
-                                onChange={handleChange}
-                                value={form.dimensions.weight}
-                                className="border"
-                                placeholder="Enter weight"
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* delivery types */}
-                <div className="flex flex-col gap-2 w-full">
-                    <label className="flex">Delivery Types</label>
-                    <div className="flex flex-row gap-2">
-                        <div className="flex items-center gap-1">
-                            <label htmlFor="selfCollect">Self Collection</label>
-                            <input
-                                type="checkbox"
-                                id="selfCollect"
-                                name="selfCollect"
-                                checked={form.deliveryTypes.selfCollect}
-                                onChange={e =>
-                                    setForm(f => ({
-                                        ...f,
-                                        deliveryTypes: {
-                                            ...f.deliveryTypes,
-                                            selfCollect: e.target.checked
-                                        }
-                                    }))
-                                }
-                            />
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <label htmlFor="singpost">Singpost</label>
-                            <input
-                                type="checkbox"
-                                id="singpost"
-                                name="singpost"
-                                checked={form.deliveryTypes.singpost}
-                                onChange={e =>
-                                    setForm(f => ({
-                                        ...f,
-                                        deliveryTypes: {
-                                            ...f.deliveryTypes,
-                                            singpost: e.target.checked
-                                        }
-                                    }))
-                                }
-                            />
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <label htmlFor="privateDelivery">Private</label>
-                            <input
-                                type="checkbox"
-                                id="privateDelivery"
-                                name="privateDelivery"
-                                checked={form.deliveryTypes.privateDelivery}
-                                onChange={e =>
-                                    setForm(f => ({
-                                        ...f,
-                                        deliveryTypes: {
-                                            ...f.deliveryTypes,
-                                            privateDelivery: e.target.checked
-                                        }
-                                    }))
-                                }
-                            />
+                                style={{ minWidth: 80, minHeight: 80 }}
+                            >
+                                {form.images.length >= 7 ? (
+                                    <span className="text-[10px] text-center px-1">MAX PHOTOS</span>
+                                ) : (
+                                    <BsPlus className="text-2xl pointer-events-none" />
+                                )}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleImageChange}
+                                    style={{ display: "none" }}
+                                    disabled={form.images.length >= 7}
+                                    ref={imageInputRef}
+                                />
+                            </label>
                         </div>
                     </div>
 
-                    {/* pickup location */}
-                    {form.deliveryTypes.selfCollect && (
-                        <div className="flex flex-col gap-1 mt-2">
-                            <label htmlFor="pickupLocation">Pickup Location</label>
-                            <input
-                                id="pickupLocation"
-                                name="pickupLocation"
-                                type="text"
-                                value={form.pickupLocation}
-                                onChange={handleChange}
-                                placeholder="Enter pickup location"
-                                className="border"
-                                required
-                            />
-                        </div>
-                    )}
-
-                    {/* singpost royalty */}
-                    {form.deliveryTypes.singpost && (
-                        <div className="flex flex-col gap-1 mt-2">
-                            <label htmlFor="singpostRoyaltyFee">Singpost Royalty Fee ($)</label>
-                            <input
-                                id="singpostRoyaltyFee"
-                                name="singpostRoyaltyFee"
-                                type="number"
-                                min={0}
-                                value={form.royaltyFees.singpost}
-                                onChange={e =>
-                                    setForm(f => ({
-                                        ...f,
-                                        royaltyFees: {
-                                            ...f.royaltyFees,
-                                            singpost: Number(e.target.value)
-                                        }
-                                    }))
-                                }
-                                className="border"
-                                required
-                            />
-                        </div>
-                    )}
-
-                    {/* private royalty */}
-                    {form.deliveryTypes.privateDelivery && (
-                        <div className="flex flex-col gap-1 mt-2">
-                            <label htmlFor="privateRoyaltyFee">Private Delivery Royalty Fee ($)</label>
-                            <input
-                                id="privateRoyaltyFee"
-                                name="privateRoyaltyFee"
-                                type="number"
-                                min={0}
-                                value={form.royaltyFees.privateDelivery}
-                                onChange={e =>
-                                    setForm(f => ({
-                                        ...f,
-                                        royaltyFees: {
-                                            ...f.royaltyFees,
-                                            privateDelivery: Number(e.target.value)
-                                        }
-                                    }))
-                                }
-                                className="border"
-                                required
-                            />
-                        </div>
-                    )}
-                </div>
-
-                {/* product type */}
-                <div className="flex flex-col gap-2 w-full">
-                    <label htmlFor="productType">Product Type</label>
-                    <select
-                        id="productType"
-                        name="productType"
-                        value={form.productType}
-                        onChange={e =>
+                    {/* product type */}
+                    <SelectField
+                        onChangeFunction={e =>
                             setForm(f => ({
                                 ...f,
                                 productType: e.target.value,
                                 category: 0,
                                 subcategory: 0
-                            }))
-                        }
-                        className="border"
-                        required
-                    >
-                        <option value="shop">Shop</option>
-                        <option value="print">Print</option>
-                    </select>
-                </div>
+                            }))}
+                        value={form.productType}
+                        name="productType"
+                        label="Product Type"
+                        options={[
+                            { value: "shop", label: "Shop" },
+                            { value: "print", label: "Print" }
+                        ]}
+                    />
 
-                {/* product category */}
-                <div className="flex flex-col gap-2 w-full">
-                    <label htmlFor="category">Category</label>
-                    <select
-                        id="category"
-                        name="category"
-                        value={form.category}
-                        onChange={e =>
+                    {/* product category */}
+                    <SelectField
+                        onChangeFunction={e =>
                             setForm(f => ({
                                 ...f,
                                 category: Number(e.target.value),
                                 subcategory: 0
-                            }))
-                        }
-                        className="border"
-                        required
-                    >
-                        {categories.map((cat, idx) => (
-                            <option value={idx} key={cat}>{cat}</option>
-                        ))}
-                    </select>
-                </div>
+                            }))}
+                        value={form.category}
+                        name="category"
+                        label="Category"
+                        options={categories.map((cat, idx) => ({ value: idx, label: cat }))}
+                    />
 
-                {/* product subcategory */}
-                <div className="flex flex-col gap-2 w-full">
-                    <label htmlFor="subcategory">Subcategory</label>
-                    <select
-                        id="subcategory"
-                        name="subcategory"
-                        value={form.subcategory}
-                        onChange={e =>
+                    {/* product subcategory */}
+                    <SelectField
+                        onChangeFunction={e =>
                             setForm(f => ({
                                 ...f,
                                 subcategory: Number(e.target.value)
-                            }))
-                        }
-                        className="border"
-                        required
-                    >
-                        {subcategories[form.category]?.map((sub, idx) => (
-                            <option value={idx} key={sub}>{sub}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* product price */}
-                <div className="flex flex-col gap-2 w-full">
-                    <label className="flex">Product Price</label>
-                    <div className="flex gap-1 items-center">
-                        <input
-                            id="presentmentAmount"
-                            name="presentmentAmount"
-                            type="number"
-                            min={0}
-                            step="0.01"
-                            value={form.presentmentAmount}
-                            onChange={handleChange}
-                            className="border"
-                            placeholder="Enter price"
-                            required
-                        />
-                        <select
-                            id="presentmentCurrency"
-                            name="presentmentCurrency"
-                            value={form.presentmentCurrency}
-                            onChange={handleChange}
-                            className="border w-28 uppercase"
-                            required
-                        >
-                            {allCurrencies.map(code => (
-                                <option value={code} key={code}>{code}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-
-                {/* product price in credits */}
-                <div className="flex flex-col gap-2 w-full">
-                    <label>Product Price (Credits)</label>
-                    <input
-                        id="priceCredits"
-                        name="priceCredits"
-                        type="number"
-                        min={0}
-                        value={form.priceCredits}
-                        onChange={handleChange}
-                        step="0.01"
-                        className="border"
-                        placeholder="Enter price in credits"
-                        required
+                            }))}
+                        value={form.subcategory}
+                        name="subcategory"
+                        label="Subcategory"
+                        options={subcategories[form.category].map((sub, idx) => ({ value: idx, label: sub }))}
                     />
-                </div>
 
-                {/* product stock */}
-                <div className="flex flex-col gap-2 w-full">
-                    <label>Stock</label>
-                    <input
-                        id="stock"
-                        name="stock"
-                        type="number"
-                        value={form.stock}
-                        onChange={handleChange}
-                        min={1}
-                        step="1"
-                        className="border"
-                        placeholder="Enter stock quantity"
-                        required
-                    />
-                </div>
-
-                {/* product variants */}
-                <div className="flex flex-col gap-2 w-full">
-                    <label>Product Variants / Tags</label>
-                    <div className="flex gap-2 items-center">
-                        <input
-                            type="text"
-                            name="variantInput"
-                            value={form.variantInput}
-                            onChange={handleChange}
-                            className="border flex-1"
-                            placeholder="Add a variant or tag and press Enter"
-                            maxLength={200}
-                            onKeyDown={e => {
-                                if (e.key === "Enter") {
-                                    e.preventDefault();
-                                    handleAddVariant(e);
+                    {/* downloadable assets (3D models) */}
+                    <div className='flex flex-col gap-2 w-full'>
+                        <label className="formLabel">Downloadable Assets (3D Models)</label>
+                        <div
+                            className={`formDrag ${dragActive ? "bg-borderColor/30" : ""}`
+                            }
+                            onClick={() => modelInputRef.current && modelInputRef.current.click()}
+                            onDragOver={e => {
+                                e.preventDefault();
+                                setDragActive(true);
+                            }}
+                            onDragLeave={e => {
+                                e.preventDefault();
+                                setDragActive(false);
+                            }}
+                            onDrop={e => {
+                                e.preventDefault();
+                                setDragActive(false);
+                                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                    setPendingModels(prev => [...prev, ...Array.from(e.dataTransfer.files)]);
                                 }
                             }}
-                        />
-                        <button
-                            type="button"
-                            className="px-3 py-1 border rounded bg-accent text-white"
-                            disabled={!form.variantInput.trim()}
-                            onClick={handleAddVariant}
                         >
-                            Add
-                        </button>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                        {form.variants.map((variant, idx) => (
-                            <span
-                                key={variant}
-                                className="flex items-center border rounded px-2 py-1 text-sm"
-                            >
-                                {variant}
-                                <RxCross1
-                                    className="ml-1 cursor-pointer"
-                                    size={14}
-                                    onClick={() => handleRemoveVariant(idx)}
-                                />
-                            </span>
-                        ))}
+                            Click to choose files or drag and drop here
+                            <input
+                                type="file"
+                                accept=".obj,.glb,.gltf,.stl,.blend,.fbx,.zip,.rar,.7z"
+                                multiple
+                                onChange={handleModelChange}
+                                style={{ display: "none" }}
+                                ref={modelInputRef}
+                            />
+                        </div>
+                        <ul className="flex flex-col text-sm w-fit">
+                            {[...(form.downloadableAssets || []), ...pendingModels].map((item, idx) => {
+                                const isPending = idx >= (form.downloadableAssets?.length || 0);
+                                return (
+                                    <div className='gap-4 flex flex-row items-center justify-between' key={idx}>
+                                        <li className='flex truncate' title={isPending ? item.name : item}>
+                                            {isPending ? (
+                                                <span className="underline">{item.name}</span>
+                                            ) : (
+                                                <a
+                                                    href={`/api/proxy?key=${encodeURIComponent(item)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="underline"
+                                                    download
+                                                >
+                                                    {item.replace(/^models\//, "")}
+                                                </a>
+                                            )}
+                                        </li>
+                                        <RxCross1
+                                            className='flex cursor-pointer'
+                                            onClick={() => handleRemoveModel(idx)}
+                                            size={12}
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </ul>
                     </div>
                 </div>
+            </div>
 
-                {/* discount */}
-                <div className="flex flex-col gap-2 w-full">
-                    <label>Discounts</label>
-                    {/* Add Discount Button */}
-                    <button
-                        type="button"
-                        className="px-3 py-1 border rounded bg-accent text-white w-fit"
-                        onClick={() => setForm(f => ({ ...f, showDiscount: true }))}
-                        disabled={form.showDiscount}
-                    >
-                        Add Discount
-                    </button>
 
-                    {/* discount box */}
-                    {form.showDiscount && (
-                        <div className="flex flex-col gap-2 border p-3 rounded">
-                            {/* event selection (optional) */}
-                            {events && events.length > 0 && (
-                                <div className="flex flex-col gap-1">
-                                    <label htmlFor="eventId">Select Event (optional)</label>
-                                    <select
-                                        id="eventId"
-                                        name="eventId"
-                                        value={form.discount.eventId}
-                                        onChange={e =>
-                                            setForm(f => ({
-                                                ...f,
-                                                discount: { ...f.discount, eventId: e.target.value }
-                                            }))
-                                        }
-                                        className="border"
-                                    >
-                                        <option value="">None</option>
-                                        {events.map(ev => (
-                                            <option value={ev._id} key={ev._id}>
-                                                {ev.name} ({ev.percentage}% off)
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-
-                            {/* Custom discount fields */}
-                            <div className="flex flex-col gap-1">
-                                <label htmlFor="discountPercentage">Discount Percentage (%)</label>
+            <div className="flex flex-col w-full border border-borderColor rounded-lg">
+                <button type="button"
+                    className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer"
+                    onClick={() => setOpenSection(s => ({ ...s, shipping: !s.shipping }))}
+                >
+                    Shipping Details
+                    {openSection.shipping ? <GoChevronDown /> : <GoChevronRight />}
+                </button>
+                <div
+                    className="formDrawer flex flex-col w-full items-center justify-center p-4 gap-6"
+                    style={{
+                        maxHeight: openSection.shipping ? 2000 : 0,
+                        opacity: openSection.shipping ? 1 : 0,
+                        pointerEvents: openSection.shipping ? 'auto' : 'none'
+                    }}
+                >
+                    {/* dimensions */}
+                    <div className="flex flex-col w-full gap-3">
+                        <label className="formLabel">Product Dimensions</label>
+                        <div className="flex flex-row items-center gap-4 w-full">
+                            <div className="flex-1/4 flex-col flex gap-1">
+                                <label htmlFor="length" className="text-xs md:text-sm font-normal text-lightColor">Length (cm)</label>
                                 <input
-                                    id="discountPercentage"
-                                    name="discountPercentage"
-                                    type="number"
-                                    min={1}
-                                    max={100}
-                                    value={form.discount.percentage}
-                                    onChange={e => setForm(f => ({
-                                        ...f,
-                                        discount: { ...f.discount, percentage: e.target.value }
-                                    }))}
-                                    className="border"
-                                    placeholder="e.g. 10"
-                                    required={!form.discount.eventId}
+                                    id="length"
+                                    name="length"
+                                    type="float"
+                                    min={0}
+                                    onChange={handleChange}
+                                    value={form.dimensions.length}
+                                    className="formInput"
+                                    placeholder="Enter length"
                                 />
                             </div>
-                            <div className="flex flex-col gap-1">
-                                <label htmlFor="discountMinimumAmount">Minimum Amount</label>
+                            <div className="flex-1/4 flex-col flex gap-1">
+                                <label htmlFor="width" className="text-xs md:text-sm font-normal text-lightColor">Width (cm)</label>
                                 <input
-                                    id="discountMinimumAmount"
-                                    name="discountMinimumAmount"
+                                    id="width"
+                                    name="width"
+                                    type="float"
+                                    min={0}
+                                    onChange={handleChange}
+                                    value={form.dimensions.width}
+                                    className="formInput"
+                                    placeholder="Enter width"
+                                />
+                            </div>
+                            <div className="flex-1/4 flex-col flex gap-1">
+                                <label htmlFor="height" className="text-xs md:text-sm font-normal text-lightColor">Height (cm)</label>
+                                <input
+                                    id="height"
+                                    name="height"
+                                    type="float"
+                                    min={0}
+                                    onChange={handleChange}
+                                    value={form.dimensions.height}
+                                    className="formInput"
+                                    placeholder="Enter height"
+                                />
+                            </div>
+                            <div className="flex-1/4 flex-col flex gap-1">
+                                <label htmlFor="weight" className="text-xs md:text-sm font-normal text-lightColor">Weight (kg)</label>
+                                <input
+                                    id="weight"
+                                    name="weight"
+                                    type="float"
+                                    min={0}
+                                    onChange={handleChange}
+                                    value={form.dimensions.weight}
+                                    className="formInput"
+                                    placeholder="Enter weight"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* delivery types */}
+                    <div className="flex flex-col gap-3 w-full">
+                        <label className="formLabel">Delivery Types</label>
+                        <div className="flex flex-col gap-2 font-normal">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="selfCollect"
+                                    name="selfCollect"
+                                    checked={form.deliveryTypes.selfCollect}
+                                    onChange={e =>
+                                        setForm(f => ({
+                                            ...f,
+                                            deliveryTypes: {
+                                                ...f.deliveryTypes,
+                                                selfCollect: e.target.checked
+                                            }
+                                        }))
+                                    }
+                                />
+                                <label htmlFor="selfCollect">Self Collection</label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="singpost"
+                                    name="singpost"
+                                    checked={form.deliveryTypes.singpost}
+                                    onChange={e =>
+                                        setForm(f => ({
+                                            ...f,
+                                            deliveryTypes: {
+                                                ...f.deliveryTypes,
+                                                singpost: e.target.checked
+                                            }
+                                        }))
+                                    }
+                                />
+                                <label htmlFor="singpost">Singpost</label>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="privateDelivery"
+                                    name="privateDelivery"
+                                    checked={form.deliveryTypes.privateDelivery}
+                                    onChange={e =>
+                                        setForm(f => ({
+                                            ...f,
+                                            deliveryTypes: {
+                                                ...f.deliveryTypes,
+                                                privateDelivery: e.target.checked
+                                            }
+                                        }))
+                                    }
+                                />
+                                <label htmlFor="privateDelivery">Private</label>
+                            </div>
+                        </div>
+
+                        {/* pickup location */}
+                        {form.deliveryTypes.selfCollect && (
+                            <div className="flex flex-col gap-1 mt-2">
+                                <label htmlFor="pickupLocation" className="formLabel">Pickup Location</label>
+                                <input
+                                    id="pickupLocation"
+                                    name="pickupLocation"
+                                    type="text"
+                                    value={form.pickupLocation}
+                                    onChange={handleChange}
+                                    placeholder="Enter pickup location"
+                                    className="formInput"
+                                    required
+                                />
+                            </div>
+                        )}
+
+                        {/* singpost royalty */}
+                        {form.deliveryTypes.singpost && (
+                            <div className="flex flex-col gap-1 mt-2">
+                                <label htmlFor="singpostRoyaltyFee" className="formLabel">Singpost Royalty Fee ($)</label>
+                                <input
+                                    id="singpostRoyaltyFee"
+                                    name="singpostRoyaltyFee"
                                     type="number"
                                     min={0}
-                                    value={form.discount.minimumPrice}
-                                    step="0.01"
-                                    onChange={e => setForm(f => ({
-                                        ...f,
-                                        discount: { ...f.discount, minimumPrice: e.target.value }
-                                    }))}
-                                    className="border"
-                                    placeholder="e.g. 50"
-                                    required={!form.discount.eventId}
+                                    value={form.royaltyFees.singpost}
+                                    onChange={e =>
+                                        setForm(f => ({
+                                            ...f,
+                                            royaltyFees: {
+                                                ...f.royaltyFees,
+                                                singpost: Number(e.target.value)
+                                            }
+                                        }))
+                                    }
+                                    className="formInput"
+                                    required
                                 />
                             </div>
-                            <div className="flex flex-col gap-1">
-                                <label htmlFor="discountStartDate">Start Date</label>
+                        )}
+
+                        {/* private royalty */}
+                        {form.deliveryTypes.privateDelivery && (
+                            <div className="flex flex-col gap-1 mt-2">
+                                <label htmlFor="privateRoyaltyFee" className="formLabel">Private Delivery Royalty Fee ($)</label>
                                 <input
-                                    id="discountStartDate"
-                                    name="discountStartDate"
-                                    type="date"
-                                    value={form.discount.startDate}
-                                    onChange={e => setForm(f => ({
-                                        ...f,
-                                        discount: { ...f.discount, startDate: e.target.value }
-                                    }))}
-                                    className="border"
-                                    required={!form.discount.eventId}
+                                    id="privateRoyaltyFee"
+                                    name="privateRoyaltyFee"
+                                    type="number"
+                                    min={0}
+                                    value={form.royaltyFees.privateDelivery}
+                                    onChange={e =>
+                                        setForm(f => ({
+                                            ...f,
+                                            royaltyFees: {
+                                                ...f.royaltyFees,
+                                                privateDelivery: Number(e.target.value)
+                                            }
+                                        }))
+                                    }
+                                    className="formInput"
+                                    required
                                 />
                             </div>
-                            <div className="flex flex-col gap-1">
-                                <label htmlFor="discountEndDate">End Date</label>
-                                <input
-                                    id="discountEndDate"
-                                    name="discountEndDate"
-                                    type="date"
-                                    value={form.discount.endDate}
-                                    onChange={e => setForm(f => ({
-                                        ...f,
-                                        discount: { ...f.discount, endDate: e.target.value }
-                                    }))}
-                                    className="border"
-                                    required={!form.discount.eventId}
-                                />
-                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <div className="flex flex-col w-full border border-borderColor rounded-lg">
+                <button type="button" className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer"
+                    onClick={() => setOpenSection(s => ({ ...s, pricing: !s.pricing }))}
+                >
+                    Pricing Details
+                    {openSection.pricing ? <GoChevronDown /> : <GoChevronRight />}
+                </button>
+                <div
+                    className="formDrawer flex flex-col w-full items-center justify-center p-4 gap-3"
+                    style={{
+                        maxHeight: openSection.pricing ? 2000 : 0,
+                        opacity: openSection.pricing ? 1 : 0,
+                        pointerEvents: openSection.pricing ? 'auto' : 'none'
+                    }}
+                >
+                    {/* product variants */}
+                    <div className="flex flex-col gap-2 w-full">
+                        <label className="formLabel">Product Variants / Tags</label>
+                        <div className="flex gap-2 items-center">
+                            <input
+                                type="text"
+                                name="variantInput"
+                                value={form.variantInput}
+                                onChange={handleChange}
+                                className="formInput"
+                                placeholder="Add a variant or tag and press Enter"
+                                maxLength={200}
+                                onKeyDown={e => {
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        handleAddVariant(e);
+                                    }
+                                }}
+                            />
                             <button
                                 type="button"
-                                className="px-3 py-1 border rounded w-fit mt-2"
-                                onClick={() =>
-                                    setForm(f => ({
-                                        ...f,
-                                        showDiscount: false,
-                                        discount: {
-                                            eventId: "",
-                                            percentage: "",
-                                            minimumPrice: "",
-                                            startDate: "",
-                                            endDate: "",
-                                        }
-                                    }))
-                                }
+                                className="formBlackButton"
+                                disabled={!form.variantInput.trim()}
+                                onClick={handleAddVariant}
                             >
-                                Remove Discount
+                                Add
                             </button>
                         </div>
-                    )}
-                </div>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                            {form.variants.map((variant, idx) => (
+                                <span
+                                    key={variant}
+                                    className="flex items-center border border-borderColor rounded-lg px-2 py-1 text-sm"
+                                >
+                                    {variant}
+                                    <RxCross1
+                                        className="ml-2 cursor-pointer text-lightColor"
+                                        size={12}
+                                        onClick={() => handleRemoveVariant(idx)}
+                                    />
+                                </span>
+                            ))}
+                        </div>
+                    </div>
 
-                <button type="submit" className="flex w-full border px-3 py-1">
-                    Submit
-                </button>
-            </form>
-        </div>
+                    {/* product price */}
+                    <div className="flex flex-col gap-2 w-full">
+                        <label className="formLabel">Product Price</label>
+                        <div className="flex gap-1 items-center">
+                            <div className="flex flex-1/5">
+                                <SelectField
+                                    onChangeFunction={handleChange}
+                                    value={form.presentmentCurrency}
+                                    name="presentmentCurrency"
+                                    label=""
+                                    options={allCurrencies.map(code => ({ value: code, label: code }))}
+                                />
+                            </div>
+                            <div className="flex flex-4/5">
+                                <input
+                                    id="presentmentAmount"
+                                    name="presentmentAmount"
+                                    type="number"
+                                    min={0}
+                                    step="0.01"
+                                    value={form.presentmentAmount}
+                                    onChange={handleChange}
+                                    className="formInput"
+                                    placeholder="Enter price"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* product price in credits */}
+                    <div className="flex flex-col gap-2 w-full">
+                        <label className="formLabel">Product Price (Credits)</label>
+                        <input
+                            id="priceCredits"
+                            name="priceCredits"
+                            type="number"
+                            min={0}
+                            value={form.priceCredits}
+                            onChange={handleChange}
+                            step="0.01"
+                            className="formInput"
+                            placeholder="Enter price in credits"
+                            required
+                        />
+                    </div>
+
+                    {/* product stock */}
+                    <div className="flex flex-col gap-2 w-full">
+                        <label className="formLabel">Stock</label>
+                        <input
+                            id="stock"
+                            name="stock"
+                            type="number"
+                            value={form.stock}
+                            onChange={handleChange}
+                            min={1}
+                            step="1"
+                            className="formInput"
+                            placeholder="Enter stock quantity"
+                            required
+                        />
+                    </div>
+
+                    {/* discount */}
+                    <div className="flex flex-col gap-2 w-full">
+                        <label className="formLabel">Discounts</label>
+                        {/* Add Discount Button */}
+                        <button
+                            type="button"
+                            className="formButton"
+                            onClick={() => setForm(f => ({ ...f, showDiscount: true }))}
+                            disabled={form.showDiscount}
+                        >
+                            Add Discount
+                            <BsPlus className="ml-2" size={20} />
+                        </button>
+
+                        {/* discount box */}
+                        {form.showDiscount && (
+                            <div className="flex flex-col gap-2 bg-baseColor border border-extraLight p-4 rounded-lg my-3">
+                                {/* event selection (optional) */}
+                                {events && events.length > 0 && (
+                                    <div className="flex flex-col gap-1">
+                                        <SelectField
+                                            onChangeFunction={e =>
+                                                setForm(f => ({
+                                                    ...f,
+                                                    discount: { ...f.discount, eventId: e.target.value }
+                                                }))}
+                                            value={form.discount.eventId}
+                                            name="eventId"
+                                            label="Event"
+                                            options={[{ value: "", label: "None" }, ...events.map(ev => ({
+                                                value: ev._id,
+                                                label: `${ev.name} (${ev.percentage}% off)`
+                                            }))]}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Custom discount fields */}
+                                <div className="flex flex-col gap-1">
+                                    <label htmlFor="discountPercentage" className="formLabel">Discount Percentage (%)</label>
+                                    <input
+                                        id="discountPercentage"
+                                        name="discountPercentage"
+                                        type="number"
+                                        min={1}
+                                        max={100}
+                                        value={form.discount.percentage ?? ""}
+                                        onChange={e => setForm(f => ({
+                                            ...f,
+                                            discount: { ...f.discount, percentage: e.target.value }
+                                        }))}
+                                        className="formInput"
+                                        placeholder="e.g. 10"
+                                        required={!form.discount.eventId}
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <label htmlFor="discountMinimumAmount" className="formLabel">Minimum Amount</label>
+                                    <input
+                                        id="discountMinimumAmount"
+                                        name="discountMinimumAmount"
+                                        type="number"
+                                        min={0}
+                                        value={form.discount.minimumPrice}
+                                        step="0.01"
+                                        onChange={e => setForm(f => ({
+                                            ...f,
+                                            discount: { ...f.discount, minimumPrice: e.target.value }
+                                        }))}
+                                        className="formInput"
+                                        placeholder="e.g. 50"
+                                        required={!form.discount.eventId}
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <label htmlFor="discountStartDate" className="formLabel">Start Date</label>
+                                    <input
+                                        id="discountStartDate"
+                                        name="discountStartDate"
+                                        type="date"
+                                        value={form.discount.startDate}
+                                        onChange={e => setForm(f => ({
+                                            ...f,
+                                            discount: { ...f.discount, startDate: e.target.value }
+                                        }))}
+                                        className="formInput"
+                                        required={!form.discount.eventId}
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <label htmlFor="discountEndDate" className="formLabel">End Date</label>
+                                    <input
+                                        id="discountEndDate"
+                                        name="discountEndDate"
+                                        type="date"
+                                        value={form.discount.endDate}
+                                        onChange={e => setForm(f => ({
+                                            ...f,
+                                            discount: { ...f.discount, endDate: e.target.value }
+                                        }))}
+                                        className="formInput"
+                                        required={!form.discount.eventId}
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    className="formButton mt-4"
+                                    onClick={() =>
+                                        setForm(f => ({
+                                            ...f,
+                                            showDiscount: false,
+                                            discount: {
+                                                eventId: "",
+                                                percentage: "",
+                                                minimumPrice: "",
+                                                startDate: "",
+                                                endDate: "",
+                                            }
+                                        }))
+                                    }
+                                >
+                                    Remove Discount
+                                    <BiMinus />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" className="formBlackButton w-full">
+                {loading ? (
+                    <>
+                        Saving
+                        <div className='animate-spin ml-3 border-1 border-t-transparent h-3 w-3 rounded-full' />
+                    </>
+                ) :
+                    'Save'
+                }
+            </button>
+        </form >
     )
 }
 

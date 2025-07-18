@@ -1,12 +1,16 @@
 'use client'
 import { useEffect, useState } from 'react';
 import ButtonLink from '../Buttons/ButtonLink';
-import { GoChevronLeft, GoChevronRight } from 'react-icons/go'
+import { GoChevronLeft, GoChevronRight, GoStarFill } from 'react-icons/go'
+import Image from 'next/image';
+import { useToast } from '../General/ToastProvider';
+import ProductCard from '../ProductCard';
 
 function FeaturedSection() {
   const [maxItems, setMaxItems] = useState(5);
   const [items, setItems] = useState([]);
   const [idx, setIdx] = useState(0);
+  const { showToast } = useToast();
 
   const nextItem = () => {
     setIdx((prevIdx) => (prevIdx + 1) % maxItems);
@@ -35,55 +39,57 @@ function FeaturedSection() {
           console.log('No items found, setting maxItems to 5');
         }
       } catch (error) {
-        console.error('Error fetching popular prints:', error);
+        showToast('Failed to fetch popular prints: ' + error.message, 'error');
       }
     }
     fetchPopularPrints();
   }, []);
 
   return (
-    <div className='section'>
-      <div className='flex flex-col md:flex-row w-full gap-20'>
-        <div className='flex flex-col gap-8 w-full md:w-[40%] mt-4'>
+    <div className='section min-h-[50vh]'>
+      <div className='flex h-full flex-col lg:flex-row w-full gap-20'>
+        <div className='flex flex-col gap-8 w-full h-full lg:w-[40%] mt-4'>
           <div className='flex flex-col gap-2'>
             <h3>Featured</h3>
             <h1>
               Popular Prints
             </h1>
           </div>
-          <p className='w-full text-pretty flex'>
+          <p className='w-full text-pretty flex text-sm'>
             Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quam eum commodi libero, dicta illum ducimus natus. Tenetur, velit eveniet inventore voluptatum magnam perspiciatis perferendis nostrum accusantium consectetur provident quidem nam.
           </p>
           <ButtonLink lnk={'/prints'} text={'Browse More'} />
         </div>
-        <div className='flex flex-col md:w-[60%] gap-6 w-full'>
-          <div className='flex w-full overflow-x-hidden relative h-[400px]'>
-            <div
-              className="absolute flex gap-5 transition-transform duration-500 ease-in-out h-full"
-              style={{ transform: `translateX(${idx * -420}px)` }}
-            >
-              {items.length > 0 ? items.map((item, index) => (
-                <div key={index} className='flex flex-col w-[400px] aspect-square not-last-of-type:p-4'>
-                  <Image src={item.imageUrl} alt={item.name} className='w-full h-48 object-cover rounded-md mb-4' />
-                  <h2 className='text-lg font-semibold'>{item.name}</h2>
-                  <p className='text-sm '>{item.description}</p>
-                  <span className='text-xl font-bold mt-2'>${item.price}</span>
-                </div>
-              )) : (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className='flex w-[400px] aspect-square bg-borderColor' />
-                ))
-              )}
+
+        <div className='flex flex-col min-w-[300px] gap-6 w-full lg:w-[60%]'>
+          <div className='flex flex-col gap-4'>
+            <div className='flex  h-full overflow-x-hidden relative'>
+              <div
+                className="flex gap-5 transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(${idx * -320}px)` }}
+              >
+                {items.length > 0 ? items.slice(0, maxItems).map((item, index) => (
+                  <div className='flex flex-col w-[300px] min-h-[300px]' key={index}>
+                    <ProductCard product={item} />
+                  </div>
+                )) : (
+                  Array.from({ length: maxItems }).map((_, i) => (
+                    <div key={i} className='flex w-[300px] min-h-[300px] bg-borderColor' />
+                  ))
+                )}
+              </div>
             </div>
+            <div className='flex gap-4 w-full md:justify-end flex-row justify-between items-center'>
+              <button onClick={prevItem} className='toggleXbutton'>
+                <GoChevronLeft size={24} />
+              </button>
+              <button onClick={nextItem} className='toggleXbutton'>
+                <GoChevronRight size={24} />
+              </button>
+            </div>
+
           </div>
-          <div className='flex gap-4 w-full md:justify-end flex-row justify-between items-center'>
-            <button onClick={prevItem} className='toggleXbutton'>
-              <GoChevronLeft size={24} />
-            </button>
-            <button onClick={nextItem} className='toggleXbutton'>
-              <GoChevronRight size={24} />
-            </button>
-          </div>
+
         </div>
       </div>
     </div>

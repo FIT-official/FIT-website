@@ -15,10 +15,10 @@ function Collections() {
                 Products
                 <LuCirclePlus className="ml-2" size={20} />
             </Link>
-            <Link href='/dashboard/products' className="collectionItem">
-                Discounted Products
+            {/* <Link href='/dashboard/products' className="collectionItem">
+                Events & Discounts
                 <LuCirclePlus className="ml-2" size={20} />
-            </Link>
+            </Link> */}
         </div>
     )
 }

@@ -45,7 +45,7 @@ function Main({ adbanner }) {
             object-cover
             object-[69%_center] sm:object-center
             z-0
-            transition-[object-position] duration-500 ease-in-out grayscale-75 opacity-90
+            transition-[object-position] duration-500 ease-in-out grayscale-60 opacity-90
           "
             />
             <div className="relative z-10 flex flex-col items-center w-full text-background text-center px-4">

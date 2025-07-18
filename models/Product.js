@@ -55,7 +55,6 @@ const DiscountSchema = new mongoose.Schema({
 const ProductSchema = new mongoose.Schema(
     {
         creatorUserId: { type: String, required: true },
-        creatorFullName: { type: String, required: true },
         name: { type: String, required: true },
         description: { type: String, required: true },
         images: { type: [String], default: [], validate: [arr => arr.length <= 7, 'Max 7 images'] },

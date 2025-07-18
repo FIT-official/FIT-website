@@ -8,21 +8,26 @@ export async function GET(req) {
     try {
         const { userId } = await auth();
         if (!userId) {
+            console.log("No userId found in auth()");
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const client = await clerkClient()
+        const client = await clerkClient();
+        const user = await client.users.getUser(userId);
 
-        const user = await client.users.getUser(userId)
-
-        if (!user.publicMetadata.stripeSubscriptionId) {
-            return NextResponse.json({ error: 'No subscription found' }, { status: 404 })
+        if (!user) {
+            console.log("No user found for userId:", userId);
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        const subscription = await stripe.subscriptions.retrieve(user.publicMetadata.stripeSubscriptionId)
+        if (!user.publicMetadata.stripeSubscriptionId) {
+            console.log("No stripeSubscriptionId in user.publicMetadata for userId:", userId);
+            return NextResponse.json({ error: 'No subscription found' }, { status: 404 });
+        }
+
+        const subscription = await stripe.subscriptions.retrieve(user.publicMetadata.stripeSubscriptionId);
 
         let isUpdatePending = false;
-
         if (subscription.pending_update) {
             isUpdatePending = true;
         }
@@ -38,10 +43,10 @@ export async function GET(req) {
             days_until_due: subscription.days_until_due,
             trial_end: subscription.trial_end,
             pending_update_expiry: subscription.pending_update ? subscription.pending_update.expires_at : null,
-        })
+        });
 
     } catch (error) {
-        console.error('Error fetching subscription:', error)
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+        console.error('Error fetching subscription:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

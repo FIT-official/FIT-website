@@ -35,7 +35,10 @@ function Dashboard() {
         <div className="flex flex-col w-full items-center justify-center border-b border-borderColor">
             <div className="flex h-[15vh] flex-col items-start justify-end w-full  gap-2 px-12">
                 <h3>Dashboard</h3>
-                <h1 className="mb-4 md:text-6xl">Welcome, {user.firstName || user.emailAddresses[0].emailAddress}</h1>
+                <h1 className="mb-2">Welcome{user.firstName ? ", " + user.firstName : ""}.</h1>
+                <p className="">
+                    Here you can manage your products, view statistics, and more.
+                </p>
             </div>
             <div className="flex w-full border-t border-borderColor mt-8" />
             <div className="flex w-full items-center justify-center p-12">

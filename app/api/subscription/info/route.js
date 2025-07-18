@@ -17,7 +17,6 @@ export async function GET(req) {
         const prodID = priceObject.product;
         const productObject = await stripe.products.retrieve(prodID);
 
-        // Compose response
         return NextResponse.json({
             productName: productObject.name || "",
             price: (priceObject.unit_amount / 100).toFixed(2),

@@ -61,13 +61,12 @@ function Visualisation({ myProducts }) {
                     label: "Gross Volume (SGD)",
                     data,
                     fill: true,
-                    borderColor: "rgba(235, 159, 37, 1)",
-                    backgroundColor: "rgba(235, 159, 37, 1)",
+                    borderColor: "#888",
                     tension: 0.3,
                     pointRadius: 0,
-                    pointHoverRadius: 0,
-                    borderWidth: 1,
-                    borderJoinStyle: "round",
+                    pointHoverRadius: 3,
+                    borderWidth: 2,
+
                 },
             ],
         };
@@ -79,7 +78,7 @@ function Visualisation({ myProducts }) {
     }, [myProducts]);
     return (
         <div className="col-span-4 row-span-1 flex lg:flex-row flex-col items-center justify-center">
-            <div className="flex w-full lg:w-[80%] lg:h-full rounded-lg p-4">
+            <div className="flex w-full lg:w-[80%] lg:h-full rounded-lg p-4  border border-borderColor/60">
                 <Line
                     data={getChartData()}
                     options={{
@@ -87,14 +86,21 @@ function Visualisation({ myProducts }) {
                         maintainAspectRatio: false,
                         plugins: {
                             legend: { display: false },
-                            tooltip: { mode: "index", intersect: false },
+                            tooltip: {
+                                mode: "index",
+                                intersect: false,
+                                titleColor: "#fff",
+                                bodyColor: "#fff",
+                                borderColor: "#aaa",
+                                borderWidth: 1,
+                            },
                         },
                         scales: {
                             x: {
                                 ticks: {
                                     maxTicksLimit: 10,
                                     autoSkip: true,
-                                    color: "#111",
+                                    color: "#888",
                                 },
                                 grid: {
                                     display: false,
@@ -104,10 +110,11 @@ function Visualisation({ myProducts }) {
                                 beginAtZero: true,
                                 ticks: {
                                     callback: value => `S$${value}`,
-                                    color: "#111",
+                                    color: "#888",
                                 },
                                 grid: {
-                                    display: false,
+                                    color: "#eee",
+                                    borderDash: [4, 4],
                                 },
                             }
                         }

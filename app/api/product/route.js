@@ -4,6 +4,7 @@ import Product from "@/models/Product";
 import { slugify } from "@/app/api/product/slugify";
 import { auth } from "@clerk/nextjs/server";
 import { sanitizeString, isValidUrl } from "@/utils/validate";
+import { PRINT_CATEGORIES, SHOP_CATEGORIES, PRINT_SUBCATEGORIES, SHOP_SUBCATEGORIES } from "@/lib/categories";
 
 async function generateUniqueSlug(baseName) {
     let baseSlug = slugify(baseName);
@@ -27,11 +28,8 @@ export async function POST(req) {
 
         await connectToDatabase();
         const body = await req.json();
-
-        // Check for missing required fields and log them
         const requiredFields = [
             "creatorUserId",
-            "creatorFullName",
             "name",
             "description",
             "images",
@@ -46,7 +44,6 @@ export async function POST(req) {
 
         const name = sanitizeString(body.name).trim();
         const description = sanitizeString(body.description).trim();
-        const creatorFullName = sanitizeString(body.creatorFullName).trim();
         const productType = sanitizeString(body.productType).trim();
 
         if (!["shop", "print"].includes(productType)) {
@@ -78,7 +75,6 @@ export async function POST(req) {
                 ...body,
                 name,
                 description,
-                creatorFullName,
                 productType,
                 slug,
             });
@@ -115,7 +111,6 @@ export async function PUT(req) {
 
         const requiredFields = [
             "creatorUserId",
-            "creatorFullName",
             "name",
             "description",
             "images",
@@ -129,7 +124,6 @@ export async function PUT(req) {
 
         const name = sanitizeString(body.name).trim();
         const description = sanitizeString(body.description).trim();
-        const creatorFullName = sanitizeString(body.creatorFullName).trim();
         const productType = sanitizeString(body.productType).trim();
 
         if (!["shop", "print"].includes(productType)) {
@@ -154,7 +148,6 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Invalid price" }, { status: 400 });
         }
 
-        // Optionally update slug if name changed
         let slug = body.slug;
         if (body.name) {
             slug = await generateUniqueSlug(name);
@@ -164,7 +157,6 @@ export async function PUT(req) {
             ...body,
             name,
             description,
-            creatorFullName,
             productType,
             slug,
         };
@@ -187,14 +179,42 @@ export async function GET(req) {
         const { searchParams } = new URL(req.url);
         const productType = searchParams.get("productType");
         const ids = searchParams.get("ids");
-        const productCategory = searchParams.get("productCategory");
-        const productSubCategory = searchParams.get("productSubCategory");
+        let productCategory = searchParams.get("productCategory");
+        let productSubCategory = searchParams.get("productSubCategory");
         const productId = searchParams.get("productId");
+        const slug = searchParams.get("slug");
+
 
         let filter = {};
 
+        if (slug) {
+            const product = await Product.findOne({ slug }).lean();
+            return NextResponse.json({ product: product || null }, { status: 200 });
+        }
+
         if (productType) {
             filter.productType = productType;
+        }
+
+        if (productCategory && isNaN(Number(productCategory))) {
+            if (productType === "shop") {
+                productCategory = SHOP_CATEGORIES.findIndex(cat => cat === productCategory);
+            } else if (productType === "print") {
+                productCategory = PRINT_CATEGORIES.findIndex(cat => cat === productCategory);
+            }
+        }
+
+        if (
+            productSubCategory &&
+            isNaN(Number(productSubCategory)) &&
+            productCategory !== null &&
+            productCategory !== -1
+        ) {
+            if (productType === "shop") {
+                productSubCategory = SHOP_SUBCATEGORIES[productCategory]?.findIndex(sub => sub === productSubCategory);
+            } else if (productType === "print") {
+                productSubCategory = PRINT_SUBCATEGORIES[productCategory]?.findIndex(sub => sub === productSubCategory);
+            }
         }
 
         if (ids) {
@@ -208,12 +228,23 @@ export async function GET(req) {
             filter._id = productId;
         }
 
-        if (productCategory && productSubCategory) {
-            filter.productCategory = productCategory;
-            filter.productSubCategory = productSubCategory;
-        } else if (productCategory) {
-            filter.productCategory = productCategory;
-        } else {
+        if (
+            productCategory !== undefined &&
+            productCategory !== null &&
+            productCategory !== -1 &&
+            productSubCategory !== undefined &&
+            productSubCategory !== null &&
+            productSubCategory !== -1
+        ) {
+            filter.category = Number(productCategory);
+            filter.subcategory = Number(productSubCategory);
+        } else if (
+            productCategory !== undefined &&
+            productCategory !== null &&
+            productCategory !== -1
+        ) {
+            filter.category = Number(productCategory);
+        } else if (!ids && !productId) {
             return NextResponse.json({ error: "Missing productCategory or productSubCategory" }, { status: 400 });
         }
 

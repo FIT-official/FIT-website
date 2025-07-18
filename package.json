@@ -13,6 +13,8 @@
     "@aws-sdk/s3-request-presigner": "^3.828.0",
     "@brianmmdev/clerk-webhooks-handler": "^1.0.7",
     "@clerk/nextjs": "^6.21.0",
+    "@react-three/drei": "^10.3.0",
+    "@react-three/fiber": "^9.1.4",
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^7.3.1",
     "@studio-freight/lenis": "^1.0.42",
@@ -25,12 +27,14 @@
     "mongoose": "^8.15.1",
     "next": "15.3.3",
     "nodemailer": "^7.0.3",
+    "r3f-perf": "^7.2.3",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
     "sharp": "^0.34.2",
-    "stripe": "^18.2.1"
+    "stripe": "^18.2.1",
+    "three": "^0.177.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

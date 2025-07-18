@@ -32,7 +32,7 @@ function AccountDropdown() {
     }, [isAccountDropdownOpen]);
 
     return (
-        <div className='flex relative' ref={accountDropdownRef}>
+        <div className='flex z-10 relative' ref={accountDropdownRef}>
 
             <button onClick={openAccountDropdown} className='flex w-7 h-7 rounded-full overflow-hidden cursor-pointer'>
                 <Image

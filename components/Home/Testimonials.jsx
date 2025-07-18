@@ -63,7 +63,7 @@ function Testimonials() {
                     <GoChevronLeft size={24} />
                 </button>
                 <div
-                    className={`flex flex-col items-start justify-center py-8 md:py-12 bg-background rounded-xl overflow-hidden transition-all duration-600 ease-in-out border border-[#f1f1f1] ${fade ? 'opacity-100 max-w-[80%]' : 'opacity-0'}`}
+                    className={`flex flex-col items-start justify-center py-8 md:py-12 bg-background rounded-xl overflow-hidden transition-all duration-600 ease-in-out border border-[#f1f1f1] ${fade ? 'opacity-100' : 'opacity-0'}`}
                     key={idx}
                     style={{
                         filter: `drop-shadow(3px 1px 5px #e6e6e6) blur(${fade ? 0 : 8}px)`,
@@ -71,7 +71,7 @@ function Testimonials() {
                     }}
                 >
                     <div className="flex px-6 md:px-16">
-                        <p className="text-sm md:text-base font-medium tracking-tight mb-2">{testimonials[idx].text}</p>
+                        <p className="text-sm font-medium tracking-tight mb-2">{testimonials[idx].text}</p>
                     </div>
                     <div className="flex w-full h-0 border-t border-[#f1f1f1] mt-4 mb-8" />
                     <div className="flex flex-row items-center gap-4 px-6 md:px-16">
@@ -84,7 +84,7 @@ function Testimonials() {
                         />
                         <div className="flex flex-col gap-1">
                             <span className="text-textColor font-semibold">{testimonials[idx].name}</span>
-                            <span className="text-lightColor text-xs md:text-sm font-medium">{testimonials[idx].role}</span>
+                            <span className="text-lightColor text-xs font-medium">{testimonials[idx].role}</span>
                         </div>
                     </div>
 
