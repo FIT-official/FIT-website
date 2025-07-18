@@ -1,3 +1,4 @@
+'use client'
 
 import { motion, cubicBezier } from 'framer-motion';
 import Image from 'next/image';

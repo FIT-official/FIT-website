@@ -1,4 +1,3 @@
-import { m } from "framer-motion";
 import mongoose from "mongoose";
 
 const CartItemSchema = new mongoose.Schema(
