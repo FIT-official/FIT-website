@@ -51,7 +51,7 @@ function Testimonials() {
     }, [idx, maxItems]);
 
     return (
-        <div className="section flex-col gap-12 relative">
+        <div className="flex w-full py-20 items-center justify-center px-4 md:px-32 border-b border-borderColor flex-col gap-12 relative">
             <Grid />
             <div className="flex flex-col items-center gap-3 z-10">
                 <h3>Testimonials</h3>

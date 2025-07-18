@@ -15,7 +15,7 @@ async function generateUniqueSlug(baseName) {
         attempt++;
         slug = `${baseSlug}-${attempt}`;
         exists = await Product.findOne({ slug });
-        if (attempt > 100) break; // avoid infinite loop
+        if (attempt > 100) break;
     }
     return slug;
 }

@@ -46,7 +46,7 @@ function FeaturedSection() {
   }, []);
 
   return (
-    <div className='section min-h-[50vh]'>
+    <div className='flex w-full py-20 items-center justify-center px-12 md:px-32 border-b border-borderColor min-h-[50vh]'>
       <div className='flex h-full flex-col lg:flex-row w-full gap-20'>
         <div className='flex flex-col gap-8 w-full h-full lg:w-[40%] mt-4'>
           <div className='flex flex-col gap-2'>
@@ -61,20 +61,20 @@ function FeaturedSection() {
           <ButtonLink lnk={'/prints'} text={'Browse More'} />
         </div>
 
-        <div className='flex flex-col min-w-[300px] gap-6 w-full lg:w-[60%]'>
+        <div className='flex flex-col min-w-[255px] gap-6 w-full lg:w-[60%]'>
           <div className='flex flex-col gap-4'>
             <div className='flex  h-full overflow-x-hidden relative'>
               <div
                 className="flex gap-5 transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(${idx * -320}px)` }}
+                style={{ transform: `translateX(${idx * -275}px)` }}
               >
                 {items.length > 0 ? items.slice(0, maxItems).map((item, index) => (
-                  <div className='flex flex-col w-[300px] min-h-[300px]' key={index}>
+                  <div className='flex flex-col w-[255px] min-h-[255px]' key={index}>
                     <ProductCard product={item} />
                   </div>
                 )) : (
                   Array.from({ length: maxItems }).map((_, i) => (
-                    <div key={i} className='flex w-[300px] min-h-[300px] bg-borderColor' />
+                    <div key={i} className='flex w-[255px] min-h-[255px] bg-borderColor' />
                   ))
                 )}
               </div>

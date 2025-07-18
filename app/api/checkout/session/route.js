@@ -116,15 +116,21 @@ export async function POST(req) {
     }
 
     try {
-        const session = await stripe.checkout.sessions.create({
+        const sessionParams = {
             payment_method_types: ["card", "paynow"],
             line_items,
             mode: "payment",
             ui_mode: "custom",
             return_url: `${domain}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
-            customer: stripeCustomerId,
-            customer_email: email,
-        });
+        };
+
+        if (stripeCustomerId) {
+            sessionParams.customer = stripeCustomerId;
+        } else if (email) {
+            sessionParams.customer_email = email;
+        }
+
+        const session = await stripe.checkout.sessions.create(sessionParams);
 
         if (!session.client_secret) {
             throw new Error("Failed to create a valid Stripe session.");

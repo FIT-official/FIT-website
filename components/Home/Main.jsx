@@ -44,7 +44,7 @@ function Main({ adbanner }) {
                 priority
                 className="
             object-cover
-            object-[69%_center] sm:object-center
+            object-[75%_center] sm:object-center
             z-0
             transition-[object-position] duration-500 ease-in-out grayscale-60 opacity-90
           "
