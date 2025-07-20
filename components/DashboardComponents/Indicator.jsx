@@ -19,7 +19,7 @@ function Indicator({ type }) {
         2: "Cancelled",
     }
     return (
-        <div className={`flex items-center border text-xs rounded-md font-medium px-2 py-1 ${indicatorStyles[type]}`}>
+        <div className={`flex items-center border text-xs rounded-sm font-medium px-2 py-1 ${indicatorStyles[type]}`}>
             {indicatorIcons[type]}
             <span>{indicatorText[type]}</span>
         </div>

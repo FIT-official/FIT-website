@@ -8,22 +8,18 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 const handler = createWebhooksHandler({
     onUserCreated: async (user) => {
         try {
-            const { cardToken, priceId } = user.unsafe_metadata
-            if (!cardToken || !priceId) return
+            const { cardToken, priceId, basedIn, business_type } = user.unsafe_metadata
+            // if (!cardToken || !priceId || !basedIn || !business_type) return
 
             const pm = await stripe.paymentMethods.create({
                 type: 'card',
                 card: { token: cardToken },
             })
 
-            // console.log('Stripe payment method created:', pm.id)
-
             const customer = await stripe.customers.create({
                 email: user?.email_addresses[0].email_address,
                 payment_method: pm.id,
             })
-
-            // console.log('Stripe customer created:', customer.id)
 
             const subscription = await stripe.subscriptions.create({
                 customer: customer.id,
@@ -33,25 +29,36 @@ const handler = createWebhooksHandler({
                 proration_behavior: 'always_invoice',
             })
 
-            // console.log('Stripe subscription created:', subscription.id)
+            const account = await stripe.accounts.create({
+                type: 'express',
+                country: basedIn,
+                email: user?.email_addresses[0].email_address,
+                business_type: business_type,
+                capabilities: {
+                    transfers: { requested: true },
+                    card_payments: { requested: true },
+                },
+            });
 
             const client = await clerkClient()
+            const userObj = await client.users.getUser(user.id)
+            const currentMetadata = userObj.publicMetadata || {}
 
             const res = await client.users.updateUser(user.id, {
                 publicMetadata: {
+                    ...currentMetadata,
                     stripeCustomerId: customer.id,
                     stripeSubscriptionId: subscription.id,
+                    stripeAccountId: account.id,
+                    expressAccountOnboarded: false,
                 },
             })
-
-            // console.log('Clerk user updated with Stripe IDs:', user.id)
         } catch (error) {
             console.error('Stripe webhook error:', error)
         }
     },
 })
 
-// Wrap the handler to always return a response
 export async function POST(req) {
     await handler.POST(req)
     return NextResponse.json({ received: true })

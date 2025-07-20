@@ -11,7 +11,6 @@ import {
     PRINT_SUBCATEGORIES,
 } from "@/lib/categories"
 import currencyCodes from "currency-codes"
-import { useRouter } from "next/navigation";
 import SelectField from "./SelectField";
 import { GoChevronDown, GoChevronRight } from "react-icons/go";
 import { BiMinus } from "react-icons/bi";
@@ -382,8 +381,8 @@ function ProductForm({ mode = "Create", product = null }) {
         <form onSubmit={handleSubmit} className='flex flex-col w-full items-center justify-center gap-4'>
             <h1 className="flex w-full mb-4">{formattedMode} Product</h1>
 
-            <div className="flex flex-col w-full border border-borderColor rounded-lg">
-                <button type="button" className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer"
+            <div className="flex flex-col w-full border border-borderColor rounded-sm">
+                <button type="button" className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer  text-sm"
                     onClick={() => setOpenSection(s => ({ ...s, details: !s.details }))}
                 >
                     Product Details
@@ -594,9 +593,9 @@ function ProductForm({ mode = "Create", product = null }) {
             </div>
 
 
-            <div className="flex flex-col w-full border border-borderColor rounded-lg">
+            <div className="flex flex-col w-full border border-borderColor rounded-sm">
                 <button type="button"
-                    className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer"
+                    className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer  text-sm"
                     onClick={() => setOpenSection(s => ({ ...s, shipping: !s.shipping }))}
                 >
                     Shipping Details
@@ -615,7 +614,7 @@ function ProductForm({ mode = "Create", product = null }) {
                         <label className="formLabel">Product Dimensions</label>
                         <div className="flex flex-row items-center gap-4 w-full">
                             <div className="flex-1/4 flex-col flex gap-1">
-                                <label htmlFor="length" className="text-xs md:text-sm font-normal text-lightColor">Length (cm)</label>
+                                <label htmlFor="length" className="text-xs font-normal text-lightColor">Length (cm)</label>
                                 <input
                                     id="length"
                                     name="length"
@@ -628,7 +627,7 @@ function ProductForm({ mode = "Create", product = null }) {
                                 />
                             </div>
                             <div className="flex-1/4 flex-col flex gap-1">
-                                <label htmlFor="width" className="text-xs md:text-sm font-normal text-lightColor">Width (cm)</label>
+                                <label htmlFor="width" className="text-xs font-normal text-lightColor">Width (cm)</label>
                                 <input
                                     id="width"
                                     name="width"
@@ -641,7 +640,7 @@ function ProductForm({ mode = "Create", product = null }) {
                                 />
                             </div>
                             <div className="flex-1/4 flex-col flex gap-1">
-                                <label htmlFor="height" className="text-xs md:text-sm font-normal text-lightColor">Height (cm)</label>
+                                <label htmlFor="height" className="text-xs font-normal text-lightColor">Height (cm)</label>
                                 <input
                                     id="height"
                                     name="height"
@@ -654,7 +653,7 @@ function ProductForm({ mode = "Create", product = null }) {
                                 />
                             </div>
                             <div className="flex-1/4 flex-col flex gap-1">
-                                <label htmlFor="weight" className="text-xs md:text-sm font-normal text-lightColor">Weight (kg)</label>
+                                <label htmlFor="weight" className="text-xs font-normal text-lightColor">Weight (kg)</label>
                                 <input
                                     id="weight"
                                     name="weight"
@@ -672,7 +671,7 @@ function ProductForm({ mode = "Create", product = null }) {
                     {/* delivery types */}
                     <div className="flex flex-col gap-3 w-full">
                         <label className="formLabel">Delivery Types</label>
-                        <div className="flex flex-col gap-2 font-normal">
+                        <div className="flex flex-col gap-2 font-normal text-sm">
                             <div className="flex items-center gap-2">
                                 <input
                                     type="checkbox"
@@ -803,8 +802,8 @@ function ProductForm({ mode = "Create", product = null }) {
 
 
 
-            <div className="flex flex-col w-full border border-borderColor rounded-lg">
-                <button type="button" className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer"
+            <div className="flex flex-col w-full border border-borderColor rounded-sm">
+                <button type="button" className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer text-sm"
                     onClick={() => setOpenSection(s => ({ ...s, pricing: !s.pricing }))}
                 >
                     Pricing Details
@@ -850,7 +849,7 @@ function ProductForm({ mode = "Create", product = null }) {
                             {form.variants.map((variant, idx) => (
                                 <span
                                     key={variant}
-                                    className="flex items-center border border-borderColor rounded-lg px-2 py-1 text-sm"
+                                    className="flex items-center border border-borderColor rounded-sm px-2 py-1 text-sm"
                                 >
                                     {variant}
                                     <RxCross1
@@ -943,7 +942,7 @@ function ProductForm({ mode = "Create", product = null }) {
 
                         {/* discount box */}
                         {form.showDiscount && (
-                            <div className="flex flex-col gap-2 bg-baseColor border border-extraLight p-4 rounded-lg my-3">
+                            <div className="flex flex-col gap-2 bg-baseColor border border-extraLight p-4 rounded-sm my-3">
                                 {/* event selection (optional) */}
                                 {events && events.length > 0 && (
                                     <div className="flex flex-col gap-1">

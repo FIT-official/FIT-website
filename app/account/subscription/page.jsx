@@ -50,16 +50,28 @@ function Subscription() {
         <div className='flex flex-col items-center justify-center h-[92vh] w-full gap-5  border-b border-borderColor'>
             {hasSubscription ? (
                 <>
-                    <div className='flex flex-col gap-2 w-80'>
-                        <button onClick={cancelSubButton} className="mt-2 px-4 py-2 border rounded cursor-pointer">
-                            Cancel Subscription
-                        </button>
-                    </div>
-                    <div className='flex flex-col gap-2 w-80'>
-                        <button onClick={updateSubButton} className="mt-2 px-4 py-2 border rounded cursor-pointer">
-                            Edit Subscription
-                        </button>
-                    </div>
+                    {!updating && (
+                        <div className='flex flex-col text-center'>
+                            <h1 className="mb-4">
+                                Your Subscription
+                            </h1>
+                            <div className='text-sm w-xs mb-8'>
+                                You are currently subscribed. You can edit or cancel your subscription at any time.
+                            </div>
+                            <button
+                                onClick={cancelSubButton}
+                                className="formBlackButton mb-1"
+                            >
+                                Cancel Subscription
+                            </button>
+                            <button
+                                onClick={updateSubButton}
+                                className="formBlackButton"
+                            >
+                                Edit Subscription
+                            </button>
+                        </div>
+                    )}
                     {updating && (
                         <Elements stripe={stripePromise}>
                             <SubscriptionDetails />

@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 function Footer() {
     return (
-        <div className='flex flex-col w-full min-h-[40vh] px-12 py-12'>
+        <footer className='flex flex-col w-full min-h-[40vh] px-12 py-12'>
             {/* top section */}
             <div className='flex flex-col md:flex-row pb-12 justify-start md:justify-between border-b border-borderColor grow-8'>
                 {/* logo section */}
@@ -63,7 +63,7 @@ function Footer() {
                     © 2025 Fix It Today. All rights reserved.
                 </div>
             </div>
-        </div>
+        </footer>
     )
 }
 

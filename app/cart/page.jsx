@@ -255,19 +255,58 @@ function Cart() {
 
                                         {/* price */}
                                         <div className='flex flex-col justify-center items-end font-semibold md:text-sm text-base'>
-                                            {product.price?.presentmentCurrency}{" "}
-                                            {Number(product.price?.presentmentAmount * cartItem.quantity).toFixed(2)}
-                                            <div className='text-xs md:text-[10px] text-lightColor font-medium'>
-                                                {product.price?.presentmentCurrency}{" "}
-                                                {Number(product.price?.presentmentAmount).toFixed(2)}
-                                            </div>
+                                            {(() => {
+                                                const hasDiscount = product.discount
+                                                    && typeof product.discount.percentage === "number"
+                                                    && product.discount.percentage > 0
+                                                    && (!product.discount.startDate || new Date(product.discount.startDate) <= new Date())
+                                                    && (!product.discount.endDate || new Date(product.discount.endDate) >= new Date());
+
+                                                const originalUnit = product.price?.presentmentAmount || 0;
+                                                const quantity = cartItem.quantity || 1;
+                                                const currency = product.price?.presentmentCurrency || "SGD";
+                                                let discountedUnit = originalUnit;
+
+                                                if (hasDiscount) {
+                                                    discountedUnit = originalUnit * (1 - product.discount.percentage / 100);
+                                                }
+
+                                                return (
+                                                    <>
+                                                        {/* Show discounted total if discount is active */}
+                                                        {hasDiscount ? (
+                                                            <>
+                                                                <span className="font-bold">
+                                                                    {currency} {Number(discountedUnit * quantity).toFixed(2)}
+                                                                </span>
+                                                                <div className="text-xs text-extraLight md:text-[10px]font-semibold">
+                                                                    {product.discount.percentage}% off!
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <span>
+                                                                    {currency} {Number(originalUnit * quantity).toFixed(2)}
+                                                                </span>
+                                                            </>
+                                                        )}
+                                                        {/* Per-unit price below */}
+                                                        <div className='text-xs md:text-[10px] text-lightColor font-medium'>
+                                                            {currency} {hasDiscount
+                                                                ? Number(discountedUnit).toFixed(2)
+                                                                : Number(originalUnit).toFixed(2)
+                                                            } per unit
+                                                        </div>
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                 );
                             })
                         ) : (
                             <div className='flex w-full items-center justify-center p-6 text-lightColor text-xs uppercase font-normal'>
-                                No items in cart
+                                No items in cart.
                             </div>
                         )
                     }
@@ -280,7 +319,7 @@ function Cart() {
                         {loading ? (
                             <CartSummarySkeleton />
                         ) : cartBreakdown.length === 0 ? (
-                            <div className="text-lightColor text-xs mb-4">No items in cart.</div>
+                            <div className="text-lightColor text-xs mb-4">No items in cart. Did you forget to update your delivery address?</div>
                         ) : (
                             <div className="flex flex-col divide-y divide-borderColor text-xs">
                                 <div className="flex justify-between font-normal text-lightColor gap-20 py-2">

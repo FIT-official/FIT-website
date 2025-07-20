@@ -69,7 +69,7 @@
 }
 
 .navbarLink{
-  @apply text-lightColor hover:text-textColor duration-300 ease-in-out transition-colors text-xs font-medium;
+  @apply  hover:text-lightColor duration-300 ease-in-out transition-colors text-xs font-medium;
 }
 
 .navSidebarLink{
@@ -85,7 +85,7 @@
 }
 
 .accountDropdownLink{
-  @apply flex flex-col gap-2 py-2 px-4 font-normal text-sm items-center text-center w-full hover:text-textColor duration-300 ease-in-out transition-colors text-lightColor;
+  @apply flex flex-col gap-2 py-2 px-4 font-medium text-xs uppercase items-center text-center w-full hover:text-textColor duration-300 ease-in-out transition-colors text-lightColor;
 }
 
 .authInput{
@@ -101,11 +101,11 @@
 }
 
 .collectionItem{
-  @apply flex pb-10 py-5 px-4 w-full bg-borderColor/50 border border-extraLight rounded-lg font-semibold text-base transition-all duration-300 ease-in-out text-lightColor items-center justify-between hover:bg-borderColor/70 mb-2
+  @apply flex pb-12 pt-4 px-4 w-full bg-baseColor border border-borderColor rounded-sm font-medium text-sm transition-all duration-300 ease-in-out text-lightColor items-center justify-between hover:bg-borderColor/20
 }
 
 .dashboardActionItem{
-  @apply my-1 gap-2 py-2 px-3 flex flex-row items-center justify-between border border-borderColor rounded-md
+  @apply gap-2 py-2 px-2 flex flex-row items-center justify-between border border-borderColor rounded-md text-xs
 }
 
 .footerLink {
@@ -113,11 +113,11 @@
 }
 
 .formLabel{
-  @apply flex font-medium text-lightColor
+  @apply flex font-medium text-lightColor text-xs
 }
 
 .formInput{
-  @apply flex px-3 py-1 border border-borderColor rounded-md focus:outline-none focus:ring focus:ring-extraLight w-full transition-all duration-300 ease-in-out font-normal bg-background
+  @apply flex px-3 py-1 border border-borderColor rounded-md focus:outline-none focus:ring  text-sm focus:ring-extraLight w-full transition-all duration-300 ease-in-out font-normal bg-background
 }
 
 .formBlackButton {
@@ -129,7 +129,7 @@
 }
 
 .formSelect {
-  @apply flex px-3 py-1 border border-borderColor rounded-md focus:outline-none focus:ring-1 focus:ring-extraLight w-full transition-all duration-300 ease-in-out font-normal appearance-none
+  @apply flex px-3 py-1 border border-borderColor rounded-md focus:outline-none focus:ring-1 focus:ring-extraLight w-full transition-all duration-300 ease-in-out font-normal appearance-none text-sm
 }
 
 .formDrag{
@@ -159,4 +159,40 @@
 
 .accountSaveButton{
   @apply rounded border flex gap-2 items-center border-borderColor px-2 py-1 uppercase text-xs font-medium text-lightColor hover:bg-baseColor duration-300 transition-colors ease-in-out cursor-pointer
+}
+
+.statContainer {
+  @apply flex flex-col w-full items-center bg-baseColor gap-1 rounded-md border border-borderColor p-4;
+}
+
+.bankAccountFormField{
+  @apply border text-sm border-borderColor rounded px-2 py-1 outline-none focus:bg-baseColor transition-all duration-300 ease-in-out;
+}
+
+.dashboardSection {
+  @apply col-span-4 lg:col-span-1 row-span-1 bg-background border border-borderColor flex flex-col rounded-md divide-y divide-borderColor text-sm h-fit;
+}
+
+
+@keyframes mask-flare-loop {
+  0% {
+    mask-position-x: 0%;
+    -webkit-mask-position-x: 0%;
+  }
+
+  100% {
+    mask-position-x: 100%;
+    -webkit-mask-position-x: 100%;
+  }
+}
+
+.mask-flare-loop {
+  mask-size: 400%;
+  -webkit-mask-size: 400%;
+  mask-image: linear-gradient(60deg, rgb(0, 0, 0) 25%, rgba(0, 0, 0, 0.4) 50%, rgb(0, 0, 0) 75%);
+  -webkit-mask-image: linear-gradient(60deg, rgb(0, 0, 0) 25%, rgba(0, 0, 0, 0.4) 50%, rgb(0, 0, 0) 75%);
+  mask-position-y: 50%;
+  -webkit-mask-position-y: 50%;
+  animation: mask-flare-loop 2s linear infinite;
+  -webkit-animation: mask-flare-loop 2s linear infinite;
 }

@@ -60,12 +60,12 @@ function Visualisation({ myProducts }) {
                 {
                     label: "Gross Volume (SGD)",
                     data,
-                    fill: true,
-                    borderColor: "#888",
-                    tension: 0.3,
+                    fill: false,
+                    borderColor: "#111",
+                    tension: 0,
                     pointRadius: 0,
                     pointHoverRadius: 3,
-                    borderWidth: 2,
+                    borderWidth: 1,
 
                 },
             ],
@@ -77,8 +77,8 @@ function Visualisation({ myProducts }) {
         }
     }, [myProducts]);
     return (
-        <div className="col-span-4 row-span-1 flex lg:flex-row flex-col items-center justify-center">
-            <div className="flex w-full lg:w-[80%] lg:h-full rounded-lg p-4  border border-borderColor/60">
+        <div className="col-span-4 row-span-1 flex lg:flex-row flex-col items-center justify-center gap-4">
+            <div className="flex w-full h-1/2 lg:h-full bg-baseColor rounded-md py-8 pl-4 pr-8 border border-borderColor">
                 <Line
                     data={getChartData()}
                     options={{
@@ -92,7 +92,7 @@ function Visualisation({ myProducts }) {
                                 titleColor: "#fff",
                                 bodyColor: "#fff",
                                 borderColor: "#aaa",
-                                borderWidth: 1,
+                                borderWidth: 0.5,
                             },
                         },
                         scales: {
@@ -122,29 +122,26 @@ function Visualisation({ myProducts }) {
                     height={350}
                 />
             </div>
-            <div className="flex w-full lg:w-[20%] h-full items-center justify-center flex-col px-4 gap-6 py-6 lg:py-0">
-
-                <div className="flex w-full lg:flex-col flex-row gap-6">
-                    <div className="flex flex-col w-full items-center">
-                        <h3 className="text-sm lg:text-lg">Net Volume</h3>
+            <div className="flex w-full md:w-fit h-full items-start flex-col gap-2">
+                <div className="flex w-full lg:flex-col flex-row gap-2">
+                    <div className="statContainer">
+                        <h3 className="text-sm">Net Volume</h3>
                         <h1 className="text-2xl lg:text:4xl">
                             S${grossVolumes.reduce((acc, curr) => (acc + curr.grossVolume) * 0.99, 0).toFixed(2)}
                         </h1>
                     </div>
 
-                    <div className="flex flex-col w-full items-center">
-                        <h3 className="text-sm lg:text-lg">Gross Volume</h3>
+                    <div className="statContainer">
+                        <h3 className="text-sm">Gross Volume</h3>
                         <h1 className="text-2xl lg:text:4xl">
                             S${grossVolumes.reduce((acc, curr) => acc + curr.grossVolume, 0).toFixed(2)}
                         </h1>
                     </div>
                 </div>
 
-                <div className="flex w-full lg:flex-col flex-row gap-6">
-                    <div className="flex flex-col w-full items-center">
-                        <h3 className="text-sm lg:text-lg">
-                            Total Sales
-                        </h3>
+                <div className="flex w-full lg:flex-col flex-row gap-2">
+                    <div className="statContainer">
+                        <h3 className="text-sm">Total Sales</h3>
                         <h1 className="text-2xl lg:text:4xl">
                             {(() => {
                                 const totalSales = myProducts.reduce((acc, product) => acc + product.sales.length, 0);
@@ -153,10 +150,8 @@ function Visualisation({ myProducts }) {
                         </h1>
                     </div>
 
-                    <div className="flex flex-col w-full items-center">
-                        <h3 className="text-sm lg:text-lg">
-                            Products
-                        </h3>
+                    <div className="statContainer">
+                        <h3 className="text-sm">Products</h3>
                         <h1 className="text-2xl lg:text:4xl">
                             {myProducts.length === 0 ? "N/A" : myProducts.length}
                         </h1>

@@ -10,8 +10,9 @@ import { GoChevronRight } from 'react-icons/go'
 import AccountDropdown from './AccountDropdown'
 import { PRINT_CATEGORIES, SHOP_CATEGORIES, PRINT_SUBCATEGORIES, SHOP_SUBCATEGORIES } from '@/lib/categories'
 import { AnimatePresence, motion } from "framer-motion";
-import { IoCartOutline } from 'react-icons/io5'
+import { FaCartShopping } from "react-icons/fa6";
 import { usePathname, useSearchParams } from 'next/navigation'
+import { HiOutlineShoppingCart } from 'react-icons/hi'
 
 function Navbar() {
     const { user, isLoaded, isSignedIn } = useUser();
@@ -37,10 +38,10 @@ function Navbar() {
     return (
         <div className='flex relative w-full'>
             <div className='hidden lg:flex w-full h-16 border-b border-borderColor items-center justify-between px-8 z-50 relative'>
-                <Link href='/' className=' text-textColor text-lg font-bold tracking-widest opacity-50 hover:opacity-80 transition-opacity duration-300 ease-in-out z-10'>
+                <Link href='/' className=' text-textColor text-lg font-bold tracking-widest  hover:opacity-80 transition-opacity duration-300 ease-in-out z-10'>
                     <Logo
-                        width={40}
-                        height={40}
+                        width={30}
+                        height={30}
                     />
                 </Link>
 
@@ -63,10 +64,10 @@ function Navbar() {
                     <li className='flex navbarLink'><Link href='/about'>About</Link></li>
                 </ul>
 
-                <div className='flex gap-6 items-center text-lightColor'>
+                <div className='flex gap-6 items-center'>
                     {isSignedIn && isLoaded && user && (
                         <Link href={`/cart?redirect=${encodeURIComponent(currentUrl)}`} className='hover:text-textColor transition-colors duration-300 ease-in-out'>
-                            <IoCartOutline size={22} />
+                            <HiOutlineShoppingCart size={16} />
                         </Link>
                     )}
                     <AccountDropdown />
@@ -89,10 +90,10 @@ function Navbar() {
                         >
                             <div className={`flex flex-row gap-16 h-full w-full`}>
                                 {(dropdownType === 'shop' ? SHOP_CATEGORIES : PRINT_CATEGORIES).map((category, catIdx) => (
-                                    <div key={category} className='flex flex-col row-span-1 col-span-1 gap-6'>
+                                    <div key={category} className='flex flex-col row-span-1 col-span-1 gap-8'>
                                         <p className='font-semibold text-xs tracking-wider uppercase'>{category}</p>
                                         {/* <div className='w-10 border-t border-borderColor flex' /> */}
-                                        <ul className='flex flex-col gap-3 tracking-wider uppercase font-medium'>
+                                        <ul className='flex flex-col gap-1 tracking-wider uppercase font-medium'>
                                             {(dropdownType === 'shop'
                                                 ? SHOP_SUBCATEGORIES[catIdx]
                                                 : PRINT_SUBCATEGORIES[catIdx]

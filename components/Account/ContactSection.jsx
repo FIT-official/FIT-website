@@ -101,8 +101,14 @@ function ContactSection() {
                         </div>
                     ) : (
                         <div className="flex gap-1 mb-4 text-sm text-textColor font-medium">
-                            <span>{phone.countryCode}</span>
-                            <span>{phone.number}</span>
+                            {(phone.countryCode || phone.number) ? (
+                                <>
+                                    <span>{phone.countryCode}</span>
+                                    <span>{phone.number}</span>
+                                </>
+                            ) : (
+                                <span className="text-lightColor">No phone number provided</span>
+                            )}
                         </div>
                     )}
 
@@ -166,9 +172,20 @@ function ContactSection() {
                         </div>
                     ) : (
                         <div className="flex flex-col gap-1 text-sm font-medium text-textColor">
-                            <span>{address.street} {address.unitNumber && `#${address.unitNumber}`}</span>
-                            <span>{address.city}, {address.state} {address.postalCode}</span>
-                            <span>{address.country}</span>
+                            {address.street || address.unitNumber || address.city || address.state || address.postalCode || address.country ? (
+                                <>
+                                    <span>
+                                        {address.street}
+                                        {address.unitNumber && ` #${address.unitNumber}`}
+                                    </span>
+                                    <span>
+                                        {address.city} {address.state} {address.postalCode}
+                                    </span>
+                                    <span>{address.country}</span>
+                                </>
+                            ) : (
+                                <span className="text-lightColor">No address provided</span>
+                            )}
                         </div>
                     )}
                     {msg && <div className="text-xs mt-4 text-lightColor">{msg}</div>}

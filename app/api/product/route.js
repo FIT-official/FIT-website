@@ -183,7 +183,7 @@ export async function GET(req) {
         let productSubCategory = searchParams.get("productSubCategory");
         const productId = searchParams.get("productId");
         const slug = searchParams.get("slug");
-
+        const creatorUserId = searchParams.get("creatorUserId");
 
         let filter = {};
 
@@ -244,8 +244,21 @@ export async function GET(req) {
             productCategory !== -1
         ) {
             filter.category = Number(productCategory);
-        } else if (!ids && !productId) {
+        } else if (
+            !ids &&
+            !productId &&
+            !creatorUserId &&
+            (
+                productCategory === undefined ||
+                productCategory === null ||
+                productCategory === -1
+            )
+        ) {
             return NextResponse.json({ error: "Missing productCategory or productSubCategory" }, { status: 400 });
+        }
+
+        if (creatorUserId) {
+            filter.creatorUserId = creatorUserId;
         }
 
         const products = await Product.find(filter).lean();

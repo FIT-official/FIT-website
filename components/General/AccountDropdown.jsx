@@ -34,7 +34,7 @@ function AccountDropdown() {
     return (
         <div className='flex z-10 relative' ref={accountDropdownRef}>
 
-            <button onClick={openAccountDropdown} className='flex w-7 h-7 rounded-full overflow-hidden cursor-pointer'>
+            <button onClick={openAccountDropdown} className='flex w-7 h-7 rounded-full overflow-hidden cursor-pointer border border-borderColor'>
                 <Image
                     src={user?.imageUrl || '/user.jpg'}
                     alt='User Avatar'
@@ -44,7 +44,7 @@ function AccountDropdown() {
                 />
             </button>
 
-            <div className={`absolute border border-borderColor top-10 right-0 min-w-40 min-h-20 rounded-lg bg-background transition-all duration-300 ease-in-out drop-shadow-lg ${isAccountDropdownOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+            <div className={`absolute border border-borderColor top-10 right-0 min-w-40 min-h-20 rounded-sm bg-background transition-all duration-300 ease-in-out drop-shadow-lg ${isAccountDropdownOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
                 {user && isLoaded ? (
                     <>
                         <Link href='/account' className="accountDropdownLink">

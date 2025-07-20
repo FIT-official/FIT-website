@@ -16,7 +16,7 @@ function MyProducts() {
     useEffect(() => {
         if (!user) return;
         const fetchProducts = async () => {
-            const res = await fetch(`/api/product/${user.id}`);
+            const res = await fetch(`/api/product?creatorUserId=${user.id}`);
             const data = await res.json();
             if (data.products && data.products.length > 0) {
                 setMyProducts(data.products);
@@ -73,7 +73,7 @@ function MyProducts() {
                 </Link>
             </div>
             <div className='flex flex-col mt-4 w-full h-full'>
-                <div className='flex justify-between w-full border border-borderColor p-2 rounded-lg bg-baseColor'>
+                <div className='flex justify-between w-full border border-borderColor p-2 rounded-sm bg-baseColor'>
                     <input
                         className='flex w-full px-2 focus:outline-none font-normal'
                         type='text'
@@ -89,7 +89,7 @@ function MyProducts() {
                         </div>
                     </div> */}
                 </div>
-                <div className='flex flex-col w-full h-full mt-4 rounded-lg gap-2'>
+                <div className='flex flex-col w-full h-full mt-4 rounded-sm gap-2'>
                     <div className='flex w-full h-fit px-4 py-2 uppercase font-medium text-sm bg-borderColor/40 divide-x gap-4 divide-borderColor items-center'>
                         <div className='flex flex-2/3 items-center justify-between pr-4'>
                             Title

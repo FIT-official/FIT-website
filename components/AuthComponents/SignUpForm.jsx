@@ -12,6 +12,7 @@ import Tier from './Tier'
 import { IoMdLock } from 'react-icons/io'
 import Error from './Error'
 import { useToast } from '../General/ToastProvider'
+import { supportedCountries } from '@/lib/supportedCountries'
 
 function SignUpForm({ setVerifying }) {
     const { isLoaded, signUp } = useSignUp()
@@ -27,27 +28,29 @@ function SignUpForm({ setVerifying }) {
     const [signUpMethod, setSignUpMethod] = useState('email')
     const [signUpStage, setSignUpStage] = useState('tier_selection')
 
+    const [basedIn, setBasedIn] = useState('SG');
+    const [businessType, setBusinessType] = useState('individual');
+    const [cardToken, setCardToken] = useState('')
     const { showToast } = useToast();
+
+    async function tokeniseAndContinue(ev) {
+        ev.preventDefault()
+        try {
+            const cardEl = elements.getElement(CardElement)
+            const res = await stripe?.createToken(cardEl)
+            setCardToken(res?.token?.id || '')
+            setSignUpStage('connect_account')
+        } catch (error) {
+            showToast('Error loading card: ' + error, 'error');
+        }
+        return;
+    }
 
     async function handleSubmit(ev) {
         ev.preventDefault()
         if (!isLoaded && !signUp) return null
         setLoading(true);
         setError('');
-        let cardToken = ''
-
-        try {
-            if (!elements || !stripe) {
-                return
-            }
-            const cardEl = elements.getElement(CardElement)
-            if (cardEl) {
-                const res = await stripe?.createToken(cardEl)
-                cardToken = res?.token?.id || ''
-            }
-        } catch (error) {
-            showToast('Error loading card: ' + error, 'error');
-        }
 
         if (signUpMethod === 'google') {
             try {
@@ -58,6 +61,8 @@ function SignUpForm({ setVerifying }) {
                     unsafeMetadata: {
                         cardToken,
                         priceId,
+                        basedIn,
+                        businessType,
                     },
                 })
             } catch (error) {
@@ -67,13 +72,14 @@ function SignUpForm({ setVerifying }) {
         }
 
         try {
-
             await signUp.create({
                 emailAddress: email,
                 password: password,
                 unsafeMetadata: {
                     cardToken,
                     priceId,
+                    basedIn,
+                    businessType,
                 },
             })
 
@@ -147,10 +153,69 @@ function SignUpForm({ setVerifying }) {
                         </p>
                     </div>
                     <div className='flex items-center justify-between w-full'>
-                        <button onClick={() => setSignUpStage('tier_selection')} className='toggleXbutton font-medium'>
-                            <GoChevronLeft size={24} /> Go Back
+                        <button onClick={() => setSignUpStage('tier_selection')} className='toggleXbutton font-medium text-sm items-center gap-2'>
+                            <GoChevronLeft size={16} /> Go Back
                         </button>
-                        <button onClick={() => setSignUpStage('first_factor')} className='toggleXbutton  font-medium'>
+                        <button onClick={(ev) => tokeniseAndContinue(ev)} className='toggleXbutton  font-medium text-sm items-center gap-2'>
+                            Continue <GoChevronRight size={24} />
+                        </button>
+                    </div>
+                </>
+            )}
+
+            {signUpStage === 'connect_account' && (
+                <>
+                    <div className='flex flex-col w-full gap-2 py-8 px-8 border border-borderColor rounded-2xl bg-white text-black items-center'>
+                        <label className='flex items-center font-medium w-full'>
+                            <IoMdLock className='mr-2' size={16} />
+                            Stripe Account
+                        </label>
+                        <p className='text-sm text-textColor w-full'>
+                            This information will be used to help you
+                            accept sales payments and move those funds to your bank account.
+                        </p>
+
+                        <div className="flex flex-col gap-3 w-full my-4">
+                            <div className="flex flex-col gap-1 w-full">
+                                <label className="text-xs font-medium">
+                                    Business Type
+                                </label>
+                                <select
+                                    className="bankAccountFormField"
+                                    value={businessType}
+                                    onChange={e => setBusinessType(e.target.value)}
+                                    required
+                                >
+                                    <option value="individual">Individual</option>
+                                    <option value="company">Company</option>
+                                    <option value="non_profit">Non-Profit</option>
+                                    <option value="government_entity">Government Entity</option>
+                                </select>
+                            </div>
+
+                            <div className="flex flex-col gap-1 w-full">
+                                <label className="text-xs font-medium">Based In</label>
+                                <select
+                                    className="bankAccountFormField"
+                                    value={basedIn}
+                                    onChange={e => setBasedIn(e.target.value)}
+                                    required
+                                >
+                                    {supportedCountries.map(country => (
+                                        <option key={"basedIn-" + country.code} value={country.code}>
+                                            {country.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div className='flex items-center justify-between w-full'>
+                        <button onClick={() => setSignUpStage('payment')} className='toggleXbutton font-medium text-sm items-center gap-2'>
+                            <GoChevronLeft size={16} /> Go Back
+                        </button>
+                        <button onClick={() => setSignUpStage('first_factor')} className='toggleXbutton  font-medium text-sm items-center gap-2'>
                             Continue <GoChevronRight size={24} />
                         </button>
                     </div>
@@ -194,7 +259,7 @@ function SignUpForm({ setVerifying }) {
                     </button>
 
                     <div className='flex items-center justify-start w-full mt-3'>
-                        <button onClick={determineStageBack} type='button' className='toggleXbutton font-medium'>
+                        <button onClick={determineStageBack} type='button' className='toggleXbutton font-medium text-sm items-center gap-2'>
                             <GoChevronLeft size={24} /> Go Back
                         </button>
                     </div>

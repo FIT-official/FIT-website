@@ -43,6 +43,7 @@ export async function POST(req) {
 
     const line_items = [];
     const updatedCart = [];
+    const salesData = {};
 
     for (const item of user.cart) {
         try {
@@ -53,6 +54,7 @@ export async function POST(req) {
                 product,
                 address,
             });
+
             const { price, deliveryFee, quantity, chosenDeliveryType } = breakdown;
 
             const unit_amount = Math.round(price * 100);
@@ -88,6 +90,11 @@ export async function POST(req) {
                 basePrice: price,
                 deliveryFee,
             });
+
+            const sellerId = product.creatorUserId;
+            const totalForThisItem = (price + deliveryFee) * quantity * 100;
+            if (!salesData[sellerId]) salesData[sellerId] = 0;
+            salesData[sellerId] += totalForThisItem;
         } catch (error) {
             console.error(
                 `Error fetching product details for ${item.productId}:`,
@@ -105,6 +112,7 @@ export async function POST(req) {
             item.deliveryFee = updatedCart[idx].deliveryFee;
         }
     });
+
     await user.save();
 
     const allFree = line_items.length > 0 && line_items.every(
@@ -122,6 +130,9 @@ export async function POST(req) {
             mode: "payment",
             ui_mode: "custom",
             return_url: `${domain}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+            metadata: {
+                salesData: JSON.stringify(salesData),
+            },
         };
 
         if (stripeCustomerId) {
