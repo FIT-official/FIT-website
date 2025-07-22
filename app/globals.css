@@ -73,7 +73,7 @@
 }
 
 .navSidebarLink{
-  @apply text-lightColor hover:text-textColor duration-300 ease-in-out transition-colors text-sm font-medium;
+  @apply text-textColor uppercase text-sm font-medium;
 }
 
 .section{
@@ -117,11 +117,15 @@
 }
 
 .formInput{
-  @apply flex px-3 py-1 border border-borderColor rounded-md focus:outline-none focus:ring  text-sm focus:ring-extraLight w-full transition-all duration-300 ease-in-out font-normal bg-background
+  @apply flex px-3 py-1 border border-borderColor rounded-md focus:outline-none focus:ring  text-sm focus:ring-extraLight w-full transition-all duration-300 ease-in-out font-normal bg-background disabled:bg-borderColor/30 disabled:text-extraLight
 }
 
 .formBlackButton {
   @apply flex px-3 py-2 items-center justify-center rounded-md font-medium text-sm text-background bg-textColor cursor-pointer
+}
+
+.formBlackButton2 {
+  @apply flex px-3 py-2 items-center justify-between gap-2 rounded-md font-medium text-sm text-background bg-textColor cursor-pointer
 }
 
 .formButton {

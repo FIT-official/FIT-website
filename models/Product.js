@@ -58,13 +58,14 @@ const ProductSchema = new mongoose.Schema(
         name: { type: String, required: true },
         description: { type: String, required: true },
         images: { type: [String], default: [], validate: [arr => arr.length <= 7, 'Max 7 images'] },
-        downloadableAssets: { type: [String], default: [], required: false },
+        viewableModel: { type: String, required: false, default: null }, // v1.1 feature
+        paidAssets: { type: [String], default: [], required: false }, // v1.1 feature
         price: {
             presentmentCurrency: { type: String, required: true },
             presentmentAmount: { type: Number, required: true, min: 0 },
         },
         priceCredits: { type: Number, required: true },
-        stock: { type: Number, default: 1, min: 0 },
+        stock: { type: Number, required: false, min: 0 },
         productType: { type: String, enum: ["print", "shop"], required: true, default: "shop" },
         category: { type: Number, required: true, default: 0 },
         subcategory: { type: Number, required: true, default: 0 },

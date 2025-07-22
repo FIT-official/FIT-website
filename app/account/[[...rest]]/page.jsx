@@ -6,6 +6,7 @@ import OrderSection from '@/components/Account/OrderSection';
 import ProfileSettings from '@/components/Account/ProfileSettings';
 import SecuritySettings from '@/components/Account/SecuritySettings';
 import { PiDotsThree } from 'react-icons/pi';
+import DownloadsSection from '@/components/Account/DownloadsSection';
 
 function Account() {
     const { user, isLoaded } = useUser();
@@ -77,11 +78,20 @@ function Account() {
                         >
                             Billing
                         </button>
+                        <button
+                            onClick={() => setTab("downloads")}
+                            className={`flex px-2 py-1 sidebarButton ${tab === "downloads" ? "bg-borderColor/40" : "bg-transparent"}`}
+                            disabled={!sidebarOpen}
+                        >
+                            Downloads
+                        </button>
                     </div>
                     <div className='flex flex-col pl-16 pr-4 py-8 w-full'>
                         {tab === "profile" && (
                             <ProfileSettings
                                 connectedAccounts={connectedAccounts}
+                                user={user}
+                                isLoaded={isLoaded}
                             />
                         )}
                         {tab === "security" && (
@@ -95,6 +105,9 @@ function Account() {
                         )}
                         {tab === "orders" && (
                             <OrderSection />
+                        )}
+                        {tab === "downloads" && (
+                            <DownloadsSection user={user} isLoaded={isLoaded} />
                         )}
                     </div>
                 </div>

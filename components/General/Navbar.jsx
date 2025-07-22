@@ -10,15 +10,18 @@ import { GoChevronRight } from 'react-icons/go'
 import AccountDropdown from './AccountDropdown'
 import { PRINT_CATEGORIES, SHOP_CATEGORIES, PRINT_SUBCATEGORIES, SHOP_SUBCATEGORIES } from '@/lib/categories'
 import { AnimatePresence, motion } from "framer-motion";
-import { FaCartShopping } from "react-icons/fa6";
 import { usePathname, useSearchParams } from 'next/navigation'
 import { HiOutlineShoppingCart } from 'react-icons/hi'
+import { LuPlus } from 'react-icons/lu'
 
 function Navbar() {
     const { user, isLoaded, isSignedIn } = useUser();
     const [isOpen, setIsOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [dropdownType, setDropdownType] = useState(null);
+    const [mobileDropdown, setMobileDropdown] = useState(null);
+    const [openShopCategory, setOpenShopCategory] = useState(null);
+    const [openPrintCategory, setOpenPrintCategory] = useState(null);
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const currentUrl = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
@@ -163,13 +166,133 @@ function Navbar() {
                     <div className='flex w-full h-0 border-t border-borderColor mt-8' />
                     <div className='flex flex-col w-full h-full pt-8 pb-24 px-8 justify-between'>
                         <ul className='flex w-full gap-4 flex-col items-start font-normal'>
-                            <li><Link href='/shop' className='flex navSidebarLink'>Shop</Link></li>
+
+                            {/* SHOP Dropdown */}
+                            <li className='w-full flex flex-col'>
+                                <button
+                                    className='flex navSidebarLink w-full justify-between items-center'
+                                    onClick={() => setMobileDropdown(mobileDropdown === 'shop' ? null : 'shop')}
+                                >
+                                    Shop
+                                    <GoChevronRight size={16} className={mobileDropdown === 'shop' ? 'rotate-90 transition' : 'transition'} />
+                                </button>
+                                <AnimatePresence>
+                                    {mobileDropdown === 'shop' && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: "auto", opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                                            className="pl-2 pr-4 pt-4 max-h-[60vh] overflow-y-auto w-full"
+                                        >
+                                            {SHOP_CATEGORIES.map((category, catIdx) => (
+                                                <div key={category} className="mb-2 w-full">
+                                                    <button
+                                                        className="font-medium uppercase text-xs  justify-between text-lightColor mb-1 w-full text-left py-2 flex-row flex items-center"
+                                                        onClick={() =>
+                                                            setOpenShopCategory(openShopCategory === category ? null : category)
+                                                        }
+                                                    >
+                                                        {category}
+                                                        <LuPlus
+                                                            className={`flex ml-2 transition-transform ${openShopCategory === category ? 'rotate-45' : ''}`}
+                                                        />
+                                                    </button>
+                                                    <AnimatePresence>
+                                                        {openShopCategory === category && (
+                                                            <motion.ul
+                                                                initial={{ height: 0, opacity: 0 }}
+                                                                animate={{ height: "auto", opacity: 1 }}
+                                                                exit={{ height: 0, opacity: 0 }}
+                                                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                                                className="pl-2"
+                                                            >
+                                                                {SHOP_SUBCATEGORIES[catIdx].map(subcategory => (
+                                                                    <li key={subcategory}>
+                                                                        <Link
+                                                                            href={`/shop?productType=shop&productCategory=${category}&productSubCategory=${subcategory}`}
+                                                                            className="text-lightColor text-xs py-1 block"
+                                                                        >
+                                                                            {subcategory}
+                                                                        </Link>
+                                                                    </li>
+                                                                ))}
+                                                            </motion.ul>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </li>
                             <div className='flex w-full h-0 border-t border-borderColor my-1' />
-                            <li><Link href='/prints' className='flex navSidebarLink'>Prints</Link></li>
+
+                            {/* PRINT Dropdown */}
+                            <li className='flex w-full flex-col'>
+                                <button
+                                    className='flex navSidebarLink w-full justify-between items-center'
+                                    onClick={() => setMobileDropdown(mobileDropdown === 'prints' ? null : 'prints')}
+                                >
+                                    Prints
+                                    <GoChevronRight size={16} className={mobileDropdown === 'prints' ? 'rotate-90 transition' : 'transition'} />
+                                </button>
+                                <AnimatePresence>
+                                    {mobileDropdown === 'prints' && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: "auto", opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                                            className="pl-2 pr-4 pt-4 max-h-[60vh] overflow-y-auto w-full"
+                                        >
+                                            {PRINT_CATEGORIES.map((category, catIdx) => (
+                                                <div key={category} className="mb-2 w-full">
+                                                    <button
+                                                        className="font-medium uppercase text-xs  justify-between text-lightColor mb-1 w-full text-left py-2 flex-row flex items-center"
+                                                        onClick={() =>
+                                                            setOpenPrintCategory(openPrintCategory === category ? null : category)
+                                                        }
+                                                    >
+                                                        {category}
+                                                        <LuPlus
+                                                            className={`flex ml-2 transition-transform ${openPrintCategory === category ? 'rotate-45' : ''}`}
+                                                        />
+                                                    </button>
+                                                    <AnimatePresence>
+                                                        {openPrintCategory === category && (
+                                                            <motion.ul
+                                                                initial={{ height: 0, opacity: 0 }}
+                                                                animate={{ height: "auto", opacity: 1 }}
+                                                                exit={{ height: 0, opacity: 0 }}
+                                                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                                                className="pl-2"
+                                                            >
+                                                                {PRINT_SUBCATEGORIES[catIdx].map(subcategory => (
+                                                                    <li key={subcategory}>
+                                                                        <Link
+                                                                            href={`/prints?productType=prints&productCategory=${category}&productSubCategory=${subcategory}`}
+                                                                            className="text-lightColor text-xs py-1 block"
+                                                                        >
+                                                                            {subcategory}
+                                                                        </Link>
+                                                                    </li>
+                                                                ))}
+                                                            </motion.ul>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </li>
+
                             <div className='flex w-full h-0 border-t border-borderColor my-1' />
+
                             <li><Link href='/creators' className='flex navSidebarLink'>Creators</Link></li>
                             <div className='flex w-full h-0 border-t border-borderColor my-1' />
-                            <li><Link href='/shop' className='flex navSidebarLink'>About</Link></li>
+                            <li><Link href='/about' className='flex navSidebarLink'>About</Link></li>
                             <div className='flex w-full h-0 border-t border-borderColor my-1' />
                             {isSignedIn && isLoaded && user && (
                                 <>

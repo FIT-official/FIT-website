@@ -10,11 +10,12 @@ import {
     PRINT_CATEGORIES,
     PRINT_SUBCATEGORIES,
 } from "@/lib/categories"
-import currencyCodes from "currency-codes"
+import { supportedCountries } from '@/lib/supportedCountries'
 import SelectField from "./SelectField";
 import { GoChevronDown, GoChevronRight } from "react-icons/go";
 import { BiMinus } from "react-icons/bi";
 import { useToast } from "../General/ToastProvider";
+import { uploadImages, uploadModels, uploadViewable } from "@/utils/uploadHelpers";
 
 function ProductForm({ mode = "Create", product = null }) {
     const { user, isLoaded } = useUser()
@@ -23,17 +24,22 @@ function ProductForm({ mode = "Create", product = null }) {
         .trim()
         .toLowerCase()
         .replace(/^([a-z])/, (m) => m.toUpperCase())
-    const allCurrencies = currencyCodes.data
-        .map(c => c.code)
-        .filter((v, i, a) => a.indexOf(v) === i)
-        .sort();
+    const allCurrencies = supportedCountries.reduce((acc, country) => {
+        if (country.currency && !acc.includes(country.currency)) {
+            acc.push(country.currency);
+        }
+        return acc;
+    }, []);
     const { showToast } = useToast();
 
     const imageInputRef = useRef(null);
     const modelInputRef = useRef(null);
+    const viewableModelInputRef = useRef(null);
     const [pendingImages, setPendingImages] = useState([]);
     const [pendingModels, setPendingModels] = useState([]);
+    const [pendingViewableModel, setPendingViewableModel] = useState(null);
     const [dragActive, setDragActive] = useState(false);
+    const [dragViewableModelActive, setDragViewableModelActive] = useState(false);
 
     const [loading, setLoading] = useState(false);
 
@@ -47,7 +53,8 @@ function ProductForm({ mode = "Create", product = null }) {
         name: "",
         description: "",
         images: [],
-        downloadableAssets: [],
+        viewableModel: "", // v1.1 feature
+        paidAssets: [], // change from paidAssets
         productType: "shop",
         category: 0,
         subcategory: 0,
@@ -58,6 +65,7 @@ function ProductForm({ mode = "Create", product = null }) {
         variants: [],
         variantInput: "",
         deliveryTypes: {
+            digital: false,
             selfCollect: false,
             singpost: false,
             privateDelivery: false,
@@ -88,26 +96,11 @@ function ProductForm({ mode = "Create", product = null }) {
     const categories = form.productType === "shop" ? SHOP_CATEGORIES : PRINT_CATEGORIES
     const subcategories = form.productType === "shop" ? SHOP_SUBCATEGORIES : PRINT_SUBCATEGORIES
 
-
-    useEffect(() => {
-        const setCurrencyFromLocale = async () => {
-            try {
-                const locale = navigator.language || navigator.languages[0] || "en-SG"
-                const mod = await import("locale-currency")
-                const detected = mod.getCurrency(locale)
-                setForm(f => {
-                    if (f.presentmentCurrency === "SGD" && detected && allCurrencies.includes(detected)) {
-                        return { ...f, presentmentCurrency: detected }
-                    }
-                    return f
-                })
-            } catch (e) { }
-        }
-        setCurrencyFromLocale()
-    }, [])
+    // form state functions
 
     function mapProductToForm(product, defaultForm) {
         const deliveryTypes = {
+            digital: false,
             selfCollect: false,
             singpost: false,
             privateDelivery: false,
@@ -120,6 +113,9 @@ function ProductForm({ mode = "Create", product = null }) {
 
         if (product.delivery && Array.isArray(product.delivery.deliveryTypes)) {
             product.delivery.deliveryTypes.forEach(dt => {
+                if (dt.type === "digital") {
+                    deliveryTypes.digital = true;
+                }
                 if (dt.type === "selfCollect") {
                     deliveryTypes.selfCollect = true;
                     pickupLocation = dt.pickupLocation || "";
@@ -135,7 +131,6 @@ function ProductForm({ mode = "Create", product = null }) {
             });
         }
 
-        // Map discount fields safely
         const discount = {
             eventId: product.discount?.eventId ?? "",
             percentage: product.discount?.percentage ?? "",
@@ -154,7 +149,7 @@ function ProductForm({ mode = "Create", product = null }) {
             presentmentAmount: product.price?.presentmentAmount ?? "",
             presentmentCurrency: product.price?.presentmentCurrency ?? "SGD",
             images: product.images || [],
-            downloadableAssets: product.downloadableAssets || [],
+            paidAssets: product.paidAssets || [],
             deliveryTypes,
             pickupLocation,
             royaltyFees,
@@ -204,7 +199,6 @@ function ProductForm({ mode = "Create", product = null }) {
                 }
             }));
         }
-        // Default: top-level
         else {
             setForm(f => ({
                 ...f,
@@ -213,12 +207,10 @@ function ProductForm({ mode = "Create", product = null }) {
         }
     };
 
+    // images
+
     const handleImageChange = (e) => {
         setPendingImages(prev => [...prev, ...Array.from(e.target.files)]);
-    };
-
-    const handleModelChange = (e) => {
-        setPendingModels(prev => [...prev, ...Array.from(e.target.files)]);
     };
 
     const handleRemoveImage = idx => {
@@ -235,19 +227,48 @@ function ProductForm({ mode = "Create", product = null }) {
         }
     };
 
+    // models (paid assets)
+
+    const handleModelChange = (e) => {
+        setPendingModels(prev => [...prev, ...Array.from(e.target.files)]);
+    };
+
     const handleRemoveModel = idx => {
-        if (idx < (form.downloadableAssets?.length || 0)) {
+        if (idx < (form.paidAssets?.length || 0)) {
             setForm(f => ({
                 ...f,
-                downloadableAssets: f.downloadableAssets.filter((_, i) => i !== idx)
+                paidAssets: f.paidAssets.filter((_, i) => i !== idx)
             }));
         } else {
-            setPendingModels(pendingModels => pendingModels.filter((_, i) => i !== (idx - (form.downloadableAssets?.length || 0))));
+            setPendingModels(pendingModels => pendingModels.filter((_, i) => i !== (idx - (form.paidAssets?.length || 0))));
         }
         if (modelInputRef.current) {
             modelInputRef.current.value = "";
         }
     };
+
+    // viewable model
+
+    const handleViewableModelChange = (e) => {
+        setPendingViewableModel(e.target.files[0]);
+    };
+
+    const handleRemoveViewableModel = (e) => {
+        if (pendingViewableModel) {
+            setPendingViewableModel(null);
+        } else {
+            setForm(f => ({
+                ...f,
+                viewableModel: ""
+            }));
+        }
+
+        if (viewableModelInputRef.current) {
+            viewableModelInputRef.current.value = "";
+        }
+    }
+
+    // variants
 
     const handleAddVariant = (e) => {
         e.preventDefault();
@@ -268,34 +289,25 @@ function ProductForm({ mode = "Create", product = null }) {
         }));
     };
 
+    //submit
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!isLoaded) return;
         setLoading(true);
-        let uploadedImages = [];
-        if (pendingImages.length > 0) {
-            const formData = new FormData();
-            pendingImages.forEach(file => formData.append('files', file));
-            const res = await fetch('/api/upload/images', { method: 'POST', body: formData });
-            const { files } = await res.json();
-            uploadedImages = files || [];
-        }
 
-        let uploadedModels = [];
-        if (pendingModels.length > 0) {
-            const formData = new FormData();
-            pendingModels.forEach(file => formData.append('files', file));
-            const res = await fetch('/api/upload/models', { method: 'POST', body: formData });
-            const { files } = await res.json();
-            uploadedModels = files || [];
-        }
+        let uploadedImages = await uploadImages(pendingImages);
+        let uploadedModels = await uploadModels(pendingModels);
+        let uploadedViewable = await uploadViewable(pendingViewableModel);
+
 
         const payload = {
             creatorUserId: user?.id,
             name: form.name,
             description: form.description,
             images: [...form.images, ...uploadedImages],
-            downloadableAssets: [...form.downloadableAssets, ...uploadedModels],
+            paidAssets: [...form.paidAssets, ...uploadedModels],
+            viewableModel: uploadedViewable ? uploadedViewable : form.viewableModel,
             price: {
                 presentmentCurrency: form.presentmentCurrency,
                 presentmentAmount: Number(form.presentmentAmount),
@@ -308,6 +320,11 @@ function ProductForm({ mode = "Create", product = null }) {
             variants: form.variants,
             delivery: {
                 deliveryTypes: [
+                    ...(form.deliveryTypes.digital
+                        ? [{
+                            type: "digital",
+                            royaltyFee: 0,
+                        }] : []),
                     ...(form.deliveryTypes.selfCollect
                         ? [{
                             type: "selfCollect",
@@ -362,9 +379,11 @@ function ProductForm({ mode = "Create", product = null }) {
                 } else {
                     setPendingImages([]);
                     setPendingModels([]);
+                    setPendingViewableModel(null);
                     setLoading(false);
                     if (imageInputRef.current) imageInputRef.current.value = "";
                     if (modelInputRef.current) modelInputRef.current.value = "";
+                    if (viewableModelInputRef.current) viewableModelInputRef.current.value = "";
                     alert(isEditing ? "Product updated successfully!" : "Product created successfully!");
                     if (!isEditing) {
                         setForm({ ...defaultForm });
@@ -376,6 +395,23 @@ function ProductForm({ mode = "Create", product = null }) {
             alert("Network error: " + err.message);
         }
     }
+
+    useEffect(() => {
+    if (form.deliveryTypes.digital && form.variants.length > 1) {
+        setForm(f => ({
+            ...f,
+            variants: f.variants.slice(0, 1),
+            variantInput: "",
+            stock: null,
+            deliveryTypes: {
+                digital: true,
+                selfCollect: false,
+                singpost: false,
+                privateDelivery: false,
+            },
+        }));
+    }
+}, [form.deliveryTypes.digital, form.variants.length]);
 
     return (
         <form onSubmit={handleSubmit} className='flex flex-col w-full items-center justify-center gap-4'>
@@ -526,9 +562,77 @@ function ProductForm({ mode = "Create", product = null }) {
                         options={subcategories[form.category].map((sub, idx) => ({ value: idx, label: sub }))}
                     />
 
-                    {/* downloadable assets (3D models) */}
+                    {/* viewable model only .glb or .gltf */}
                     <div className='flex flex-col gap-2 w-full'>
-                        <label className="formLabel">Downloadable Assets (3D Models)</label>
+                        <label className="formLabel">Viewable Model</label>
+                        <div
+                            className={`formDrag ${dragViewableModelActive ? "bg-borderColor/30" : ""}`
+                            }
+                            onClick={() => viewableModelInputRef.current && viewableModelInputRef.current.click()}
+                            onDragOver={e => {
+                                e.preventDefault();
+                                setDragViewableModelActive(true);
+                            }}
+                            onDragLeave={e => {
+                                e.preventDefault();
+                                setDragViewableModelActive(false);
+                            }}
+                            onDrop={e => {
+                                e.preventDefault();
+                                setDragViewableModelActive(false);
+                                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                    setPendingViewableModel(e.dataTransfer.files[0]);
+                                }
+                            }}
+                        >
+                            Click to choose files or drag and drop here
+                            <input
+                                type="file"
+                                accept=".glb,.gltf"
+                                multiple
+                                onChange={handleViewableModelChange}
+                                style={{ display: "none" }}
+                                ref={viewableModelInputRef}
+                            />
+                        </div>
+                        <ul className="flex flex-col text-sm w-fit">
+                            {pendingViewableModel ? (
+                                <div className='gap-4 flex flex-row items-center justify-between'>
+                                    <li className='flex truncate' title={pendingViewableModel.name}>
+                                        <span className="underline">{pendingViewableModel.name}</span>
+                                    </li>
+                                    <RxCross1
+                                        className='flex cursor-pointer'
+                                        onClick={handleRemoveViewableModel}
+                                        size={12}
+                                    />
+                                </div>
+                            ) : form.viewableModel ? (
+                                <div className='gap-4 flex flex-row items-center justify-between'>
+                                    <li className='flex truncate' title={form.viewableModel}>
+                                        <a
+                                            href={`/api/proxy?key=${encodeURIComponent(form.viewableModel)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline"
+                                            download
+                                        >
+                                            {form.viewableModel.replace(/^models\//, "")}
+                                        </a>
+                                    </li>
+                                    <RxCross1
+                                        className='flex cursor-pointer'
+                                        onClick={handleRemoveViewableModel}
+                                        size={12}
+                                    />
+                                </div>
+                            ) : null}
+                        </ul>
+                    </div>
+
+                    {/* paid assets (3D models) */}
+                    <div className='flex flex-col gap-2 w-full'>
+                        <label className="formLabel">Paid Assets (3D Models)</label>
                         <div
                             className={`formDrag ${dragActive ? "bg-borderColor/30" : ""}`
                             }
@@ -560,8 +664,8 @@ function ProductForm({ mode = "Create", product = null }) {
                             />
                         </div>
                         <ul className="flex flex-col text-sm w-fit">
-                            {[...(form.downloadableAssets || []), ...pendingModels].map((item, idx) => {
-                                const isPending = idx >= (form.downloadableAssets?.length || 0);
+                            {[...(form.paidAssets || []), ...pendingModels].map((item, idx) => {
+                                const isPending = idx >= (form.paidAssets?.length || 0);
                                 return (
                                     <div className='gap-4 flex flex-row items-center justify-between' key={idx}>
                                         <li className='flex truncate' title={isPending ? item.name : item}>
@@ -675,6 +779,24 @@ function ProductForm({ mode = "Create", product = null }) {
                             <div className="flex items-center gap-2">
                                 <input
                                     type="checkbox"
+                                    id="digital"
+                                    name="digital"
+                                    checked={form.deliveryTypes.digital}
+                                    onChange={e =>
+                                        setForm(f => ({
+                                            ...f,
+                                            deliveryTypes: {
+                                                ...f.deliveryTypes,
+                                                digital: e.target.checked
+                                            }
+                                        }))
+                                    }
+                                />
+                                <label htmlFor="digital">Digital Product</label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
                                     id="selfCollect"
                                     name="selfCollect"
                                     checked={form.deliveryTypes.selfCollect}
@@ -687,6 +809,7 @@ function ProductForm({ mode = "Create", product = null }) {
                                             }
                                         }))
                                     }
+                                    disabled={form.deliveryTypes.digital} // disable if digital is checked
                                 />
                                 <label htmlFor="selfCollect">Self Collection</label>
                             </div>
@@ -705,6 +828,7 @@ function ProductForm({ mode = "Create", product = null }) {
                                             }
                                         }))
                                     }
+                                    disabled={form.deliveryTypes.digital} // disable if digital is checked
                                 />
                                 <label htmlFor="singpost">Singpost</label>
                             </div>
@@ -724,6 +848,7 @@ function ProductForm({ mode = "Create", product = null }) {
                                             }
                                         }))
                                     }
+                                    disabled={form.deliveryTypes.digital} // disable if digital is checked
                                 />
                                 <label htmlFor="privateDelivery">Private</label>
                             </div>
@@ -742,6 +867,7 @@ function ProductForm({ mode = "Create", product = null }) {
                                     placeholder="Enter pickup location"
                                     className="formInput"
                                     required
+                                    disabled={form.deliveryTypes.digital} // disable if digital is checked
                                 />
                             </div>
                         )}
@@ -767,6 +893,7 @@ function ProductForm({ mode = "Create", product = null }) {
                                     }
                                     className="formInput"
                                     required
+                                    disabled={form.deliveryTypes.digital} // disable if digital is checked
                                 />
                             </div>
                         )}
@@ -792,14 +919,13 @@ function ProductForm({ mode = "Create", product = null }) {
                                     }
                                     className="formInput"
                                     required
+                                    disabled={form.deliveryTypes.digital} // disable if digital is checked
                                 />
                             </div>
                         )}
                     </div>
                 </div>
             </div>
-
-
 
 
             <div className="flex flex-col w-full border border-borderColor rounded-sm">
@@ -916,13 +1042,13 @@ function ProductForm({ mode = "Create", product = null }) {
                             id="stock"
                             name="stock"
                             type="number"
-                            value={form.stock}
+                            value={form.stock ?? 1}
                             onChange={handleChange}
                             min={1}
                             step="1"
                             className="formInput"
                             placeholder="Enter stock quantity"
-                            required
+                            disabled={form.deliveryTypes.digital} // disable if digital is checked
                         />
                     </div>
 

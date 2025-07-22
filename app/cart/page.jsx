@@ -9,6 +9,8 @@ import { useToast } from '@/components/General/ToastProvider';
 import CartSummarySkeleton from './components/CartSummarySkeleton';
 import CartItemSkeleton from './components/CartItemSkeleton';
 import { IoCartOutline } from 'react-icons/io5';
+import { convertToGlobalCurrency, useConvertedPrice } from '@/utils/convertCurrency';
+import { getDiscountedPrice } from '@/utils/discount';
 
 function Cart() {
     const { user, isLoaded } = useUser();
@@ -182,6 +184,7 @@ function Cart() {
                             cart.map((cartItem, index) => {
                                 const product = products[cartItem.productId];
                                 if (!product) return null;
+                                const [convertedPrice, globalCurrency] = useConvertedPrice(product.price?.presentmentAmount, product.price?.presentmentCurrency);
 
                                 return (
                                     <div key={index} className='grid grid-cols-1 md:grid-rows-1 md:grid-cols-5 gap-2 md:gap-4 py-8 md:py-6 px-6'>
@@ -233,19 +236,19 @@ function Cart() {
                                             <div className='flex flex-row rounded border border-borderColor py-1'>
                                                 <button
                                                     onClick={() => handleChangeQuantity(cartItem, 1)}
-                                                    disabled={loading}
-                                                    className="px-2"
+                                                    disabled={loading || cartItem.chosenDeliveryType === "digital"}
+                                                    className="px-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     aria-label="Increase quantity"
                                                 >
                                                     +
                                                 </button>
                                                 <div className=''>
-                                                    {cartItem.quantity}
+                                                    {cartItem.chosenDeliveryType === "digital" ? 1 : cartItem.quantity}
                                                 </div>
                                                 <button
                                                     onClick={() => handleChangeQuantity(cartItem, -1)}
-                                                    disabled={loading}
-                                                    className="px-2"
+                                                    disabled={loading || cartItem.chosenDeliveryType === "digital"}
+                                                    className="px-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     aria-label="Decrease quantity"
                                                 >
                                                     -
@@ -256,28 +259,19 @@ function Cart() {
                                         {/* price */}
                                         <div className='flex flex-col justify-center items-end font-semibold md:text-sm text-base'>
                                             {(() => {
-                                                const hasDiscount = product.discount
-                                                    && typeof product.discount.percentage === "number"
-                                                    && product.discount.percentage > 0
-                                                    && (!product.discount.startDate || new Date(product.discount.startDate) <= new Date())
-                                                    && (!product.discount.endDate || new Date(product.discount.endDate) >= new Date());
+                                                const discountedPrice =
+                                                    getDiscountedPrice(product);
 
-                                                const originalUnit = product.price?.presentmentAmount || 0;
-                                                const quantity = cartItem.quantity || 1;
-                                                const currency = product.price?.presentmentCurrency || "SGD";
-                                                let discountedUnit = originalUnit;
+                                                const [convertedDiscountedPrice, discountCurrency] = useConvertedPrice(discountedPrice, product.price?.presentmentCurrency);
 
-                                                if (hasDiscount) {
-                                                    discountedUnit = originalUnit * (1 - product.discount.percentage / 100);
-                                                }
+                                                const [convertedUnitPrice, unitCurrency] = useConvertedPrice(product.price?.presentmentAmount, product.price?.presentmentCurrency);
 
                                                 return (
                                                     <>
-                                                        {/* Show discounted total if discount is active */}
-                                                        {hasDiscount ? (
+                                                        {discountedPrice ? (
                                                             <>
                                                                 <span className="font-bold">
-                                                                    {currency} {Number(discountedUnit * quantity).toFixed(2)}
+                                                                    {discountCurrency} {Number(convertedDiscountedPrice * quantity).toFixed(2)}
                                                                 </span>
                                                                 <div className="text-xs text-extraLight md:text-[10px]font-semibold">
                                                                     {product.discount.percentage}% off!
@@ -286,15 +280,15 @@ function Cart() {
                                                         ) : (
                                                             <>
                                                                 <span>
-                                                                    {currency} {Number(originalUnit * quantity).toFixed(2)}
+                                                                    {unitCurrency} {Number(convertedUnitPrice * quantity).toFixed(2)}
                                                                 </span>
                                                             </>
                                                         )}
                                                         {/* Per-unit price below */}
                                                         <div className='text-xs md:text-[10px] text-lightColor font-medium'>
-                                                            {currency} {hasDiscount
-                                                                ? Number(discountedUnit).toFixed(2)
-                                                                : Number(originalUnit).toFixed(2)
+                                                            {unitCurrency} {hasDiscount
+                                                                ? Number(convertedDiscountedPrice).toFixed(2)
+                                                                : Number(convertedUnitPrice).toFixed(2)
                                                             } per unit
                                                         </div>
                                                     </>
@@ -340,7 +334,7 @@ function Cart() {
 
                                     <div key={idx} className="flex justify-between font-normal text-lightColor gap-20 py-2">
                                         <span>
-                                            Delivery Fee for <span>{item.name}</span>
+                                            {item.chosenDeliveryType === "digital" ? "Digital Delivery" : "Delivery Fee"} for <span>{item.name}</span>
                                             {item.chosenDeliveryType ? ` (${item.chosenDeliveryType})` : ""}
                                         </span>
                                         <span className='font-medium text-textColor text-right'>

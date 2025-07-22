@@ -10,17 +10,15 @@ export async function GET(
     request,
     { params }
 ) {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const awaitedParams = await params;
+
+    const sessionId = awaitedParams.sessionId;
+    if (!sessionId) return NextResponse.json({ error: "Invalid Session ID" }, { status: 400 });
+        
     try {
-        const { userId } = await auth();
-        if (!userId)
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-        const awaitedParams = await params;
-        const sessionId = awaitedParams.sessionId;
-        if (!sessionId) {
-            return NextResponse.json({ error: "Invalid Session ID" }, { status: 400 });
-        }
-
         const session = await stripe.checkout.sessions.retrieve(sessionId);
         return NextResponse.json({ session }, { status: 200 });
     } catch (error) {

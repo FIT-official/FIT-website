@@ -7,7 +7,6 @@ import { calculateCartItemBreakdown } from "../calculateBreakdown";
 async function fetchProduct(productId) {
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/product?productId=${productId}`);
-        if (!res.ok) throw new Error("Failed to fetch product");
         const data = await res.json();
         return data.product;
     } catch (err) {

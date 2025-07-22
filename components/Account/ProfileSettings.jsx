@@ -1,4 +1,3 @@
-import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import { useEffect, useState } from 'react'
 import { AiOutlineEdit } from 'react-icons/ai';
@@ -9,9 +8,10 @@ import { IoLogoGoogle } from 'react-icons/io5';
 import { MdMailOutline } from 'react-icons/md';
 
 function ProfileSettings({
-    connectedAccounts = []
+    connectedAccounts = [],
+    user,
+    isLoaded
 }) {
-    const { user, isLoaded } = useUser();
     const [loading, setLoading] = useState(false);
     const [hovered, setHovered] = useState(false);
     const [editMode, setEditMode] = useState(false);

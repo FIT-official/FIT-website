@@ -23,7 +23,7 @@ export async function POST(req) {
                 chosenDeliveryType: item.chosenDeliveryType,
                 price: item.price,
             },
-            status: "pending",
+            status: item.chosenDeliveryType === "digital" ? "delivered" : "pending",
         }));
 
         for (const item of user.cart) {

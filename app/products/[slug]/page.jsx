@@ -35,8 +35,8 @@ function ProductPage() {
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState(0);
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-    const [currentAssetIdx, setCurrentAssetIdx] = useState(0);
-    const [totalAssets, setTotalAssets] = useState(0);
+
+
 
     useEffect(() => {
         if (containerRef.current) {
@@ -76,9 +76,9 @@ function ProductPage() {
     useEffect(() => {
         setIsOwnProduct(product?.creatorUserId === user?.id);
         setLiked(!!(product?.likes?.includes?.(user?.id)));
-        setDisplayModelUrl("/api/proxy?key=" + encodeURIComponent(getGlbModel(product?.downloadableAssets)) || null);
+        setDisplayModelUrl("/api/proxy?key=" + encodeURIComponent(product?.viewableModel) || null);
         setTotalTabs(product?.images.length + (displayModelUrl ? 1 : 0) || 0);
-        setTotalAssets(product?.downloadableAssets?.length || 0);
+        // setTotalAssets(product?.downloadableAssets?.length || 0);
     }, [product, displayModelUrl, user, isLoaded])
 
     const handleAddToCart = async (product) => {
@@ -201,38 +201,6 @@ function ProductPage() {
             return idx;
         });
     };
-
-    const nextAsset = () => {
-        setCurrentAssetIdx((prev) => (prev + 1) % totalAssets);
-        console.log("next asset");
-    }
-    const prevAsset = () => {
-        setCurrentAssetIdx((prev) => (prev - 1 + totalAssets) % totalAssets);
-        console.log("prev asset");
-    }
-
-    const downloadAsset = async (asset) => {
-        if (!isLoaded || !user || !isSignedIn) {
-            router.push("/sign-in?redirect=/products");
-            return;
-        }
-        const url = `/api/proxy?key=${encodeURIComponent(asset)}&download=1`;
-        try {
-            const res = await fetch(url);
-            if (!res.ok) throw new Error("Failed to download asset");
-            const blob = await res.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = asset.split('/').pop();
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(downloadUrl);
-        } catch (err) {
-            alert("Download failed.");
-        }
-    }
 
     return (
         <div className='flex w-full flex-col py-20 border-b border-borderColor px-20'>
@@ -400,7 +368,7 @@ function ProductPage() {
                                 </button>
                             )}
 
-                            {totalAssets > 0 && (
+                            {/* {totalAssets > 0 && (
                                 <>
                                     <div className="flex uppercase font-semibold text-sm mt-6">
                                         Free Downloadable Assets
@@ -437,7 +405,7 @@ function ProductPage() {
                                         </button>
                                     </div>
                                 </>
-                            )}
+                            )} */}
 
 
                             <div className="flex uppercase font-semibold text-sm mt-4">

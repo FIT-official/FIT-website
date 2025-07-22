@@ -58,10 +58,10 @@ export async function POST(req) {
         }
 
         if (
-            !Array.isArray(body.downloadableAssets) ||
-            body.downloadableAssets.some(key => typeof key !== "string" || !key.trim())
+            !Array.isArray(body.paidAssets) ||
+            body.paidAssets.some(key => typeof key !== "string" || !key.trim())
         ) {
-            return NextResponse.json({ error: "Invalid images array" }, { status: 400 });
+            return NextResponse.json({ error: "Invalid paid assets array" }, { status: 400 });
         }
 
         if (typeof body.price !== "object" || isNaN(Number(body.price.presentmentAmount))) {
@@ -108,6 +108,49 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Missing productId" }, { status: 400 });
         }
 
+        // Fetch previous product for asset comparison
+        const prevProduct = await Product.findById(productId).lean();
+        if (!prevProduct) {
+            return NextResponse.json({ error: "Product not found" }, { status: 404 });
+        }
+
+        // Compare images
+        const prevImages = prevProduct.images || [];
+        const newImages = body.images || [];
+        const removedImages = prevImages.filter(img => !newImages.includes(img));
+
+        // Compare paid assets
+        const prevModels = prevProduct.paidAssets || [];
+        const newModels = body.paidAssets || [];
+        const removedModels = prevModels.filter(model => !newModels.includes(model));
+
+        // Compare viewable model
+        const prevViewable = prevProduct.viewableModel || "";
+        const newViewable = body.viewableModel || "";
+        const removedViewable = prevViewable && prevViewable !== newViewable ? prevViewable : null;
+
+        // Call delete APIs for removed assets
+        const deleteAsset = async (url, api) => {
+            try {
+                await fetch(api, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url }),
+                });
+            } catch (err) {
+                console.error(`Failed to delete asset ${url} via ${api}:`, err);
+            }
+        };
+
+        for (const img of removedImages) {
+            await deleteAsset(img, `${process.env.NEXT_PUBLIC_BASE_URL}/api/upload/images`);
+        }
+        for (const model of removedModels) {
+            await deleteAsset(model, `${process.env.NEXT_PUBLIC_BASE_URL}/api/upload/models`);
+        }
+        if (removedViewable) {
+            await deleteAsset(removedViewable, `${process.env.NEXT_PUBLIC_BASE_URL}/api/upload/viewable`);
+        }
 
         const requiredFields = [
             "creatorUserId",
@@ -117,7 +160,9 @@ export async function PUT(req) {
             "price",
             "productType"
         ];
+
         const missingFields = requiredFields.filter(field => !body[field]);
+
         if (missingFields.length > 0) {
             return NextResponse.json({ error: "Missing required fields", missingFields }, { status: 400 });
         }
@@ -138,10 +183,10 @@ export async function PUT(req) {
         }
 
         if (
-            !Array.isArray(body.downloadableAssets) ||
-            body.downloadableAssets.some(key => typeof key !== "string" || !key.trim())
+            !Array.isArray(body.paidAssets) ||
+            body.paidAssets.some(key => typeof key !== "string" || !key.trim())
         ) {
-            return NextResponse.json({ error: "Invalid images array" }, { status: 400 });
+            return NextResponse.json({ error: "Invalid paidAssets array" }, { status: 400 });
         }
 
         if (typeof body.price !== "object" || isNaN(Number(body.price.presentmentAmount))) {

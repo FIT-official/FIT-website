@@ -44,7 +44,7 @@ function AccountDropdown() {
                 />
             </button>
 
-            <div className={`absolute border border-borderColor top-10 right-0 min-w-40 min-h-20 rounded-sm bg-background transition-all duration-300 ease-in-out drop-shadow-lg ${isAccountDropdownOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+            <div className={`absolute border border-borderColor top-10 right-0 min-w-40 rounded-sm bg-background transition-all duration-300 ease-in-out drop-shadow-lg ${isAccountDropdownOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
                 {user && isLoaded ? (
                     <>
                         <Link href='/account' className="accountDropdownLink">

@@ -77,6 +77,9 @@ function OrderSection() {
     return (
         <div className='flex flex-col overflow-auto'>
             <h2 className="font-semibold mb-2 text-textColor">Order History</h2>
+            <p className="flex text-xs max-w-sm mb-6">
+                Here you can view your past orders and their details.
+            </p>
             {loading && (
                 <div className="flex flex-col gap-6">
                     <OrderSkeleton />
@@ -94,8 +97,8 @@ function OrderSection() {
                             key={idx}
                             className="border border-borderColor rounded-lg  p-0 md:p-0 flex flex-col gap-0"
                         >
-                            <div className="flex flex-row flex-wrap items-center justify-between border-b border-borderColor px-4 py-3 bg-white rounded-t-lg">
-                                <div className="flex flex-row gap-8 text-xs text-lightColor">
+                            <div className="flex flex-row flex-wrap items-center justify-between border-b border-borderColor px-4 py-3 bg-white rounded-t-lg md:gap-0 gap-1">
+                                <div className="flex flex-row md:justify-start justify-between gap-8 text-xs text-lightColor w-full md:w-fit">
                                     <div>
                                         <span className="font-medium text-textColor">Order Date:</span>{" "}
                                         {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "-"}
@@ -110,7 +113,7 @@ function OrderSection() {
                                     <span className="font-semibold text-textColor text-xs uppercase">#{order._id?.slice(-8) || "N/A"}</span>
                                 </div>
                             </div>
-                            <div className="flex flex-row gap-4 px-4 py-4 items-center">
+                            <div className="flex flex-col md:flex-row gap-4 px-4 py-4 items-start md:items-center">
                                 <div className="w-20 h-20 rounded-sm bg-borderColor/10 flex items-center justify-center overflow-hidden border border-borderColor/30">
                                     <Image
                                         src={`/api/proxy?key=${encodeURIComponent(product.images?.[0] || "/placeholder.png")}`}
@@ -120,7 +123,7 @@ function OrderSection() {
                                         className="object-cover w-full h-full"
                                     />
                                 </div>
-                                <div className="flex flex-col flex-1 min-w-0">
+                                <div className="flex flex-col flex-1 w-full md:w-xs">
                                     <div className="font-semibold text-textColor text-base truncate">
                                         {product.name || cartItem.productId}
                                     </div>
@@ -136,7 +139,7 @@ function OrderSection() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col items-end min-w-[90px]">
+                                <div className="flex flex-col md:items-end min-w-[90px]">
                                     <span className="text-xs text-lightColor">Paid</span>
                                     <span className="font-semibold text-textColor text-lg">
                                         {`S$${cartItem.price.toFixed(2)}`}
