@@ -23,7 +23,7 @@ const nextConfig = {
                 headers: [
                     {
                         key: "Content-Security-Policy",
-                        value: "frame-ancestors 'self' https://pay.google.com; frame-src 'self' https://pay.google.com https://js.stripe.com https://challenges.cloudflare.com;",
+                        value: "frame-ancestors 'self' https://pay.google.com; frame-src 'self' https://pay.google.com https://js.stripe.com https://challenges.cloudflare.com; img-src 'self' data: https://img.clerk.com https://fixittoday.s3.amazonaws.com; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self';",
                     },
                 ],
             },

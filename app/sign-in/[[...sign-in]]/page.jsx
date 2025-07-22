@@ -1,24 +1,15 @@
-'use client'
-import SignInForm from "@/components/AuthComponents/SignInForm";
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import SignInPage from "./SignInPage";
 
-function SignInPage() {
-    const { isSignedIn, isLoaded } = useUser();
-    const router = useRouter();
 
-    useEffect(() => {
-        if (isLoaded && isSignedIn) {
-            router.replace("/dashboard");
-        }
-    }, [isLoaded, isSignedIn, router]);
+export const metadata = {
+    title: "Sign In | Fix It Today®",
+    description: "Log in to your account to continue using Fix It Today®",
+};
 
+function SignInLayout() {
     return (
-        <div className='flex w-full items-center h-[92vh] justify-center border-b border-borderColor px-8'>
-            <SignInForm />
-        </div>
+        <SignInPage />
     )
 }
 
-export default SignInPage
+export default SignInLayout

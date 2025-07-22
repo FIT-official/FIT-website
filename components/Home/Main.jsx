@@ -38,7 +38,7 @@ function Main({ adbanner }) {
                 </div>
             )}
             <Image
-                src="/bg5.jpg"
+                src="/placeholder.jpg"
                 alt="Background"
                 fill
                 priority

@@ -2,16 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { PRINT_CATEGORIES, PRINT_SUBCATEGORIES } from "@/lib/categories";
+import { SHOP_CATEGORIES, SHOP_SUBCATEGORIES } from "@/lib/categories";
 import Image from "next/image";
 import { GoChevronDown } from "react-icons/go";
 import { AnimatePresence, motion } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
 import { useToast } from "@/components/General/ToastProvider";
 
-function Print() {
+function ShopPage() {
     const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const searchParams = useSearchParams();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [priceRange, setPriceRange] = useState(100);
@@ -29,20 +29,20 @@ function Print() {
             let subcategoryIdx = null;
 
             if (categoryName) {
-                categoryIdx = PRINT_CATEGORIES.findIndex(cat => cat === categoryName);
+                categoryIdx = SHOP_CATEGORIES.findIndex(cat => cat === categoryName);
             }
             if (categoryIdx !== -1 && subcategoryName) {
-                subcategoryIdx = PRINT_SUBCATEGORIES[categoryIdx]?.findIndex(sub => sub === subcategoryName);
+                subcategoryIdx = SHOP_SUBCATEGORIES[categoryIdx]?.findIndex(sub => sub === subcategoryName);
             }
 
-            let url = "/api/product?productType=print";
+            let url = "/api/product?productType=shop";
             if (categoryIdx !== null && categoryIdx !== -1) url += `&productCategory=${categoryIdx}`;
             if (subcategoryIdx !== null && subcategoryIdx !== -1) url += `&productSubCategory=${subcategoryIdx}`;
 
             const res = await fetch(url);
             const data = await res.json();
             if (!res.ok) {
-                showToast('Failed to fetch products', 'error');
+                showToast('Failed to fetch products', 'error'); d
             } else {
                 setProducts(data.products);
             }
@@ -199,7 +199,7 @@ function Print() {
                 </div>
             </div>
 
-            <div className="grid w-full lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6 mb-8">
+            <div className="grid w-full lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6">
                 {loading ? (
                     Array.from({ length: 4 }).map((_, i) => (
                         <div
@@ -217,14 +217,14 @@ function Print() {
                     filteredProducts.map((product) => (
                         <ProductCard key={product._id || product.id} product={product} />
                     ))
-                ) : !loading ? (
+                ) : (
                     <div className="col-span-4 text-center py-8">
                         <p>No products found.</p>
                     </div>
-                ) : null}
+                )}
             </div>
         </div>
     )
 }
 
-export default Print
+export default ShopPage

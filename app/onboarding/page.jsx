@@ -33,7 +33,6 @@ function Onboarding() {
         const formData = new FormData(e.currentTarget)
         const res = await completeOnboarding(formData)
         if (res?.message) {
-            console.log('Onboarding complete, updating role...')
             setLoading(true)
             await updateRoleFromStripe(user.publicMetadata.stripeSubscriptionId)
             setSubmitted(true)

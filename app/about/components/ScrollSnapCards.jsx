@@ -61,7 +61,7 @@ export default function ScrollSnapCards() {
                         >
                             <div className="relative w-full h-1/2">
                                 <Image
-                                    src={card.image || '/bg5.jpg'}
+                                    src={card.image || '/placeholder.jpg'}
                                     alt={card.title}
                                     fill
                                     className="rounded-t-xl object-cover"

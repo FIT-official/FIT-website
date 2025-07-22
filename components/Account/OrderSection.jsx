@@ -116,7 +116,7 @@ function OrderSection() {
                             <div className="flex flex-col md:flex-row gap-4 px-4 py-4 items-start md:items-center">
                                 <div className="w-20 h-20 rounded-sm bg-borderColor/10 flex items-center justify-center overflow-hidden border border-borderColor/30">
                                     <Image
-                                        src={`/api/proxy?key=${encodeURIComponent(product.images?.[0] || "/placeholder.png")}`}
+                                        src={`/api/proxy?key=${encodeURIComponent(product.images?.[0] || "/placeholder.jpg")}`}
                                         alt={product.name || "Product"}
                                         width={80}
                                         height={80}

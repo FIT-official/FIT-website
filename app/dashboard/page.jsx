@@ -22,7 +22,6 @@ function Dashboard() {
             const res = await fetch(`/api/product?creatorUserId=${user.id}`);
             const data = await res.json();
             setMyProducts(data.products || []);
-            console.log("Fetched products:", data.products);
         };
         fetchProducts();
     }, [user, isLoaded]);

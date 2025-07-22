@@ -14,12 +14,10 @@ function FeaturedSection() {
 
   const nextItem = () => {
     setIdx((prevIdx) => (prevIdx + 1) % maxItems);
-    console.log('Next item clicked');
   }
 
   const prevItem = () => {
     setIdx((prevIdx) => (prevIdx - 1 + maxItems) % maxItems);
-    console.log('Previous item clicked');
   }
 
   useEffect(() => {
@@ -33,10 +31,8 @@ function FeaturedSection() {
         setItems(data.products || []);
         if (data.products && data.products.length > 0) {
           setMaxItems(Math.min(data.products.length, 5));
-          console.log('Fetched items:', items);
         } else {
           setMaxItems(5);
-          console.log('No items found, setting maxItems to 5');
         }
       } catch (error) {
         showToast('Failed to fetch popular prints: ' + error.message, 'error');

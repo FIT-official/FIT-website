@@ -21,7 +21,6 @@ function DownloadsSection({
             ...prev,
             [transactionId]: ((prev[transactionId] ?? 0) + 1) % total
         }));
-        console.log("next Model");
     }
     const prevModel = (transactionId, total) => {
 
@@ -29,7 +28,6 @@ function DownloadsSection({
             ...prev,
             [transactionId]: ((prev[transactionId] ?? 0) - 1 + total) % total
         }));
-        console.log("prev Model");
     }
 
     const downloadModel = async (productId, linkIdx) => {
@@ -131,7 +129,7 @@ function DownloadsSection({
                                     <Image
                                         src={transaction.product?.images?.[0]
                                             ? `/api/proxy?key=${encodeURIComponent(transaction.product.images[0])}`
-                                            : "/bg5.jpg"}
+                                            : "/placeholder.jpg"}
                                         alt={transaction.product?.name || "Product"}
                                         width={80}
                                         height={80}

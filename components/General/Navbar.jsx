@@ -126,18 +126,19 @@ function Navbar() {
                 </button>
                 <div className={`fixed flex flex-col top-0 left-0 w-[80vw] h-screen z-0 bg-background transition-transform duration-300 pt-16 ease-in-out border-r border-borderColor ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:hidden`}>
                     <div className='flex flex-row mt-8 items-center gap-6 px-8'>
-                        <div className='w-16 h-16 rounded-full overflow-hidden flex'>
-                            <Link href='/account'>
+                        <div className="flex items-center justify-center bg-gray-100" style={{ width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', minWidth: 64, minHeight: 64 }}>
+                            <Link href="/account" className="block w-full h-full">
                                 <Image
                                     src={user?.imageUrl || '/user.jpg'}
-                                    alt='User Avatar'
-                                    width={40}
-                                    height={40}
-                                    className='w-full h-full object-cover grayscale'
+                                    alt="User Avatar"
+                                    width={64}
+                                    height={64}
+                                    className="object-cover"
+                                    style={{ width: '100%', height: '100%', borderRadius: '50%' }}
                                 />
                             </Link>
                         </div>
-                        <div className='flex flex-col gap-1 items-start'>
+                        <div className='flex flex-col gap-1 items-start w-fit'>
                             <div className='text-textColor font-bold text-xl truncate w-50'>
                                 {!isLoaded
                                     ? (<div className='w-full block h-6 animate-pulse bg-lightColor' />)

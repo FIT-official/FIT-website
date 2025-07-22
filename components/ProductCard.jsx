@@ -22,9 +22,6 @@ function ProductCard({ product }) {
         if (!isLoaded || !user) return false;
         return creatorId === user.id;
     }
-    useEffect(() => {
-        console.log(product);
-    }, []);
 
     const handleLike = async (e) => {
         e.stopPropagation();

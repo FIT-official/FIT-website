@@ -10,16 +10,16 @@ function MobileServicesComponent() {
                     key={index}
                     className="flex flex-col w-full aspect-square border-borderColor border rounded-xl bg-baseColor"
                 >
-                    <div className="relative w-full h-1/2">
+                    <div className="relative w-full h-[150px]">
                         <Image
-                            src={card.image || '/bg5.jpg'}
+                            src={card.image || '/placeholder.jpg'}
                             alt={card.title}
                             fill
                             className="rounded-t-xl object-cover"
                             style={{ objectFit: "cover" }}
                         />
                     </div>
-                    <div className="flex flex-col h-1/2 p-8 justify-center">
+                    <div className="flex flex-col p-8 justify-center">
                         <p className="flex text-lightColor font-semibold uppercase text-xs">Service</p>
                         <h2 className="font-semibold text-lg mb-2">{card.title}</h2>
                         <p className=" font-normal text-pretty text-xs">{card.description}</p>

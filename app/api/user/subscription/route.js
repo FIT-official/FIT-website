@@ -8,7 +8,6 @@ export async function GET(req) {
     try {
         const { userId } = await auth();
         if (!userId) {
-            console.log("No userId found in auth()");
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -16,12 +15,10 @@ export async function GET(req) {
         const user = await client.users.getUser(userId);
 
         if (!user) {
-            console.log("No user found for userId:", userId);
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
         if (!user.publicMetadata.stripeSubscriptionId) {
-            console.log("No stripeSubscriptionId in user.publicMetadata for userId:", userId);
             return NextResponse.json({ error: 'No subscription found' }, { status: 404 });
         }
 

@@ -48,7 +48,6 @@ function SignInForm() {
                     router.push('/dashboard');
                 }
             }
-            console.log('Form submitted:', signInMethod)
         } catch (error) {
             console.error('Error during sign in:', error);
             setError(error.message || 'An error occurred during sign in');

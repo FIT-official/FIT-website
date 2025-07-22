@@ -38,7 +38,6 @@ export async function POST(req) {
         ];
         const missingFields = requiredFields.filter(field => !body[field]);
         if (missingFields.length > 0) {
-            console.log("Missing required fields:", missingFields);
             return NextResponse.json({ error: "Missing required fields", missingFields }, { status: 400 });
         }
 

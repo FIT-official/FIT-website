@@ -35,12 +35,10 @@ function Testimonials() {
 
     const nextItem = () => {
         showItem((idx + 1) % maxItems);
-        console.log('Next testimonial clicked');
     }
 
     const prevItem = () => {
         showItem((idx - 1 + maxItems) % maxItems);
-        console.log('Previous testimonial clicked');
     }
 
     useEffect(() => {
