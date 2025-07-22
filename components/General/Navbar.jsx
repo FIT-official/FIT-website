@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import Logo from '../Logo'
-import { SignOutButton, SignInButton, useUser } from '@clerk/nextjs'
+import { SignOutButton, SignInButton, useUser, SignUpButton } from '@clerk/nextjs'
 import Image from 'next/image'
 import { FcMenu } from "react-icons/fc";
 import { useState } from 'react'
@@ -125,8 +125,8 @@ function Navbar() {
                     <FcMenu size={20} />
                 </button>
                 <div className={`fixed flex flex-col top-0 left-0 w-[80vw] h-screen z-0 bg-background transition-transform duration-300 pt-16 ease-in-out border-r border-borderColor ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:hidden`}>
-                    <div className='flex flex-row mt-8 items-center gap-6 px-8'>
-                        <div className="flex items-center justify-center bg-gray-100" style={{ width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', minWidth: 64, minHeight: 64 }}>
+                    <div className='flex flex-row mt-8 w-full items-center gap-6 px-8 min-w-0'>
+                        <div className="flex items-center justify-center rounded-full overflow-hidden w-12 h-12 min-w-12">
                             <Link href="/account" className="block w-full h-full">
                                 <Image
                                     src={user?.imageUrl || '/user.jpg'}
@@ -138,30 +138,30 @@ function Navbar() {
                                 />
                             </Link>
                         </div>
-                        <div className='flex flex-col gap-1 items-start w-fit'>
-                            <div className='text-textColor font-bold text-xl truncate w-50'>
+                        <div className='flex flex-col w-full items-start'>
+
+                            <div className='flex w-full text-lg font-semibold overflow-hidden'>
                                 {!isLoaded
-                                    ? (<div className='w-full block h-6 animate-pulse bg-lightColor' />)
+                                    ? (<div className='block h-6 animate-pulse bg-lightColor' />)
                                     : user
                                         ? user.firstName || user.emailAddresses[0]?.emailAddress
                                         : 'Guest'}
                             </div>
                             {isSignedIn && isLoaded && user ? (
-                                <div className='flex flex-row items-center gap-1 cursor-pointer'>
+                                <div className='flex flex-row items-center gap-1 cursor-pointer w-full'>
                                     <PiSignOut />
                                     <SignOutButton>
                                         Log Out
                                     </SignOutButton>
                                 </div>
                             ) : (
-                                <div className='flex flex-row items-center gap-1 cursor-pointer'>
+                                <div className='flex flex-row items-center gap-1 cursor-pointer w-full'>
                                     <PiSignIn />
-                                    <SignInButton>
-                                        Sign In
-                                    </SignInButton>
+                                    <SignUpButton>
+                                        Sign Up
+                                    </SignUpButton>
                                 </div>
                             )}
-
                         </div>
                     </div>
                     <div className='flex w-full h-0 border-t border-borderColor mt-8' />
@@ -298,6 +298,8 @@ function Navbar() {
                             {isSignedIn && isLoaded && user && (
                                 <>
                                     <li><Link href='/cart' className='flex navSidebarLink'>Cart</Link></li>
+                                    <div className='flex w-full h-0 border-t border-borderColor my-1' />
+                                    <li><Link href='/account' className='flex navSidebarLink'>Account</Link></li>
                                     <div className='flex w-full h-0 border-t border-borderColor my-1' />
                                 </>
                             )}

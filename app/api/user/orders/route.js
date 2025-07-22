@@ -50,9 +50,11 @@ export async function GET(req) {
         if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         await connectToDatabase();
         const user = await User.findOne({ userId }, { orderHistory: 1, _id: 0 });
-        return NextResponse.json({ orders: user.orderHistory || [] }, { status: 200 });
+        const orders = user?.orderHistory ?? [];
+        return NextResponse.json({ orders }, { status: 200 });
     } catch (error) {
-        return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
+        console.error("Error fetching user orders:", error);
+        return NextResponse.json({ error: "Failed to fetch orders: " + error.message }, { status: 500 });
     }
 }
 

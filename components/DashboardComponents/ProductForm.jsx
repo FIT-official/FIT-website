@@ -2,7 +2,7 @@
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image"
 import { RxCross1 } from "react-icons/rx"
-import { BsPlus, BsPlusCircle } from "react-icons/bs"
+import { BsPlus } from "react-icons/bs"
 import { useEffect, useRef, useState } from "react"
 import {
     SHOP_CATEGORIES,
@@ -12,10 +12,11 @@ import {
 } from "@/lib/categories"
 import { supportedCountries } from '@/lib/supportedCountries'
 import SelectField from "./SelectField";
-import { GoChevronDown, GoChevronRight } from "react-icons/go";
+import { GoChevronDown, GoChevronLeft, GoChevronRight } from "react-icons/go";
 import { BiMinus } from "react-icons/bi";
 import { useToast } from "../General/ToastProvider";
 import { uploadImages, uploadModels, uploadViewable } from "@/utils/uploadHelpers";
+import Link from "next/link";
 
 function ProductForm({ mode = "Create", product = null }) {
     const { user, isLoaded } = useUser()
@@ -42,6 +43,7 @@ function ProductForm({ mode = "Create", product = null }) {
     const [dragViewableModelActive, setDragViewableModelActive] = useState(false);
 
     const [loading, setLoading] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     const [openSection, setOpenSection] = useState({
         details: true,
@@ -384,7 +386,7 @@ function ProductForm({ mode = "Create", product = null }) {
                     if (imageInputRef.current) imageInputRef.current.value = "";
                     if (modelInputRef.current) modelInputRef.current.value = "";
                     if (viewableModelInputRef.current) viewableModelInputRef.current.value = "";
-                    alert(isEditing ? "Product updated successfully!" : "Product created successfully!");
+                    showToast(isEditing ? "Product updated successfully!" : "Product created successfully!", 'success');
                     if (!isEditing) {
                         setForm({ ...defaultForm });
                     }
@@ -392,29 +394,51 @@ function ProductForm({ mode = "Create", product = null }) {
             }
         } catch (err) {
             setLoading(false);
-            alert("Network error: " + err.message);
+            showToast("Network error: " + err.message, 'error');
         }
     }
 
     useEffect(() => {
-    if (form.deliveryTypes.digital && form.variants.length > 1) {
-        setForm(f => ({
-            ...f,
-            variants: f.variants.slice(0, 1),
-            variantInput: "",
-            stock: null,
-            deliveryTypes: {
-                digital: true,
-                selfCollect: false,
-                singpost: false,
-                privateDelivery: false,
-            },
-        }));
-    }
-}, [form.deliveryTypes.digital, form.variants.length]);
+        if (form.deliveryTypes.digital && form.variants.length > 1) {
+            setForm(f => ({
+                ...f,
+                variants: f.variants.slice(0, 1),
+                variantInput: "",
+                stock: null,
+                deliveryTypes: {
+                    digital: true,
+                    selfCollect: false,
+                    singpost: false,
+                    privateDelivery: false,
+                },
+            }));
+        }
+    }, [form.deliveryTypes.digital, form.variants.length]);
 
+
+    const handleDelete = async () => {
+        if (!window.confirm("Are you sure you want to delete this product?")) return;
+        try {
+            setDeleting(true);
+            const res = await fetch(`/api/product?productId=${product._id}`, {
+                method: "DELETE",
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                showToast(data.error || "Failed to delete product", "error");
+            } else {
+                showToast("Product deleted successfully!", "success");
+            }
+        } catch (err) {
+            showToast("Network error: " + err.message, "error");
+        }
+        setDeleting(false);
+    }
     return (
         <form onSubmit={handleSubmit} className='flex flex-col w-full items-center justify-center gap-4'>
+            <Link href='/dashboard/products' className='flex w-full items-center text-sm font-normal gap-2 toggleXbutton'>
+                <GoChevronLeft /> Back to Products
+            </Link>
             <h1 className="flex w-full mb-4">{formattedMode} Product</h1>
 
             <div className="flex flex-col w-full border border-borderColor rounded-sm">
@@ -1182,16 +1206,39 @@ function ProductForm({ mode = "Create", product = null }) {
                 </div>
             </div>
 
-            <button type="submit" className="formBlackButton w-full">
-                {loading ? (
-                    <>
-                        Saving
-                        <div className='animate-spin ml-3 border-1 border-t-transparent h-3 w-3 rounded-full' />
-                    </>
-                ) :
-                    'Save'
-                }
-            </button>
+            <div className="flex flex-col gap-1 w-full mt-4">
+                <button type="submit" className="formBlackButton w-full">
+                    {loading ? (
+                        <>
+                            Saving Product
+                            <div className='animate-spin ml-3 border-1 border-t-transparent h-3 w-3 rounded-full' />
+                        </>
+                    ) :
+                        'Save Product'
+                    }
+                </button>
+
+                {product && product._id && (
+                    <button
+                        type="button"
+                        className="formRedButton w-full"
+                        onClick={handleDelete}
+                    >
+                        {deleting ? (
+                            <>
+                                Deleting Product
+                                <div className='animate-spin ml-3 border-1 border-t-transparent h-3 w-3 rounded-full' />
+                            </>
+                        ) :
+                            'Delete Product'
+                        }
+                    </button>
+                )}
+
+                <button className="formButton2 w-full mt-4">
+                    Hide Product
+                </button>
+            </div>
         </form >
     )
 }

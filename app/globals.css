@@ -128,8 +128,16 @@
   @apply flex px-3 py-2 items-center justify-between gap-2 rounded-md font-medium text-sm text-background bg-textColor cursor-pointer
 }
 
+.formRedButton {
+  @apply flex px-3 py-2 items-center justify-center rounded-md font-medium text-sm text-background bg-red-500 cursor-pointer
+}
+
 .formButton {
-  @apply flex px-3 py-1 items-center justify-between rounded-md font-medium border-extraLight text-lightColor bg-baseColor border cursor-pointer hover:bg-borderColor/20 transition-all ease-in-out duration-300
+  @apply flex px-3 py-1 items-center justify-between rounded-md font-medium border-extraLight text-lightColor bg-baseColor border cursor-pointer hover:bg-borderColor/20 transition-all ease-in-out duration-300 text-sm
+}
+
+.formButton2 {
+  @apply flex px-3 py-1 items-center rounded-md font-medium border-extraLight text-lightColor bg-baseColor border cursor-pointer hover:bg-borderColor/20 transition-all ease-in-out duration-300 justify-center text-sm
 }
 
 .formSelect {

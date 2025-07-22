@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { s3 } from "@/lib/s3";
 import sharp from "sharp";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { auth } from "@clerk/nextjs/server";
 import { isValidUrl } from "@/utils/validate";
 
@@ -75,8 +75,8 @@ export async function POST(req) {
 export async function DELETE(req) {
   try {
     const { userId } = await auth();
-    if (!userId)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { url } = await req.json();
     if (!url || !isValidUrl(url)) {

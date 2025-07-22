@@ -317,3 +317,70 @@ export async function GET(req) {
         return NextResponse.json({ error: "Server error" }, { status: 500 });
     }
 }
+
+export async function DELETE(req) {
+    try {
+        const { userId } = await auth();
+        if (!userId)
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+        await connectToDatabase();
+        const { searchParams } = new URL(req.url);
+        const productId = searchParams.get("productId");
+        if (!productId) {
+            return NextResponse.json({ error: "Missing productId" }, { status: 400 });
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return NextResponse.json({ error: "Product not found" }, { status: 404 });
+        }
+
+        if (product.creatorUserId !== userId) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
+        for (const img of product.images || []) {
+            try {
+                await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/upload/images`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: `${process.env.NEXT_PUBLIC_BASE_URL}/${img}` }),
+                });
+            } catch (err) {
+                console.error(`Failed to delete image ${img}:`, err);
+            }
+        }
+
+        for (const model of product.paidAssets || []) {
+            try {
+                await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/upload/models`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: `${process.env.NEXT_PUBLIC_BASE_URL}/${model}` }),
+                });
+            } catch (err) {
+                console.error(`Failed to delete model ${model}:`, err);
+            }
+        }
+
+        if (product.viewableModel) {
+            try {
+                await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/upload/viewable`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: `${process.env.NEXT_PUBLIC_BASE_URL}/${product.viewableModel}` }),
+                });
+            } catch (err) {
+                console.error(`Failed to delete viewable model ${product.viewableModel}:`, err);
+            }
+        }
+
+        await Product.findByIdAndDelete(productId);
+
+        return NextResponse.json({ success: true }, { status: 200 });
+    } catch (err) {
+        console.error(err);
+        return NextResponse.json({ error: "Server error" }, { status: 500 });
+    }
+}

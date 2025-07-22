@@ -17,24 +17,17 @@ function ContactSection() {
     const [editMode, setEditMode] = useState(false);
 
     useEffect(() => {
-        (async () => {
-            setLoading(true);
-            try {
-                const phoneRes = await fetch("/api/user/contact/phone");
-                if (phoneRes.ok) {
-                    const data = await phoneRes.json();
-                    if (data.phone) setPhone(data.phone);
-                }
-                const addrRes = await fetch("/api/user/contact/address");
-                if (addrRes.ok) {
-                    const data = await addrRes.json();
-                    if (data.address) setAddress(data.address);
-                }
-            } catch (err) {
-                setMsg("Failed to load contact info.");
-            }
-            setLoading(false);
-        })();
+        setLoading(true);
+        Promise.all([
+            fetch("/api/user/contact/phone").then(res => res.ok ? res.json() : {}),
+            fetch("/api/user/contact/address").then(res => res.ok ? res.json() : {})
+        ])
+            .then(([phoneData, addressData]) => {
+                if (phoneData.phone) setPhone(phoneData.phone);
+                if (addressData.address) setAddress(addressData.address);
+            })
+            .catch(() => setMsg("Failed to load contact info."))
+            .finally(() => setLoading(false));
     }, []);
 
     const handlePhoneChange = (e) => {

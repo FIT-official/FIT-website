@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { s3 } from "@/lib/s3";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { isValidUrl, checkMagicNumber } from "@/utils/validate";
 import { auth } from "@clerk/nextjs/server";
 
