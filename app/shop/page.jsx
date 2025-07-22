@@ -7,7 +7,7 @@ export const metadata = {
 
 function ShopLayout() {
     return (
-        <Shop />
+        <ShopPage />
     )
 }
 
