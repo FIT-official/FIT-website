@@ -1,6 +1,6 @@
 'use client'
 import Logo from '../Logo'
-import { FaInstagram, FaWhatsapp } from 'react-icons/fa'
+import { FaLinkedin, FaWhatsapp } from 'react-icons/fa'
 import { HiOutlineMail } from 'react-icons/hi'
 import Link from 'next/link'
 
@@ -22,8 +22,8 @@ function Footer() {
                     <div className='flex flex-col gap-6'>
                         <div className='flex flex-col gap-3'>
                             <div className='uppercase tracking-wide font-semibold'>Legal</div>
-                            <Link href='/' className='footerLink'>Terms & Conditions</Link>
-                            <Link href='/' className='footerLink'>Privacy Policy</Link>
+                            <Link href='/terms' className='footerLink'>Terms & Conditions</Link>
+                            <Link href='/privacy' className='footerLink'>Privacy Policy</Link>
                         </div>
 
                     </div>
@@ -34,9 +34,9 @@ function Footer() {
                             <Link href='mailto:fixittoday.contact@gmail.com' className='footerLink'>
                                 <HiOutlineMail size={16} className='flex' /> Email
                             </Link>
-                            <Link href='https://instagram.com' target="_blank" rel="noopener noreferrer" className='footerLink'>
+                            {/* <Link href='https://instagram.com' target="_blank" rel="noopener noreferrer" className='footerLink'>
                                 <FaInstagram size={16} className='flex' /> Instagram
-                            </Link>
+                            </Link> */}
                             <Link href='https://whatsapp.com' target="_blank" rel="noopener noreferrer" className='footerLink'>
                                 <FaWhatsapp size={16} className='flex' /> Whatsapp
                             </Link>
@@ -45,10 +45,10 @@ function Footer() {
                             </Link>
                             <Link href='https://telegram.org' target="_blank" rel="noopener noreferrer" className='footerLink'>
                                 <FaFacebook size={16} className='flex' /> Facebook
-                            </Link>
-                             <Link href='https://telegram.org' target="_blank" rel="noopener noreferrer" className='footerLink'>
-                                <FaLinkedin size={16} className='flex' /> Linkedin
                             </Link> */}
+                            <Link href='https://www.linkedin.com/company/fix-it-today-sg' target="_blank" rel="noopener noreferrer" className='footerLink'>
+                                <FaLinkedin size={16} className='flex' /> Linkedin
+                            </Link>
                         </div>
                     </div>
                 </div>

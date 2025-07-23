@@ -4,20 +4,20 @@ import { useEffect, useState } from "react"
 import MobileServicesComponent from "./MobileServicesComponent";
 
 function ServicesSection() {
-    const [mobile, setMobile] = useState(
-        typeof window !== "undefined" ? window.innerWidth < 768 : false
-    );
+    const [mobile, setMobile] = useState(false);
 
     useEffect(() => {
         function handleResize() {
             setMobile(window.innerWidth < 768);
         }
+        // Set initial value on client
+        handleResize();
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
     return (
-        <div className="flex flex-col lg:flex-row w-full gap-20 px-12 md:px-32 py-20">
+        <div className="flex flex-col lg:flex-row w-full gap-20 px-12 md:px-32 py-20 pointer-events-none">
             <div className='flex flex-col gap-8 w-full lg:w-[40%] mt-4'>
                 <div className='flex flex-col gap-2'>
                     <h3>Our Services</h3>

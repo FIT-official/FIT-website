@@ -5,7 +5,7 @@ import IntroductionSection from "./components/IntroductionSection"
 
 function About() {
     return (
-        <div className='flex w-full flex-col pt-12 border-b border-borderColor overflow-hidden'>
+        <div className='flex w-full flex-col pt-12 border-b border-borderColor'>
             <IntroductionSection />
             <BenefitsSection />
             <Header title="OUR SERVICES" />
