@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import DigitalProductTransaction from "@/models/DigitalProductTransaction";
+import { connectToDatabase } from "@/lib/db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -41,6 +42,7 @@ export async function POST(req) {
 
         for (const [productId, { buyer, links }] of Object.entries(digitalProductData)) {
             try {
+                await connectToDatabase();
                 await DigitalProductTransaction.create({
                     userId: buyer,
                     productId,
