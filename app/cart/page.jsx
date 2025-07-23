@@ -9,8 +9,9 @@ import { useToast } from '@/components/General/ToastProvider';
 import CartSummarySkeleton from './components/CartSummarySkeleton';
 import CartItemSkeleton from './components/CartItemSkeleton';
 import { IoCartOutline } from 'react-icons/io5';
-import { convertToGlobalCurrency, useConvertedPrice } from '@/utils/convertCurrency';
+import { convertToGlobalCurrency } from '@/utils/convertCurrency';
 import { getDiscountedPrice } from '@/utils/discount';
+import { useCurrency } from '@/components/General/CurrencyContext';
 
 function Cart() {
     const { user, isLoaded } = useUser();
@@ -21,6 +22,7 @@ function Cart() {
     const searchParams = useSearchParams();
     const redirectUrl = searchParams.get("redirect") || "/";
     const { showToast } = useToast();
+    const globalCurrency = useCurrency();
 
     useEffect(() => {
         if (!isLoaded || !user) return;
@@ -184,8 +186,6 @@ function Cart() {
                             cart.map((cartItem, index) => {
                                 const product = products[cartItem.productId];
                                 if (!product) return null;
-                                const [convertedPrice, globalCurrency] = useConvertedPrice(product.price?.presentmentAmount, product.price?.presentmentCurrency);
-
                                 return (
                                     <div key={index} className='grid grid-cols-1 md:grid-rows-1 md:grid-cols-5 gap-2 md:gap-4 py-8 md:py-6 px-6'>
                                         {/* image */}
@@ -258,20 +258,21 @@ function Cart() {
 
                                         {/* price */}
                                         <div className='flex flex-col justify-center items-end font-semibold md:text-sm text-base'>
-                                            {(() => {
+                                            {(async () => {
                                                 const discountedPrice =
                                                     getDiscountedPrice(product);
 
-                                                const [convertedDiscountedPrice, discountCurrency] = useConvertedPrice(discountedPrice, product.price?.presentmentCurrency);
-
-                                                const [convertedUnitPrice, unitCurrency] = useConvertedPrice(product.price?.presentmentAmount, product.price?.presentmentCurrency);
+                                                const convertedPrice = await convertToGlobalCurrency(product.price?.presentmentAmount, product.price?.presentmentCurrency, globalCurrency);
+                                                const convertedDiscountedPrice = discountedPrice
+                                                    ? await convertToGlobalCurrency(discountedPrice.amount, discountedPrice.currency, globalCurrency)
+                                                    : null;
 
                                                 return (
                                                     <>
                                                         {discountedPrice ? (
                                                             <>
                                                                 <span className="font-bold">
-                                                                    {discountCurrency} {Number(convertedDiscountedPrice * quantity).toFixed(2)}
+                                                                    {globalCurrency} {Number(convertedDiscountedPrice * quantity).toFixed(2)}
                                                                 </span>
                                                                 <div className="text-xs text-extraLight md:text-[10px]font-semibold">
                                                                     {product.discount.percentage}% off!
@@ -280,15 +281,15 @@ function Cart() {
                                                         ) : (
                                                             <>
                                                                 <span>
-                                                                    {unitCurrency} {Number(convertedUnitPrice * quantity).toFixed(2)}
+                                                                    {globalCurrency} {Number(convertedPrice * quantity).toFixed(2)}
                                                                 </span>
                                                             </>
                                                         )}
                                                         {/* Per-unit price below */}
                                                         <div className='text-xs md:text-[10px] text-lightColor font-medium'>
-                                                            {unitCurrency} {discountedPrice
+                                                            {globalCurrency} {discountedPrice
                                                                 ? Number(convertedDiscountedPrice).toFixed(2)
-                                                                : Number(convertedUnitPrice).toFixed(2)
+                                                                : Number(convertedPrice).toFixed(2)
                                                             } per unit
                                                         </div>
                                                     </>

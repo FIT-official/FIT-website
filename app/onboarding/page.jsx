@@ -19,6 +19,7 @@ function Onboarding() {
         const poll = async () => {
             await user?.reload?.()
             if (user?.publicMetadata?.onboardingComplete) {
+                setLoading(false)
                 router.push('/dashboard')
             }
         }
@@ -30,17 +31,16 @@ function Onboarding() {
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (!isLoaded) return
+        setLoading(true)
         const formData = new FormData(e.currentTarget)
         const res = await completeOnboarding(formData)
         if (res?.message) {
-            setLoading(true)
             await updateRoleFromStripe(user.publicMetadata.stripeSubscriptionId)
             setSubmitted(true)
-            setLoading(false)
         }
         if (res?.error) {
             setError(res?.error)
-            setLoading(false)
+
         }
     }
 

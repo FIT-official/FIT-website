@@ -38,8 +38,9 @@ function ProductPage() {
     useEffect(() => {
         if (!containerRef.current) return;
         const updateSize = () => {
-            setContainerSize(containerRef.current.offsetWidth);
-            console.log("Container size updated:", containerRef.current.offsetWidth);
+            if (containerRef.current) {
+                setContainerSize(containerRef.current.offsetWidth);
+            }
         };
         updateSize();
         const resizeObserver = new window.ResizeObserver(() => {
