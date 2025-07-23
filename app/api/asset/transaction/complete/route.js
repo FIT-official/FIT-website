@@ -22,6 +22,9 @@ export async function POST(req) {
         return NextResponse.json({ error: "Webhook Error" }, { status: 400 });
     }
 
+    await connectToDatabase(); // <-- Move this here
+
+
     if (event.type === "checkout.session.completed") {
         const session = event.data.object;
         const sessionId = session.id;
@@ -42,7 +45,6 @@ export async function POST(req) {
 
         for (const [productId, { buyer, links }] of Object.entries(digitalProductData)) {
             try {
-                await connectToDatabase();
                 await DigitalProductTransaction.create({
                     userId: buyer,
                     productId,
