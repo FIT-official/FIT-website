@@ -391,8 +391,8 @@ function Cart() {
                             (() => {
                                 // Subtotal: sum of all product prices × quantity
                                 const subtotal = cartBreakdown.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
-                                // Delivery fees: sum of all deliveryFee
-                                const totalDeliveryFee = cartBreakdown.reduce((sum, item) => sum + (item.deliveryFee || 0), 0);
+                                // Delivery fees: sum of all deliveryFee * quantity (per item)
+                                const totalDeliveryFee = cartBreakdown.reduce((sum, item) => sum + ((item.deliveryFee || 0) * (item.quantity || 1)), 0);
                                 // Grand total: subtotal + totalDeliveryFee
                                 const grandTotal = subtotal + totalDeliveryFee;
                                 const currency = cartBreakdown[0]?.currency || 'SGD';
@@ -407,9 +407,10 @@ function Cart() {
                                                 <span>
                                                     {item.chosenDeliveryType === "digital" ? "Digital Delivery" : "Delivery Fee"} for <span>{item.name}</span>
                                                     {item.chosenDeliveryType ? ` (${item.chosenDeliveryType})` : ""}
+                                                    {item.quantity > 1 ? ` x${item.quantity}` : ""}
                                                 </span>
                                                 <span className='font-medium text-textColor text-right'>
-                                                    {`${currency} ${item.deliveryFee?.toFixed(2) ?? "0.00"}`}
+                                                    {`${currency} ${(item.deliveryFee ? item.deliveryFee * (item.quantity || 1) : 0).toFixed(2)}`}
                                                 </span>
                                             </div>
                                         ))}

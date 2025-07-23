@@ -113,9 +113,12 @@ const BillingInfo = ({ userContact }) => (
 );
 
 const OrderSummary = ({ cartBreakdown }) => {
-    const subtotal = cartBreakdown.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const delivery = cartBreakdown.reduce((acc, item) => acc + item.deliveryFee, 0);
-    const total = cartBreakdown.reduce((acc, item) => acc + item.total, 0);
+    // Subtotal: sum of all product prices × quantity
+    const subtotal = cartBreakdown.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    // Delivery fees: sum of all deliveryFee * quantity (per item)
+    const delivery = cartBreakdown.reduce((acc, item) => acc + ((item.deliveryFee || 0) * (item.quantity || 1)), 0);
+    // Grand total: subtotal + delivery
+    const total = subtotal + delivery;
 
     return (
         <div className="border border-borderColor rounded bg-white p-6 flex flex-col ">
