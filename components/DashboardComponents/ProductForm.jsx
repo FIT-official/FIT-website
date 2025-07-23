@@ -297,11 +297,19 @@ function ProductForm({ mode = "Create", product = null }) {
         e.preventDefault();
         if (!isLoaded) return;
         setLoading(true);
+        let uploadedImages
+        let uploadedModels
+        let uploadedViewable
 
-        let uploadedImages = await uploadImages(pendingImages);
-        let uploadedModels = await uploadModels(pendingModels);
-        let uploadedViewable = await uploadViewable(pendingViewableModel);
-
+        try {
+            uploadedImages = await uploadImages(pendingImages);
+            uploadedModels = await uploadModels(pendingModels);
+            uploadedViewable = await uploadViewable(pendingViewableModel);
+        } catch (error) {
+            console.error("Error uploading files:", error);
+            setLoading(false);
+            return;
+        }
 
         const payload = {
             creatorUserId: user?.id,
@@ -393,9 +401,10 @@ function ProductForm({ mode = "Create", product = null }) {
                 }
             }
         } catch (err) {
-            setLoading(false);
             showToast("Network error: " + err.message, 'error');
         }
+        setLoading(false);
+        window.location.reload()
     }
 
     useEffect(() => {

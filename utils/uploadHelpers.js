@@ -1,3 +1,18 @@
+function getMimeType(ext) {
+    const mimeTypes = {
+        obj: "application/octet-stream",
+        glb: "model/gltf-binary",
+        gltf: "model/gltf+json",
+        stl: "model/stl",
+        blend: "application/octet-stream",
+        fbx: "application/octet-stream",
+        zip: "application/zip",
+        rar: "application/x-rar-compressed",
+        "7z": "application/x-7z-compressed"
+    };
+    return mimeTypes[ext] || "application/octet-stream";
+}
+
 export async function uploadImages(pendingImages) {
     let files = [];
     if (pendingImages.length > 0) {
@@ -18,29 +33,43 @@ export async function uploadModels(pendingModels) {
     const uploadedKeys = [];
 
     for (const model of pendingModels) {
-        const ext = model.name.split('.').pop().toLowerCase();
+        const name = model.name || `model_${Date.now()}.${(model.type ? model.type.split('/').pop() : 'bin')}`;
+        const ext = name.split('.').pop().toLowerCase();
+
         if (!ALLOWED_MODEL_EXTS.includes(ext)) {
-            throw new Error(`Unsupported file type: ${ext}`);
+            console.error(`Unsupported file type: ${ext}`);
+            continue;
         }
         if (model.size > MAX_SIZE) {
-            throw new Error(`File size exceeds limit: ${model.size} bytes`);
+            console.error(`File size exceeds limit: ${model.size} bytes`);
+            continue;
         }
+        const contentType = model.type || getMimeType(ext);
+
         try {
             const res = await fetch("/api/upload/models", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ filename: model.name, contentType: model.type }),
+                body: JSON.stringify({ filename: name, contentType }),
             });
+            if (!res.ok) {
+                console.error(`Failed to get signed URL for ${name}:`, await res.text());
+                continue;
+            }
             const { url, key } = await res.json();
 
-            await fetch(url, {
+            const uploadRes = await fetch(url, {
                 method: "PUT",
-                headers: { "Content-Type": model.type },
+                headers: { "Content-Type": contentType },
                 body: model,
             });
-            uploadedKeys.push(key);
+            if (uploadRes.ok && key) {
+                uploadedKeys.push(key);
+            } else {
+                console.error(`Failed to upload model ${name}:`, await uploadRes.text());
+            }
         } catch (error) {
-            console.error(`Failed to upload model ${model.name}:`, error);
+            console.error(`Failed to upload model ${name}:`, error);
         }
     }
     return uploadedKeys;
@@ -53,30 +82,47 @@ export async function uploadViewable(pendingViewableModel) {
     ];
 
     if (pendingViewableModel) {
-        const ext = pendingViewableModel.name.split('.').pop().toLowerCase();
+        const name = pendingViewableModel.name || `viewable_${Date.now()}.${(pendingViewableModel.type ? pendingViewableModel.type.split('/').pop() : 'glb')}`;
+        const ext = name.split('.').pop().toLowerCase();
+
         if (!ALLOWED_MODEL_EXTS.includes(ext)) {
-            throw new Error(`Unsupported file type: ${ext}`);
+            console.error(`Unsupported file type: ${ext}`);
+            return null;
         }
         if (pendingViewableModel.size > MAX_SIZE) {
-            throw new Error(`File size exceeds limit: ${pendingViewableModel.size} bytes`);
+            console.error(`File size exceeds limit: ${pendingViewableModel.size} bytes`);
+            return null;
         }
+        const contentType = pendingViewableModel.type || getMimeType(ext);
+
         try {
             const res = await fetch("/api/upload/viewable", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ filename: pendingViewableModel.name, contentType: pendingViewableModel.type }),
+                body: JSON.stringify({ filename: name, contentType }),
             });
+            if (!res.ok) {
+                console.error(`Failed to get signed URL for ${name}:`, await res.text());
+                return null;
+            }
             const { url, key } = await res.json();
-            await fetch(url, {
+            const uploadRes = await fetch(url, {
                 method: "PUT",
-                headers: { "Content-Type": pendingViewableModel.type },
+                headers: { "Content-Type": contentType },
                 body: pendingViewableModel,
             });
-            return key;
+            if (uploadRes.ok && key) {
+                return key;
+            } else {
+                console.error(`Failed to upload viewable model ${name}:`, await uploadRes.text());
+                return null;
+            }
         } catch (error) {
-            console.error(`Failed to upload viewable model ${pendingViewableModel.name}:`, error);
+            console.error(`Failed to upload viewable model ${name}:`, error);
+            return null;
         }
-    };
+    }
+    return null;
 }
 
 // export async function uploadViewable(pendingViewableModel) {

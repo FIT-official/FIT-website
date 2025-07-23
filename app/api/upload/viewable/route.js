@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { s3 } from "@/lib/s3";
-import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { isValidUrl, checkMagicNumber } from "@/utils/validate";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { auth } from "@clerk/nextjs/server";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const BUCKET_NAME = process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
 
@@ -72,32 +72,4 @@ export async function POST(req) {
     });
     const url = await getSignedUrl(s3, command, { expiresIn: 60 * 5 }); // 5 minutes
     return NextResponse.json({ url, key });
-}
-
-export async function DELETE(req) {
-    try {
-        const { userId } = await auth();
-        if (!userId)
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-        const { url } = await req.json();
-
-        if (!url || !isValidUrl(url)) {
-            return NextResponse.json({ error: "No valid model URL provided" }, { status: 400 });
-        }
-
-        const urlObj = new URL(url);
-        const key = urlObj.pathname.startsWith("/") ? urlObj.pathname.slice(1) : urlObj.pathname;
-
-        await s3.send(
-            new DeleteObjectCommand({
-                Bucket: BUCKET_NAME,
-                Key: key,
-            })
-        );
-
-        return NextResponse.json({ success: true });
-    } catch (error) {
-        return NextResponse.json({ error: error.message || "Model delete failed" }, { status: 500 });
-    }
 }

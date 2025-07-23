@@ -5,6 +5,19 @@ import { slugify } from "@/app/api/product/slugify";
 import { auth } from "@clerk/nextjs/server";
 import { sanitizeString, isValidUrl } from "@/utils/validate";
 import { PRINT_CATEGORIES, SHOP_CATEGORIES, PRINT_SUBCATEGORIES, SHOP_SUBCATEGORIES } from "@/lib/categories";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { s3 } from "@/lib/s3";
+
+const BUCKET_NAME = process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
+
+async function deleteS3Object(key) {
+    await s3.send(
+        new DeleteObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: key,
+        })
+    );
+}
 
 async function generateUniqueSlug(baseName) {
     let baseSlug = slugify(baseName);
@@ -128,27 +141,16 @@ export async function PUT(req) {
         const newViewable = body.viewableModel || "";
         const removedViewable = prevViewable && prevViewable !== newViewable ? prevViewable : null;
 
-        // Call delete APIs for removed assets
-        const deleteAsset = async (url, api) => {
-            try {
-                await fetch(api, {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url }),
-                });
-            } catch (err) {
-                console.error(`Failed to delete asset ${url} via ${api}:`, err);
-            }
-        };
-
         for (const img of removedImages) {
-            await deleteAsset(img, `${process.env.NEXT_PUBLIC_BASE_URL}/api/upload/images`);
+            await deleteS3Object(img);
         }
+
         for (const model of removedModels) {
-            await deleteAsset(model, `${process.env.NEXT_PUBLIC_BASE_URL}/api/upload/models`);
+            await deleteS3Object(model);
         }
+
         if (removedViewable) {
-            await deleteAsset(removedViewable, `${process.env.NEXT_PUBLIC_BASE_URL}/api/upload/viewable`);
+            await deleteS3Object(removedViewable);
         }
 
         const requiredFields = [
@@ -221,6 +223,7 @@ export async function GET(req) {
     try {
         await connectToDatabase();
         const { searchParams } = new URL(req.url);
+
         const productType = searchParams.get("productType");
         const ids = searchParams.get("ids");
         let productCategory = searchParams.get("productCategory");
@@ -228,24 +231,22 @@ export async function GET(req) {
         const productId = searchParams.get("productId");
         const slug = searchParams.get("slug");
         const creatorUserId = searchParams.get("creatorUserId");
+        const fields = searchParams.get("fields"); // comma-separated string
 
         let filter = {};
 
         if (slug) {
-            const product = await Product.findOne({ slug }).lean();
+            const projection = fields ? fields.split(",").map(f => f.trim()).join(" ") : undefined;
+            const product = await Product.findOne({ slug }).select(projection).lean();
             return NextResponse.json({ product: product || null }, { status: 200 });
         }
 
-        if (productType) {
-            filter.productType = productType;
-        }
+        if (productType) filter.productType = productType;
 
         if (productCategory && isNaN(Number(productCategory))) {
-            if (productType === "shop") {
-                productCategory = SHOP_CATEGORIES.findIndex(cat => cat === productCategory);
-            } else if (productType === "print") {
-                productCategory = PRINT_CATEGORIES.findIndex(cat => cat === productCategory);
-            }
+            productCategory = productType === "shop"
+                ? SHOP_CATEGORIES.findIndex(cat => cat === productCategory)
+                : PRINT_CATEGORIES.findIndex(cat => cat === productCategory);
         }
 
         if (
@@ -254,23 +255,17 @@ export async function GET(req) {
             productCategory !== null &&
             productCategory !== -1
         ) {
-            if (productType === "shop") {
-                productSubCategory = SHOP_SUBCATEGORIES[productCategory]?.findIndex(sub => sub === productSubCategory);
-            } else if (productType === "print") {
-                productSubCategory = PRINT_SUBCATEGORIES[productCategory]?.findIndex(sub => sub === productSubCategory);
-            }
+            productSubCategory = productType === "shop"
+                ? SHOP_SUBCATEGORIES[productCategory]?.findIndex(sub => sub === productSubCategory)
+                : PRINT_SUBCATEGORIES[productCategory]?.findIndex(sub => sub === productSubCategory);
         }
 
         if (ids) {
             const idArr = ids.split(",").map(id => id.trim()).filter(Boolean);
-            if (idArr.length > 0) {
-                filter._id = { $in: idArr };
-            }
+            if (idArr.length > 0) filter._id = { $in: idArr };
         }
-
-        if (productId) {
-            filter._id = productId;
-        }
+        if (productId) filter._id = productId;
+        if (creatorUserId) filter.creatorUserId = creatorUserId;
 
         if (
             productCategory !== undefined &&
@@ -301,11 +296,9 @@ export async function GET(req) {
             return NextResponse.json({ error: "Missing productCategory or productSubCategory" }, { status: 400 });
         }
 
-        if (creatorUserId) {
-            filter.creatorUserId = creatorUserId;
-        }
+        const projection = fields ? fields.split(",").map(f => f.trim()).join(" ") : undefined;
 
-        const products = await Product.find(filter).lean();
+        const products = await Product.find(filter).select(projection).lean();
 
         if (productId) {
             return NextResponse.json({ product: products[0] || null }, { status: 200 });
@@ -341,39 +334,15 @@ export async function DELETE(req) {
         }
 
         for (const img of product.images || []) {
-            try {
-                await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/upload/images`, {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url: `${process.env.NEXT_PUBLIC_BASE_URL}/${img}` }),
-                });
-            } catch (err) {
-                console.error(`Failed to delete image ${img}:`, err);
-            }
+            await deleteS3Object(img);
         }
 
         for (const model of product.paidAssets || []) {
-            try {
-                await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/upload/models`, {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url: `${process.env.NEXT_PUBLIC_BASE_URL}/${model}` }),
-                });
-            } catch (err) {
-                console.error(`Failed to delete model ${model}:`, err);
-            }
+            await deleteS3Object(model);
         }
 
         if (product.viewableModel) {
-            try {
-                await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/upload/viewable`, {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url: `${process.env.NEXT_PUBLIC_BASE_URL}/${product.viewableModel}` }),
-                });
-            } catch (err) {
-                console.error(`Failed to delete viewable model ${product.viewableModel}:`, err);
-            }
+            await deleteS3Object(product.viewableModel);
         }
 
         await Product.findByIdAndDelete(productId);

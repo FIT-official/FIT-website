@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { s3 } from "@/lib/s3";
 import sharp from "sharp";
-import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { auth } from "@clerk/nextjs/server";
-import { isValidUrl } from "@/utils/validate";
 
 const BUCKET_NAME = process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
 
@@ -69,33 +68,5 @@ export async function POST(req) {
     return NextResponse.json({ files: filenames });
   } catch (error) {
     return NextResponse.json({ error: error.message || "Image upload failed" }, { status: 500 });
-  }
-}
-
-export async function DELETE(req) {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const { url } = await req.json();
-    if (!url || !isValidUrl(url)) {
-      return NextResponse.json({ error: "No valid image URL provided" }, { status: 400 });
-    }
-
-    // Extract the S3 key from the URL
-    const urlObj = new URL(url);
-    const key = urlObj.pathname.startsWith("/") ? urlObj.pathname.slice(1) : urlObj.pathname;
-
-    await s3.send(
-      new DeleteObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: key,
-      })
-    );
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: error.message || "Image delete failed" }, { status: 500 });
   }
 }

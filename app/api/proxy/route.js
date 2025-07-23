@@ -2,13 +2,16 @@ import { NextResponse } from "next/server";
 import { s3 } from "@/lib/s3";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { auth } from "@clerk/nextjs/server";
+import { sanitizeString } from "@/utils/validate";
 
 export async function GET(req) {
     const { searchParams } = new URL(req.url);
-    const key = searchParams.get("key");
+    const key = sanitizeString(searchParams.get("key"));
     const download = searchParams.get("download");
 
-    if (!key) return new NextResponse("Missing key", { status: 400 });
+    if (!key || key.includes("..") || key.startsWith("http") || !key.trim()) {
+        return new NextResponse("Missing or invalid key", { status: 400 });
+    }
 
     if (download) {
         const { userId } = await auth();

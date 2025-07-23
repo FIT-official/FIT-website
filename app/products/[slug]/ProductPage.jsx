@@ -3,7 +3,6 @@ import { useUser } from '@clerk/nextjs';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { GoChevronLeft, GoChevronRight, GoDownload, GoPlus, GoStar, GoStarFill } from 'react-icons/go';
-import { getExtension, getGlbModel } from './helpers';
 import Image from 'next/image';
 import { HiCubeTransparent } from 'react-icons/hi';
 import dynamic from 'next/dynamic';
@@ -36,18 +35,20 @@ function ProductPage() {
     const [containerSize, setContainerSize] = useState(0);
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
-
     useEffect(() => {
-        if (containerRef.current) {
-            setContainerSize(containerRef.current.offsetHeight);
-        }
-        const handleResize = () => {
-            if (containerRef.current) {
-                setContainerSize(containerRef.current.offsetHeight);
-            }
+        if (!containerRef.current) return;
+        const updateSize = () => {
+            setContainerSize(containerRef.current.offsetWidth);
+            console.log("Container size updated:", containerRef.current.offsetWidth);
         };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        updateSize();
+        const resizeObserver = new window.ResizeObserver(() => {
+            updateSize();
+        });
+        resizeObserver.observe(containerRef.current);
+        return () => {
+            resizeObserver.disconnect();
+        };
     }, []);
 
     useEffect(() => {
@@ -75,10 +76,17 @@ function ProductPage() {
     useEffect(() => {
         setIsOwnProduct(product?.creatorUserId === user?.id);
         setLiked(!!(product?.likes?.includes?.(user?.id)));
-        setDisplayModelUrl("/api/proxy?key=" + encodeURIComponent(product?.viewableModel) || null);
-        setTotalTabs(product?.images.length + (displayModelUrl ? 1 : 0) || 0);
-        // setTotalAssets(product?.downloadableAssets?.length || 0);
-    }, [product, displayModelUrl, user, isLoaded])
+
+        if (product?.viewableModel) {
+            setDisplayModelUrl("/api/proxy?key=" + encodeURIComponent(product.viewableModel));
+        } else {
+            setDisplayModelUrl(null);
+        }
+
+        const imagesCount = Array.isArray(product?.images) ? product.images.length : 0;
+        const hasViewableModel = !!product?.viewableModel;
+        setTotalTabs(imagesCount + (hasViewableModel ? 1 : 0));
+    }, [product, user, isLoaded])
 
     const handleAddToCart = async (product) => {
         if (isOwnProduct) {
@@ -184,17 +192,19 @@ function ProductPage() {
     const nextTab = () => {
         if (tabIdx < totalTabs - 1) {
             setTabIdx((prev) => (prev + 1));
+            console.log("nextTab", tabIdx);
         }
     }
-
     const prevTab = () => {
         if (tabIdx > 0) {
             setTabIdx((prev) => (prev - 1));
+            console.log("prevTab", tabIdx);
         }
 
     }
     const handleTabClick = (idx) => {
         setCurrentTab(() => {
+            console.log("handleTabClick", idx);
             return idx;
         });
     };
@@ -203,14 +213,13 @@ function ProductPage() {
         <div className='flex w-full flex-col py-20 border-b border-borderColor px-20'>
             <div className='flex lg:flex-row flex-col w-full gap-16'>
                 <div className='flex flex-col lg:flex-2/5 gap-4'>
-                    <div className='flex w-full overflow-hidden aspect-square'>
+                    <div className='flex w-full overflow-hidden aspect-square' ref={containerRef}>
                         <div
                             className='flex h-full flex-row'
                             style={{
                                 transform: `translateX(-${currentTab * containerSize}px)`,
                                 transition: 'transform 0.3s ease-in-out'
                             }}
-                            ref={containerRef}
                         >
                             {displayModelUrl && displayModelUrl !== "/api/proxy?key=null" && (
                                 <div className='relative flex aspect-square h-full bg-borderColor/20'>
@@ -222,7 +231,7 @@ function ProductPage() {
                             {product?.images?.map((image, idx) => (
                                 <div key={idx} className='flex aspect-square h-full'>
                                     <Image
-                                        src={`/api/proxy?key=${encodeURIComponent(product.images[idx])}`}
+                                        src={`/api/proxy?key=${encodeURIComponent(image)}`}
                                         alt={`Product Image`}
                                         priority
                                         width={500}
@@ -264,7 +273,7 @@ function ProductPage() {
                                             onClick={() => handleTabClick(idx + (displayModelUrl ? 1 : 0))}
                                         >
                                             <Image
-                                                src={`/api/proxy?key=${encodeURIComponent(product.images[idx])}`}
+                                                src={`/api/proxy?key=${encodeURIComponent(image)}`}
                                                 alt={`Product Image ${idx + 1}`}
                                                 width={100}
                                                 height={100}

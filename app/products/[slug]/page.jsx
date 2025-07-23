@@ -1,6 +1,7 @@
 import ProductPage from "./ProductPage";
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata(props) {
+    const { params } = await props;
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/product?slug=${params.slug}`, {
         cache: 'no-store'
     });

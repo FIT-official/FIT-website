@@ -32,7 +32,6 @@ export async function POST(req) {
         // console.log("Connected to database");
 
         const user = await User.findOne({ userId });
-        // console.log("Fetched user:", user);
         const client = await clerkClient();
         const userObj = await client.users.getUser(userId);
         // console.log("Fetched Clerk user:", userObj);
