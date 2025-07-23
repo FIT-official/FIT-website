@@ -259,12 +259,14 @@ function Cart() {
                                         {/* price */}
                                         <div className='flex flex-col justify-center items-end font-semibold md:text-sm text-base'>
                                             {(async () => {
+                                                const price = product.price.presentmentAmount;
+                                                const currency = product.price.presentmentCurrency;
                                                 const discountedPrice =
                                                     getDiscountedPrice(product);
 
-                                                const convertedPrice = await convertToGlobalCurrency(product.price?.presentmentAmount, product.price?.presentmentCurrency, globalCurrency);
+                                                const convertedPrice = await convertToGlobalCurrency(price, currency, globalCurrency);
                                                 const convertedDiscountedPrice = discountedPrice
-                                                    ? await convertToGlobalCurrency(discountedPrice.amount, discountedPrice.currency, globalCurrency)
+                                                    ? await convertToGlobalCurrency(discountedPrice, currency, globalCurrency)
                                                     : null;
 
                                                 return (
