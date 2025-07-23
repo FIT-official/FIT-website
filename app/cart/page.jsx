@@ -18,31 +18,12 @@ function Cart() {
     const [cart, setCart] = useState([]);
     const [cartBreakdown, setCartBreakdown] = useState([]);
     const [products, setProducts] = useState({});
+    const [convertedPrices, setConvertedPrices] = useState({});
     const [loading, setLoading] = useState(true);
     const searchParams = useSearchParams();
     const redirectUrl = searchParams.get("redirect") || "/";
     const { showToast } = useToast();
     const globalCurrency = useCurrency();
-
-    useEffect(() => {
-        if (!isLoaded || !user) return;
-        const fetchCart = async () => {
-            setLoading(true);
-            const res = await fetch(`/api/user/cart`);
-            const data = await res.json();
-            setCart(data.cart || []);
-            const productIds = (data.cart || []).map(item => item.productId);
-            if (productIds.length) {
-                const res2 = await fetch(`/api/product?ids=${productIds.join(",")}`);
-                const data2 = await res2.json();
-                const prodMap = {};
-                (data2.products || []).forEach(p => { prodMap[p._id] = p; });
-                setProducts(prodMap);
-            }
-            setLoading(false);
-        };
-        fetchCart();
-    }, [isLoaded, user]);
 
     const refreshCartBreakdown = async () => {
         setLoading(true);
@@ -59,8 +40,69 @@ function Cart() {
     };
 
     useEffect(() => {
-        refreshCartBreakdown();
-    }, []);
+        if (!isLoaded || !user) return;
+        const fetchCart = async () => {
+            setLoading(true);
+            const res = await fetch(`/api/user/cart`);
+            const data = await res.json();
+            setCart(data.cart || []);
+            const productIds = (data.cart || []).map(item => item.productId);
+            if (productIds.length > 0) {
+                const res2 = await fetch(`/api/product?ids=${productIds.join(",")}`);
+                const data2 = await res2.json();
+                const prodMap = {};
+                (data2.products || []).forEach(p => { prodMap[p._id] = p; });
+                setProducts(prodMap);
+            }
+            setLoading(false);
+            // Fetch cart breakdown after loading cart
+            if (data.cart && data.cart.length > 0) {
+                refreshCartBreakdown();
+            }
+        };
+        fetchCart();
+    }, [isLoaded, user]);
+
+    // Calculate converted prices when products or currency changes
+    useEffect(() => {
+        const calculateConvertedPrices = async () => {
+            const newConvertedPrices = {};
+
+            for (const productId of Object.keys(products)) {
+                const product = products[productId];
+                const price = product.price.presentmentAmount;
+                const currency = product.price.presentmentCurrency;
+                const discountedPrice = getDiscountedPrice(product);
+
+                try {
+                    const convertedPrice = await convertToGlobalCurrency(price, currency, globalCurrency);
+                    const convertedDiscountedPrice = discountedPrice
+                        ? await convertToGlobalCurrency(discountedPrice, currency, globalCurrency)
+                        : null;
+
+                    newConvertedPrices[productId] = {
+                        price: convertedPrice,
+                        discountedPrice: convertedDiscountedPrice,
+                        currency: globalCurrency
+                    };
+                } catch (error) {
+                    console.error('Error converting price for product', productId, error);
+                    // Fallback to original price
+                    newConvertedPrices[productId] = {
+                        price: price,
+                        discountedPrice: discountedPrice,
+                        currency: currency
+                    };
+                }
+            }
+
+            setConvertedPrices(newConvertedPrices);
+        };
+
+        if (Object.keys(products).length > 0 && globalCurrency) {
+            calculateConvertedPrices();
+        }
+    }, [products, globalCurrency]);
 
     const handleDeliveryChange = async (cartItem, newType) => {
         setLoading(true);
@@ -78,7 +120,7 @@ function Cart() {
             const cartRes = await fetch(`/api/user/cart`);
             const cartData = await cartRes.json();
             setCart(cartData.cart || []);
-            await refreshCartBreakdown();
+            refreshCartBreakdown();
         }
     };
 
@@ -99,6 +141,7 @@ function Cart() {
                     !(item.productId === cartItem.productId && item.variantId === cartItem.variantId)
                 )
             );
+            refreshCartBreakdown();
         }
     };
 
@@ -128,13 +171,12 @@ function Cart() {
                             : item
                     )
                 );
-                await refreshCartBreakdown();
+                refreshCartBreakdown();
             }
         } else if (delta === -1) {
             if (cartItem.quantity <= 1) {
                 await handleRemove(cartItem);
                 setLoading(false);
-                await refreshCartBreakdown();
                 return;
             }
             const res = await fetch("/api/user/cart", {
@@ -160,7 +202,7 @@ function Cart() {
                             : item
                     )
                 );
-                await refreshCartBreakdown();
+                refreshCartBreakdown();
             }
         }
     };
@@ -258,23 +300,51 @@ function Cart() {
 
                                         {/* price */}
                                         <div className='flex flex-col justify-center items-end font-semibold md:text-sm text-base'>
-                                            {(async () => {
-                                                const price = product.price.presentmentAmount;
-                                                const currency = product.price.presentmentCurrency;
-                                                const discountedPrice =
-                                                    getDiscountedPrice(product);
+                                            {(() => {
+                                                const convertedPriceData = convertedPrices[product._id];
+                                                if (!convertedPriceData) {
+                                                    // Fallback to original price if conversion not ready
+                                                    const price = product.price.presentmentAmount;
+                                                    const currency = product.price.presentmentCurrency;
+                                                    const discountedPrice = getDiscountedPrice(product);
 
-                                                const convertedPrice = await convertToGlobalCurrency(price, currency, globalCurrency);
-                                                const convertedDiscountedPrice = discountedPrice
-                                                    ? await convertToGlobalCurrency(discountedPrice, currency, globalCurrency)
-                                                    : null;
+                                                    return (
+                                                        <>
+                                                            {discountedPrice ? (
+                                                                <>
+                                                                    <span className="font-bold">
+                                                                        {currency} {Number(discountedPrice * cartItem.quantity).toFixed(2)}
+                                                                    </span>
+                                                                    <div className="text-xs text-extraLight md:text-[10px]font-semibold">
+                                                                        {product.discount.percentage}% off!
+                                                                    </div>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <span>
+                                                                        {currency} {Number(price * cartItem.quantity).toFixed(2)}
+                                                                    </span>
+                                                                </>
+                                                            )}
+                                                            <div className='text-xs md:text-[10px] text-lightColor font-medium'>
+                                                                {currency} {discountedPrice
+                                                                    ? Number(discountedPrice).toFixed(2)
+                                                                    : Number(price).toFixed(2)
+                                                                } per unit
+                                                            </div>
+                                                        </>
+                                                    );
+                                                }
+
+                                                const { price: convertedPrice, discountedPrice: convertedDiscountedPrice, currency } = convertedPriceData;
+                                                const hasDiscount = convertedDiscountedPrice !== null;
 
                                                 return (
                                                     <>
-                                                        {discountedPrice ? (
+                                                        {hasDiscount ? (
                                                             <>
                                                                 <span className="font-bold">
-                                                                    {globalCurrency} {Number(convertedDiscountedPrice * quantity).toFixed(2)}
+                                                                    {currency} {Number(convertedDiscountedPrice * cartItem.quantity).toFixed(2)}
                                                                 </span>
                                                                 <div className="text-xs text-extraLight md:text-[10px]font-semibold">
                                                                     {product.discount.percentage}% off!
@@ -283,13 +353,13 @@ function Cart() {
                                                         ) : (
                                                             <>
                                                                 <span>
-                                                                    {globalCurrency} {Number(convertedPrice * quantity).toFixed(2)}
+                                                                    {currency} {Number(convertedPrice * cartItem.quantity).toFixed(2)}
                                                                 </span>
                                                             </>
                                                         )}
                                                         {/* Per-unit price below */}
                                                         <div className='text-xs md:text-[10px] text-lightColor font-medium'>
-                                                            {globalCurrency} {discountedPrice
+                                                            {currency} {hasDiscount
                                                                 ? Number(convertedDiscountedPrice).toFixed(2)
                                                                 : Number(convertedPrice).toFixed(2)
                                                             } per unit

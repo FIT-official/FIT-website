@@ -27,7 +27,7 @@ export async function GET(req) {
         const user = await User.findOne({ userId });
         const address = user.contact?.address;
         if (!address || !address.country) {
-            console.error("Missing delivery address for user:", userId);
+            console.error("Missing delivery address for user");
             return NextResponse.json({ error: "Missing delivery address" }, { status: 400 });
         }
 
