@@ -388,50 +388,38 @@ function Cart() {
                         ) : cartBreakdown.length === 0 ? (
                             <div className="text-lightColor text-xs mb-4">No items in cart. Did you forget to update your delivery address?</div>
                         ) : (
-                            <div className="flex flex-col divide-y divide-borderColor text-xs">
-                                <div className="flex justify-between font-normal text-lightColor gap-20 py-2">
-                                    <span>
-                                        Subtotal
-                                    </span>
-                                    <span className='font-medium text-textColor text-right'>
-                                        {cartBreakdown.length > 0
-                                            ? (() => {
-                                                const total = cartBreakdown.reduce((sum, item) => sum + (item.price || 0), 0);
-                                                return `${"SGD " + total.toFixed(2)}`;
-                                            })()
-                                            : "0.00"
-                                        }
-                                    </span>
-                                </div>
-                                {cartBreakdown.map((item, idx) => (
-
-                                    <div key={idx} className="flex justify-between font-normal text-lightColor gap-20 py-2">
-                                        <span>
-                                            {item.chosenDeliveryType === "digital" ? "Digital Delivery" : "Delivery Fee"} for <span>{item.name}</span>
-                                            {item.chosenDeliveryType ? ` (${item.chosenDeliveryType})` : ""}
-                                        </span>
-                                        <span className='font-medium text-textColor text-right'>
-                                            {"SGD " + item.deliveryFee?.toFixed(2) ?? "0.00"}
-                                        </span>
+                            (() => {
+                                // Subtotal: sum of all product prices × quantity
+                                const subtotal = cartBreakdown.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+                                // Delivery fees: sum of all deliveryFee
+                                const totalDeliveryFee = cartBreakdown.reduce((sum, item) => sum + (item.deliveryFee || 0), 0);
+                                // Grand total: subtotal + totalDeliveryFee
+                                const grandTotal = subtotal + totalDeliveryFee;
+                                const currency = cartBreakdown[0]?.currency || 'SGD';
+                                return (
+                                    <div className="flex flex-col divide-y divide-borderColor text-xs">
+                                        <div className="flex justify-between font-normal text-lightColor gap-20 py-2">
+                                            <span>Subtotal</span>
+                                            <span className='font-medium text-textColor text-right'>{`${currency} ${subtotal.toFixed(2)}`}</span>
+                                        </div>
+                                        {cartBreakdown.map((item, idx) => (
+                                            <div key={idx} className="flex justify-between font-normal text-lightColor gap-20 py-2">
+                                                <span>
+                                                    {item.chosenDeliveryType === "digital" ? "Digital Delivery" : "Delivery Fee"} for <span>{item.name}</span>
+                                                    {item.chosenDeliveryType ? ` (${item.chosenDeliveryType})` : ""}
+                                                </span>
+                                                <span className='font-medium text-textColor text-right'>
+                                                    {`${currency} ${item.deliveryFee?.toFixed(2) ?? "0.00"}`}
+                                                </span>
+                                            </div>
+                                        ))}
+                                        <div className='py-2 flex justify-between font-bold mt-2 w-full whitespace-nowrap'>
+                                            <span>Grand Total</span>
+                                            <span className='text-right'>{`${currency} ${grandTotal.toFixed(2)}`}</span>
+                                        </div>
                                     </div>
-
-                                ))}
-                                <div className='py-2 flex justify-between font-bold mt-2 w-full whitespace-nowrap'>
-                                    <span>
-                                        Grand Total
-                                    </span>
-                                    <span className='text-right'>
-                                        {cartBreakdown.length > 0
-                                            ? (() => {
-                                                const currency = cartBreakdown[0]?.currency || 'SGD';
-                                                const total = cartBreakdown.reduce((sum, item) => sum + (item.total || 0), 0);
-                                                return `${currency} ${total.toFixed(2)}`;
-                                            })()
-                                            : "0.00"
-                                        }
-                                    </span>
-                                </div>
-                            </div>
+                                );
+                            })()
                         )}
                         <Link
                             href="/checkout"
