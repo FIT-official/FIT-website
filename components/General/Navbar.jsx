@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import Logo from '../Logo'
-import { SignOutButton, SignInButton, useUser, SignUpButton } from '@clerk/nextjs'
+import { SignOutButton, useUser, SignUpButton } from '@clerk/nextjs'
 import Image from 'next/image'
 import { FcMenu } from "react-icons/fc";
 import { useState } from 'react'
@@ -139,7 +139,6 @@ function Navbar() {
                             </Link>
                         </div>
                         <div className='flex flex-col w-full items-start'>
-
                             <div className='flex w-full text-lg font-semibold overflow-hidden'>
                                 {!isLoaded
                                     ? (<div className='block h-6 animate-pulse bg-lightColor' />)

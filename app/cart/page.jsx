@@ -286,7 +286,7 @@ function Cart() {
                                                         )}
                                                         {/* Per-unit price below */}
                                                         <div className='text-xs md:text-[10px] text-lightColor font-medium'>
-                                                            {unitCurrency} {hasDiscount
+                                                            {unitCurrency} {discountedPrice
                                                                 ? Number(convertedDiscountedPrice).toFixed(2)
                                                                 : Number(convertedUnitPrice).toFixed(2)
                                                             } per unit
