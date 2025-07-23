@@ -5,7 +5,6 @@ import { OrbitControls, Stage } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { useLoader } from "@react-three/fiber";
 import * as THREE from "three";
-import { Perf } from "r3f-perf";
 
 function ModelContent({ url }) {
     const glb = useLoader(GLTFLoader, url);

@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server'
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const handler = createWebhooksHandler({
+    secret: process.env.CLERK_WEBHOOK_SECRET,
     onUserCreated: async (user) => {
         try {
             const { cardToken, priceId, basedIn, business_type } = user.unsafe_metadata
@@ -54,7 +55,7 @@ const handler = createWebhooksHandler({
                 },
             })
         } catch (error) {
-            console.error('Stripe webhook error:', error)
+            console.error('Clerk webhook error:', error)
         }
     },
 })
