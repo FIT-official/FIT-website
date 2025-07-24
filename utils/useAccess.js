@@ -25,7 +25,9 @@ export default function useAccess() {
                     priceId = subData.priceId;
                 }
 
-                if ((priceId) || role === "admin") {
+                // Only allow if priceId is a non-empty string (not null/undefined/empty) or role is exactly 'admin'
+                const hasValidSub = typeof priceId === 'string' && priceId.trim().length > 0;
+                if (hasValidSub || role === "admin") {
                     setCanAccess(true);
                 } else {
                     setCanAccess(false);
