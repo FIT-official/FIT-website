@@ -1,7 +1,7 @@
 'use client'
 
 import EditProduct from "./EditProduct";
-import Fallback from "./Fallback";
+import Fallback from "@/app/dashboard/Fallback";
 import useAccess from "@/utils/useAccess";
 
 function EditProductPage() {
