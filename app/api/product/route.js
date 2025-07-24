@@ -62,6 +62,8 @@ export async function POST(req) {
             return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
         }
 
+        let userRole = "user";
+
         const client = await clerkClient()
         const userObj = await client.users.getUser(userId)
         if (userObj && userObj.publicMetadata && userObj.publicMetadata.role) {
@@ -185,6 +187,7 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
         }
 
+        let userRole = "user";
         const client = await clerkClient()
         const userObj = await client.users.getUser(userId)
         if (userObj && userObj.publicMetadata && userObj.publicMetadata.role) {
