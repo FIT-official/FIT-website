@@ -64,7 +64,7 @@ function MyProducts() {
     };
 
     return (
-        <div className='flex w-full flex-col h-[92vh] py-20 border-b border-borderColor px-8'>
+        <div className='flex w-full flex-col min-h-[92vh] py-20 border-b border-borderColor px-8'>
             <div className='flex w-full items-end justify-between'>
                 <h1>Products</h1>
                 <Link href='/dashboard/products/create' className='border border-borderColor rounded-sm font-normal flex items-center py-1 pl-4 pr-2 text-sm'>
@@ -72,7 +72,7 @@ function MyProducts() {
                     <GoPlus className='ml-2' />
                 </Link>
             </div>
-            <div className='flex flex-col mt-4 w-full h-full'>
+            <div className='flex flex-col mt-4 w-full'>
                 <div className='flex justify-between w-full border border-borderColor p-2 rounded-sm bg-baseColor'>
                     <input
                         className='flex w-full px-2 focus:outline-none font-normal text-sm'
@@ -89,8 +89,8 @@ function MyProducts() {
                         </div>
                     </div> */}
                 </div>
-                <div className='flex flex-col w-full h-full mt-4 rounded-sm gap-2'>
-                    <div className='flex w-full h-fit px-4 py-2 uppercase font-medium text-sm bg-borderColor/40 divide-x gap-4 divide-borderColor items-center text-xs'>
+                <div className='flex flex-col w-full mt-4 rounded-sm gap-2'>
+                    <div className='flex w-full h-fit px-4 py-2 uppercase font-medium bg-borderColor/40 divide-x gap-4 divide-borderColor items-center text-xs'>
                         <div className='flex flex-2/3 items-center justify-between pr-4'>
                             Title
                             <div className='flex items-center'>
