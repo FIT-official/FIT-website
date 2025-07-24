@@ -80,10 +80,10 @@ function SubscriptionDetails() {
                 {step === 'tier_selection' && (
                     <>
                         <div className="flex flex-col gap-2 w-full">
-                            <Tier value="price_1RYmL7Q8qkF9EYSx0qQSc8zE" priceId={priceId} setPriceId={setPriceId} />
-                            <Tier value="price_1RYmMAQ8qkF9EYSxkjocLoII" priceId={priceId} setPriceId={setPriceId} />
-                            <Tier value="price_1RYmMwQ8qkF9EYSxJskJvmYC" priceId={priceId} setPriceId={setPriceId} />
-                            <Tier value="price_1RYmNXQ8qkF9EYSxFGHrQ4ZB" priceId={priceId} setPriceId={setPriceId} />
+                            <Tier value="price_1RoLEqL8rcZaPQbIbEJFpb8w" priceId={priceId} setPriceId={setPriceId} />
+                            <Tier value="price_1RoLFaL8rcZaPQbIkidotx2y" priceId={priceId} setPriceId={setPriceId} />
+                            <Tier value="price_1RoLGsL8rcZaPQbIMgKmvF5q" priceId={priceId} setPriceId={setPriceId} />
+                            <Tier value="price_1RoLJEL8rcZaPQbIhoVl8diR" priceId={priceId} setPriceId={setPriceId} />
                             <Tier value="" priceId={priceId} setPriceId={setPriceId} />
                         </div>
                         <button
