@@ -1,13 +1,28 @@
-'use client'
+import CreateProduct from "./CreateProduct";
 
-import ProductForm from "@/components/DashboardComponents/ProductForm"
+export const metadata = {
+    title: "Create Product | Fix It Today®",
+    description: "Create a new product with Fix It Today®",
+    openGraph: {
+        title: "Create Product | Fix It Today®",
+        description: "Create a new product with Fix It Today®",
+        url: "https://fixitoday.com/dashboard/products/create",
+        siteName: "Fix It Today®",
+        images: [
+            {
+                url: "/fitogimage.png",
+                width: 800,
+                height: 800,
+                alt: "Fix It Today® Photo",
+            },
+        ],
+        locale: "en_SG",
+        type: "website",
+    },
+};
 
-function CreateProduct() {
-    return (
-        <div className='flex w-full flex-col py-20 border-b border-borderColor px-8 md:px-16'>
-            <ProductForm mode="Create" />
-        </div>
-    )
+function CreateProductLayout() {
+    return <CreateProduct />;
 }
 
-export default CreateProduct
+export default CreateProductLayout;

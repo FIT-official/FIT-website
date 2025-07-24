@@ -16,6 +16,23 @@ const inter = Inter({
 export const metadata = {
   title: "Fix It Today® | Home",
   description: "We are a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration. We offer a comprehensive suite of services including 3D printing, printer maintenance, filament supply, and electronics sourcing.",
+  openGraph: {
+    title: "Fix It Today® | Home",
+    description:
+      "We are a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration.",
+    url: "https://fixitoday.com",
+    siteName: "Fix It Today®",
+    images: [
+      {
+        url: "/fitogimage.png",
+        width: 800,
+        height: 800,
+        alt: "Fix It Today® Photo",
+      },
+    ],
+    locale: "en_SG",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }) {

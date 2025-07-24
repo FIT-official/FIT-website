@@ -6,11 +6,11 @@ const isOnboardingRoute = createRouteMatcher(['/onboarding'])
 
 export default clerkMiddleware(async (auth, req) => {
     const { userId, sessionClaims, redirectToSignIn } = await auth()
-    const dashboardUrl = new URL('/dashboard', req.url)
+    const homeUrl = new URL('/', req.url)
 
-    // for users who finished onboarding, redirect to dashboard
+    // for users who finished onboarding, redirect to home
     if (userId && isOnboardingRoute(req) && sessionClaims?.metadata?.onboardingComplete) {
-        return NextResponse.redirect(dashboardUrl)
+        return NextResponse.redirect(homeUrl)
     }
 
     // for users visiting /onboarding to complete, don't try to redirect

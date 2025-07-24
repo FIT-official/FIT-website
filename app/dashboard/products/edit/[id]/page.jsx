@@ -1,45 +1,28 @@
-'use client';
-import ProductForm from "@/components/DashboardComponents/ProductForm";
-import { useUser } from "@clerk/nextjs";
-import { useRouter, useParams } from "next/navigation"
-import { useEffect, useState } from "react";
+import EditProductPage from "./EditProductPage";
 
-function EditProduct() {
-    const { user, isLoading } = useUser();
-    const params = useParams();
-    const productId = params.id;
-    const [productToEdit, setProductToEdit] = useState(null);
-    const router = useRouter();
+export const metadata = {
+    title: "Edit Product | Fix It Today®",
+    description: "Edit your product details with Fix It Today®",
+    openGraph: {
+        title: "Edit Product | Fix It Today®",
+        description: "Edit your product details with Fix It Today®",
+        url: "https://fixitoday.com/dashboard/products/edit/[id]",
+        siteName: "Fix It Today®",
+        images: [
+            {
+                url: "/fitogimage.png",
+                width: 800,
+                height: 800,
+                alt: "Fix It Today® Photo",
+            },
+        ],
+        locale: "en_SG",
+        type: "website",
+    },
+};
 
-    useEffect(() => {
-        if (!user || isLoading) return;
-
-        if (!productId) {
-            router.push('/dashboard/products');
-            return;
-        }
-
-        const fetchProduct = async () => {
-            const res = await fetch(`/api/product?ids=${productId}`);
-            const data = await res.json();
-            if (data.products && data.products.length > 0) {
-                setProductToEdit(data.products[0]);
-            } else {
-                console.error('Product not found');
-            }
-        };
-
-        fetchProduct();
-    }, [productId, user, isLoading, router]);
-
-    return (
-        <div className='flex w-full flex-col py-20 border-b border-borderColor px-8 md:px-16'>
-            <ProductForm
-                mode="Edit"
-                product={productToEdit}
-            />
-        </div>
-    )
+function EditProductLayout() {
+    return <EditProductPage />;
 }
 
-export default EditProduct
+export default EditProductLayout;

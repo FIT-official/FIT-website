@@ -40,6 +40,7 @@ export async function GET(req) {
             days_until_due: subscription.days_until_due,
             trial_end: subscription.trial_end,
             pending_update_expiry: subscription.pending_update ? subscription.pending_update.expires_at : null,
+            role: user.publicMetadata.role || "user",
         });
 
     } catch (error) {

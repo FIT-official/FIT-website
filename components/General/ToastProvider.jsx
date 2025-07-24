@@ -12,7 +12,7 @@ export function useToast() {
 export function ToastProvider({ children }) {
     const [toast, setToast] = useState(null);
 
-    const showToast = useCallback((message, type = 'success', duration = 3000) => {
+    const showToast = useCallback((message, type = 'success', duration = 5000) => {
         setToast({ message, type });
         setTimeout(() => setToast(null), duration);
     }, []);

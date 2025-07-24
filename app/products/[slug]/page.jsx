@@ -11,6 +11,22 @@ export async function generateMetadata(props) {
     return {
         title: `${product?.name || "Product"} | Fix It Today®`,
         description: product?.description || "Browse and purchase products from Fix It Today®",
+        openGraph: {
+            title: `${product?.name || "Product"} | Fix It Today®`,
+            description: product?.description || "Browse and purchase products from Fix It Today®",
+            url: `https://fixitoday.com/products/${params.slug}`,
+            siteName: "Fix It Today®",
+            images: [
+                {
+                    url: product?.image || "/fitogimage.png",
+                    width: 800,
+                    height: 800,
+                    alt: product?.name || "Fix It Today® Photo",
+                },
+            ],
+            locale: "en_SG",
+            type: "website",
+        },
     };
 }
 

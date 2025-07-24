@@ -1,5 +1,26 @@
 import Link from 'next/link'
 
+export const metadata = {
+    title: "Creators | Fix It Today®",
+    description: "Browse creator subscription packages at Fix It Today®",
+    openGraph: {
+        title: "Creators | Fix It Today®",
+        description: "Browse creator subscription packages at Fix It Today®",
+        url: "https://fixitoday.com/creators",
+        siteName: "Fix It Today®",
+        images: [
+            {
+                url: "/fitogimage.png",
+                width: 800,
+                height: 800,
+                alt: "Fix It Today® Photo",
+            },
+        ],
+        locale: "en_SG",
+        type: "website",
+    },
+};
+
 function Creators() {
     return (
         <div className="min-h-[92vh] flex flex-col items-center p-12 border-b border-borderColor justify-center">

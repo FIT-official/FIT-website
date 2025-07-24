@@ -62,6 +62,15 @@ export async function POST(req) {
             return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
         }
 
+        const client = await clerkClient()
+        const userObj = await client.users.getUser(user.id)
+        if (userObj && userObj.publicMetadata && userObj.publicMetadata.role) {
+            userRole = userObj.publicMetadata.role;
+        }
+        if (productType === "shop" && userRole !== "admin") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
         if (
             !Array.isArray(body.images) ||
             body.images.some(key => typeof key !== "string" || !key.trim())
@@ -174,6 +183,15 @@ export async function PUT(req) {
 
         if (!["shop", "print"].includes(productType)) {
             return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
+        }
+
+        const client = await clerkClient()
+        const userObj = await client.users.getUser(user.id)
+        if (userObj && userObj.publicMetadata && userObj.publicMetadata.role) {
+            userRole = userObj.publicMetadata.role;
+        }
+        if (productType === "shop" && userRole !== "admin") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
         if (

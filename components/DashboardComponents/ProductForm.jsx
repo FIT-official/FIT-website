@@ -17,6 +17,7 @@ import { BiMinus } from "react-icons/bi";
 import { useToast } from "../General/ToastProvider";
 import { uploadImages, uploadModels, uploadViewable } from "@/utils/uploadHelpers";
 import Link from "next/link";
+import useAccess from "@/utils/useAccess";
 
 function ProductForm({ mode = "Create", product = null }) {
     const { user, isLoaded } = useUser()
@@ -32,6 +33,8 @@ function ProductForm({ mode = "Create", product = null }) {
         return acc;
     }, []);
     const { showToast } = useToast();
+    const { isAdmin } = useAccess();
+
 
     const imageInputRef = useRef(null);
     const modelInputRef = useRef(null);
@@ -42,7 +45,7 @@ function ProductForm({ mode = "Create", product = null }) {
     const [dragActive, setDragActive] = useState(false);
     const [dragViewableModelActive, setDragViewableModelActive] = useState(false);
 
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
     const [openSection, setOpenSection] = useState({
@@ -94,6 +97,18 @@ function ProductForm({ mode = "Create", product = null }) {
     };
 
     const [form, setForm] = useState(product ? { ...defaultForm, ...product } : defaultForm);
+
+    // If not admin, force productType to 'print' and reset category/subcategory if needed
+    useEffect(() => {
+        if (!isAdmin && form.productType !== "print") {
+            setForm(f => ({
+                ...f,
+                productType: "print",
+                category: 0,
+                subcategory: 0
+            }));
+        }
+    }, [isAdmin]);
 
     const categories = form.productType === "shop" ? SHOP_CATEGORIES : PRINT_CATEGORIES
     const subcategories = form.productType === "shop" ? SHOP_SUBCATEGORIES : PRINT_SUBCATEGORIES
@@ -296,7 +311,7 @@ function ProductForm({ mode = "Create", product = null }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!isLoaded) return;
-        setLoading(true);
+        setIsLoading(true);
         let uploadedImages
         let uploadedModels
         let uploadedViewable
@@ -306,8 +321,8 @@ function ProductForm({ mode = "Create", product = null }) {
             uploadedModels = await uploadModels(pendingModels);
             uploadedViewable = await uploadViewable(pendingViewableModel);
         } catch (error) {
-            console.error("Error uploading files:", error);
-            setLoading(false);
+            console.error("Error upisLoading files:", error);
+            setIsLoading(false);
             return;
         }
 
@@ -390,7 +405,7 @@ function ProductForm({ mode = "Create", product = null }) {
                     setPendingImages([]);
                     setPendingModels([]);
                     setPendingViewableModel(null);
-                    setLoading(false);
+                    setIsLoading(false);
                     if (imageInputRef.current) imageInputRef.current.value = "";
                     if (modelInputRef.current) modelInputRef.current.value = "";
                     if (viewableModelInputRef.current) viewableModelInputRef.current.value = "";
@@ -403,7 +418,7 @@ function ProductForm({ mode = "Create", product = null }) {
         } catch (err) {
             showToast("Network error: " + err.message, 'error');
         }
-        setLoading(false);
+        setIsLoading(false);
         window.location.reload()
     }
 
@@ -512,7 +527,7 @@ function ProductForm({ mode = "Create", product = null }) {
                                                     : `/api/proxy?key=${encodeURIComponent(item)}`
                                             }
                                             alt={`Preview ${idx + 1}`}
-                                            loading="lazy"
+                                            isLoading="lazy"
                                             width={80}
                                             height={80}
                                             quality={20}
@@ -552,19 +567,22 @@ function ProductForm({ mode = "Create", product = null }) {
 
                     {/* product type */}
                     <SelectField
-                        onChangeFunction={e =>
+                        onChangeFunction={e => {
+                            const val = e.target.value;
+                            if (val === "shop" && !isAdmin) return; // Prevent non-admin from selecting shop
                             setForm(f => ({
                                 ...f,
-                                productType: e.target.value,
+                                productType: val,
                                 category: 0,
                                 subcategory: 0
-                            }))}
+                            }));
+                        }}
                         value={form.productType}
                         name="productType"
                         label="Product Type"
                         options={[
-                            { value: "shop", label: "Shop" },
-                            { value: "print", label: "Print" }
+                            { value: "print", label: "Print" },
+                            ...(isAdmin ? [{ value: "shop", label: "Shop" }] : [])
                         ]}
                     />
 
@@ -1217,7 +1235,7 @@ function ProductForm({ mode = "Create", product = null }) {
 
             <div className="flex flex-col gap-1 w-full mt-4">
                 <button type="submit" className="formBlackButton w-full">
-                    {loading ? (
+                    {isLoading ? (
                         <>
                             Saving Product
                             <div className='animate-spin ml-3 border-1 border-t-transparent h-3 w-3 rounded-full' />

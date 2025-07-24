@@ -51,7 +51,7 @@ const handler = createWebhooksHandler({
                     stripeCustomerId: customer.id,
                     stripeSubscriptionId: subscription.id,
                     stripeAccountId: account.id,
-                    expressAccountOnboarded: false,
+                    role: 'user', // Default role, can be updated later
                 },
             })
         } catch (error) {
