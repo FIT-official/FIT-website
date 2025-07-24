@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import Product from "@/models/Product";
 import { slugify } from "@/app/api/product/slugify";
-import { auth, clerkClient } from "@clerk/nextjs/server";
-import { sanitizeString, isValidUrl } from "@/utils/validate";
+import { auth } from "@clerk/nextjs/server";
+import { sanitizeString } from "@/utils/validate";
 import { PRINT_CATEGORIES, SHOP_CATEGORIES, PRINT_SUBCATEGORIES, SHOP_SUBCATEGORIES } from "@/lib/categories";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3 } from "@/lib/s3";
@@ -63,7 +63,7 @@ export async function POST(req) {
         }
 
         const client = await clerkClient()
-        const userObj = await client.users.getUser(user.id)
+        const userObj = await client.users.getUser(userId)
         if (userObj && userObj.publicMetadata && userObj.publicMetadata.role) {
             userRole = userObj.publicMetadata.role;
         }
@@ -186,7 +186,7 @@ export async function PUT(req) {
         }
 
         const client = await clerkClient()
-        const userObj = await client.users.getUser(user.id)
+        const userObj = await client.users.getUser(userId)
         if (userObj && userObj.publicMetadata && userObj.publicMetadata.role) {
             userRole = userObj.publicMetadata.role;
         }
