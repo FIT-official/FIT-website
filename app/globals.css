@@ -182,7 +182,7 @@
 }
 
 .dashboardSection {
-  @apply col-span-4 lg:col-span-1 row-span-1 bg-background border border-borderColor flex flex-col rounded-md divide-y divide-borderColor text-sm h-fit;
+  @apply col-span-4 lg:col-span-1 row-span-1 bg-background border border-borderColor flex flex-col rounded-md divide-y divide-borderColor text-sm max-h-[40vh];
 }
 
 

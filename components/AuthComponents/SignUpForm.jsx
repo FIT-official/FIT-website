@@ -13,6 +13,7 @@ import { IoMdLock } from 'react-icons/io'
 import Error from './Error'
 import { useToast } from '../General/ToastProvider'
 import { supportedCountries } from '@/lib/supportedCountries'
+import { STRIPE_PRICE_TIER_1, STRIPE_PRICE_TIER_2, STRIPE_PRICE_TIER_3, STRIPE_PRICE_TIER_4, debugStripeConfig } from '@/lib/stripeConfig'
 
 function SignUpForm({ setVerifying }) {
     const { isLoaded, signUp } = useSignUp()
@@ -35,13 +36,41 @@ function SignUpForm({ setVerifying }) {
 
     async function tokeniseAndContinue(ev) {
         ev.preventDefault()
+        // Debug stripe configuration in development
+        debugStripeConfig();
+
         try {
+            if (!stripe || !elements) {
+                showToast('Payment system not ready. Please try again.', 'error')
+                return
+            }
+
             const cardEl = elements.getElement(CardElement)
-            const res = await stripe?.createToken(cardEl)
-            setCardToken(res?.token?.id || '')
+            if (!cardEl) {
+                showToast('Card input not found. Please enter your card details.', 'error')
+                return
+            }
+
+            const res = await stripe.createToken(cardEl)
+
+            // Handle stripe tokenization errors explicitly
+            if (res?.error) {
+                setCardToken('')
+                showToast(res.error.message || 'Failed to tokenize card', 'error')
+                return
+            }
+
+            if (!res?.token?.id) {
+                setCardToken('')
+                showToast('Failed to tokenize card. Please check your card details.', 'error')
+                return
+            }
+
+            setCardToken(res.token.id)
             setSignUpStage('connect_account')
         } catch (error) {
-            showToast('Error loading card: ' + error, 'error');
+            showToast('Error loading card: ' + (error?.message || error), 'error');
+            setCardToken('')
         }
         return;
     }
@@ -52,42 +81,56 @@ function SignUpForm({ setVerifying }) {
         setLoading(true);
         setError('');
 
+        // If user selected a paid tier, ensure we have a card token
+        if (priceId && priceId !== '' && !cardToken) {
+            showToast('Please enter payment details and continue before completing signup.', 'error')
+            setSignUpStage('payment')
+            setLoading(false)
+            return
+        }
+
         if (signUpMethod === 'google') {
             try {
+                // Build unsafe metadata but only include cardToken if present
+                const unsafeMetadata = {
+                    priceId,
+                    basedIn,
+                    businessType,
+                }
+                if (cardToken) unsafeMetadata.cardToken = cardToken
+
                 signUp.authenticateWithRedirect({
                     strategy: 'oauth_google',
                     redirectUrl: '/sign-up/sso-callback',
                     redirectUrlComplete: '/dashboard',
-                    unsafeMetadata: {
-                        cardToken,
-                        priceId,
-                        basedIn,
-                        businessType,
-                    },
+                    unsafeMetadata,
                 })
             } catch (error) {
-                showToast('Error during sign up via Google: ' + error, 'error');
+                showToast('Error during sign up via Google: ' + (error?.message || error), 'error');
             }
             return
         }
 
         try {
+            // Build unsafe metadata but only include cardToken if present
+            const unsafeMetadata = {
+                priceId,
+                basedIn,
+                businessType,
+            }
+            if (cardToken) unsafeMetadata.cardToken = cardToken
+
             await signUp.create({
                 emailAddress: email,
                 password: password,
-                unsafeMetadata: {
-                    cardToken,
-                    priceId,
-                    basedIn,
-                    businessType,
-                },
+                unsafeMetadata,
             })
 
             await signUp.prepareEmailAddressVerification()
             setVerifying(true)
         } catch (err) {
-            console.error('Error during sign in:', error);
-            setError(error.message || 'An error occurred during sign in');
+            console.error('Error during sign in:', err);
+            setError(err?.message || 'An error occurred during sign in');
         }
         setLoading(false);
     }
@@ -124,10 +167,10 @@ function SignUpForm({ setVerifying }) {
                 <>
                     {/* tier element */}
                     <div className='flex flex-col gap-2 w-full'>
-                        <Tier value="price_1RoLEqL8rcZaPQbIbEJFpb8w" priceId={priceId} setPriceId={setPriceId} />
-                        <Tier value="price_1RoLFaL8rcZaPQbIkidotx2y" priceId={priceId} setPriceId={setPriceId} />
-                        <Tier value="price_1RoLGsL8rcZaPQbIMgKmvF5q" priceId={priceId} setPriceId={setPriceId} />
-                        <Tier value="price_1RoLJEL8rcZaPQbIhoVl8diR" priceId={priceId} setPriceId={setPriceId} />
+                        <Tier value={STRIPE_PRICE_TIER_1()} priceId={priceId} setPriceId={setPriceId} />
+                        <Tier value={STRIPE_PRICE_TIER_2()} priceId={priceId} setPriceId={setPriceId} />
+                        <Tier value={STRIPE_PRICE_TIER_3()} priceId={priceId} setPriceId={setPriceId} />
+                        <Tier value={STRIPE_PRICE_TIER_4()} priceId={priceId} setPriceId={setPriceId} />
                         <Tier value="" priceId={priceId} setPriceId={setPriceId} />
                     </div>
                     <button className='authButton2 gap-2 mt-3' type='button' onClick={determineStageForward}>
@@ -147,7 +190,20 @@ function SignUpForm({ setVerifying }) {
                         <p className='text-sm text-textColor w-full'>
                             This card will be used for automatic billing of your subscription.
                         </p>
-                        <CardElement className='w-full mt-4 px-4 py-2 border border-borderColor rounded-lg' required={priceId !== ''} />
+                        <CardElement
+                            options={{
+                                hidePostalCode: true,
+                                style: {
+                                    base: {
+                                        fontSize: '16px',
+                                        color: '#32325d',
+                                        '::placeholder': { color: '#a0aec0' },
+                                    },
+                                },
+                            }}
+                            className='w-full mt-4 px-4 py-2 border border-borderColor rounded-lg'
+                            required={priceId !== ''}
+                        />
                         <p className='text-xs w-full mt-2 text-center text-lightColor '>
                             You can cancel or change your payment method at anytime.
                         </p>

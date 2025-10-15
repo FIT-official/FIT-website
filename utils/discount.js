@@ -1,5 +1,9 @@
 export function getDiscountedPrice(product) {
     const { discount, price } = product;
+    if (!price || !price.presentmentAmount) {
+        return null;
+    }
+
     if (
         !discount ||
         !discount.percentage ||

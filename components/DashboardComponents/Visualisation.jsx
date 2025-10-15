@@ -125,13 +125,6 @@ function Visualisation({ myProducts }) {
             <div className="flex w-full md:w-fit h-full items-start flex-col gap-2">
                 <div className="flex w-full lg:flex-col flex-row gap-2">
                     <div className="statContainer">
-                        <h3 className="text-sm">Net Volume</h3>
-                        <h1 className="text-2xl lg:text:4xl">
-                            S${grossVolumes.reduce((acc, curr) => (acc + curr.grossVolume) * 0.99, 0).toFixed(2)}
-                        </h1>
-                    </div>
-
-                    <div className="statContainer">
                         <h3 className="text-sm">Gross Volume</h3>
                         <h1 className="text-2xl lg:text:4xl">
                             S${grossVolumes.reduce((acc, curr) => acc + curr.grossVolume, 0).toFixed(2)}

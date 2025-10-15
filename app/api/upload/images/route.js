@@ -21,12 +21,23 @@ export async function POST(req) {
       return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
     }
 
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     const filenames = [];
 
     for (const file of files) {
       // Validate file type
       if (!file.type.startsWith("image/")) {
-        return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
+        return NextResponse.json({
+          error: `File "${file.name}" is not a valid image file. Please upload only image files.`
+        }, { status: 400 });
+      }
+
+      // Validate file size before processing
+      if (file.size > MAX_FILE_SIZE) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        return NextResponse.json({
+          error: `File "${file.name}" is too large (${sizeMB}MB). Maximum file size is 5MB. Please compress your image or choose a smaller file.`
+        }, { status: 400 });
       }
 
       const arrayBuffer = await file.arrayBuffer();
@@ -46,7 +57,10 @@ export async function POST(req) {
         if (compressed.length < 200 * 1024) break;
       }
       if (!compressed || compressed.length >= 200 * 1024) {
-        return NextResponse.json({ error: "Could not compress image below 200KB" }, { status: 400 });
+        const finalSizeKB = compressed ? (compressed.length / 1024).toFixed(1) : 'unknown';
+        return NextResponse.json({
+          error: `Unable to compress "${file.name}" to required size. Final size: ${finalSizeKB}KB (required: <200KB). Please use a smaller or simpler image.`
+        }, { status: 400 });
       }
 
       const ext = "jpg";
@@ -67,6 +81,9 @@ export async function POST(req) {
 
     return NextResponse.json({ files: filenames });
   } catch (error) {
-    return NextResponse.json({ error: error.message || "Image upload failed" }, { status: 500 });
+    console.error("Image upload error:", error);
+    return NextResponse.json({
+      error: error.message || "Image upload failed. Please try again or contact support if the problem persists."
+    }, { status: 500 });
   }
 }

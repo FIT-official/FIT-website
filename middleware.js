@@ -29,8 +29,17 @@ export default clerkMiddleware(async (auth, req) => {
         return NextResponse.redirect(onboardingUrl)
     }
 
-    // if user is authenticated and visiting a private route, allow access
-    if (userId && isPrivateRoute(req)) return NextResponse.next()
+    const signInSignUpRoutes = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)'])
+
+    // Redirect authenticated users away from sign-in and sign-up pages
+    if (userId && signInSignUpRoutes(req)) {
+        return NextResponse.redirect(homeUrl)
+    }
+
+    // Allow authenticated users to access private routes
+    if (userId && isPrivateRoute(req)) {
+        return NextResponse.next()
+    }
 })
 
 

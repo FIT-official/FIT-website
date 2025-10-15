@@ -38,11 +38,12 @@ function ShopPage() {
             let url = "/api/product?productType=shop";
             if (categoryIdx !== null && categoryIdx !== -1) url += `&productCategory=${categoryIdx}`;
             if (subcategoryIdx !== null && subcategoryIdx !== -1) url += `&productSubCategory=${subcategoryIdx}`;
+            url += "&fields=_id,name,images,discount,slug,sales,reviews,variants,likes,creatorUserId,basePrice,variantTypes";
 
             const res = await fetch(url);
             const data = await res.json();
             if (!res.ok) {
-                showToast('Failed to fetch products', 'error'); d
+                showToast('Failed to fetch products', 'error');
             } else {
                 setProducts(data.products);
             }

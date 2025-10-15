@@ -60,15 +60,48 @@ const CartBreakdown = ({ cartBreakdown }) => {
                         {item.name}
                         <span className="flex">x{item.quantity}</span>
                     </div>
-                    <div className="flex flex-col gap-2 text-xs text-lightColor">
-                        Product: S${item.price.toFixed(2)}<br />
-                        Delivery ({item.chosenDeliveryType}): S${item.deliveryFee.toFixed(2)}
-                        {item.chosenDeliveryType === "singpost" && (
-                            <span>
-                                {" "} (Royalty: S${item.royaltyFee.toFixed(2)} + SingPost: S${item.singpostFee.toFixed(2)})
-                            </span>
+                    <div className="flex flex-col gap-1 text-xs text-lightColor mt-1">
+                        {/* Display variant options with fees */}
+                        {item.variantInfo && item.variantInfo.length > 0 && (
+                            <div className="text-textColor">
+                                {item.variantInfo.map((v, i) => (
+                                    <span key={i}>
+                                        {v.option}
+                                        {v.additionalFee > 0 && ` (+S$${v.additionalFee.toFixed(2)})`}
+                                        {i < item.variantInfo.length - 1 && ", "}
+                                    </span>
+                                ))}
+                            </div>
                         )}
-                        <br />
+                        {/* Price breakdown */}
+                        <div className="text-lightColor">
+                            Price: S${item.price.toFixed(2)}
+                            {item.variantInfo && item.variantInfo.length > 0 && (
+                                <span className="ml-1 text-xs">
+                                    (Base: S${item.basePrice.toFixed(2)}
+                                    {item.variantInfo.some(v => v.additionalFee > 0) && (
+                                        <> + S${item.variantInfo.reduce((sum, v) => sum + v.additionalFee, 0).toFixed(2)}</>
+                                    )}
+                                    {item.priceBeforeDiscount > item.price && (
+                                        <> - discount</>
+                                    )}
+                                    )
+                                </span>
+                            )}
+                        </div>
+                        <div className="text-lightColor">
+                            Delivery ({item.chosenDeliveryType}): S${item.deliveryFee.toFixed(2)}
+                            {item.chosenDeliveryType === "singpost" && (
+                                <span>
+                                    {" "}(Royalty: S${item.royaltyFee.toFixed(2)} + SingPost: S${item.singpostFee.toFixed(2)})
+                                </span>
+                            )}
+                        </div>
+                        {item.orderNote && (
+                            <div className="text-xs text-textColor bg-extraLight p-2 rounded mt-2">
+                                <span className="font-medium">Note:</span> {item.orderNote}
+                            </div>
+                        )}
                     </div>
                 </div>
             ))}

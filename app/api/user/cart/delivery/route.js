@@ -11,7 +11,7 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        let { productId, variantId, chosenDeliveryType } = await req.json();
+        let { productId, variantId, chosenDeliveryType, selectedVariants } = await req.json();
 
         productId = sanitizeString(productId);
         variantId = variantId === undefined ? null : sanitizeString(variantId);
@@ -27,10 +27,22 @@ export async function PUT(req) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
+        // Helper function to compare selectedVariants Maps
+        const selectedVariantsMatch = (item1, item2) => {
+            const variants1 = item1.selectedVariants || {};
+            const variants2 = item2.selectedVariants || {};
+            return JSON.stringify(variants1) === JSON.stringify(variants2);
+        };
+
         const cartItem = user.cart.find(
             item =>
                 item.productId === productId &&
-                String(item.variantId || "") === String(variantId || "")
+                (
+                    // For new variant system, compare selectedVariants
+                    (selectedVariants && selectedVariantsMatch(item, { selectedVariants })) ||
+                    // For legacy system, compare variantId
+                    (!selectedVariants && String(item.variantId || "") === String(variantId || ""))
+                )
         );
 
         if (!cartItem) {

@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
+import CheckoutSession from "@/models/CheckoutSession";
 import { calculateCartItemBreakdown } from "../calculateBreakdown";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -57,6 +58,7 @@ export async function POST(req) {
         const updatedCart = [];
         const salesData = {};
         const digitalProductData = {};
+        let totalSessionAmount = 0;
 
         for (const item of user.cart) {
             try {
@@ -64,6 +66,7 @@ export async function POST(req) {
                 const { product } = await fetchProductDetails(item.productId);
                 // console.log("Fetched product details:", product);
 
+                // Use calculateCartItemBreakdown for all pricing calculations
                 const breakdown = await calculateCartItemBreakdown({
                     item,
                     product,
@@ -71,23 +74,29 @@ export async function POST(req) {
                 });
                 // console.log("Breakdown:", breakdown);
 
-                const { price, deliveryFee, quantity, chosenDeliveryType } = breakdown;
+                const { price, deliveryFee, quantity, chosenDeliveryType, basePrice, priceBeforeDiscount, variantInfo, currency } = breakdown;
                 const unit_amount = Math.round(price * 100);
 
-                if (chosenDeliveryType === "digital") {
+                // Add to digitalProductData if product has paid assets (for both digital and print delivery)
+                if (product.paidAssets && product.paidAssets.length > 0) {
                     digitalProductData[item.productId] = {
                         buyer: userId,
-                        productId: item.productId,
                         links: Array.isArray(product.paidAssets) ? product.paidAssets : [],
                     };
+                }
 
+                // Build product name with variant info if available
+                let productName = product.name || "Unknown Product";
+                if (variantInfo && variantInfo.length > 0) {
+                    const variantText = variantInfo.map(v => `${v.option}`).join(", ");
+                    productName = `${productName} (${variantText})`;
                 }
 
                 line_items.push({
                     price_data: {
                         currency: "sgd",
                         product_data: {
-                            name: product.name || "Unknown Product",
+                            name: productName,
                             images: [product.images?.[0] || ""],
                         },
                         unit_amount,
@@ -108,17 +117,45 @@ export async function POST(req) {
                     });
                 }
 
+                // Store complete pricing breakdown in cart for order history
                 updatedCart.push({
                     ...item.toObject?.() || { ...item },
-                    price: price + deliveryFee,
-                    basePrice: price,
+                    price: price + deliveryFee, // Total price paid
+                    finalPrice: price, // Price after discount, before delivery
+                    basePrice: basePrice, // Base price without variants/options
+                    priceBeforeDiscount: priceBeforeDiscount, // Base + variants before discount
+                    variantInfo: variantInfo || [], // Array of variant selections with fees
                     deliveryFee,
+                    currency: currency || 'SGD',
                 });
 
-                const sellerId = product.creatorUserId;
-                const totalForThisItem = (price + deliveryFee) * quantity * 100;
-                if (!salesData[sellerId]) salesData[sellerId] = 0;
-                salesData[sellerId] += totalForThisItem;
+                const productRevenue = price * quantity * 100; // Product revenue in cents
+                const shippingRevenue = deliveryFee * quantity * 100; // Shipping revenue in cents
+                const totalForThisItem = productRevenue + shippingRevenue;
+
+                if (!salesData[product.creatorUserId]) {
+                    salesData[product.creatorUserId] = {
+                        totalAmount: 0,
+                        productRevenue: 0,
+                        shippingRevenue: 0,
+                        items: []
+                    };
+                }
+
+                salesData[product.creatorUserId].totalAmount += totalForThisItem;
+                salesData[product.creatorUserId].productRevenue += productRevenue;
+                salesData[product.creatorUserId].shippingRevenue += shippingRevenue;
+                salesData[product.creatorUserId].items.push({
+                    productId: item.productId,
+                    selectedVariants: item.selectedVariants || {},
+                    variantInfo: variantInfo || [],
+                    quantity: quantity,
+                    unitPrice: price,
+                    deliveryFee: deliveryFee,
+                    deliveryType: chosenDeliveryType
+                });
+
+                totalSessionAmount += totalForThisItem;
             } catch (error) {
                 console.error(
                     `Error fetching product details or calculating breakdown for productId ${item.productId}:`,
@@ -132,8 +169,12 @@ export async function POST(req) {
         user.cart.forEach((item, idx) => {
             if (updatedCart[idx]) {
                 item.price = updatedCart[idx].price;
+                item.finalPrice = updatedCart[idx].finalPrice;
                 item.basePrice = updatedCart[idx].basePrice;
+                item.priceBeforeDiscount = updatedCart[idx].priceBeforeDiscount;
+                item.variantInfo = updatedCart[idx].variantInfo;
                 item.deliveryFee = updatedCart[idx].deliveryFee;
+                item.currency = updatedCart[idx].currency;
             }
         });
 
@@ -157,8 +198,7 @@ export async function POST(req) {
                 ui_mode: "custom",
                 return_url: `${domain}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
                 metadata: {
-                    salesData: JSON.stringify(salesData),
-                    digitalProductData: JSON.stringify(digitalProductData),
+                    userId: userId, // Only store minimal data in Stripe metadata
                 },
             };
             // console.log("Stripe sessionParams:", sessionParams);
@@ -171,6 +211,16 @@ export async function POST(req) {
 
             const session = await stripe.checkout.sessions.create(sessionParams);
             // console.log("Stripe session created:", session);
+
+            // Store detailed session data in MongoDB
+            await CheckoutSession.create({
+                sessionId: session.id,
+                userId: userId,
+                salesData: salesData,
+                digitalProductData: digitalProductData,
+                totalAmount: totalSessionAmount,
+                currency: 'sgd'
+            });
 
             if (!session.client_secret) {
                 console.error("Stripe error: No client_secret returned from session", session);

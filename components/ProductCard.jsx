@@ -115,25 +115,52 @@ function ProductCard({ product }) {
 
                 <p className="text-base font-bold flex items-end">
                     {(() => {
-                        const discounted = getDiscountedPrice(product);
-                        if (discounted !== null) {
+                        const basePrice = Number(product.basePrice?.presentmentAmount || 0);
+                        const currency = product.basePrice?.presentmentCurrency || 'SGD';
+
+                        // Calculate lowest possible price: base + minimum additional fees from variants
+                        let minAdditionalFee = 0;
+                        if (product.variantTypes && product.variantTypes.length > 0) {
+                            product.variantTypes.forEach(variantType => {
+                                if (variantType.options && variantType.options.length > 0) {
+                                    // Find the option with the lowest additional fee
+                                    const lowestFee = Math.min(...variantType.options.map(opt => opt.additionalFee || 0));
+                                    minAdditionalFee += lowestFee;
+                                }
+                            });
+                        }
+
+                        const lowestPrice = basePrice + minAdditionalFee;
+
+                        // Check if discount applies to the lowest price
+                        const productWithLowestPrice = {
+                            ...product,
+                            price: {
+                                presentmentAmount: lowestPrice,
+                                presentmentCurrency: currency
+                            }
+                        };
+
+                        const discountedPrice = getDiscountedPrice(productWithLowestPrice);
+
+                        if (discountedPrice !== null && discountedPrice < lowestPrice) {
                             return (
                                 <>
-
                                     <span className="flex mr-1">
-                                        {product.price?.presentmentCurrency} {discounted.toFixed(2)}
+                                        {currency} {discountedPrice.toFixed(2)}
                                     </span>
                                     <span className="flex text-xs text-extraLight mb-0.5 line-through">
-                                        {Number(product.price?.presentmentAmount).toFixed(2)}
+                                        {lowestPrice.toFixed(2)}
                                     </span>
                                 </>
                             );
                         }
-                        return (
-                            <>
-                                {product.price?.presentmentCurrency} {Number(product.price?.presentmentAmount).toFixed(2)}
-                            </>
-                        );
+
+                        // Show "From" prefix if there are variants that could increase the price
+                        const hasVariablePricing = product.variantTypes && product.variantTypes.length > 0 &&
+                            product.variantTypes.some(vt => vt.options?.some(opt => (opt.additionalFee || 0) > 0));
+
+                        return `${hasVariablePricing ? 'From ' : ''}${currency} ${lowestPrice.toFixed(2)}`;
                     })()}
                 </p>
 
@@ -145,7 +172,7 @@ function ProductCard({ product }) {
                 )}
 
                 <span className='flex text-xs text-lightColor'>{product.sales.length} sold</span>
-                {isItMyProduct(product.creatorId) && (
+                {!isItMyProduct(product.creatorUserId) && (
                     <button
                         onClick={liked ? handleUnlike : handleLike}
                         className="absolute top-1 right-1 z-5 cursor-pointer"

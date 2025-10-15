@@ -1,0 +1,96 @@
+import { NextResponse } from "next/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
+import { getContentByPath, updateContentByPath } from "@/lib/mdx";
+
+export async function GET(req) {
+    try {
+        const { userId } = await auth();
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const client = await clerkClient();
+        const user = await client.users.getUser(userId);
+
+        if (user?.publicMetadata?.role !== "admin") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
+        const { searchParams } = new URL(req.url);
+        const contentPath = searchParams.get("path");
+
+        if (!contentPath) {
+            return NextResponse.json({ error: "Missing content path" }, { status: 400 });
+        }
+
+        const content = getContentByPath(contentPath);
+
+        if (!content) {
+            // Return default empty content structure instead of 404
+            const defaultContent = {
+                frontmatter: {},
+                content: ''
+            };
+
+            // Initialize default fields based on content path
+            if (contentPath.includes('home/hero-banner')) {
+                defaultContent.frontmatter.text = '';
+            } else if (contentPath.includes('about/introduction')) {
+                defaultContent.frontmatter.heading = '';
+                defaultContent.frontmatter.subheading = '';
+                defaultContent.frontmatter.description = '';
+            } else if (contentPath.includes('about/services')) {
+                defaultContent.frontmatter.heading = '';
+                defaultContent.frontmatter.subheading = '';
+                defaultContent.frontmatter.description = '';
+            } else if (contentPath.includes('terms/content') || contentPath.includes('privacy/content')) {
+                defaultContent.frontmatter.title = '';
+                defaultContent.frontmatter.subtitle = '';
+            } else {
+                // Default case (like featured-section)
+                defaultContent.frontmatter.title = '';
+                defaultContent.frontmatter.description = '';
+            }
+
+            return NextResponse.json(defaultContent);
+        }
+
+        return NextResponse.json(content);
+    } catch (error) {
+        console.error("Error fetching content:", error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
+}
+
+export async function PUT(req) {
+    try {
+        const { userId } = await auth();
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const client = await clerkClient();
+        const user = await client.users.getUser(userId);
+
+        if (user?.publicMetadata?.role !== "admin") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
+        const { contentPath, frontmatter, content } = await req.json();
+
+        if (!contentPath || !frontmatter || content === undefined) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
+        const success = updateContentByPath(contentPath, frontmatter, content);
+
+        if (!success) {
+            return NextResponse.json({ error: "Failed to update content" }, { status: 500 });
+        }
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Error updating content:", error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
+}

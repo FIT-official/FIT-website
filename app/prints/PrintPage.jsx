@@ -38,7 +38,7 @@ function PrintPage() {
             let url = "/api/product?productType=print";
             if (categoryIdx !== null && categoryIdx !== -1) url += `&productCategory=${categoryIdx}`;
             if (subcategoryIdx !== null && subcategoryIdx !== -1) url += `&productSubCategory=${subcategoryIdx}`;
-            url += "&fields=sales,name,price,discount,images,reviews,slug";
+            url += "&fields=sales,name,variants,discount,images,reviews,slug,likes,creatorUserId,basePrice,variantTypes";
 
 
             const res = await fetch(url);

@@ -4,9 +4,17 @@ const CartItemSchema = new mongoose.Schema(
     {
         productId: { type: String, required: true },
         quantity: { type: Number, default: 1 },
+        // Legacy variant system (for backward compatibility)
         variantId: { type: String, default: null },
+        // New variant selection system
+        selectedVariants: {
+            type: Map,
+            of: String, // Maps variant type name to selected option name
+            default: new Map()
+        },
         chosenDeliveryType: { type: String, required: true },
         price: { type: Number, required: true, default: 0, min: 0 },
+        orderNote: { type: String, default: "", maxlength: 500 },
     },
     { timestamps: true }
 );
@@ -16,9 +24,29 @@ const OrderSchema = new mongoose.Schema(
         cartItem: { type: CartItemSchema, default: {} },
         status: {
             type: String,
-            enum: ["pending", "shipped", "delivered", "cancelled"],
+            enum: [
+                "pending", "shipped", "delivered", "cancelled",
+                "processing", "confirmed", "on_hold", "refunded", "partially_refunded"
+            ],
             default: "pending",
         },
+        orderType: {
+            type: String,
+            enum: ["order", "printOrder"],
+            default: "order",
+        },
+        printStatus: {
+            type: String,
+            enum: [
+                "pending_config", "configured", "printing", "printed",
+                "shipped", "delivered", "cancelled", "failed", "on_hold"
+            ],
+            required: function () { return this.orderType === "printOrder"; }
+        },
+        statusUpdatedBy: { type: String, default: "system" },
+        trackingNumber: { type: String, default: null },
+        notes: { type: String, default: "", maxlength: 1000 },
+        schemaVersion: { type: Number, default: 2 },
     },
     { timestamps: true }
 );

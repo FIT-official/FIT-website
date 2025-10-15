@@ -17,11 +17,20 @@ export async function POST(req) {
         }
 
         const user = await User.findOne({ userId });
+
+        // Helper function to compare selectedVariants Maps
+        const selectedVariantsMatch = (item1, item2) => {
+            const variants1 = item1.selectedVariants || {};
+            const variants2 = item2.selectedVariants || {};
+            return JSON.stringify(variants1) === JSON.stringify(variants2);
+        };
+
         const existingIndex = user.cart.findIndex(
             item =>
                 item.productId === cartItem.productId &&
                 item.variantId === (cartItem.variantId || null) &&
-                item.chosenDeliveryType === cartItem.chosenDeliveryType
+                item.chosenDeliveryType === cartItem.chosenDeliveryType &&
+                selectedVariantsMatch(item, cartItem)
         );
 
         if (existingIndex !== -1) {
@@ -31,7 +40,10 @@ export async function POST(req) {
                 productId: cartItem.productId,
                 quantity: cartItem.quantity || 1,
                 variantId: cartItem.variantId || null,
+                selectedVariants: cartItem.selectedVariants || new Map(),
                 chosenDeliveryType: cartItem.chosenDeliveryType,
+                price: cartItem.price || 0,
+                orderNote: cartItem.orderNote || "",
             });
         }
 
@@ -66,14 +78,28 @@ export async function DELETE(req) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
         await connectToDatabase();
-        const { productId, variantId } = await req.json();
+        const { productId, variantId, selectedVariants } = await req.json();
         if (!productId) {
             return NextResponse.json({ error: "Missing product" }, { status: 400 });
         }
+
+        // Helper function to compare selectedVariants Maps
+        const selectedVariantsMatch = (item1, item2) => {
+            const variants1 = item1.selectedVariants || {};
+            const variants2 = item2.selectedVariants || {};
+            return JSON.stringify(variants1) === JSON.stringify(variants2);
+        };
+
         const user = await User.findOne({ userId });
         user.cart = user.cart.filter(
-            item =>
-                !(item.productId === productId && (item.variantId || null) === (variantId || null))
+            item => {
+                // For legacy system compatibility, if no selectedVariants provided, use variantId matching
+                if (!selectedVariants && !item.selectedVariants) {
+                    return !(item.productId === productId && (item.variantId || null) === (variantId || null));
+                }
+                // For new variant system, match both productId and selectedVariants
+                return !(item.productId === productId && selectedVariantsMatch(item, { selectedVariants: selectedVariants || {} }));
+            }
         );
         await user.save();
         return NextResponse.json({ success: true, cart: user.cart }, { status: 200 });

@@ -5,12 +5,18 @@ import { GoChevronLeft, GoChevronRight, GoStarFill } from 'react-icons/go'
 import Image from 'next/image';
 import { useToast } from '../General/ToastProvider';
 import ProductCard from '../ProductCard';
+import { useContent } from '@/utils/useContent';
 
 function FeaturedSection() {
   const [maxItems, setMaxItems] = useState(5);
   const [items, setItems] = useState([]);
   const [idx, setIdx] = useState(0);
   const { showToast } = useToast();
+
+  const { content: sectionContent } = useContent('home/featured-section', {
+    title: 'Popular Prints',
+    content: 'Discover amazing 3D printable designs from our community of creators.'
+  });
 
   const nextItem = () => {
     setIdx((prevIdx) => (prevIdx + 1) % maxItems);
@@ -38,6 +44,7 @@ function FeaturedSection() {
         showToast('Failed to fetch popular prints: ' + error.message, 'error');
       }
     }
+
     fetchPopularPrints();
   }, []);
 
@@ -48,11 +55,11 @@ function FeaturedSection() {
           <div className='flex flex-col gap-2'>
             <h3>Featured</h3>
             <h1>
-              Popular Prints
+              {sectionContent.title}
             </h1>
           </div>
           <p className='w-full text-pretty flex text-sm'>
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quam eum commodi libero, dicta illum ducimus natus. Tenetur, velit eveniet inventore voluptatum magnam perspiciatis perferendis nostrum accusantium consectetur provident quidem nam.
+            {sectionContent.content}
           </p>
           <ButtonLink lnk={'/prints'} text={'Browse More'} />
         </div>

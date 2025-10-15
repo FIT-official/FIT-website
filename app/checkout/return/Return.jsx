@@ -19,6 +19,7 @@ function Return() {
                 const email = await data.session.customer_details?.email;
                 setCustomerEmail(email);
                 if (data.session.status === 'complete') {
+                    // Send confirmation email
                     const confEmailSent = `emailSent_${sessionId}`;
                     if (!localStorage.getItem(confEmailSent)) {
                         try {
@@ -33,16 +34,14 @@ function Return() {
                         }
                     }
 
-                    fetch('/api/user/checkout', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    })
-                        .then((res) => res.json())
-                        .catch((error) => {
-                            showToast('Error during checkout: ' + error, 'error');
-                        });
+                    // Clear print configurations from localStorage after payment success
+                    // The webhook will handle creating orders and emptying cart
+                    const keys = Object.keys(localStorage);
+                    keys.forEach(key => {
+                        if (key.startsWith('printConfig_')) {
+                            localStorage.removeItem(key);
+                        }
+                    });
                 }
             });
     }, []);

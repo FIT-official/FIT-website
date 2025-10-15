@@ -5,7 +5,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
     try {
-        const { stripeAccountId } = await req.json();
+        const { stripeAccountId, linkType } = await req.json();
 
         if (!stripeAccountId) {
             return NextResponse.json({ error: "Missing stripeAccountId" }, { status: 400 });
@@ -13,17 +13,30 @@ export async function POST(req) {
 
         const origin = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-        const accountLink = await stripe.accountLinks.create({
-            account: stripeAccountId,
-            refresh_url: `${origin}/dashboard?onboard=refresh`,
-            return_url: `${origin}/dashboard?onboard=return`,
-            type: "account_onboarding",
-        });
+        // Check if account is already onboarded
+        const account = await stripe.accounts.retrieve(stripeAccountId);
+        const isOnboarded = !!account.details_submitted;
+
+        let accountLink;
+
+        if (linkType === 'login' && isOnboarded) {
+            // For onboarded accounts, create a login link to access the dashboard
+            const loginLink = await stripe.accounts.createLoginLink(stripeAccountId);
+            return NextResponse.json({ url: loginLink.url });
+        } else {
+            // For non-onboarded accounts, create onboarding link
+            accountLink = await stripe.accountLinks.create({
+                account: stripeAccountId,
+                refresh_url: `${origin}/dashboard?onboard=refresh`,
+                return_url: `${origin}/dashboard?onboard=return`,
+                type: "account_onboarding",
+            });
+        }
 
         return NextResponse.json({ url: accountLink.url });
     } catch (error) {
-        console.error("Stripe Express onboarding error:", error);
-        return NextResponse.json({ error: "Failed to create onboarding link" }, { status: 500 });
+        console.error("Stripe Express link error:", error);
+        return NextResponse.json({ error: "Failed to create account link" }, { status: 500 });
     }
 }
 

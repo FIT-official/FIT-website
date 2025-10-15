@@ -2,8 +2,13 @@
 
 import { motion, cubicBezier } from 'framer-motion';
 import Image from 'next/image';
+import { useContent } from '@/utils/useContent';
 
 function Main({ adbanner }) {
+    const { content } = useContent('home/hero-banner', {
+        text: '3D printing and modeling services'
+    })
+
     const text = "FIX IT TODAY®";
     const letters = Array.from(text);
 
@@ -74,7 +79,7 @@ function Main({ adbanner }) {
                     className="font-semibold uppercase text-xs md:text-lg"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1, transition: { duration: 0.5 } }}>
-                    3D printing and modeling services
+                    {content.text}
                 </motion.div>
             </div>
         </div>

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { useOrderStatuses, getStatusDisplayName, getStatusColor } from '@/utils/useOrderStatuses';
 
 function OrderSkeleton() {
     return (
@@ -35,6 +36,7 @@ function OrderSection() {
     const [products, setProducts] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const { orderStatuses } = useOrderStatuses(); // Get all order statuses
 
     useEffect(() => {
         (async () => {
@@ -105,7 +107,32 @@ function OrderSection() {
                                     </div>
                                     <div>
                                         <span className="font-medium text-textColor">Status:</span>{" "}
-                                        <span className="capitalize">{order.status}</span>
+                                        <span
+                                            className="capitalize px-2 py-1 rounded text-xs font-medium"
+                                            style={{
+                                                backgroundColor: `${getStatusColor(order.status, orderStatuses)}15`,
+                                                color: getStatusColor(order.status, orderStatuses),
+                                                border: `1px solid ${getStatusColor(order.status, orderStatuses)}30`
+                                            }}
+                                        >
+                                            {getStatusDisplayName(order.status, orderStatuses)}
+                                        </span>
+                                        {/* Show print status for print orders */}
+                                        {order.orderType === "printOrder" && order.printStatus && order.printStatus !== order.status && (
+                                            <span className="ml-2">
+                                                <span className="font-medium text-textColor">Print:</span>{" "}
+                                                <span
+                                                    className="capitalize px-2 py-1 rounded text-xs font-medium"
+                                                    style={{
+                                                        backgroundColor: `${getStatusColor(order.printStatus, orderStatuses)}15`,
+                                                        color: getStatusColor(order.printStatus, orderStatuses),
+                                                        border: `1px solid ${getStatusColor(order.printStatus, orderStatuses)}30`
+                                                    }}
+                                                >
+                                                    {getStatusDisplayName(order.printStatus, orderStatuses)}
+                                                </span>
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="flex flex-row gap-2 items-center">
@@ -138,11 +165,70 @@ function OrderSection() {
                                             <span className="font-medium text-textColor">Delivery:</span> {cartItem.chosenDeliveryType}
                                         </div>
                                     </div>
+                                    {/* Display selected variant options from new system */}
+                                    {cartItem.selectedVariants && Object.keys(cartItem.selectedVariants).length > 0 && (
+                                        <div className="mt-2 text-xs">
+                                            <span className="font-medium text-textColor">Options:</span>
+                                            <span className="text-lightColor ml-1">
+                                                {Object.entries(cartItem.selectedVariants)
+                                                    .map(([type, option]) => {
+                                                        // Find additional fee if available
+                                                        const variantInfoItem = cartItem.variantInfo?.find(v => v.type === type && v.option === option);
+                                                        const fee = variantInfoItem?.additionalFee || 0;
+                                                        return fee > 0 ? `${option} (+S$${fee.toFixed(2)})` : option;
+                                                    })
+                                                    .join(", ")}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {/* Fallback: Display legacy variant selection */}
+                                    {(!cartItem.selectedVariants || Object.keys(cartItem.selectedVariants).length === 0) && cartItem.variantId && (
+                                        <div className="mt-2 text-xs">
+                                            <span className="font-medium text-textColor">Variant:</span>
+                                            <span className="text-lightColor ml-1">{cartItem.variantId}</span>
+                                        </div>
+                                    )}
+                                    {/* Display pricing breakdown if available */}
+                                    {(cartItem.basePrice || cartItem.priceBeforeDiscount) && (
+                                        <div className="mt-2 text-xs text-lightColor">
+                                            {cartItem.basePrice && cartItem.priceBeforeDiscount && cartItem.basePrice !== cartItem.priceBeforeDiscount ? (
+                                                // Has variants with fees
+                                                <>
+                                                    Base: S${cartItem.basePrice.toFixed(2)}
+                                                    {cartItem.variantInfo && cartItem.variantInfo.length > 0 && (
+                                                        <span> + S${cartItem.variantInfo.reduce((sum, v) => sum + (v.additionalFee || 0), 0).toFixed(2)}</span>
+                                                    )}
+                                                    {cartItem.finalPrice && cartItem.priceBeforeDiscount !== cartItem.finalPrice && (
+                                                        <span> - {(((cartItem.priceBeforeDiscount - cartItem.finalPrice) / cartItem.priceBeforeDiscount) * 100).toFixed(0)}% off</span>
+                                                    )}
+                                                </>
+                                            ) : cartItem.basePrice && cartItem.finalPrice && cartItem.basePrice !== cartItem.finalPrice ? (
+                                                // No variants, but has discount
+                                                <>
+                                                    Base: S${cartItem.basePrice.toFixed(2)} - {(((cartItem.basePrice - cartItem.finalPrice) / cartItem.basePrice) * 100).toFixed(0)}% off
+                                                </>
+                                            ) : null}
+                                        </div>
+                                    )}
+                                    {cartItem.orderNote && (
+                                        <div className="mt-2 text-xs">
+                                            <span className="font-medium text-textColor">Note:</span>
+                                            <span className="text-lightColor ml-1">{cartItem.orderNote}</span>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex flex-col md:items-end min-w-[90px]">
                                     <span className="text-xs text-lightColor">Paid</span>
                                     <span className="font-semibold text-textColor text-lg">
-                                        {`S$${cartItem.price.toFixed(2)}`}
+                                        {cartItem.currency || 'S'}${((cartItem.finalPrice || cartItem.price || 0) * (cartItem.quantity || 1)).toFixed(2)}
+                                    </span>
+                                    {cartItem.deliveryFee > 0 && (
+                                        <span className="text-xs text-lightColor mt-1">
+                                            + S${(cartItem.deliveryFee * (cartItem.quantity || 1)).toFixed(2)} delivery
+                                        </span>
+                                    )}
+                                    <span className="text-xs font-medium text-textColor mt-1">
+                                        Total: {cartItem.currency || 'S'}${(cartItem.price * (cartItem.quantity || 1)).toFixed(2)}
                                     </span>
                                 </div>
                             </div>

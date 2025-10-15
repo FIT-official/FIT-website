@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { useUser, useSession } from "@clerk/nextjs"
+import { useSearchParams } from 'next/navigation'
 import ContactSection from '@/components/Account/ContactSection';
 import OrderSection from '@/components/Account/OrderSection';
 import ProfileSettings from '@/components/Account/ProfileSettings';
@@ -11,11 +12,20 @@ import DownloadsSection from '@/components/Account/DownloadsSection';
 function Account() {
     const { user, isLoaded } = useUser();
     const { session: currentSession } = useSession();
+    const searchParams = useSearchParams();
 
     const [tab, setTab] = useState("profile");
     const [connectedAccounts, setConnectedAccounts] = useState([]);
     const [devices, setDevices] = useState([]);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    // Check for tab parameter on component mount
+    useEffect(() => {
+        const tabParam = searchParams.get('tab');
+        if (tabParam && ['profile', 'security', 'orders', 'billing', 'downloads'].includes(tabParam)) {
+            setTab(tabParam);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (!isLoaded || !user) return;
@@ -39,11 +49,11 @@ function Account() {
     };
 
     return (
-        <div className="flex flex-col w-full h-screen md:h-[92vh] border-b border-borderColor py-12 px-8 md:px-12 items-center justify-center">
-            <div className='flex flex-col w-full bg-baseColor h-full rounded-lg'>
+        <div className="flex flex-col w-full border-b border-borderColor py-12 px-8 md:px-12 items-center justify-center">
+            <div className='flex flex-col w-full bg-baseColor'>
                 <h3>Profile</h3>
                 <h1>Account Settings</h1>
-                <div className='flex relative h-full w-full bg-background mt-6 rounded-lg divide-x divide-borderColor drop-shadow-sm overflow-x-hidden'>
+                <div className='flex relative min-h-[92vh] w-full bg-background mt-6 rounded-lg divide-x divide-borderColor drop-shadow-sm overflow-x-hidden'>
                     <div
                         className={`absolute bg-background flex flex-col z-10 sidebar ${sidebarOpen ? 'translate-x-0' : '-translate-x-[82%]'}`}
                     >

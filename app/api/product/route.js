@@ -5,6 +5,7 @@ import { slugify } from "@/app/api/product/slugify";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { sanitizeString } from "@/utils/validate";
 import { PRINT_CATEGORIES, SHOP_CATEGORIES, PRINT_SUBCATEGORIES, SHOP_SUBCATEGORIES } from "@/lib/categories";
+import { getAllCategoriesServer, getAllSubcategories } from "@/lib/categoriesHelper";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3 } from "@/lib/s3";
 
@@ -46,7 +47,8 @@ export async function POST(req) {
             "name",
             "description",
             "images",
-            "price",
+            "basePrice",
+            "priceCredits",
             "productType"
         ];
         const missingFields = requiredFields.filter(field => !body[field]);
@@ -87,8 +89,8 @@ export async function POST(req) {
             return NextResponse.json({ error: "Invalid paid assets array" }, { status: 400 });
         }
 
-        if (typeof body.price !== "object" || isNaN(Number(body.price.presentmentAmount))) {
-            return NextResponse.json({ error: "Invalid price" }, { status: 400 });
+        if (typeof body.basePrice !== "object" || isNaN(Number(body.basePrice.presentmentAmount))) {
+            return NextResponse.json({ error: "Invalid basePrice" }, { status: 400 });
         }
 
         const slug = await generateUniqueSlug(name);
@@ -169,7 +171,8 @@ export async function PUT(req) {
             "name",
             "description",
             "images",
-            "price",
+            "basePrice",
+            "priceCredits",
             "productType"
         ];
 
@@ -211,8 +214,8 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Invalid paidAssets array" }, { status: 400 });
         }
 
-        if (typeof body.price !== "object" || isNaN(Number(body.price.presentmentAmount))) {
-            return NextResponse.json({ error: "Invalid price" }, { status: 400 });
+        if (typeof body.basePrice !== "object" || isNaN(Number(body.basePrice.presentmentAmount))) {
+            return NextResponse.json({ error: "Invalid basePrice" }, { status: 400 });
         }
 
         let slug = body.slug;
@@ -265,9 +268,9 @@ export async function GET(req) {
         if (productType) filter.productType = productType;
 
         if (productCategory && isNaN(Number(productCategory))) {
-            productCategory = productType === "shop"
-                ? SHOP_CATEGORIES.findIndex(cat => cat === productCategory)
-                : PRINT_CATEGORIES.findIndex(cat => cat === productCategory);
+            // Use combined categories (hardcoded + admin-created)
+            const allCategories = await getAllCategoriesServer(productType);
+            productCategory = allCategories.findIndex(cat => cat === productCategory);
         }
 
         if (
@@ -276,6 +279,7 @@ export async function GET(req) {
             productCategory !== null &&
             productCategory !== -1
         ) {
+            // For now, still use hardcoded subcategories until admin subcategories are implemented
             productSubCategory = productType === "shop"
                 ? SHOP_SUBCATEGORIES[productCategory]?.findIndex(sub => sub === productSubCategory)
                 : PRINT_SUBCATEGORIES[productCategory]?.findIndex(sub => sub === productSubCategory);

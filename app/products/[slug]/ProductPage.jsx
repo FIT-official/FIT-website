@@ -5,9 +5,10 @@ import { useEffect, useRef, useState } from 'react';
 import { GoChevronLeft, GoChevronRight, GoDownload, GoPlus, GoStar, GoStarFill } from 'react-icons/go';
 import Image from 'next/image';
 import { HiCubeTransparent } from 'react-icons/hi';
+import { BiPrinter } from 'react-icons/bi';
 import dynamic from 'next/dynamic';
-import SelectField from '@/components/DashboardComponents/SelectField';
 import { IoMdCheckmark } from 'react-icons/io';
+import { getDiscountedPrice } from '@/utils/discount';
 
 const ModelViewer = dynamic(() => import("@/components/3D/ModelViewer"), { ssr: false });
 
@@ -20,11 +21,14 @@ function ProductPage() {
 
     const [liked, setLiked] = useState(false);
     const [product, setProduct] = useState(null);
-    const [selectedVariant, setSelectedVariant] = useState(null);
+    const [selectedVariantOptions, setSelectedVariantOptions] = useState({}); // new variant types system
     const [isAdding, setIsAdding] = useState(false);
     const [showAdded, setShowAdded] = useState(false);
     const [isOwnProduct, setIsOwnProduct] = useState(false);
-    const [selectedVariants, setSelectedVariants] = useState({}); // for product - variant mapping in cart
+    const [ownsDigitalProduct, setOwnsDigitalProduct] = useState(false);
+    const [checkingOwnership, setCheckingOwnership] = useState(false);
+    const [isPrintAdding, setIsPrintAdding] = useState(false);
+    const [showPrintAdded, setShowPrintAdded] = useState(false);
 
     const [tabIdx, setTabIdx] = useState(0);
     const [currentTab, setCurrentTab] = useState(0);
@@ -65,14 +69,41 @@ function ProductPage() {
             const data = await res.json();
 
             setProduct(data.product);
-
-            if (data.product && data.product.variants && data.product.variants.length > 0) {
-                setSelectedVariant(data.product.variants[0]);
-            }
             setLoading(false);
         }
         fetchProduct();
     }, [slug]);
+
+    // Function to check if user owns this digital product
+    const checkDigitalOwnership = async () => {
+        if (!product || !user || !isLoaded) return;
+
+        // Only check for products that have digital delivery option
+        const hasDigitalDelivery = product.delivery?.deliveryTypes?.some(dt => dt.type === 'digital');
+        if (!hasDigitalDelivery) {
+            setOwnsDigitalProduct(false);
+            return;
+        }
+
+        setCheckingOwnership(true);
+        try {
+            const params = new URLSearchParams({
+                productId: product._id
+                // Note: Digital ownership is now checked at product level rather than variant level
+                // since variants are now combinations of options rather than discrete items
+            });
+
+            const res = await fetch(`/api/user/owns-product?${params}`);
+            const data = await res.json();
+
+            setOwnsDigitalProduct(data.owns || false);
+        } catch (error) {
+            console.error('Error checking product ownership:', error);
+            setOwnsDigitalProduct(false);
+        } finally {
+            setCheckingOwnership(false);
+        }
+    };
 
     useEffect(() => {
         setIsOwnProduct(product?.creatorUserId === user?.id);
@@ -87,6 +118,33 @@ function ProductPage() {
         const imagesCount = Array.isArray(product?.images) ? product.images.length : 0;
         const hasViewableModel = !!product?.viewableModel;
         setTotalTabs(imagesCount + (hasViewableModel ? 1 : 0));
+
+        // Initialize variant selections for new variant types system
+        if (product && product.variantTypes && product.variantTypes.length > 0) {
+            const defaultSelections = {};
+            let needsUpdate = false;
+
+            product.variantTypes.forEach(variantType => {
+                const currentSelection = selectedVariantOptions[variantType.name];
+                // If no selection exists or selection is invalid, set first option as default
+                if (!currentSelection || currentSelection === '') {
+                    if (variantType.options && variantType.options.length > 0) {
+                        defaultSelections[variantType.name] = variantType.options[0].name;
+                        needsUpdate = true;
+                    }
+                } else {
+                    // Keep existing valid selection
+                    defaultSelections[variantType.name] = currentSelection;
+                }
+            });
+
+            if (needsUpdate) {
+                setSelectedVariantOptions(defaultSelections);
+            }
+        }
+
+        // Check digital ownership when product or user changes
+        checkDigitalOwnership();
     }, [product, user, isLoaded])
 
     const handleAddToCart = async (product) => {
@@ -98,14 +156,19 @@ function ProductPage() {
             router.push("/sign-in");
             return;
         }
+
+        // Validate variant selection for new variant types system
+        if (product.variantTypes && product.variantTypes.length > 0 && !areAllVariantsSelected()) {
+            alert("Please select all variant options before adding to cart.");
+            return;
+        }
+
         setIsAdding(true);
         try {
-            const variantId = selectedVariants[product._id] || product.variants?.[0] || null;
-
             const cartItem = {
                 productId: product._id,
                 quantity: 1,
-                variantId,
+                selectedVariants: selectedVariantOptions,
                 chosenDeliveryType: product.delivery?.deliveryTypes?.[0]?.type || "selfCollect",
             };
 
@@ -125,11 +188,123 @@ function ProductPage() {
         }
     };
 
-    const handleVariantChange = (productId, variantId) => {
-        setSelectedVariants(prev => ({
-            ...prev,
-            [productId]: variantId,
-        }));
+    const handleAddToPrintCart = async (product) => {
+        if (isOwnProduct) {
+            return;
+        }
+
+        if (!isLoaded || !user) {
+            router.push("/sign-in");
+            return;
+        }
+
+        // Validate variant selection for new variant types system
+        if (product.variantTypes && product.variantTypes.length > 0 && !areAllVariantsSelected()) {
+            alert("Please select all variant options before adding to print cart.");
+            return;
+        }
+
+        setIsPrintAdding(true);
+        try {
+            const cartItem = {
+                productId: product._id,
+                quantity: 1,
+                selectedVariants: selectedVariantOptions,
+                chosenDeliveryType: "printDelivery",
+            };
+
+            const res = await fetch("/api/user/cart", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cartItem }),
+            });
+
+            setIsPrintAdding(false);
+            setShowPrintAdded(true);
+            setTimeout(() => setShowPrintAdded(false), 3000);
+        } catch (error) {
+            alert(error || "Failed to add print item to cart.");
+        } finally {
+            setIsPrintAdding(false);
+        }
+    };
+
+    // Handle variant option selection for new variant types system
+    const handleVariantOptionChange = (variantTypeName, optionName) => {
+        setSelectedVariantOptions(prev => {
+            const newMap = new Map(prev);
+            newMap.set(variantTypeName, optionName);
+            return newMap;
+        });
+        // Re-check ownership when variant changes
+        checkDigitalOwnership();
+    };
+
+    // Function to check if all required variants are selected
+    const areAllVariantsSelected = () => {
+        if (!product || !product.variantTypes || product.variantTypes.length === 0) {
+            return true; // No variants required - digital products with default variant only
+        }
+
+        // Check if all variant types have a valid selection
+        return product.variantTypes.every(variantType => {
+            const selectedOption = selectedVariantOptions[variantType.name];
+            // Ensure the selected option exists in the variant type's options
+            if (!selectedOption || selectedOption === '') return false;
+            return variantType.options.some(opt => opt.name === selectedOption);
+        });
+    };
+
+    // Function to calculate total price including selected variant fees
+    const calculateTotalPrice = () => {
+        if (!product) return { total: 0, currency: 'SGD', breakdown: null, discountedTotal: null, discount: null };
+
+        const basePrice = product.basePrice?.presentmentAmount || 0;
+        const currency = product.basePrice?.presentmentCurrency || 'SGD';
+
+        let additionalFees = 0;
+        if (product.variantTypes && product.variantTypes.length > 0) {
+            product.variantTypes.forEach(variantType => {
+                const selectedOption = selectedVariantOptions[variantType.name];
+                if (selectedOption) {
+                    const option = variantType.options.find(opt => opt.name === selectedOption);
+                    if (option) {
+                        additionalFees += option.additionalFee || 0;
+                    }
+                }
+            });
+        }
+
+        const totalPrice = basePrice + additionalFees;
+
+        // Check if discount applies to the total price
+        let discountedTotal = null;
+        if (product.discount && product.discount.percentage > 0) {
+            const productWithPrice = {
+                ...product,
+                price: { presentmentAmount: totalPrice, presentmentCurrency: currency }
+            };
+            const discounted = getDiscountedPrice(productWithPrice);
+            if (discounted !== null) {
+                discountedTotal = discounted;
+            }
+        }
+
+        return {
+            total: totalPrice,
+            currency,
+            breakdown: additionalFees > 0 ? { base: basePrice, additional: additionalFees } : null,
+            discountedTotal,
+            discount: product.discount
+        };
+    };
+
+    const handleViewInDownloads = () => {
+        if (!user || !isLoaded) {
+            router.push('/sign-in?redirect=' + encodeURIComponent('/account?tab=downloads'));
+            return;
+        }
+        router.push('/account?tab=downloads');
     };
 
     const handleLike = async (e) => {
@@ -310,10 +485,43 @@ function ProductPage() {
                     ) : (
                         <>
                             <h1>{product.name}</h1>
-                            <p className='font-medium text-lg mb-6'>
-                                {product.price?.presentmentCurrency}{" "}
-                                {Number(product.price?.presentmentAmount).toFixed(2)}
-                            </p>
+                            <div className='font-medium text-lg mb-6'>
+                                {(() => {
+                                    const priceInfo = calculateTotalPrice();
+
+                                    if (priceInfo.discountedTotal !== null) {
+                                        // Show discounted price with strikethrough
+                                        return (
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className="font-bold text-red-600">{priceInfo.currency} {priceInfo.discountedTotal.toFixed(2)}</span>
+                                                    <span className="text-lightColor line-through text-base">{priceInfo.currency} {priceInfo.total.toFixed(2)}</span>
+                                                    <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">
+                                                        -{priceInfo.discount.percentage}% OFF
+                                                    </span>
+                                                </div>
+                                                {priceInfo.breakdown && (
+                                                    <span className="text-sm text-lightColor">
+                                                        (Base: {priceInfo.currency} {priceInfo.breakdown.base.toFixed(2)} + {priceInfo.currency} {priceInfo.breakdown.additional.toFixed(2)})
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    }
+
+                                    // No discount, show regular price with breakdown if applicable
+                                    return (
+                                        <div className="flex flex-col gap-1">
+                                            <span className="font-bold">{priceInfo.currency} {priceInfo.total.toFixed(2)}</span>
+                                            {priceInfo.breakdown && (
+                                                <span className="text-sm text-lightColor">
+                                                    (Base: {priceInfo.currency} {priceInfo.breakdown.base.toFixed(2)} + {priceInfo.currency} {priceInfo.breakdown.additional.toFixed(2)})
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
+                            </div>
                             <div className="flex flex-col w-full justify-center mb-4 bg-borderColor/20 p-4">
                                 <div className="flex uppercase font-semibold text-sm">
                                     Description
@@ -335,44 +543,111 @@ function ProductPage() {
                                 )}
 
                             </div>
-                            <div className="flex uppercase font-semibold text-sm">
-                                Variants
-                            </div>
-                            <SelectField
-                                label=""
-                                options={product.variants.map((variant) => ({
-                                    value: variant,
-                                    label: variant
-                                }))}
-                                value={selectedVariant || product.variants?.[0] || ""}
-                                onChangeFunction={(e) => {
-                                    setSelectedVariant(e.target.value);
-                                    handleVariantChange(product._id, e.target.value);
-                                }}
-                            />
+                            {/* Variant types system - only for products with additional variant options */}
+                            {product.variantTypes && product.variantTypes.length > 0 && (
+                                <div className="flex flex-col gap-4">
+                                    {product.variantTypes.map((variantType) => (
+                                        <div key={variantType._id} className="flex flex-col gap-2">
+                                            <div className="flex uppercase font-semibold text-sm">
+                                                {variantType.name}
+                                            </div>
+                                            <select
+                                                className="w-full p-3 border border-borderColor rounded-md bg-background text-textColor focus:outline-none focus:border-gray-400"
+                                                value={selectedVariantOptions[variantType.name] || (variantType.options[0]?.name || '')}
+                                                onChange={(e) => {
+                                                    setSelectedVariantOptions(prev => ({
+                                                        ...prev,
+                                                        [variantType.name]: e.target.value
+                                                    }));
+                                                }}
+                                            >
+                                                {variantType.options.map((option) => (
+                                                    <option key={option._id} value={option.name}>
+                                                        {option.name} {option.additionalFee > 0 && `(+${product.basePrice?.presentmentCurrency || 'SGD'} ${option.additionalFee.toFixed(2)})`}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
                             {!loading && product && user && product.creatorUserId !== user.id && (
-                                <button
-                                    className='formBlackButton gap-2 mt-2'
-                                    onClick={() => handleAddToCart(product)}
-                                    disabled={isAdding || showAdded}
-                                >
-                                    {isAdding ? (
-                                        <>
-                                            Adding to cart
-                                            <div className='animate-spin border border-t-transparent border-lightColor h-3 w-3 rounded-full' />
-                                        </>
-                                    ) : showAdded ? (
-                                        <>
-                                            Added to cart
-                                            <IoMdCheckmark size={16} className='transition-opacity duration-300' />
-                                        </>
+                                <div className="flex flex-col gap-2 mt-2">
+                                    {ownsDigitalProduct ? (
+                                        <button
+                                            className='formBlackButton gap-2 bg-green-600 hover:bg-green-700'
+                                            onClick={handleViewInDownloads}
+                                        >
+                                            <>
+                                                View in Downloads
+                                                <GoDownload size={16} className='inline' />
+                                            </>
+                                        </button>
                                     ) : (
-                                        <>
-                                            Add to Cart
-                                            <GoPlus size={16} className='inline' />
-                                        </>
+                                        <button
+                                            className='formBlackButton gap-2'
+                                            onClick={() => handleAddToCart(product)}
+                                            disabled={isAdding || showAdded || checkingOwnership || !areAllVariantsSelected()}
+                                        >
+                                            {checkingOwnership ? (
+                                                <>
+                                                    Checking availability
+                                                    <div className='animate-spin border border-t-transparent border-lightColor h-3 w-3 rounded-full' />
+                                                </>
+                                            ) : isAdding ? (
+                                                <>
+                                                    Adding to cart
+                                                    <div className='animate-spin border border-t-transparent border-lightColor h-3 w-3 rounded-full' />
+                                                </>
+                                            ) : showAdded ? (
+                                                <>
+                                                    Added to cart
+                                                    <IoMdCheckmark size={16} className='transition-opacity duration-300' />
+                                                </>
+                                            ) : !areAllVariantsSelected() ? (
+                                                <>
+                                                    Select all options
+                                                    <GoPlus size={16} className='inline opacity-50' />
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Add to Cart
+                                                    <GoPlus size={16} className='inline' />
+                                                </>
+                                            )}
+                                        </button>
+                                    )}                                    {/* Print Button - only show if product has a 3D model */}
+                                    {product.viewableModel && (
+                                        <button
+                                            className='flex items-center justify-center gap-2 px-4 py-2 border border-borderColor text-sm font-medium rounded hover:bg-borderColor/10 transition-colors'
+                                            onClick={() => handleAddToPrintCart(product)}
+                                            disabled={isPrintAdding || showPrintAdded || !areAllVariantsSelected()}
+                                        >
+                                            {isPrintAdding ? (
+                                                <>
+                                                    Creating print order
+                                                    <div className='animate-spin border border-t-transparent border-current h-3 w-3 rounded-full' />
+                                                </>
+                                            ) : showPrintAdded ? (
+                                                <>
+                                                    Print order created
+                                                    <IoMdCheckmark size={16} className='transition-opacity duration-300' />
+                                                </>
+                                            ) : !areAllVariantsSelected() ? (
+                                                <>
+                                                    Select all options
+                                                    <BiPrinter size={16} className='inline opacity-50' />
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Order Print
+                                                    <BiPrinter size={16} className='inline' />
+                                                </>
+                                            )}
+                                        </button>
                                     )}
-                                </button>
+                                </div>
                             )}
 
                             {/* {totalAssets > 0 && (

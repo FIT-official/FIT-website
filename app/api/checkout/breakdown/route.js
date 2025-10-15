@@ -40,6 +40,8 @@ export async function GET(req) {
                     product,
                     address,
                 });
+                // Add order note to the breakdown
+                breakdown.orderNote = item.orderNote || "";
                 cartBreakdown.push(breakdown);
             } catch (err) {
                 console.error("Error in cart breakdown:", err);

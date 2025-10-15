@@ -12,7 +12,7 @@ export function useToast() {
 export function ToastProvider({ children }) {
     const [toast, setToast] = useState(null);
 
-    const showToast = useCallback((message, type = 'success', duration = 5000) => {
+    const showToast = useCallback((message, type = 'success', duration = 10000) => {
         setToast({ message, type });
         setTimeout(() => setToast(null), duration);
     }, []);
@@ -32,11 +32,13 @@ export function ToastProvider({ children }) {
                             ${toast.type === 'error' ? 'text-red-700' : 'text-green-700'}`}
                     >
                         {toast.type === 'error' ? (
-                            <CiCircleRemove size={20} className="flex mr-2" />
+                            <CiCircleRemove size={20} className="flex mr-3" />
                         ) : (
-                            <CiCircleCheck size={20} className="flex mr-2" />
+                            <CiCircleCheck size={20} className="flex mr-3" />
                         )}
-                        {toast.message}
+                        <div className='flex max-w-[40vw]'>
+                            {toast.message}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

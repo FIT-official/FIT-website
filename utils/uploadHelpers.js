@@ -20,6 +20,11 @@ export async function uploadImages(pendingImages) {
         pendingImages.forEach(file => formData.append('files', file));
         const res = await fetch('/api/upload/images', { method: 'POST', body: formData });
         const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || 'Image upload failed');
+        }
+
         files = data.files || [];
     }
     return files;
@@ -37,12 +42,11 @@ export async function uploadModels(pendingModels) {
         const ext = name.split('.').pop().toLowerCase();
 
         if (!ALLOWED_MODEL_EXTS.includes(ext)) {
-            console.error(`Unsupported file type: ${ext}`);
-            continue;
+            throw new Error(`Unsupported file type: ${ext} for file "${name}". Allowed types: ${ALLOWED_MODEL_EXTS.join(', ')}`);
         }
         if (model.size > MAX_SIZE) {
-            console.error(`File size exceeds limit: ${model.size} bytes`);
-            continue;
+            const sizeMB = (model.size / (1024 * 1024)).toFixed(1);
+            throw new Error(`File "${name}" is too large (${sizeMB}MB). Maximum size is 100MB.`);
         }
         const contentType = model.type || getMimeType(ext);
 
@@ -53,8 +57,8 @@ export async function uploadModels(pendingModels) {
                 body: JSON.stringify({ filename: name, contentType }),
             });
             if (!res.ok) {
-                console.error(`Failed to get signed URL for ${name}:`, await res.text());
-                continue;
+                const errorText = await res.text();
+                throw new Error(`Failed to get signed URL for "${name}": ${errorText}`);
             }
             const { url, key } = await res.json();
 
@@ -66,10 +70,12 @@ export async function uploadModels(pendingModels) {
             if (uploadRes.ok && key) {
                 uploadedKeys.push(key);
             } else {
-                console.error(`Failed to upload model ${name}:`, await uploadRes.text());
+                const errorText = await uploadRes.text();
+                throw new Error(`Failed to upload model "${name}" to S3: ${errorText}`);
             }
         } catch (error) {
             console.error(`Failed to upload model ${name}:`, error);
+            throw error; // Re-throw to be handled by ProductForm
         }
     }
     return uploadedKeys;
@@ -86,12 +92,11 @@ export async function uploadViewable(pendingViewableModel) {
         const ext = name.split('.').pop().toLowerCase();
 
         if (!ALLOWED_MODEL_EXTS.includes(ext)) {
-            console.error(`Unsupported file type: ${ext}`);
-            return null;
+            throw new Error(`Unsupported viewable model file type: ${ext} for file "${name}". Allowed types: ${ALLOWED_MODEL_EXTS.join(', ')}`);
         }
         if (pendingViewableModel.size > MAX_SIZE) {
-            console.error(`File size exceeds limit: ${pendingViewableModel.size} bytes`);
-            return null;
+            const sizeMB = (pendingViewableModel.size / (1024 * 1024)).toFixed(1);
+            throw new Error(`Viewable model "${name}" is too large (${sizeMB}MB). Maximum size is 15MB.`);
         }
         const contentType = pendingViewableModel.type || getMimeType(ext);
 
@@ -102,8 +107,8 @@ export async function uploadViewable(pendingViewableModel) {
                 body: JSON.stringify({ filename: name, contentType }),
             });
             if (!res.ok) {
-                console.error(`Failed to get signed URL for ${name}:`, await res.text());
-                return null;
+                const errorText = await res.text();
+                throw new Error(`Failed to get signed URL for viewable model "${name}": ${errorText}`);
             }
             const { url, key } = await res.json();
             const uploadRes = await fetch(url, {
@@ -114,12 +119,12 @@ export async function uploadViewable(pendingViewableModel) {
             if (uploadRes.ok && key) {
                 return key;
             } else {
-                console.error(`Failed to upload viewable model ${name}:`, await uploadRes.text());
-                return null;
+                const errorText = await uploadRes.text();
+                throw new Error(`Failed to upload viewable model "${name}" to S3: ${errorText}`);
             }
         } catch (error) {
             console.error(`Failed to upload viewable model ${name}:`, error);
-            return null;
+            throw error; // Re-throw to be handled by ProductForm
         }
     }
     return null;
