@@ -74,11 +74,9 @@ function ProductPage() {
         fetchProduct();
     }, [slug]);
 
-    // Function to check if user owns this digital product
     const checkDigitalOwnership = async () => {
         if (!product || !user || !isLoaded) return;
 
-        // Only check for products that have digital delivery option
         const hasDigitalDelivery = product.delivery?.deliveryTypes?.some(dt => dt.type === 'digital');
         if (!hasDigitalDelivery) {
             setOwnsDigitalProduct(false);
@@ -89,8 +87,6 @@ function ProductPage() {
         try {
             const params = new URLSearchParams({
                 productId: product._id
-                // Note: Digital ownership is now checked at product level rather than variant level
-                // since variants are now combinations of options rather than discrete items
             });
 
             const res = await fetch(`/api/user/owns-product?${params}`);
@@ -119,21 +115,18 @@ function ProductPage() {
         const hasViewableModel = !!product?.viewableModel;
         setTotalTabs(imagesCount + (hasViewableModel ? 1 : 0));
 
-        // Initialize variant selections for new variant types system
         if (product && product.variantTypes && product.variantTypes.length > 0) {
             const defaultSelections = {};
             let needsUpdate = false;
 
             product.variantTypes.forEach(variantType => {
                 const currentSelection = selectedVariantOptions[variantType.name];
-                // If no selection exists or selection is invalid, set first option as default
                 if (!currentSelection || currentSelection === '') {
                     if (variantType.options && variantType.options.length > 0) {
                         defaultSelections[variantType.name] = variantType.options[0].name;
                         needsUpdate = true;
                     }
                 } else {
-                    // Keep existing valid selection
                     defaultSelections[variantType.name] = currentSelection;
                 }
             });
@@ -143,7 +136,6 @@ function ProductPage() {
             }
         }
 
-        // Check digital ownership when product or user changes
         checkDigitalOwnership();
     }, [product, user, isLoaded])
 
@@ -156,8 +148,6 @@ function ProductPage() {
             router.push("/sign-in");
             return;
         }
-
-        // Validate variant selection for new variant types system
         if (product.variantTypes && product.variantTypes.length > 0 && !areAllVariantsSelected()) {
             alert("Please select all variant options before adding to cart.");
             return;

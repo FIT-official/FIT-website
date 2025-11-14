@@ -6,10 +6,12 @@ import CreatorPayments from '@/components/Admin/CreatorPayments'
 import CategoryManagement from '@/components/Admin/CategoryManagement'
 import DeliveryTypeManagement from '@/components/Admin/DeliveryTypeManagement'
 import OrderStatusManagement from '@/components/Admin/OrderStatusManagement'
+import { useUser } from '@clerk/nextjs'
 
 export default function AdminPage() {
     const { loading, isAdmin } = useAccess()
     const [activeTab, setActiveTab] = useState('content')
+    const { user, isLoaded } = useUser()
 
     if (loading) {
         return (
@@ -31,16 +33,21 @@ export default function AdminPage() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
-            <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+        <div className="container mx-auto py-16 max-w-6xl">
+            <div className='flex flex-col px-12 mb-12'>
+                <h3>Admin Dashboard</h3>
+                <h1 className="flex font-bold mb-6 mt-2">Hello, {user.firstName}.</h1>
+                <p className='text-xs w-md'>
+                    You can manage your site content, payments and settings here. This includes updating dynamic content, managing creator payments, categories, delivery types, and order statuses.
+                </p>
+            </div>
 
-            {/* Tab Navigation */}
-            <div className="flex space-x-1 mb-8 border-b border-borderColor overflow-x-auto">
+            <div className="flex space-x-1 mb-8 border-b border-borderColor overflow-x-auto px-12">
                 <button
                     onClick={() => setActiveTab('content')}
                     className={`px-4 cursor-pointer py-2 font-medium text-xs rounded-t-lg whitespace-nowrap ${activeTab === 'content'
                         ? 'bg-black text-white'
-                        : 'text-gray-600 hover:text-gray-800 border border-borderColor'
+                        : 'text-gray-600 hover:text-gray-800 border-t border-r border-l border-borderColor'
                         }`}
                 >
                     Content Management
@@ -49,7 +56,7 @@ export default function AdminPage() {
                     onClick={() => setActiveTab('payments')}
                     className={`px-4 cursor-pointer py-2 font-medium text-xs rounded-t-lg whitespace-nowrap ${activeTab === 'payments'
                         ? 'bg-black text-white'
-                        : 'text-gray-600 hover:text-gray-800 border border-borderColor'
+                        : 'text-gray-600 hover:text-gray-800 border-t border-r border-l  border-borderColor'
                         }`}
                 >
                     Creator Payments
@@ -58,7 +65,7 @@ export default function AdminPage() {
                     onClick={() => setActiveTab('categories')}
                     className={`px-4 cursor-pointer py-2 font-medium text-xs rounded-t-lg whitespace-nowrap ${activeTab === 'categories'
                         ? 'bg-black text-white'
-                        : 'text-gray-600 hover:text-gray-800 border border-borderColor'
+                        : 'text-gray-600 hover:text-gray-800 border-t border-r border-l  border-borderColor'
                         }`}
                 >
                     Categories
@@ -67,7 +74,7 @@ export default function AdminPage() {
                     onClick={() => setActiveTab('delivery')}
                     className={`px-4 cursor-pointer py-2 font-medium text-xs rounded-t-lg whitespace-nowrap ${activeTab === 'delivery'
                         ? 'bg-black text-white'
-                        : 'text-gray-600 hover:text-gray-800 border border-borderColor'
+                        : 'text-gray-600 hover:text-gray-800 border-t border-r border-l  border-borderColor'
                         }`}
                 >
                     Delivery Types
@@ -76,7 +83,7 @@ export default function AdminPage() {
                     onClick={() => setActiveTab('orders')}
                     className={`px-4 cursor-pointer py-2 font-medium text-xs rounded-t-lg whitespace-nowrap ${activeTab === 'orders'
                         ? 'bg-black text-white'
-                        : 'text-gray-600 hover:text-gray-800 border border-borderColor'
+                        : 'text-gray-600 hover:text-gray-800 border-t border-r border-l  border-borderColor'
                         }`}
                 >
                     Order Statuses

@@ -182,7 +182,7 @@
 }
 
 .dashboardSection {
-  @apply col-span-4 lg:col-span-1 row-span-1 bg-background border border-borderColor flex flex-col rounded-md divide-y divide-borderColor text-sm max-h-[40vh];
+  @apply col-span-4 lg:col-span-1 row-span-1 bg-background border border-borderColor flex flex-col rounded-md divide-y divide-borderColor text-sm ;
 }
 
 
@@ -207,4 +207,8 @@
   -webkit-mask-position-y: 50%;
   animation: mask-flare-loop 2s linear infinite;
   -webkit-animation: mask-flare-loop 2s linear infinite;
+}
+
+.adminDashboardContainer {
+  @apply bg-white border border-borderColor/70 rounded-lg p-6 flex flex-col gap-3;
 }

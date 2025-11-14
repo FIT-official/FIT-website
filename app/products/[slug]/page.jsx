@@ -8,6 +8,8 @@ export async function generateMetadata(props) {
     const data = await res.json();
     const product = data.product;
 
+    if (!res.ok) return { title: 'Product | Fix It Today®' };
+
     return {
         title: `${product?.name || "Product"} | Fix It Today®`,
         description: product?.description || "Browse and purchase products from Fix It Today®",

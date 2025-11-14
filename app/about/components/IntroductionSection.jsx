@@ -2,6 +2,7 @@
 import Link from "next/link"
 import { GoChevronRight } from "react-icons/go"
 import { useContent } from '@/utils/useContent'
+import MarkdownRenderer from '@/components/General/MarkdownRenderer'
 
 function IntroductionSection() {
     const { content } = useContent('about/introduction', {
@@ -28,9 +29,10 @@ function IntroductionSection() {
             <h1 className="flex w-full md:w-md text-center">
                 {content.heading}
             </h1>
-            <p className="flex text-xs text-center w-3/4 md:w-2/5 items-center justify-center">
-                {content.description}
-            </p>
+            <MarkdownRenderer
+                source={content.description}
+                className="flex text-xs text-center w-3/4 md:w-2/5 items-center justify-center"
+            />
         </div>
     )
 }

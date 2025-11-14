@@ -77,7 +77,7 @@ function Visualisation({ myProducts }) {
         }
     }, [myProducts]);
     return (
-        <div className="col-span-4 row-span-1 flex lg:flex-row flex-col items-center justify-center gap-4">
+        <div className="col-span-5 row-span-1 flex lg:flex-row flex-col items-center justify-center gap-4">
             <div className="flex w-full h-1/2 lg:h-full bg-baseColor rounded-md py-8 pl-4 pr-8 border border-borderColor">
                 <Line
                     data={getChartData()}

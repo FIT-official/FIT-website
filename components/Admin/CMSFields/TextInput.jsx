@@ -22,7 +22,7 @@ export default function TextInput({
                     rows={rows}
                     placeholder={placeholder}
                     disabled={disabled}
-                    className="w-full px-3 py-2 border border-borderColor rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                    className="formInput"
                 />
             ) : (
                 <input

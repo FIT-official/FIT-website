@@ -1,11 +1,11 @@
 'use client'
 import { useEffect, useState } from 'react';
 import ButtonLink from '../Buttons/ButtonLink';
-import { GoChevronLeft, GoChevronRight, GoStarFill } from 'react-icons/go'
-import Image from 'next/image';
+import { GoChevronLeft, GoChevronRight } from 'react-icons/go'
 import { useToast } from '../General/ToastProvider';
 import ProductCard from '../ProductCard';
 import { useContent } from '@/utils/useContent';
+import MarkdownRenderer from '@/components/General/MarkdownRenderer';
 
 function FeaturedSection() {
   const [maxItems, setMaxItems] = useState(5);
@@ -58,9 +58,10 @@ function FeaturedSection() {
               {sectionContent.title}
             </h1>
           </div>
-          <p className='w-full text-pretty flex text-sm'>
-            {sectionContent.content}
-          </p>
+          <MarkdownRenderer
+            source={sectionContent.content}
+            className='w-full text-pretty flex text-sm'
+          />
           <ButtonLink lnk={'/prints'} text={'Browse More'} />
         </div>
 

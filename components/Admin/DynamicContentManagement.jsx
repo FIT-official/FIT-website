@@ -4,8 +4,9 @@ import TextInput from './CMSFields/TextInput'
 import RichTextEditor from './CMSFields/RichTextEditor'
 import ImageUpload from './CMSFields/ImageUpload'
 import SelectField from './CMSFields/SelectField'
+import { IoRefresh } from 'react-icons/io5'
+import { MdOpenInNew } from 'react-icons/md'
 
-// Default content sections - can be extended dynamically
 const defaultContentSections = [
     {
         id: 'home/featured-section',
@@ -52,6 +53,7 @@ export default function ContentManagement() {
     const [content, setContent] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
+    const [previewKey, setPreviewKey] = useState(Date.now())
 
     useEffect(() => {
         fetchContent()
@@ -104,6 +106,7 @@ export default function ContentManagement() {
             }
 
             showToast('Content saved successfully!', 'success')
+            setPreviewKey(Date.now())
         } catch (error) {
             showToast('Failed to save content: ' + error.message, 'error')
         } finally {
@@ -132,7 +135,6 @@ export default function ContentManagement() {
         const isContentField = field === 'content'
         const isComplexContent = selectedSection.includes('terms') || selectedSection.includes('privacy')
 
-        // Determine field type based on field name and content
         if (isContentField) {
             return (
                 <RichTextEditor
@@ -146,7 +148,6 @@ export default function ContentManagement() {
             )
         }
 
-        // Handle image fields
         if (field.toLowerCase().includes('image') || field.toLowerCase().includes('photo') || field.toLowerCase().includes('avatar')) {
             return (
                 <ImageUpload
@@ -158,7 +159,6 @@ export default function ContentManagement() {
             )
         }
 
-        // Handle description/long text fields
         if (field.toLowerCase().includes('description') || field.toLowerCase().includes('subtitle') || field.toLowerCase().includes('text')) {
             return (
                 <TextInput
@@ -171,7 +171,6 @@ export default function ContentManagement() {
             )
         }
 
-        // Default to regular text input
         return (
             <TextInput
                 key={field}
@@ -186,35 +185,50 @@ export default function ContentManagement() {
 
     const currentSection = contentSections.find(s => s.id === selectedSection)
 
+    const getPreviewPath = (sectionId) => {
+        if (!sectionId) return '/'
+        if (sectionId.startsWith('home/')) return '/'
+        if (sectionId.startsWith('about/')) return '/about'
+        if (sectionId.startsWith('terms/')) return '/terms'
+        if (sectionId.startsWith('privacy/')) return '/privacy'
+        if (sectionId.startsWith('shop/')) return '/shop'
+        if (sectionId.startsWith('products/')) return '/products'
+        if (sectionId.startsWith('creators/')) return '/creators'
+        if (sectionId.startsWith('prints/')) return '/prints'
+        if (sectionId.startsWith('dashboard/')) return '/dashboard'
+        if (sectionId.startsWith('onboarding/')) return '/onboarding'
+        if (sectionId.startsWith('account/')) return '/account'
+        return '/'
+    }
+
+    const previewUrl = `${getPreviewPath(selectedSection)}?previewKey=${previewKey}`
+
     return (
-        <div className="space-y-6">
-            {/* Section Selector */}
-            <div className="bg-white border border-borderColor rounded-lg p-4">
-                <div className="flex flex-col space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Select Content Section:
-                        </label>
-                        <select
-                            value={selectedSection}
-                            onChange={(e) => setSelectedSection(e.target.value)}
-                            className="w-full px-3 py-2 border border-borderColor rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            {contentSections.map((section) => (
-                                <option key={section.id} value={section.id}>
-                                    {section.name}
-                                </option>
-                            ))}
-                        </select>
+        <div className="flex gap-4 flex-col px-12">
+            <div className="adminDashboardContainer">
+                <label className="flex text-sm font-semibold pl-1">
+                    Select Content Section
+                </label>
+                <select
+                    value={selectedSection}
+                    onChange={(e) => setSelectedSection(e.target.value)}
+                    className="w-full px-2 font-normal font- py-1 border border-borderColor bg-borderColor/40 rounded-sm text-sm outline-none"
+                >
+                    {contentSections.map((section) => (
+                        <option key={section.id} value={section.id}>
+                            {section.name}
+                        </option>
+                    ))}
+                </select>
+
+                {currentSection && (
+                    <div className="text-xs font-normal bg-borderColor/30 p-3 rounded">
+                        <strong>Description:</strong> {currentSection.description}
+                        <br />
+                        <strong>Fields:</strong> {currentSection.fields.join(', ')}
                     </div>
-                    {currentSection && (
-                        <div className="text-xs text-gray-600 bg-gray-50 p-3 rounded">
-                            <strong>Description:</strong> {currentSection.description}
-                            <br />
-                            <strong>Fields:</strong> {currentSection.fields.join(', ')}
-                        </div>
-                    )}
-                </div>
+                )}
+
             </div>
 
             {/* Content Editor */}
@@ -223,42 +237,42 @@ export default function ContentManagement() {
                     <div className="loader" />
                 </div>
             ) : content && currentSection ? (
-                <div className="space-y-6">
-                    <div className="bg-white border border-borderColor rounded-lg p-6">
-                        <h2 className="text-xl font-semibold mb-4">
-                            Editing: {currentSection.name}
-                        </h2>
+                <div className="adminDashboardContainer">
 
-                        <div className="space-y-6">
-                            {currentSection.fields.map((field) => {
-                                const value = field === 'content' ? content.content : content.frontmatter[field]
-                                const onChange = (newValue) => updateField(field, newValue)
+                    <h2 className="text-xl font-semibold mb-4">
+                        Editing: {currentSection.name}
+                    </h2>
 
-                                return renderField(field, value, onChange)
-                            })}
+                    <div className="space-y-6">
+                        {currentSection.fields.map((field) => {
+                            const value = field === 'content' ? content.content : content.frontmatter[field]
+                            const onChange = (newValue) => updateField(field, newValue)
 
-                            <div className="flex gap-4 pt-4 border-t">
-                                <button
-                                    onClick={handleSave}
-                                    disabled={isSaving}
-                                    className="formBlackButton disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isSaving ? 'Saving...' : 'Save Changes'}
-                                </button>
+                            return renderField(field, value, onChange)
+                        })}
 
-                                <button
-                                    onClick={fetchContent}
-                                    disabled={isLoading}
-                                    className="formButton disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    Reset
-                                </button>
-                            </div>
+                        <div className="flex gap-4 pt-4 border-t">
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="formBlackButton disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isSaving ? 'Saving...' : 'Save Changes'}
+                            </button>
+
+                            <button
+                                onClick={fetchContent}
+                                disabled={isLoading}
+                                className="formButton disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Reset
+                            </button>
                         </div>
                     </div>
+
                 </div>
             ) : (
-                <div className="text-center py-12 bg-white border border-borderColor rounded-lg">
+                <div className="adminDashboardContainer text-center">
                     <p>Failed to load content. Please try again.</p>
                     <button
                         onClick={fetchContent}
@@ -268,6 +282,44 @@ export default function ContentManagement() {
                     </button>
                 </div>
             )}
+            <div className="bg-white border border-borderColor rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                    <div>
+                        <h3 className="font-semibold">Preview</h3>
+                        <p className="text-xs text-gray-600">This shows the actual page using the last saved content. Save changes, then refresh if needed.</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setPreviewKey(Date.now())}
+                            className="formButton"
+                            type="button"
+                        >
+                            <IoRefresh />
+                        </button>
+                        <a
+                            href={previewUrl || '#'}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="formBlackButton"
+                        >
+                            <MdOpenInNew />
+                        </a>
+                    </div>
+                </div>
+                <div className="relative w-full border border-dashed border-borderColor rounded-md overflow-hidden bg-gray-50">
+                    {previewUrl ? (
+                        <iframe
+                            key={previewKey}
+                            src={previewUrl}
+                            title="Content Preview"
+                            className="w-full"
+                            style={{ height: 600, border: '0' }}
+                        />
+                    ) : (
+                        <div className="p-6 text-sm text-gray-600">Preview unavailable.</div>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }

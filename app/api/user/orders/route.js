@@ -50,7 +50,19 @@ export async function GET(req) {
         if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         await connectToDatabase();
         const user = await User.findOne({ userId }, { orderHistory: 1, _id: 0 });
-        const orders = user?.orderHistory ?? [];
+        if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+        const { searchParams } = new URL(req.url);
+        const orderId = searchParams.get('orderId');
+
+        if (orderId) {
+            const order = user.orderHistory.id(orderId);
+            if (!order) {
+                return NextResponse.json({ error: "Order not found" }, { status: 404 });
+            }
+            return NextResponse.json({ order }, { status: 200 });
+        }
+
+        const orders = user.orderHistory ?? [];
         return NextResponse.json({ orders }, { status: 200 });
     } catch (error) {
         console.error("Error fetching user orders:", error);

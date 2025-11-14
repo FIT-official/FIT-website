@@ -1,11 +1,5 @@
 import { useState, useEffect } from 'react'
 
-/**
- * Custom hook to fetch CMS content for any section
- * @param {string} contentPath - The path to the content (e.g., 'home/featured-section')
- * @param {object} defaultContent - Default content to use if fetch fails
- * @returns {object} { content, isLoading, error, refetch }
- */
 export function useContent(contentPath, defaultContent = {}) {
     const [content, setContent] = useState(defaultContent)
     const [isLoading, setIsLoading] = useState(true)
@@ -32,7 +26,6 @@ export function useContent(contentPath, defaultContent = {}) {
             if (response.ok) {
                 const data = await response.json()
 
-                // Merge frontmatter and content into a flat object
                 const mergedContent = {
                     ...defaultContent,
                     ...data.frontmatter,
@@ -64,12 +57,6 @@ export function useContent(contentPath, defaultContent = {}) {
     }
 }
 
-/**
- * Utility function to fetch content directly (for use in server components or one-off fetches)
- * @param {string} contentPath - The path to the content
- * @param {object} defaultContent - Default content to use if fetch fails
- * @returns {Promise<object>} The content object
- */
 export async function fetchContent(contentPath, defaultContent = {}) {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/content?path=${contentPath}`, {
