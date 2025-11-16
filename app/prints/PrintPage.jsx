@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { PRINT_CATEGORIES, PRINT_SUBCATEGORIES } from "@/lib/categories";
 import Image from "next/image";
 import { GoChevronDown } from "react-icons/go";
 import { AnimatePresence, motion } from "framer-motion";
@@ -27,12 +26,17 @@ function PrintPage() {
 
             let categoryIdx = null;
             let subcategoryIdx = null;
-
             if (categoryName) {
-                categoryIdx = PRINT_CATEGORIES.findIndex(cat => cat === categoryName);
-            }
-            if (categoryIdx !== -1 && subcategoryName) {
-                subcategoryIdx = PRINT_SUBCATEGORIES[categoryIdx]?.findIndex(sub => sub === subcategoryName);
+                const settingsRes = await fetch('/api/admin/settings');
+                if (settingsRes.ok) {
+                    const settingsData = await settingsRes.json();
+                    const printCats = (settingsData.categories || []).filter(c => c.type === 'print' && c.isActive);
+                    categoryIdx = printCats.findIndex(c => c.displayName === categoryName);
+                    if (categoryIdx !== -1 && subcategoryName) {
+                        const subcats = (printCats[categoryIdx].subcategories || []).map(s => s.displayName);
+                        subcategoryIdx = subcats.findIndex(s => s === subcategoryName);
+                    }
+                }
             }
 
             let url = "/api/product?productType=print";

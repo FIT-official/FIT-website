@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { SHOP_CATEGORIES, SHOP_SUBCATEGORIES } from "@/lib/categories";
+import { useEffect } from 'react';
 import Image from "next/image";
 import { GoChevronDown } from "react-icons/go";
 import { AnimatePresence, motion } from "framer-motion";
@@ -25,14 +25,20 @@ function ShopPage() {
             const categoryName = searchParams.get('productCategory');
             const subcategoryName = searchParams.get('productSubCategory');
 
+            // Map names to indices by fetching categories from admin settings
             let categoryIdx = null;
             let subcategoryIdx = null;
-
             if (categoryName) {
-                categoryIdx = SHOP_CATEGORIES.findIndex(cat => cat === categoryName);
-            }
-            if (categoryIdx !== -1 && subcategoryName) {
-                subcategoryIdx = SHOP_SUBCATEGORIES[categoryIdx]?.findIndex(sub => sub === subcategoryName);
+                const settingsRes = await fetch('/api/admin/settings');
+                if (settingsRes.ok) {
+                    const settingsData = await settingsRes.json();
+                    const shopCats = (settingsData.categories || []).filter(c => c.type === 'shop' && c.isActive);
+                    categoryIdx = shopCats.findIndex(c => c.displayName === categoryName);
+                    if (categoryIdx !== -1 && subcategoryName) {
+                        const subcats = (shopCats[categoryIdx].subcategories || []).map(s => s.displayName);
+                        subcategoryIdx = subcats.findIndex(s => s === subcategoryName);
+                    }
+                }
             }
 
             let url = "/api/product?productType=shop";

@@ -1,39 +1,51 @@
 import OrderPage from "./OrderPage";
+import { auth } from "@clerk/nextjs/server";
+import { connectToDatabase } from "@/lib/db";
+import User from "@/models/User";
 
 export async function generateMetadata(props) {
     const params = await props.params;
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user/orders?orderId=${params.orderId}`, {
-        cache: 'no-store'
-    });
-    const data = await res.json();
-    const order = data.order;
 
-    if (!res.ok) return { title: 'Your Order | Fix It Today®' };
+    try {
+        const { userId } = await auth();
+        if (!userId) return { title: 'Your Order | Fix It Today®' };
 
-    return {
-        title: `${order?.name || "Order"} | Fix It Today®`,
-        description: order?.description || "View your order from Fix It Today®",
-        openGraph: {
-            title: `${order?.name || "Order"} | Fix It Today®`,
-            description: order?.description || "View your order from Fix It Today®",
-            url: `https://fixitoday.com/account/orders/${params.orderId}`,
-            siteName: "Fix It Today®",
-            images: [
-                {
-                    url: product?.image || "/fitogimage.png",
-                    width: 800,
-                    height: 800,
-                    alt: product?.name || "Fix It Today® Photo",
-                },
-            ],
-            locale: "en_SG",
-            type: "website",
-        },
-    };
+        await connectToDatabase();
+        const user = await User.findOne({ userId }, { orderHistory: 1, _id: 0 });
+        if (!user) return { title: 'Your Order | Fix It Today®' };
+
+        const order = user.orderHistory.id(params.orderId);
+        if (!order) return { title: 'Your Order | Fix It Today®' };
+
+        return {
+            title: `Order #${order._id?.toString().slice(-8) || params.orderId.slice(-8)} | Fix It Today®`,
+            description: `View your order details from Fix It Today®`,
+            openGraph: {
+                title: `Order #${order._id?.toString().slice(-8) || params.orderId.slice(-8)} | Fix It Today®`,
+                description: `View your order details from Fix It Today®`,
+                url: `https://fixitoday.com/account/orders/${params.orderId}`,
+                siteName: "Fix It Today®",
+                images: [
+                    {
+                        url: order.items?.[0]?.product?.images?.[0] || "/fitogimage.png",
+                        width: 800,
+                        height: 800,
+                        alt: "Fix It Today® Order",
+                    },
+                ],
+                locale: "en_SG",
+                type: "website",
+            },
+        };
+    } catch (error) {
+        console.error('Error generating metadata:', error);
+        return { title: 'Your Order | Fix It Today®' };
+    }
 }
 
-function OrderLayout() {
-    return <OrderPage />
+async function OrderLayout(props) {
+    const params = await props.params;
+    return <OrderPage orderId={params.orderId} />
 }
 
 export default OrderLayout

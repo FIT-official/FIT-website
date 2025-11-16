@@ -1,6 +1,8 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useOrderStatuses, getStatusDisplayName, getStatusColor } from '@/utils/useOrderStatuses';
+import { HiExternalLink } from 'react-icons/hi';
 
 function OrderSkeleton() {
     return (
@@ -135,9 +137,18 @@ function OrderSection() {
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex flex-row gap-2 items-center">
-                                    <span className="text-xs text-lightColor">Order:</span>
-                                    <span className="font-semibold text-textColor text-xs uppercase">#{order._id?.slice(-8) || "N/A"}</span>
+                                <div className="flex flex-row gap-3 items-center">
+                                    <div className="flex flex-row gap-2 items-center">
+                                        <span className="text-xs text-lightColor">Order:</span>
+                                        <span className="font-semibold text-textColor text-xs uppercase">#{order._id?.slice(-8) || "N/A"}</span>
+                                    </div>
+                                    <Link
+                                        href={`/account/orders/${order._id}`}
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors"
+                                    >
+                                        View Order
+                                        <HiExternalLink size={12} />
+                                    </Link>
                                 </div>
                             </div>
                             <div className="flex flex-col md:flex-row gap-4 px-4 py-4 items-start md:items-center">

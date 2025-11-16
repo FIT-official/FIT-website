@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { s3 } from "@/lib/s3";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
-import { auth } from "@clerk/nextjs/server";
 import { connectToDatabase } from "@/lib/db";
 import DigitalProductTransaction from "@/models/DigitalProductTransaction";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { authenticate } from "@/lib/authenticate";
 
 function isValidIdx(idx, links) {
     const i = Number(idx);
@@ -12,9 +12,7 @@ function isValidIdx(idx, links) {
 }
 
 export async function GET(req, { params }) {
-    const { userId } = await auth();
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
+    const { userId } = await authenticate(req);
     const awaitedParams = await params;
     const productId = awaitedParams.productId;
     if (!productId) return NextResponse.json({ error: "Invalid Product ID" }, { status: 400 });

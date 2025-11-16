@@ -40,6 +40,10 @@
     @apply font-semibold text-3xl md:text-4xl tracking-tight text-textColor;
   }
 
+    h2 {
+      @apply font-medium text-xl md:text-2xl tracking-tight text-textColor;
+    }
+
   h3{
     @apply font-semibold text-sm md:text-base tracking-tight text-lightColor;
   }
@@ -210,5 +214,20 @@
 }
 
 .adminDashboardContainer {
-  @apply bg-white border border-borderColor/70 rounded-lg p-6 flex flex-col gap-3;
+  @apply bg-white border border-lightColor/20 rounded-lg p-6 flex flex-col gap-3;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out;
 }

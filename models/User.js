@@ -44,7 +44,12 @@ const OrderSchema = new mongoose.Schema(
             required: function () { return this.orderType === "printOrder"; }
         },
         statusUpdatedBy: { type: String, default: "system" },
-        trackingNumber: { type: String, default: null },
+        trackingId: { type: String, default: null }, // Tracking ID for shipments
+        statusHistory: [{
+            status: { type: String, required: true },
+            timestamp: { type: Date, default: Date.now },
+            updatedBy: { type: String, default: "system" }
+        }], // History of status changes for timeline
         notes: { type: String, default: "", maxlength: 1000 },
         schemaVersion: { type: Number, default: 2 },
     },

@@ -18,13 +18,7 @@ export default function RichTextEditor({
     height = 300,
     showHtmlTip = false
 }) {
-    const fileInputRef = useRef(null)
     const [uploading, setUploading] = useState(false)
-
-    const handleUploadClick = () => {
-        if (disabled) return
-        fileInputRef.current?.click()
-    }
 
     const handleFilesSelected = async (e) => {
         const files = Array.from(e.target.files || [])
@@ -57,44 +51,18 @@ export default function RichTextEditor({
             alert(err.message || 'Image upload failed')
         } finally {
             setUploading(false)
-            // reset input so selecting the same file again still triggers change
-            if (fileInputRef.current) fileInputRef.current.value = ''
         }
     }
 
     return (
-        <div className={`space-y-2 ${className}`}>
-            <label className="block text-sm font-medium text-gray-700">
+        <div className={`flex flex-col gap-2 ${className}`}>
+            <label className="formLabel">
                 {label} {required && <span className="text-red-500">*</span>}
                 <span className="text-xs text-gray-500 font-normal ml-2">
                     (Rich Text Editor - Markdown/HTML)
                 </span>
             </label>
 
-            <div className="flex items-center justify-between">
-                <div className="text-xs text-gray-600">
-                    You can use Markdown syntax or HTML tags.
-                </div>
-                <div className="flex items-center gap-2">
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        className="hidden"
-                        onChange={handleFilesSelected}
-                    />
-                    <button
-                        type="button"
-                        onClick={handleUploadClick}
-                        disabled={disabled || uploading}
-                        className={`px-3 py-1.5 text-xs rounded-md border ${disabled || uploading ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-50'} border-gray-300 text-gray-700`}
-                        title="Upload images and insert Markdown image tags"
-                    >
-                        {uploading ? 'Uploading…' : 'Upload & insert image'}
-                    </button>
-                </div>
-            </div>
 
             <div className="border border-borderColor rounded-md overflow-hidden">
                 <MDEditor

@@ -73,10 +73,12 @@ export async function GET(req) {
 export async function PUT(req) {
     try {
         await connectToDatabase();
-        const { orderId, status } = await req.json();
-        if (!orderId || !status) {
-            return NextResponse.json({ error: "Missing orderId or status" }, { status: 400 });
+        const { orderId, status, trackingId } = await req.json();
+
+        if (!orderId) {
+            return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
         }
+
         const user = await User.findOne({ "orderHistory._id": orderId });
         if (!user) {
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -87,12 +89,31 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
         }
 
-        order.status = status;
+        // Update status if provided
+        if (status && status !== order.status) {
+            order.status = status;
+
+            // Add to status history
+            if (!order.statusHistory) {
+                order.statusHistory = [];
+            }
+            order.statusHistory.push({
+                status: status,
+                timestamp: new Date(),
+                updatedBy: 'creator'
+            });
+        }
+
+        // Update tracking ID if provided (even if null to clear it)
+        if (trackingId !== undefined) {
+            order.trackingId = trackingId || null;
+        }
+
         await user.save();
 
-        return NextResponse.json({ success: true }, { status: 200 });
+        return NextResponse.json({ success: true, order }, { status: 200 });
     } catch (error) {
-        console.error("Error updating order status:", error);
-        return NextResponse.json({ error: "Failed to update order status" }, { status: 500 });
+        console.error("Error updating order:", error);
+        return NextResponse.json({ error: "Failed to update order: " + error.message }, { status: 500 });
     }
 }

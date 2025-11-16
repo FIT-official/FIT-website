@@ -2,21 +2,20 @@ import mongoose from "mongoose";
 
 const DeliveryTypeSchema = new mongoose.Schema(
     {
-        type: { type: String, required: true },
+        type: { type: String, required: true }, // "digital" or reference to deliveryType name from AppSettings
         price: {
             type: Number,
             required: false,
             default: 0,
         },
-        pickupLocation: { type: String, default: null, required: false },
-        royaltyFee: { type: Number, default: 0, required: false },
+        customPrice: { type: Number, default: null, required: false }, // Creator's override price
+        customDescription: { type: String, default: null, required: false }, // Creator's custom notes (e.g., pickup location)
+        pickupLocation: { type: String, default: null, required: false }, // Legacy - keep for backward compatibility
         deliveryTypeConfigId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'DeliveryTypeConfig',
+            ref: 'AppSettings.additionalDeliveryTypes',
             required: false
         },
-        customFeeName: { type: String, required: false },
-        customRoyaltyFee: { type: Number, required: false, min: 0 },
     },
     { _id: false }
 );
@@ -90,15 +89,13 @@ const ProductSchema = new mongoose.Schema(
         // Legacy category system (for backward compatibility)
         category: { type: Number, required: false, default: 0 },
         subcategory: { type: Number, required: false, default: 0 },
-        // New admin-configurable category system
+        // New name-based category system (references SHOP_CATEGORIES/PRINT_CATEGORIES from lib/categories.js)
         categoryId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Category',
+            type: String,
             required: false
         },
         subcategoryId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Subcategory',
+            type: String,
             required: false
         },
 

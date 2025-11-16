@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
-import { auth } from "@clerk/nextjs/server";
 import { calculateCartItemBreakdown } from "../calculateBreakdown";
+import { authenticate } from "@/lib/authenticate";
 
 async function fetchProduct(productId) {
     try {
@@ -17,12 +17,7 @@ async function fetchProduct(productId) {
 
 export async function GET(req) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            console.error("Unauthorized: No userId from auth()");
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
+        const { userId } = await authenticate(req);
         await connectToDatabase();
         const user = await User.findOne({ userId });
         const address = user.contact?.address;

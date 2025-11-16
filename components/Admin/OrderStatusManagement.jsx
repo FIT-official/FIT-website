@@ -1,10 +1,38 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useToast } from '@/components/General/ToastProvider'
+import { MdExpandMore, MdExpandLess, MdCheckCircle, MdOutlineLightbulb, MdAdd } from 'react-icons/md'
+import { TbTruckDelivery, TbPackage, TbBox, TbChecks, TbX, TbClock } from 'react-icons/tb'
+import { FiPackage, FiTruck, FiCheck } from 'react-icons/fi'
+import { BiPackage } from 'react-icons/bi'
+import { HiSparkles } from 'react-icons/hi'
+import { IoMdCheckmarkCircleOutline, IoMdPrint } from 'react-icons/io'
+import { RxCross1 } from 'react-icons/rx'
+
+// Available icons for order statuses
+const AVAILABLE_ICONS = [
+    { name: 'TbTruckDelivery', component: TbTruckDelivery, label: 'Truck Delivery' },
+    { name: 'TbPackage', component: TbPackage, label: 'Package' },
+    { name: 'TbBox', component: TbBox, label: 'Box' },
+    { name: 'TbChecks', component: TbChecks, label: 'Checks' },
+    { name: 'FiPackage', component: FiPackage, label: 'Package Outline' },
+    { name: 'FiTruck', component: FiTruck, label: 'Truck Outline' },
+    { name: 'IoMdCheckmarkCircleOutline', component: IoMdCheckmarkCircleOutline, label: 'Check Circle' },
+    { name: 'IoMdPrint', component: IoMdPrint, label: 'Print' },
+    { name: 'TbClock', component: TbClock, label: 'Clock' },
+    { name: 'BiPackage', component: BiPackage, label: 'Package Alt' },
+]
+
+const getIconComponent = (iconName) => {
+    const icon = AVAILABLE_ICONS.find(i => i.name === iconName)
+    return icon ? icon.component : TbTruckDelivery
+}
 
 export default function OrderStatusManagement() {
     const [orderStatuses, setOrderStatuses] = useState([])
     const [loading, setLoading] = useState(false)
+    const [expandedStatuses, setExpandedStatuses] = useState({})
+    const [showForm, setShowForm] = useState(false)
     const { showToast } = useToast()
 
     // Form state
@@ -14,6 +42,7 @@ export default function OrderStatusManagement() {
         description: '',
         orderType: 'order',
         color: '#6b7280',
+        icon: 'TbTruckDelivery',
         order: 0,
         isActive: true
     })
@@ -61,6 +90,7 @@ export default function OrderStatusManagement() {
                     'success'
                 )
                 resetForm()
+                setShowForm(false)
                 fetchOrderStatuses()
             } else {
                 showToast(data.error || 'Operation failed', 'error')
@@ -98,15 +128,18 @@ export default function OrderStatusManagement() {
             description: item.description,
             orderType: item.orderType,
             color: item.color,
+            icon: item.icon || 'TbTruckDelivery',
             order: item.order,
             isActive: item.isActive
         })
         setEditingItem(item)
+        setShowForm(true)
     }
 
     const cancelEdit = () => {
         resetForm()
         setEditingItem(null)
+        setShowForm(false)
     }
 
     const resetForm = () => {
@@ -116,62 +149,91 @@ export default function OrderStatusManagement() {
             description: '',
             orderType: 'order',
             color: '#6b7280',
+            icon: 'TbTruckDelivery',
             order: 0,
             isActive: true
         })
+        setEditingItem(null)
+    }
+
+    const toggleStatus = (statusKey) => {
+        setExpandedStatuses(prev => ({
+            ...prev,
+            [statusKey]: !prev[statusKey]
+        }))
+    }
+
+    // Group statuses by order type
+    const groupedStatuses = {
+        order: orderStatuses.filter(s => s.orderType === 'order'),
+        printOrder: orderStatuses.filter(s => s.orderType === 'printOrder')
     }
 
     return (
         <div className="space-y-6">
-            <div className="bg-white rounded-lg border border-borderColor p-6">
-                <h2 className="text-xl font-semibold mb-4">Order Status Management</h2>
+            {/* Header with Add Button */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-2xl font-semibold text-textColor">Order Status Management</h2>
+                    <p className="text-sm text-lightColor mt-1">Create and manage custom order statuses for your creators</p>
+                </div>
+                <button
+                    onClick={() => setShowForm(!showForm)}
+                    className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
+                >
+                    <MdAdd size={18} />
+                    Add Status
+                </button>
+            </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Form */}
-                    <div>
-                        <h3 className="text-lg font-medium mb-4">
-                            {editingItem ? 'Edit Order Status' : 'Add New Order Status'}
-                        </h3>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Form - Collapsible */}
+            {showForm && (
+                <div className="bg-white border border-borderColor rounded-xl p-6 shadow-sm animate-slideDown">
+                    <h3 className="text-lg font-semibold text-textColor mb-4">
+                        {editingItem ? 'Edit Order Status' : 'Create New Order Status'}
+                    </h3>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium mb-1">Status Key *</label>
+                                <label className="block text-sm font-medium text-textColor mb-2">Status Key *</label>
                                 <input
                                     type="text"
                                     value={form.statusKey}
                                     onChange={(e) => setForm(prev => ({ ...prev, statusKey: e.target.value }))}
                                     className="formInput"
-                                    placeholder="e.g., pending_config, processing"
+                                    placeholder="e.g., awaiting_shipment"
                                     required
+                                    disabled={editingItem}
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Internal key, should be unique and snake_case</p>
+                                <p className="text-xs text-lightColor mt-1">Unique identifier (snake_case, cannot be changed)</p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-1">Display Name *</label>
+                                <label className="block text-sm font-medium text-textColor mb-2">Display Name *</label>
                                 <input
                                     type="text"
                                     value={form.displayName}
                                     onChange={(e) => setForm(prev => ({ ...prev, displayName: e.target.value }))}
                                     className="formInput"
-                                    placeholder="e.g., Pending Configuration, Processing"
+                                    placeholder="e.g., Awaiting Shipment"
                                     required
                                 />
-                                <p className="text-xs text-gray-500 mt-1">User-friendly name shown in UI</p>
+                                <p className="text-xs text-lightColor mt-1">User-friendly name</p>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Description</label>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-textColor mb-2">Description</label>
                                 <textarea
                                     value={form.description}
                                     onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
                                     className="formInput"
-                                    rows="3"
-                                    placeholder="Brief description of this status"
+                                    rows="2"
+                                    placeholder="Brief description of this status..."
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-1">Order Type *</label>
+                                <label className="block text-sm font-medium text-textColor mb-2">Order Type *</label>
                                 <select
                                     value={form.orderType}
                                     onChange={(e) => setForm(prev => ({ ...prev, orderType: e.target.value }))}
@@ -184,125 +246,255 @@ export default function OrderStatusManagement() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-1">Color</label>
-                                <div className="flex space-x-2">
+                                <label className="block text-sm font-medium text-textColor mb-2">Display Order</label>
+                                <input
+                                    type="number"
+                                    value={form.order}
+                                    onChange={(e) => setForm(prev => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
+                                    className="formInput"
+                                    min="0"
+                                    placeholder="0"
+                                />
+                                <p className="text-xs text-lightColor mt-1">Lower numbers appear first</p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-textColor mb-2">Color</label>
+                                <div className="flex gap-2">
                                     <input
                                         type="color"
                                         value={form.color}
                                         onChange={(e) => setForm(prev => ({ ...prev, color: e.target.value }))}
-                                        className="w-12 h-10 border border-borderColor rounded"
+                                        className="w-12 h-10 border border-borderColor rounded cursor-pointer"
                                     />
                                     <input
                                         type="text"
                                         value={form.color}
                                         onChange={(e) => setForm(prev => ({ ...prev, color: e.target.value }))}
-                                        className="formInput flex-1"
+                                        className="formInput flex-1 font-mono text-sm"
                                         placeholder="#6b7280"
                                     />
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">Hex color for UI display</p>
                             </div>
-
-
 
                             <div>
-                                <label className="block text-sm font-medium mb-1">Order</label>
-                                <input
-                                    type="number"
-                                    value={form.order}
-                                    onChange={(e) => setForm(prev => ({ ...prev, order: parseInt(e.target.value) }))}
-                                    className="formInput"
-                                    min="0"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">Display order in status lists</p>
+                                <label className="block text-sm font-medium text-textColor mb-2">Icon</label>
+                                <div className="grid grid-cols-5 gap-2">
+                                    {AVAILABLE_ICONS.map(icon => {
+                                        const Icon = icon.component
+                                        const isSelected = form.icon === icon.name
+                                        return (
+                                            <button
+                                                key={icon.name}
+                                                type="button"
+                                                onClick={() => setForm(prev => ({ ...prev, icon: icon.name }))}
+                                                className={`p-3 border-2 rounded-lg transition-all ${isSelected
+                                                        ? 'border-black bg-black/5'
+                                                        : 'border-borderColor hover:border-lightColor'
+                                                    }`}
+                                                title={icon.label}
+                                            >
+                                                <Icon size={20} className={isSelected ? 'text-black' : 'text-lightColor'} />
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                                <p className="text-xs text-lightColor mt-2">Selected: {AVAILABLE_ICONS.find(i => i.name === form.icon)?.label}</p>
                             </div>
 
-                            <div className="flex items-center">
+                            <div className="md:col-span-2 flex items-center gap-3">
                                 <input
                                     type="checkbox"
                                     id="isActive"
                                     checked={form.isActive}
                                     onChange={(e) => setForm(prev => ({ ...prev, isActive: e.target.checked }))}
-                                    className="mr-2"
+                                    className="w-4 h-4 rounded border-borderColor"
                                 />
-                                <label htmlFor="isActive" className="text-sm font-medium">Active</label>
+                                <label htmlFor="isActive" className="text-sm font-medium text-textColor">
+                                    Active (visible to creators)
+                                </label>
                             </div>
+                        </div>
 
-                            <div className="flex space-x-2">
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="formBlackButton"
-                                >
-                                    {loading ? 'Saving...' : (editingItem ? 'Update' : 'Create')}
-                                </button>
-                                {editingItem && (
-                                    <button
-                                        type="button"
-                                        onClick={cancelEdit}
-                                        className="formButton"
-                                    >
-                                        Cancel
-                                    </button>
-                                )}
-                            </div>
-                        </form>
-                    </div>
+                        <div className="flex gap-2 pt-4 border-t border-borderColor">
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium disabled:opacity-50"
+                            >
+                                {loading ? 'Saving...' : (editingItem ? 'Update Status' : 'Create Status')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={cancelEdit}
+                                className="px-4 py-2 border border-borderColor rounded-lg hover:bg-baseColor transition-colors text-sm font-medium"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
 
-                    {/* List */}
-                    <div>
-                        <h3 className="text-lg font-medium mb-4">Existing Order Statuses</h3>
-                        <div className="space-y-3 max-h-96 overflow-y-auto">
-                            {orderStatuses.map((item, index) => (
-                                <div key={item._id || `hardcoded-${item.statusKey}-${item.orderType}-${index}`} className="p-4 border border-borderColor rounded">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center space-x-2">
+            {/* Regular Orders Section */}
+            <div className="bg-white border border-borderColor rounded-xl overflow-hidden">
+                <div className="px-6 py-4 border-b border-borderColor bg-gradient-to-r from-blue-50 to-purple-50">
+                    <h3 className="text-sm font-semibold text-textColor uppercase tracking-wide">Regular Orders</h3>
+                    <p className="text-xs text-lightColor mt-1">{groupedStatuses.order.length} status{groupedStatuses.order.length !== 1 ? 'es' : ''}</p>
+                </div>
+                <div className="p-4 space-y-2">
+                    {groupedStatuses.order.length === 0 ? (
+                        <div className="text-center py-8 text-lightColor text-sm">
+                            <MdOutlineLightbulb className="mx-auto mb-2" size={24} />
+                            <p>No custom regular order statuses yet</p>
+                        </div>
+                    ) : (
+                        groupedStatuses.order
+                            .sort((a, b) => (a.order || 0) - (b.order || 0))
+                            .map((status) => {
+                                const Icon = getIconComponent(status.icon)
+                                const isExpanded = expandedStatuses[status.statusKey]
+                                const isBuiltIn = status.isHardcoded
+
+                                return (
+                                    <div key={status._id || status.statusKey} className="border border-borderColor rounded-lg overflow-hidden">
+                                        <button
+                                            onClick={() => !isBuiltIn && toggleStatus(status.statusKey)}
+                                            className="w-full p-4 flex items-center justify-between hover:bg-baseColor/50 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-3">
                                                 <div
-                                                    className="w-4 h-4 rounded"
-                                                    style={{ backgroundColor: item.color }}
-                                                ></div>
-                                                <div className="font-medium">{item.displayName}</div>
+                                                    className="w-10 h-10 rounded-lg flex items-center justify-center"
+                                                    style={{ backgroundColor: `${status.color}20` }}
+                                                >
+                                                    <Icon size={20} style={{ color: status.color }} />
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="font-medium text-sm text-textColor">{status.displayName}</div>
+                                                    <div className="text-xs text-lightColor flex items-center gap-2 mt-0.5">
+                                                        <span className="font-mono">{status.statusKey}</span>
+                                                        {isBuiltIn && <span className="px-2 py-0.5 bg-gray-100 rounded text-[10px]">Built-in</span>}
+                                                        {!status.isActive && <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px]">Inactive</span>}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="text-sm text-gray-600 mt-1">
-                                                Key: {item.statusKey} • Type: {item.orderType}
-                                            </div>
-                                            <div className="text-sm text-gray-600">
-                                                Order: {item.order} • {item.isActive ? 'Active' : 'Inactive'}
-                                            </div>
-                                            {item.description && (
-                                                <div className="text-sm text-gray-500 mt-1 italic">
-                                                    {item.description}
+                                            {!isBuiltIn && (
+                                                <div className="flex items-center gap-2">
+                                                    {isExpanded ? (
+                                                        <MdExpandLess className="text-xl text-lightColor" />
+                                                    ) : (
+                                                        <MdExpandMore className="text-xl text-lightColor" />
+                                                    )}
                                                 </div>
                                             )}
-                                        </div>
-                                        <div className="flex space-x-2 ml-4">
-                                            {item.isHardcoded ? (
-                                                <span className="text-sm px-3 py-1 bg-gray-100 text-gray-500 rounded">
-                                                    Built-in
-                                                </span>
-                                            ) : (
-                                                <>
+                                        </button>
+
+                                        {isExpanded && !isBuiltIn && (
+                                            <div className="p-4 border-t border-borderColor bg-baseColor/30 animate-slideDown">
+                                                {status.description && (
+                                                    <p className="text-sm text-lightColor mb-4">{status.description}</p>
+                                                )}
+                                                <div className="flex gap-2">
                                                     <button
-                                                        onClick={() => startEdit(item)}
-                                                        className="text-sm px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                                        onClick={() => startEdit(status)}
+                                                        className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-xs font-medium"
                                                     >
                                                         Edit
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDelete(item._id)}
-                                                        className="text-sm px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                                                        onClick={() => handleDelete(status._id)}
+                                                        className="px-3 py-1.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors text-xs font-medium"
                                                     >
                                                         Delete
                                                     </button>
-                                                </>
-                                            )}
-                                        </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                            ))}
+                                )
+                            })
+                    )}
+                </div>
+            </div>
+
+            {/* Print Orders Section */}
+            <div className="bg-white border border-borderColor rounded-xl overflow-hidden">
+                <div className="px-6 py-4 border-b border-borderColor bg-gradient-to-r from-purple-50 to-pink-50">
+                    <h3 className="text-sm font-semibold text-textColor uppercase tracking-wide">Print Orders</h3>
+                    <p className="text-xs text-lightColor mt-1">{groupedStatuses.printOrder.length} status{groupedStatuses.printOrder.length !== 1 ? 'es' : ''}</p>
+                </div>
+                <div className="p-4 space-y-2">
+                    {groupedStatuses.printOrder.length === 0 ? (
+                        <div className="text-center py-8 text-lightColor text-sm">
+                            <MdOutlineLightbulb className="mx-auto mb-2" size={24} />
+                            <p>No custom print order statuses yet</p>
                         </div>
-                    </div>
+                    ) : (
+                        groupedStatuses.printOrder
+                            .sort((a, b) => (a.order || 0) - (b.order || 0))
+                            .map((status) => {
+                                const Icon = getIconComponent(status.icon)
+                                const isExpanded = expandedStatuses[status.statusKey]
+                                const isBuiltIn = status.isHardcoded
+
+                                return (
+                                    <div key={status._id || status.statusKey} className="border border-borderColor rounded-lg overflow-hidden">
+                                        <button
+                                            onClick={() => !isBuiltIn && toggleStatus(status.statusKey)}
+                                            className="w-full p-4 flex items-center justify-between hover:bg-baseColor/50 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="w-10 h-10 rounded-lg flex items-center justify-center"
+                                                    style={{ backgroundColor: `${status.color}20` }}
+                                                >
+                                                    <Icon size={20} style={{ color: status.color }} />
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="font-medium text-sm text-textColor">{status.displayName}</div>
+                                                    <div className="text-xs text-lightColor flex items-center gap-2 mt-0.5">
+                                                        <span className="font-mono">{status.statusKey}</span>
+                                                        {isBuiltIn && <span className="px-2 py-0.5 bg-gray-100 rounded text-[10px]">Built-in</span>}
+                                                        {!status.isActive && <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px]">Inactive</span>}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {!isBuiltIn && (
+                                                <div className="flex items-center gap-2">
+                                                    {isExpanded ? (
+                                                        <MdExpandLess className="text-xl text-lightColor" />
+                                                    ) : (
+                                                        <MdExpandMore className="text-xl text-lightColor" />
+                                                    )}
+                                                </div>
+                                            )}
+                                        </button>
+
+                                        {isExpanded && !isBuiltIn && (
+                                            <div className="p-4 border-t border-borderColor bg-baseColor/30 animate-slideDown">
+                                                {status.description && (
+                                                    <p className="text-sm text-lightColor mb-4">{status.description}</p>
+                                                )}
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => startEdit(status)}
+                                                        className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-xs font-medium"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(status._id)}
+                                                        className="px-3 py-1.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors text-xs font-medium"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })
+                    )}
                 </div>
             </div>
         </div>

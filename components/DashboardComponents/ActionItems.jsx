@@ -7,6 +7,7 @@ import { IoMdClose } from "react-icons/io";
 import { useOrderStatuses, getStatusDisplayName, getStatusColor } from "@/utils/useOrderStatuses";
 import { HiDownload, HiChevronDown, HiChevronRight, HiClipboardCopy } from "react-icons/hi";
 import { BiListUl } from "react-icons/bi";
+import { MdOutlineLightbulb } from "react-icons/md";
 
 function ActionItems({ user, myProducts }) {
     const [matchedOrders, setMatchedOrders] = useState([]);
@@ -14,6 +15,7 @@ function ActionItems({ user, myProducts }) {
     const [updating, setUpdating] = useState(false);
     const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
     const [expandedOrders, setExpandedOrders] = useState(new Set());
+    const [trackingId, setTrackingId] = useState('');
     const { showToast } = useToast();
     const { orderStatuses: regularOrderStatuses } = useOrderStatuses('order'); // Get regular order statuses
     const { orderStatuses: printOrderStatuses } = useOrderStatuses('printOrder'); // Get print order statuses
@@ -53,6 +55,7 @@ function ActionItems({ user, myProducts }) {
                             deliveryType: item.chosenDeliveryType || "",
                             price: item.price || 0,
                             printConfiguration: order.printConfiguration || null, // Include print config for print orders
+                            trackingId: order.trackingId || null, // Include tracking ID
                         });
                     }
                 });
@@ -62,26 +65,72 @@ function ActionItems({ user, myProducts }) {
         fetchOrders();
     }, [user, myProducts]);
 
+    // Set tracking ID when order is selected
+    useEffect(() => {
+        if (selectedOrder) {
+            setTrackingId(selectedOrder.trackingId || '');
+        }
+    }, [selectedOrder]);
+
     const handleStatusChange = async (newStatus) => {
         if (!selectedOrder) return;
         setUpdating(true);
         try {
-            await fetch('/api/user/orders', {
+            const response = await fetch('/api/user/orders', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     orderId: selectedOrder.orderId,
                     status: newStatus,
+                    trackingId: trackingId || undefined
                 }),
             });
+
+            if (!response.ok) {
+                throw new Error('Failed to update order');
+            }
+
             setMatchedOrders(orders =>
                 orders.map(o =>
-                    o.orderId === selectedOrder.orderId ? { ...o, orderStatus: newStatus } : o
+                    o.orderId === selectedOrder.orderId
+                        ? { ...o, orderStatus: newStatus, trackingId: trackingId || o.trackingId }
+                        : o
                 )
             );
-            setSelectedOrder(o => ({ ...o, orderStatus: newStatus }));
+            setSelectedOrder(o => ({ ...o, orderStatus: newStatus, trackingId: trackingId || o.trackingId }));
+            showToast('Order updated successfully', 'success');
         } catch (e) {
-            showToast('Failed to update order status: ' + e, 'error')
+            showToast('Failed to update order: ' + e.message, 'error')
+        }
+        setUpdating(false);
+    };
+
+    const handleTrackingIdUpdate = async () => {
+        if (!selectedOrder) return;
+        setUpdating(true);
+        try {
+            const response = await fetch('/api/user/orders', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: selectedOrder.orderId,
+                    trackingId: trackingId || null
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update tracking ID');
+            }
+
+            setMatchedOrders(orders =>
+                orders.map(o =>
+                    o.orderId === selectedOrder.orderId ? { ...o, trackingId: trackingId || null } : o
+                )
+            );
+            setSelectedOrder(o => ({ ...o, trackingId: trackingId || null }));
+            showToast('Tracking ID updated successfully', 'success');
+        } catch (e) {
+            showToast('Failed to update tracking ID: ' + e.message, 'error')
         }
         setUpdating(false);
     };
@@ -378,6 +427,50 @@ function ActionItems({ user, myProducts }) {
                                                     );
                                                 });
                                         })()}
+                                    </div>
+                                </div>
+
+                                {/* Tracking ID Section */}
+                                <div className="bg-white border border-borderColor rounded-lg p-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="text-sm font-semibold text-textColor">Tracking ID</h3>
+                                        {selectedOrder.trackingId && (
+                                            <a
+                                                href={`/account/orders/${selectedOrder.orderId}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs text-blue-600 hover:text-blue-800 underline"
+                                            >
+                                                View Customer Page
+                                            </a>
+                                        )}
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={trackingId}
+                                                onChange={(e) => setTrackingId(e.target.value)}
+                                                placeholder="Enter tracking ID (e.g., SPX123456789)"
+                                                className="formInput flex-1 text-sm"
+                                                disabled={updating}
+                                            />
+                                            <button
+                                                onClick={handleTrackingIdUpdate}
+                                                disabled={updating || trackingId === (selectedOrder.trackingId || '')}
+                                                className="px-4 py-2 bg-black text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {updating ? 'Saving...' : 'Save'}
+                                            </button>
+                                        </div>
+                                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex gap-2 items-start text-xs text-blue-900">
+                                            <MdOutlineLightbulb className="shrink-0 mt-0.5" />
+                                            <p>
+                                                {selectedOrder.trackingId
+                                                    ? 'Customer can track this order at /account/orders/' + selectedOrder.orderId.slice(-8)
+                                                    : 'Add a tracking ID to enable the customer order tracking page. Leave empty if no tracking is needed.'}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 

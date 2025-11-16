@@ -4,11 +4,10 @@ import Logo from '../Logo'
 import { SignOutButton, useUser, SignUpButton } from '@clerk/nextjs'
 import Image from 'next/image'
 import { FcMenu } from "react-icons/fc";
-import { useState } from 'react'
 import { PiSignIn, PiSignOut } from "react-icons/pi";
 import { GoChevronRight } from 'react-icons/go'
 import AccountDropdown from './AccountDropdown'
-import { PRINT_CATEGORIES, SHOP_CATEGORIES, PRINT_SUBCATEGORIES, SHOP_SUBCATEGORIES } from '@/lib/categories'
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname, useSearchParams } from 'next/navigation'
 import { HiOutlineShoppingCart } from 'react-icons/hi'
@@ -22,6 +21,8 @@ function Navbar() {
     const [mobileDropdown, setMobileDropdown] = useState(null);
     const [openShopCategory, setOpenShopCategory] = useState(null);
     const [openPrintCategory, setOpenPrintCategory] = useState(null);
+    const [shopCategories, setShopCategories] = useState([]);
+    const [printCategories, setPrintCategories] = useState([]);
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const currentUrl = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
@@ -31,6 +32,22 @@ function Navbar() {
     const handleMenu = () => {
         setIsOpen((prev) => !prev);
     }
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await fetch('/api/admin/settings');
+                if (!res.ok) return;
+                const data = await res.json();
+                const cats = data.categories || [];
+                setShopCategories(cats.filter(c => c.type === 'shop' && c.isActive));
+                setPrintCategories(cats.filter(c => c.type === 'print' && c.isActive));
+            } catch (e) {
+                console.error('Failed to load categories for navbar', e);
+            }
+        }
+        fetchCategories();
+    }, []);
 
     if (!isLoaded) {
         return (
@@ -92,24 +109,23 @@ function Navbar() {
                             style={{ pointerEvents: dropdownOpen ? 'auto' : 'none' }}
                         >
                             <div className={`flex flex-row gap-16 h-full w-full`}>
-                                {(dropdownType === 'shop' ? SHOP_CATEGORIES : PRINT_CATEGORIES).map((category, catIdx) => (
-                                    <div key={category} className='flex flex-col row-span-1 col-span-1 gap-8'>
-                                        <p className='font-semibold text-xs tracking-wider uppercase'>{category}</p>
+                                {(dropdownType === 'shop' ? shopCategories : printCategories).map((category, catIdx) => (
+                                    <div key={category.name} className='flex flex-col row-span-1 col-span-1 gap-8'>
+                                        <p className='font-semibold text-xs tracking-wider uppercase'>{category.displayName}</p>
                                         {/* <div className='w-10 border-t border-borderColor flex' /> */}
                                         <ul className='flex flex-col gap-1 tracking-wider uppercase font-medium'>
-                                            {(dropdownType === 'shop'
-                                                ? SHOP_SUBCATEGORIES[catIdx]
-                                                : PRINT_SUBCATEGORIES[catIdx]
-                                            ).map((subcategory, subIdx) => (
-                                                <li key={subcategory}>
-                                                    <Link
-                                                        href={`/${dropdownType}?productType=${dropdownType}&productCategory=${category}&productSubCategory=${subcategory}`}
-                                                        className='flex hover:text-textColor transition-colors duration-300 ease-in-out text-lightColor text-[10px]'
-                                                    >
-                                                        {subcategory}
-                                                    </Link>
-                                                </li>
-                                            ))}
+                                            {(category.subcategories || [])
+                                                .filter(sub => sub.isActive)
+                                                .map((subcategory, subIdx) => (
+                                                    <li key={subcategory.name}>
+                                                        <Link
+                                                            href={`/${dropdownType}?productType=${dropdownType}&productCategory=${encodeURIComponent(category.displayName)}&productSubCategory=${encodeURIComponent(subcategory.displayName)}`}
+                                                            className='flex hover:text-textColor transition-colors duration-300 ease-in-out text-lightColor text-[10px]'
+                                                        >
+                                                            {subcategory.displayName}
+                                                        </Link>
+                                                    </li>
+                                                ))}
                                         </ul>
                                     </div>
                                 ))}
@@ -185,21 +201,21 @@ function Navbar() {
                                             transition={{ duration: 0.3, ease: "easeInOut" }}
                                             className="pl-2 pr-4 pt-4 max-h-[60vh] overflow-y-auto w-full"
                                         >
-                                            {SHOP_CATEGORIES.map((category, catIdx) => (
-                                                <div key={category} className="mb-2 w-full">
+                                            {shopCategories.map((category, catIdx) => (
+                                                <div key={category.name} className="mb-2 w-full">
                                                     <button
                                                         className="font-medium uppercase text-xs  justify-between text-lightColor mb-1 w-full text-left py-2 flex-row flex items-center"
                                                         onClick={() =>
-                                                            setOpenShopCategory(openShopCategory === category ? null : category)
+                                                            setOpenShopCategory(openShopCategory === category.name ? null : category.name)
                                                         }
                                                     >
-                                                        {category}
+                                                        {category.displayName}
                                                         <LuPlus
-                                                            className={`flex ml-2 transition-transform ${openShopCategory === category ? 'rotate-45' : ''}`}
+                                                            className={`flex ml-2 transition-transform ${openShopCategory === category.name ? 'rotate-45' : ''}`}
                                                         />
                                                     </button>
                                                     <AnimatePresence>
-                                                        {openShopCategory === category && (
+                                                        {openShopCategory === category.name && (
                                                             <motion.ul
                                                                 initial={{ height: 0, opacity: 0 }}
                                                                 animate={{ height: "auto", opacity: 1 }}
@@ -207,16 +223,18 @@ function Navbar() {
                                                                 transition={{ duration: 0.3, ease: "easeInOut" }}
                                                                 className="pl-2"
                                                             >
-                                                                {SHOP_SUBCATEGORIES[catIdx].map(subcategory => (
-                                                                    <li key={subcategory}>
-                                                                        <Link
-                                                                            href={`/shop?productType=shop&productCategory=${category}&productSubCategory=${subcategory}`}
-                                                                            className="text-lightColor text-xs py-1 block"
-                                                                        >
-                                                                            {subcategory}
-                                                                        </Link>
-                                                                    </li>
-                                                                ))}
+                                                                {(category.subcategories || [])
+                                                                    .filter(sub => sub.isActive)
+                                                                    .map(subcategory => (
+                                                                        <li key={subcategory.name}>
+                                                                            <Link
+                                                                                href={`/shop?productType=shop&productCategory=${encodeURIComponent(category.displayName)}&productSubCategory=${encodeURIComponent(subcategory.displayName)}`}
+                                                                                className="text-lightColor text-xs py-1 block"
+                                                                            >
+                                                                                {subcategory.displayName}
+                                                                            </Link>
+                                                                        </li>
+                                                                    ))}
                                                             </motion.ul>
                                                         )}
                                                     </AnimatePresence>
@@ -246,21 +264,21 @@ function Navbar() {
                                             transition={{ duration: 0.3, ease: "easeInOut" }}
                                             className="pl-2 pr-4 pt-4 max-h-[60vh] overflow-y-auto w-full"
                                         >
-                                            {PRINT_CATEGORIES.map((category, catIdx) => (
-                                                <div key={category} className="mb-2 w-full">
+                                            {printCategories.map((category, catIdx) => (
+                                                <div key={category.name} className="mb-2 w-full">
                                                     <button
                                                         className="font-medium uppercase text-xs  justify-between text-lightColor mb-1 w-full text-left py-2 flex-row flex items-center"
                                                         onClick={() =>
-                                                            setOpenPrintCategory(openPrintCategory === category ? null : category)
+                                                            setOpenPrintCategory(openPrintCategory === category.name ? null : category.name)
                                                         }
                                                     >
-                                                        {category}
+                                                        {category.displayName}
                                                         <LuPlus
-                                                            className={`flex ml-2 transition-transform ${openPrintCategory === category ? 'rotate-45' : ''}`}
+                                                            className={`flex ml-2 transition-transform ${openPrintCategory === category.name ? 'rotate-45' : ''}`}
                                                         />
                                                     </button>
                                                     <AnimatePresence>
-                                                        {openPrintCategory === category && (
+                                                        {openPrintCategory === category.name && (
                                                             <motion.ul
                                                                 initial={{ height: 0, opacity: 0 }}
                                                                 animate={{ height: "auto", opacity: 1 }}
@@ -268,16 +286,18 @@ function Navbar() {
                                                                 transition={{ duration: 0.3, ease: "easeInOut" }}
                                                                 className="pl-2"
                                                             >
-                                                                {PRINT_SUBCATEGORIES[catIdx].map(subcategory => (
-                                                                    <li key={subcategory}>
-                                                                        <Link
-                                                                            href={`/prints?productType=prints&productCategory=${category}&productSubCategory=${subcategory}`}
-                                                                            className="text-lightColor text-xs py-1 block"
-                                                                        >
-                                                                            {subcategory}
-                                                                        </Link>
-                                                                    </li>
-                                                                ))}
+                                                                {(category.subcategories || [])
+                                                                    .filter(sub => sub.isActive)
+                                                                    .map(subcategory => (
+                                                                        <li key={subcategory.name}>
+                                                                            <Link
+                                                                                href={`/prints?productType=prints&productCategory=${encodeURIComponent(category.displayName)}&productSubCategory=${encodeURIComponent(subcategory.displayName)}`}
+                                                                                className="text-lightColor text-xs py-1 block"
+                                                                            >
+                                                                                {subcategory.displayName}
+                                                                            </Link>
+                                                                        </li>
+                                                                    ))}
                                                             </motion.ul>
                                                         )}
                                                     </AnimatePresence>

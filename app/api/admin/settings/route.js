@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { auth, clerkClient } from "@clerk/nextjs/server";
 import { connectToDatabase } from "@/lib/db";
 import AppSettings from "@/models/AppSettings";
+import { checkAdminPrivileges } from "@/lib/checkPrivileges";
+import { authenticate } from "@/lib/authenticate";
 
-// Helper function to get or create app settings
 async function getAppSettings() {
     let settings = await AppSettings.findById("app-settings");
     if (!settings) {
@@ -18,39 +18,22 @@ async function getAppSettings() {
     return settings;
 }
 
-// Helper function to check admin access (same logic as useAccess)
-async function checkAdminAccess(userId) {
-    try {
-        const client = await clerkClient();
-        const user = await client.users.getUser(userId);
-
-        // Check role
-        const userRole = user.publicMetadata.role || "user";
-        const isAdmin = userRole === "admin";
-
-        // Check subscription
-        const priceId = user.unsafeMetadata?.priceId || null;
-        const hasValidSub = typeof priceId === 'string' && priceId.trim().length > 0;
-
-        // Allow access if has valid subscription OR is admin
-        return hasValidSub || isAdmin;
-    } catch (error) {
-        console.error("Error checking admin access:", error);
-        return false;
-    }
-}
 
 export async function GET(request) {
     try {
         await connectToDatabase();
         const settings = await getAppSettings();
-
-        // Return both hardcoded and additional delivery types
         const hardcodedDeliveryTypes = [
-            { name: "digital", displayName: "Digital Download", applicableToProductTypes: ["shop"], isActive: true, isHardcoded: true },
-            { name: "selfCollect", displayName: "Self Collection", applicableToProductTypes: ["shop", "print"], isActive: true, isHardcoded: true },
-            { name: "singpost", displayName: "SingPost Delivery", applicableToProductTypes: ["shop", "print"], isActive: true, isHardcoded: true },
-            { name: "privateDelivery", displayName: "Private Delivery", applicableToProductTypes: ["shop", "print"], isActive: true, isHardcoded: true }
+            {
+                name: "digital",
+                displayName: "Digital Download",
+                description: "Instant download after purchase",
+                applicableToProductTypes: ["shop"],
+                pricingTiers: [],
+                hasDefaultPrice: false,
+                isActive: true,
+                isHardcoded: true
+            }
         ];
 
         const allDeliveryTypes = [
@@ -58,33 +41,12 @@ export async function GET(request) {
             ...settings.additionalDeliveryTypes.map(dt => ({ ...dt.toObject(), isHardcoded: false }))
         ];
 
-        // Hardcoded categories from categories.js
-        const hardcodedCategories = [
-            // Shop categories
-            { name: "electronics", displayName: "Electronics", type: "shop", isActive: true, isHardcoded: true },
-            { name: "filament", displayName: "Filament", type: "shop", isActive: true, isHardcoded: true },
-            { name: "printer", displayName: "Printer", type: "shop", isActive: true, isHardcoded: true },
-            { name: "accessories", displayName: "Accessories", type: "shop", isActive: true, isHardcoded: true },
-            { name: "power-tools", displayName: "Power Tools", type: "shop", isActive: true, isHardcoded: true },
-            { name: "gears", displayName: "Gears", type: "shop", isActive: true, isHardcoded: true },
-            // Print categories
-            { name: "trending-prints", displayName: "Trending Prints", type: "print", isActive: true, isHardcoded: true },
-            { name: "games", displayName: "Games", type: "print", isActive: true, isHardcoded: true },
-            { name: "educational", displayName: "Educational", type: "print", isActive: true, isHardcoded: true },
-            { name: "display", displayName: "Display", type: "print", isActive: true, isHardcoded: true },
-            { name: "for-him", displayName: "For Him", type: "print", isActive: true, isHardcoded: true },
-            { name: "adda", displayName: "Adda", type: "print", isActive: true, isHardcoded: true }
-        ];
-
-        const allCategories = [
-            ...hardcodedCategories,
-            ...(settings.additionalCategories || []).map(cat => ({ ...cat.toObject(), isHardcoded: false }))
-        ];
+        const dbCategories = (settings.additionalCategories || []).map(cat => ({ ...cat.toObject(), isHardcoded: false }));
 
         return NextResponse.json({
             deliveryTypes: allDeliveryTypes,
             additionalDeliveryTypes: settings.additionalDeliveryTypes,
-            categories: allCategories,
+            categories: dbCategories,
             additionalCategories: settings.additionalCategories || []
         }, { status: 200 });
     } catch (error) {
@@ -98,12 +60,9 @@ export async function GET(request) {
 
 export async function POST(request) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const { userId } = await authenticate(request);
 
-        if (!(await checkAdminAccess(userId))) {
+        if (!(await checkAdminPrivileges(userId))) {
             return NextResponse.json({ error: "Access denied. Valid subscription or admin role required." }, { status: 403 });
         }
 
@@ -120,8 +79,8 @@ export async function POST(request) {
 
         const settings = await getAppSettings();
 
-        if (type === "delivery-type") {
-            const { name, displayName, description = "", feeName = "", applicableToProductTypes = ["shop"], order = 0, isActive = true } = data;
+        if (type === "deliveryType") {
+            const { name, displayName, description = "", applicableToProductTypes = ["shop"], pricingTiers = [], order = 0, isActive = true } = data;
 
             if (!name || !displayName) {
                 return NextResponse.json(
@@ -130,7 +89,6 @@ export async function POST(request) {
                 );
             }
 
-            // Check if delivery type already exists in additional types
             const exists = settings.additionalDeliveryTypes.some(dt => dt.name === name);
             if (exists) {
                 return NextResponse.json(
@@ -143,8 +101,9 @@ export async function POST(request) {
                 name: name.trim(),
                 displayName: displayName.trim(),
                 description: description.trim(),
-                feeName: feeName.trim(),
                 applicableToProductTypes,
+                pricingTiers,
+                hasDefaultPrice: pricingTiers && pricingTiers.length > 0,
                 order: parseInt(order),
                 isActive
             });
@@ -222,6 +181,37 @@ export async function POST(request) {
 
             return NextResponse.json({ message: "Category added successfully" }, { status: 201 });
 
+        } else if (type === "subcategory") {
+            // data should include: parentId (optional) or parentName, name, displayName, isActive
+            const { parentId, parentName, name, displayName, isActive = true } = data;
+            if (!name || !displayName || (!parentId && !parentName)) {
+                return NextResponse.json({ error: "parentId or parentName, name and displayName are required" }, { status: 400 });
+            }
+
+            // Find parent category
+            let parent = null;
+            if (parentId) {
+                parent = (settings.additionalCategories || []).id(parentId);
+            } else if (parentName) {
+                parent = (settings.additionalCategories || []).find(cat => cat.name === parentName || cat.displayName === parentName);
+            }
+
+            if (!parent) {
+                return NextResponse.json({ error: "Parent category not found" }, { status: 404 });
+            }
+
+            parent.subcategories = parent.subcategories || [];
+            // Check for existing subcategory
+            const existsSub = parent.subcategories.some(sc => sc.name === name);
+            if (existsSub) {
+                return NextResponse.json({ error: "Subcategory name already exists for this category" }, { status: 409 });
+            }
+
+            parent.subcategories.push({ name: name.trim(), displayName: displayName.trim(), isActive });
+            await settings.save();
+
+            return NextResponse.json({ message: "Subcategory added successfully" }, { status: 201 });
+
         } else {
             return NextResponse.json(
                 { error: "Invalid type. Must be 'deliveryType', 'orderStatus', or 'category'" },
@@ -240,29 +230,22 @@ export async function POST(request) {
 
 export async function PUT(request) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const { userId } = await authenticate(request);
 
-        if (!(await checkAdminAccess(userId))) {
+        if (!(await checkAdminPrivileges(userId))) {
             return NextResponse.json({ error: "Access denied. Valid subscription or admin role required." }, { status: 403 });
         }
 
         await connectToDatabase();
 
-        const { type, id, data } = await request.json();
-
-        if (!type || !id || !data) {
-            return NextResponse.json(
-                { error: "Type, id, and data are required" },
-                { status: 400 }
-            );
-        }
+        const { type, id, name, parentName, action, isActive, data } = await request.json();
 
         const settings = await getAppSettings();
 
         if (type === "delivery-type") {
+            if (!id) {
+                return NextResponse.json({ error: "ID is required" }, { status: 400 });
+            }
             const deliveryType = settings.additionalDeliveryTypes.id(id);
             if (!deliveryType) {
                 return NextResponse.json(
@@ -277,6 +260,9 @@ export async function PUT(request) {
             return NextResponse.json({ message: "Delivery type updated successfully" }, { status: 200 });
 
         } else if (type === "order-status") {
+            if (!id) {
+                return NextResponse.json({ error: "ID is required" }, { status: 400 });
+            }
             const orderStatus = settings.additionalOrderStatuses.id(id);
             if (!orderStatus) {
                 return NextResponse.json(
@@ -291,7 +277,17 @@ export async function PUT(request) {
             return NextResponse.json({ message: "Order status updated successfully" }, { status: 200 });
 
         } else if (type === "category") {
-            const category = settings.additionalCategories.id(id);
+            if (!name && !id) {
+                return NextResponse.json({ error: "Name or ID is required" }, { status: 400 });
+            }
+
+            let category;
+            if (id) {
+                category = settings.additionalCategories.id(id);
+            } else {
+                category = (settings.additionalCategories || []).find(cat => cat.name === name);
+            }
+
             if (!category) {
                 return NextResponse.json(
                     { error: "Category not found" },
@@ -299,14 +295,44 @@ export async function PUT(request) {
                 );
             }
 
-            Object.assign(category, data);
+            if (action === "toggleActive" && typeof isActive !== "undefined") {
+                category.isActive = isActive;
+            } else if (data) {
+                Object.assign(category, data);
+            }
+
             await settings.save();
 
             return NextResponse.json({ message: "Category updated successfully" }, { status: 200 });
 
+        } else if (type === "subcategory") {
+            if (!parentName || !name) {
+                return NextResponse.json({ error: "parentName and name are required" }, { status: 400 });
+            }
+
+            const parent = (settings.additionalCategories || []).find(cat => cat.name === parentName);
+            if (!parent) {
+                return NextResponse.json({ error: "Parent category not found" }, { status: 404 });
+            }
+
+            const subcategory = parent.subcategories.find(sc => sc.name === name);
+            if (!subcategory) {
+                return NextResponse.json({ error: "Subcategory not found" }, { status: 404 });
+            }
+
+            if (action === "toggleActive" && typeof isActive !== "undefined") {
+                subcategory.isActive = isActive;
+            } else if (data) {
+                Object.assign(subcategory, data);
+            }
+
+            await settings.save();
+
+            return NextResponse.json({ message: "Subcategory updated successfully" }, { status: 200 });
+
         } else {
             return NextResponse.json(
-                { error: "Invalid type. Must be 'delivery-type', 'order-status', or 'category'" },
+                { error: "Invalid type. Must be 'delivery-type', 'order-status', 'category', or 'subcategory'" },
                 { status: 400 }
             );
         }
@@ -322,24 +348,20 @@ export async function PUT(request) {
 
 export async function DELETE(request) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const { userId } = await authenticate(request);
 
-        if (!(await checkAdminAccess(userId))) {
+        if (!(await checkAdminPrivileges(userId))) {
             return NextResponse.json({ error: "Access denied. Valid subscription or admin role required." }, { status: 403 });
         }
 
         await connectToDatabase();
 
-        const { searchParams } = new URL(request.url);
-        const type = searchParams.get('type');
-        const id = searchParams.get('id');
+        const body = await request.json();
+        const { type, id, name, parentName } = body;
 
-        if (!type || !id) {
+        if (!type) {
             return NextResponse.json(
-                { error: "Type and id are required" },
+                { error: "Type is required" },
                 { status: 400 }
             );
         }
@@ -347,6 +369,9 @@ export async function DELETE(request) {
         const settings = await getAppSettings();
 
         if (type === "delivery-type") {
+            if (!id) {
+                return NextResponse.json({ error: "ID is required" }, { status: 400 });
+            }
             const deliveryType = settings.additionalDeliveryTypes.id(id);
             if (!deliveryType) {
                 return NextResponse.json(
@@ -361,6 +386,9 @@ export async function DELETE(request) {
             return NextResponse.json({ message: "Delivery type deleted successfully" }, { status: 200 });
 
         } else if (type === "order-status") {
+            if (!id) {
+                return NextResponse.json({ error: "ID is required" }, { status: 400 });
+            }
             const orderStatus = settings.additionalOrderStatuses.id(id);
             if (!orderStatus) {
                 return NextResponse.json(
@@ -375,22 +403,52 @@ export async function DELETE(request) {
             return NextResponse.json({ message: "Order status deleted successfully" }, { status: 200 });
 
         } else if (type === "category") {
-            const category = settings.additionalCategories.id(id);
-            if (!category) {
-                return NextResponse.json(
-                    { error: "Category not found" },
-                    { status: 404 }
-                );
+            if (!name && !id) {
+                return NextResponse.json({ error: "Name or ID is required" }, { status: 400 });
             }
 
-            settings.additionalCategories.pull(id);
+            let category;
+            if (id) {
+                category = settings.additionalCategories.id(id);
+                if (!category) {
+                    return NextResponse.json({ error: "Category not found" }, { status: 404 });
+                }
+                settings.additionalCategories.pull(id);
+            } else {
+                const catIndex = (settings.additionalCategories || []).findIndex(cat => cat.name === name);
+                if (catIndex === -1) {
+                    return NextResponse.json({ error: "Category not found" }, { status: 404 });
+                }
+                settings.additionalCategories.splice(catIndex, 1);
+            }
+
             await settings.save();
 
             return NextResponse.json({ message: "Category deleted successfully" }, { status: 200 });
 
+        } else if (type === "subcategory") {
+            if (!parentName || !name) {
+                return NextResponse.json({ error: "parentName and name are required" }, { status: 400 });
+            }
+
+            const parent = (settings.additionalCategories || []).find(cat => cat.name === parentName);
+            if (!parent) {
+                return NextResponse.json({ error: "Parent category not found" }, { status: 404 });
+            }
+
+            const subIndex = parent.subcategories.findIndex(sc => sc.name === name);
+            if (subIndex === -1) {
+                return NextResponse.json({ error: "Subcategory not found" }, { status: 404 });
+            }
+
+            parent.subcategories.splice(subIndex, 1);
+            await settings.save();
+
+            return NextResponse.json({ message: "Subcategory deleted successfully" }, { status: 200 });
+
         } else {
             return NextResponse.json(
-                { error: "Invalid type. Must be 'delivery-type', 'order-status', or 'category'" },
+                { error: "Invalid type. Must be 'delivery-type', 'order-status', 'category', or 'subcategory'" },
                 { status: 400 }
             );
         }

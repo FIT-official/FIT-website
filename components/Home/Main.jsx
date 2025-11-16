@@ -3,14 +3,33 @@
 import { motion, cubicBezier } from 'framer-motion';
 import Image from 'next/image';
 import { useContent } from '@/utils/useContent';
+import { useState, useEffect } from 'react'
 
 function Main({ adbanner }) {
     const { content } = useContent('home/hero-banner', {
-        text: '3D printing and modeling services'
+        text: '3D printing and modeling services',
+        heroImage: '/placeholder.jpg'
     })
 
     const text = "FIX IT TODAY®";
     const letters = Array.from(text);
+
+    const [heroSrc, setHeroSrc] = useState(() => {
+        const hi = content?.heroImage
+        if (!hi) return '/placeholder.jpg'
+        if (hi.startsWith('http://') || hi.startsWith('https://') || hi.startsWith('/')) return hi
+        return `/api/proxy?key=${encodeURIComponent(hi)}`
+    })
+
+    useEffect(() => {
+        const hi = content?.heroImage
+        if (!hi) {
+            setHeroSrc('/placeholder.jpg')
+            return
+        }
+        if (hi.startsWith('http://') || hi.startsWith('https://') || hi.startsWith('/')) setHeroSrc(hi)
+        else setHeroSrc(`/api/proxy?key=${encodeURIComponent(hi)}`)
+    }, [content?.heroImage])
 
     const containerVariants = {
         hidden: { opacity: 1 },
@@ -43,16 +62,17 @@ function Main({ adbanner }) {
                 </div>
             )}
             <Image
-                src="/placeholder.jpg"
+                src={heroSrc}
                 alt="Background"
                 fill
                 priority
                 className="
-            object-cover
-            object-[75%_center] sm:object-center
-            z-0
-            transition-[object-position] duration-500 ease-in-out grayscale-60 opacity-90
-          "
+                        object-cover
+                        object-[75%_center] sm:object-center
+                        z-0
+                        transition-[object-position] duration-500 ease-in-out grayscale-60 opacity-90
+                    "
+                onError={() => setHeroSrc('/placeholder.jpg')}
             />
             <div className="relative z-10 flex flex-col items-center w-full text-background text-center px-4">
                 <motion.h1

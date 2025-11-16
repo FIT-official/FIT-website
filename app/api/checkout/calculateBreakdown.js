@@ -1,8 +1,6 @@
-import { calculateSingpostRate, getDestinationZone } from './singpostRate';
 import { getDiscountedPrice } from '@/utils/discount';
 
 export async function calculateCartItemBreakdown({ item, product, address }) {
-    const destination = getDestinationZone(address.country);
     const quantity = item.quantity || 1;
 
     let basePrice = 0;
@@ -57,24 +55,13 @@ export async function calculateCartItemBreakdown({ item, product, address }) {
         throw new Error(`Product ${product._id} missing basePrice`);
     }
 
+    // Get delivery fee from product's delivery types configuration
     const deliveryTypeObj = (product.delivery?.deliveryTypes || []).find(
         dt => dt.type === item.chosenDeliveryType
     );
-    const royaltyFee = deliveryTypeObj?.royaltyFee || 0;
 
-    let deliveryFee = royaltyFee;
-    let singpostFee = 0;
-    if (item.chosenDeliveryType === "singpost") {
-        const weight_kg = product.dimensions?.weight || 0;
-        const dimensions_mm = [
-            (product.dimensions?.length || 0) * 10,
-            (product.dimensions?.width || 0) * 10,
-            (product.dimensions?.height || 0) * 10,
-        ];
-        singpostFee = calculateSingpostRate(destination, weight_kg, dimensions_mm);
-        if (singpostFee < 0) singpostFee = 0;
-        deliveryFee += singpostFee;
-    }
+    // Use custom price if set by creator, otherwise use default price
+    const deliveryFee = deliveryTypeObj?.customPrice ?? deliveryTypeObj?.price ?? 0;
 
     const total = (finalPrice * quantity) + deliveryFee;
 
@@ -88,8 +75,6 @@ export async function calculateCartItemBreakdown({ item, product, address }) {
         basePrice, // Base price without variants/options
         variantInfo, // Array of variant selections with fees (empty for default variant products)
         chosenDeliveryType: item.chosenDeliveryType,
-        royaltyFee,
-        singpostFee,
         deliveryFee,
         total,
         creatorUserId: product.creatorUserId,

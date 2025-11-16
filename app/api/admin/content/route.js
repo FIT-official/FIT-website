@@ -1,20 +1,14 @@
 import { NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { getContentByPath, updateContentByPath } from "@/lib/mdx";
+import { authenticate } from "@/lib/authenticate";
+import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 
 export async function GET(req) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
-        const client = await clerkClient();
-        const user = await client.users.getUser(userId);
-
-        if (user?.publicMetadata?.role !== "admin") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
+        const { userId } = await authenticate(req);
+        const isAdmin = await checkAdminPrivileges(userId);
+        if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
         const { searchParams } = new URL(req.url);
         const contentPath = searchParams.get("path");
@@ -26,7 +20,6 @@ export async function GET(req) {
         const content = getContentByPath(contentPath);
 
         if (!content) {
-            // Return default empty content structure instead of 404
             const defaultContent = {
                 frontmatter: {},
                 content: ''
@@ -64,18 +57,9 @@ export async function GET(req) {
 
 export async function PUT(req) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
-        const client = await clerkClient();
-        const user = await client.users.getUser(userId);
-
-        if (user?.publicMetadata?.role !== "admin") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
+        const { userId } = await authenticate(req);
+        const isAdmin = await checkAdminPrivileges(userId);
+        if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         const { contentPath, frontmatter, content } = await req.json();
 
         if (!contentPath || !frontmatter || content === undefined) {

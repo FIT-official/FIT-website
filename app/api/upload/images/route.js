@@ -21,18 +21,16 @@ export async function POST(req) {
       return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
     }
 
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
     const filenames = [];
 
     for (const file of files) {
-      // Validate file type
       if (!file.type.startsWith("image/")) {
         return NextResponse.json({
           error: `File "${file.name}" is not a valid image file. Please upload only image files.`
         }, { status: 400 });
       }
 
-      // Validate file size before processing
       if (file.size > MAX_FILE_SIZE) {
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
         return NextResponse.json({

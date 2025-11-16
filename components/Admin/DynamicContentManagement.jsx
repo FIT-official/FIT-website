@@ -18,7 +18,7 @@ const defaultContentSections = [
         id: 'home/hero-banner',
         name: 'Home - Hero Banner',
         description: 'Banner text displayed at the top of the homepage',
-        fields: ['text']
+        fields: ['text', 'heroImage']
     },
     {
         id: 'about/introduction',
@@ -148,13 +148,37 @@ export default function ContentManagement() {
             )
         }
 
-        if (field.toLowerCase().includes('image') || field.toLowerCase().includes('photo') || field.toLowerCase().includes('avatar')) {
+        // image field detection: prefer explicit frontmatter fieldMeta, fallback to naming heuristic
+        const getFieldMeta = (f) => {
+            try {
+                return content?.frontmatter?.fieldMeta?.[f] || null
+            } catch (e) {
+                return null
+            }
+        }
+
+        const isImageField = (f) => {
+            const meta = getFieldMeta(f)
+            if (meta) return meta.type === 'image' || meta.type === 'images'
+            const name = f.toLowerCase()
+            return name.includes('image') || name.includes('photo') || name.includes('avatar')
+        }
+
+        if (isImageField(field)) {
+            const meta = getFieldMeta(field) || {}
+            // uploadPath helps group uploads (e.g. 'home/featured'), default to selectedSection
+            const uploadPath = meta.uploadPath || selectedSection
+            // use a dedicated admin upload endpoint so these do not mix with product uploads
+            const uploadEndpoint = meta.uploadEndpoint || '/api/admin/upload/images'
+
             return (
                 <ImageUpload
                     key={field}
                     label={field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')}
                     value={value}
                     onChange={onChange}
+                    uploadPath={uploadPath}
+                    uploadEndpoint={uploadEndpoint}
                 />
             )
         }
@@ -204,11 +228,11 @@ export default function ContentManagement() {
     const previewUrl = `${getPreviewPath(selectedSection)}?previewKey=${previewKey}`
 
     return (
-        <div className="flex gap-4 flex-col px-12">
+        <div className="flex gap-4 flex-col p-6 md:p-12 bg-borderColor/60">
             <div className="adminDashboardContainer">
-                <label className="flex text-sm font-semibold pl-1">
-                    Select Content Section
-                </label>
+                <h3>
+                    Choose some content to edit.
+                </h3>
                 <select
                     value={selectedSection}
                     onChange={(e) => setSelectedSection(e.target.value)}
@@ -223,15 +247,13 @@ export default function ContentManagement() {
 
                 {currentSection && (
                     <div className="text-xs font-normal bg-borderColor/30 p-3 rounded">
-                        <strong>Description:</strong> {currentSection.description}
+                        <strong>What is this?</strong> {currentSection.description}
                         <br />
-                        <strong>Fields:</strong> {currentSection.fields.join(', ')}
                     </div>
                 )}
 
             </div>
 
-            {/* Content Editor */}
             {isLoading ? (
                 <div className="flex items-center justify-center py-12">
                     <div className="loader" />
@@ -239,11 +261,11 @@ export default function ContentManagement() {
             ) : content && currentSection ? (
                 <div className="adminDashboardContainer">
 
-                    <h2 className="text-xl font-semibold mb-4">
-                        Editing: {currentSection.name}
-                    </h2>
+                    <h3>
+                        You're editing <span className='text-textColor'>"{currentSection.name}"</span>
+                    </h3>
 
-                    <div className="space-y-6">
+                    <div className="gap-6 flex flex-col">
                         {currentSection.fields.map((field) => {
                             const value = field === 'content' ? content.content : content.frontmatter[field]
                             const onChange = (newValue) => updateField(field, newValue)
@@ -251,7 +273,7 @@ export default function ContentManagement() {
                             return renderField(field, value, onChange)
                         })}
 
-                        <div className="flex gap-4 pt-4 border-t">
+                        <div className="flex gap-4">
                             <button
                                 onClick={handleSave}
                                 disabled={isSaving}
@@ -272,17 +294,11 @@ export default function ContentManagement() {
 
                 </div>
             ) : (
-                <div className="adminDashboardContainer text-center">
-                    <p>Failed to load content. Please try again.</p>
-                    <button
-                        onClick={fetchContent}
-                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                    >
-                        Retry
-                    </button>
+                <div className="adminDashboardContainer items-center justify-center text-center">
+                    <p className='text-xs font-medium text-center'>Failed to load content. Please try again.</p>
                 </div>
             )}
-            <div className="bg-white border border-borderColor rounded-lg p-4">
+            <div className="adminDashboardContainer">
                 <div className="flex items-center justify-between mb-3">
                     <div>
                         <h3 className="font-semibold">Preview</h3>

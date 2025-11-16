@@ -4,8 +4,7 @@ import Product from "@/models/Product";
 import { slugify } from "@/app/api/product/slugify";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { sanitizeString } from "@/utils/validate";
-import { PRINT_CATEGORIES, SHOP_CATEGORIES, PRINT_SUBCATEGORIES, SHOP_SUBCATEGORIES } from "@/lib/categories";
-import { getAllCategoriesServer, getAllSubcategories } from "@/lib/categoriesHelper";
+import { getAllCategoriesServer, getAllSubcategoriesServer } from "@/lib/categoriesHelper";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3 } from "@/lib/s3";
 
@@ -279,10 +278,9 @@ export async function GET(req) {
             productCategory !== null &&
             productCategory !== -1
         ) {
-            // For now, still use hardcoded subcategories until admin subcategories are implemented
-            productSubCategory = productType === "shop"
-                ? SHOP_SUBCATEGORIES[productCategory]?.findIndex(sub => sub === productSubCategory)
-                : PRINT_SUBCATEGORIES[productCategory]?.findIndex(sub => sub === productSubCategory);
+            // Resolve subcategory name to index using server helper (handles legacy hardcoded + admin DB)
+            const subcats = await getAllSubcategoriesServer(productType, productCategory);
+            productSubCategory = subcats.findIndex(sub => sub === productSubCategory);
         }
 
         if (ids) {

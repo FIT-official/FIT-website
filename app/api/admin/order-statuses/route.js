@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import AppSettings from "@/models/AppSettings";
+import { authenticate } from "@/lib/authenticate";
 
 export async function GET(request) {
     try {
@@ -66,10 +67,7 @@ export async function GET(request) {
 
 export async function POST(request) {
     try {
-        const { userId } = auth();
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const { userId } = await authenticate(request);
 
         await connectToDatabase();
 
@@ -139,11 +137,7 @@ export async function POST(request) {
 
 export async function PUT(request) {
     try {
-        const { userId } = auth();
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
+        const { userId } = await authenticate(request);
         await connectToDatabase();
 
         const {
@@ -217,10 +211,7 @@ export async function PUT(request) {
 
 export async function DELETE(request) {
     try {
-        const { userId } = auth();
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const { userId } = await authenticate(request);
 
         await connectToDatabase();
 
