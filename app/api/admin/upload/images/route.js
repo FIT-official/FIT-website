@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { s3 } from "@/lib/s3";
-import sharp from "sharp";
 import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 import { authenticate } from "@/lib/authenticate";
@@ -32,6 +31,9 @@ function sanitizeS3Key(key) {
 
 export async function POST(req) {
     try {
+        // Dynamic import of sharp to avoid build-time errors
+        const sharp = (await import('sharp')).default;
+
         const { userId } = await authenticate(req);
         const isAdmin = await checkAdminPrivileges(userId);
         if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
