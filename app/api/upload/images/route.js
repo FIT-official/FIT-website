@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { s3 } from "@/lib/s3";
-import sharp from "sharp";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { auth } from "@clerk/nextjs/server";
 
@@ -10,6 +9,9 @@ export const runtime = "nodejs";
 
 export async function POST(req) {
   try {
+    // Dynamic import of sharp to avoid build-time errors
+    const sharp = (await import('sharp')).default;
+
     const { userId } = await auth();
     if (!userId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
