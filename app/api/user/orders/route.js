@@ -49,7 +49,7 @@ export async function GET(req) {
         const { userId } = await auth();
         if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         await connectToDatabase();
-        const user = await User.findOne({ userId }, { orderHistory: 1, _id: 0 });
+        const user = await User.findOne({ userId }, { orderHistory: 1, contact: 1, _id: 0 });
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
         const { searchParams } = new URL(req.url);
         const orderId = searchParams.get('orderId');
@@ -59,7 +59,25 @@ export async function GET(req) {
             if (!order) {
                 return NextResponse.json({ error: "Order not found" }, { status: 404 });
             }
-            return NextResponse.json({ order }, { status: 200 });
+
+            // Fetch user details from Clerk
+            const client = await clerkClient();
+            let clerkUser = null;
+            try {
+                clerkUser = await client.users.getUser(userId);
+            } catch (err) {
+                console.error("Error fetching Clerk user:", err);
+            }
+
+            return NextResponse.json({
+                order,
+                userDetails: {
+                    name: clerkUser ? `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() : null,
+                    email: clerkUser?.emailAddresses?.[0]?.emailAddress || null,
+                    phone: clerkUser?.phoneNumbers?.[0]?.phoneNumber || null,
+                    contact: user.contact || null
+                }
+            }, { status: 200 });
         }
 
         const orders = user.orderHistory ?? [];

@@ -58,6 +58,15 @@ function OrderPage({ orderId }) {
                     }
                 }
 
+                // Set user details from API response
+                if (orderData.userDetails) {
+                    setCustomerDetails({
+                        name: orderData.userDetails.name,
+                        email: orderData.userDetails.email,
+                        phone: orderData.userDetails.phone
+                    })
+                }
+
                 // Fetch payment method from Stripe if sessionId exists
                 if (orderData.order.stripeSessionId) {
                     try {
@@ -65,7 +74,12 @@ function OrderPage({ orderId }) {
                         if (paymentRes.ok) {
                             const paymentData = await paymentRes.json()
                             setPaymentMethod(paymentData.paymentMethod)
-                            setCustomerDetails(paymentData.customerDetails)
+                            if (paymentData.customerDetails?.address) {
+                                setCustomerDetails(prev => ({
+                                    ...prev,
+                                    address: paymentData.customerDetails.address
+                                }))
+                            }
                         }
                     } catch (err) {
                         console.error('Error fetching payment method:', err)
