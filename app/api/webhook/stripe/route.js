@@ -91,6 +91,7 @@ export async function POST(req) {
                         currency: item.currency || 'SGD',
                     },
                     status: item.chosenDeliveryType === "digital" ? "delivered" : "pending",
+                    stripeSessionId: session.id, // Store Stripe session ID for payment method retrieval
                 });
 
                 // Update product sales

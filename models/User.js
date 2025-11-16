@@ -50,6 +50,7 @@ const OrderSchema = new mongoose.Schema(
             timestamp: { type: Date, default: Date.now },
             updatedBy: { type: String, default: "system" }
         }], // History of status changes for timeline
+        stripeSessionId: { type: String, default: null }, // Stripe checkout session ID
         notes: { type: String, default: "", maxlength: 1000 },
         schemaVersion: { type: Number, default: 2 },
     },
