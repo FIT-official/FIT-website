@@ -18,6 +18,15 @@ function ProductCard({ product }) {
     const [tooltip, setTooltip] = useState(null);
     const [hoveringLink, setHoveringLink] = useState(false);
 
+    const images = product.images || [];
+    const primaryImageKey = images[0];
+    const imageSrc = primaryImageKey
+        ? `/api/proxy?key=${encodeURIComponent(primaryImageKey)}`
+        : '/placeholder.jpg';
+
+    const reviews = product.reviews || [];
+    const sales = product.sales || [];
+
     const isItMyProduct = (creatorId) => {
         if (!isLoaded || !user) return false;
         return creatorId === user.id;
@@ -104,7 +113,7 @@ function ProductCard({ product }) {
         >
             {!hoveringLink && <LinkToolTip tooltip={tooltip} title={"View " + product.name} />}
             <Image
-                src={`/api/proxy?key=${encodeURIComponent(product.images[0])}`}
+                src={imageSrc}
                 alt={product.name}
                 width={400}
                 height={400}
@@ -164,14 +173,14 @@ function ProductCard({ product }) {
                     })()}
                 </p>
 
-                {product.reviews.length > 0 && (
+                {reviews.length > 0 && (
                     <span className='flex items-center gap-2 text-lightColor text-sm'>
                         <GoStar className='inline' />
-                        {product.reviews.reduce((acc, review) => acc + review.rating, 0) / product.reviews.length}
+                        {reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length}
                     </span>
                 )}
 
-                <span className='flex text-xs text-lightColor'>{product.sales.length} sold</span>
+                <span className='flex text-xs text-lightColor'>{sales.length} sold</span>
                 {!isItMyProduct(product.creatorUserId) && (
                     <button
                         onClick={liked ? handleUnlike : handleLike}

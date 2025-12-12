@@ -1,22 +1,50 @@
 'use client'
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { GoChevronDown } from "react-icons/go";
 import { AnimatePresence, motion } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
+import CustomPrintCard from "@/components/CustomPrintCard";
 import { useToast } from "@/components/General/ToastProvider";
+import { HiUpload, HiCube } from "react-icons/hi";
+import { useContent } from "@/utils/useContent";
 
 function PrintPage() {
     const [products, setProducts] = useState([]);
+    const [customPrintProduct, setCustomPrintProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const searchParams = useSearchParams();
+    const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [priceRange, setPriceRange] = useState(100);
     const [sort, setSort] = useState("topRated");
     const [search, setSearch] = useState("");
     const { showToast } = useToast();
+
+    const { content: bannerContent } = useContent('prints/banner', {
+        bannerImage: '/placeholder.jpg'
+    });
+
+    const [bannerSrc, setBannerSrc] = useState(null);
+    const [isBannerLoaded, setIsBannerLoaded] = useState(false);
+
+    useEffect(() => {
+        const bi = bannerContent?.bannerImage;
+        if (!bi || bi === '/placeholder.jpg') {
+            setBannerSrc('/placeholder.jpg');
+            setIsBannerLoaded(false);
+            return;
+        }
+
+        setIsBannerLoaded(false);
+        if (bi.startsWith('http://') || bi.startsWith('https://') || bi.startsWith('/')) {
+            setBannerSrc(bi);
+        } else {
+            setBannerSrc(`/api/proxy?key=${encodeURIComponent(bi)}`);
+        }
+    }, [bannerContent?.bannerImage]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -24,28 +52,23 @@ function PrintPage() {
             const categoryName = searchParams.get('productCategory');
             const subcategoryName = searchParams.get('productSubCategory');
 
-            let categoryIdx = null;
-            let subcategoryIdx = null;
-            if (categoryName) {
-                const settingsRes = await fetch('/api/admin/settings');
-                if (settingsRes.ok) {
-                    const settingsData = await settingsRes.json();
-                    const printCats = (settingsData.categories || []).filter(c => c.type === 'print' && c.isActive);
-                    categoryIdx = printCats.findIndex(c => c.displayName === categoryName);
-                    if (categoryIdx !== -1 && subcategoryName) {
-                        const subcats = (printCats[categoryIdx].subcategories || []).map(s => s.displayName);
-                        subcategoryIdx = subcats.findIndex(s => s === subcategoryName);
-                    }
+            try {
+                // Fetch custom print product
+                const customPrintRes = await fetch('/api/product/custom-print-config');
+                if (customPrintRes.ok) {
+                    const customPrintData = await customPrintRes.json();
+                    setCustomPrintProduct(customPrintData.product);
                 }
+            } catch (error) {
+                console.error('Error fetching custom print product:', error);
             }
+            const params = new URLSearchParams();
+            params.set('productType', 'print');
+            if (categoryName) params.set('productCategory', categoryName);
+            if (subcategoryName) params.set('productSubCategory', subcategoryName);
+            params.set('fields', 'sales,name,variants,discount,images,reviews,slug,likes,creatorUserId,basePrice,variantTypes');
 
-            let url = "/api/product?productType=print";
-            if (categoryIdx !== null && categoryIdx !== -1) url += `&productCategory=${categoryIdx}`;
-            if (subcategoryIdx !== null && subcategoryIdx !== -1) url += `&productSubCategory=${subcategoryIdx}`;
-            url += "&fields=sales,name,variants,discount,images,reviews,slug,likes,creatorUserId,basePrice,variantTypes";
-
-
-            const res = await fetch(url);
+            const res = await fetch(`/api/product?${params.toString()}`);
             const data = await res.json();
             if (!res.ok) {
                 showToast('Failed to fetch products', 'error');
@@ -56,19 +79,21 @@ function PrintPage() {
         };
 
         fetchProducts();
-    }, [searchParams]);
+    }, [searchParams, showToast]);
 
     const filteredProducts = useMemo(() => {
-        let filtered = products.filter(
-            (p) =>
-                (!p.price?.presentmentAmount ||
-                    Number(p.price.presentmentAmount) <= priceRange) &&
-                (
-                    !search ||
-                    p.name?.toLowerCase().includes(search.toLowerCase()) ||
-                    p.description?.toLowerCase().includes(search.toLowerCase())
-                )
-        );
+        let filtered = products
+            .filter(p => p.slug !== 'custom-print-request') // Exclude custom print product as it's shown separately
+            .filter(
+                (p) =>
+                    (!p.price?.presentmentAmount ||
+                        Number(p.price.presentmentAmount) <= priceRange) &&
+                    (
+                        !search ||
+                        p.name?.toLowerCase().includes(search.toLowerCase()) ||
+                        p.description?.toLowerCase().includes(search.toLowerCase())
+                    )
+            );
 
         switch (sort) {
             case "topRated":
@@ -105,17 +130,24 @@ function PrintPage() {
     }
 
     return (
-        <div className='fle flex-col w-full min-h-[92vh] border-b border-borderColor px-8'>
-            <div className="mb-4 w-full mt-8 grayscale-60">
-                <div className="relative aspect-[16/5] w-full">
-                    <Image
-                        src="/placeholder.jpg"
-                        alt="Banner"
-                        fill
-                        className="object-cover"
-                        priority
-                        sizes="100vw"
-                    />
+        <div className='flex flex-col w-full min-h-[92vh] border-b border-borderColor px-8'>
+            <div className="mb-4 w-full mt-8">
+                <div className="relative aspect-16/5 w-full">
+                    {bannerSrc && (
+                        <Image
+                            src={bannerSrc}
+                            alt="Banner"
+                            fill
+                            priority
+                            sizes="100vw"
+                            className={`object-cover transition-all duration-500 ease-in-out ${isBannerLoaded ? 'opacity-100' : 'opacity-0'}`}
+                            onLoad={() => setIsBannerLoaded(true)}
+                            onError={() => {
+                                setBannerSrc('/placeholder.jpg');
+                                setIsBannerLoaded(true);
+                            }}
+                        />
+                    )}
                 </div>
             </div>
 
@@ -206,6 +238,11 @@ function PrintPage() {
             </div>
 
             <div className="grid w-full lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6 mb-8">
+                {/* Custom Print Request Card */}
+                {!loading && customPrintProduct && (
+                    <CustomPrintCard product={customPrintProduct} />
+                )}
+
                 {loading ? (
                     Array.from({ length: 4 }).map((_, i) => (
                         <div

@@ -3,12 +3,25 @@ import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { services } from "@/lib/services";
+import { useContent } from '@/utils/useContent'
 import Image from "next/image";
 
 
 export default function ScrollSnapCards() {
     const containerRef = useRef(null);
+
+    const { content } = useContent('about/services-list', {
+        services: []
+    })
+
+    const services = content.services || []
+
+    // Helper function to get image src with proxy support
+    const getImageSrc = (imgPath) => {
+        if (!imgPath) return '/placeholder.jpg'
+        if (imgPath.startsWith('http://') || imgPath.startsWith('https://') || imgPath.startsWith('/')) return imgPath
+        return `/api/proxy?key=${encodeURIComponent(imgPath)}`
+    }
 
 
     useGSAP(() => {
@@ -61,7 +74,7 @@ export default function ScrollSnapCards() {
                         >
                             <div className="relative w-full h-1/2">
                                 <Image
-                                    src={card.image || '/placeholder.jpg'}
+                                    src={getImageSrc(card.image)}
                                     alt={card.title}
                                     fill
                                     className="rounded-t-xl object-cover"

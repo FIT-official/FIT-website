@@ -15,6 +15,8 @@ const CartItemSchema = new mongoose.Schema(
         chosenDeliveryType: { type: String, required: true },
         price: { type: Number, required: true, default: 0, min: 0 },
         orderNote: { type: String, default: "", maxlength: 500 },
+        // For custom print requests
+        requestId: { type: String, default: null },
     },
     { timestamps: true }
 );

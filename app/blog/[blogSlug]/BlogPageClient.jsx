@@ -5,15 +5,28 @@ import CTALink from '@/components/General/CTALink'
 
 export default function BlogPageClient({ post }) {
     if (!post) return <div className="p-8">Not found</div>
+
+    const hasCTA = !!(post.cta && (post.cta.tag || post.cta.text || post.cta.url))
+
+    const authorLabel = (() => {
+        if (post.authorName && post.authorName.trim()) return post.authorName
+        if (post.author && typeof post.author === 'object') {
+            const candidate = post.author.firstName || post.author.name || post.author.username
+            if (candidate && candidate.trim()) return candidate
+        }
+        return 'Admin'
+    })()
     return (
         <div className="min-h-[92vh] flex flex-col items-center pt-12 pb-32 border-b border-borderColor justify-center">
             <div className="flex flex-col items-center justify-center px-8 md:px-12">
-                <CTALink tag={post.cta?.tag} text={post.cta?.text} url={post.cta?.url} />
+                {hasCTA && (
+                    <CTALink tag={post.cta?.tag} text={post.cta?.text} url={post.cta?.url} />
+                )}
                 <h1 className="flex max-w-md text-center items-center justify-center mt-3 mb-4">
                     {post.title}
                 </h1>
                 <p className="text-xs font-medium text-lightColor flex mb-8">
-                    By {post.authorId || 'Admin'}{post.publishDateFormatted ? `, ${post.publishDateFormatted}` : (post.publishDate ? `, ${new Date(post.publishDate).toISOString().slice(0, 10)}` : '')}
+                    By {authorLabel}{post.publishDateFormatted ? `, ${post.publishDateFormatted}` : (post.publishDate ? `, ${new Date(post.publishDate).toISOString().slice(0, 10)}` : '')}
                 </p>
 
                 <div className="flex text-sm text-center w-3/4 md:w-1/2 items-center mb-12 justify-center">

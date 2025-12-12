@@ -7,6 +7,7 @@ import { GoChevronDown } from "react-icons/go";
 import { AnimatePresence, motion } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
 import { useToast } from "@/components/General/ToastProvider";
+import { useContent } from "@/utils/useContent";
 
 function ShopPage() {
     const [products, setProducts] = useState([]);
@@ -18,34 +19,42 @@ function ShopPage() {
     const [search, setSearch] = useState("");
     const { showToast } = useToast();
 
+    const { content: bannerContent } = useContent('shop/banner', {
+        bannerImage: '/placeholder.jpg'
+    });
+
+    const [bannerSrc, setBannerSrc] = useState(null);
+    const [isBannerLoaded, setIsBannerLoaded] = useState(false);
+
+    useEffect(() => {
+        const bi = bannerContent?.bannerImage;
+        if (!bi || bi === '/placeholder.jpg') {
+            setBannerSrc('/placeholder.jpg');
+            setIsBannerLoaded(false);
+            return;
+        }
+
+        setIsBannerLoaded(false);
+        if (bi.startsWith('http://') || bi.startsWith('https://') || bi.startsWith('/')) {
+            setBannerSrc(bi);
+        } else {
+            setBannerSrc(`/api/proxy?key=${encodeURIComponent(bi)}`);
+        }
+    }, [bannerContent?.bannerImage]);
+
     useEffect(() => {
         const fetchProducts = async () => {
             setLoading(true);
             const categoryName = searchParams.get('productCategory');
             const subcategoryName = searchParams.get('productSubCategory');
 
-            // Map names to indices by fetching categories from admin settings
-            let categoryIdx = null;
-            let subcategoryIdx = null;
-            if (categoryName) {
-                const settingsRes = await fetch('/api/admin/settings');
-                if (settingsRes.ok) {
-                    const settingsData = await settingsRes.json();
-                    const shopCats = (settingsData.categories || []).filter(c => c.type === 'shop' && c.isActive);
-                    categoryIdx = shopCats.findIndex(c => c.displayName === categoryName);
-                    if (categoryIdx !== -1 && subcategoryName) {
-                        const subcats = (shopCats[categoryIdx].subcategories || []).map(s => s.displayName);
-                        subcategoryIdx = subcats.findIndex(s => s === subcategoryName);
-                    }
-                }
-            }
+            const params = new URLSearchParams();
+            params.set('productType', 'shop');
+            if (categoryName) params.set('productCategory', categoryName);
+            if (subcategoryName) params.set('productSubCategory', subcategoryName);
+            params.set('fields', '_id,name,images,discount,slug,sales,reviews,variants,likes,creatorUserId,basePrice,variantTypes');
 
-            let url = "/api/product?productType=shop";
-            if (categoryIdx !== null && categoryIdx !== -1) url += `&productCategory=${categoryIdx}`;
-            if (subcategoryIdx !== null && subcategoryIdx !== -1) url += `&productSubCategory=${subcategoryIdx}`;
-            url += "&fields=_id,name,images,discount,slug,sales,reviews,variants,likes,creatorUserId,basePrice,variantTypes";
-
-            const res = await fetch(url);
+            const res = await fetch(`/api/product?${params.toString()}`);
             const data = await res.json();
             if (!res.ok) {
                 showToast('Failed to fetch products', 'error');
@@ -106,16 +115,23 @@ function ShopPage() {
 
     return (
         <div className='fle flex-col w-full min-h-[92vh] border-b border-borderColor px-8'>
-            <div className="mb-4 w-full mt-8 grayscale-60">
-                <div className="relative aspect-[16/5] w-full">
-                    <Image
-                        src="/placeholder.jpg"
-                        alt="Banner"
-                        fill
-                        className="object-cover"
-                        priority
-                        sizes="100vw"
-                    />
+            <div className="mb-4 w-full mt-8">
+                <div className="relative aspect-16/5 w-full">
+                    {bannerSrc && (
+                        <Image
+                            src={bannerSrc}
+                            alt="Banner"
+                            fill
+                            priority
+                            sizes="100vw"
+                            className={`object-cover transition-all duration-500 ease-in-out ${isBannerLoaded ? 'opacity-100' : 'opacity-0'}`}
+                            onLoad={() => setIsBannerLoaded(true)}
+                            onError={() => {
+                                setBannerSrc('/placeholder.jpg');
+                                setIsBannerLoaded(true);
+                            }}
+                        />
+                    )}
                 </div>
             </div>
 

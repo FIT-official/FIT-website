@@ -1,5 +1,6 @@
 import React from 'react'
 import { RxCross1 } from 'react-icons/rx'
+import { MdOutlineLightbulb } from 'react-icons/md'
 
 export default function PaidAssetsField({
     form,
@@ -12,9 +13,23 @@ export default function PaidAssetsField({
     handleRemoveModel,
     pendingModels
 }) {
+    const hasPaidAssets = (form.paidAssets?.length || 0) + pendingModels.length > 0
+    const hasDigitalDelivery = form.delivery?.deliveryTypes?.some(dt => dt.type === 'digital' || dt === 'digital')
+    
     return (
         <div className='flex flex-col gap-2 w-full'>
             <label className="formLabel">Paid Assets (3D Models)</label>
+            
+            {hasPaidAssets && !hasDigitalDelivery && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded flex gap-2 items-start text-xs text-blue-950">
+                    <MdOutlineLightbulb className="flex-shrink-0 mt-0.5" />
+                    <div className="flex flex-col gap-1">
+                        <p className="font-semibold">Delivery type will be set to digital</p>
+                        <p>Paid assets (downloadable files) can only be delivered to customers as online products. The delivery type will automatically be set to digital delivery when you save this product.</p>
+                    </div>
+                </div>
+            )}
+            
             {modelValidationErrors.length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-md p-3">
                     <div className="text-sm text-red-800 font-medium mb-1">Model Upload Errors:</div>

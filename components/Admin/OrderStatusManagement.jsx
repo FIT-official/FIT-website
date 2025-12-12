@@ -49,13 +49,16 @@ export default function OrderStatusManagement() {
 
     const [editingItem, setEditingItem] = useState(null)
 
+    // For scrolling back to the form area on edit
+    const [formAnchorId] = useState('order-status-form')
+
     useEffect(() => {
         fetchOrderStatuses()
     }, [])
 
     const fetchOrderStatuses = async () => {
         try {
-            const response = await fetch('/api/admin/settings')
+            const response = await fetch('/api/admin/order-statuses')
             const data = await response.json()
             if (response.ok) {
                 setOrderStatuses(data.orderStatuses || [])
@@ -106,8 +109,10 @@ export default function OrderStatusManagement() {
         if (!confirm('Are you sure you want to delete this order status? This action cannot be undone.')) return
 
         try {
-            const response = await fetch(`/api/admin/settings?type=order-status&id=${id}`, {
-                method: 'DELETE'
+            const response = await fetch('/api/admin/settings', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'order-status', id })
             })
             const data = await response.json()
             if (response.ok) {
@@ -134,6 +139,14 @@ export default function OrderStatusManagement() {
         })
         setEditingItem(item)
         setShowForm(true)
+
+        // Scroll to form so the edit state is obvious
+        if (typeof window !== 'undefined') {
+            const el = document.getElementById(formAnchorId)
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }
+        }
     }
 
     const cancelEdit = () => {
@@ -163,37 +176,38 @@ export default function OrderStatusManagement() {
         }))
     }
 
-    // Group statuses by order type
+    // Group statuses by order type and sort by display order (gaps and duplicates allowed)
+    const sortByDisplayOrder = (list) =>
+        [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
     const groupedStatuses = {
-        order: orderStatuses.filter(s => s.orderType === 'order'),
-        printOrder: orderStatuses.filter(s => s.orderType === 'printOrder')
+        order: sortByDisplayOrder(orderStatuses.filter(s => s.orderType === 'order')),
+        printOrder: sortByDisplayOrder(orderStatuses.filter(s => s.orderType === 'printOrder'))
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header with Add Button */}
-            <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:gap-6 p-6 md:p-12 bg-borderColor/30 min-h-screen">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <h2 className="text-2xl font-semibold text-textColor">Order Status Management</h2>
-                    <p className="text-sm text-lightColor mt-1">Create and manage custom order statuses for your creators</p>
+                    <h2 className="text-xl sm:text-2xl font-semibold text-textColor">Order Status Management</h2>
+                    <p className="text-xs sm:text-sm text-lightColor mt-1">Create and manage custom order statuses for your creators</p>
                 </div>
                 <button
                     onClick={() => setShowForm(!showForm)}
-                    className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
+                    className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-xs sm:text-sm font-medium w-full sm:w-auto"
                 >
                     <MdAdd size={18} />
                     Add Status
                 </button>
             </div>
 
-            {/* Form - Collapsible */}
             {showForm && (
-                <div className="bg-white border border-borderColor rounded-xl p-6 shadow-sm animate-slideDown">
-                    <h3 className="text-lg font-semibold text-textColor mb-4">
+                <div id={formAnchorId} className="bg-white border border-borderColor rounded-xl p-4 sm:p-6 shadow-sm animate-slideDown">
+                    <h3 className="text-base sm:text-lg font-semibold text-textColor mb-4">
                         {editingItem ? 'Edit Order Status' : 'Create New Order Status'}
                     </h3>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-textColor mb-2">Status Key *</label>
                                 <input
@@ -250,12 +264,18 @@ export default function OrderStatusManagement() {
                                 <input
                                     type="number"
                                     value={form.order}
-                                    onChange={(e) => setForm(prev => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
+                                    onChange={(e) => {
+                                        const raw = e.target.value
+                                        const parsed = raw === '' ? '' : parseInt(raw, 10)
+                                        setForm(prev => ({ ...prev, order: isNaN(parsed) ? '' : parsed }))
+                                    }}
                                     className="formInput"
                                     min="0"
                                     placeholder="0"
                                 />
-                                <p className="text-xs text-lightColor mt-1">Lower numbers appear first</p>
+                                <p className="text-xs text-lightColor mt-1">
+                                    Lower numbers appear first. Same numbers have equal priority.
+                                </p>
                             </div>
 
                             <div>
@@ -289,8 +309,8 @@ export default function OrderStatusManagement() {
                                                 type="button"
                                                 onClick={() => setForm(prev => ({ ...prev, icon: icon.name }))}
                                                 className={`p-3 border-2 rounded-lg transition-all ${isSelected
-                                                        ? 'border-black bg-black/5'
-                                                        : 'border-borderColor hover:border-lightColor'
+                                                    ? 'border-black bg-black/5'
+                                                    : 'border-borderColor hover:border-lightColor'
                                                     }`}
                                                 title={icon.label}
                                             >
@@ -336,9 +356,8 @@ export default function OrderStatusManagement() {
                 </div>
             )}
 
-            {/* Regular Orders Section */}
             <div className="bg-white border border-borderColor rounded-xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-borderColor bg-gradient-to-r from-blue-50 to-purple-50">
+                <div className="px-6 py-4 border-b border-borderColor bg-linear-to-r from-borderColor/60 to-borderColor/80">
                     <h3 className="text-sm font-semibold text-textColor uppercase tracking-wide">Regular Orders</h3>
                     <p className="text-xs text-lightColor mt-1">{groupedStatuses.order.length} status{groupedStatuses.order.length !== 1 ? 'es' : ''}</p>
                 </div>
@@ -350,7 +369,6 @@ export default function OrderStatusManagement() {
                         </div>
                     ) : (
                         groupedStatuses.order
-                            .sort((a, b) => (a.order || 0) - (b.order || 0))
                             .map((status) => {
                                 const Icon = getIconComponent(status.icon)
                                 const isExpanded = expandedStatuses[status.statusKey]
@@ -371,8 +389,11 @@ export default function OrderStatusManagement() {
                                                 </div>
                                                 <div className="text-left">
                                                     <div className="font-medium text-sm text-textColor">{status.displayName}</div>
-                                                    <div className="text-xs text-lightColor flex items-center gap-2 mt-0.5">
+                                                    <div className="text-xs text-lightColor flex items-center gap-2 mt-0.5 flex-wrap">
                                                         <span className="font-mono">{status.statusKey}</span>
+                                                        <span className="px-2 py-0.5 bg-borderColor/60 rounded text-[10px] font-mono">
+                                                            #{typeof status.order === 'number' ? status.order : 0}
+                                                        </span>
                                                         {isBuiltIn && <span className="px-2 py-0.5 bg-gray-100 rounded text-[10px]">Built-in</span>}
                                                         {!status.isActive && <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px]">Inactive</span>}
                                                     </div>
@@ -419,7 +440,7 @@ export default function OrderStatusManagement() {
 
             {/* Print Orders Section */}
             <div className="bg-white border border-borderColor rounded-xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-borderColor bg-gradient-to-r from-purple-50 to-pink-50">
+                <div className="px-6 py-4 border-b border-borderColor bg-linear-to-r from-borderColor/60 to-borderColor/80">
                     <h3 className="text-sm font-semibold text-textColor uppercase tracking-wide">Print Orders</h3>
                     <p className="text-xs text-lightColor mt-1">{groupedStatuses.printOrder.length} status{groupedStatuses.printOrder.length !== 1 ? 'es' : ''}</p>
                 </div>
@@ -431,7 +452,6 @@ export default function OrderStatusManagement() {
                         </div>
                     ) : (
                         groupedStatuses.printOrder
-                            .sort((a, b) => (a.order || 0) - (b.order || 0))
                             .map((status) => {
                                 const Icon = getIconComponent(status.icon)
                                 const isExpanded = expandedStatuses[status.statusKey]
@@ -452,8 +472,11 @@ export default function OrderStatusManagement() {
                                                 </div>
                                                 <div className="text-left">
                                                     <div className="font-medium text-sm text-textColor">{status.displayName}</div>
-                                                    <div className="text-xs text-lightColor flex items-center gap-2 mt-0.5">
+                                                    <div className="text-xs text-lightColor flex items-center gap-2 mt-0.5 flex-wrap">
                                                         <span className="font-mono">{status.statusKey}</span>
+                                                        <span className="px-2 py-0.5 bg-borderColor/60 rounded text-[10px] font-mono">
+                                                            #{typeof status.order === 'number' ? status.order : 0}
+                                                        </span>
                                                         {isBuiltIn && <span className="px-2 py-0.5 bg-gray-100 rounded text-[10px]">Built-in</span>}
                                                         {!status.isActive && <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px]">Inactive</span>}
                                                     </div>

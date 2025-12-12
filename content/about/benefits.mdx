@@ -1,0 +1,38 @@
+---
+backgroundImage: "/image.png"
+benefits:
+  - icon: "MdOutlinePrecisionManufacturing"
+    title: "High-Precision Prints"
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt."
+  - icon: "BsTools"
+    title: "Quality & Reliable Repairs"
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt."
+  - icon: "MdOutlineDiamond"
+    title: "Trusted Quality Materials"
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt."
+  - icon: "CgToolbox"
+    title: "STEM projects, Hackathons"
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt."
+fieldMeta:
+  backgroundImage:
+    type: "image"
+    uploadPath: "about/benefits"
+    uploadEndpoint: "/api/admin/upload/images"
+  benefits:
+    type: "array"
+    fields:
+      icon:
+        type: "select"
+        options:
+          - "MdOutlinePrecisionManufacturing"
+          - "BsTools"
+          - "MdOutlineDiamond"
+          - "CgToolbox"
+          - "MdOutlineDiamond"
+      title:
+        type: "text"
+      description:
+        type: "textarea"
+---
+
+Benefits section displaying key advantages

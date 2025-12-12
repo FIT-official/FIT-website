@@ -12,6 +12,7 @@ export default function ImageDrop({
     accept = 'image/*',
     onFilesSelected = () => { },
     onRemove = () => { },
+    onValidationError = () => { },
     inputRef = null,
     className = ''
 }) {
@@ -35,18 +36,43 @@ export default function ImageDrop({
         return [files]
     }
 
+    const validateAndSelect = (files) => {
+        if (!files || files.length === 0) return
+
+        const allowedSlots = multiple ? Math.max(0, maxFiles - currentValues.length - pendingFiles.length) : 1
+        if (multiple && allowedSlots <= 0) {
+            onValidationError(`You can upload a maximum of ${maxFiles} images per product.`)
+            return
+        }
+
+        const valid = []
+        for (const file of files) {
+            if (file.size > maxSize) {
+                onValidationError(`File "${file.name}" is too large. Maximum size is ${Math.round(maxSize / (1024 * 1024))}MB.`)
+                continue
+            }
+            if (multiple && valid.length >= allowedSlots) {
+                onValidationError(`You can upload a maximum of ${maxFiles} images per product.`)
+                break
+            }
+            valid.push(file)
+        }
+
+        if (valid.length > 0) {
+            onFilesSelected(valid)
+        }
+    }
+
     const handleInputChange = (e) => {
         const files = toFilesArray(e.target.files)
-        if (!files || files.length === 0) return
-        onFilesSelected(files)
+        validateAndSelect(files)
     }
 
     const handleDrop = (e) => {
         e.preventDefault()
         setDragActive(false)
         const files = toFilesArray(e.dataTransfer.files)
-        if (!files || files.length === 0) return
-        onFilesSelected(files)
+        validateAndSelect(files)
     }
 
     const renderPreviewSrc = (item, isPending) => {

@@ -24,6 +24,7 @@ function Account() {
         const tabParam = searchParams.get('tab');
         if (tabParam && ['profile', 'security', 'orders', 'billing', 'downloads'].includes(tabParam)) {
             setTab(tabParam);
+            setSidebarOpen(true); // Auto-open sidebar when navigating with tab param
         }
     }, [searchParams]);
 

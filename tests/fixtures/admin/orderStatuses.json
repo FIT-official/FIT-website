@@ -1,0 +1,31 @@
+[
+  {
+    "id": "OS_ORDER_PAID",
+    "description": "After Stripe checkout.session.completed webhook.",
+    "form": {
+      "statusKey": "paid",
+      "displayName": "Paid",
+      "description": "Payment received and order is awaiting fulfilment.",
+      "orderType": "order",
+      "color": "#22c55e",
+      "icon": "TbChecks",
+      "order": 10,
+      "isActive": true
+    }
+  },
+  
+  {
+    "id": "OS_PRINT_PENDING_CONFIG",
+    "description": "Initial status for custom print orders awaiting configuration.",
+    "form": {
+      "statusKey": "pending_config",
+      "displayName": "Pending Configuration",
+      "description": "Waiting for customer to configure their custom print.",
+      "orderType": "printOrder",
+      "color": "#f97316",
+      "icon": "TbClock",
+      "order": 0,
+      "isActive": true
+    }
+  }
+]

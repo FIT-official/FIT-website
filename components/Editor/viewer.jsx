@@ -1,6 +1,6 @@
 import React, { Suspense, useLayoutEffect, useRef } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
-import { OrbitControls, Stage } from '@react-three/drei'
+import { OrbitControls, Stage, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 import useStore from '@/utils/store'
 
@@ -88,7 +88,7 @@ const SceneStyler = ({
 
 const Viewer = ({
   autoRotate = false,
-  environment = 'city',
+  environment,
   preset = 'rembrandt',
   intensity = 0,
   wireframe,
@@ -127,17 +127,20 @@ const Viewer = ({
       <directionalLight position={[10, 10, 5]} intensity={0.5} />
       <Suspense fallback={null}>
         {scene && (
-          <Stage
-            preset={preset}
-            intensity={intensity}
-            shadows={true}
-            adjustCamera
-            environment={environment}
-          >
-            <>
-              <primitive object={scene} />
-            </>
-          </Stage>
+          <>
+            <Environment key={environment} preset={environment || 'city'} background={false} />
+            <Stage
+              preset={preset}
+              intensity={intensity}
+              shadows={true}
+              adjustCamera
+              environment={null}
+            >
+              <>
+                <primitive object={scene} />
+              </>
+            </Stage>
+          </>
         )}
         <SceneStyler
           wireframe={wireframe}

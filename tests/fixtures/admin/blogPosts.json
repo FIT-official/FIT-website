@@ -1,0 +1,70 @@
+[
+  {
+    "id": "B1_SIMPLE_POST",
+    "description": "Short post with plain text and one category.",
+    "form": {
+      "title": "Welcome to FIT: Launch Notes",
+      "slug": "welcome-to-fit",
+      "excerpt": "Introducing our new marketplace for 3D models and prints.",
+      "content": "## Welcome to FIT\n\nThis is a short post explaining what the platform does.",
+      "heroImage": "",
+      "cta": { "tag": "", "text": "", "url": "" },
+      "metaTitle": "",
+      "metaDescription": "",
+      "tags": ["launch", "fit"],
+      "published": true,
+      "featured": false
+    }
+  },
+  {
+    "id": "B2_LONG_RICH_TEXT",
+    "description": "Very long post using rich text/markdown to exercise the editor.",
+    "form": {
+      "title": "Everything You Need to Know About Custom 3D Prints",
+      "slug": "custom-3d-print-guide",
+      "excerpt": "A deep dive into custom 3D printing on FIT.",
+      "content": "# Custom 3D Printing Guide\n\nThis post contains **bold text**, _italics_, lists and code.\n\n## File Types\n\n- STL\n- OBJ\n- GLB / GLTF\n- 3MF\n- PLY\n\n```js\\nconsole.log('hello from code block');\\n```\n\n## Tips\n\n1. Check overhangs\n2. Use supports when needed\n3. Verify wall thickness",
+      "heroImage": "",
+      "cta": { "tag": "Guide", "text": "Read the full guide", "url": "/blog/custom-3d-print-guide" },
+      "metaTitle": "Custom 3D Printing Guide | FIT Blog",
+      "metaDescription": "Everything you need to know about ordering custom 3D prints on FIT.",
+      "tags": ["3d-print", "guide", "files"],
+      "published": true,
+      "featured": true
+    }
+  },
+  {
+    "id": "B3_SCHEDULED_UNPUBLISHED",
+    "description": "Future-dated post to test scheduling/unpublished visibility.",
+    "form": {
+      "title": "Black Friday Deals 2026",
+      "slug": "black-friday-2026",
+      "excerpt": "Upcoming deals and discounts.",
+      "content": "This post is set in the future and initially unpublished.",
+      "heroImage": "",
+      "cta": { "tag": "", "text": "", "url": "" },
+      "metaTitle": "Black Friday Deals 2026 | FIT",
+      "metaDescription": "Preview of upcoming Black Friday discounts on FIT.",
+      "tags": ["sale", "discounts"],
+      "published": false,
+      "featured": false
+    }
+  },
+  {
+    "id": "B4_VALIDATION_ERRORS",
+    "description": "Broken post used to confirm server-side validation.",
+    "form": {
+      "title": "",
+      "slug": "this-slug-is-way-too-long---------------------------------------",
+      "excerpt": "",
+      "content": "",
+      "heroImage": "",
+      "cta": { "tag": "", "text": "", "url": "" },
+      "metaTitle": "",
+      "metaDescription": "",
+      "tags": [],
+      "published": true,
+      "featured": false
+    }
+  }
+]

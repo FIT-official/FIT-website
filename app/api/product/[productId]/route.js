@@ -8,7 +8,10 @@ export async function GET(request, { params }) {
 
         const { productId } = await params
 
-        const product = await Product.findById(productId).select('name variants viewableModel creatorUserId')
+        // Return the full product document so downstream consumers
+        // (e.g. ProductCard, CreatorPayments, FeaturedSection) have
+        // access to images, pricing, reviews, sales, etc.
+        const product = await Product.findById(productId).lean()
 
         if (!product) {
             return NextResponse.json({ error: 'Product not found' }, { status: 404 })

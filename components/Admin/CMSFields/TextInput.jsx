@@ -8,13 +8,17 @@ export default function TextInput({
     required = false,
     disabled = false,
     className = "",
-    rows = 1
+    rows = 1,
+    helpText
 }) {
     return (
         <div className={`space-y-2 ${className}`}>
             <label className="formLabel">
                 {label} {required && <span className="text-red-500">*</span>}
             </label>
+            {helpText && (
+                <p className="text-xs text-lightColor -mt-1">{helpText}</p>
+            )}
             {rows > 1 ? (
                 <textarea
                     value={value || ''}

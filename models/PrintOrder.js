@@ -1,21 +1,27 @@
 import mongoose from 'mongoose'
 
+// DEPRECATED: This model is being phased out in favor of CustomPrintRequest
+// Print orders are now handled as custom upload requests, not product-based orders
 const PrintOrderSchema = new mongoose.Schema({
     // Order identification
     orderId: { type: String, required: true, unique: true },
     stripeSessionId: { type: String, required: true },
 
-    // User and product info
+    // User and product info (LEGACY - for backwards compatibility)
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
 
-    productTitle: { type: String, required: true },
+    productTitle: { type: String },
     quantity: { type: Number, default: 1 },
     basePrice: { type: Number, required: true }, // Original product price
     printFee: { type: Number, required: true }, // Additional printing cost
     deliveryFee: { type: Number, required: true }, // Shipping cost
     totalAmount: { type: Number, required: true }, // Total paid amount
+
+    // Custom print request reference (NEW)
+    customPrintRequestId: { type: mongoose.Schema.Types.ObjectId, ref: "CustomPrintRequest" },
+    isCustomUpload: { type: Boolean, default: false }
 
     // Print configuration
     printConfiguration: {

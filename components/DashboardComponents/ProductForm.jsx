@@ -1,6 +1,6 @@
 'use client'
 import { useUser } from "@clerk/nextjs";
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link";
 import { GoChevronDown, GoChevronLeft, GoChevronRight } from "react-icons/go";
 import { supportedCountries } from '@/lib/supportedCountries'
@@ -50,6 +50,11 @@ function ProductForm({ mode = "Create", product = null }) {
     const imageInputRef = useRef(null);
     const modelInputRef = useRef(null);
     const viewableModelInputRef = useRef(null);
+    
+    // Refs for scrolling to sections with errors
+    const detailsSectionRef = useRef(null);
+    const shippingSectionRef = useRef(null);
+    const pricingSectionRef = useRef(null);
     const [pendingImages, setPendingImages] = useState([]);
     const [pendingModels, setPendingModels] = useState([]);
     const [pendingViewableModel, setPendingViewableModel] = useState(null);
@@ -257,30 +262,194 @@ function ProductForm({ mode = "Create", product = null }) {
     const [imageValidationErrors, setImageValidationErrors] = useState([]);
     const [modelValidationErrors, setModelValidationErrors] = useState([]);
     const [viewableValidationErrors, setViewableValidationErrors] = useState([]);
+    const [missingFields, setMissingFields] = useState([]);
 
-    const handleImageChange = (e) => handleImageChangeHelper(e, setPendingImages, setImageValidationErrors);
-    const handleImageDrop = (fileList) => handleImageDropHelper(fileList, setPendingImages, setImageValidationErrors);
-    const handleRemoveImage = (idx) => handleRemoveImageHelper(idx, form, setForm, pendingImages, setPendingImages, imageInputRef, setImageValidationErrors);
+    const handleImageChange = useCallback(
+        (e) => handleImageChangeHelper(e, setPendingImages, setImageValidationErrors),
+        [],
+    );
+    const handleImageDrop = useCallback(
+        (fileList) => handleImageDropHelper(fileList, setPendingImages, setImageValidationErrors),
+        [],
+    );
+    const handleRemoveImage = useCallback(
+        (idx) => handleRemoveImageHelper(idx, form, setForm, pendingImages, setPendingImages, imageInputRef, setImageValidationErrors),
+        [form, pendingImages],
+    );
 
-    const handleModelChange = (e) => handleModelChangeHelper(e, setPendingModels, setModelValidationErrors);
-    const handleModelDrop = (fileList) => handleModelDropHelper(fileList, setPendingModels, setModelValidationErrors);
-    const handleRemoveModel = (idx) => handleRemoveModelHelper(idx, form, setForm, pendingModels, setPendingModels, modelInputRef, setModelValidationErrors);
+    const handleModelChange = useCallback(
+        (e) => handleModelChangeHelper(e, setPendingModels, setModelValidationErrors),
+        [],
+    );
+    const handleModelDrop = useCallback(
+        (fileList) => handleModelDropHelper(fileList, setPendingModels, setModelValidationErrors),
+        [],
+    );
+    const handleRemoveModel = useCallback(
+        (idx) => handleRemoveModelHelper(idx, form, setForm, pendingModels, setPendingModels, modelInputRef, setModelValidationErrors),
+        [form, pendingModels],
+    );
 
-    const handleViewableModelChange = (e) => handleViewableModelChangeHelper(e, setPendingViewableModel, setViewableValidationErrors);
-    const handleRemoveViewableModel = () => handleRemoveViewableModelHelper(pendingViewableModel, setPendingViewableModel, setForm, viewableModelInputRef, setViewableValidationErrors);
+    const handleViewableModelChange = useCallback(
+        (e) => handleViewableModelChangeHelper(e, setPendingViewableModel, setViewableValidationErrors),
+        [],
+    );
+    const handleRemoveViewableModel = useCallback(
+        () => handleRemoveViewableModelHelper(pendingViewableModel, setPendingViewableModel, setForm, viewableModelInputRef, setViewableValidationErrors),
+        [pendingViewableModel],
+    );
 
     // Submit handler
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!isLoaded) return;
 
-        // Validate that at least one image exists
+        // Clear previous validation errors
+        setMissingFields([]);
+
+        // Validate required fields (matching backend requirements)
         const totalImages = (form.images?.length || 0) + pendingImages.length;
-        if (totalImages === 0) {
-            showToast("Please add at least one product image before saving.", "error");
+        const requiredFieldsCheck = [];
+        
+        if (!form.name || form.name.trim() === '') requiredFieldsCheck.push('name');
+        if (!form.description || form.description.trim() === '') requiredFieldsCheck.push('description');
+        if (totalImages === 0) requiredFieldsCheck.push('images');
+        if (!form.basePrice || form.basePrice.presentmentAmount === undefined) requiredFieldsCheck.push('basePrice');
+        if (form.priceCredits === undefined || form.priceCredits === null) requiredFieldsCheck.push('priceCredits');
+        if (!form.productType) requiredFieldsCheck.push('productType');
+        const hasDeliveryTypes = Array.isArray(form.delivery?.deliveryTypes) && form.delivery.deliveryTypes.length > 0;
+        if (!hasDeliveryTypes) requiredFieldsCheck.push('deliveryTypes');
+
+        if (requiredFieldsCheck.length > 0) {
+            setMissingFields(requiredFieldsCheck);
+
+            // Ensure relevant sections are open
+            setOpenSection(prev => ({
+                ...prev,
+                details: prev.details || requiredFieldsCheck.some(f => ['name', 'description', 'images', 'productType'].includes(f)),
+                shipping: prev.shipping || requiredFieldsCheck.includes('deliveryTypes'),
+                pricing: prev.pricing || requiredFieldsCheck.some(f => ['basePrice', 'priceCredits'].includes(f)),
+            }));
+
+            // Scroll to first missing field
+            if (requiredFieldsCheck.some(f => ['name', 'description', 'images', 'productType'].includes(f))) {
+                detailsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else if (requiredFieldsCheck.includes('deliveryTypes')) {
+                shippingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else if (requiredFieldsCheck.some(f => ['basePrice', 'priceCredits'].includes(f))) {
+                pricingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            const fieldNames = requiredFieldsCheck.map(f => {
+                switch(f) {
+                    case 'name': return 'Product Name';
+                    case 'description': return 'Description';
+                    case 'images': return 'Product Images (at least 1)';
+                    case 'basePrice': return 'Base Price';
+                    case 'priceCredits': return 'Credit Price';
+                    case 'productType': return 'Product Type';
+                    case 'deliveryTypes': return 'Delivery Type';
+                    default: return f;
+                }
+            }).join(', ');
+            
+            showToast(`Missing required fields: ${fieldNames}`, "error");
             return;
         }
 
+        // Additional validation for invalid values (beyond just missing fields)
+        const validationErrors = [];
+
+        // Numeric validations
+        const baseAmount = typeof form.basePrice?.presentmentAmount === 'number'
+            ? form.basePrice.presentmentAmount
+            : Number(form.basePrice?.presentmentAmount);
+        if (!Number.isNaN(baseAmount) && baseAmount < 0) {
+            validationErrors.push('Base price cannot be negative.');
+        }
+
+        const creditsAmount = typeof form.priceCredits === 'number'
+            ? form.priceCredits
+            : Number(form.priceCredits);
+        if (!Number.isNaN(creditsAmount) && creditsAmount < 0) {
+            validationErrors.push('Credit price cannot be negative.');
+        }
+
+        if (typeof form.stock === 'number' && form.stock < 0) {
+            validationErrors.push('Stock cannot be negative.');
+        }
+
+        const dims = form.dimensions || {};
+        if (
+            (typeof dims.length === 'number' && dims.length < 0) ||
+            (typeof dims.width === 'number' && dims.width < 0) ||
+            (typeof dims.height === 'number' && dims.height < 0) ||
+            (typeof dims.weight === 'number' && dims.weight < 0)
+        ) {
+            validationErrors.push('Dimensions must be zero or positive values.');
+        }
+
+        // Discount validations
+        if (form.showDiscount) {
+            const discount = form.discount || {};
+            const hasEvent = !!discount.eventId;
+            const percentage = Number(discount.percentage);
+            const minimumPrice = Number(discount.minimumPrice);
+            const startDate = discount.startDate ? new Date(discount.startDate) : null;
+            const endDate = discount.endDate ? new Date(discount.endDate) : null;
+
+            if (!hasEvent && (Number.isNaN(percentage) || percentage <= 0 || percentage > 100)) {
+                validationErrors.push('Discount percentage must be between 1 and 100%.');
+            }
+
+            if (!hasEvent && !Number.isNaN(minimumPrice) && minimumPrice < 0) {
+                validationErrors.push('Discount minimum amount cannot be negative.');
+            }
+
+            if (!hasEvent && startDate && endDate && startDate > endDate) {
+                validationErrors.push('Discount start date must be before the end date.');
+            }
+        }
+
+        // Delivery type validations
+        const hasPaidAssets = (Array.isArray(form.paidAssets) && form.paidAssets.length > 0) || pendingModels.length > 0;
+        const hasDigitalDelivery = form.delivery?.deliveryTypes?.some(dt => dt.type === 'digital' || dt === 'digital');
+
+        if (!hasDeliveryTypes) {
+            validationErrors.push('Select at least one delivery type.');
+        }
+
+        if (hasPaidAssets && !hasDigitalDelivery) {
+            validationErrors.push('Products with downloadable files must include digital delivery.');
+        }
+
+        // If digital delivery is selected, enforce a single variant configuration
+        if (hasDigitalDelivery) {
+            if (form.variantTypes?.length > 1) {
+                validationErrors.push('Digital products support only one variant type.');
+            }
+            if (form.variantTypes?.[0]?.options && form.variantTypes[0].options.length > 1) {
+                validationErrors.push('Digital products support only one variant option.');
+            }
+        }
+
+        if (validationErrors.length > 0) {
+            // Open relevant sections and scroll to the first problem area
+            setOpenSection(prev => ({
+                ...prev,
+                shipping: true,
+                pricing: true,
+            }));
+
+            if (!hasDeliveryTypes || (hasPaidAssets && !hasDigitalDelivery)) {
+                shippingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else if (validationErrors.some(msg => msg.toLowerCase().includes('price'))) {
+                pricingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            showToast(`Validation errors: ${validationErrors.join(' ')}`, 'error');
+            return;
+        }
         setIsLoading(true);
         let uploadedImages = []
         let uploadedModels = []
@@ -334,30 +503,120 @@ function ProductForm({ mode = "Create", product = null }) {
                 body: JSON.stringify(payload),
             });
             const data = await res.json();
+
             if (!res.ok) {
-                showToast(data.error || "Failed to create product", 'error');
-            } else {
-                if (!res.ok) {
-                    showToast(data.error || "Failed to create product", 'error');
-                } else {
-                    setPendingImages([]);
-                    setPendingModels([]);
-                    setPendingViewableModel(null);
-                    setIsLoading(false);
-                    if (imageInputRef.current) imageInputRef.current.value = "";
-                    if (modelInputRef.current) modelInputRef.current.value = "";
-                    if (viewableModelInputRef.current) viewableModelInputRef.current.value = "";
-                    showToast(isEditing ? "Product updated successfully!" : "Product created successfully!", 'success');
-                    if (!isEditing) {
-                        setForm({ ...defaultForm });
+                // Cleanup any uploaded files since the product save failed
+                if (allUploadedFiles.length > 0) {
+                    try {
+                        await cleanupUploadedFiles(allUploadedFiles);
+                    } catch (cleanupError) {
+                        console.error("Cleanup after product save failed:", cleanupError);
                     }
                 }
+
+                // If backend reports missingFields, mirror that in the UI
+                if (Array.isArray(data.missingFields) && data.missingFields.length > 0) {
+                    setMissingFields(data.missingFields);
+
+                    const missing = data.missingFields;
+
+                    // Ensure the relevant sections are open
+                    setOpenSection(prev => ({
+                        ...prev,
+                        details: prev.details || missing.some(f => ["name", "description", "images", "productType"].includes(f)),
+                        pricing: prev.pricing || missing.some(f => ["basePrice", "priceCredits"].includes(f)),
+                    }));
+
+                    // Scroll to the most relevant section
+                    if (missing.some(f => ["name", "description", "images", "productType"].includes(f))) {
+                        detailsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else if (missing.some(f => ["basePrice", "priceCredits"].includes(f))) {
+                        pricingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    const fieldNames = missing.map(f => {
+                        switch (f) {
+                            case 'name': return 'Product Name';
+                            case 'description': return 'Description';
+                            case 'images': return 'Product Images (at least 1)';
+                            case 'basePrice': return 'Base Price';
+                            case 'priceCredits': return 'Credit Price';
+                            case 'productType': return 'Product Type';
+                            default: return f;
+                        }
+                    }).join(', ');
+
+                    showToast(`Missing required fields: ${fieldNames}`, 'error');
+                } else {
+                    showToast(data.error || "Failed to create product", 'error');
+                }
+
+                setIsLoading(false);
+                return;
+            }
+
+            // Success path
+            setPendingImages([]);
+            setPendingModels([]);
+            setPendingViewableModel(null);
+            setIsLoading(false);
+            if (imageInputRef.current) imageInputRef.current.value = "";
+            if (modelInputRef.current) modelInputRef.current.value = "";
+            if (viewableModelInputRef.current) viewableModelInputRef.current.value = "";
+            showToast(isEditing ? "Product updated successfully!" : "Product created successfully!", 'success');
+            if (!isEditing) {
+                setForm({ ...defaultForm });
             }
         } catch (err) {
             showToast("Network error: " + err.message, 'error');
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }
+
+    // Auto-set digital delivery when paid assets (downloadable files) are present
+    useEffect(() => {
+        const hasPaidAssets = (Array.isArray(form.paidAssets) && form.paidAssets.length > 0) || pendingModels.length > 0;
+        const hasDigital = form.delivery?.deliveryTypes?.some(dt => dt.type === 'digital' || dt === 'digital');
+
+        // Add digital delivery when paid assets are added
+        if (hasPaidAssets && !hasDigital) {
+            // When switching to digital delivery, trim variants to max 1 type with 1 option
+            const trimmedVariantTypes = form.variantTypes?.length > 0
+                ? [{
+                    ...form.variantTypes[0], // Keep first variant type
+                    options: form.variantTypes[0].options?.length > 0
+                        ? [form.variantTypes[0].options[0]] // Keep only first option
+                        : []
+                }]
+                : [];
+
+            setForm(prev => ({
+                ...prev,
+                delivery: {
+                    ...(prev.delivery || {}),
+                    deliveryTypes: [{ type: 'digital', price: 0, customDescription: 'Digital download only' }]
+                },
+                variantTypes: trimmedVariantTypes
+            }));
+        }
+        
+        // Remove digital delivery when all paid assets are removed
+        if (!hasPaidAssets && hasDigital) {
+            // Only remove digital if it was auto-added (i.e., it's the only delivery type)
+            const onlyDigital = form.delivery?.deliveryTypes?.length === 1 && 
+                               form.delivery?.deliveryTypes[0]?.type === 'digital';
+            
+            if (onlyDigital) {
+                setForm(prev => ({
+                    ...prev,
+                    delivery: {
+                        ...(prev.delivery || {}),
+                        deliveryTypes: []
+                    }
+                }));
+            }
+        }
+    }, [form.paidAssets, pendingModels]);
 
 
     const handleDelete = async () => {
@@ -385,7 +644,7 @@ function ProductForm({ mode = "Create", product = null }) {
             </Link>
             <h1 className="flex w-full mb-4">{formattedMode} Product</h1>
 
-            <div className="flex flex-col w-full border border-borderColor rounded-sm">
+            <div ref={detailsSectionRef} className="flex flex-col w-full border border-borderColor rounded-sm">
                 <button type="button" className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer  text-sm"
                     onClick={() => setOpenSection(s => ({ ...s, details: !s.details }))}
                 >
@@ -400,10 +659,10 @@ function ProductForm({ mode = "Create", product = null }) {
                         pointerEvents: openSection.details ? 'auto' : 'none'
                     }}
                 >
-                    <BasicInfo form={form} handleChange={handleChange} />
+                    <BasicInfo form={form} handleChange={handleChange} missingFields={missingFields} />
 
                     <ImagesField
-                        form={form}
+                        images={form.images}
                         imageValidationErrors={imageValidationErrors}
                         dragImagesActive={dragImagesActive}
                         setDragImagesActive={setDragImagesActive}
@@ -412,6 +671,8 @@ function ProductForm({ mode = "Create", product = null }) {
                         handleImageDrop={handleImageDrop}
                         handleRemoveImage={handleRemoveImage}
                         pendingImages={pendingImages}
+                        setImageValidationErrors={setImageValidationErrors}
+                        missingFields={missingFields}
                     />
 
                     <ProductTypeCategory
@@ -448,7 +709,7 @@ function ProductForm({ mode = "Create", product = null }) {
             </div>
 
 
-            <div className="flex flex-col w-full border border-borderColor rounded-sm">
+            <div ref={shippingSectionRef} className="flex flex-col w-full border border-borderColor rounded-sm">
                 <button type="button"
                     className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer  text-sm"
                     onClick={() => setOpenSection(s => ({ ...s, shipping: !s.shipping }))}
@@ -464,12 +725,12 @@ function ProductForm({ mode = "Create", product = null }) {
                         pointerEvents: openSection.shipping ? 'auto' : 'none'
                     }}
                 >
-                    <ShippingFields form={form} handleChange={handleChange} setForm={setForm} />
+                    <ShippingFields form={form} handleChange={handleChange} setForm={setForm} missingFields={missingFields} />
                 </div>
             </div>
 
 
-            <div className="flex flex-col w-full border border-borderColor rounded-sm">
+            <div ref={pricingSectionRef} className="flex flex-col w-full border border-borderColor rounded-sm">
                 <button type="button" className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer text-sm"
                     onClick={() => setOpenSection(s => ({ ...s, pricing: !s.pricing }))}
                 >
@@ -484,11 +745,12 @@ function ProductForm({ mode = "Create", product = null }) {
                         pointerEvents: openSection.pricing ? 'auto' : 'none'
                     }}
                 >
-                    <PricingFields form={form} setForm={setForm} allCurrencies={allCurrencies} />
+                    <PricingFields form={form} setForm={setForm} allCurrencies={allCurrencies} missingFields={missingFields} />
 
                     <VariantTypesField
                         form={form}
                         setForm={setForm}
+                        isDigitalDelivery={form.delivery?.deliveryTypes?.some(dt => dt.type === 'digital' || dt === 'digital')}
                     />
 
                     <DiscountsField form={form} setForm={setForm} events={events} />
@@ -504,7 +766,7 @@ function ProductForm({ mode = "Create", product = null }) {
                     {isLoading ? (
                         <>
                             Saving Product
-                            <div className='animate-spin ml-3 border-1 border-t-transparent h-3 w-3 rounded-full' />
+                            <div className='animate-spin ml-3 border border-t-transparent h-3 w-3 rounded-full' />
                         </>
                     ) :
                         'Save Product'
@@ -520,7 +782,7 @@ function ProductForm({ mode = "Create", product = null }) {
                         {deleting ? (
                             <>
                                 Deleting Product
-                                <div className='animate-spin ml-3 border-1 border-t-transparent h-3 w-3 rounded-full' />
+                                <div className='animate-spin ml-3 border border-t-transparent h-3 w-3 rounded-full' />
                             </>
                         ) :
                             'Delete Product'

@@ -47,14 +47,12 @@ const Result = () => {
     scene.traverse((obj) => {
       if (obj.isMesh && obj.name) {
         names.push(obj.name)
-        console.log('Found mesh:', obj.name) // Debug log
       }
     })
-    console.log('All mesh names:', names) // Debug log
     setMeshNames(names)
   }, [scene])
 
-  // Load existing configuration when productId is available
+  // Load existing configuration from MongoDB when productId is available
   useEffect(() => {
     if (!productId) {
       setConfigLoaded(true)
@@ -63,218 +61,143 @@ const Result = () => {
 
     if (configLoaded) return
 
-    const configKey = `printConfig_${productId}_${variantId || 'default'}`
-    const savedConfig = localStorage.getItem(configKey)
-
-    console.log('=== CONFIGURATION LOADING ===')
-    console.log('Config key:', configKey)
-    console.log('Found saved config:', !!savedConfig)
-
-    if (savedConfig) {
+    const loadConfigFromDB = async () => {
       try {
-        const config = JSON.parse(savedConfig)
-        console.log('Successfully parsed saved configuration:', config)
-        console.log('Print settings found:', !!config.printSettings)
-        console.log('Mesh colors found:', !!config.meshColors)
-        console.log('Editor settings found:', !!config.editorSettings)
+        const requestId = variantId // variantId is the requestId for custom prints
+        const response = await fetch(`/api/custom-print?requestId=${requestId}`)
 
-        // Small delay to ensure all components are ready
-        setTimeout(() => {
-          setConfigLoaded(true)
-        }, 100)
+        if (response.ok) {
+          const data = await response.json()
+          console.log('Loaded configuration from MongoDB:', data.request?.printConfiguration)
+        }
       } catch (e) {
-        console.error('Failed to parse saved configuration:', e)
+        console.error('Failed to load configuration from MongoDB:', e)
+      } finally {
         setConfigLoaded(true)
       }
-    } else {
-      console.log('No saved configuration found, using defaults')
-      setConfigLoaded(true)
     }
+
+    loadConfigFromDB()
   }, [productId, variantId, configLoaded])
 
   // Leva controls for visual config, including mesh colors
   const [visualConfig, setVisualConfig] = useControls('visual', () => {
-    // Load saved configuration if available
-    let savedVisualConfig = null
-    let savedMeshColors = null
-
-    if (productId && configLoaded) {
-      const configKey = `printConfig_${productId}_${variantId || 'default'}`
-      const savedConfigStr = localStorage.getItem(configKey)
-      if (savedConfigStr) {
-        try {
-          const parsed = JSON.parse(savedConfigStr)
-          savedVisualConfig = parsed.editorSettings?.visual
-          savedMeshColors = parsed.meshColors // Mesh colors are at root level
-          console.log('Loading visual config:', savedVisualConfig)
-          console.log('Loading mesh colors:', savedMeshColors)
-        } catch (e) {
-          console.error('Failed to parse saved visual config:', e)
-        }
-      }
-    }
-
     const controls = {
-      background: savedVisualConfig?.background || '#e3e3e3',
-      wireframe: savedVisualConfig?.wireframe || false,
+      background: '#e3e3e3',
+      wireframe: false,
       materialType: {
-        value: savedVisualConfig?.materialType || 'plastic',
+        value: 'plastic',
         options: ['plastic', 'resin', 'metal', 'sandstone'],
       },
     }
 
-    meshNames.forEach((name, i) => {
-      // Use saved mesh color from meshColors object or default to white
-      const savedColor = savedMeshColors?.[name] || '#ffffff'
-      controls[name] = { value: savedColor, label: `${name}` }
-      console.log(`Setting mesh color for ${name}: ${savedColor}`)
+    meshNames.forEach((name) => {
+      controls[name] = { value: '#ffffff', label: `${name}` }
     })
 
     return controls
-  }, { collapsed: true }, [meshNames, configLoaded])
+  }, { collapsed: true }, [meshNames])
 
 
-  const [lighting, setLighting] = useControls('lighting', () => {
-    // Load saved lighting configuration if available
-    let savedLighting = null
-    if (productId && configLoaded) {
-      const configKey = `printConfig_${productId}_${variantId || 'default'}`
-      const savedConfigStr = localStorage.getItem(configKey)
-      if (savedConfigStr) {
-        try {
-          const parsed = JSON.parse(savedConfigStr)
-          savedLighting = parsed.editorSettings?.lighting
-        } catch (e) {
-          console.error('Failed to parse saved lighting config:', e)
-        }
-      }
-    }
+  const [lighting] = useControls('lighting', () => ({
+    autoRotate: true,
+    lightIntensity: {
+      value: 1,
+      min: 0,
+      max: 2,
+      step: 0.1
+    },
+    preset: {
+      value: 'rembrandt',
+      options: ['rembrandt', 'portrait', 'upfront', 'soft'],
+    },
+    environment: {
+      value: 'city',
+      options: [
+        'sunset', 'dawn', 'night', 'warehouse', 'forest',
+        'apartment', 'studio', 'city', 'park', 'lobby',
+      ],
+    },
+  }), { collapsed: true })
 
-    return {
-      autoRotate: savedLighting?.autoRotate ?? true,
-      lightIntensity: {
-        value: savedLighting?.lightIntensity ?? 1,
-        min: 0,
-        max: 2,
-        step: 0.1
-      },
-      preset: {
-        value: savedLighting?.preset || 'rembrandt',
-        options: ['rembrandt', 'portrait', 'upfront', 'soft'],
-      },
-      environment: {
-        value: savedLighting?.environment || 'city',
-        options: [
-          'sunset', 'dawn', 'night', 'warehouse', 'forest',
-          'apartment', 'studio', 'city', 'park', 'lobby',
-        ],
-      },
-    }
-  }, { collapsed: true }, [configLoaded])
-
-  const [printability, setPrintability] = useControls('printability', () => {
-    // Load saved printability configuration if available
-    let savedPrintSettings = null
-    if (productId && configLoaded) {
-      const configKey = `printConfig_${productId}_${variantId || 'default'}`
-      const savedConfigStr = localStorage.getItem(configKey)
-      if (savedConfigStr) {
-        try {
-          const parsed = JSON.parse(savedConfigStr)
-          savedPrintSettings = parsed.printSettings
-          console.log('Loading print settings:', savedPrintSettings)
-          if (savedPrintSettings) {
-            console.log('Saved layer height:', savedPrintSettings.layerHeight)
-            console.log('Saved infill density:', savedPrintSettings.sparseInfillDensity)
-            console.log('Saved wall loops:', savedPrintSettings.wallLoops)
-          }
-        } catch (e) {
-          console.error('Failed to parse saved print settings:', e)
-        }
-      }
-    }
-
-    return {
-      // Layer Height
-      layerHeight: {
-        value: savedPrintSettings?.layerHeight ?? 0.2,
-        min: 0.1,
-        max: 0.4,
-        step: 0.01,
-        label: 'Layer height (mm)'
-      },
-      initialLayerHeight: {
-        value: savedPrintSettings?.initialLayerHeight ?? 0.2,
-        min: 0.1,
-        max: 0.4,
-        step: 0.01,
-        label: 'Initial layer height (mm)'
-      },
-      // Walls
-      wallLoops: {
-        value: savedPrintSettings?.wallLoops ?? 2,
-        min: 1,
-        max: 4,
-        step: 1,
-        label: 'Wall loops'
-      },
-      internalSolidInfillPattern: {
-        value: savedPrintSettings?.internalSolidInfillPattern || 'Rectilinear',
-        options: [
-          'Rectilinear',
-          'Concentric',
-          'Monotonic',
-          'Monotonic line',
-          'Aligned Rectilinear',
-        ],
-        label: 'Internal solid infill pattern',
-      },
-      // Sparse Infill
-      sparseInfillDensity: {
-        value: savedPrintSettings?.sparseInfillDensity ?? 20,
-        min: 5,
-        max: 40,
-        step: 1,
-        label: 'Sparse infill density (%)'
-      },
-      sparseInfillPattern: {
-        value: savedPrintSettings?.sparseInfillPattern || 'Rectilinear',
-        options: [
-          'Rectilinear',
-          'Grid',
-          'HoneyComb',
-          'Triangles',
-          'Lightning',
-          'Concentric',
-          'Aligned Rectilinear',
-        ],
-        label: 'Sparse infill pattern',
-      },
-      nozzleDiameter: {
-        value: savedPrintSettings?.nozzleDiameter ?? 0.4,
-        options: [0.2, 0.4, 0.6, 0.8],
-        label: 'Nozzle diameter (mm)',
-      },
-      // Support
-      enableSupport: {
-        value: savedPrintSettings?.enableSupport ?? false,
-        label: 'Enable support'
-      },
-      supportType: {
-        value: savedPrintSettings?.supportType || 'Normal',
-        options: ['Tree', 'Normal'],
-        label: 'Support type',
-      },
-      // Print plate
-      printPlate: {
-        value: savedPrintSettings?.printPlate || 'Textured',
-        options: ['Textured', 'Smooth'],
-        label: 'Print plate',
-      },
-    }
-  }, { collapsed: true }, [configLoaded])
-
-  // Update refs whenever control values change
+  const [printability, setPrintability] = useControls('printability', () => ({
+    // Layer Height
+    layerHeight: {
+      value: 0.2,
+      min: 0.1,
+      max: 0.4,
+      step: 0.01,
+      label: 'Layer height (mm)'
+    },
+    initialLayerHeight: {
+      value: 0.2,
+      min: 0.1,
+      max: 0.4,
+      step: 0.01,
+      label: 'Initial layer height (mm)'
+    },
+    // Walls
+    wallLoops: {
+      value: 2,
+      min: 1,
+      max: 4,
+      step: 1,
+      label: 'Wall loops'
+    },
+    internalSolidInfillPattern: {
+      value: 'Rectilinear',
+      options: [
+        'Rectilinear',
+        'Concentric',
+        'Monotonic',
+        'Monotonic line',
+        'Aligned Rectilinear',
+      ],
+      label: 'Internal solid infill pattern',
+    },
+    // Sparse Infill
+    sparseInfillDensity: {
+      value: 20,
+      min: 5,
+      max: 40,
+      step: 1,
+      label: 'Sparse infill density (%)'
+    },
+    sparseInfillPattern: {
+      value: 'Rectilinear',
+      options: [
+        'Rectilinear',
+        'Grid',
+        'HoneyComb',
+        'Triangles',
+        'Lightning',
+        'Concentric',
+        'Aligned Rectilinear',
+      ],
+      label: 'Sparse infill pattern',
+    },
+    nozzleDiameter: {
+      value: 0.4,
+      options: [0.2, 0.4, 0.6, 0.8],
+      label: 'Nozzle diameter (mm)',
+    },
+    // Support
+    enableSupport: {
+      value: false,
+      label: 'Enable support'
+    },
+    supportType: {
+      value: 'Normal',
+      options: ['Tree', 'Normal'],
+      label: 'Support type',
+    },
+    // Print plate
+    printPlate: {
+      value: 'Textured',
+      options: ['Textured', 'Smooth'],
+      label: 'Print plate',
+    },
+  }), { collapsed: true })  // Update refs whenever control values change
   useEffect(() => {
     currentPrintabilityRef.current = printability
   }, [printability])
@@ -302,29 +225,7 @@ const Result = () => {
     }
   }, [fileName, showToast])
 
-  const exportControls = useMemo(() => ({
-    'Download image': button(() => downloadImage()),
-  }), [downloadImage])
-
-  useControls('export', exportControls, { collapsed: true })
-
-  // Add submit configuration controls when in order mode or cart item mode
-  const submitControls = useMemo(() => {
-    if (!orderId && !productId) return {}
-
-    const buttonText = orderId ? 'Submit Print Configuration' : 'Save Print Configuration'
-
-    return {
-      [buttonText]: button(() => submitConfiguration(), { disabled: submittingConfig }),
-    }
-  }, [orderId, productId, submittingConfig])
-
-  if (orderId || productId) {
-    const controlsTitle = orderId ? 'Print Order' : 'Print Configuration'
-    useControls(controlsTitle, submitControls, { collapsed: false })
-  }
-
-  // Submit configuration for print order or save for cart item
+  // Submit configuration for print order or save to MongoDB
   const submitConfiguration = useCallback(async () => {
     setSubmittingConfig(true)
     try {
@@ -332,11 +233,6 @@ const Result = () => {
       const currentPrintability = currentPrintabilityRef.current
       const currentVisual = currentVisualRef.current
       const currentLighting = currentLightingRef.current
-
-      console.log('=== USING CURRENT VALUES FROM REFS ===')
-      console.log('Current printability from ref:', currentPrintability)
-      console.log('Current visual from ref:', currentVisual)
-      console.log('Current lighting from ref:', currentLighting)
 
       // Extract only mesh colors (not background, wireframe, materialType)
       const meshColors = {}
@@ -346,52 +242,21 @@ const Result = () => {
         }
       })
 
-      console.log('=== SAVING CONFIGURATION ===')
-      console.log('Final printability object:', currentPrintability)
-      console.log('Full visualConfig object:', currentVisual)
-      console.log('Full lighting object:', currentLighting)
-      console.log('Mesh names found:', meshNames)
-      console.log('Extracted mesh colors:', meshColors)
-
-      console.log('Individual values being saved:')
-      console.log('- Layer Height:', currentPrintability.layerHeight)
-      console.log('- Initial Layer Height:', currentPrintability.initialLayerHeight)
-      console.log('- Wall Loops:', currentPrintability.wallLoops)
-      console.log('- Internal Solid Infill Pattern:', currentPrintability.internalSolidInfillPattern)
-      console.log('- Sparse Infill Density:', currentPrintability.sparseInfillDensity)
-      console.log('- Sparse Infill Pattern:', currentPrintability.sparseInfillPattern)
-      console.log('- Nozzle Diameter:', currentPrintability.nozzleDiameter)
-      console.log('- Enable Support:', currentPrintability.enableSupport)
-      console.log('- Support Type:', currentPrintability.supportType)
-      console.log('- Print Plate:', currentPrintability.printPlate)
-
       const configurationData = {
-        // Only save print-related settings, not visual/lighting for display
         printSettings: {
-          // Layer Height
           layerHeight: currentPrintability.layerHeight,
           initialLayerHeight: currentPrintability.initialLayerHeight,
-          // Walls
+          materialType: currentVisual.materialType,
           wallLoops: currentPrintability.wallLoops,
           internalSolidInfillPattern: currentPrintability.internalSolidInfillPattern,
-          // Infill
           sparseInfillDensity: currentPrintability.sparseInfillDensity,
           sparseInfillPattern: currentPrintability.sparseInfillPattern,
-          // Nozzle
           nozzleDiameter: currentPrintability.nozzleDiameter,
-          // Support
           enableSupport: currentPrintability.enableSupport,
           supportType: currentPrintability.supportType,
-          // Print plate
           printPlate: currentPrintability.printPlate,
         },
         meshColors: meshColors,
-        // Save visual/lighting settings for editor restoration only
-        editorSettings: {
-          visual: currentVisual,
-          lighting: currentLighting,
-        },
-        submittedAt: new Date().toISOString(),
       }
 
       if (orderId) {
@@ -408,7 +273,6 @@ const Result = () => {
 
         if (response.ok) {
           showToast('Print configuration submitted successfully!', 'success')
-          // Redirect to account or orders page
           setTimeout(() => {
             window.location.href = '/account'
           }, 1500)
@@ -416,29 +280,25 @@ const Result = () => {
           throw new Error('Failed to submit configuration')
         }
       } else if (productId) {
-        // Handle cart item configuration - save to localStorage for now
-        const configKey = `printConfig_${productId}_${variantId || 'default'}`
-        localStorage.setItem(configKey, JSON.stringify(configurationData))
+        // Save custom print configuration to MongoDB
+        const requestId = variantId // variantId is the requestId for custom prints
+        const response = await fetch('/api/custom-print/config', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            requestId,
+            ...configurationData,
+          }),
+        })
 
-        console.log('=== CONFIGURATION SAVED ===')
-        console.log('Config key:', configKey)
-        console.log('Full configuration saved:', configurationData)
-        console.log('Print settings saved:', configurationData.printSettings)
-        console.log('Mesh colors saved:', configurationData.meshColors)
-
-        // Verify what was actually stored
-        const stored = localStorage.getItem(configKey)
-        const parsed = JSON.parse(stored)
-        console.log('=== VERIFICATION ===')
-        console.log('What was actually stored:', parsed)
-        console.log('Stored layer height:', parsed.printSettings.layerHeight)
-        console.log('Stored infill density:', parsed.printSettings.sparseInfillDensity)
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.error || 'Failed to save configuration')
+        }
 
         showToast('Print configuration saved successfully!', 'success')
-        // Redirect back to cart
-        setTimeout(() => {
-          window.location.href = '/cart'
-        }, 1500)
       }
     } catch (error) {
       console.error('Error submitting configuration:', error)
@@ -446,23 +306,28 @@ const Result = () => {
     } finally {
       setSubmittingConfig(false)
     }
-  }, [meshNames, orderId, productId, variantId])
+  }, [meshNames, orderId, productId, variantId, showToast])
 
-  // Debug: Track when printability values change
+  // Add save configuration button in export controls
+  const saveConfigControls = useMemo(() => {
+    const controls = {
+      'Download image': button(() => downloadImage()),
+    }
+
+    // Always show save button if we have a scene (for custom prints or orders)
+    if (orderId || productId || variantId) {
+      const buttonText = orderId ? 'Submit Print Configuration' : 'Save Print Config'
+      controls[buttonText] = button(() => submitConfiguration(), { disabled: submittingConfig })
+    }
+
+    return controls
+  }, [orderId, productId, variantId, submittingConfig, downloadImage, submitConfiguration])
+
+  useControls('export', saveConfigControls, { collapsed: false })
+
+  // Update refs whenever control values change
   useEffect(() => {
-    console.log('=== PRINTABILITY VALUES CHANGED ===')
-    console.log('Full printability object:', printability)
-    console.log('Layer Height:', printability.layerHeight)
-    console.log('Initial Layer Height:', printability.initialLayerHeight)
-    console.log('Wall Loops:', printability.wallLoops)
-    console.log('Internal Solid Infill Pattern:', printability.internalSolidInfillPattern)
-    console.log('Sparse Infill Density:', printability.sparseInfillDensity)
-    console.log('Sparse Infill Pattern:', printability.sparseInfillPattern)
-    console.log('Nozzle Diameter:', printability.nozzleDiameter)
-    console.log('Enable Support:', printability.enableSupport)
-    console.log('Support Type:', printability.supportType)
-    console.log('Print Plate:', printability.printPlate)
-    console.log('================================')
+    currentPrintabilityRef.current = printability
   }, [printability])
 
   useEffect(() => {

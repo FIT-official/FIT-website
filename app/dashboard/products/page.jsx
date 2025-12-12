@@ -19,7 +19,19 @@ function MyProducts() {
             const res = await fetch(`/api/product?creatorUserId=${user.id}`);
             const data = await res.json();
             if (data.products && data.products.length > 0) {
-                setMyProducts(data.products);
+                // Hide the special Custom 3D Print config product from this list;
+                // it is managed via the dedicated admin tab instead.
+                const filtered = data.products.filter(p => {
+                    // Filter by known slug/id/name patterns used for custom print config
+                    const slug = p.slug || p.handle || '';
+                    const name = p.name || '';
+                    const isCustomPrintSlug = typeof slug === 'string' && slug.includes('custom-print');
+                    const isCustomPrintName = typeof name === 'string' && name.toLowerCase().includes('custom 3d print');
+                    const isCustomPrintId = p._id === 'CP1_CUSTOM_PRINT_CONFIG';
+                    return !(isCustomPrintSlug || isCustomPrintName || isCustomPrintId);
+                });
+
+                setMyProducts(filtered);
             }
         };
         fetchProducts();

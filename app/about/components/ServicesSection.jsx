@@ -10,7 +10,7 @@ function ServicesSection() {
     const { content } = useContent('about/services', {
         heading: 'What We Offer',
         subheading: 'Our Services',
-        description: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quam eum commodi libero, dicta illum ducimus natus. Tenetur, velit eveniet inventore voluptatum magnam perspiciatis perferendis nostrum accusantium consectetur provident quidem nam.'
+        description: 'Explore our comprehensive range of 3D printing and related services designed to bring your ideas to life.'
     })
 
     useEffect(() => {

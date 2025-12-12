@@ -1,0 +1,30 @@
+---
+testimonials:
+-
+    name: "J. Cedrick"
+    role: "NTU MAE Student, Beginner"
+    text: "Sent in a last-minute print for my project and got it back the next day, even did some post-processing work for free!"
+    avatar: "/user.jpg"
+-
+    name: "C. Kenny"
+    role: "Hobbyist"
+    text: "FIT isn't just selling prints, they helped me build my 3D printer and sourced affordable parts for me!"
+    avatar: "/user.jpg"
+fieldMeta:
+  testimonials:
+    type: "array"
+    fields:
+      name:
+        type: "text"
+      role:
+        type: "text"
+      text:
+        type: "textarea"
+      avatar:
+        type: "image"
+        uploadPath: "home/testimonials"
+        uploadEndpoint: "/api/admin/upload/images"
+        resetValue: "/user.jpg"
+---
+
+Customer testimonials displayed on the homepage

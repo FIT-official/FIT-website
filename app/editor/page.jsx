@@ -23,10 +23,59 @@ const Editor = () => {
     const orderId = searchParams.get('orderId')
     const productId = searchParams.get('productId')
     const variantId = searchParams.get('variantId')
+    const requestId = searchParams.get('requestId') // NEW: Custom print request ID
     const buffers = useStore((state) => state.buffers)
     const [orderData, setOrderData] = useState(null)
     const [productData, setProductData] = useState(null)
+    const [customRequestData, setCustomRequestData] = useState(null) // NEW
     const [loading, setLoading] = useState(false)
+
+    // NEW: Load custom print request data when requestId is provided
+    useEffect(() => {
+        if (!requestId || !isLoaded || !user) return
+
+        const loadCustomRequest = async () => {
+            setLoading(true)
+            try {
+                const requestRes = await fetch(`/api/custom-print?requestId=${requestId}`)
+                if (!requestRes.ok) {
+                    throw new Error('Failed to load custom print request')
+                }
+                const { request } = await requestRes.json()
+                setCustomRequestData(request)
+
+                // Load the 3D model file
+                if (request.modelFile?.s3Url) {
+                    const modelRes = await fetch(`/api/proxy?key=${encodeURIComponent(request.modelFile.s3Url)}`)
+                    if (modelRes.ok) {
+                        const modelBuffer = await modelRes.arrayBuffer()
+                        const buffers = new Map()
+
+                        const fileName = request.modelFile.originalName || 'model.glb'
+                        buffers.set(fileName, modelBuffer)
+
+                        const { setBuffers, setFileName, setProductId, setVariantId } = useStore.getState()
+                        setBuffers(buffers)
+                        setFileName(fileName)
+                        setProductId('custom-print-request')
+                        setVariantId(requestId)
+
+                        useStore.setState({
+                            textOriginalFile: btoa(arrayBufferToBase64(modelBuffer)),
+                            requestId: requestId, // Store request ID in state
+                            isCustomPrint: true
+                        })
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading custom print request:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        loadCustomRequest()
+    }, [requestId, isLoaded, user])
 
     // Load order data and associated 3D model when orderId is provided
     useEffect(() => {
@@ -164,7 +213,7 @@ const Editor = () => {
                     <div className="loader" />
                 ) : buffers ? (
                     <Result />
-                ) : (orderId || productId) ? (
+                ) : (orderId || productId || requestId) ? (
                     <div className="flex flex-col items-center justify-center gap-4">
                         <div className="loader" />
                         <p className="text-lightColor text-sm">Loading 3D model...</p>

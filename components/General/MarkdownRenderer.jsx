@@ -15,7 +15,11 @@ export default function MarkdownRenderer({ source, className = '' }) {
     if (!source) return null
     return (
         <div className={className} data-color-mode="light">
-            <Markdown source={source} style={{ whiteSpace: 'pre-wrap' }} />
+            <Markdown
+                source={source}
+                style={{ whiteSpace: 'pre-wrap' }}
+                className="markdown-content"
+            />
         </div>
     )
 }

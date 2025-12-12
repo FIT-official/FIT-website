@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { RxCross1 } from 'react-icons/rx'
 
 export default function ViewableModelField({
@@ -11,6 +11,54 @@ export default function ViewableModelField({
     handleRemoveViewableModel,
     form
 }) {
+    const MAX_SIZE = 50 * 1024 * 1024 // 50MB for viewable models
+
+    const hasSetter = useMemo(
+        () => Array.isArray(viewableValidationErrors) && typeof viewableValidationErrors.setErrors === 'function',
+        [viewableValidationErrors]
+    )
+
+    const setErrors = useCallback(
+        (errors) => {
+            if (hasSetter) {
+                viewableValidationErrors.setErrors(errors)
+            }
+        },
+        [hasSetter, viewableValidationErrors]
+    )
+
+    const validateFiles = useCallback(
+        (fileList) => {
+            const errors = []
+            const files = fileList ? Array.from(fileList) : []
+
+            files.forEach((file) => {
+                if (file.size > MAX_SIZE) {
+                    errors.push(
+                        `Viewable model "${file.name}" is too large. Maximum size is ${Math.round(
+                            MAX_SIZE / (1024 * 1024),
+                        )}MB.`,
+                    )
+                }
+            })
+
+            return { files, errors }
+        },
+        [MAX_SIZE]
+    )
+
+    const handleChangeWithValidation = useCallback(
+        (e) => {
+            const { files, errors } = validateFiles(e.target.files)
+
+            setErrors(errors)
+
+            if (errors.length === 0 && files.length > 0) {
+                handleViewableModelChange({ target: { files } })
+            }
+        },
+        [handleViewableModelChange, setErrors, validateFiles]
+    )
     return (
         <div className='flex flex-col gap-2 w-full'>
             <label className="formLabel">Viewable Model</label>
@@ -40,7 +88,11 @@ export default function ViewableModelField({
                     e.preventDefault();
                     setDragViewableModelActive(false);
                     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                        handleViewableModelChange({ target: { files: e.dataTransfer.files } });
+                        const { files, errors } = validateFiles(e.dataTransfer.files)
+                        setErrors(errors)
+                        if (errors.length === 0 && files.length > 0) {
+                            handleViewableModelChange({ target: { files } })
+                        }
                     }
                 }}
             >
@@ -49,7 +101,7 @@ export default function ViewableModelField({
                     type="file"
                     accept=".glb,.gltf"
                     multiple
-                    onChange={handleViewableModelChange}
+                    onChange={handleChangeWithValidation}
                     style={{ display: "none" }}
                     ref={viewableModelInputRef}
                 />

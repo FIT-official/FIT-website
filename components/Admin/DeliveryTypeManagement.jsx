@@ -17,18 +17,23 @@ export default function DeliveryTypeManagement() {
         displayName: '',
         description: '',
         applicableToProductTypes: [],
-        pricingTiers: [],
-        hasDefaultPrice: false,
+        basePricing: {
+            basePrice: '',
+            volumeFactor: '',
+            weightFactor: '',
+            minPrice: '',
+            maxPrice: '',
+            freeShippingThreshold: ''
+        },
         isActive: true
     })
 
-    const [tierForm, setTierForm] = useState({
-        minVolume: '',
-        maxVolume: '',
-        minWeight: '',
-        maxWeight: '',
-        price: ''
+    const [customExample, setCustomExample] = useState({
+        volume: '',
+        weight: ''
     })
+
+
 
     const toggleDeliveryType = (deliveryTypeName) => {
         setExpandedDeliveryTypes(prev => ({
@@ -57,42 +62,7 @@ export default function DeliveryTypeManagement() {
         }
     }
 
-    const addPricingTier = () => {
-        if (!tierForm.minVolume || !tierForm.maxVolume || !tierForm.minWeight || !tierForm.maxWeight || !tierForm.price) {
-            showToast('Please fill in all tier fields', 'error')
-            return
-        }
 
-        const newTier = {
-            minVolume: Number(tierForm.minVolume),
-            maxVolume: Number(tierForm.maxVolume),
-            minWeight: Number(tierForm.minWeight),
-            maxWeight: Number(tierForm.maxWeight),
-            price: Number(tierForm.price)
-        }
-
-        setFormData(prev => ({
-            ...prev,
-            pricingTiers: [...prev.pricingTiers, newTier],
-            hasDefaultPrice: true
-        }))
-
-        setTierForm({
-            minVolume: '',
-            maxVolume: '',
-            minWeight: '',
-            maxWeight: '',
-            price: ''
-        })
-    }
-
-    const removePricingTier = (index) => {
-        setFormData(prev => ({
-            ...prev,
-            pricingTiers: prev.pricingTiers.filter((_, i) => i !== index),
-            hasDefaultPrice: prev.pricingTiers.length > 1
-        }))
-    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -121,8 +91,14 @@ export default function DeliveryTypeManagement() {
                     displayName: '',
                     description: '',
                     applicableToProductTypes: [],
-                    pricingTiers: [],
-                    hasDefaultPrice: false,
+                    basePricing: {
+                        basePrice: '',
+                        volumeFactor: '',
+                        weightFactor: '',
+                        minPrice: '',
+                        maxPrice: '',
+                        freeShippingThreshold: ''
+                    },
                     isActive: true
                 })
                 setShowDeliveryTypeForm(false)
@@ -141,10 +117,16 @@ export default function DeliveryTypeManagement() {
         if (!confirm('Delete this delivery type?')) return
 
         try {
+            const deliveryType = deliveryTypes.find(dt => dt.name === name && !dt.isHardcoded)
+            if (!deliveryType || !deliveryType._id) {
+                showToast('Unable to delete: missing id for this delivery type', 'error')
+                return
+            }
+
             const response = await fetch('/api/admin/settings', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'deliveryType', name })
+                body: JSON.stringify({ type: 'delivery-type', id: deliveryType._id })
             })
 
             if (response.ok) {
@@ -164,7 +146,7 @@ export default function DeliveryTypeManagement() {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    type: 'deliveryType',
+                    type: 'delivery-type',
                     action: 'toggleActive',
                     name,
                     isActive: !isActive
@@ -189,18 +171,18 @@ export default function DeliveryTypeManagement() {
     )
 
     return (
-        <div className="flex flex-col gap-6 p-6 md:p-12 bg-borderColor/30 min-h-screen">
+        <div className="flex flex-col gap-4 sm:gap-6 p-6 md:p-12 bg-borderColor/30 min-h-screen">
             {/* Header Section */}
             <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-semibold tracking-tight">Delivery Type Management</h1>
-                <p className="text-sm text-lightColor">Configure delivery options with custom pricing tiers for creators</p>
+                <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Delivery Type Management</h1>
+                <p className="text-xs sm:text-sm text-lightColor">Configure delivery options with custom pricing tiers for creators</p>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-2 sm:gap-3 flex-wrap">
                 <button
                     onClick={() => setShowDeliveryTypeForm(!showDeliveryTypeForm)}
-                    className={`${showDeliveryTypeForm ? 'formBlackButton' : 'formButton2'} transition-all duration-300`}
+                    className={`${showDeliveryTypeForm ? 'formBlackButton' : 'formButton2'} transition-all duration-300 text-xs sm:text-sm`}
                 >
                     <BsPlus size={18} />
                     New Delivery Type
@@ -220,7 +202,7 @@ export default function DeliveryTypeManagement() {
                         </button>
                     </div>
                     <form onSubmit={handleSubmit} className="gap-4 flex flex-col">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div className='gap-2 flex flex-col'>
                                 <label className="formLabel">URL Name*</label>
                                 <input
@@ -300,118 +282,207 @@ export default function DeliveryTypeManagement() {
                             <span className="text-xs text-extraLight">Select product types this delivery option applies to</span>
                         </div>
 
-                        {/* Pricing Tiers Section */}
+                        {/* Formula-Based Pricing Section */}
                         <div className="border-t border-borderColor pt-4 mt-2">
                             <div className="flex items-center justify-between mb-3">
                                 <div>
-                                    <h4 className="text-sm font-medium text-textColor">Pricing Tiers</h4>
-                                    <p className="text-xs text-extraLight mt-1">Define price based on product dimensions and weight</p>
+                                    <h4 className="text-sm font-medium text-textColor">Automatic Pricing Formula</h4>
+                                    <p className="text-xs text-extraLight mt-1">Price = Base Price + (Volume × Volume Factor) + (Weight × Weight Factor)</p>
                                 </div>
                             </div>
 
-                            {/* Add Tier Form */}
-                            <div className="bg-baseColor border border-borderColor rounded-lg p-4 mb-3">
-                                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                                    <div className="flex flex-col gap-1">
-                                        <label className="text-xs text-extraLight">Min Volume (cm³)</label>
+                            <div className="bg-baseColor border border-borderColor rounded-lg p-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-xs font-medium text-textColor">Base Price ($)</label>
                                         <input
                                             type="number"
-                                            value={tierForm.minVolume}
-                                            onChange={(e) => setTierForm(prev => ({ ...prev, minVolume: e.target.value }))}
-                                            className="formInput text-xs"
-                                            placeholder="0"
-                                            min="0"
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-1">
-                                        <label className="text-xs text-extraLight">Max Volume (cm³)</label>
-                                        <input
-                                            type="number"
-                                            value={tierForm.maxVolume}
-                                            onChange={(e) => setTierForm(prev => ({ ...prev, maxVolume: e.target.value }))}
-                                            className="formInput text-xs"
-                                            placeholder="1000"
-                                            min="0"
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-1">
-                                        <label className="text-xs text-extraLight">Min Weight (g)</label>
-                                        <input
-                                            type="number"
-                                            value={tierForm.minWeight}
-                                            onChange={(e) => setTierForm(prev => ({ ...prev, minWeight: e.target.value }))}
-                                            className="formInput text-xs"
-                                            placeholder="0"
-                                            min="0"
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-1">
-                                        <label className="text-xs text-extraLight">Max Weight (g)</label>
-                                        <input
-                                            type="number"
-                                            value={tierForm.maxWeight}
-                                            onChange={(e) => setTierForm(prev => ({ ...prev, maxWeight: e.target.value }))}
-                                            className="formInput text-xs"
-                                            placeholder="500"
-                                            min="0"
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-1">
-                                        <label className="text-xs text-extraLight">Price ($)</label>
-                                        <input
-                                            type="number"
-                                            value={tierForm.price}
-                                            onChange={(e) => setTierForm(prev => ({ ...prev, price: e.target.value }))}
-                                            className="formInput text-xs"
+                                            value={formData.basePricing.basePrice}
+                                            onChange={(e) => setFormData(prev => ({
+                                                ...prev,
+                                                basePricing: { ...prev.basePricing, basePrice: e.target.value }
+                                            }))}
+                                            className="formInput"
                                             placeholder="5.00"
                                             min="0"
                                             step="0.01"
                                         />
+                                        <span className="text-xs text-extraLight">Flat fee added to all deliveries</span>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-xs font-medium text-textColor">Volume Factor ($/cm³)</label>
+                                        <input
+                                            type="number"
+                                            value={formData.basePricing.volumeFactor}
+                                            onChange={(e) => setFormData(prev => ({
+                                                ...prev,
+                                                basePricing: { ...prev.basePricing, volumeFactor: e.target.value }
+                                            }))}
+                                            className="formInput"
+                                            placeholder="0.001"
+                                            min="0"
+                                            step="0.0001"
+                                        />
+                                        <span className="text-xs text-extraLight">Cost per cubic centimeter</span>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-xs font-medium text-textColor">Weight Factor ($/g)</label>
+                                        <input
+                                            type="number"
+                                            value={formData.basePricing.weightFactor}
+                                            onChange={(e) => setFormData(prev => ({
+                                                ...prev,
+                                                basePricing: { ...prev.basePricing, weightFactor: e.target.value }
+                                            }))}
+                                            className="formInput"
+                                            placeholder="0.01"
+                                            min="0"
+                                            step="0.001"
+                                        />
+                                        <span className="text-xs text-extraLight">Cost per gram</span>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-xs font-medium text-textColor">Minimum Price ($)</label>
+                                        <input
+                                            type="number"
+                                            value={formData.basePricing.minPrice}
+                                            onChange={(e) => setFormData(prev => ({
+                                                ...prev,
+                                                basePricing: { ...prev.basePricing, minPrice: e.target.value }
+                                            }))}
+                                            className="formInput"
+                                            placeholder="5.00"
+                                            min="0"
+                                            step="0.01"
+                                        />
+                                        <span className="text-xs text-extraLight">Floor price (never go below)</span>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-xs font-medium text-textColor">Maximum Price ($)</label>
+                                        <input
+                                            type="number"
+                                            value={formData.basePricing.maxPrice}
+                                            onChange={(e) => setFormData(prev => ({
+                                                ...prev,
+                                                basePricing: { ...prev.basePricing, maxPrice: e.target.value }
+                                            }))}
+                                            className="formInput"
+                                            placeholder="50.00"
+                                            min="0"
+                                            step="0.01"
+                                        />
+                                        <span className="text-xs text-extraLight">Ceiling price (never exceed)</span>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-xs font-medium text-textColor">Free Shipping Threshold ($)</label>
+                                        <input
+                                            type="number"
+                                            value={formData.basePricing.freeShippingThreshold}
+                                            onChange={(e) => setFormData(prev => ({
+                                                ...prev,
+                                                basePricing: { ...prev.basePricing, freeShippingThreshold: e.target.value }
+                                            }))}
+                                            className="formInput"
+                                            placeholder="100.00"
+                                            min="0"
+                                            step="0.01"
+                                        />
+                                        <span className="text-xs text-extraLight">Free if product value exceeds (optional)</span>
                                     </div>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={addPricingTier}
-                                    className="formButton2 mt-3 text-xs"
-                                >
-                                    <BsPlus size={16} />
-                                    Add Tier
-                                </button>
-                            </div>
 
-                            {/* Display Added Tiers */}
-                            {formData.pricingTiers.length > 0 && (
-                                <div className="flex flex-col gap-2">
-                                    {formData.pricingTiers.map((tier, idx) => (
-                                        <div key={idx} className="flex items-center justify-between p-3 bg-background border border-borderColor rounded-md">
-                                            <div className="flex items-center gap-3 flex-wrap text-xs">
-                                                <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded">
-                                                    Vol: {tier.minVolume}-{tier.maxVolume} cm³
-                                                </span>
-                                                <span className="px-2 py-1 bg-green-50 text-green-700 rounded">
-                                                    Weight: {tier.minWeight}-{tier.maxWeight}g
-                                                </span>
-                                                <span className="px-2 py-1 bg-purple-50 text-purple-700 rounded font-medium">
-                                                    ${tier.price.toFixed(2)}
-                                                </span>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => removePricingTier(idx)}
-                                                className="p-1.5 text-extraLight hover:text-red-600 transition-colors duration-200 rounded hover:bg-red-50"
-                                            >
-                                                <RxCross1 size={12} />
-                                            </button>
+                                {/* Pricing Calculator Preview */}
+                                {formData.basePricing.basePrice && formData.basePricing.volumeFactor && formData.basePricing.weightFactor && (
+                                    <div className="mt-4 pt-4 border-t border-borderColor">
+                                        <h5 className="text-xs font-medium text-textColor mb-3">Example Calculations</h5>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            {[
+                                                { volume: 1000, weight: 100, label: 'Small Item' },
+                                                { volume: 5000, weight: 500, label: 'Medium Item' },
+                                                { volume: 10000, weight: 1000, label: 'Large Item' }
+                                            ].map(example => {
+                                                const calculated = parseFloat(formData.basePricing.basePrice) +
+                                                    (example.volume * parseFloat(formData.basePricing.volumeFactor)) +
+                                                    (example.weight * parseFloat(formData.basePricing.weightFactor))
+                                                const minPrice = parseFloat(formData.basePricing.minPrice) || 0
+                                                const maxPrice = parseFloat(formData.basePricing.maxPrice) || Infinity
+                                                const finalPrice = Math.max(minPrice, Math.min(maxPrice, calculated))
+
+                                                return (
+                                                    <div key={example.label} className="bg-background border border-borderColor rounded p-3">
+                                                        <div className="text-xs font-medium text-textColor mb-2">{example.label}</div>
+                                                        <div className="text-xs text-extraLight space-y-1">
+                                                            <div>{example.volume} cm³ × ${formData.basePricing.volumeFactor}</div>
+                                                            <div>{example.weight}g × ${formData.basePricing.weightFactor}</div>
+                                                            <div className="pt-1 border-t border-borderColor mt-2 font-medium text-textColor">
+                                                                Price: ${finalPrice.toFixed(2)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
                                         </div>
-                                    ))}
-                                </div>
-                            )}
 
-                            {formData.pricingTiers.length === 0 && (
-                                <div className="text-center py-4 text-xs text-extraLight border border-dashed border-borderColor rounded-lg">
-                                    No pricing tiers added yet. Add tiers above or leave empty for creator-defined pricing.
-                                </div>
-                            )}
+                                        {/* Custom example input */}
+                                        <div className="mt-4 pt-4 border-t border-borderColor">
+                                            <h5 className="text-xs font-medium text-textColor mb-3">Test Your Own Example</h5>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                                                <div className="flex flex-col gap-2">
+                                                    <label className="text-xs font-medium text-textColor">Volume (cm³)</label>
+                                                    <input
+                                                        type="number"
+                                                        value={customExample.volume}
+                                                        onChange={(e) => setCustomExample(prev => ({ ...prev, volume: e.target.value }))}
+                                                        className="formInput"
+                                                        placeholder="e.g., 2500"
+                                                        min="0"
+                                                        step="1"
+                                                    />
+                                                </div>
+                                                <div className="flex flex-col gap-2">
+                                                    <label className="text-xs font-medium text-textColor">Weight (g)</label>
+                                                    <input
+                                                        type="number"
+                                                        value={customExample.weight}
+                                                        onChange={(e) => setCustomExample(prev => ({ ...prev, weight: e.target.value }))}
+                                                        className="formInput"
+                                                        placeholder="e.g., 300"
+                                                        min="0"
+                                                        step="1"
+                                                    />
+                                                </div>
+                                                <div className="flex flex-col gap-2">
+                                                    <span className="text-xs font-medium text-textColor">Calculated Price</span>
+                                                    <div className="px-3 py-2 text-xs font-medium text-textColor flex items-center">
+                                                        {(() => {
+                                                            const basePrice = parseFloat(formData.basePricing.basePrice)
+                                                            const volumeFactor = parseFloat(formData.basePricing.volumeFactor)
+                                                            const weightFactor = parseFloat(formData.basePricing.weightFactor)
+                                                            const minPrice = parseFloat(formData.basePricing.minPrice) || 0
+                                                            const maxPrice = isNaN(parseFloat(formData.basePricing.maxPrice)) ? Infinity : parseFloat(formData.basePricing.maxPrice)
+                                                            const volume = parseFloat(customExample.volume)
+                                                            const weight = parseFloat(customExample.weight)
+
+                                                            if (isNaN(basePrice) || isNaN(volumeFactor) || isNaN(weightFactor) || isNaN(volume) || isNaN(weight)) {
+                                                                return <span className="text-extraLight">Enter volume and weight to preview</span>
+                                                            }
+
+                                                            const raw = basePrice + (volume * volumeFactor) + (weight * weightFactor)
+                                                            const final = Math.max(minPrice, Math.min(maxPrice, raw))
+                                                            return `$${final.toFixed(2)}`
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="flex gap-2 justify-end pt-2 border-t border-borderColor">
@@ -424,16 +495,15 @@ export default function DeliveryTypeManagement() {
                                         displayName: '',
                                         description: '',
                                         applicableToProductTypes: [],
-                                        pricingTiers: [],
-                                        hasDefaultPrice: false,
+                                        basePricing: {
+                                            basePrice: '',
+                                            volumeFactor: '',
+                                            weightFactor: '',
+                                            minPrice: '',
+                                            maxPrice: '',
+                                            freeShippingThreshold: ''
+                                        },
                                         isActive: true
-                                    })
-                                    setTierForm({
-                                        minVolume: '',
-                                        maxVolume: '',
-                                        minWeight: '',
-                                        maxWeight: '',
-                                        price: ''
                                     })
                                 }}
                                 className="formButton2 min-w-24"
@@ -472,13 +542,13 @@ export default function DeliveryTypeManagement() {
                         {deliveryTypes.map((dt, idx) => (
                             <div key={dt.name || idx} className="border border-borderColor rounded-lg overflow-hidden transition-all duration-200 hover:border-extraLight">
                                 {/* Delivery Type Row */}
-                                <div className="flex items-center justify-between p-4 bg-baseColor">
-                                    <div className="flex items-center gap-3 flex-1">
+                                <div className="flex flex-col gap-3 p-4 bg-baseColor">
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
                                         {/* Expand/Collapse Button */}
-                                        {dt.pricingTiers && dt.pricingTiers.length > 0 && (
+                                        {dt.basePricing && dt.basePricing.basePrice && (
                                             <button
                                                 onClick={() => toggleDeliveryType(dt.name)}
-                                                className="toggleXbutton p-1"
+                                                className="toggleXbutton p-1 shrink-0"
                                                 aria-label={expandedDeliveryTypes[dt.name] ? 'Collapse' : 'Expand'}
                                             >
                                                 {expandedDeliveryTypes[dt.name] ? (
@@ -489,7 +559,7 @@ export default function DeliveryTypeManagement() {
                                             </button>
                                         )}
 
-                                        <div className="flex-1">
+                                        <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 flex-wrap">
                                                 <span className="font-medium text-sm">{dt.displayName}</span>
                                                 <span className="text-xs px-2 py-0.5 bg-borderColor rounded text-lightColor font-mono">{dt.name}</span>
@@ -511,12 +581,12 @@ export default function DeliveryTypeManagement() {
                                                     }`}>
                                                     {dt.isActive ? 'Active' : 'Inactive'}
                                                 </span>
-                                                {dt.pricingTiers && dt.pricingTiers.length > 0 && (
+                                                {dt.basePricing && dt.basePricing.basePrice && (
                                                     <span className="text-xs text-extraLight">
-                                                        {dt.pricingTiers.length} pricing tiers
+                                                        Formula-based pricing
                                                     </span>
                                                 )}
-                                                {(!dt.pricingTiers || dt.pricingTiers.length === 0) && (
+                                                {(!dt.basePricing || !dt.basePricing.basePrice) && (
                                                     <span className="text-xs text-extraLight">
                                                         Creator-defined pricing
                                                     </span>
@@ -531,9 +601,9 @@ export default function DeliveryTypeManagement() {
                                     <div className="flex items-center gap-2">
                                         <button
                                             onClick={() => handleToggleActive(dt.name, dt.isActive)}
-                                            className={`text-xs px-3 py-1.5 rounded transition-all duration-200 font-medium ${dt.isActive
-                                                    ? 'border border-borderColor hover:bg-borderColor/30 text-lightColor'
-                                                    : 'bg-textColor text-background hover:bg-textColor/90'
+                                            className={`text-xs px-3 py-1.5 rounded transition-all duration-200 font-medium whitespace-nowrap ${dt.isActive
+                                                ? 'border border-borderColor hover:bg-borderColor/30 text-lightColor'
+                                                : 'bg-textColor text-background hover:bg-textColor/90'
                                                 }`}
                                         >
                                             {dt.isActive ? 'Deactivate' : 'Activate'}
@@ -542,7 +612,7 @@ export default function DeliveryTypeManagement() {
                                         {!dt.isHardcoded && (
                                             <button
                                                 onClick={() => handleDelete(dt.name)}
-                                                className="p-2 text-extraLight hover:text-red-600 transition-colors duration-200 rounded hover:bg-red-50"
+                                                className="p-2 text-extraLight hover:text-red-600 transition-colors duration-200 rounded hover:bg-red-50 shrink-0"
                                                 aria-label="Delete delivery type"
                                             >
                                                 <RxCross1 size={14} />
@@ -551,30 +621,38 @@ export default function DeliveryTypeManagement() {
                                     </div>
                                 </div>
 
-                                {/* Pricing Tiers List - Collapsible */}
-                                {dt.pricingTiers && dt.pricingTiers.length > 0 && expandedDeliveryTypes[dt.name] && (
+                                {/* Pricing Formula Details - Collapsible */}
+                                {dt.basePricing && dt.basePricing.basePrice && expandedDeliveryTypes[dt.name] && (
                                     <div className="border-t border-borderColor bg-background/50">
                                         <div className="p-4">
-                                            <h4 className="text-xs font-medium text-lightColor mb-3">Pricing Tiers</h4>
-                                            <div className="flex flex-col gap-2">
-                                                {dt.pricingTiers.map((tier, tidx) => (
-                                                    <div
-                                                        key={tidx}
-                                                        className="flex items-center justify-between p-3 bg-background border border-borderColor rounded-md"
-                                                    >
-                                                        <div className="flex items-center gap-3 flex-wrap text-xs">
-                                                            <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded">
-                                                                Vol: {tier.minVolume}-{tier.maxVolume} cm³
-                                                            </span>
-                                                            <span className="px-2 py-1 bg-green-50 text-green-700 rounded">
-                                                                Weight: {tier.minWeight}-{tier.maxWeight}g
-                                                            </span>
-                                                            <span className="px-2 py-1 bg-purple-50 text-purple-700 rounded font-medium">
-                                                                ${tier.price.toFixed(2)}
-                                                            </span>
-                                                        </div>
+                                            <h4 className="text-xs font-medium text-lightColor mb-3">Pricing Formula</h4>
+                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-extraLight">Base Price</span>
+                                                    <span className="font-medium text-textColor">${dt.basePricing.basePrice}</span>
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-extraLight">Volume Factor</span>
+                                                    <span className="font-medium text-textColor">${dt.basePricing.volumeFactor}/cm³</span>
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-extraLight">Weight Factor</span>
+                                                    <span className="font-medium text-textColor">${dt.basePricing.weightFactor}/g</span>
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-extraLight">Min Price</span>
+                                                    <span className="font-medium text-textColor">${dt.basePricing.minPrice}</span>
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-extraLight">Max Price</span>
+                                                    <span className="font-medium text-textColor">${dt.basePricing.maxPrice}</span>
+                                                </div>
+                                                {dt.basePricing.freeShippingThreshold && (
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-extraLight">Free Shipping</span>
+                                                        <span className="font-medium text-textColor">${dt.basePricing.freeShippingThreshold}</span>
                                                     </div>
-                                                ))}
+                                                )}
                                             </div>
                                         </div>
                                     </div>

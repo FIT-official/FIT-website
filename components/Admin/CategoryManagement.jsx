@@ -222,19 +222,19 @@ export default function CategoryManagement() {
     )
 
     return (
-        <div className="flex flex-col gap-6 p-6 md:p-12 bg-borderColor/30 min-h-screen">
+        <div className="flex flex-col gap-4 sm:gap-6 p-6 md:p-12  bg-borderColor/30 min-h-screen">
             <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-semibold tracking-tight">Category Management</h1>
-                <p className="text-sm text-lightColor">Organize your products with categories and subcategories</p>
+                <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Category Management</h1>
+                <p className="text-xs sm:text-sm text-lightColor">Organize your products with categories and subcategories</p>
             </div>
 
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-2 sm:gap-3 flex-wrap">
                 <button
                     onClick={() => {
                         setShowCategoryForm(!showCategoryForm)
                         setShowSubcategoryForm(false)
                     }}
-                    className={`${showCategoryForm ? 'formBlackButton' : 'formButton2'} transition-all duration-300`}
+                    className={`${showCategoryForm ? 'formBlackButton' : 'formButton2'} transition-all duration-300 text-xs sm:text-sm`}
                 >
                     <BsPlus size={18} />
                     New Category
@@ -244,7 +244,7 @@ export default function CategoryManagement() {
                         setShowSubcategoryForm(!showSubcategoryForm)
                         setShowCategoryForm(false)
                     }}
-                    className={`${showSubcategoryForm ? 'formBlackButton' : 'formButton2'} transition-all duration-300`}
+                    className={`${showSubcategoryForm ? 'formBlackButton' : 'formButton2'} transition-all duration-300 text-xs sm:text-sm`}
                 >
                     <BsPlus size={18} />
                     New Subcategory
@@ -263,7 +263,7 @@ export default function CategoryManagement() {
                         </button>
                     </div>
                     <form onSubmit={handleSubmit} className="gap-4 flex flex-col">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                             <div className='gap-2 flex flex-col'>
                                 <label className="formLabel">URL Name*</label>
                                 <input
@@ -406,7 +406,6 @@ export default function CategoryManagement() {
                 </div>
             )}
 
-            {/* Categories List */}
             <div className="adminDashboardContainer">
                 <div className="flex items-center justify-between mb-4">
                     <div>
@@ -424,12 +423,12 @@ export default function CategoryManagement() {
                     <div className="flex flex-col gap-2">
                         {categories.map((cat, idx) => (
                             <div key={cat.name || idx} className="border border-borderColor rounded-lg overflow-hidden group">
-                                <div className="flex items-center justify-between p-4 bg-baseColor hover:bg-borderColor/30 transition-all duration-200">
-                                    <div className="flex items-center gap-3 flex-1">
+                                <div className="flex flex-col md:flex-row gap-3 p-4 bg-baseColor hover:bg-borderColor/30 transition-all duration-200">
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
                                         {cat.subcategories && cat.subcategories.length > 0 && (
                                             <button
                                                 onClick={() => toggleCategory(cat.name)}
-                                                className="toggleXbutton p-1"
+                                                className="toggleXbutton p-1 shrink-0"
                                                 aria-label={expandedCategories[cat.name] ? 'Collapse' : 'Expand'}
                                             >
                                                 {expandedCategories[cat.name] ? (
@@ -440,12 +439,12 @@ export default function CategoryManagement() {
                                             </button>
                                         )}
 
-                                        <div className="flex-1">
+                                        <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 flex-wrap">
                                                 <span className="font-medium text-sm">{cat.displayName}</span>
                                                 <span className="text-xs px-2 py-0.5 bg-borderColor rounded text-lightColor font-mono">{cat.name}</span>
                                             </div>
-                                            <div className="flex items-center gap-2 mt-1.5">
+                                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                                                 <span className="text-xs px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full font-medium">
                                                     {cat.type}
                                                 </span>
@@ -472,7 +471,7 @@ export default function CategoryManagement() {
                                     <div className="flex items-center gap-2">
                                         <button
                                             onClick={() => handleToggleActive(cat.name, cat.isActive)}
-                                            className={`text-xs px-3 py-1.5 rounded transition-all duration-200 font-medium ${cat.isActive
+                                            className={`text-xs px-3 py-1.5 rounded transition-all duration-200 font-medium whitespace-nowrap ${cat.isActive
                                                 ? 'border border-borderColor hover:bg-borderColor/30 text-lightColor'
                                                 : 'bg-textColor text-background hover:bg-textColor/90'
                                                 }`}
@@ -483,7 +482,7 @@ export default function CategoryManagement() {
                                         {!cat.isHardcoded && (
                                             <button
                                                 onClick={() => handleDelete(cat.name)}
-                                                className="p-2 text-extraLight hover:text-red-600 transition-colors duration-200 rounded hover:bg-red-50"
+                                                className="p-2 text-extraLight hover:text-red-600 transition-colors duration-200 rounded hover:bg-red-50 shrink-0"
                                                 aria-label="Delete category"
                                             >
                                                 <RxCross1 size={14} />
@@ -498,9 +497,9 @@ export default function CategoryManagement() {
                                                 {cat.subcategories.map((sub, sidx) => (
                                                     <div
                                                         key={sub.name || sidx}
-                                                        className="flex items-center justify-between p-3 border border-borderColor rounded-md bg-background hover:bg-borderColor/30 transition-all duration-200"
+                                                        className="flex md:flex-row flex-col gap-2 p-3 border border-borderColor rounded-md bg-background hover:bg-borderColor/30 transition-all duration-200"
                                                     >
-                                                        <div className="flex-1">
+                                                        <div className="flex-1 min-w-0">
                                                             <div className="flex items-center gap-2 flex-wrap">
                                                                 <span className="font-medium text-sm">{sub.displayName}</span>
                                                                 <span className="text-xs px-2 py-0.5 bg-borderColor rounded text-lightColor font-mono">{sub.name}</span>
@@ -518,7 +517,7 @@ export default function CategoryManagement() {
                                                         <div className="flex items-center gap-2">
                                                             <button
                                                                 onClick={() => handleToggleSubActive(cat.name, sub.name, sub.isActive)}
-                                                                className={`text-xs px-3 py-1.5 rounded transition-all duration-200 font-medium ${sub.isActive
+                                                                className={`text-xs px-3 py-1.5 rounded transition-all duration-200 font-medium whitespace-nowrap ${sub.isActive
                                                                     ? 'border border-borderColor hover:bg-borderColor/30 text-lightColor'
                                                                     : 'bg-textColor text-background hover:bg-textColor/90'
                                                                     }`}
@@ -529,7 +528,7 @@ export default function CategoryManagement() {
                                                             {!sub.isHardcoded && (
                                                                 <button
                                                                     onClick={() => handleDeleteSub(cat.name, sub.name)}
-                                                                    className="p-2 text-extraLight hover:text-red-600 transition-colors duration-200 rounded hover:bg-red-50"
+                                                                    className="p-2 text-extraLight hover:text-red-600 transition-colors duration-200 rounded hover:bg-red-50 shrink-0"
                                                                     aria-label="Delete subcategory"
                                                                 >
                                                                     <RxCross1 size={14} />

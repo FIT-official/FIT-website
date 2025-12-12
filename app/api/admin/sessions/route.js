@@ -13,6 +13,8 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url)
         const status = searchParams.get('status')
         const processed = searchParams.get('processed')
+        const startDate = searchParams.get('startDate')
+        const endDate = searchParams.get('endDate')
 
         await connectToDatabase()
 
@@ -23,6 +25,14 @@ export async function GET(request) {
         }
         if (processed !== null) {
             query.processed = processed === 'true'
+        }
+
+        // Add date range filtering
+        if (startDate && endDate) {
+            query.createdAt = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate)
+            }
         }
 
         const sessions = await CheckoutSession.find(query)

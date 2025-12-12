@@ -1,0 +1,29 @@
+{
+  "id": "CP1_CUSTOM_PRINT_CONFIG",
+  "description": "Admin configuration for the single Custom 3D Print product.",
+  "form": {
+    "name": "Custom 3D Print",
+    "description": "Upload any supported 3D file (STL, OBJ, GLB, GLTF, 3MF, PLY) and we will print it to your specifications.",
+    "images": [],
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 20
+    },
+    "priceCredits": 10,
+    "delivery": {
+      "deliveryTypes": [
+        "local-pickup",
+        "express-courier"
+      ]
+    },
+    "discount": {
+      "eventId": "",
+      "percentage": "",
+      "minimumPrice": "",
+      "startDate": "",
+      "endDate": ""
+    },
+    "showDiscount": false,
+    "productType": "print"
+  }
+}

@@ -3,25 +3,35 @@ import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { GoChevronLeft, GoChevronRight } from "react-icons/go"
 import Grid from "../General/Grid";
-
-const testimonials = [
-    {
-        name: "J. Cedrick",
-        role: "NTU MAE Student, Beginner",
-        text: "Sent in a last-minute print for my project and got it back the next day, even did some post-processing work for free!",
-    },
-    {
-        name: "C. Kenny",
-        role: "Hobbyist",
-        text: "FIT isn't just selling prints, they helped me build my 3D printer and sourced affordable parts for me!",
-    }
-];
+import { useContent } from '@/utils/useContent'
 
 function Testimonials() {
+    const { content } = useContent('home/testimonials', {
+        testimonials: [
+            {
+                name: "J. Cedrick",
+                role: "NTU MAE Student, Beginner",
+                text: "Sent in a last-minute print for my project and got it back the next day, even did some post-processing work for free!",
+                avatar: "/user.jpg"
+            },
+            {
+                name: "C. Kenny",
+                role: "Hobbyist",
+                text: "FIT isn't just selling prints, they helped me build my 3D printer and sourced affordable parts for me!",
+                avatar: "/user.jpg"
+            }
+        ]
+    })
+
+    const testimonials = content.testimonials || []
     const [maxItems, setMaxItems] = useState(testimonials.length);
     const [idx, setIdx] = useState(0);
     const [fade, setFade] = useState(true);
     const intervalRef = useRef(null);
+
+    useEffect(() => {
+        setMaxItems(testimonials.length)
+    }, [testimonials])
 
     const showItem = (newIdx) => {
         setFade(false);
@@ -47,6 +57,17 @@ function Testimonials() {
         }, 5000);
         return () => clearInterval(intervalRef.current);
     }, [idx, maxItems]);
+
+    if (!testimonials.length) {
+        return null
+    }
+
+    // Helper function to get image src with proxy support
+    const getImageSrc = (imgPath) => {
+        if (!imgPath) return '/user.jpg'
+        if (imgPath.startsWith('http://') || imgPath.startsWith('https://') || imgPath.startsWith('/')) return imgPath
+        return `/api/proxy?key=${encodeURIComponent(imgPath)}`
+    }
 
     return (
         <div className="flex w-full py-20 items-center justify-center px-4 md:px-32 border-b border-borderColor flex-col gap-12 relative">
@@ -74,7 +95,7 @@ function Testimonials() {
                     <div className="flex w-full h-0 border-t border-[#f1f1f1] mt-4 mb-8" />
                     <div className="flex flex-row items-center gap-4 px-6 md:px-16">
                         <Image
-                            src="/user.jpg"
+                            src={getImageSrc(testimonials[idx].avatar)}
                             alt="User Avatar"
                             width={80}
                             height={80}

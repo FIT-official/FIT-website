@@ -1,0 +1,78 @@
+[
+  {
+    "id": "DT1_STANDARD_SHIPPING",
+    "description": "Basic shipping for physical shop products.",
+    "form": {
+      "name": "standard-shipping",
+      "displayName": "Standard Shipping",
+      "description": "3–5 business days within region. No tracking.",
+      "applicableToProductTypes": ["shop"],
+      "basePricing": {
+        "basePrice": "4.90",
+        "volumeFactor": "0",
+        "weightFactor": "0.02",
+        "minPrice": "4.90",
+        "maxPrice": "25.00",
+        "freeShippingThreshold": "80.00"
+      },
+      "isActive": true
+    }
+  },
+  {
+    "id": "DT2_EXPRESS_COURIER",
+    "description": "Premium tracked courier; tests higher bounds.",
+    "form": {
+      "name": "express-courier",
+      "displayName": "Express Courier",
+      "description": "1–2 business days, fully tracked.",
+      "applicableToProductTypes": ["shop", "print"],
+      "basePricing": {
+        "basePrice": "9.90",
+        "volumeFactor": "0.01",
+        "weightFactor": "1.0",
+        "minPrice": "9.90",
+        "maxPrice": "60.00",
+        "freeShippingThreshold": "150.00"
+      },
+      "isActive": true
+    }
+  },
+  {
+    "id": "DT3_LOCAL_PICKUP",
+    "description": "Pickup only for print services; tests zero price and no max.",
+    "form": {
+      "name": "local-pickup",
+      "displayName": "Local Pickup",
+      "description": "Collect your print from our studio. No shipping fee.",
+      "applicableToProductTypes": ["print"],
+      "basePricing": {
+        "basePrice": "0",
+        "volumeFactor": "0",
+        "weightFactor": "0",
+        "minPrice": "0",
+        "maxPrice": "",
+        "freeShippingThreshold": ""
+      },
+      "isActive": true
+    }
+  },
+  {
+    "id": "DT4_BROKEN_TYPE_FOR_VALIDATION",
+    "description": "Intentionally invalid type (missing fields) to confirm admin UI validation.",
+    "form": {
+      "name": "",
+      "displayName": "",
+      "description": "",
+      "applicableToProductTypes": [],
+      "basePricing": {
+        "basePrice": "",
+        "volumeFactor": "",
+        "weightFactor": "",
+        "minPrice": "",
+        "maxPrice": "",
+        "freeShippingThreshold": ""
+      },
+      "isActive": true
+    }
+  }
+]

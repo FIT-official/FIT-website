@@ -1,0 +1,259 @@
+[
+  {
+    "id": "P1_FREE_DIGITAL",
+    "description": "Free digital STL file; tests zero price and digital download.",
+    "form": {
+      "name": "Free Calibration Cube STL",
+      "description": "A 20x20x20mm calibration cube for testing printer accuracy. Free download.",
+      "productType": "shop",
+      "categoryId": "Electronics",
+      "subcategoryId": "Sensors",
+      "stock": 9999,
+      "basePrice": {
+        "presentmentAmount": 0,
+        "presentmentCurrency": "SGD"
+      },
+      "priceCredits": 0,
+      "images": [],
+      "paidAssets": [
+        {
+          "name": "calibration-cube.stl",
+          "sizeBytes": 3000000,
+          "contentType": "model/stl"
+        }
+      ],
+      "viewableModel": "",
+      "variantTypes": [
+        { "name": "Original" }
+      ],
+      "variants": [
+        {
+          "name": "Normal",
+          "presentmentAmount": 0,
+          "presentmentCurrency": "SGD",
+          "priceCredits": "",
+          "stock": 50
+        }
+      ],
+      "delivery": {
+        "deliveryTypes": []
+      },
+      "dimensions": {
+        "length": 0,
+        "width": 0,
+        "height": 0,
+        "weight": 0
+      },
+      "showDiscount": false,
+      "discount": {
+        "eventId": "",
+        "percentage": "",
+        "minimumPrice": "",
+        "startDate": "",
+        "endDate": ""
+      }
+    }
+  },
+  {
+    "id": "P2_PHYSICAL_WITH_VIEWABLE_MODEL",
+    "description": "Physical product with a viewable 3D model on the product page.",
+    "form": {
+      "name": "Display Stand with 3D Preview",
+      "description": "A physical display stand whose geometry can be previewed in 3D.",
+      "productType": "shop",
+      "categoryId": "Accessories",
+      "subcategoryId": "Storage",
+      "stock": 50,
+      "basePrice": {
+        "presentmentAmount": 29.9,
+        "presentmentCurrency": "SGD"
+      },
+      "priceCredits": 0,
+      "images": [],
+      "paidAssets": [],
+      "viewableModel": "s3://path/to/display-stand.glb",
+      "variantTypes": [],
+      "variants": [],
+      "delivery": {
+        "deliveryTypes": [
+          "standard-shipping",
+          "express-courier"
+        ]
+      },
+      "dimensions": {
+        "length": 150,
+        "width": 80,
+        "height": 120,
+        "weight": 0.3
+      },
+      "showDiscount": false,
+      "discount": {
+        "eventId": "",
+        "percentage": "",
+        "minimumPrice": "",
+        "startDate": "",
+        "endDate": ""
+      }
+    }
+  },
+  {
+    "id": "P3_PHYSICAL_WITH_VARIANTS_AND_DELIVERY",
+    "description": "Physical product with variants, delivery types and edge-case dimensions.",
+    "form": {
+      "name": "Custom Engraved Keychain",
+      "description": "Metal keychain with custom engraving. Multiple colors and finishes.",
+      "productType": "shop",
+      "categoryId": "Accessories",
+      "subcategoryId": "Tools",
+      "stock": 100,
+      "basePrice": {
+        "presentmentAmount": 12.5,
+        "presentmentCurrency": "SGD"
+      },
+      "priceCredits": 0,
+      "images": [],
+      "paidAssets": [],
+      "viewableModel": "",
+      "variantTypes": [
+        { "name": "Color" },
+        { "name": "Finish" }
+      ],
+      "variants": [
+        {
+          "name": "Red",
+          "presentmentAmount": 0,
+          "presentmentCurrency": "SGD",
+          "priceCredits": "",
+          "stock": 50
+        },
+        {
+          "name": "Matte",
+          "presentmentAmount": 12.5,
+          "presentmentCurrency": "SGD",
+          "priceCredits": "",
+          "stock": 50
+        },
+        {
+          "name": "Black",
+          "presentmentAmount": 0,
+          "presentmentCurrency": "SGD",
+          "priceCredits": "",
+          "stock": 50
+        },
+        {
+          "name": "Glossy",
+          "presentmentAmount": 14,
+          "presentmentCurrency": "SGD",
+          "priceCredits": "",
+          "stock": 50
+        }
+      ],
+      "delivery": {
+        "deliveryTypes": [
+          "standard-shipping",
+          "express-courier"
+        ]
+      },
+      "dimensions": {
+        "length": 5,
+        "width": 2,
+        "height": 0.5,
+        "weight": 0.02
+      },
+      "showDiscount": false,
+      "discount": {
+        "eventId": "",
+        "percentage": "",
+        "minimumPrice": "",
+        "startDate": "",
+        "endDate": ""
+      }
+    }
+  },
+  {
+    "id": "P4_PRINT_ONLY_CREATOR_PRODUCT",
+    "description": "Print-only product meant for creators (tests productType=print & non-admin behaviour).",
+    "form": {
+      "name": "PLA Figurine Print Service",
+      "description": "We provide the model; we print in high-quality PLA.",
+      "productType": "print",
+      "categoryId": "Trending Prints",
+      "subcategoryId": "Popular",
+      "stock": 999,
+      "basePrice": {
+        "presentmentAmount": 25,
+        "presentmentCurrency": "SGD"
+      },
+      "priceCredits": 0,
+      "images": [],
+      "paidAssets": [],
+      "viewableModel": "",
+      "variantTypes": [],
+      "variants": [],
+      "delivery": {
+        "deliveryTypes": [
+          "local-pickup"
+        ]
+      },
+      "dimensions": {
+        "length": 0,
+        "width": 0,
+        "height": 0,
+        "weight": 0
+      },
+      "showDiscount": true,
+      "discount": {
+        "eventId": "",
+        "percentage": "10",
+        "minimumPrice": "25",
+        "startDate": "2025-12-12T00:00:00.000Z",
+        "endDate": "2025-12-19T00:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "P5_VALIDATION_FAILURES",
+    "description": "Intentionally broken product to test validation & error messages.",
+    "form": {
+      "name": "",
+      "description": "This product should fail: no name, no images, negative price.",
+      "productType": "shop",
+      "categoryId": "",
+      "subcategoryId": "",
+      "stock": -5,
+      "basePrice": {
+        "presentmentAmount": -1,
+        "presentmentCurrency": "SGD"
+      },
+      "priceCredits": -10,
+      "images": [],
+      "paidAssets": [
+        {
+          "name": "oversize-file.stl",
+          "sizeBytes": 60000000,
+          "contentType": "model/stl"
+        }
+      ],
+      "viewableModel": "",
+      "variantTypes": [],
+      "variants": [],
+      "delivery": {
+        "deliveryTypes": []
+      },
+      "dimensions": {
+        "length": -10,
+        "width": 0,
+        "height": 0,
+        "weight": -1
+      },
+      "showDiscount": true,
+      "discount": {
+        "eventId": "",
+        "percentage": 150,
+        "minimumPrice": -5,
+        "startDate": "2025-01-01T00:00:00.000Z",
+        "endDate": "2025-01-03T00:00:00.000Z"
+      }
+    }
+  }
+]

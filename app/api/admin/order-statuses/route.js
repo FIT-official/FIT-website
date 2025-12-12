@@ -15,27 +15,27 @@ export async function GET(request) {
 
         // Hardcoded order statuses from User model
         const hardcodedOrderStatuses = [
-            { statusKey: "pending", displayName: "Pending", orderType: "order", color: "#f59e0b", isHardcoded: true },
-            { statusKey: "processing", displayName: "Processing", orderType: "order", color: "#3b82f6", isHardcoded: true },
-            { statusKey: "confirmed", displayName: "Confirmed", orderType: "order", color: "#10b981", isHardcoded: true },
-            { statusKey: "shipped", displayName: "Shipped", orderType: "order", color: "#6366f1", isHardcoded: true },
-            { statusKey: "delivered", displayName: "Delivered", orderType: "order", color: "#22c55e", isHardcoded: true },
-            { statusKey: "cancelled", displayName: "Cancelled", orderType: "order", color: "#ef4444", isHardcoded: true },
-            { statusKey: "on_hold", displayName: "On Hold", orderType: "order", color: "#f97316", isHardcoded: true },
-            { statusKey: "refunded", displayName: "Refunded", orderType: "order", color: "#8b5cf6", isHardcoded: true },
-            { statusKey: "partially_refunded", displayName: "Partially Refunded", orderType: "order", color: "#a855f7", isHardcoded: true }
+            { statusKey: "pending", displayName: "Pending", orderType: "order", color: "#f59e0b", order: 0, icon: "TbClock", isHardcoded: true },
+            { statusKey: "processing", displayName: "Processing", orderType: "order", color: "#3b82f6", order: 10, icon: "TbTruckDelivery", isHardcoded: true },
+            { statusKey: "confirmed", displayName: "Confirmed", orderType: "order", color: "#10b981", order: 20, icon: "IoMdCheckmarkCircleOutline", isHardcoded: true },
+            { statusKey: "shipped", displayName: "Shipped", orderType: "order", color: "#6366f1", order: 30, icon: "FiTruck", isHardcoded: true },
+            { statusKey: "delivered", displayName: "Delivered", orderType: "order", color: "#22c55e", order: 40, icon: "FiPackage", isHardcoded: true },
+            { statusKey: "cancelled", displayName: "Cancelled", orderType: "order", color: "#ef4444", order: 50, icon: "TbX", isHardcoded: true },
+            { statusKey: "on_hold", displayName: "On Hold", orderType: "order", color: "#f97316", order: 60, icon: "TbClock", isHardcoded: true },
+            { statusKey: "refunded", displayName: "Refunded", orderType: "order", color: "#8b5cf6", order: 70, icon: "TbChecks", isHardcoded: true },
+            { statusKey: "partially_refunded", displayName: "Partially Refunded", orderType: "order", color: "#a855f7", order: 80, icon: "BiPackage", isHardcoded: true }
         ];
 
         const hardcodedPrintOrderStatuses = [
-            { statusKey: "pending_config", displayName: "Pending Configuration", orderType: "printOrder", color: "#f59e0b", isHardcoded: true },
-            { statusKey: "configured", displayName: "Configured", orderType: "printOrder", color: "#3b82f6", isHardcoded: true },
-            { statusKey: "printing", displayName: "Printing", orderType: "printOrder", color: "#8b5cf6", isHardcoded: true },
-            { statusKey: "printed", displayName: "Printed", orderType: "printOrder", color: "#10b981", isHardcoded: true },
-            { statusKey: "shipped", displayName: "Shipped", orderType: "printOrder", color: "#6366f1", isHardcoded: true },
-            { statusKey: "delivered", displayName: "Delivered", orderType: "printOrder", color: "#22c55e", isHardcoded: true },
-            { statusKey: "cancelled", displayName: "Cancelled", orderType: "printOrder", color: "#ef4444", isHardcoded: true },
-            { statusKey: "failed", displayName: "Failed", orderType: "printOrder", color: "#dc2626", isHardcoded: true },
-            { statusKey: "on_hold", displayName: "On Hold", orderType: "printOrder", color: "#f97316", isHardcoded: true }
+            { statusKey: "pending_config", displayName: "Pending Configuration", orderType: "printOrder", color: "#f59e0b", order: 0, icon: "TbClock", isHardcoded: true },
+            { statusKey: "configured", displayName: "Configured", orderType: "printOrder", color: "#3b82f6", order: 10, icon: "IoMdPrint", isHardcoded: true },
+            { statusKey: "printing", displayName: "Printing", orderType: "printOrder", color: "#8b5cf6", order: 20, icon: "IoMdPrint", isHardcoded: true },
+            { statusKey: "printed", displayName: "Printed", orderType: "printOrder", color: "#10b981", order: 30, icon: "FiCheck", isHardcoded: true },
+            { statusKey: "shipped", displayName: "Shipped", orderType: "printOrder", color: "#6366f1", order: 40, icon: "FiTruck", isHardcoded: true },
+            { statusKey: "delivered", displayName: "Delivered", orderType: "printOrder", color: "#22c55e", order: 50, icon: "FiPackage", isHardcoded: true },
+            { statusKey: "cancelled", displayName: "Cancelled", orderType: "printOrder", color: "#ef4444", order: 60, icon: "TbX", isHardcoded: true },
+            { statusKey: "failed", displayName: "Failed", orderType: "printOrder", color: "#dc2626", order: 70, icon: "TbX", isHardcoded: true },
+            { statusKey: "on_hold", displayName: "On Hold", orderType: "printOrder", color: "#f97316", order: 80, icon: "TbClock", isHardcoded: true }
         ];
 
         const { searchParams } = new URL(request.url);
@@ -46,6 +46,13 @@ export async function GET(request) {
             ...hardcodedPrintOrderStatuses,
             ...settings.additionalOrderStatuses.map(os => ({ ...os.toObject(), isHardcoded: false }))
         ];
+
+        // Ensure statuses are ordered by their display order, regardless of source
+        allOrderStatuses.sort((a, b) => {
+            const aOrder = typeof a.order === 'number' ? a.order : 0;
+            const bOrder = typeof b.order === 'number' ? b.order : 0;
+            return aOrder - bOrder;
+        });
 
         // Filter by order type if specified
         if (orderType) {

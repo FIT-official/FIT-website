@@ -5,6 +5,7 @@ import User from "@/models/User";
 import Product from "@/models/Product";
 import PrintOrder from "@/models/PrintOrder";
 import CheckoutSession from "@/models/CheckoutSession";
+import Order from "@/models/Order";
 import mongoose from "mongoose";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -65,6 +66,34 @@ export async function POST(req) {
             // Create order history entries and handle print orders
             const orders = [];
             const printOrderPromises = [];
+            const orderItems = []; // For the new Order model
+
+            // Fetch payment method details from Stripe
+            let paymentMethodDetails = null;
+            try {
+                if (session.payment_intent) {
+                    const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
+                    if (paymentIntent.charges.data.length > 0) {
+                        const charge = paymentIntent.charges.data[0];
+                        const paymentMethod = charge.payment_method_details;
+
+                        if (paymentMethod) {
+                            paymentMethodDetails = {
+                                type: paymentMethod.type,
+                                brand: paymentMethod.card?.brand || paymentMethod.type,
+                                last4: paymentMethod.card?.last4 || null,
+                                expiryMonth: paymentMethod.card?.exp_month || null,
+                                expiryYear: paymentMethod.card?.exp_year || null
+                            };
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching payment method details:', error);
+            }
+
+            // Get shipping address from session
+            const shippingAddress = session.shipping_details?.address || null;
 
             for (const item of user.cart) {
                 const product = await Product.findById(item.productId);
@@ -74,7 +103,60 @@ export async function POST(req) {
                     continue;
                 }
 
-                // Add to order history with complete pricing breakdown
+                // Build variant info
+                let variantInfo = [];
+                let variantFees = 0;
+                if (item.selectedVariants && Object.keys(item.selectedVariants).length > 0) {
+                    if (product.variantTypes && product.variantTypes.length > 0) {
+                        for (const [variantTypeName, selectedOption] of Object.entries(item.selectedVariants)) {
+                            const variantType = product.variantTypes.find(vt => vt.name === variantTypeName);
+                            if (variantType) {
+                                const option = variantType.options.find(opt => opt.name === selectedOption);
+                                if (option) {
+                                    variantInfo.push({
+                                        type: variantTypeName,
+                                        option: selectedOption,
+                                        additionalFee: option.additionalFee || 0
+                                    });
+                                    variantFees += option.additionalFee || 0;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Calculate pricing breakdown
+                const basePrice = product.basePrice?.presentmentAmount || 0;
+                const priceBeforeDiscount = basePrice + variantFees;
+                const discount = (item.priceBeforeDiscount || priceBeforeDiscount) - (item.finalPrice || priceBeforeDiscount);
+                const finalPrice = item.finalPrice || priceBeforeDiscount;
+                const deliveryFee = item.deliveryFee || 0;
+                const totalPrice = item.price || (finalPrice + deliveryFee);
+
+                // Create order item for new Order model
+                orderItems.push({
+                    productId: item.productId,
+                    productName: product.name,
+                    productSlug: product.slug,
+                    quantity: item.quantity || 1,
+                    selectedVariants: item.selectedVariants || {},
+                    variantInfo: variantInfo,
+                    basePrice: basePrice,
+                    variantFees: variantFees,
+                    priceBeforeDiscount: priceBeforeDiscount,
+                    discount: discount,
+                    finalPrice: finalPrice,
+                    deliveryFee: deliveryFee,
+                    totalPrice: totalPrice,
+                    currency: item.currency || product.basePrice?.presentmentCurrency || 'SGD',
+                    chosenDeliveryType: item.chosenDeliveryType,
+                    orderNote: item.orderNote || "",
+                    requestId: item.requestId || null,
+                    reviewed: false,
+                    reviewId: null
+                });
+
+                // Add to order history with complete pricing breakdown (keep for backward compatibility)
                 orders.push({
                     cartItem: {
                         productId: item.productId,
@@ -82,12 +164,12 @@ export async function POST(req) {
                         selectedVariants: item.selectedVariants || {},
                         chosenDeliveryType: item.chosenDeliveryType,
                         orderNote: item.orderNote || "", // Include customer's order note
-                        price: item.price, // Total price paid (final + delivery)
-                        finalPrice: item.finalPrice, // Price after discount, before delivery
-                        basePrice: item.basePrice, // Base price without variants
-                        priceBeforeDiscount: item.priceBeforeDiscount, // Base + variants before discount
-                        variantInfo: item.variantInfo || [], // Array of variant selections with fees
-                        deliveryFee: item.deliveryFee || 0,
+                        price: totalPrice, // Total price paid (final + delivery)
+                        finalPrice: finalPrice, // Price after discount, before delivery
+                        basePrice: basePrice, // Base price without variants
+                        priceBeforeDiscount: priceBeforeDiscount, // Base + variants before discount
+                        variantInfo: variantInfo, // Array of variant selections with fees
+                        deliveryFee: deliveryFee,
                         currency: item.currency || 'SGD',
                     },
                     status: item.chosenDeliveryType === "digital" ? "delivered" : "pending",
@@ -184,14 +266,50 @@ export async function POST(req) {
             // Wait for all print orders to be created
             await Promise.all(printOrderPromises);
 
-            // Add orders to order history
+            // Create the comprehensive Order record
+            const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            const newOrder = new Order({
+                orderId: orderId,
+                userId: userId,
+                stripeSessionId: session.id,
+                stripePaymentIntentId: session.payment_intent || null,
+                paymentMethod: paymentMethodDetails,
+                customerEmail: session.customer_details?.email || user.email || "",
+                customerName: session.customer_details?.name || "",
+                shippingAddress: shippingAddress ? {
+                    line1: shippingAddress.line1 || "",
+                    line2: shippingAddress.line2 || "",
+                    city: shippingAddress.city || "",
+                    state: shippingAddress.state || "",
+                    postalCode: shippingAddress.postal_code || "",
+                    country: shippingAddress.country || ""
+                } : undefined,
+                items: orderItems,
+                subtotal: orderItems.reduce((sum, item) => sum + item.finalPrice, 0),
+                totalDiscount: orderItems.reduce((sum, item) => sum + item.discount, 0),
+                totalDelivery: orderItems.reduce((sum, item) => sum + item.deliveryFee, 0),
+                totalAmount: orderItems.reduce((sum, item) => sum + item.totalPrice, 0),
+                currency: orderItems[0]?.currency || 'SGD',
+                status: 'pending',
+                statusHistory: [{
+                    status: 'pending',
+                    timestamp: new Date(),
+                    updatedBy: 'system',
+                    note: 'Order created from successful checkout'
+                }],
+                customerNote: orderItems.map(item => item.orderNote).filter(Boolean).join('; ') || ""
+            });
+
+            await newOrder.save();
+
+            // Add orders to order history (keep for backward compatibility)
             user.orderHistory.push(...orders);
 
             // Empty the cart
             user.cart = [];
             await user.save();
 
-            console.log(`Successfully processed checkout for userId: ${userId}, sessionId: ${session.id}`);
+            // console.log(`Successfully processed checkout for userId: ${userId}, sessionId: ${session.id}`);
 
             return NextResponse.json({ received: true }, { status: 200 });
         } catch (error) {

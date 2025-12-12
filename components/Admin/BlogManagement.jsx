@@ -140,20 +140,20 @@ export default function BlogManagement() {
     const previewUrl = form.slug ? `/blog/${encodeURIComponent(form.slug)}?previewKey=${previewKey}` : null
 
     return (
-        <div className='flex gap-4 flex-col p-12 bg-borderColor/60'>
-            <div className='flex flex-col md:flex-row gap-6 min-h-[70vh]'>
-                <div className="w-full md:w-1/3 adminDashboardContainer overflow-auto">
+        <div className='flex gap-4 flex-col p-6 md:p-12 bg-borderColor/60'>
+            <div className='flex flex-col lg:flex-row gap-4 sm:gap-6 min-h-[70vh]'>
+                <div className="w-full lg:w-1/3 adminDashboardContainer overflow-auto">
                     <div className="flex justify-between items-center mb-3">
-                        <h3>Blog Posts</h3>
-                        <button onClick={handleNew} className="px-3 py-2 border border-borderColor rounded text-xs hover:bg-baseColor transition flex items-center gap-1 cursor-pointer">
+                        <h3 className="text-base sm:text-lg">Blog Posts</h3>
+                        <button onClick={handleNew} className="px-2.5 sm:px-3 py-1.5 sm:py-2 border border-borderColor rounded text-xs hover:bg-baseColor transition flex items-center gap-1 cursor-pointer">
                             <BsPlusLg />
                         </button>
                     </div>
-                    {loading && <div>Loading...</div>}
+                    {loading && <div className="text-sm">Loading...</div>}
                     <ul className="flex gap-2 flex-col w-full max-h-[40vh] overflow-y-auto">
                         {posts.map(p => (
-                            <li key={p._id} className={`p-4 border border-borderColor w-full rounded cursor-pointer hover:text-textColor/80 transition-colors duration-100 ease-in-out  ${selected && selected._id === p._id ? '' : 'bg-borderColor/40 text-lightColor'}`} onClick={() => handleSelect(p)}>
-                                <div className="font-medium text-sm truncate">{p.title}</div>
+                            <li key={p._id} className={`p-3 sm:p-4 border border-borderColor w-full rounded cursor-pointer hover:text-textColor/80 transition-colors duration-100 ease-in-out  ${selected && selected._id === p._id ? '' : 'bg-borderColor/40 text-lightColor'}`} onClick={() => handleSelect(p)}>
+                                <div className="font-medium text-xs sm:text-sm truncate">{p.title}</div>
                                 <div className="text-xs text-lightColor truncate">{p.slug}</div>
                             </li>
                         ))}
@@ -161,7 +161,7 @@ export default function BlogManagement() {
                 </div>
 
                 <div className="adminDashboardContainer w-full flex flex-col gap-4">
-                    <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-4">
                         <div className='flex flex-col gap-2'>
                             <label className="formLabel">Title</label>
                             <input className="formInput" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
@@ -188,7 +188,7 @@ export default function BlogManagement() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 mb-4">
                         <div className='flex flex-col gap-2'>
                             <label className="formLabel">CTA Tag</label>
                             <input className="formInput" value={form.cta.tag} onChange={e => setForm(f => ({ ...f, cta: { ...f.cta, tag: e.target.value } }))} />
@@ -203,7 +203,7 @@ export default function BlogManagement() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-4">
                         <div className='flex flex-col gap-2'>
                             <label className="formLabel">Meta Title</label>
                             <input className="formInput" value={form.metaTitle} onChange={e => setForm(f => ({ ...f, metaTitle: e.target.value }))} placeholder="Optional SEO title" />
@@ -225,23 +225,23 @@ export default function BlogManagement() {
                         />
                     </div>
 
-                    <div className="flex items-center gap-2 mb-6">
-                        <label className="flex items-center gap-2 font-normal text-sm"><input type="checkbox" checked={form.published} onChange={e => setForm(f => ({ ...f, published: e.target.checked }))} /> Published</label>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-6">
+                        <label className="flex items-center gap-2 font-normal text-xs sm:text-sm"><input type="checkbox" checked={form.published} onChange={e => setForm(f => ({ ...f, published: e.target.checked }))} /> Published</label>
 
-                        <label className="flex items-center gap-2 font-normal text-sm"><input type="checkbox" checked={form.featured} onChange={e => setForm(f => ({ ...f, featured: e.target.checked }))} /> Featured</label>
+                        <label className="flex items-center gap-2 font-normal text-xs sm:text-sm"><input type="checkbox" checked={form.featured} onChange={e => setForm(f => ({ ...f, featured: e.target.checked }))} /> Featured</label>
                     </div>
 
-                    <div className="flex gap-2">
-                        <button onClick={handleSave} className="formBlackButton">{loading ? 'Saving...' : 'Save'}</button>
-                        {selected && <button onClick={handleDelete} className="formRedButton">Delete</button>}
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                        <button onClick={handleSave} className="formBlackButton w-full sm:w-auto">{loading ? 'Saving...' : 'Save'}</button>
+                        {selected && <button onClick={handleDelete} className="formRedButton w-full sm:w-auto">Delete</button>}
                     </div>
                 </div>
             </div>
 
             <div className="adminDashboardContainer mt-2">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                     <div>
-                        <h3 className="font-semibold">Preview</h3>
+                        <h3 className="font-semibold text-base sm:text-lg">Preview</h3>
                         <p className="text-xs text-gray-600">This shows how the blog post will look on the site. Save changes, then refresh the preview.</p>
                     </div>
                     <div className="flex gap-2">
@@ -251,7 +251,7 @@ export default function BlogManagement() {
                 </div>
                 <div className="relative w-full border border-dashed border-borderColor rounded-md overflow-hidden bg-gray-50">
                     {previewUrl ? (
-                        <iframe key={previewKey} src={previewUrl} title="Blog Preview" className="w-full" style={{ height: 600, border: '0' }} />
+                        <iframe key={previewKey} src={previewUrl} title="Blog Preview" className="w-full" style={{ height: '400px', border: '0' }} />
                     ) : (
                         <div className="p-6 text-xs font-medium text-lightColor">Enter a slug (or save the post) to preview.</div>
                     )}

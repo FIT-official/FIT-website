@@ -50,7 +50,27 @@ export async function POST(req) {
             "priceCredits",
             "productType"
         ];
-        const missingFields = requiredFields.filter(field => !body[field]);
+
+        const missingFields = requiredFields.filter(field => {
+            const value = body[field];
+
+            // Explicit handling per field to avoid treating 0 as missing
+            switch (field) {
+                case "creatorUserId":
+                case "name":
+                case "description":
+                case "productType":
+                    return (typeof value !== "string" || !value.trim());
+                case "images":
+                    return !Array.isArray(value) || value.length === 0;
+                case "basePrice":
+                    return typeof value !== "object" || value === null;
+                case "priceCredits":
+                    return value === undefined || value === null || Number.isNaN(Number(value));
+                default:
+                    return value === undefined || value === null;
+            }
+        });
         if (missingFields.length > 0) {
             return NextResponse.json({ error: "Missing required fields", missingFields }, { status: 400 });
         }
@@ -175,7 +195,25 @@ export async function PUT(req) {
             "productType"
         ];
 
-        const missingFields = requiredFields.filter(field => !body[field]);
+        const missingFields = requiredFields.filter(field => {
+            const value = body[field];
+
+            switch (field) {
+                case "creatorUserId":
+                case "name":
+                case "description":
+                case "productType":
+                    return (typeof value !== "string" || !value.trim());
+                case "images":
+                    return !Array.isArray(value) || value.length === 0;
+                case "basePrice":
+                    return typeof value !== "object" || value === null;
+                case "priceCredits":
+                    return value === undefined || value === null || Number.isNaN(Number(value));
+                default:
+                    return value === undefined || value === null;
+            }
+        });
 
         if (missingFields.length > 0) {
             return NextResponse.json({ error: "Missing required fields", missingFields }, { status: 400 });
@@ -249,12 +287,14 @@ export async function GET(req) {
 
         const productType = searchParams.get("productType");
         const ids = searchParams.get("ids");
-        let productCategory = searchParams.get("productCategory");
-        let productSubCategory = searchParams.get("productSubCategory");
+        const productCategoryParam = searchParams.get("productCategory");
+        const productSubCategoryParam = searchParams.get("productSubCategory");
         const productId = searchParams.get("productId");
         const slug = searchParams.get("slug");
         const creatorUserId = searchParams.get("creatorUserId");
         const fields = searchParams.get("fields"); // comma-separated string
+        const search = searchParams.get("search");
+        const limit = searchParams.get("limit");
 
         let filter = {};
 
@@ -266,21 +306,46 @@ export async function GET(req) {
 
         if (productType) filter.productType = productType;
 
-        if (productCategory && isNaN(Number(productCategory))) {
-            // Use combined categories (hardcoded + admin-created)
-            const allCategories = await getAllCategoriesServer(productType);
-            productCategory = allCategories.findIndex(cat => cat === productCategory);
+        // Handle search query
+        if (search) {
+            filter.name = { $regex: search, $options: 'i' }; // Case-insensitive search
         }
 
-        if (
-            productSubCategory &&
-            isNaN(Number(productSubCategory)) &&
-            productCategory !== null &&
-            productCategory !== -1
-        ) {
-            // Resolve subcategory name to index using server helper (handles legacy hardcoded + admin DB)
-            const subcats = await getAllSubcategoriesServer(productType, productCategory);
-            productSubCategory = subcats.findIndex(sub => sub === productSubCategory);
+        // Determine whether caller is using legacy numeric categories or new name-based ids
+        let productCategory = productCategoryParam;
+        let productSubCategory = productSubCategoryParam;
+        const usingNumericCategories =
+            (productCategoryParam && !isNaN(Number(productCategoryParam))) ||
+            (productSubCategoryParam && !isNaN(Number(productSubCategoryParam)));
+
+        if (!usingNumericCategories) {
+            // New path: filter by name-based categoryId / subcategoryId when params are strings
+            if (productCategoryParam) {
+                filter.categoryId = productCategoryParam;
+            }
+            if (productSubCategoryParam) {
+                filter.subcategoryId = productSubCategoryParam;
+            }
+        } else {
+            // Legacy path: resolve indices and filter by numeric category/subcategory
+            if (productCategory && isNaN(Number(productCategory))) {
+                const allCategories = await getAllCategoriesServer(productType);
+                productCategory = allCategories.findIndex(cat => cat === productCategory);
+            } else if (productCategory !== null && productCategory !== undefined) {
+                productCategory = Number(productCategory);
+            }
+
+            if (
+                productSubCategory &&
+                isNaN(Number(productSubCategory)) &&
+                productCategory !== null &&
+                productCategory !== -1
+            ) {
+                const subcats = await getAllSubcategoriesServer(productType, productCategory);
+                productSubCategory = subcats.findIndex(sub => sub === productSubCategory);
+            } else if (productSubCategory !== null && productSubCategory !== undefined) {
+                productSubCategory = Number(productSubCategory);
+            }
         }
 
         if (ids) {
@@ -290,38 +355,52 @@ export async function GET(req) {
         if (productId) filter._id = productId;
         if (creatorUserId) filter.creatorUserId = creatorUserId;
 
+        if (usingNumericCategories) {
+            if (
+                productCategory !== undefined &&
+                productCategory !== null &&
+                productCategory !== -1 &&
+                productSubCategory !== undefined &&
+                productSubCategory !== null &&
+                productSubCategory !== -1
+            ) {
+                filter.category = Number(productCategory);
+                filter.subcategory = Number(productSubCategory);
+            } else if (
+                productCategory !== undefined &&
+                productCategory !== null &&
+                productCategory !== -1
+            ) {
+                filter.category = Number(productCategory);
+            }
+        }
+
+        // Ensure some form of category filter is provided for catalogue listings
+        const hasAnyCategoryFilter =
+            usingNumericCategories
+                ? productCategoryParam !== null && productCategoryParam !== undefined
+                : Boolean(productCategoryParam || productSubCategoryParam);
+
         if (
-            productCategory !== undefined &&
-            productCategory !== null &&
-            productCategory !== -1 &&
-            productSubCategory !== undefined &&
-            productSubCategory !== null &&
-            productSubCategory !== -1
-        ) {
-            filter.category = Number(productCategory);
-            filter.subcategory = Number(productSubCategory);
-        } else if (
-            productCategory !== undefined &&
-            productCategory !== null &&
-            productCategory !== -1
-        ) {
-            filter.category = Number(productCategory);
-        } else if (
             !ids &&
             !productId &&
             !creatorUserId &&
-            (
-                productCategory === undefined ||
-                productCategory === null ||
-                productCategory === -1
-            )
+            !search &&
+            !hasAnyCategoryFilter
         ) {
             return NextResponse.json({ error: "Missing productCategory or productSubCategory" }, { status: 400 });
         }
 
         const projection = fields ? fields.split(",").map(f => f.trim()).join(" ") : undefined;
 
-        const products = await Product.find(filter).select(projection).lean();
+        let query = Product.find(filter).select(projection);
+
+        // Apply limit if provided
+        if (limit) {
+            query = query.limit(Number(limit));
+        }
+
+        const products = await query.lean();
 
         if (productId) {
             return NextResponse.json({ product: products[0] || null }, { status: 200 });

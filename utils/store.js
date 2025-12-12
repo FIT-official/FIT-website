@@ -19,6 +19,8 @@ const useStore = create((set, get) => ({
   orderId: null,
   productId: null,
   variantId: null,
+  requestId: null,
+  isCustomPrint: false,
 
   setFileName: (fileName) => set({ fileName }),
   setBuffers: (buffers) => set({ buffers }),
@@ -26,6 +28,7 @@ const useStore = create((set, get) => ({
   setOrderId: (orderId) => set({ orderId }),
   setProductId: (productId) => set({ productId }),
   setVariantId: (variantId) => set({ variantId }),
+  setRequestId: (requestId) => set({ requestId }),
 
   generateScene: async (config) => {
     const { fileName: rawFileName, buffers } = get()

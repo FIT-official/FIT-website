@@ -12,6 +12,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePathname, useSearchParams } from 'next/navigation'
 import { HiOutlineShoppingCart } from 'react-icons/hi'
 import { LuPlus } from 'react-icons/lu'
+import { SiPrintables } from "react-icons/si";
+import { BsBadge3D } from 'react-icons/bs'
+import { FaChevronRight } from 'react-icons/fa'
 
 function Navbar() {
     const { user, isLoaded, isSignedIn } = useUser();
@@ -36,8 +39,11 @@ function Navbar() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await fetch('/api/admin/settings');
-                if (!res.ok) return;
+                const res = await fetch('/api/categories');
+                if (!res.ok) {
+                    console.error('Failed to fetch categories:', res.status);
+                    return;
+                }
                 const data = await res.json();
                 const cats = data.categories || [];
                 setShopCategories(cats.filter(c => c.type === 'shop' && c.isActive));
@@ -109,6 +115,28 @@ function Navbar() {
                             style={{ pointerEvents: dropdownOpen ? 'auto' : 'none' }}
                         >
                             <div className={`flex flex-row gap-16 h-full w-full`}>
+                                <Link href='/' className="flex bg-gradient-to-br from-amber-300 to-red-400 flex flex-col rounded-md h-fit items-start justify-center p-4 font-medium text-xs text-pretty text-white shadow-lg transition hover:scale-[1.01] cursor-pointer">
+                                    {/* <div className='animate-spin border-1 border-t-transparent mr-1 h-4 w-4 rounded-full' />
+                                    <div className="mt-3">Loading...</div> */}
+                                    <div className='gap-3 font-semibold mb-2 items-center flex w-full'>
+                                        <BsBadge3D className='flex shrink-0' size={24} />
+
+                                        <div className='flex items-center justify-between w-full text-base shrink-0'>
+                                            Print your Model
+
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        You can now 3D print your models with us with ease!
+                                    </div>
+
+                                    <div className='mask-flare-loop mt-3 bg-red-500/40 py-1 px-2 rounded-full font-semibold'>
+                                        <span className='flex gap-2 items-center'>
+                                            Do it now <FaChevronRight size={10} />
+                                        </span>
+                                    </div>
+                                </Link>
                                 {(dropdownType === 'shop' ? shopCategories : printCategories).map((category, catIdx) => (
                                     <div key={category.name} className='flex flex-col row-span-1 col-span-1 gap-8'>
                                         <p className='font-semibold text-xs tracking-wider uppercase'>{category.displayName}</p>
@@ -183,7 +211,6 @@ function Navbar() {
                     <div className='flex flex-col w-full h-full pt-8 pb-24 px-8 justify-between'>
                         <ul className='flex w-full gap-4 flex-col items-start font-normal'>
 
-                            {/* SHOP Dropdown */}
                             <li className='w-full flex flex-col'>
                                 <button
                                     className='flex navSidebarLink w-full justify-between items-center'
@@ -246,7 +273,6 @@ function Navbar() {
                             </li>
                             <div className='flex w-full h-0 border-t border-borderColor my-1' />
 
-                            {/* PRINT Dropdown */}
                             <li className='flex w-full flex-col'>
                                 <button
                                     className='flex navSidebarLink w-full justify-between items-center'

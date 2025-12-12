@@ -23,9 +23,19 @@ const DeliveryTypeSchema = new mongoose.Schema(
 const ReviewSchema = new mongoose.Schema(
     {
         userId: { type: String, required: true, },
+        username: { type: String, required: true }, // Reviewer's username for display
+        userImageUrl: { type: String, required: false }, // Reviewer's profile image
         rating: { type: Number, required: true, min: 1, max: 5 },
         comment: { type: String, required: false },
         mediaUrls: { type: [String], default: [], required: false, validate: [arr => arr.length <= 3, 'Max 3 media'] },
+        // Store which specific product variant was purchased (if any)
+        purchasedVariants: {
+            type: Map,
+            of: String, // Maps variant type name to selected option name
+            default: new Map()
+        },
+        verifiedPurchase: { type: Boolean, default: false }, // Mark if this review is from a verified buyer
+        helpful: { type: [String], default: [] }, // Array of userIds who marked this review as helpful
     },
     { timestamps: true }
 )

@@ -9,6 +9,7 @@ import { BiPrinter } from 'react-icons/bi';
 import dynamic from 'next/dynamic';
 import { IoMdCheckmark } from 'react-icons/io';
 import { getDiscountedPrice } from '@/utils/discount';
+import ReviewSection from '@/components/ProductPage/ReviewSection';
 
 const ModelViewer = dynamic(() => import("@/components/3D/ModelViewer"), { ssr: false });
 
@@ -38,6 +39,9 @@ function ProductPage() {
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState(0);
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+
+    // User orders for review eligibility
+    const [userOrders, setUserOrders] = useState([]);
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -73,6 +77,25 @@ function ProductPage() {
         }
         fetchProduct();
     }, [slug]);
+
+    // Fetch user orders for review eligibility
+    useEffect(() => {
+        const fetchUserOrders = async () => {
+            if (!isLoaded || !isSignedIn || !user || !product) return;
+
+            try {
+                const response = await fetch(`/api/order?userId=${user.id}&productId=${product._id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserOrders(data.orders || []);
+                }
+            } catch (error) {
+                console.error('Error fetching user orders:', error);
+            }
+        };
+
+        fetchUserOrders();
+    }, [isLoaded, isSignedIn, user, product]);
 
     const checkDigitalOwnership = async () => {
         if (!product || !user || !isLoaded) return;
@@ -148,7 +171,11 @@ function ProductPage() {
             router.push("/sign-in");
             return;
         }
-        if (product.variantTypes && product.variantTypes.length > 0 && !areAllVariantsSelected()) {
+
+        // Check if this is a custom print product
+        const isCustomPrint = product.slug === 'custom-print-request' || slug === 'custom-print-request'
+
+        if (!isCustomPrint && product.variantTypes && product.variantTypes.length > 0 && !areAllVariantsSelected()) {
             alert("Please select all variant options before adding to cart.");
             return;
         }
@@ -158,8 +185,9 @@ function ProductPage() {
             const cartItem = {
                 productId: product._id,
                 quantity: 1,
-                selectedVariants: selectedVariantOptions,
+                selectedVariants: isCustomPrint ? {} : selectedVariantOptions,
                 chosenDeliveryType: product.delivery?.deliveryTypes?.[0]?.type || "selfCollect",
+                isCustomPrint: isCustomPrint, // Flag for cart to show upload interface
             };
 
             const res = await fetch("/api/user/cart", {
@@ -171,6 +199,11 @@ function ProductPage() {
             setIsAdding(false);
             setShowAdded(true);
             setTimeout(() => setShowAdded(false), 3000);
+
+            // Redirect to cart if custom print so user can upload model
+            if (isCustomPrint) {
+                setTimeout(() => router.push('/cart'), 1000);
+            }
         } catch (error) {
             alert(error || "Failed to add to cart.");
         } finally {
@@ -358,19 +391,16 @@ function ProductPage() {
     const nextTab = () => {
         if (tabIdx < totalTabs - 1) {
             setTabIdx((prev) => (prev + 1));
-            console.log("nextTab", tabIdx);
         }
     }
     const prevTab = () => {
         if (tabIdx > 0) {
             setTabIdx((prev) => (prev - 1));
-            console.log("prevTab", tabIdx);
         }
 
     }
     const handleTabClick = (idx) => {
         setCurrentTab(() => {
-            console.log("handleTabClick", idx);
             return idx;
         });
     };
@@ -417,7 +447,7 @@ function ProductPage() {
                         >
                             <GoChevronLeft size={20} />
                         </button>
-                        <div className='flex w-full overflow-hidden'>
+                        <div className='flex w-full max-w-[332px] overflow-hidden'>
                             <div
                                 className='flex gap-4'
                                 style={{ transform: `translateX(-${tabIdx * 116}px)`, transition: 'transform 0.3s ease-in-out' }}
@@ -720,6 +750,13 @@ function ProductPage() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Reviews Section */}
+                            {product && (
+                                <div className="mt-8 pt-8 border-t border-borderColor">
+                                    <ReviewSection product={product} userOrders={userOrders} />
+                                </div>
+                            )}
                         </>
                     )}
                 </div>

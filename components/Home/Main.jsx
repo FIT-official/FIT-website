@@ -14,21 +14,23 @@ function Main({ adbanner }) {
     const text = "FIX IT TODAY®";
     const letters = Array.from(text);
 
-    const [heroSrc, setHeroSrc] = useState(() => {
-        const hi = content?.heroImage
-        if (!hi) return '/placeholder.jpg'
-        if (hi.startsWith('http://') || hi.startsWith('https://') || hi.startsWith('/')) return hi
-        return `/api/proxy?key=${encodeURIComponent(hi)}`
-    })
+    const [heroSrc, setHeroSrc] = useState(null)
+    const [isImageLoaded, setIsImageLoaded] = useState(false)
 
     useEffect(() => {
         const hi = content?.heroImage
-        if (!hi) {
+        if (!hi || hi === '/placeholder.jpg') {
             setHeroSrc('/placeholder.jpg')
+            setIsImageLoaded(false)
             return
         }
-        if (hi.startsWith('http://') || hi.startsWith('https://') || hi.startsWith('/')) setHeroSrc(hi)
-        else setHeroSrc(`/api/proxy?key=${encodeURIComponent(hi)}`)
+
+        setIsImageLoaded(false)
+        if (hi.startsWith('http://') || hi.startsWith('https://') || hi.startsWith('/')) {
+            setHeroSrc(hi)
+        } else {
+            setHeroSrc(`/api/proxy?key=${encodeURIComponent(hi)}`)
+        }
     }, [content?.heroImage])
 
     const containerVariants = {
@@ -61,46 +63,57 @@ function Main({ adbanner }) {
                     </div>
                 </div>
             )}
-            <Image
-                src={heroSrc}
-                alt="Background"
-                fill
-                priority
-                className="
+            {heroSrc && (
+                <Image
+                    src={heroSrc}
+                    alt="Background"
+                    fill
+                    priority
+                    className={`
                         object-cover
                         object-[75%_center] sm:object-center
                         z-0
-                        transition-[object-position] duration-500 ease-in-out grayscale-60 opacity-90
-                    "
-                onError={() => setHeroSrc('/placeholder.jpg')}
-            />
+                        transition-all duration-500 ease-in-out
+                        ${isImageLoaded ? 'opacity-90' : 'opacity-0'}
+                    `}
+                    onLoad={() => setIsImageLoaded(true)}
+                    onError={() => {
+                        setHeroSrc('/placeholder.jpg')
+                        setIsImageLoaded(true)
+                    }}
+                />
+            )}
             <div className="relative z-10 flex flex-col items-center w-full text-background text-center px-4">
-                <motion.h1
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    aria-label={text}
-                >
-                    {letters.map((letter, index) => (
-                        <div
-                            key={index}
-                            className='inline-block overflow-hidden relative leading-none h-[32px] md:h-[64px]'
+                {isImageLoaded && (
+                    <>
+                        <motion.h1
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                            aria-label={text}
                         >
-                            <motion.span
-                                variants={letterVariants}
-                                className='block text-background text-4xl md:text-7xl font-black'
-                            >
-                                {letter === " " ? "\u00A0" : letter}
-                            </motion.span>
-                        </div>
-                    ))}
-                </motion.h1>
-                <motion.div
-                    className="font-semibold uppercase text-xs md:text-lg"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1, transition: { duration: 0.5 } }}>
-                    {content.text}
-                </motion.div>
+                            {letters.map((letter, index) => (
+                                <div
+                                    key={index}
+                                    className='inline-block overflow-hidden relative leading-none h-8 md:h-16'
+                                >
+                                    <motion.span
+                                        variants={letterVariants}
+                                        className='block text-background text-4xl md:text-7xl font-black'
+                                    >
+                                        {letter === " " ? "\u00A0" : letter}
+                                    </motion.span>
+                                </div>
+                            ))}
+                        </motion.h1>
+                        <motion.div
+                            className="font-semibold uppercase text-xs md:text-lg"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1, transition: { duration: 0.5 } }}>
+                            {content.text}
+                        </motion.div>
+                    </>
+                )}
             </div>
         </div>
 

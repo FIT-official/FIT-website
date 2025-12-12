@@ -20,7 +20,7 @@ function Onboarding() {
             await user?.reload?.()
             if (user?.publicMetadata?.onboardingComplete) {
                 setLoading(false)
-                router.push('/dashboard')
+                router.push('/')
             }
         }
         interval = setInterval(poll, 500)

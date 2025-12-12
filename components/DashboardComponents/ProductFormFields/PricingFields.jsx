@@ -1,11 +1,15 @@
 import React, { useState } from 'react'
 import SelectField from '../SelectField'
+import FieldErrorBanner from './FieldErrorBanner'
 import { MdExpandMore, MdExpandLess, MdAttachMoney, MdOutlineLightbulb } from 'react-icons/md'
 import { BiCoin } from 'react-icons/bi'
 import { HiCurrencyDollar } from 'react-icons/hi'
 
-export default function PricingFields({ form, setForm, allCurrencies }) {
+export default function PricingFields({ form, setForm, allCurrencies, missingFields = [] }) {
     const [expandedPricing, setExpandedPricing] = useState(false)
+
+    const basePriceMissing = missingFields.includes('basePrice')
+    const priceCreditsMissing = missingFields.includes('priceCredits')
 
     return (
         <div className="border border-borderColor rounded-lg overflow-hidden transition-all duration-200 hover:border-extraLight w-full">
@@ -34,10 +38,19 @@ export default function PricingFields({ form, setForm, allCurrencies }) {
 
             {expandedPricing && (
                 <div className="p-4 border-t border-borderColor bg-baseColor animate-slideDown space-y-4">
+                    {(basePriceMissing || priceCreditsMissing) && (
+                        <FieldErrorBanner
+                            title="Pricing information required"
+                            message={[
+                                basePriceMissing ? 'Set a base price so we can calculate totals at checkout.' : null,
+                                priceCreditsMissing ? 'Specify a credit amount if this product can be bought with credits.' : null,
+                            ].filter(Boolean).join(' ')}
+                        />
+                    )}
                     <div className="space-y-3">
                         <div className="flex items-center gap-2">
                             <MdAttachMoney className="text-textColor text-lg" />
-                            <h4 className="text-xs font-semibold text-textColor uppercase tracking-wide">
+                            <h4 className="text-xs font-semibold tracking-wide text-textColor uppercase">
                                 Base Price
                             </h4>
                         </div>
@@ -57,7 +70,9 @@ export default function PricingFields({ form, setForm, allCurrencies }) {
                                 />
                             </div>
                             <div className="flex flex-col gap-1 w-full">
-                                <label className="text-xs font-medium text-lightColor">Amount</label>
+                                <label className="text-xs font-medium text-lightColor flex items-center gap-1">
+                                    <span>Amount</span>
+                                </label>
                                 <div className="flex items-center gap-2">
 
                                     <input
@@ -65,12 +80,12 @@ export default function PricingFields({ form, setForm, allCurrencies }) {
                                         type="number"
                                         min={0}
                                         step="0.01"
-                                        value={form.basePrice?.presentmentAmount || 0}
+                                        value={form.basePrice?.presentmentAmount ?? ''}
                                         onChange={(e) => setForm(f => ({
                                             ...f,
-                                            basePrice: { ...f.basePrice, presentmentAmount: parseFloat(e.target.value) || 0 }
+                                            basePrice: { ...f.basePrice, presentmentAmount: e.target.value === '' ? '' : parseFloat(e.target.value) }
                                         }))}
-                                        className="formInput text-sm font-medium flex-1"
+                                        className={`formInput text-sm font-medium flex-1 ${basePriceMissing ? 'border-2 border-red-500 focus:border-red-500' : ''}`}
                                         placeholder="0.00"
                                     />
                                 </div>
@@ -92,14 +107,16 @@ export default function PricingFields({ form, setForm, allCurrencies }) {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-medium text-lightColor">Credits Amount</label>
+                            <label className="text-xs font-medium text-lightColor flex items-center gap-1">
+                                <span>Credits Amount</span>
+                            </label>
                             <input
                                 name="priceCredits"
                                 type="number"
                                 min={0}
-                                value={form.priceCredits || 0}
-                                onChange={(e) => setForm(f => ({ ...f, priceCredits: parseInt(e.target.value) || 0 }))}
-                                className="formInput text-sm font-medium"
+                                value={form.priceCredits ?? ''}
+                                onChange={(e) => setForm(f => ({ ...f, priceCredits: e.target.value === '' ? '' : parseInt(e.target.value) }))}
+                                className={`formInput text-sm font-medium ${priceCreditsMissing ? 'border-2 border-red-500 focus:border-red-500' : ''}`}
                                 placeholder="0"
                             />
                         </div>

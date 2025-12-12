@@ -243,20 +243,47 @@ export async function PUT(request) {
         const settings = await getAppSettings();
 
         if (type === "delivery-type") {
-            if (!id) {
-                return NextResponse.json({ error: "ID is required" }, { status: 400 });
+            // Used by DeliveryTypeManagement when editing by ID
+            if (id) {
+                const deliveryType = settings.additionalDeliveryTypes.id(id);
+                if (!deliveryType) {
+                    return NextResponse.json(
+                        { error: "Delivery type not found" },
+                        { status: 404 }
+                    );
+                }
+
+                if (data) {
+                    Object.assign(deliveryType, data);
+                }
+                if (action === "toggleActive" && typeof isActive !== "undefined") {
+                    deliveryType.isActive = isActive;
+                }
+
+                await settings.save();
+                return NextResponse.json({ message: "Delivery type updated successfully" }, { status: 200 });
             }
-            const deliveryType = settings.additionalDeliveryTypes.id(id);
-            if (!deliveryType) {
+
+            // Used by DeliveryTypeManagement when toggling by name only
+            if (!name && !id) {
+                return NextResponse.json({ error: "Name or ID is required" }, { status: 400 });
+            }
+
+            const deliveryTypeByName = (settings.additionalDeliveryTypes || []).find(dt => dt.name === name);
+            if (!deliveryTypeByName) {
                 return NextResponse.json(
                     { error: "Delivery type not found" },
                     { status: 404 }
                 );
             }
 
-            Object.assign(deliveryType, data);
-            await settings.save();
+            if (action === "toggleActive" && typeof isActive !== "undefined") {
+                deliveryTypeByName.isActive = isActive;
+            } else if (data) {
+                Object.assign(deliveryTypeByName, data);
+            }
 
+            await settings.save();
             return NextResponse.json({ message: "Delivery type updated successfully" }, { status: 200 });
 
         } else if (type === "order-status") {

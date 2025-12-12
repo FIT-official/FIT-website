@@ -53,8 +53,6 @@ function Dashboard() {
                     <Statistics user={user} myProducts={myProducts} />
                     <ActionItems user={user} myProducts={myProducts} />
                     <ExpressWidget user={user} isLoaded={isLoaded} />
-
-
                 </div>
             </div>
         </div >

@@ -15,7 +15,12 @@ function FeaturedSection() {
 
   const { content: sectionContent } = useContent('home/featured-section', {
     title: 'Popular Prints',
-    content: 'Discover amazing 3D printable designs from our community of creators.'
+    content: 'Discover amazing 3D printable designs from our community of creators.',
+    productType: 'print',
+    displayMode: 'category',
+    category: 'Trending Prints',
+    subcategory: 'Popular',
+    customProducts: ''
   });
 
   const nextItem = () => {
@@ -27,26 +32,80 @@ function FeaturedSection() {
   }
 
   useEffect(() => {
-    const fetchPopularPrints = async () => {
+    const fetchProducts = async () => {
       try {
-        const response = await fetch('/api/product?productType=print&productCategory=Trending%20Prints&productSubCategory=Popular&limit=20')
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        setItems(data.products || []);
-        if (data.products && data.products.length > 0) {
-          setMaxItems(Math.min(data.products.length, 5));
+        const displayMode = sectionContent.displayMode || 'category'
+        const productType = sectionContent.productType === 'shop' ? 'shop' : 'print'
+        let response
+
+        if (displayMode === 'custom' && sectionContent.customProducts) {
+          // Fetch custom products by IDs
+          const productIds = sectionContent.customProducts
+            .split(',')
+            .map(id => id.trim())
+            .filter(id => id.length > 0)
+
+          if (productIds.length === 0) {
+            setItems([])
+            setMaxItems(5)
+            return
+          }
+
+          const products = []
+          for (const productId of productIds.slice(0, 20)) {
+            try {
+              const res = await fetch(`/api/product/${productId}`)
+              if (res.ok) {
+                const product = await res.json()
+                products.push(product)
+              }
+            } catch (err) {
+              console.error(`Failed to fetch product ${productId}:`, err)
+            }
+          }
+
+          setItems(products)
+          if (products.length > 0) {
+            setMaxItems(Math.min(products.length, 5))
+          } else {
+            setMaxItems(5)
+          }
         } else {
-          setMaxItems(5);
+          // Fetch by category/subcategory
+          const category = sectionContent.category || 'Trending Prints'
+          const subcategory = sectionContent.subcategory || 'Popular'
+
+          const params = new URLSearchParams({
+            productType,
+            productCategory: category,
+            limit: '20'
+          })
+
+          if (subcategory) {
+            params.append('productSubCategory', subcategory)
+          }
+
+          response = await fetch(`/api/product?${params.toString()}`)
+
+          if (!response.ok) {
+            throw new Error('Network response was not ok')
+          }
+
+          const data = await response.json()
+          setItems(data.products || [])
+          if (data.products && data.products.length > 0) {
+            setMaxItems(Math.min(data.products.length, 5))
+          } else {
+            setMaxItems(5)
+          }
         }
       } catch (error) {
-        showToast('Failed to fetch popular prints: ' + error.message, 'error');
+        showToast('Failed to fetch products: ' + error.message, 'error')
       }
     }
 
-    fetchPopularPrints();
-  }, []);
+    fetchProducts()
+  }, [sectionContent.displayMode, sectionContent.category, sectionContent.subcategory, sectionContent.customProducts, sectionContent.productType]);
 
   return (
     <div className='flex w-full py-20 items-center justify-center px-12 md:px-32 border-b border-borderColor min-h-[50vh]'>

@@ -7,6 +7,9 @@ import CreatorPayments from '@/components/Admin/CreatorPayments'
 import CategoryManagement from '@/components/Admin/CategoryManagement'
 import DeliveryTypeManagement from '@/components/Admin/DeliveryTypeManagement'
 import OrderStatusManagement from '@/components/Admin/OrderStatusManagement'
+import CustomPrintProductManagement from '@/components/Admin/CustomPrintProductManagement'
+import CustomPrintRequests from '@/components/Admin/CustomPrintRequests'
+import ReviewManagement from '@/components/Admin/ReviewManagement'
 import { useUser } from '@clerk/nextjs'
 
 export default function AdminPage() {
@@ -98,6 +101,33 @@ export default function AdminPage() {
                 >
                     Blog Posts
                 </button>
+                <button
+                    onClick={() => setActiveTab('customPrint')}
+                    className={`px-4 cursor-pointer py-2 font-medium text-xs rounded-t-lg whitespace-nowrap ${activeTab === 'customPrint'
+                        ? 'bg-black text-white'
+                        : 'text-gray-600 hover:text-gray-800 border-t border-r border-l  border-borderColor'
+                        }`}
+                >
+                    Custom Print
+                </button>
+                <button
+                    onClick={() => setActiveTab('customPrintRequests')}
+                    className={`px-4 cursor-pointer py-2 font-medium text-xs rounded-t-lg whitespace-nowrap ${activeTab === 'customPrintRequests'
+                        ? 'bg-black text-white'
+                        : 'text-gray-600 hover:text-gray-800 border-t border-r border-l  border-borderColor'
+                        }`}
+                >
+                    Custom Print Requests
+                </button>
+                <button
+                    onClick={() => setActiveTab('reviews')}
+                    className={`px-4 cursor-pointer py-2 font-medium text-xs rounded-t-lg whitespace-nowrap ${activeTab === 'reviews'
+                        ? 'bg-black text-white'
+                        : 'text-gray-600 hover:text-gray-800 border-t border-r border-l  border-borderColor'
+                        }`}
+                >
+                    Reviews
+                </button>
             </div>
 
             {/* Content Management Tab */}
@@ -116,6 +146,12 @@ export default function AdminPage() {
             {activeTab === 'orders' && <OrderStatusManagement />}
             {/* Blog Posts Tab */}
             {activeTab === 'blog' && <BlogManagement />}
+            {/* Custom Print Product Tab */}
+            {activeTab === 'customPrint' && <CustomPrintProductManagement />}
+            {/* Custom Print Requests Tab */}
+            {activeTab === 'customPrintRequests' && <CustomPrintRequests />}
+            {/* Reviews Management Tab */}
+            {activeTab === 'reviews' && <ReviewManagement />}
         </div>
     )
 }

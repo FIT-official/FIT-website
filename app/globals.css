@@ -214,7 +214,7 @@
 }
 
 .adminDashboardContainer {
-  @apply bg-white border border-lightColor/20 rounded-lg p-6 flex flex-col gap-3;
+  @apply bg-white border border-lightColor/20 rounded-lg p-6 md:p-8 flex flex-col gap-3 shadow-sm;
 }
 
 @keyframes slideDown {
@@ -230,4 +230,24 @@
 
 .animate-slideDown {
   animation: slideDown 0.3s ease-out;
+}
+
+/* Markdown content tweaks (used in blog posts, etc.) */
+.markdown-content ul,
+.markdown-content ol,
+.wmde-markdown ul,
+.wmde-markdown ol {
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+  margin-left: 1.25rem;
+}
+
+.markdown-content ol,
+.wmde-markdown ol {
+  list-style-type: decimal !important;
+}
+
+.markdown-content li::marker,
+.wmde-markdown li::marker {
+  color: var(--textColor) !important;
 }

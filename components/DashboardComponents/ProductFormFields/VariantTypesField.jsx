@@ -4,9 +4,9 @@ import { MdExpandMore, MdExpandLess, MdOutlineLightbulb, MdAdd } from 'react-ico
 import { BiPalette } from 'react-icons/bi'
 import { IoMdPricetag } from 'react-icons/io'
 
-export default function VariantTypesField({ form, setForm }) {
-    // Check if digital delivery is selected in the new structure
-    const isDigitalProduct = form.delivery?.deliveryTypes?.some(dt => dt.type === 'digital') || false
+export default function VariantTypesField({ form, setForm, isDigitalDelivery }) {
+    // Check if digital delivery is selected
+    const isDigitalProduct = !!isDigitalDelivery
     const [expandedVariants, setExpandedVariants] = useState(false)
     const [expandedVariantTypes, setExpandedVariantTypes] = useState({})
 
@@ -29,10 +29,10 @@ export default function VariantTypesField({ form, setForm }) {
                     <div className="text-left">
                         <h3 className="font-medium text-sm text-textColor">Variant Types</h3>
                         <p className="text-xs text-extraLight mt-0.5">
-                            {form.variantTypes?.length > 0
-                                ? `${form.variantTypes.length} variant ${form.variantTypes.length === 1 ? 'type' : 'types'} (${form.variantTypes.reduce((sum, vt) => sum + (vt.options?.length || 0), 0)} total options)`
-                                : isDigitalProduct
-                                    ? 'Not available for digital products'
+                            {isDigitalProduct
+                                ? 'Digital products are sold as a single configuration.'
+                                : form.variantTypes?.length > 0
+                                    ? `${form.variantTypes.length} variant ${form.variantTypes.length === 1 ? 'type' : 'types'} (${form.variantTypes.reduce((sum, vt) => sum + (vt.options?.length || 0), 0)} total options)`
                                     : 'Add customization options (max 5 types)'}
                         </p>
                     </div>
@@ -46,15 +46,15 @@ export default function VariantTypesField({ form, setForm }) {
 
             {expandedVariants && (
                 <div className="p-4 border-t border-borderColor bg-baseColor animate-slideDown space-y-4">
-                    {isDigitalProduct && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded flex gap-2 items-start text-xs text-red-900">
+                    {isDigitalProduct ? (
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded flex gap-2 items-start text-xs text-blue-950">
                             <MdOutlineLightbulb className="flex-shrink-0 mt-0.5" />
-                            <span className="font-medium">Variant types are not available for digital products. Remove digital delivery to enable variants.</span>
+                            <div className="flex flex-col gap-1">
+                                <p className="font-semibold">Only one variant configuration allowed</p>
+                                <p>For digital products, customers receive a single downloadable item. To avoid confusion and file access issues, only one variant type with one option is permitted. All variant controls are disabled while digital delivery is active.</p>
+                            </div>
                         </div>
-                    )}
-
-                    {/* Info tip */}
-                    {!isDigitalProduct && (
+                    ) : (
                         <div className="p-2 bg-blue-50 border border-blue-200 rounded flex gap-2 items-start text-xs font-medium text-blue-950">
                             <MdOutlineLightbulb className="flex-shrink-0 mt-0.5" />
                             <span>Create variant types like Color, Size, or Material. Customers select one option from each type, and fees are added to the base price.</span>
@@ -62,7 +62,7 @@ export default function VariantTypesField({ form, setForm }) {
                     )}
 
                     {/* Add new variant type form */}
-                    <div className={`border-2 border-dashed rounded-lg p-4 transition-all ${isDigitalProduct || form.variantTypes?.length >= 5
+                    <div className={`border-2 border-dashed rounded-lg p-4 transition-all ${(isDigitalProduct && form.variantTypes?.length >= 1) || form.variantTypes?.length >= 5
                         ? 'border-borderColor bg-borderColor/10 opacity-50'
                         : 'border-purple-200 bg-purple-50/30 hover:bg-purple-50/50'
                         }`}>
@@ -82,7 +82,7 @@ export default function VariantTypesField({ form, setForm }) {
                                     placeholder="e.g., Color, Size, Material"
                                     maxLength={50}
                                     id="variantTypeName"
-                                    disabled={isDigitalProduct || form.variantTypes?.length >= 5}
+                                    disabled={(isDigitalProduct && form.variantTypes?.length >= 1) || form.variantTypes?.length >= 5}
                                 />
                                 <p className="text-xs text-extraLight">
                                     Example: "Color" for options like Red, Blue, Green
@@ -92,11 +92,11 @@ export default function VariantTypesField({ form, setForm }) {
                             <button
                                 type="button"
                                 className="formBlackButton w-full"
-                                disabled={form.variantTypes?.length >= 5 || isDigitalProduct}
+                                disabled={(isDigitalProduct && form.variantTypes?.length >= 1) || form.variantTypes?.length >= 5}
                                 onClick={() => {
                                     const input = document.getElementById('variantTypeName');
                                     const name = input.value.trim();
-                                    if (name && !isDigitalProduct) {
+                                    if (name && !(isDigitalProduct && form.variantTypes?.length >= 1)) {
                                         setForm(f => ({
                                             ...f,
                                             variantTypes: [...(f.variantTypes || []), { name, options: [] }]
@@ -144,15 +144,12 @@ export default function VariantTypesField({ form, setForm }) {
                                             <button
                                                 type="button"
                                                 onClick={() => {
-                                                    if (!isDigitalProduct) {
-                                                        setForm(f => ({
-                                                            ...f,
-                                                            variantTypes: f.variantTypes.filter((_, i) => i !== typeIdx)
-                                                        }));
-                                                    }
+                                                    setForm(f => ({
+                                                        ...f,
+                                                        variantTypes: f.variantTypes.filter((_, i) => i !== typeIdx)
+                                                    }));
                                                 }}
                                                 className="ml-2 p-1.5 hover:bg-red-50 rounded transition-colors group"
-                                                disabled={isDigitalProduct}
                                             >
                                                 <RxCross1 className="text-lightColor group-hover:text-red-600 transition-colors" size={16} />
                                             </button>
@@ -163,7 +160,7 @@ export default function VariantTypesField({ form, setForm }) {
                                     {expandedVariantTypes[typeIdx] !== false && (
                                         <div className="p-4 space-y-4 animate-slideDown">
                                             {/* Add option form */}
-                                            <div className="space-y-3 p-3 bg-extraLight/10 rounded-lg border border-borderColor">
+                                                            <div className="space-y-3 p-3 bg-extraLight/10 rounded-lg border border-borderColor">
                                                 <div className="flex items-center gap-2">
                                                     <IoMdPricetag className="text-textColor text-sm" />
                                                     <span className="text-xs font-semibold text-textColor uppercase tracking-wide">
@@ -179,7 +176,7 @@ export default function VariantTypesField({ form, setForm }) {
                                                             className="formInput text-sm"
                                                             placeholder="e.g., Red, Large, Plastic"
                                                             id={`optionName-${typeIdx}`}
-                                                            disabled={isDigitalProduct}
+                                                            disabled={isDigitalProduct && variantType.options?.length >= 1}
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
@@ -193,7 +190,7 @@ export default function VariantTypesField({ form, setForm }) {
                                                                 className="formInput text-sm flex-1"
                                                                 placeholder="0.00"
                                                                 id={`optionFee-${typeIdx}`}
-                                                                disabled={isDigitalProduct}
+                                                                disabled={isDigitalProduct && variantType.options?.length >= 1}
                                                             />
                                                         </div>
                                                     </div>
@@ -202,9 +199,9 @@ export default function VariantTypesField({ form, setForm }) {
                                                 <button
                                                     type="button"
                                                     className="formButton text-sm w-full"
-                                                    disabled={isDigitalProduct}
+                                                    disabled={isDigitalProduct && variantType.options?.length >= 1}
                                                     onClick={() => {
-                                                        if (!isDigitalProduct) {
+                                                        if (!(isDigitalProduct && variantType.options?.length >= 1)) {
                                                             const nameInput = document.getElementById(`optionName-${typeIdx}`);
                                                             const feeInput = document.getElementById(`optionFee-${typeIdx}`);
                                                             const name = nameInput.value.trim();
@@ -252,19 +249,16 @@ export default function VariantTypesField({ form, setForm }) {
                                                             <button
                                                                 type="button"
                                                                 onClick={() => {
-                                                                    if (!isDigitalProduct) {
-                                                                        setForm(f => ({
-                                                                            ...f,
-                                                                            variantTypes: f.variantTypes.map((vt, i) =>
-                                                                                i === typeIdx
-                                                                                    ? { ...vt, options: vt.options.filter((_, j) => j !== optionIdx) }
-                                                                                    : vt
-                                                                            )
-                                                                        }));
-                                                                    }
+                                                                    setForm(f => ({
+                                                                        ...f,
+                                                                        variantTypes: f.variantTypes.map((vt, i) =>
+                                                                            i === typeIdx
+                                                                                ? { ...vt, options: vt.options.filter((_, j) => j !== optionIdx) }
+                                                                                : vt
+                                                                        )
+                                                                    }));
                                                                 }}
                                                                 className="p-1.5 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
-                                                                disabled={isDigitalProduct}
                                                             >
                                                                 <RxCross1 className="text-lightColor hover:text-red-600 transition-colors" size={14} />
                                                             </button>

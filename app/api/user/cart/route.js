@@ -93,6 +93,11 @@ export async function DELETE(req) {
         const user = await User.findOne({ userId });
         user.cart = user.cart.filter(
             item => {
+                // Special handling for custom print items - match by productId only
+                if (productId === 'custom-print-request' || item.productId === 'custom-print-request') {
+                    return item.productId !== productId;
+                }
+
                 // For legacy system compatibility, if no selectedVariants provided, use variantId matching
                 if (!selectedVariants && !item.selectedVariants) {
                     return !(item.productId === productId && (item.variantId || null) === (variantId || null));
@@ -101,7 +106,7 @@ export async function DELETE(req) {
                 return !(item.productId === productId && selectedVariantsMatch(item, { selectedVariants: selectedVariants || {} }));
             }
         );
-        await user.save();
+        await user.save({ validateModifiedOnly: true });
         return NextResponse.json({ success: true, cart: user.cart }, { status: 200 });
     } catch (err) {
         console.error(err);

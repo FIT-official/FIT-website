@@ -81,9 +81,9 @@ function SignInForm() {
             )}
 
 
-
-            <PasswordField setPassword={setPassword} required={signInMethod === 'email'} password={password} />
             <EmailField setEmail={setEmail} required={signInMethod === 'email'} email={email} />
+            <PasswordField setPassword={setPassword} required={signInMethod === 'email'} password={password} />
+
 
 
             <button onClick={() => setSignInMethod('email')} type='submit' className='authButton2'>
