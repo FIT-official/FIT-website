@@ -107,6 +107,7 @@ function Account() {
                         )}
                         {tab === "security" && (
                             <SecuritySettings
+                                user={user}
                                 devices={devices}
                                 currentSession={currentSession}
                             />

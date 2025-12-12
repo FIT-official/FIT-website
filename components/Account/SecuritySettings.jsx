@@ -6,6 +6,7 @@ import { RiSaveLine } from "react-icons/ri";
 function SecuritySettings({
     devices = [],
     currentSession,
+    user,
 }) {
     const [password, setPassword] = useState("");
     const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -13,7 +14,7 @@ function SecuritySettings({
     const [deleteMsg, setDeleteMsg] = useState("");
     const [loading, setLoading] = useState(false);
     const [editMode, setEditMode] = useState(false);
-    const { clerk } = useClerk();
+    const { signOut } = useClerk();
 
     const handlePasswordSave = async () => {
         setPasswordMsg("");
@@ -23,7 +24,10 @@ function SecuritySettings({
         }
         setLoading(true);
         try {
-            await clerk.updatePassword({ newPassword: password });
+            // Clerk v5: password update is done on the user object
+            if (user && typeof user.updatePassword === "function") {
+                await user.updatePassword({ newPassword: password });
+            }
             setPasswordMsg("Password updated!");
             setEditMode(false);
             setPassword("");
@@ -37,25 +41,49 @@ function SecuritySettings({
     const handleSignOutSession = async (sessionId) => {
         setLoading(true);
         try {
-            await clerk.endSession(sessionId);
-            // You may want to refresh devices here
+            // If this is the current session, sign out via Clerk helper
+            if (currentSession && sessionId === currentSession.id) {
+                await signOut();
+                return;
+            }
+
+            const res = await fetch("/api/user/sessions", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ sessionId }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || "Failed to sign out device.");
+            }
+
+            // Optionally: you could trigger a refresh of devices here
         } catch (err) {
-            alert("Failed to sign out device.");
+            alert(err.message || "Failed to sign out device.");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleDeleteAccount = async () => {
         if (!window.confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
         setLoading(true);
         try {
-            await user.delete();
-            setDeleteMsg("Account deleted.");
-            clerk.signOut();
+            if (user && typeof user.delete === "function") {
+                await user.delete();
+                setDeleteMsg("Account deleted.");
+                await signOut();
+            } else {
+                setDeleteMsg("Unable to delete account: user not loaded.");
+            }
         } catch (err) {
             setDeleteMsg("Failed to delete account.");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (
@@ -156,7 +184,7 @@ function SecuritySettings({
                                 <button
                                     onClick={() => handleSignOutSession(device.id)}
                                     className="mt-2 text-xs underline text-gray-500 hover:text-gray-700 transition-colors duration-200 w-fit"
-                                    disabled={loading || isCurrent}
+                                    disabled={loading}
                                 >
                                     Sign out of device
                                 </button>
