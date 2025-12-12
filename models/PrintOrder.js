@@ -21,7 +21,7 @@ const PrintOrderSchema = new mongoose.Schema({
 
     // Custom print request reference (NEW)
     customPrintRequestId: { type: mongoose.Schema.Types.ObjectId, ref: "CustomPrintRequest" },
-    isCustomUpload: { type: Boolean, default: false }
+    isCustomUpload: { type: Boolean, default: false },
 
     // Print configuration
     printConfiguration: {
