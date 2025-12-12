@@ -4,4 +4,4 @@ Fix It Today is a modern 3D services startup. This website is a high-performance
 
 ## Stack
 
-Next.js · React · Tailwind CSS · WebGL / Three.js
+Next.js · React · Tailwind CSS · Three.js
