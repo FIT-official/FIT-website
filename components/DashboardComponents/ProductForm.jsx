@@ -645,7 +645,9 @@ function ProductForm({ mode = "Create", product = null }) {
             <h1 className="flex w-full mb-4">{formattedMode} Product</h1>
 
             <div ref={detailsSectionRef} className="flex flex-col w-full border border-borderColor rounded-sm">
-                <button type="button" className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer  text-sm"
+                <button
+                    type="button"
+                    className="flex font-medium justify-between bg-borderColor/40 hover:bg-borderColor/70 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer text-sm transition-colors"
                     onClick={() => setOpenSection(s => ({ ...s, details: !s.details }))}
                 >
                     Product Details
@@ -710,8 +712,9 @@ function ProductForm({ mode = "Create", product = null }) {
 
 
             <div ref={shippingSectionRef} className="flex flex-col w-full border border-borderColor rounded-sm">
-                <button type="button"
-                    className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer  text-sm"
+                <button
+                    type="button"
+                    className="flex font-medium justify-between bg-borderColor/40 hover:bg-borderColor/70 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer text-sm transition-colors"
                     onClick={() => setOpenSection(s => ({ ...s, shipping: !s.shipping }))}
                 >
                     Shipping Details
@@ -731,7 +734,9 @@ function ProductForm({ mode = "Create", product = null }) {
 
 
             <div ref={pricingSectionRef} className="flex flex-col w-full border border-borderColor rounded-sm">
-                <button type="button" className="flex font-medium justify-between bg-borderColor/40 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer text-sm"
+                <button
+                    type="button"
+                    className="flex font-medium justify-between bg-borderColor/40 hover:bg-borderColor/70 w-full px-4 py-2 border-b border-borderColor items-center cursor-pointer text-sm transition-colors"
                     onClick={() => setOpenSection(s => ({ ...s, pricing: !s.pricing }))}
                 >
                     Pricing Details
