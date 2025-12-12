@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    // Silence Next.js 16 warning about having a webpack config
+    // without a Turbopack config. We don't need any special
+    // Turbopack settings right now, so an empty object is fine.
+    turbopack: {},
     images: {
         remotePatterns: [
             {
