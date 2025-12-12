@@ -1,11 +1,25 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
+import Product from "@/models/Product";
 import { auth, clerkClient } from "@clerk/nextjs/server";
+import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 
 export async function POST(req) {
     try {
+        const { userId } = await auth();
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         await connectToDatabase();
+
+        // Only allow admins (via Clerk metadata) to query by productIds.
+        const isAdmin = await checkAdminPrivileges(userId);
+        if (!isAdmin) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
         const { productIds } = await req.json();
         if (!Array.isArray(productIds) || productIds.length === 0) {
             return NextResponse.json([], { status: 200 });
@@ -90,6 +104,11 @@ export async function GET(req) {
 
 export async function PUT(req) {
     try {
+        const { userId } = await auth();
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         await connectToDatabase();
         const { orderId, status, trackingId } = await req.json();
 
@@ -107,6 +126,29 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
         }
 
+        // Access control: allow only
+        // - the customer who owns the order
+        // - an admin (determined via Clerk)
+        // - the creator of the product attached to this order
+        const actingUser = await User.findOne({ userId });
+        const isAdmin = await checkAdminPrivileges(userId);
+        const isCustomer = actingUser && actingUser.userId === user.userId;
+
+        let isCreator = false;
+        if (!isAdmin && !isCustomer) {
+            const productId = order.cartItem?.productId;
+            if (productId) {
+                const product = await Product.findById(productId).lean();
+                if (product && product.creatorUserId === userId) {
+                    isCreator = true;
+                }
+            }
+        }
+
+        if (!isAdmin && !isCustomer && !isCreator) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
         // Update status if provided
         if (status && status !== order.status) {
             order.status = status;
@@ -118,7 +160,7 @@ export async function PUT(req) {
             order.statusHistory.push({
                 status: status,
                 timestamp: new Date(),
-                updatedBy: 'creator'
+                updatedBy: isAdmin ? 'admin' : (isCustomer ? 'user' : 'creator')
             });
         }
 

@@ -1,5 +1,7 @@
 import ShopPage from "./ShopPage";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://fixitoday.com";
+
 export const metadata = {
     title: "Shop | Fix It Today®",
     description: "Browse and purchase shop products from Fix It Today®",
@@ -21,9 +23,27 @@ export const metadata = {
     },
 };
 
+const SHOP_JSON_LD = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Shop | Fix It Today®",
+    description: "Browse and purchase shop products from Fix It Today®",
+    url: `${BASE_URL}/shop`,
+    isPartOf: {
+        "@type": "WebSite",
+        url: BASE_URL,
+    },
+};
+
 function ShopLayout() {
     return (
-        <ShopPage />
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(SHOP_JSON_LD) }}
+            />
+            <ShopPage />
+        </>
     )
 }
 

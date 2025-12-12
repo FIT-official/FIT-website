@@ -168,7 +168,7 @@ export default function DeliveryTypeManagement() {
         <div className="flex items-center justify-center p-12">
             <div className="loader"></div>
         </div>
-    )
+    ) 
 
     return (
         <div className="flex flex-col gap-4 sm:gap-6 p-6 md:p-12 bg-borderColor/30 min-h-screen">

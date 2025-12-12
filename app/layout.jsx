@@ -13,6 +13,35 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const GEO_JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://fixitoday.com/#organization",
+      "name": "Fix It Today®",
+      "url": "https://fixitoday.com",
+      "logo": "https://fixitoday.com/fitogimage.png",
+      "description": "We are a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration. We offer a comprehensive suite of services including 3D printing, printer maintenance, filament supply, and electronics sourcing.",
+      "areaServed": "SG"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://fixitoday.com/#website",
+      "url": "https://fixitoday.com",
+      "name": "Fix It Today®",
+      "publisher": {
+        "@id": "https://fixitoday.com/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://fixitoday.com/shop?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+};
+
 export const metadata = {
   title: "Fix It Today® | Home",
   description: "We are a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration. We offer a comprehensive suite of services including 3D printing, printer maintenance, filament supply, and electronics sourcing.",
@@ -39,6 +68,13 @@ export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
       <html lang="en">
+        <head>
+          <script
+            type="application/ld+json"
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(GEO_JSON_LD) }}
+          />
+        </head>
         <body className={`${inter.variable} antialiased`}>
           <CurrencyProvider>
             <Smooth>

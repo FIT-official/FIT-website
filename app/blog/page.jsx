@@ -1,5 +1,7 @@
 import Blog from "./Blog";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://fixitoday.com";
+
 export const metadata = {
     title: "Blog | Fix It Today®",
     description: "Blog for Fix It Today®",
@@ -21,9 +23,28 @@ export const metadata = {
     },
 };
 
+const BLOG_INDEX_JSON_LD = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "Fix It Today® Blog",
+    description: "Check out our Fix It Today® blog for the latest updates and stories.",
+    url: `${BASE_URL}/blog`,
+    publisher: {
+        "@type": "Organization",
+        name: "Fix It Today®",
+        url: BASE_URL,
+    },
+};
+
 function BlogLayout() {
     return (
-        <Blog />
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(BLOG_INDEX_JSON_LD) }}
+            />
+            <Blog />
+        </>
     )
 }
 

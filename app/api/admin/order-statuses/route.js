@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import AppSettings from "@/models/AppSettings";
 import { authenticate } from "@/lib/authenticate";
+import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 
 export async function GET(request) {
     try {
@@ -76,6 +77,15 @@ export async function POST(request) {
     try {
         const { userId } = await authenticate(request);
 
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const isAdmin = await checkAdminPrivileges(userId);
+        if (!isAdmin) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
         await connectToDatabase();
 
         const {
@@ -145,6 +155,15 @@ export async function POST(request) {
 export async function PUT(request) {
     try {
         const { userId } = await authenticate(request);
+
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const isAdmin = await checkAdminPrivileges(userId);
+        if (!isAdmin) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
         await connectToDatabase();
 
         const {
@@ -219,6 +238,15 @@ export async function PUT(request) {
 export async function DELETE(request) {
     try {
         const { userId } = await authenticate(request);
+
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const isAdmin = await checkAdminPrivileges(userId);
+        if (!isAdmin) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
 
         await connectToDatabase();
 

@@ -5,6 +5,7 @@ import Product from "@/models/Product";
 import Order from "@/models/Order";
 import User from "@/models/User";
 import { uploadImages, deleteFromS3 } from "@/lib/s3";
+import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 
 export const dynamic = 'force-dynamic';
 
@@ -254,11 +255,9 @@ export async function DELETE(req) {
             return NextResponse.json({ error: "Review not found" }, { status: 404 });
         }
 
-        // Check if user is admin
-        const user = await User.findOne({ userId });
-        const isAdmin = user?.metadata?.role === "Admin";
+        // Check ownership or admin (admin is determined via Clerk metadata)
+        const isAdmin = await checkAdminPrivileges(userId);
 
-        // Check ownership or admin
         if (review.userId !== userId && !isAdmin) {
             return NextResponse.json({ error: "You can only delete your own reviews" }, { status: 403 });
         }

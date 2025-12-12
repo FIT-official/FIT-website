@@ -1,14 +1,28 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
     try {
+        const { userId } = await auth();
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const { stripeAccountId, linkType } = await req.json();
 
         if (!stripeAccountId) {
             return NextResponse.json({ error: "Missing stripeAccountId" }, { status: 400 });
+        }
+
+        const client = await clerkClient();
+        const user = await client.users.getUser(userId);
+        const userStripeAccountId = user.publicMetadata?.stripeAccountId;
+
+        if (!userStripeAccountId || userStripeAccountId !== stripeAccountId) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
         const origin = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -47,6 +61,19 @@ export async function GET(req) {
         return NextResponse.json({ error: "Missing stripeAccountId" }, { status: 400 });
     }
     try {
+        const { userId } = await auth();
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const client = await clerkClient();
+        const user = await client.users.getUser(userId);
+        const userStripeAccountId = user.publicMetadata?.stripeAccountId;
+
+        if (!userStripeAccountId || userStripeAccountId !== stripeAccountId) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
         const account = await stripe.accounts.retrieve(stripeAccountId);
         return NextResponse.json({ onboarded: !!account.details_submitted });
     } catch (error) {

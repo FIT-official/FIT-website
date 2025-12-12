@@ -70,14 +70,16 @@ export const updateRoleFromStripe = async (subscriptionId) => {
             }
         }
 
-        await connectToDatabase()
-        let user = await User.findOne({ userId })
-        if (user) {
-            user.metadata.role = role
-            await user.save()
-        }
+        // Persist role only in Clerk publicMetadata, not in the local DB
+        const currentMetadata = userObj.publicMetadata || {}
+        const updatedUser = await client.users.updateUser(userId, {
+            publicMetadata: {
+                ...currentMetadata,
+                role,
+            },
+        })
 
-        return { message: 'Role updated', role }
+        return { message: 'Role updated', role: updatedUser.publicMetadata?.role }
     } catch (error) {
         console.error('Error updating role from Stripe:', error)
         return { error: 'Failed to update role' }

@@ -1,5 +1,7 @@
 import PrintPage from "./PrintPage";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://fixitoday.com";
+
 export const metadata = {
     title: "Print | Fix It Today®",
     description: "Browse and purchase print products from Fix It Today®",
@@ -21,9 +23,27 @@ export const metadata = {
     },
 };
 
+const PRINTS_JSON_LD = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Print | Fix It Today®",
+    description: "Browse and purchase print products from Fix It Today®",
+    url: `${BASE_URL}/prints`,
+    isPartOf: {
+        "@type": "WebSite",
+        url: BASE_URL,
+    },
+};
+
 function PrintLayout() {
     return (
-        <PrintPage />
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(PRINTS_JSON_LD) }}
+            />
+            <PrintPage />
+        </>
     )
 }
 

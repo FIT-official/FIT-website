@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { connectToDatabase } from "@/lib/db";
 import Order from "@/models/Order";
-import User from "@/models/User";
+import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 
 export const dynamic = 'force-dynamic';
 
@@ -19,10 +19,10 @@ export async function GET(req) {
         const productId = searchParams.get("productId");
         const orderId = searchParams.get("orderId");
 
-        // Check if user is admin
         await connectToDatabase();
-        const user = await User.findOne({ userId: clerkUserId });
-        const isAdmin = user?.metadata?.role === "Admin";
+
+        // Check if user is admin based on Clerk metadata
+        const isAdmin = await checkAdminPrivileges(clerkUserId);
 
         // Only allow users to fetch their own orders unless they're admin
         if (requestedUserId !== clerkUserId && !isAdmin) {

@@ -19,6 +19,18 @@ const nextConfig = {
                 pathname: '/**',
             },
         ],
+        // Allow using the internal /api/proxy route with a `key` query
+        // (e.g. /api/proxy?key=admin/uploads/home/hero/....jpg) in <Image />
+        localPatterns: [
+            {
+                pathname: '/api/proxy',
+                search: 'key=*',
+            },
+            // Allow all other static assets under /public (e.g. /user.jpg)
+            {
+                pathname: '/**',
+            },
+        ],
     },
     webpack: (config, { isServer }) => {
         // Handle gltfjsx and other AST parsing libraries
