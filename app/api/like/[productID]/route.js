@@ -3,18 +3,17 @@ import { connectToDatabase } from "@/lib/db";
 import Product from "@/models/Product";
 import { auth } from "@clerk/nextjs/server";
 
-export async function POST(
-    req,
-    { params }) {
+export async function POST(req, { params }) {
     const { userId } = await auth();
     if (!userId) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
     try {
         const { productId } = params;
-        const { userId, action } = await req.json();
+        const { action } = await req.json();
 
-        if (!userId || !productId || !["like", "unlike"].includes(action)) {
+        if (!productId || !["like", "unlike"].includes(action)) {
             return NextResponse.json({ error: "Invalid request" }, { status: 400 });
         }
 

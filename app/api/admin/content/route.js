@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { getContentByPath, updateContentByPath } from "@/lib/mdx";
+import { getContentByPath } from "@/lib/mdx";
 import { authenticate } from "@/lib/authenticate";
 import { checkAdminPrivileges } from "@/lib/checkPrivileges";
+import { connectToDatabase } from "@/lib/db";
+import ContentBlock from "@/models/ContentBlock";
 
 export async function GET(req) {
     try {
+        await connectToDatabase();
         const { userId } = await authenticate(req);
         const isAdmin = await checkAdminPrivileges(userId);
         if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -17,9 +20,16 @@ export async function GET(req) {
             return NextResponse.json({ error: "Missing content path" }, { status: 400 });
         }
 
-        const content = getContentByPath(contentPath);
+        // Prefer DB override, fallback to MDX file or sensible defaults
+        const dbBlock = await ContentBlock.findOne({ path: contentPath }).lean();
 
-        if (!content) {
+        if (!dbBlock) {
+            const fileContent = getContentByPath(contentPath);
+
+            if (fileContent) {
+                return NextResponse.json(fileContent);
+            }
+
             const defaultContent = {
                 frontmatter: {},
                 content: ''
@@ -48,7 +58,10 @@ export async function GET(req) {
             return NextResponse.json(defaultContent);
         }
 
-        return NextResponse.json(content);
+        return NextResponse.json({
+            frontmatter: dbBlock.frontmatter || {},
+            content: dbBlock.content || "",
+        });
     } catch (error) {
         console.error("Error fetching content:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -57,6 +70,7 @@ export async function GET(req) {
 
 export async function PUT(req) {
     try {
+        await connectToDatabase();
         const { userId } = await authenticate(req);
         const isAdmin = await checkAdminPrivileges(userId);
         if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -66,11 +80,17 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        const success = updateContentByPath(contentPath, frontmatter, content);
+        const update = {
+            path: contentPath,
+            frontmatter: frontmatter || {},
+            content: content || "",
+        };
 
-        if (!success) {
-            return NextResponse.json({ error: "Failed to update content" }, { status: 500 });
-        }
+        await ContentBlock.findOneAndUpdate(
+            { path: contentPath },
+            update,
+            { upsert: true, new: true }
+        );
 
         return NextResponse.json({ success: true });
     } catch (error) {

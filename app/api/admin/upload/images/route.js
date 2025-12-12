@@ -31,8 +31,14 @@ function sanitizeS3Key(key) {
 
 export async function POST(req) {
     try {
-        // Dynamic import of sharp to avoid build-time errors
-        const sharp = (await import('sharp')).default;
+        // Try to load sharp for compression; if unavailable, fall back to raw upload
+        let sharp = null;
+        try {
+            // Dynamic import of sharp to avoid build-time or platform-specific errors
+            sharp = (await import("sharp")).default;
+        } catch (err) {
+            console.warn("sharp not available for admin uploads, skipping compression:", err?.message || err);
+        }
 
         const { userId } = await authenticate(req);
         const isAdmin = await checkAdminPrivileges(userId);
@@ -84,33 +90,47 @@ export async function POST(req) {
             }
 
             const arrayBuffer = await file.arrayBuffer();
-            let buffer = Buffer.from(arrayBuffer);
-            let sharpInstance = sharp(buffer);
-            if (file.type === "image/png") {
-                sharpInstance = sharpInstance.flatten({ background: '#ffffff' });
+            const originalBuffer = Buffer.from(arrayBuffer);
+
+            let bodyBuffer = originalBuffer;
+            let contentType = file.type || "image/jpeg";
+
+            if (sharp) {
+                let sharpInstance = sharp(originalBuffer);
+                if (file.type === "image/png") {
+                    sharpInstance = sharpInstance.flatten({ background: "#ffffff" });
+                }
+
+                // compress to jpeg and aim < 200KB using decreasing quality
+                let compressed = null;
+                let quality = 80;
+                for (; quality >= 30; quality -= 10) {
+                    compressed = await sharpInstance.jpeg({ quality, mozjpeg: true }).toBuffer();
+                    if (compressed.length < 200 * 1024) break;
+                }
+
+                if (compressed && compressed.length < 200 * 1024) {
+                    bodyBuffer = compressed;
+                    contentType = "image/jpeg";
+                } else {
+                    console.warn(
+                        `sharp compression skipped for admin file "${file.name}"; using original buffer (size: ${
+                            compressed ? (compressed.length / 1024).toFixed(1) : "unknown"
+                        }KB)`
+                    );
+                }
             }
 
-            // compress to jpeg and aim < 200KB using decreasing quality
-            let compressed = null;
-            let quality = 80;
-            for (; quality >= 30; quality -= 10) {
-                compressed = await sharpInstance.jpeg({ quality, mozjpeg: true }).toBuffer();
-                if (compressed.length < 200 * 1024) break;
-            }
-
-            if (!compressed || compressed.length >= 200 * 1024) {
-                const finalSizeKB = compressed ? (compressed.length / 1024).toFixed(1) : 'unknown';
-                return NextResponse.json({ error: `Unable to compress "${file.name}" to required size. Final size: ${finalSizeKB}KB (required: <200KB).` }, { status: 400 });
-            }
-
-            const ext = 'jpg';
-            const filename = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+            const ext = contentType === "image/png" ? "png" : "jpg";
+            const filename = `${prefix}/${Date.now()}-${Math.random()
+                .toString(36)
+                .slice(2)}.${ext}`;
 
             await s3.send(new PutObjectCommand({
                 Bucket: BUCKET_NAME,
                 Key: filename,
-                Body: compressed,
-                ContentType: 'image/jpeg',
+                Body: bodyBuffer,
+                ContentType: contentType,
                 CacheControl: 'public, max-age=31536000'
             }));
 

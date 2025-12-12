@@ -10,6 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "migrate:content": "node scripts/migrate-content-to-db.js",
+    "postinstall": "npm install --include=optional sharp || true",
     "postbuild": "next-sitemap",
     "tunnel": "scripts/dev-tunnel.sh"
   },
