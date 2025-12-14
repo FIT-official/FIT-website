@@ -1,6 +1,6 @@
 import { getDiscountedPrice } from '@/utils/discount';
 
-export async function calculateCartItemBreakdown({ item, product, address }) {
+export async function calculateCartItemBreakdown({ item, product, address, extraDiscountRules = [] }) {
     const quantity = item.quantity || 1;
 
     let basePrice = 0;
@@ -37,8 +37,12 @@ export async function calculateCartItemBreakdown({ item, product, address }) {
             }
         }
 
-        // Apply discount to price with variants
-        const discounted = getDiscountedPrice({ ...product, price: { presentmentAmount: priceBeforeDiscount } });
+        // Apply discount to price with variants (supports tiered discounts by quantity)
+        const discounted = getDiscountedPrice(
+            { ...product, price: { presentmentAmount: priceBeforeDiscount } },
+            quantity,
+            extraDiscountRules,
+        );
         finalPrice = discounted !== null ? discounted : priceBeforeDiscount;
 
     } else if (product.basePrice) {
@@ -46,8 +50,12 @@ export async function calculateCartItemBreakdown({ item, product, address }) {
         basePrice = product.basePrice.presentmentAmount || 0;
         priceBeforeDiscount = basePrice;
 
-        // Apply discount if applicable
-        const discounted = getDiscountedPrice({ ...product, price: { presentmentAmount: priceBeforeDiscount } });
+        // Apply discount if applicable (supports tiered discounts by quantity)
+        const discounted = getDiscountedPrice(
+            { ...product, price: { presentmentAmount: priceBeforeDiscount } },
+            quantity,
+            extraDiscountRules,
+        );
         finalPrice = discounted !== null ? discounted : priceBeforeDiscount;
 
     } else {

@@ -5,6 +5,7 @@ import Navbar from "@/components/General/Navbar";
 import Footer from "@/components/General/Footer";
 import Smooth from "@/components/General/Smooth";
 import { ToastProvider } from "@/components/General/ToastProvider";
+import ChatLauncher from "@/components/Chat/ChatLauncher";
 import { Suspense } from "react";
 import { CurrencyProvider } from "@/components/General/CurrencyContext";
 
@@ -87,6 +88,7 @@ export default function RootLayout({ children }) {
                       {children}
                       <Footer />
                     </div>
+                    <ChatLauncher />
                   </div>
                 </ToastProvider>
               </Suspense>

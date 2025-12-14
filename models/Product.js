@@ -47,6 +47,12 @@ const SaleSchema = new mongoose.Schema(
         price: { type: Number, required: true, min: 0 },
     }, { timestamps: true })
 
+const DiscountTierSchema = new mongoose.Schema({
+    minQty: { type: Number, required: true, min: 1 },
+    maxQty: { type: Number, required: false, min: 1 }, // optional upper bound
+    percentage: { type: Number, required: true, min: 1, max: 100 },
+}, { _id: false });
+
 const DiscountSchema = new mongoose.Schema({
     eventId: { type: String, required: false, default: null },
     percentage: {
@@ -65,6 +71,11 @@ const DiscountSchema = new mongoose.Schema({
     endDate: {
         type: Date,
         required: false,
+    },
+    tiers: {
+        type: [DiscountTierSchema],
+        required: false,
+        default: [],
     },
 }, { _id: false, timestamps: true });
 
@@ -129,6 +140,9 @@ const ProductSchema = new mongoose.Schema(
         sales: { type: [SaleSchema], default: [] },
         reviews: { type: [ReviewSchema], default: [] },
         discount: { type: DiscountSchema, default: {} },
+        // New stacked discounts array for advanced use-cases.
+        // Legacy code continues to rely on the single `discount` field.
+        discounts: { type: [DiscountSchema], default: [] },
         likes: { type: [String], default: [] },
         hidden: { type: Boolean, default: false },
         flaggedForModeration: { type: Boolean, default: false },

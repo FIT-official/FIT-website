@@ -70,6 +70,14 @@ function Dashboard() {
                     </Link>
 
                     <Link
+                        href="/dashboard/messages"
+                        className="flex items-center justify-between rounded-md border border-borderColor px-3 py-2 text-xs font-medium hover:bg-borderColor/20"
+                    >
+                        <span>Messages</span>
+                        <GoChevronRight size={14} />
+                    </Link>
+
+                    <Link
                         href="/account"
                         className="flex items-center justify-between rounded-md border border-borderColor px-3 py-2 text-xs font-medium hover:bg-borderColor/20"
                     >

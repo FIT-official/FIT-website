@@ -138,7 +138,7 @@ function Cart() {
         }
     };
 
-    // Calculate converted prices when products or currency changes
+    // Calculate converted prices when products, breakdown or currency changes
     useEffect(() => {
         const calculateConvertedPrices = async () => {
             const newConvertedPrices = {};
@@ -162,15 +162,10 @@ function Cart() {
                 const price = lowestVariant.price.presentmentAmount;
                 const currency = lowestVariant.price.presentmentCurrency;
 
-                // Create a mock product with variant price for discount calculation
-                const productWithVariantPrice = {
-                    ...product,
-                    price: {
-                        presentmentAmount: price,
-                        presentmentCurrency: currency
-                    }
-                };
-                const discountedPrice = getDiscountedPrice(productWithVariantPrice);
+                // Try to find a matching breakdown item to reuse final discounted price,
+                // so it already includes any global events.
+                const breakdownItem = cartBreakdown.find(b => b.productId === productId);
+                const discountedPrice = breakdownItem ? breakdownItem.price : null;
 
                 try {
                     const convertedPrice = await convertToGlobalCurrency(price, currency, globalCurrency);
@@ -200,7 +195,7 @@ function Cart() {
         if (Object.keys(products).length > 0 && globalCurrency) {
             calculateConvertedPrices();
         }
-    }, [products, globalCurrency]);
+    }, [products, cartBreakdown, globalCurrency]);
 
     const handleDeliveryChange = async (cartItem, newType) => {
         setLoading(true);

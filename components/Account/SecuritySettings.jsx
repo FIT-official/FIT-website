@@ -70,17 +70,22 @@ function SecuritySettings({
 
     const handleDeleteAccount = async () => {
         if (!window.confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
+        setDeleteMsg("");
         setLoading(true);
         try {
-            if (user && typeof user.delete === "function") {
-                await user.delete();
-                setDeleteMsg("Account deleted.");
-                await signOut();
-            } else {
-                setDeleteMsg("Unable to delete account: user not loaded.");
+            const res = await fetch("/api/user/delete", {
+                method: "DELETE",
+            });
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || "Failed to delete account.");
             }
+
+            setDeleteMsg("Account deleted.");
+            await signOut();
         } catch (err) {
-            setDeleteMsg("Failed to delete account.");
+            setDeleteMsg(err.message || "Failed to delete account.");
         } finally {
             setLoading(false);
         }

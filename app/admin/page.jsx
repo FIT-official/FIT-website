@@ -10,6 +10,7 @@ import OrderStatusManagement from '@/components/Admin/OrderStatusManagement'
 import CustomPrintProductManagement from '@/components/Admin/CustomPrintProductManagement'
 import CustomPrintRequests from '@/components/Admin/CustomPrintRequests'
 import ReviewManagement from '@/components/Admin/ReviewManagement'
+import EventManagement from '@/components/Admin/EventManagement'
 import { useUser } from '@clerk/nextjs'
 
 export default function AdminPage() {
@@ -64,6 +65,15 @@ export default function AdminPage() {
                         }`}
                 >
                     Creator Payments
+                </button>
+                <button
+                    onClick={() => setActiveTab('events')}
+                    className={`px-4 cursor-pointer py-2 font-medium text-xs rounded-t-lg whitespace-nowrap ${activeTab === 'events'
+                        ? 'bg-black text-white'
+                        : 'text-gray-600 hover:text-gray-800 border-t border-r border-l  border-borderColor'
+                        }`}
+                >
+                    Events
                 </button>
                 <button
                     onClick={() => setActiveTab('categories')}
@@ -135,6 +145,9 @@ export default function AdminPage() {
 
             {/* Creator Payments Tab */}
             {activeTab === 'payments' && <CreatorPayments />}
+
+            {/* Events Management Tab */}
+            {activeTab === 'events' && <EventManagement />}
 
             {/* Categories Management Tab */}
             {activeTab === 'categories' && <CategoryManagement />}

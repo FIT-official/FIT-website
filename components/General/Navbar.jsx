@@ -11,13 +11,17 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname, useSearchParams } from 'next/navigation'
 import { HiOutlineShoppingCart } from 'react-icons/hi'
+import { IoChatbubblesOutline } from 'react-icons/io5'
 import { LuPlus } from 'react-icons/lu'
 import { SiPrintables } from "react-icons/si";
 import { BsBadge3D } from 'react-icons/bs'
 import { FaChevronRight } from 'react-icons/fa'
+import useEntitlements from '@/utils/useEntitlements';
 
 function Navbar() {
     const { user, isLoaded, isSignedIn } = useUser();
+    const { loading: entitlementsLoading, canUseMessaging, canAccessDashboard } = useEntitlements();
+    const [unreadMessages, setUnreadMessages] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [dropdownType, setDropdownType] = useState(null);
@@ -53,6 +57,38 @@ function Navbar() {
             }
         }
         fetchCategories();
+    }, []);
+
+    useEffect(() => {
+        const fetchUnread = async () => {
+            if (!isSignedIn || !isLoaded || !user) return;
+            try {
+                const res = await fetch('/api/chat/inbox');
+                if (!res.ok) return;
+                const data = await res.json();
+                const channels = data.channels || [];
+                const total = channels.reduce((sum, ch) => sum + (ch.unreadCount || 0), 0);
+                setUnreadMessages(total);
+            } catch (e) {
+                console.error('Failed to load unread messages for navbar', e);
+            }
+        };
+        fetchUnread();
+    }, [isSignedIn, isLoaded, user]);
+
+    // Listen for global unread count updates from chat components
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const handleUnreadUpdated = (event) => {
+            const total = event.detail?.total;
+            if (typeof total === 'number') {
+                setUnreadMessages(total);
+            }
+        };
+
+        window.addEventListener('chat:unread-updated', handleUnreadUpdated);
+        return () => window.removeEventListener('chat:unread-updated', handleUnreadUpdated);
     }, []);
 
     if (!isLoaded) {
@@ -92,9 +128,21 @@ function Navbar() {
 
                 <div className='flex gap-6 items-center'>
                     {isSignedIn && isLoaded && user && (
-                        <Link href={`/cart?redirect=${encodeURIComponent(currentUrl)}`} className='hover:text-textColor transition-colors duration-300 ease-in-out'>
-                            <HiOutlineShoppingCart size={16} />
-                        </Link>
+                        <>
+                            <Link href={`/cart?redirect=${encodeURIComponent(currentUrl)}`} className='hover:text-textColor transition-colors duration-300 ease-in-out'>
+                                <HiOutlineShoppingCart size={16} />
+                            </Link>
+                            {canUseMessaging && !entitlementsLoading && (
+                                <Link href="/dashboard/messages" className='relative hover:text-textColor transition-colors duration-300 ease-in-out'>
+                                    <IoChatbubblesOutline size={18} />
+                                    {unreadMessages > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full text-[9px] px-1.5 py-0.5">
+                                            {unreadMessages > 9 ? '9+' : unreadMessages}
+                                        </span>
+                                    )}
+                                </Link>
+                            )}
+                        </>
                     )}
                     <AccountDropdown />
                 </div>
@@ -344,15 +392,23 @@ function Navbar() {
                                 <>
                                     <li><Link href='/cart' className='flex navSidebarLink'>Cart</Link></li>
                                     <div className='flex w-full h-0 border-t border-borderColor my-1' />
+                                    {canUseMessaging && !entitlementsLoading && (
+                                        <>
+                                            <li><Link href='/dashboard/messages' className='flex navSidebarLink'>Messages</Link></li>
+                                            <div className='flex w-full h-0 border-t border-borderColor my-1' />
+                                        </>
+                                    )}
                                     <li><Link href='/account' className='flex navSidebarLink'>Account</Link></li>
                                     <div className='flex w-full h-0 border-t border-borderColor my-1' />
                                 </>
                             )}
                         </ul>
-                        <Link href='/dashboard' className='flex flex-row justify-between items-center bg-textColor py-3 rounded-lg text-sm font-semibold px-4 text-background w-full '>
-                            Dashboard
-                            <GoChevronRight size={16} />
-                        </Link>
+                        {canAccessDashboard && !entitlementsLoading && (
+                            <Link href='/dashboard' className='flex flex-row justify-between items-center bg-textColor py-3 rounded-lg text-sm font-semibold px-4 text-background w-full '>
+                                Dashboard
+                                <GoChevronRight size={16} />
+                            </Link>
+                        )}
                     </div>
 
                 </div>

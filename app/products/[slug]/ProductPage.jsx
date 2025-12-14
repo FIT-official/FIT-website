@@ -8,7 +8,7 @@ import { HiCubeTransparent } from 'react-icons/hi';
 import { BiPrinter } from 'react-icons/bi';
 import dynamic from 'next/dynamic';
 import { IoMdCheckmark } from 'react-icons/io';
-import { getDiscountedPrice } from '@/utils/discount';
+import { getDiscountedPrice, getEffectivePercentageForRule } from '@/utils/discount';
 import ReviewSection from '@/components/ProductPage/ReviewSection';
 
 const ModelViewer = dynamic(() => import("@/components/3D/ModelViewer"), { ssr: false });
@@ -39,6 +39,7 @@ function ProductPage() {
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState(0);
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+    const [globalDiscountRules, setGlobalDiscountRules] = useState([]);
 
     // User orders for review eligibility
     const [userOrders, setUserOrders] = useState([]);
@@ -77,6 +78,33 @@ function ProductPage() {
         }
         fetchProduct();
     }, [slug]);
+
+    // Fetch active global events so we can reflect their effect in the
+    // displayed discount percentage on the product page.
+    useEffect(() => {
+        const fetchGlobalEvents = async () => {
+            try {
+                const res = await fetch('/api/events/active');
+                if (!res.ok) return;
+                const data = await res.json();
+                const rules = (data.events || [])
+                    .filter(ev => ev.isGlobal)
+                    .map(ev => ({
+                        percentage: ev.percentage,
+                        minimumAmount: ev.minimumPrice,
+                        startDate: ev.startDate,
+                        endDate: ev.endDate,
+                        eventName: ev.name,
+                    }));
+                setGlobalDiscountRules(rules);
+            } catch (e) {
+                // Non-fatal for the product page; checkout still enforces globals.
+                console.error('Failed to load global events for product page', e);
+            }
+        };
+
+        fetchGlobalEvents();
+    }, []);
 
     // Fetch user orders for review eligibility
     useEffect(() => {
@@ -280,7 +308,7 @@ function ProductPage() {
 
     // Function to calculate total price including selected variant fees
     const calculateTotalPrice = () => {
-        if (!product) return { total: 0, currency: 'SGD', breakdown: null, discountedTotal: null, discount: null };
+        if (!product) return { total: 0, currency: 'SGD', breakdown: null, discountedTotal: null, effectivePercentage: null, appliedGlobalEvents: [] };
 
         const basePrice = product.basePrice?.presentmentAmount || 0;
         const currency = product.basePrice?.presentmentCurrency || 'SGD';
@@ -300,16 +328,30 @@ function ProductPage() {
 
         const totalPrice = basePrice + additionalFees;
 
-        // Check if discount applies to the total price
-        let discountedTotal = null;
-        if (product.discount && product.discount.percentage > 0) {
-            const productWithPrice = {
-                ...product,
-                price: { presentmentAmount: totalPrice, presentmentCurrency: currency }
-            };
-            const discounted = getDiscountedPrice(productWithPrice);
-            if (discounted !== null) {
-                discountedTotal = discounted;
+        const appliedGlobalEvents = [];
+        if (Array.isArray(globalDiscountRules) && globalDiscountRules.length > 0) {
+            globalDiscountRules.forEach(rule => {
+                const effective = getEffectivePercentageForRule(rule, totalPrice, 1);
+                if (effective > 0 && rule.eventName) {
+                    appliedGlobalEvents.push(rule.eventName);
+                }
+            });
+        }
+
+        // Always run discount engine (it will consider stacked rules) and
+        // also pass in active global event rules for display parity with checkout.
+        const productWithPrice = {
+            ...product,
+            price: { presentmentAmount: totalPrice, presentmentCurrency: currency }
+        };
+        const discounted = getDiscountedPrice(productWithPrice, 1, globalDiscountRules);
+        const discountedTotal = discounted !== null ? discounted : null;
+
+        let effectivePercentage = null;
+        if (discountedTotal !== null && totalPrice > 0) {
+            const pct = Math.round((1 - discountedTotal / totalPrice) * 100);
+            if (pct > 0) {
+                effectivePercentage = pct;
             }
         }
 
@@ -318,7 +360,8 @@ function ProductPage() {
             currency,
             breakdown: additionalFees > 0 ? { base: basePrice, additional: additionalFees } : null,
             discountedTotal,
-            discount: product.discount
+            effectivePercentage,
+            appliedGlobalEvents,
         };
     };
 
@@ -510,16 +553,23 @@ function ProductPage() {
                                     const priceInfo = calculateTotalPrice();
 
                                     if (priceInfo.discountedTotal !== null) {
-                                        // Show discounted price with strikethrough
+                                        // Show discounted price with strikethrough and combined effective % off
                                         return (
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-2 flex-wrap">
                                                     <span className="font-bold text-red-600">{priceInfo.currency} {priceInfo.discountedTotal.toFixed(2)}</span>
                                                     <span className="text-lightColor line-through text-base">{priceInfo.currency} {priceInfo.total.toFixed(2)}</span>
-                                                    <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">
-                                                        -{priceInfo.discount.percentage}% OFF
-                                                    </span>
+                                                    {priceInfo.effectivePercentage != null && (
+                                                        <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">
+                                                            -{priceInfo.effectivePercentage}% OFF
+                                                        </span>
+                                                    )}
                                                 </div>
+                                                {priceInfo.appliedGlobalEvents && priceInfo.appliedGlobalEvents.length > 0 && (
+                                                    <span className="text-xs text-lightColor">
+                                                        Includes global event{priceInfo.appliedGlobalEvents.length > 1 ? 's' : ''}: {priceInfo.appliedGlobalEvents.join(', ')}
+                                                    </span>
+                                                )}
                                                 {priceInfo.breakdown && (
                                                     <span className="text-sm text-lightColor">
                                                         (Base: {priceInfo.currency} {priceInfo.breakdown.base.toFixed(2)} + {priceInfo.currency} {priceInfo.breakdown.additional.toFixed(2)})

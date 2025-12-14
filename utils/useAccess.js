@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getEntitlements } from "./entitlements";
 
 export default function useAccess() {
     const [canAccess, setCanAccess] = useState(null);
@@ -13,9 +14,6 @@ export default function useAccess() {
                 if (roleRes.ok) {
                     const roleData = await roleRes.json();
                     role = roleData.role;
-                    setIsAdmin(role === "admin");
-                } else {
-                    setIsAdmin(false);
                 }
 
                 const subRes = await fetch('/api/user/subscription');
@@ -25,13 +23,9 @@ export default function useAccess() {
                     priceId = subData.priceId;
                 }
 
-                // Only allow if priceId is a non-empty string (not null/undefined/empty) or role is exactly 'admin'
-                const hasValidSub = typeof priceId === 'string' && priceId.trim().length > 0;
-                if (hasValidSub || role === "admin") {
-                    setCanAccess(true);
-                } else {
-                    setCanAccess(false);
-                }
+                const { isAdmin: adminFlag, canAccessDashboard } = getEntitlements({ role, priceId });
+                setIsAdmin(adminFlag);
+                setCanAccess(!!canAccessDashboard);
             } catch (e) {
                 setCanAccess(false);
                 setIsAdmin(false);

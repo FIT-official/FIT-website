@@ -12,9 +12,9 @@ export default function ScrollSnapCards() {
 
     const { content } = useContent('about/services-list', {
         services: []
-    })
+    });
 
-    const services = content.services || []
+    const services = content.services || [];
 
     // Helper function to get image src with proxy support
     const getImageSrc = (imgPath) => {
@@ -25,18 +25,23 @@ export default function ScrollSnapCards() {
 
 
     useGSAP(() => {
-        gsap.registerPlugin(ScrollTrigger);
-        const cardEls = containerRef.current.querySelectorAll('.card');
+        const container = containerRef.current;
+        if (!container) return;
+
+        const cardEls = container.querySelectorAll('.card');
         const totalCards = cardEls.length;
+        if (totalCards === 0) return;
+
+        gsap.registerPlugin(ScrollTrigger);
 
         gsap.set(cardEls, { y: "100%", scale: 1, rotation: 0 });
         gsap.set(cardEls[0], { y: "0%" });
 
         const scrollTimeline = gsap.timeline({
             scrollTrigger: {
-                trigger: containerRef.current,
+                trigger: container,
                 start: "top top",
-                end: `+=${window.innerHeight * (totalCards - 1)}`,
+                end: `+=${window.innerHeight * Math.max(totalCards - 1, 1)}`,
                 pin: true,
                 scrub: 0.5,
                 anticipatePin: 1,
@@ -56,14 +61,16 @@ export default function ScrollSnapCards() {
                 ease: "ease.inOut",
             }, i);
         }
-    }, { scope: containerRef });
+    }, { scope: containerRef, dependencies: [services.length] });
 
 
     return (
         <div
             ref={containerRef}
             className="relative flex"
-            style={{ height: `${(services.length - 1) * 100 + 50}vh` }}
+            style={{
+                height: `${(services.length > 1 ? (services.length - 1) * 100 + 50 : 100)}vh`
+            }}
         >
             <div className="sticky top-1/3 md:top-10 aspect-square h-[300px] md:h-[50vh] flex items-center justify-center overflow-hidden transition-all ease-in-out duration-500">
                 <div className="relative w-full h-[300px] md:h-[50vh]">

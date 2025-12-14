@@ -82,6 +82,8 @@ const UserSchema = new mongoose.Schema({
     usedPromoCodes: { type: [String], default: [] },
     metadata: {
         role: { type: String, default: "Customer", required: true },
+            displayName: { type: String, required: false },
+            autoReplyMessage: { type: String },
     },
     creatorBannerUrl: { type: String, default: undefined },
     creatorProducts: { type: [String], default: [] },

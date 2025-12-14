@@ -42,7 +42,8 @@ export default function CustomPrintProductManagement() {
             percentage: '',
             minimumPrice: '',
             startDate: '',
-            endDate: ''
+            endDate: '',
+            tiers: [],
         },
         showDiscount: false,
         productType: 'print'

@@ -57,7 +57,9 @@ function FeaturedSection() {
               const res = await fetch(`/api/product/${productId}`)
               if (res.ok) {
                 const product = await res.json()
-                products.push(product)
+                if (!product.hidden) {
+                  products.push(product)
+                }
               }
             } catch (err) {
               console.error(`Failed to fetch product ${productId}:`, err)
@@ -71,7 +73,7 @@ function FeaturedSection() {
             setMaxItems(5)
           }
         } else {
-          // Fetch by category/subcategory
+          // Fetch by category/subcategory (API already filters hidden=false by default)
           const category = sectionContent.category || 'Trending Prints'
           const subcategory = sectionContent.subcategory || 'Popular'
 

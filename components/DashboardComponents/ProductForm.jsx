@@ -83,6 +83,7 @@ function ProductForm({ mode = "Create", product = null }) {
         categoryId: "",
         subcategoryId: "",
         stock: 1,
+            hidden: false,
 
         basePrice: {
             presentmentAmount: 0,
@@ -111,13 +112,17 @@ function ProductForm({ mode = "Create", product = null }) {
             weight: 0,
         },
         showDiscount: false,
+        // primary discount (kept in sync with first entry in discounts)
         discount: {
             eventId: "",
             percentage: "",
             minimumPrice: "",
             startDate: "",
             endDate: "",
+            tiers: [],
         },
+        // stacked discounts
+        discounts: [],
     };
 
     const [form, setForm] = useState(product ? { ...defaultForm, ...product } : defaultForm);
@@ -389,25 +394,30 @@ function ProductForm({ mode = "Create", product = null }) {
             validationErrors.push('Dimensions must be zero or positive values.');
         }
 
-        // Discount validations
+        // Discount validations (support stacked discounts)
         if (form.showDiscount) {
-            const discount = form.discount || {};
-            const hasEvent = !!discount.eventId;
-            const percentage = Number(discount.percentage);
-            const minimumPrice = Number(discount.minimumPrice);
-            const startDate = discount.startDate ? new Date(discount.startDate) : null;
-            const endDate = discount.endDate ? new Date(discount.endDate) : null;
+            const rules = Array.isArray(form.discounts) && form.discounts.length > 0
+                ? form.discounts
+                : [form.discount || {}];
 
-            if (!hasEvent && (Number.isNaN(percentage) || percentage <= 0 || percentage > 100)) {
-                validationErrors.push('Discount percentage must be between 1 and 100%.');
-            }
+            for (const rule of rules) {
+                const hasEvent = !!rule.eventId;
+                const percentage = Number(rule.percentage);
+                const minimumPrice = Number(rule.minimumPrice);
+                const startDate = rule.startDate ? new Date(rule.startDate) : null;
+                const endDate = rule.endDate ? new Date(rule.endDate) : null;
 
-            if (!hasEvent && !Number.isNaN(minimumPrice) && minimumPrice < 0) {
-                validationErrors.push('Discount minimum amount cannot be negative.');
-            }
+                if (!hasEvent && (Number.isNaN(percentage) || percentage <= 0 || percentage > 100)) {
+                    validationErrors.push('Each discount needs a percentage between 1 and 100%, or be linked to an event.');
+                }
 
-            if (!hasEvent && startDate && endDate && startDate > endDate) {
-                validationErrors.push('Discount start date must be before the end date.');
+                if (!hasEvent && !Number.isNaN(minimumPrice) && minimumPrice < 0) {
+                    validationErrors.push('Minimum amount for any discount cannot be negative.');
+                }
+
+                if (!hasEvent && startDate && endDate && startDate > endDate) {
+                    validationErrors.push('For each discount, the start date must be before the end date.');
+                }
             }
         }
 
@@ -779,27 +789,32 @@ function ProductForm({ mode = "Create", product = null }) {
                 </button>
 
                 {product && product._id && (
-                    <button
-                        type="button"
-                        className="formRedButton w-full"
-                        onClick={handleDelete}
-                    >
-                        {deleting ? (
-                            <>
-                                Deleting Product
-                                <div className='animate-spin ml-3 border border-t-transparent h-3 w-3 rounded-full' />
-                            </>
-                        ) :
-                            'Delete Product'
-                        }
-                    </button>
+                    <div className="flex flex-col gap-2 w-full">
+                        <button
+                            type="button"
+                            className="formRedButton w-full"
+                            onClick={handleDelete}
+                        >
+                            {deleting ? (
+                                <>
+                                    Deleting Product
+                                    <div className='animate-spin ml-3 border border-t-transparent h-3 w-3 rounded-full' />
+                                </>
+                            ) :
+                                'Delete Product'
+                            }
+                        </button>
+                        <button
+                            type="button"
+                            className="formButton2 w-full"
+                            onClick={() => setForm(f => ({ ...f, hidden: !f.hidden }))}
+                        >
+                            {form.hidden ? 'Unhide Product (requires Save)' : 'Hide Product from Store (requires Save)'}
+                        </button>
+                    </div>
                 )}
-
-                <button className="formButton2 w-full mt-4">
-                    Hide Product
-                </button>
             </div>
-        </form >
+        </form>
     )
 }
 

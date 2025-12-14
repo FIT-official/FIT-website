@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import Product from "@/models/Product";
+import User from "@/models/User";
 import { slugify } from "@/app/api/product/slugify";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { sanitizeString } from "@/utils/validate";
@@ -122,6 +123,22 @@ export async function POST(req) {
                 productType,
                 slug,
             });
+
+            // Mark the creator as a "Creator" in MongoDB on first product publish.
+            // This runs idempotently: role stays "Creator" and creatorProducts only
+            // ever gains new productIds via $addToSet.
+            if (body.creatorUserId) {
+                await User.findOneAndUpdate(
+                    { userId: body.creatorUserId },
+                    {
+                        $set: { 'metadata.role': 'Creator' },
+                        $addToSet: { creatorProducts: String(product._id) },
+                        $setOnInsert: { 'metadata.displayName': body.creatorUserId, userId: body.creatorUserId },
+                    },
+                    { upsert: true, new: true }
+                );
+            }
+
             return NextResponse.json({ success: true, product }, { status: 201 });
         } catch (err) {
             if (err.code === 11000 && err.keyPattern && err.keyPattern.slug) {
@@ -295,6 +312,7 @@ export async function GET(req) {
         const fields = searchParams.get("fields"); // comma-separated string
         const search = searchParams.get("search");
         const limit = searchParams.get("limit");
+        const includeHidden = searchParams.get("includeHidden") === "true";
 
         let filter = {};
 
@@ -389,6 +407,12 @@ export async function GET(req) {
             !hasAnyCategoryFilter
         ) {
             return NextResponse.json({ error: "Missing productCategory or productSubCategory" }, { status: 400 });
+        }
+
+        // Hide products from public catalogue listings by default
+        // Allow hidden products to be fetched explicitly via ids/productId/creatorUserId
+        if (!includeHidden && !ids && !productId && !creatorUserId) {
+            filter.hidden = false;
         }
 
         const projection = fields ? fields.split(",").map(f => f.trim()).join(" ") : undefined;

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
+import Event from "@/models/Event";
 import { calculateCartItemBreakdown } from "../calculateBreakdown";
 import { authenticate } from "@/lib/authenticate";
 
@@ -26,6 +27,22 @@ export async function GET(req) {
             return NextResponse.json({ error: "Missing delivery address" }, { status: 400 });
         }
 
+        // Load active global events once for this checkout breakdown
+        const now = new Date();
+        const globalEvents = await Event.find({
+            isActive: true,
+            isGlobal: true,
+            startDate: { $lte: now },
+            endDate: { $gte: now },
+        }).lean();
+
+        const extraDiscountRules = (globalEvents || []).map(ev => ({
+            percentage: ev.percentage,
+            minimumAmount: ev.minimumPrice,
+            startDate: ev.startDate,
+            endDate: ev.endDate,
+        }));
+
         const cartBreakdown = [];
         for (const item of user.cart) {
             const product = await fetchProduct(item.productId);
@@ -34,6 +51,7 @@ export async function GET(req) {
                     item,
                     product,
                     address,
+                    extraDiscountRules,
                 });
                 // Add order note to the breakdown
                 breakdown.orderNote = item.orderNote || "";

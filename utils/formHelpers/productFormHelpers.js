@@ -13,16 +13,35 @@ export function mapProductToForm(product, defaultForm) {
     // Extract delivery info from product
     const delivery = product.delivery || { deliveryTypes: [] };
 
-    const discount = {
-        eventId: product.discount?.eventId ?? "",
-        percentage: product.discount?.percentage ?? "",
-        minimumPrice: product.discount?.minimumAmount ?? "",
-        startDate: product.discount?.startDate
-            ? new Date(product.discount.startDate).toISOString().slice(0, 10)
+    // Support both legacy single discount and new stacked discounts array
+    const rawDiscounts = Array.isArray(product.discounts) && product.discounts.length
+        ? product.discounts
+        : (product.discount ? [product.discount] : []);
+
+    const normalizeDiscount = (disc) => ({
+        eventId: disc?.eventId ?? "",
+        percentage: disc?.percentage ?? "",
+        minimumPrice: disc?.minimumAmount ?? "",
+        startDate: disc?.startDate
+            ? new Date(disc.startDate).toISOString().slice(0, 10)
             : "",
-        endDate: product.discount?.endDate
-            ? new Date(product.discount.endDate).toISOString().slice(0, 10)
+        endDate: disc?.endDate
+            ? new Date(disc.endDate).toISOString().slice(0, 10)
             : "",
+        tiers: Array.isArray(disc?.tiers) ? disc.tiers : [],
+    });
+
+    const discounts = rawDiscounts.map(normalizeDiscount);
+
+    // For backwards compatibility, keep a single `discount` in form pointing
+    // at the first discount rule (if any). The UI can evolve to show all.
+    const primaryDiscount = discounts[0] || {
+        eventId: "",
+        percentage: "",
+        minimumPrice: "",
+        startDate: "",
+        endDate: "",
+        tiers: [],
     };
 
     return {
@@ -34,14 +53,16 @@ export function mapProductToForm(product, defaultForm) {
         delivery, // Use the delivery object directly
         categoryId: product.categoryId || "",
         subcategoryId: product.subcategoryId || "",
-        showDiscount: !!(
-            discount.percentage ||
-            discount.eventId ||
-            discount.minimumPrice ||
-            discount.startDate ||
-            discount.endDate
+        showDiscount: discounts.some(d =>
+            d.percentage ||
+            d.eventId ||
+            d.minimumPrice ||
+            d.startDate ||
+            d.endDate ||
+            (d.tiers && d.tiers.length > 0)
         ),
-        discount,
+        discount: primaryDiscount,
+        discounts,
     };
 }
 
@@ -55,6 +76,37 @@ export function mapProductToForm(product, defaultForm) {
  * @returns {Object} - API payload
  */
 export function buildProductPayload(form, user, uploadedImages, uploadedModels, uploadedViewable) {
+    // Build a single normalized discount object (for legacy field)
+    const buildOneDiscount = (disc) => ({
+        eventId: disc.eventId || null,
+        percentage: disc.percentage ? Number(disc.percentage) : undefined,
+        minimumAmount: disc.minimumPrice ? Number(disc.minimumPrice) : undefined,
+        startDate: disc.startDate ? new Date(disc.startDate) : undefined,
+        endDate: disc.endDate ? new Date(disc.endDate) : undefined,
+        tiers: Array.isArray(disc.tiers)
+            ? disc.tiers
+                .filter(t => t && (t.minQty || t.maxQty) && t.percentage)
+                .map(t => ({
+                    minQty: Number(t.minQty) || 1,
+                    maxQty: t.maxQty ? Number(t.maxQty) : undefined,
+                    percentage: Number(t.percentage) || 0,
+                }))
+            : [],
+    });
+
+    // Derive stacked discounts from form; include legacy `discount` for now
+    const stackedDiscounts = Array.isArray(form.discounts) && form.discounts.length
+        ? form.discounts.filter(d => d && (d.eventId || d.percentage || d.minimumPrice || (d.tiers && d.tiers.length)))
+        : (form.showDiscount && form.discount
+            ? [form.discount]
+            : []);
+
+    const normalizedStacked = stackedDiscounts.map(buildOneDiscount);
+
+    const legacyDiscount = form.showDiscount && form.discount
+        ? buildOneDiscount(form.discount)
+        : {};
+
     return {
         creatorUserId: user?.id,
         name: form.name,
@@ -82,13 +134,11 @@ export function buildProductPayload(form, user, uploadedImages, uploadedModels, 
             height: Number(form.dimensions.height),
             weight: Number(form.dimensions.weight),
         },
-        discount: form.showDiscount ? {
-            eventId: form.discount.eventId || null,
-            percentage: form.discount.percentage ? Number(form.discount.percentage) : undefined,
-            minimumAmount: form.discount.minimumPrice ? Number(form.discount.minimumPrice) : undefined,
-            startDate: form.discount.startDate ? new Date(form.discount.startDate) : undefined,
-            endDate: form.discount.endDate ? new Date(form.discount.endDate) : undefined,
-        } : {},
+        hidden: !!form.hidden,
+        // Keep legacy single-discount field for existing consumers
+        discount: legacyDiscount,
+        // New stacked discounts array for advanced scenarios / stacking
+        discounts: normalizedStacked,
     };
 }
 

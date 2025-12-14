@@ -6,6 +6,8 @@ const EventSchema = new mongoose.Schema({
     description: { type: String, required: true },
     locations: { type: [String], required: false, default: [] },
     isActive: { type: Boolean, default: true },
+    // When true, this event's discount should apply store-wide
+    isGlobal: { type: Boolean, default: false },
     percentage: {
         type: Number,
         required: function () {
@@ -33,3 +35,5 @@ const EventSchema = new mongoose.Schema({
     },
     schemaVersion: { type: Number, default: 1 },
 }, { _id: true, timestamps: true, unique: true });
+
+export default mongoose.models.Event || mongoose.model("Event", EventSchema);

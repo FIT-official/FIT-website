@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 
 const isPrivateRoute = createRouteMatcher(['/dashboard(.*)', '/account(.*)', '/onboarding', '/checkout(.*)', '/cart(.*)'])
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
+const isDashboardRoute = createRouteMatcher(['/dashboard(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
     const { userId, sessionClaims, redirectToSignIn } = await auth()
@@ -29,6 +30,21 @@ export default clerkMiddleware(async (auth, req) => {
         return NextResponse.redirect(onboardingUrl)
     }
 
+    // Restrict dashboard access to creators with a subscription or admins
+    if (userId && isDashboardRoute(req)) {
+        const metadata = sessionClaims?.metadata || {};
+        const role = metadata.role;
+        const stripeSubscriptionId = metadata.stripeSubscriptionId;
+
+        const hasSubscription = typeof stripeSubscriptionId === 'string' && stripeSubscriptionId.trim().length > 0;
+        const isAdmin = role === 'admin';
+
+        if (!hasSubscription && !isAdmin) {
+            const redirectUrl = new URL('/', req.url);
+            return NextResponse.redirect(redirectUrl);
+        }
+    }
+
     const signInSignUpRoutes = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)'])
 
     // Redirect authenticated users away from sign-in and sign-up pages
@@ -36,7 +52,7 @@ export default clerkMiddleware(async (auth, req) => {
         return NextResponse.redirect(homeUrl)
     }
 
-    // Allow authenticated users to access private routes
+    // Allow authenticated users to access private routes (dashboard is further gated above)
     if (userId && isPrivateRoute(req)) {
         return NextResponse.next()
     }
