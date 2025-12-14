@@ -92,6 +92,10 @@
   @apply flex flex-col gap-2 py-2 px-4 font-medium text-xs uppercase items-center text-center w-full hover:text-textColor duration-300 ease-in-out transition-colors text-lightColor;
 }
 
+.accountDropdownLinkGradient{
+  @apply flex bg-gradient-to-br from-amber-300 to-red-400 flex-col gap-2 py-2 px-4 font-medium text-xs uppercase items-center text-center w-full hover:text-background/90 duration-300 ease-in-out transition-colors text-background;
+}
+
 .authInput{
   @apply w-full px-4 py-2 outline-none rounded-full border border-borderColor
 }

@@ -35,8 +35,17 @@ export async function POST(req) {
 
             const kind = channel?.data?.kind || "support";
 
-            // Build participant list from channel members
-            const members = Object.values(channel.state?.members || {});
+            // Build participant list from channel members. Fall back through
+            // several possible locations to be resilient to webhook config.
+            const rawMembers =
+                (channel.state && channel.state.members) ||
+                channel.members ||
+                event.members ||
+                {};
+
+            const members = Array.isArray(rawMembers)
+                ? rawMembers
+                : Object.values(rawMembers || {});
             const participants = members.map((m) => ({
                 id: m.user_id,
                 name:

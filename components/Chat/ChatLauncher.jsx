@@ -117,10 +117,13 @@ export default function ChatLauncher() {
                             setMessages(
                                 (streamChannel.state.messages || []).map(m => ({
                                     id: m.id,
-                                    from: m.user?.id === tokenData.userId ? 'user' : 'other',
+                                    from: m.user?.id === user?.id ? 'user' : 'other',
                                     text: m.text,
                                 }))
                             );
+
+                            // Ensure only a single message.new listener is attached per channel
+                            streamChannel.off('message.new');
                             streamChannel.on('message.new', (event) => {
                                 const m = event.message;
                                 if (!m || !m.id) return;
@@ -130,7 +133,7 @@ export default function ChatLauncher() {
                                         ...prev,
                                         {
                                             id: m.id,
-                                            from: m.user?.id === tokenData.userId ? 'user' : 'other',
+                                            from: m.user?.id === user?.id ? 'user' : 'other',
                                             text: m.text,
                                         },
                                     ];
@@ -192,9 +195,28 @@ export default function ChatLauncher() {
         const text = input.trim();
         setInput('');
 
+        const activeConversation = conversations.find((c) => c.channelId === activeChannelId) || null;
+        const isFirstMessageInChannel = messages.length === 0;
+        const shouldTriggerAutoReply =
+            activeConversation &&
+            activeConversation.kind === 'creator' &&
+            isFirstMessageInChannel;
+
         if (channel) {
             try {
                 await channel.sendMessage({ text });
+
+                if (shouldTriggerAutoReply && activeConversation) {
+                    try {
+                        await fetch('/api/chat/auto-reply', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ channelId: activeConversation.channelId }),
+                        });
+                    } catch (err) {
+                        console.error('Failed to trigger auto-reply', err);
+                    }
+                }
             } catch (err) {
                 console.error('Failed to send chat message', err);
             }
@@ -220,25 +242,20 @@ export default function ChatLauncher() {
         if (!client || !isSignedIn) return;
         try {
             setConnecting(true);
-            const tokenRes = await fetch('/api/chat/token');
-            if (!tokenRes.ok) throw new Error('Failed to get chat token');
-            const tokenData = await tokenRes.json();
-            if (!tokenData.token || !tokenData.apiKey) throw new Error('Stream Chat not configured');
 
-            const streamClient = StreamChat.getInstance(tokenData.apiKey);
-            await streamClient.connectUser({ id: tokenData.userId }, tokenData.token);
-
-            const streamChannel = streamClient.channel('messaging', channelId);
+            const streamChannel = client.channel('messaging', channelId);
             await streamChannel.watch();
 
             setMessages(
                 (streamChannel.state.messages || []).map(m => ({
                     id: m.id,
-                    from: m.user?.id === tokenData.userId ? 'user' : 'other',
+                    from: m.user?.id === user?.id ? 'user' : 'other',
                     text: m.text,
                 })),
             );
 
+            // Ensure only a single message.new listener is attached per channel
+            streamChannel.off('message.new');
             streamChannel.on('message.new', (event) => {
                 const m = event.message;
                 if (!m || !m.id) return;
@@ -249,7 +266,7 @@ export default function ChatLauncher() {
                         ...prev,
                         {
                             id: m.id,
-                            from: m.user?.id === tokenData.userId ? 'user' : 'other',
+                            from: m.user?.id === user?.id ? 'user' : 'other',
                             text: m.text,
                         },
                     ];
@@ -258,7 +275,7 @@ export default function ChatLauncher() {
 
             setChannel(streamChannel);
             setActiveChannelId(channelId);
-            setChatInfo({ provider: tokenData.provider, channelId });
+            setChatInfo(prev => ({ ...(prev || {}), channelId }));
 
             try {
                 await fetch('/api/chat/read', {
@@ -417,11 +434,7 @@ export default function ChatLauncher() {
                                                                     onClick={async () => {
                                                                         try {
                                                                             setConnecting(true);
-                                                                            const tokenRes = await fetch('/api/chat/token');
-                                                                            if (!tokenRes.ok) throw new Error('Failed to get chat token');
-                                                                            const tokenData = await tokenRes.json();
-
-                                                                            const channelRes = await fetch('/api/chat/channel', {
+                                                                                const channelRes = await fetch('/api/chat/channel', {
                                                                                 method: 'POST',
                                                                                 headers: { 'Content-Type': 'application/json' },
                                                                                 body: JSON.stringify({ kind: 'creator', targetUserId: c.id }),
@@ -429,25 +442,33 @@ export default function ChatLauncher() {
                                                                             if (!channelRes.ok) throw new Error('Failed to create chat channel');
                                                                             const channelData = await channelRes.json();
 
-                                                                            if (!tokenData.token || !tokenData.apiKey) {
-                                                                                throw new Error('Stream Chat not fully configured');
-                                                                            }
+                                                                                let streamClient = client;
+                                                                                if (!streamClient) {
+                                                                                    const tokenRes = await fetch('/api/chat/token');
+                                                                                    if (!tokenRes.ok) throw new Error('Failed to get chat token');
+                                                                                    const tokenData = await tokenRes.json();
+                                                                                    if (!tokenData.token || !tokenData.apiKey) {
+                                                                                        throw new Error('Stream Chat not fully configured');
+                                                                                    }
+                                                                                    streamClient = StreamChat.getInstance(tokenData.apiKey);
+                                                                                    await streamClient.connectUser({ id: tokenData.userId }, tokenData.token);
+                                                                                    setClient(streamClient);
+                                                                                }
 
-                                                                            const streamClient = StreamChat.getInstance(tokenData.apiKey);
-                                                                            await streamClient.connectUser({ id: tokenData.userId }, tokenData.token);
-
-                                                                            const streamChannel = streamClient.channel('messaging', channelData.channelId);
+                                                                                const streamChannel = streamClient.channel('messaging', channelData.channelId);
                                                                             await streamChannel.watch();
 
                                                                             setMessages(
                                                                                 (streamChannel.state.messages || []).map(m => ({
                                                                                     id: m.id,
-                                                                                    from: m.user?.id === tokenData.userId ? 'user' : 'other',
+                                                                                        from: m.user?.id === user?.id ? 'user' : 'other',
                                                                                     text: m.text,
                                                                                 })),
                                                                             );
 
-                                                                            streamChannel.on('message.new', (event) => {
+                                                                                // Ensure only a single message.new listener is attached per channel
+                                                                                streamChannel.off('message.new');
+                                                                                streamChannel.on('message.new', (event) => {
                                                                                 const m = event.message;
                                                                                 if (!m || !m.id) return;
                                                                                 setMessages(prev => {
@@ -456,16 +477,15 @@ export default function ChatLauncher() {
                                                                                         ...prev,
                                                                                         {
                                                                                             id: m.id,
-                                                                                            from: m.user?.id === tokenData.userId ? 'user' : 'other',
+                                                                                                from: m.user?.id === user?.id ? 'user' : 'other',
                                                                                             text: m.text,
                                                                                         },
                                                                                     ];
                                                                                 });
                                                                             });
 
-                                                                            setClient(streamClient);
                                                                             setChannel(streamChannel);
-                                                                            setChatInfo({ provider: tokenData.provider, channelId: channelData.channelId });
+                                                                            setChatInfo(prev => ({ ...(prev || {}), channelId: channelData.channelId }));
                                                                             setInitialised(true);
                                                                             setCreatorSearchOpen(false);
                                                                             setSearchQuery('');

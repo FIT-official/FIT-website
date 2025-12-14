@@ -1,4 +1,5 @@
 'use client'
+import useAccess from "@/utils/useAccess";
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 
 function AccountDropdown() {
     const { user, isLoaded } = useUser()
+    const { isAdmin } = useAccess();
     const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
     const accountDropdownRef = useRef(null);
     const openAccountDropdown = () => {
@@ -54,6 +56,12 @@ function AccountDropdown() {
                         <Link href='/dashboard' className="accountDropdownLink">
                             Dashboard
                         </Link>
+                        <div className="w-full h-0 border-t border-borderColor" />
+                        {isAdmin && (
+                            <Link href='/admin' className="accountDropdownLinkGradient">
+                                Admin
+                            </Link>
+                        )}
                         <div className="w-full h-0 border-t border-borderColor" />
                         <SignOutButton className="accountDropdownLink">
                             Log Out

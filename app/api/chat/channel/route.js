@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/authenticate";
 import { getStreamServerClient } from "@/lib/streamChat";
 import { connectToDatabase } from "@/lib/db";
-import User from "@/models/User";
+import ChannelSummary from "@/models/ChannelSummary";
 
 
 export async function POST(request) {
@@ -49,33 +49,69 @@ export async function POST(request) {
         }
 
         // Deduplicate members in case of misconfiguration and let Stream
-        // create a deterministic channel for this member set.
-        // When using server-side auth, we must provide created_by/created_by_id.
+        // create or re-use a deterministic channel for this member set.
         const members = Array.from(new Set([userId, otherUserId].filter(Boolean)));
+        const sortedMembers = [...members].sort();
 
-        const channel = serverClient.channel("messaging", undefined, {
-            members,
-            kind,
-            created_by_id: userId,
-        });
+        // First, try to find an existing channel for this member set and kind
+        let existingChannels = [];
+        try {
+            existingChannels = await serverClient.queryChannels(
+                {
+                    type: "messaging",
+                    members: { $eq: sortedMembers },
+                    kind,
+                },
+                { last_message_at: -1 },
+                { limit: 1 }
+            );
+        } catch (e) {
+            console.error("Error querying existing chat channel", e);
+        }
 
-        await channel.create();
+        let channel;
+        const isNewChannel = existingChannels.length === 0;
 
-        // If this is a creator DM initiated by a customer, send creator auto-reply if configured
-        if (kind === "creator" && otherUserId && otherUserId !== userId) {
-            try {
-                await connectToDatabase();
-                const creator = await User.findOne({ userId: otherUserId }).lean();
-                const autoReply = creator?.metadata?.autoReplyMessage;
-                if (autoReply && autoReply.trim().length > 0) {
-                    await channel.sendMessage({
-                        text: autoReply,
-                        user_id: otherUserId,
-                    });
-                }
-            } catch (e) {
-                console.error("Failed to send creator auto-reply", e);
-            }
+        if (!isNewChannel) {
+            channel = existingChannels[0];
+        } else {
+            channel = serverClient.channel("messaging", undefined, {
+                members,
+                kind,
+                created_by_id: userId,
+            });
+
+            await channel.create();
+        }
+
+        // Ensure a ChannelSummary exists so both participants see this
+        // conversation in their inbox/launcher even before webhooks run.
+        try {
+            await connectToDatabase();
+
+            const memberIds = sortedMembers;
+
+            // Store all channel members in participants. The inbox API will
+            // filter out the current user and enrich the remaining entries
+            // with Clerk profiles (name, avatar, etc.).
+            const participants = sortedMembers.map((id) => ({
+                id,
+                name: undefined,
+                imageUrl: undefined,
+            }));
+
+            await ChannelSummary.findOneAndUpdate(
+                { channelId: channel.id },
+                {
+                    channelId: channel.id,
+                    kind,
+                    participants,
+                    memberIds,
+                },
+                { upsert: true, new: true, setDefaultsOnInsert: true }
+            );
+        } catch (e) {
+            console.error("Failed to upsert ChannelSummary from /api/chat/channel", e);
         }
 
         return NextResponse.json({
