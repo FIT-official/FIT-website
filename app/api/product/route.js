@@ -124,9 +124,6 @@ export async function POST(req) {
                 slug,
             });
 
-            // Mark the creator as a "Creator" in MongoDB on first product publish.
-            // This runs idempotently: role stays "Creator" and creatorProducts only
-            // ever gains new productIds via $addToSet.
             if (body.creatorUserId) {
                 await User.findOneAndUpdate(
                     { userId: body.creatorUserId },

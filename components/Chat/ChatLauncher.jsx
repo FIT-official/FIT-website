@@ -505,7 +505,7 @@ export default function ChatLauncher() {
                                                                                             {
                                                                                                 id: c.id,
                                                                                                 name: c.displayName || c.id,
-                                                                                                imageUrl: null,
+                                                                                                imageUrl: c.imageUrl || null,
                                                                                             },
                                                                                         ],
                                                                                         lastMessage: null,
@@ -522,13 +522,23 @@ export default function ChatLauncher() {
                                                                         }
                                                                     }}
                                                                 >
-                                                                    <div className="flex flex-col gap-0.5">
-                                                                        <span className="text-xs font-medium text-gray-900 dark:text-textColor truncate">
-                                                                            {c.displayName || c.id}
-                                                                        </span>
-                                                                        {c.hasProducts && (
-                                                                            <span className="text-[10px] text-gray-500 dark:text-lightColor/80">Creator</span>
-                                                                        )}
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-borderColor dark:to-borderColor/50 overflow-hidden flex items-center justify-center text-xs font-semibold text-gray-700 dark:text-textColor flex-shrink-0">
+                                                                            {c.imageUrl ? (
+                                                                                // eslint-disable-next-line @next/next/no-img-element
+                                                                                <img src={c.imageUrl} alt={c.displayName || c.id} className="w-full h-full object-cover" />
+                                                                            ) : (
+                                                                                (c.displayName || c.id || '?')[0].toUpperCase()
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="flex flex-col gap-0.5 min-w-0">
+                                                                            <span className="text-xs font-medium text-gray-900 dark:text-textColor truncate">
+                                                                                {c.displayName || c.id}
+                                                                            </span>
+                                                                            {c.hasProducts && (
+                                                                                <span className="text-[10px] text-gray-500 dark:text-lightColor/80">Creator</span>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
                                                                 </button>
                                                             ))}

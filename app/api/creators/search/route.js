@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
+import { clerkClient } from "@clerk/nextjs/server";
 
 // Search creators by simple text query. We treat users with metadata.role === "Creator"
-// or non-empty creatorProducts as creators. This avoids checking Stripe/Clerk on each request.
+// or non-empty creatorProducts as creators. Enriches results with Clerk profile data.
 export async function GET(request) {
     try {
         await connectToDatabase();
 
         const { searchParams } = new URL(request.url);
         const q = (searchParams.get("q") || "").trim();
-        const limit = Math.min(Number(searchParams.get("limit")) || 3, 20);
+        const limit = Math.min(Number(searchParams.get("limit")) || 20, 50);
 
         const baseFilter = {
             $or: [
@@ -36,13 +37,38 @@ export async function GET(request) {
             .limit(limit)
             .lean();
 
-        const result = creators.map((u) => ({
-            id: u.userId,
-            // Fallbacks until you add richer profile fields
-            displayName: u.metadata?.displayName || u.metadata?.role || "Creator",
-            role: u.metadata?.role || "Creator",
-            hasProducts: Array.isArray(u.creatorProducts) && u.creatorProducts.length > 0,
-        }));
+        // Fetch Clerk profiles for all creator user IDs
+        const client = await clerkClient();
+        const profileCache = {};
+
+        for (const u of creators) {
+            if (u.userId && !profileCache[u.userId]) {
+                try {
+                    profileCache[u.userId] = await client.users.getUser(u.userId);
+                } catch (e) {
+                    profileCache[u.userId] = null;
+                }
+            }
+        }
+
+        const result = creators.map((u) => {
+            const profile = profileCache[u.userId];
+            const displayName =
+                u.metadata?.displayName ||
+                profile?.firstName ||
+                profile?.username ||
+                profile?.emailAddresses?.[0]?.emailAddress?.split("@")[0] ||
+                "Creator";
+            const imageUrl = profile?.imageUrl || null;
+
+            return {
+                id: u.userId,
+                displayName,
+                imageUrl,
+                role: u.metadata?.role || "Creator",
+                hasProducts: Array.isArray(u.creatorProducts) && u.creatorProducts.length > 0,
+            };
+        });
 
         return NextResponse.json({ creators: result });
     } catch (error) {

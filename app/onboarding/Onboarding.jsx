@@ -8,39 +8,32 @@ import Logo from '@/components/Logo'
 function Onboarding() {
     const { user, isLoaded } = useUser()
     const router = useRouter()
-    const [submitted, setSubmitted] = useState(false)
-    const [onboardingStage, setOnboardingStage] = useState('intro')
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
-
-    useEffect(() => {
-        if (!submitted) return
-        let interval
-        const poll = async () => {
-            await user?.reload?.()
-            if (user?.publicMetadata?.onboardingComplete) {
-                setLoading(false)
-                router.push('/')
-            }
-        }
-        interval = setInterval(poll, 500)
-        return () => clearInterval(interval)
-    }, [submitted, user])
-
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (!isLoaded) return
         setLoading(true)
+        setError(null)
+        
         const formData = new FormData(e.currentTarget)
         const res = await completeOnboarding(formData)
-        if (res?.message) {
-            await updateRoleFromStripe(user.publicMetadata.stripeSubscriptionId)
-            setSubmitted(true)
-        }
+        
         if (res?.error) {
-            setError(res?.error)
-
+            setError(res.error)
+            setLoading(false)
+            return
+        }
+        
+        if (res?.message) {
+            // Update role from Stripe if subscription exists
+            if (user.publicMetadata?.stripeSubscriptionId) {
+                await updateRoleFromStripe(user.publicMetadata.stripeSubscriptionId)
+            }
+            
+            // Use window.location for a hard redirect to ensure middleware gets fresh session
+            window.location.href = '/'
         }
     }
 
@@ -59,7 +52,7 @@ function Onboarding() {
                 
             )} */}
             <div className='flex w-1/4 mt-4'>
-                <button type="submit" className='authButton2'>
+                <button type="submit" disabled={loading} className='authButton2'>
                     {loading ?
                         <>
                             Setting Things Up
@@ -69,6 +62,9 @@ function Onboarding() {
                         'Begin Now'}
                 </button>
             </div>
+            {error && (
+                <p className='text-sm text-red-600 dark:text-red-400 mt-2'>{error}</p>
+            )}
 
         </form>
 

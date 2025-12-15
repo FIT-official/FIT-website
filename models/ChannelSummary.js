@@ -23,7 +23,5 @@ const ChannelSummarySchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-ChannelSummarySchema.index({ memberIds: 1 });
-
 export default mongoose.models.ChannelSummary ||
     mongoose.model("ChannelSummary", ChannelSummarySchema);

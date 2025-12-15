@@ -4,6 +4,7 @@ import { auth, clerkClient } from '@clerk/nextjs/server'
 import { connectToDatabase } from '@/lib/db'
 import User from '@/models/User'
 import Stripe from 'stripe'
+import { revalidatePath } from 'next/cache'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
@@ -33,6 +34,10 @@ export const completeOnboarding = async (formData) => {
                 onboardingComplete: true,
             },
         })
+
+        // Force Next.js to revalidate the middleware auth state
+        revalidatePath('/', 'layout')
+        revalidatePath('/onboarding')
 
         return { message: 'Onboarding complete', publicMetadata: res.publicMetadata }
 
