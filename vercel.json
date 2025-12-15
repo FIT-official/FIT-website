@@ -1,6 +1,6 @@
 {
   "buildCommand": "yarn build",
-  "installCommand": "yarn install",
+  "installCommand": "yarn install --ignore-engines",
   "framework": "nextjs",
   "regions": ["iad1"]
 }
