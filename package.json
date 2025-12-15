@@ -11,7 +11,6 @@
     "start": "next start",
     "lint": "next lint",
     "migrate:content": "node scripts/migrate-content-to-db.js",
-    "postinstall": "yarn add --ignore-engines sharp || true",
     "postbuild": "next-sitemap",
     "tunnel": "scripts/dev-tunnel.sh"
   },
