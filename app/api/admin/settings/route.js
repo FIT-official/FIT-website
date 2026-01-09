@@ -5,10 +5,13 @@ import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 import { authenticate } from "@/lib/authenticate";
 
 async function getAppSettings() {
-    let settings = await AppSettings.findById("app-settings");
+    function getAppSettingsId() {
+        return process.env.NODE_ENV === 'development' ? 'app-settings-dev' : 'app-settings';
+    }
+    let settings = await AppSettings.findById(getAppSettingsId());
     if (!settings) {
         settings = new AppSettings({
-            _id: "app-settings",
+            _id: getAppSettingsId(),
             additionalDeliveryTypes: [],
             additionalOrderStatuses: [],
             additionalCategories: []
@@ -79,8 +82,9 @@ export async function POST(request) {
 
         const settings = await getAppSettings();
 
+
         if (type === "deliveryType") {
-            const { name, displayName, description = "", applicableToProductTypes = ["shop"], pricingTiers = [], order = 0, isActive = true } = data;
+            const { name, displayName, description = "", applicableToProductTypes = ["shop"], pricingTiers = undefined, basePricing = undefined, order = 0, isActive = true } = data;
 
             if (!name || !displayName) {
                 return NextResponse.json(
@@ -97,17 +101,30 @@ export async function POST(request) {
                 );
             }
 
-            settings.additionalDeliveryTypes.push({
+            // Only save pricingTiers if present and not using basePricing
+            let deliveryTypeObj = {
                 name: name.trim(),
                 displayName: displayName.trim(),
                 description: description.trim(),
                 applicableToProductTypes,
-                pricingTiers,
-                hasDefaultPrice: pricingTiers && pricingTiers.length > 0,
                 order: parseInt(order),
                 isActive
-            });
+            };
+            if (basePricing && Object.values(basePricing).some(v => v !== '' && v != null)) {
+                deliveryTypeObj.basePricing = basePricing;
+                deliveryTypeObj.pricingTiers = undefined;
+                deliveryTypeObj.hasDefaultPrice = false;
+            } else if (Array.isArray(pricingTiers) && pricingTiers.length > 0) {
+                deliveryTypeObj.pricingTiers = pricingTiers;
+                deliveryTypeObj.basePricing = undefined;
+                deliveryTypeObj.hasDefaultPrice = true;
+            } else {
+                deliveryTypeObj.basePricing = undefined;
+                deliveryTypeObj.pricingTiers = undefined;
+                deliveryTypeObj.hasDefaultPrice = false;
+            }
 
+            settings.additionalDeliveryTypes.push(deliveryTypeObj);
             await settings.save();
 
             return NextResponse.json({ message: "Delivery type added successfully" }, { status: 201 });

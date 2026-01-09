@@ -7,7 +7,7 @@
 export const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
 export const MAX_MODEL_SIZE = 100 * 1024 * 1024; // 100MB
 export const MAX_VIEWABLE_SIZE = 15 * 1024 * 1024; // 15MB
-export const ALLOWED_MODEL_EXTS = ['obj', 'glb', 'gltf', 'stl', 'blend', 'fbx', 'zip', 'rar', '7z'];
+export const ALLOWED_MODEL_EXTS = ['obj', 'glb', 'gltf', 'stl', 'blend', 'fbx', 'zip', 'rar', '7z', '3mf'];
 export const ALLOWED_VIEWABLE_EXTS = ['glb', 'gltf'];
 
 /**

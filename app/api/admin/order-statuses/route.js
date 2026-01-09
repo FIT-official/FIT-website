@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
+
+function getAppSettingsId() {
+    return process.env.NODE_ENV === 'development' ? 'app-settings-dev' : 'app-settings';
+}
 import AppSettings from "@/models/AppSettings";
 import { authenticate } from "@/lib/authenticate";
 import { checkAdminPrivileges } from "@/lib/checkPrivileges";
@@ -9,7 +13,7 @@ export async function GET(request) {
         await connectToDatabase();
 
         // Get app settings for additional statuses
-        let settings = await AppSettings.findById("app-settings");
+        let settings = await AppSettings.findById(getAppSettingsId());
         if (!settings) {
             settings = { additionalOrderStatuses: [] };
         }

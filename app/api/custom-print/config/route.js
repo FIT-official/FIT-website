@@ -3,6 +3,45 @@ import { auth } from '@clerk/nextjs/server'
 import { connectToDatabase } from '@/lib/db'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
 
+const STATUS_RANK = {
+    pending_upload: 0,
+    pending_config: 1,
+    configured: 2,
+    quoted: 3,
+    payment_pending: 4,
+    paid: 5,
+    printing: 6,
+    printed: 7,
+    shipped: 8,
+    delivered: 9,
+};
+
+function computeMinimumStatusFromData(requestDoc) {
+    const hasModel = !!(requestDoc?.modelFile?.s3Key && requestDoc?.modelFile?.originalName);
+    const isConfigured = !!requestDoc?.printConfiguration?.isConfigured;
+    if (isConfigured) return 'configured';
+    if (hasModel) return 'pending_config';
+    return 'pending_upload';
+}
+
+function maybeUpgradeStatusToMatchData(requestDoc, note) {
+    const target = computeMinimumStatusFromData(requestDoc);
+    const current = requestDoc?.status || 'pending_upload';
+    const currentRank = STATUS_RANK[current];
+    const targetRank = STATUS_RANK[target];
+    if (currentRank == null || targetRank == null) return false;
+    if (currentRank >= targetRank) return false;
+
+    requestDoc.status = target;
+    requestDoc.statusHistory = requestDoc.statusHistory || [];
+    requestDoc.statusHistory.push({
+        status: target,
+        updatedAt: new Date(),
+        note: note || 'Auto-reconciled status based on uploaded model/configuration',
+    });
+    return true;
+}
+
 export async function PUT(req) {
     try {
         const { userId } = await auth()
@@ -49,10 +88,8 @@ export async function PUT(req) {
             isConfigured: true
         }
 
-        // Update status to configured
-        if (customPrintRequest.status === 'pending_config') {
-            customPrintRequest.status = 'configured'
-        }
+        // Ensure status never lags behind stored data (e.g. pending_upload -> configured)
+        maybeUpgradeStatusToMatchData(customPrintRequest, 'Print configuration saved');
 
         await customPrintRequest.save()
 

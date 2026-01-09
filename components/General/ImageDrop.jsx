@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react'
 import Image from 'next/image'
 import { RxCross1 } from 'react-icons/rx'
 
-export default function ImageDrop({
+const ImageDrop = function ImageDrop({
     label,
     value,
     pendingFiles = [],
@@ -75,14 +75,19 @@ export default function ImageDrop({
         validateAndSelect(files)
     }
 
-    const renderPreviewSrc = (item, isPending) => {
-        if (isPending) return URL.createObjectURL(item)
-        if (typeof item === 'string') {
-            if (item.startsWith('http://') || item.startsWith('https://') || item.startsWith('/')) return item
-            return `/api/proxy?key=${encodeURIComponent(item)}`
+    const renderPreviewSrc = (item, isPending, forNextImage = false) => {
+        let src = '';
+        if (isPending) src = URL.createObjectURL(item);
+        else if (typeof item === 'string') {
+            if (item.startsWith('http://') || item.startsWith('https://') || item.startsWith('/')) src = item;
+            else if (forNextImage) src = `/api/proxy?key=${item}`;
+            else src = `/api/proxy?key=${encodeURIComponent(item)}`;
         }
-        return ''
+        return src;
     }
+
+    // Debug: log all srcs used for images
+    // Debug logs removed
 
     return (
         <div className={className}>
@@ -120,16 +125,27 @@ export default function ImageDrop({
                 <div className="flex gap-2 flex-wrap mt-2">
                     {[...currentValues, ...pendingFiles].map((item, idx) => {
                         const isPending = idx >= (currentValues.length || 0)
+                        // Use stable key: file.name (pending), S3 key (string), fallback idx
+                        let stableKey = idx;
+                        if (isPending && item && item.name) stableKey = `pending-${item.name}`;
+                        else if (typeof item === 'string') stableKey = item;
+                        else if (item && item.name) stableKey = item.name;
                         return (
-                            <div key={idx} className="relative">
+                            <div key={stableKey} className="relative">
                                 <Image
-                                    src={renderPreviewSrc(item, isPending)}
+                                    src={renderPreviewSrc(item, isPending, true)}
                                     alt={`Preview ${idx + 1}`}
                                     loading="lazy"
                                     width={80}
                                     height={80}
-                                    quality={20}
+                                    quality={80}
                                     className="w-20 h-20 object-cover rounded-sm border border-borderColor"
+                                    onError={e => {
+                                        // fallback to placeholder if image fails
+                                        if (e?.target?.src && !e.target.src.endsWith('/placeholder.jpg')) {
+                                            e.target.src = '/placeholder.jpg';
+                                        }
+                                    }}
                                 />
                                 <RxCross1
                                     className="absolute top-1 right-1 cursor-pointer p-0.5 bg-white/80 rounded-full"
@@ -157,3 +173,5 @@ export default function ImageDrop({
         </div>
     )
 }
+
+export default React.memo(ImageDrop);

@@ -1,5 +1,6 @@
 'use client'
 
+
 import Header from "@/components/General/Header";
 import FeaturedSection from "@/components/Home/FeaturedSection";
 import Main from "@/components/Home/Main";
@@ -7,11 +8,27 @@ import Divider from "@/components/General/Divider";
 import Testimonials from "@/components/Home/Testimonials";
 import { useContent } from '@/utils/useContent'
 import FeaturedArticles from "@/components/Home/FeaturedArticles";
+import { useEffect, useState } from 'react';
 
 export default function Home() {
   const { content: adBannerContent } = useContent('home/ad-banner', {
     text: ''
   })
+
+  const [hasArticles, setHasArticles] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/blog')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.posts?.some(p => p.published)) {
+          setHasArticles(true);
+        } else {
+          setHasArticles(false);
+        }
+      })
+      .catch(() => setHasArticles(false));
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center w-full ">
@@ -19,10 +36,14 @@ export default function Home() {
       <Divider />
       <FeaturedSection />
       <Divider />
-      <Header title="Read some of our articles" />
-      <Divider />
-      <FeaturedArticles/>
-      <Divider />
+      {hasArticles && (
+        <>
+          <Header title="Read some of our articles" />
+          <Divider />
+          <FeaturedArticles/>
+          <Divider />
+        </>
+      )}
       <Header title="Don't take our word" />
       <Divider />
       <Testimonials />

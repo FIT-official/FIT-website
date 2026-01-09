@@ -1,21 +1,20 @@
 'use client'
-import Link from 'next/link'
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useSignUp } from '@clerk/nextjs'
 import { useState } from 'react'
-import PasswordField from './PasswordField'
-import EmailField from './EmailField'
-import AuthDivider from './AuthDivider'
-import { FaGoogle } from 'react-icons/fa'
-import { GoChevronLeft, GoChevronRight } from 'react-icons/go'
-import Tier from './Tier'
-import { IoMdLock } from 'react-icons/io'
-import Error from './Error'
+import { useStripePriceIds } from '@/utils/StripePriceIdsContext'
 import { useToast } from '../General/ToastProvider'
-import { supportedCountries } from '@/lib/supportedCountries'
-import { STRIPE_PRICE_TIER_1, STRIPE_PRICE_TIER_2, STRIPE_PRICE_TIER_3, STRIPE_PRICE_TIER_4, debugStripeConfig } from '@/lib/stripeConfig'
+import Link from 'next/link'
+import Tier from './Tier'
+import { GoChevronRight, GoChevronLeft } from 'react-icons/go'
+import { FaGoogle } from 'react-icons/fa'
+import AuthDivider from './AuthDivider'
+import EmailField from './EmailField'
+import PasswordField from './PasswordField'
+import Error from './Error'
 
-function SignUpForm({ setVerifying }) {
+function SignUpForm() {
+    const { stripePriceIds, loading: priceIdsLoading, error: priceIdsError } = useStripePriceIds();
     const { isLoaded, signUp } = useSignUp()
     const stripe = useStripe()
     const elements = useElements()
@@ -36,8 +35,6 @@ function SignUpForm({ setVerifying }) {
 
     async function tokeniseAndContinue(ev) {
         ev.preventDefault()
-        // Debug stripe configuration in development
-        debugStripeConfig();
 
         try {
             if (!stripe || !elements) {
@@ -102,7 +99,7 @@ function SignUpForm({ setVerifying }) {
                 signUp.authenticateWithRedirect({
                     strategy: 'oauth_google',
                     redirectUrl: '/sign-up/sso-callback',
-                    redirectUrlComplete: '/dashboard',
+                    redirectUrlComplete: '/',
                     unsafeMetadata,
                 })
             } catch (error) {
@@ -151,6 +148,10 @@ function SignUpForm({ setVerifying }) {
         }
     }
 
+    if (priceIdsLoading) return <div className="text-center py-8">Loading subscription tiers...</div>;
+    if (priceIdsError) return <div className="text-center py-8 text-red-600">Failed to load subscription tiers.</div>;
+    if (!stripePriceIds) return <div className="text-center py-8">No subscription tiers found.</div>;
+
     return (
         <form onSubmit={handleSubmit} className='flex w-full md:w-[30vw] items-center justify-center flex-col gap-4 transition-all duration-300 ease-in-out'>
             <h1>Sign Up</h1>
@@ -167,10 +168,10 @@ function SignUpForm({ setVerifying }) {
                 <>
                     {/* tier element */}
                     <div className='flex flex-col gap-2 w-full'>
-                        <Tier value={STRIPE_PRICE_TIER_1()} priceId={priceId} setPriceId={setPriceId} />
-                        <Tier value={STRIPE_PRICE_TIER_2()} priceId={priceId} setPriceId={setPriceId} />
-                        <Tier value={STRIPE_PRICE_TIER_3()} priceId={priceId} setPriceId={setPriceId} />
-                        <Tier value={STRIPE_PRICE_TIER_4()} priceId={priceId} setPriceId={setPriceId} />
+                        <Tier value={stripePriceIds.tier1} priceId={priceId} setPriceId={setPriceId} />
+                        <Tier value={stripePriceIds.tier2} priceId={priceId} setPriceId={setPriceId} />
+                        <Tier value={stripePriceIds.tier3} priceId={priceId} setPriceId={setPriceId} />
+                        <Tier value={stripePriceIds.tier4} priceId={priceId} setPriceId={setPriceId} />
                         <Tier value="" priceId={priceId} setPriceId={setPriceId} />
                     </div>
                     <button className='authButton2 gap-2 mt-3' type='button' onClick={determineStageForward}>
@@ -290,7 +291,7 @@ function SignUpForm({ setVerifying }) {
                         {loading && signUpMethod === 'email' ? (
                             <>
                                 Signing In
-                                <div className='animate-spin ml-3 border-1 border-t-transparent h-3 w-3 rounded-full' />
+                                <div className='animate-spin ml-3 border border-t-transparent h-3 w-3 rounded-full' />
                             </>
                         ) :
                             'Sign In'
@@ -303,17 +304,15 @@ function SignUpForm({ setVerifying }) {
                         {loading && signUpMethod === 'google' ? (
                             <>
                                 Signing In
-                                <div className='animate-spin ml-3 border-1 border-t-transparent h-3 w-3 rounded-full' />
+                                <div className='animate-spin ml-3 border border-t-transparent h-3 w-3 rounded-full' />
                             </>
-                        ) :
+                        ) : (
                             <>
                                 Sign in with Google
                                 <FaGoogle size={16} />
                             </>
-                        }
-
+                        )}
                     </button>
-
                     <div className='flex items-center justify-start w-full mt-3'>
                         <button onClick={determineStageBack} type='button' className='toggleXbutton font-medium text-sm items-center gap-2'>
                             <GoChevronLeft size={24} /> Go Back
@@ -326,4 +325,4 @@ function SignUpForm({ setVerifying }) {
     )
 }
 
-export default SignUpForm
+export default SignUpForm;

@@ -9,7 +9,8 @@ async function activateAllCategories() {
 
     await connectToDatabase()
 
-    const settings = await AppSettingsModel.findById('app-settings')
+    const appSettingsId = process.env.NODE_ENV === 'development' ? 'app-settings-dev' : 'app-settings';
+    const settings = await AppSettingsModel.findById(appSettingsId)
 
     if (!settings) {
         console.log('No app settings found!')

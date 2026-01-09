@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { connectToDatabase } from '@/lib/db'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
+import Product from '@/models/Product'
 import { checkAdminPrivileges } from '@/lib/checkPrivileges'
 
 // Admin: list all custom print requests
@@ -34,7 +35,7 @@ export async function PUT(request) {
   }
 
   const body = await request.json()
-  const { requestId, action, quoteAmount, deliveryFee, currency, note, status, deliveryType } = body
+  const { requestId, action, quoteAmount, currency, note, status, dimensions, delivery } = body
 
   if (!requestId) {
     return NextResponse.json({ error: 'requestId is required' }, { status: 400 })
@@ -51,19 +52,40 @@ export async function PUT(request) {
     if (typeof quoteAmount !== 'number' || quoteAmount < 0) {
       return NextResponse.json({ error: 'quoteAmount must be a non-negative number' }, { status: 400 })
     }
-    const safeDelivery = typeof deliveryFee === 'number' && deliveryFee >= 0 ? deliveryFee : 0
     const cur = currency || doc.currency || 'sgd'
 
-    doc.basePrice = quoteAmount
+    // Ensure basePrice exists (older requests may have been created before using the canonical slug lookup)
+    if (doc.basePrice == null || Number(doc.basePrice) === 0) {
+      try {
+        const product = await Product.findOne({ slug: 'custom-print-request' }).lean();
+        const amount = Number(product?.basePrice?.presentmentAmount);
+        if (Number.isFinite(amount) && amount > 0) {
+          doc.basePrice = amount;
+        }
+      } catch (e) {
+        console.error('[PUT /api/admin/custom-print-requests] Failed to backfill basePrice:', e);
+      }
+    }
+
+    // basePrice is set at request creation from product, do not overwrite here
     doc.printFee = quoteAmount
-    doc.deliveryFee = safeDelivery
-    doc.deliveryType = deliveryType || doc.deliveryType || null
-    doc.totalAmount = quoteAmount + safeDelivery
+    // Save available delivery types (array of objects)
+    if (delivery && Array.isArray(delivery.deliveryTypes)) {
+      doc.delivery = { deliveryTypes: delivery.deliveryTypes }
+    }
+    // Save dimensions if provided
+    if (dimensions && typeof dimensions === 'object') {
+      doc.dimensions = { ...dimensions }
+    }
+    // Save admin note if provided
+    if (typeof note === 'string') {
+      doc.adminNote = note
+    }
     doc.currency = cur
-    doc.status = 'payment_pending'
+    doc.status = 'quoted'
     doc.statusHistory.push({
-      status: 'payment_pending',
-      note: note || 'Quote created and awaiting payment.',
+      status: 'quoted',
+      note: note || 'Quote created.',
     })
   } else if (action === 'cancel') {
     doc.status = 'cancelled'
@@ -74,5 +96,8 @@ export async function PUT(request) {
   }
 
   await doc.save()
-  return NextResponse.json({ request: doc })
+  // Remove deliveryFee from response if present
+  const obj = doc.toObject()
+  if ('deliveryFee' in obj) delete obj.deliveryFee
+  return NextResponse.json({ request: obj })
 }

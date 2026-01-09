@@ -238,7 +238,6 @@ function PrintPage() {
             </div>
 
             <div className="grid w-full lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6 mb-8">
-                {/* Custom Print Request Card */}
                 {!loading && customPrintProduct && (
                     <CustomPrintCard product={customPrintProduct} />
                 )}

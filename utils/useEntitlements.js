@@ -1,65 +1,44 @@
 import { useEffect, useState } from "react";
 import useSubscription from "./useSubscription";
 import { getEntitlements } from "./entitlements";
+import { useUserRole } from "./UserRoleContext";
+import { useUserSubscription } from "./UserSubscriptionContext";
+import { useStripePriceIds } from "./StripePriceIdsContext";
 
 export default function useEntitlements() {
-    const { subscription, loading: subLoading, error: subError } = useSubscription();
-    const [role, setRole] = useState(subscription?.role || null);
-    const [roleLoading, setRoleLoading] = useState(!subscription); // if no subscription, we'll fetch role
-    const [roleError, setRoleError] = useState(null);
+    const userRoleCtx = useUserRole() || {};
+    const userSubCtx = useUserSubscription() || {};
+    const { role, loading: roleLoading, error: roleError } = userRoleCtx;
+    const { subscription, loading: subLoading, error: subError } = userSubCtx;
+    const priceId = subscription?.priceId || null;
+    const { stripePriceIds, loading: priceIdsLoading } = useStripePriceIds();
+    const [entitlements, setEntitlements] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        // If subscription already includes role, no need to fetch it again
-        if (subscription?.role) {
-            setRole(subscription.role);
-            setRoleLoading(false);
-            setRoleError(null);
+        if (roleLoading || subLoading || priceIdsLoading) {
+            setLoading(true);
             return;
         }
-
-        let cancelled = false;
-
-        const fetchRole = async () => {
+        async function fetchEntitlements() {
             try {
-                setRoleLoading(true);
-                const res = await fetch("/api/user/role");
-                if (!res.ok) {
-                    if (!cancelled) {
-                        setRole(null);
-                        setRoleError(null);
-                    }
-                    return;
-                }
-                const data = await res.json();
-                if (!cancelled) {
-                    setRole(data.role || "user");
-                    setRoleError(null);
-                }
+                const result = await getEntitlements({ role, priceId, priceIds: stripePriceIds });
+                setEntitlements(result);
+                setError(null);
             } catch (e) {
-                if (!cancelled) {
-                    setRole(null);
-                    setRoleError(e.message || "Failed to load role");
-                }
+                setEntitlements({});
+                setError(e.message || 'Failed to get entitlements');
             } finally {
-                if (!cancelled) {
-                    setRoleLoading(false);
-                }
+                setLoading(false);
             }
-        };
-
-        fetchRole();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [subscription]);
-
-    const priceId = subscription?.priceId || null;
-    const entitlements = getEntitlements({ role, priceId });
+        }
+        fetchEntitlements();
+    }, [role, roleLoading, priceId, subLoading, stripePriceIds, priceIdsLoading]);
 
     return {
-        loading: subLoading || roleLoading,
-        error: subError || roleError,
+        loading: loading,
+        error: subError || roleError || error,
         subscription,
         role: entitlements.isAdmin ? "admin" : role || "user",
         ...entitlements,

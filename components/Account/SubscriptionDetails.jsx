@@ -2,40 +2,50 @@
 import { useUser } from '@clerk/nextjs'
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useStripePriceIds } from '@/utils/StripePriceIdsContext'
 import { useToast } from '../General/ToastProvider'
 import Tier from '../AuthComponents/Tier'
 import { IoMdLock } from 'react-icons/io'
 import { GoChevronLeft } from 'react-icons/go'
-import { STRIPE_PRICE_TIER_1, STRIPE_PRICE_TIER_2, STRIPE_PRICE_TIER_3, STRIPE_PRICE_TIER_4, debugStripeConfig } from '@/lib/stripeConfig'
 
-function SubscriptionDetails() {
-    const stripe = useStripe()
-    const elements = useElements()
-    const router = useRouter()
-    const { user, isLoaded } = useUser()
-    const [loading, setLoading] = useState(false)
-    const [priceId, setPriceId] = useState('')
-    const [step, setStep] = useState('tier_selection')
+
+function SubscriptionDetailsInner() {
+    const stripe = useStripe();
+    const elements = useElements();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const { user, isLoaded } = useUser();
+    const [loading, setLoading] = useState(false);
+    const [step, setStep] = useState('tier_selection');
     const { showToast } = useToast();
 
-    useEffect(() => {
-        // Debug stripe configuration in development
-        debugStripeConfig();
+    // Use shared Stripe price IDs context
+    const { stripePriceIds, loading: priceIdsLoading, error: priceIdsError } = useStripePriceIds();
+    // Use shared subscription context
+    const { subscription, loading: subLoading, error: subError } = require('@/utils/UserSubscriptionContext').useUserSubscription();
+    const [priceId, setPriceId] = useState('');
 
-        const fetchSubscription = async () => {
-            const res = await fetch('/api/user/subscription')
-            if (res.ok) {
-                const data = await res.json()
-                setPriceId(data?.priceId || '')
-            } else if (res.status === 404) {
-                setPriceId('')
-            } else {
-                showToast('Failed to fetch subscription: ' + res.statusText, 'error')
-            }
+    // Preselect tier from query param (used by /creators pricing cards)
+    useEffect(() => {
+        const incoming = (searchParams?.get('priceId') || '').trim();
+        if (!incoming) return;
+        // Only preselect if user isn't already subscribed to a tier.
+        if (subLoading) return;
+        if (subscription?.priceId) return;
+        setPriceId(incoming);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams, subLoading, subscription?.priceId]);
+
+    // Set priceId from subscription context when loaded
+    useEffect(() => {
+        if (!subLoading && subscription) {
+            setPriceId(subscription?.priceId || '');
+        } else if (!subLoading && subscription === null) {
+            setPriceId('');
         }
-        fetchSubscription()
-    }, [user, isLoaded])
+    }, [subLoading, subscription]);
 
     const updateSubscription = async (e) => {
         e.preventDefault();
@@ -74,6 +84,10 @@ function SubscriptionDetails() {
         }
     }
 
+    if (priceIdsLoading) return <div className="text-center py-8">Loading subscription tiers...</div>;
+    if (priceIdsError) return <div className="text-center py-8 text-red-600">Failed to load subscription tiers.</div>;
+    if (!stripePriceIds) return <div className="text-center py-8">No subscription tiers found.</div>;
+
     return (
         <div className="flex flex-col items-center w-full max-w-lg mx-auto py-8">
             <h2 className="text-2xl font-bold mb-2 text-textColor">Choose Your Subscription Tier</h2>
@@ -84,10 +98,10 @@ function SubscriptionDetails() {
                 {step === 'tier_selection' && (
                     <>
                         <div className="flex flex-col gap-2 w-full">
-                            <Tier value={STRIPE_PRICE_TIER_1()} priceId={priceId} setPriceId={setPriceId} />
-                            <Tier value={STRIPE_PRICE_TIER_2()} priceId={priceId} setPriceId={setPriceId} />
-                            <Tier value={STRIPE_PRICE_TIER_3()} priceId={priceId} setPriceId={setPriceId} />
-                            <Tier value={STRIPE_PRICE_TIER_4()} priceId={priceId} setPriceId={setPriceId} />
+                            <Tier value={stripePriceIds.tier1} priceId={priceId} setPriceId={setPriceId} />
+                            <Tier value={stripePriceIds.tier2} priceId={priceId} setPriceId={setPriceId} />
+                            <Tier value={stripePriceIds.tier3} priceId={priceId} setPriceId={setPriceId} />
+                            <Tier value={stripePriceIds.tier4} priceId={priceId} setPriceId={setPriceId} />
                             <Tier value="" priceId={priceId} setPriceId={setPriceId} />
                         </div>
                         <button
@@ -140,4 +154,5 @@ function SubscriptionDetails() {
 
 }
 
-export default SubscriptionDetails
+// No need to wrap with provider, already provided at app root
+export default SubscriptionDetailsInner;

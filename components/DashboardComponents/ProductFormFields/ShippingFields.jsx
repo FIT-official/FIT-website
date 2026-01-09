@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { calculateDeliveryPrice, isDeliveryTypeApplicable } from '@/utils/deliveryPriceCalculator'
+import { useAdminSettings } from '@/utils/AdminSettingsContext';
+import { getDeliveryTypeApplicability as getDeliveryTypeApplicabilityHelper, toggleDeliveryType as toggleDeliveryTypeHelper, updateCustomPrice as updateCustomPriceHelper, updateCustomDescription as updateCustomDescriptionHelper, resetToDefaultPrice as resetToDefaultPriceHelper } from '@/utils/deliveryTypeHelpers'
 import { MdExpandMore, MdExpandLess, MdCheckCircle, MdRadioButtonUnchecked, MdOutlineLightbulb } from 'react-icons/md'
-import { IoMdCube, IoMdResize } from 'react-icons/io'
+import { IoMdCube } from 'react-icons/io'
 import { FiPackage, FiTruck, FiSearch } from 'react-icons/fi'
 import { BiReset } from 'react-icons/bi'
 import { RxDimensions } from 'react-icons/rx'
-import { HiSparkles } from 'react-icons/hi'
 import FieldErrorBanner from './FieldErrorBanner'
 
-export default function ShippingFields({ form, handleChange, setForm, hideDimensions, hidePriceEditor, missingFields = [] }) {
+export default function ShippingFields({ form, handleChange, setForm, hideDimensions, hidePriceEditor, missingFields = [], availableDeliveryTypes: propAvailableDeliveryTypes }) {
     const [availableDeliveryTypes, setAvailableDeliveryTypes] = useState([])
     const [loadingDeliveryTypes, setLoadingDeliveryTypes] = useState(true)
     const [selectedDeliveryTypes, setSelectedDeliveryTypes] = useState({})
@@ -17,26 +17,23 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
     const [expandedDelivery, setExpandedDelivery] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
 
+    // Use admin settings context for delivery types
+    const { settings: adminSettings, loading: adminSettingsLoading, error: adminSettingsError } = useAdminSettings();
     useEffect(() => {
-        const fetchDeliveryTypes = async () => {
-            try {
-                const response = await fetch('/api/admin/settings')
-                const data = await response.json()
-                if (response.ok) {
-                    setAvailableDeliveryTypes(data.deliveryTypes || [])
-                }
-            } catch (error) {
-                console.error('Error fetching delivery types:', error)
-            } finally {
-                setLoadingDeliveryTypes(false)
-            }
+        if (propAvailableDeliveryTypes) {
+            setAvailableDeliveryTypes(propAvailableDeliveryTypes);
+            setLoadingDeliveryTypes(false);
+        } else if (adminSettingsLoading) return;
+        else if (adminSettings && adminSettings.deliveryTypes) {
+            setAvailableDeliveryTypes(adminSettings.deliveryTypes || []);
+            setLoadingDeliveryTypes(false);
         }
-        fetchDeliveryTypes()
-    }, [])
+    }, [adminSettings, adminSettingsLoading, propAvailableDeliveryTypes]);
 
     useEffect(() => {
-        if (!initialized && form.delivery?.deliveryTypes && form.delivery.deliveryTypes.length > 0) {
-            const selected = {}
+        if (initialized) return;
+        const selected = {}
+        if (form.delivery?.deliveryTypes && form.delivery.deliveryTypes.length > 0) {
             form.delivery.deliveryTypes.forEach(dt => {
                 selected[dt.type] = {
                     enabled: true,
@@ -45,174 +42,45 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
                     defaultPrice: dt.price ?? null
                 }
             })
-            setSelectedDeliveryTypes(selected)
-            setInitialized(true)
         }
+        setSelectedDeliveryTypes(selected)
+        setInitialized(true)
     }, [form.delivery?.deliveryTypes, initialized])
 
     const hasDigitalDelivery = form.delivery?.deliveryTypes?.some(dt => dt.type === 'digital' || dt === 'digital')
 
-    // Calculate if a delivery type is applicable based on dimensions
-    const getDeliveryTypeApplicability = (deliveryType) => {
-        // For print products (including custom 3D prints), digital delivery
-        // must never be selectable or recommended
-        if (form.productType === 'print' && deliveryType.name === 'digital') {
-            return {
-                applicable: false,
-                reason: 'Digital delivery is not available for printed products'
-            }
-        }
+    const getDeliveryTypeApplicability = (deliveryType) => getDeliveryTypeApplicabilityHelper(deliveryType, form)
 
-        if (!isDeliveryTypeApplicable(deliveryType, form.productType)) {
-            return {
-                applicable: false,
-                reason: `Not applicable to ${form.productType} products`
-            }
-        }
-
-        // Check if product has dimensions set
-        const dims = form?.dimensions || {}
-        const hasDimensions =
-            typeof dims.length === 'number' && dims.length > 0 &&
-            typeof dims.width === 'number' && dims.width > 0 &&
-            typeof dims.height === 'number' && dims.height > 0 &&
-            typeof dims.weight === 'number' && dims.weight > 0
-
-        if (!hasDimensions && deliveryType.pricingTiers?.length > 0) {
-            return {
-                applicable: false,
-                reason: 'Enter product dimensions first'
-            }
-        }
-
-        // Calculate pricing if tiers exist
-        if (deliveryType.pricingTiers?.length > 0) {
-            const dimensions = {
-                length: Number(dims.length) || 0,
-                width: Number(dims.width) || 0,
-                height: Number(dims.height) || 0,
-                weight: (Number(dims.weight) || 0) * 1000 // Convert kg to grams
-            }
-
-            const priceCalc = calculateDeliveryPrice(deliveryType, dimensions)
-            return {
-                applicable: priceCalc.applicable,
-                defaultPrice: priceCalc.price,
-                tierMatched: priceCalc.tierMatched,
-                reason: !priceCalc.applicable ? 'Product dimensions exceed all pricing tiers' : null
-            }
-        }
-
-        // No pricing tiers, creator must set price
-        return {
-            applicable: true,
-            defaultPrice: null,
-            reason: null
-        }
-    }
-
-    // Toggle delivery type selection
     const toggleDeliveryType = (deliveryType) => {
-        // Ensure we start syncing selection back to the form
-        if (!initialized) {
-            setInitialized(true)
-        }
-        // For print products like custom 3D print, prevent selecting digital delivery entirely
-        if (form.productType === 'print' && deliveryType.name === 'digital') return
-
-        const typeName = deliveryType.name
-        const isCurrentlySelected = selectedDeliveryTypes[typeName]?.enabled
-        
-        // If digital is already selected, prevent any interaction with physical delivery types
-        if (hasDigitalDelivery && deliveryType.name !== 'digital') return
-        
-        // If trying to select digital while other types are selected, clear them all first
-        if (deliveryType.name === 'digital' && !isCurrentlySelected) {
-            const otherTypesSelected = Object.keys(selectedDeliveryTypes).some(key => key !== 'digital' && selectedDeliveryTypes[key]?.enabled)
-            if (otherTypesSelected) {
-                setSelectedDeliveryTypes({
-                    digital: {
-                        enabled: true,
-                        customPrice: 0,
-                        customDescription: 'Digital download only',
-                        defaultPrice: 0
-                    }
-                })
-                setForm(prev => ({
-                    ...prev,
-                    variantTypes: []
-                }))
-                return
-            }
-        }
-
-        if (isCurrentlySelected) {
-            // Deselect
-            const newSelected = { ...selectedDeliveryTypes }
-            delete newSelected[typeName]
-            setSelectedDeliveryTypes(newSelected)
-        } else {
-            // Select and calculate default price
-            const applicability = getDeliveryTypeApplicability(deliveryType)
-            setSelectedDeliveryTypes({
-                ...selectedDeliveryTypes,
-                [typeName]: {
-                    enabled: true,
-                    customPrice: applicability.defaultPrice,
-                    customDescription: deliveryType.description || '',
-                    defaultPrice: applicability.defaultPrice
-                }
-            })
-
-            // If digital delivery is selected, remove all variants
-            if (typeName === 'digital') {
-                setForm(prev => ({
-                    ...prev,
-                    variantTypes: []
-                }))
-            }
-        }
+        toggleDeliveryTypeHelper({
+            deliveryType,
+            form,
+            selectedDeliveryTypes,
+            setSelectedDeliveryTypes,
+            setForm,
+            initialized,
+            setInitialized,
+            getDeliveryTypeApplicabilityImpl: getDeliveryTypeApplicability
+        })
     }
 
     // Update custom price for a delivery type
     const updateCustomPrice = (typeName, price) => {
-        setSelectedDeliveryTypes({
-            ...selectedDeliveryTypes,
-            [typeName]: {
-                ...selectedDeliveryTypes[typeName],
-                customPrice: price === '' ? null : Number(price)
-            }
-        })
+        setSelectedDeliveryTypes(updateCustomPriceHelper(selectedDeliveryTypes, typeName, price))
     }
 
     // Update custom description for a delivery type
     const updateCustomDescription = (typeName, description) => {
-        setSelectedDeliveryTypes({
-            ...selectedDeliveryTypes,
-            [typeName]: {
-                ...selectedDeliveryTypes[typeName],
-                customDescription: description
-            }
-        })
+        setSelectedDeliveryTypes(updateCustomDescriptionHelper(selectedDeliveryTypes, typeName, description))
     }
 
     // Reset to default price
     const resetToDefaultPrice = (typeName) => {
-        if (selectedDeliveryTypes[typeName]?.defaultPrice != null) {
-            setSelectedDeliveryTypes({
-                ...selectedDeliveryTypes,
-                [typeName]: {
-                    ...selectedDeliveryTypes[typeName],
-                    customPrice: selectedDeliveryTypes[typeName].defaultPrice
-                }
-            })
-        }
+        setSelectedDeliveryTypes(resetToDefaultPriceHelper(selectedDeliveryTypes, typeName))
     }
 
     // Update form when selected delivery types change
     useEffect(() => {
-        if (!initialized) return // Don't update form during initialization
-
         const deliveryTypes = Object.entries(selectedDeliveryTypes)
             .filter(([_, data]) => data.enabled)
             .map(([type, data]) => ({
@@ -235,7 +103,7 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
                 }
             }))
         }
-    }, [selectedDeliveryTypes, initialized])
+    }, [selectedDeliveryTypes, form.delivery?.deliveryTypes, setForm])
 
     // Filter delivery types based on search query
     const filteredDeliveryTypes = availableDeliveryTypes
@@ -271,7 +139,128 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
 
     return (
         <div className="flex flex-col gap-2 w-full">
-            {/* Delivery Types Section - shown first for clarity */}
+                        {!hideDimensions && (
+                <div className="border border-borderColor rounded-lg overflow-hidden transition-all duration-200 hover:border-extraLight w-full">
+                    <button
+                        type="button"
+                        onClick={() => setExpandedDimensions(!expandedDimensions)}
+                        className="w-full p-4 flex items-center justify-between bg-background hover:bg-extraLight/5 transition-colors"
+                    >
+                        <div className="flex items-center gap-3">
+                            <RxDimensions className="text-textColor text-xl" />
+                            <div className="text-left">
+                                <h3 className="font-medium text-sm text-textColor">Product Dimensions</h3>
+                                <p className="text-xs text-extraLight mt-0.5">
+                                    {(() => {
+                                        const dims = form?.dimensions || {}
+                                        const hasAny =
+                                            (typeof dims.length === 'number' && dims.length > 0) ||
+                                            (typeof dims.width === 'number' && dims.width > 0) ||
+                                            (typeof dims.height === 'number' && dims.height > 0) ||
+                                            (typeof dims.weight === 'number' && dims.weight > 0)
+                                        return hasAny
+                                            ? `${dims.length || 0}×${dims.width || 0}×${dims.height || 0} cm, ${dims.weight || 0} kg`
+                                            : 'Required for delivery types with pricing tiers'
+                                    })()}
+                                </p>
+                            </div>
+                        </div>
+                        {expandedDimensions ? (
+                            <MdExpandLess className="text-xl text-lightColor transition-transform" />
+                        ) : (
+                            <MdExpandMore className="text-xl text-lightColor transition-transform" />
+                        )}
+                    </button>
+
+                    {expandedDimensions && (
+                        <div className="p-4 border-t border-borderColor bg-baseColor animate-slideDown">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="flex flex-col gap-2">
+                                    <label htmlFor="length" className="text-xs font-medium text-lightColor flex items-center gap-1">
+                                        <IoMdCube className="text-sm" />
+                                        Length (cm)
+                                    </label>
+                                    <input
+                                        id="length"
+                                        name="length"
+                                        type="number"
+                                        min={0}
+                                        step="0.01"
+                                        onChange={handleChange}
+                                        value={(form.dimensions && form.dimensions.length) ?? ''}
+                                        className="formInput text-sm"
+                                        placeholder="0.00"
+                                        disabled={hasDigitalDelivery}
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <label htmlFor="width" className="text-xs font-medium text-lightColor flex items-center gap-1">
+                                        <IoMdCube className="text-sm" />
+                                        Width (cm)
+                                    </label>
+                                    <input
+                                        id="width"
+                                        name="width"
+                                        type="number"
+                                        min={0}
+                                        step="0.01"
+                                        onChange={handleChange}
+                                        value={(form.dimensions && form.dimensions.width) ?? ''}
+                                        className="formInput text-sm"
+                                        placeholder="0.00"
+                                        disabled={hasDigitalDelivery}
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <label htmlFor="height" className="text-xs font-medium text-lightColor flex items-center gap-1">
+                                        <IoMdCube className="text-sm" />
+                                        Height (cm)
+                                    </label>
+                                    <input
+                                        id="height"
+                                        name="height"
+                                        type="number"
+                                        min={0}
+                                        step="0.01"
+                                        onChange={handleChange}
+                                        value={(form.dimensions && form.dimensions.height) ?? ''}
+                                        className="formInput text-sm"
+                                        placeholder="0.00"
+                                        disabled={hasDigitalDelivery}
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <label htmlFor="weight" className="text-xs font-medium text-lightColor flex items-center gap-1">
+                                        <FiPackage className="text-sm" />
+                                        Weight (kg)
+                                    </label>
+                                    <input
+                                        id="weight"
+                                        name="weight"
+                                        type="number"
+                                        min={0}
+                                        step="0.01"
+                                        onChange={handleChange}
+                                        value={(form.dimensions && form.dimensions.weight) ?? ''}
+                                        className="formInput text-sm"
+                                        placeholder="0.00"
+                                        disabled={hasDigitalDelivery}
+                                    />
+                                </div>
+                            </div>
+                            <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded flex gap-2 items-center justify-start text-xs font-medium text-blue-950">
+                                <MdOutlineLightbulb />
+                                <span>
+                                    {hasDigitalDelivery
+                                        ? 'Dimensions are not required for digital-only products. Physical shipping methods are disabled while digital delivery is selected.'
+                                        : 'Accurate dimensions can help calculate delivery prices automatically for certain delivery types.'}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
             <div className="border border-borderColor rounded-lg overflow-hidden transition-all duration-200 hover:border-extraLight w-full">
                 <button
                     type="button"
@@ -316,7 +305,7 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
                             <div className="space-y-4">
                                 {hasDigitalDelivery && (
                                     <div className="p-3 bg-blue-50 border border-blue-200 rounded flex gap-2 items-start text-xs text-blue-950">
-                                        <MdOutlineLightbulb className="flex-shrink-0 mt-0.5" />
+                                        <MdOutlineLightbulb className="shrink-0 mt-0.5" />
                                         <div className="flex flex-col gap-1">
                                             <p className="font-semibold">Digital Delivery Only</p>
                                             <p>Paid assets (downloadable files) can only be delivered to customers as online products. Physical shipping options, product dimensions, and multiple variants are disabled for digital-only products.</p>
@@ -516,9 +505,11 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
                                                                     />
                                                                 </div>
                                                                 <p className="text-xs text-extraLight leading-relaxed">
-                                                                    {applicability.defaultPrice != null
-                                                                        ? 'You can override the automatically calculated price'
-                                                                        : 'Set your delivery price for this option'}
+                                                                    {deliveryType.basePricing && applicability.defaultPrice != null
+                                                                        ? 'You can override the automatically calculated price (formula-based)'
+                                                                        : deliveryType.pricingTiers?.length > 0 && applicability.defaultPrice != null
+                                                                            ? 'You can override the automatically calculated price (tier-based)'
+                                                                            : 'Set your delivery price for this option'}
                                                                 </p>
                                                             </div>
                                                         )}
@@ -582,128 +573,6 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
                 )}
             </div>
 
-            {/* Dimensions Section (optional) */}
-            {!hideDimensions && (
-                <div className="border border-borderColor rounded-lg overflow-hidden transition-all duration-200 hover:border-extraLight w-full">
-                    <button
-                        type="button"
-                        onClick={() => setExpandedDimensions(!expandedDimensions)}
-                        className="w-full p-4 flex items-center justify-between bg-background hover:bg-extraLight/5 transition-colors"
-                    >
-                        <div className="flex items-center gap-3">
-                            <RxDimensions className="text-textColor text-xl" />
-                            <div className="text-left">
-                                <h3 className="font-medium text-sm text-textColor">Product Dimensions</h3>
-                                <p className="text-xs text-extraLight mt-0.5">
-                                    {(() => {
-                                        const dims = form?.dimensions || {}
-                                        const hasAny =
-                                            (typeof dims.length === 'number' && dims.length > 0) ||
-                                            (typeof dims.width === 'number' && dims.width > 0) ||
-                                            (typeof dims.height === 'number' && dims.height > 0) ||
-                                            (typeof dims.weight === 'number' && dims.weight > 0)
-                                        return hasAny
-                                            ? `${dims.length || 0}×${dims.width || 0}×${dims.height || 0} cm, ${dims.weight || 0} kg`
-                                            : 'Required for delivery types with pricing tiers'
-                                    })()}
-                                </p>
-                            </div>
-                        </div>
-                        {expandedDimensions ? (
-                            <MdExpandLess className="text-xl text-lightColor transition-transform" />
-                        ) : (
-                            <MdExpandMore className="text-xl text-lightColor transition-transform" />
-                        )}
-                    </button>
-
-                    {expandedDimensions && (
-                        <div className="p-4 border-t border-borderColor bg-baseColor animate-slideDown">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="length" className="text-xs font-medium text-lightColor flex items-center gap-1">
-                                        <IoMdCube className="text-sm" />
-                                        Length (cm)
-                                    </label>
-                                    <input
-                                        id="length"
-                                        name="length"
-                                        type="number"
-                                        min={0}
-                                        step="0.01"
-                                        onChange={handleChange}
-                                        value={(form.dimensions && form.dimensions.length) ?? ''}
-                                        className="formInput text-sm"
-                                        placeholder="0.00"
-                                        disabled={hasDigitalDelivery}
-                                    />
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="width" className="text-xs font-medium text-lightColor flex items-center gap-1">
-                                        <IoMdCube className="text-sm" />
-                                        Width (cm)
-                                    </label>
-                                    <input
-                                        id="width"
-                                        name="width"
-                                        type="number"
-                                        min={0}
-                                        step="0.01"
-                                        onChange={handleChange}
-                                        value={(form.dimensions && form.dimensions.width) ?? ''}
-                                        className="formInput text-sm"
-                                        placeholder="0.00"
-                                        disabled={hasDigitalDelivery}
-                                    />
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="height" className="text-xs font-medium text-lightColor flex items-center gap-1">
-                                        <IoMdCube className="text-sm" />
-                                        Height (cm)
-                                    </label>
-                                    <input
-                                        id="height"
-                                        name="height"
-                                        type="number"
-                                        min={0}
-                                        step="0.01"
-                                        onChange={handleChange}
-                                        value={(form.dimensions && form.dimensions.height) ?? ''}
-                                        className="formInput text-sm"
-                                        placeholder="0.00"
-                                        disabled={hasDigitalDelivery}
-                                    />
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <label htmlFor="weight" className="text-xs font-medium text-lightColor flex items-center gap-1">
-                                        <FiPackage className="text-sm" />
-                                        Weight (kg)
-                                    </label>
-                                    <input
-                                        id="weight"
-                                        name="weight"
-                                        type="number"
-                                        min={0}
-                                        step="0.01"
-                                        onChange={handleChange}
-                                        value={(form.dimensions && form.dimensions.weight) ?? ''}
-                                        className="formInput text-sm"
-                                        placeholder="0.00"
-                                        disabled={hasDigitalDelivery}
-                                    />
-                                </div>
-                            </div>
-                            <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded flex gap-2 items-center justify-start text-xs font-medium text-blue-950">
-                                <MdOutlineLightbulb />
-                                <span>
-                                    {hasDigitalDelivery
-                                        ? 'Dimensions are not required for digital-only products. Physical shipping methods are disabled while digital delivery is selected.'
-                                        : 'Accurate dimensions can help calculate delivery prices automatically for certain delivery types.'}
-                                </span>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
         </div>
     )
 }

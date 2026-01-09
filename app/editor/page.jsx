@@ -44,9 +44,9 @@ const Editor = () => {
                 const { request } = await requestRes.json()
                 setCustomRequestData(request)
 
-                // Load the 3D model file
-                if (request.modelFile?.s3Url) {
-                    const modelRes = await fetch(`/api/proxy?key=${encodeURIComponent(request.modelFile.s3Url)}`)
+                // Load the 3D model file using s3Key
+                if (request.modelFile?.s3Key) {
+                    const modelRes = await fetch(`/api/proxy?key=${encodeURIComponent(request.modelFile.s3Key)}`)
                     if (modelRes.ok) {
                         const modelBuffer = await modelRes.arrayBuffer()
                         const buffers = new Map()
@@ -61,7 +61,7 @@ const Editor = () => {
                         setVariantId(requestId)
 
                         useStore.setState({
-                            textOriginalFile: btoa(arrayBufferToBase64(modelBuffer)),
+                            textOriginalFile: arrayBufferToBase64(modelBuffer),
                             requestId: requestId, // Store request ID in state
                             isCustomPrint: true
                         })
@@ -107,7 +107,7 @@ const Editor = () => {
                         setFileName(fileName)
 
                         useStore.setState({
-                            textOriginalFile: btoa(arrayBufferToBase64(modelBuffer)),
+                            textOriginalFile: arrayBufferToBase64(modelBuffer),
                             orderId: orderId, // Store order ID in state for later use
                         })
                     }
@@ -153,7 +153,7 @@ const Editor = () => {
                         setFileName(fileName)
 
                         useStore.setState({
-                            textOriginalFile: btoa(arrayBufferToBase64(modelBuffer)),
+                            textOriginalFile: arrayBufferToBase64(modelBuffer),
                             productId: productId,
                             variantId: variantId,
                         })
@@ -201,7 +201,7 @@ const Editor = () => {
         setFileName(filePath)
 
         useStore.setState({
-            textOriginalFile: buffers.get(filePath) ? btoa(arrayBufferToBase64(buffers.get(filePath))) : '',
+            textOriginalFile: buffers.get(filePath) ? arrayBufferToBase64(buffers.get(filePath)) : '',
         })
     }, [])
 

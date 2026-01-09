@@ -6,7 +6,7 @@
       "name": "standard-shipping",
       "displayName": "Standard Shipping",
       "description": "3–5 business days within region. No tracking.",
-      "applicableToProductTypes": ["shop"],
+      "applicableToProductTypes": ["shop", "print"],
       "basePricing": {
         "basePrice": "4.90",
         "volumeFactor": "0",
@@ -29,7 +29,7 @@
       "basePricing": {
         "basePrice": "9.90",
         "volumeFactor": "0.01",
-        "weightFactor": "1.0",
+        "weightFactor": "0.005",
         "minPrice": "9.90",
         "maxPrice": "60.00",
         "freeShippingThreshold": "150.00"

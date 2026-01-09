@@ -130,7 +130,7 @@ export async function POST(req) {
                     {
                         $set: { 'metadata.role': 'Creator' },
                         $addToSet: { creatorProducts: String(product._id) },
-                        $setOnInsert: { 'metadata.displayName': body.creatorUserId, userId: body.creatorUserId },
+                        $setOnInsert: { 'metadata.displayName': null, userId: body.creatorUserId },
                     },
                     { upsert: true, new: true }
                 );
@@ -299,6 +299,10 @@ export async function GET(req) {
         await connectToDatabase();
         const { searchParams } = new URL(req.url);
 
+        const isLikelyClerkUserId = (value) => typeof value === 'string' && /^user_[a-zA-Z0-9]+$/.test(value);
+
+        const isObjectIdString = (value) => typeof value === "string" && /^[0-9a-fA-F]{24}$/.test(value);
+
         const productType = searchParams.get("productType");
         const ids = searchParams.get("ids");
         const productCategoryParam = searchParams.get("productCategory");
@@ -316,7 +320,38 @@ export async function GET(req) {
         if (slug) {
             const projection = fields ? fields.split(",").map(f => f.trim()).join(" ") : undefined;
             const product = await Product.findOne({ slug }).select(projection).lean();
-            return NextResponse.json({ product: product || null }, { status: 200 });
+            if (!product) {
+                return NextResponse.json({ product: null }, { status: 200 });
+            }
+
+            // Enrich with creator display name + URL slug.
+            let creatorDisplayName = 'Unnamed Store';
+            let creatorSlug = product.creatorUserId || null;
+
+            if (product.creatorUserId) {
+                const creator = await User.findOne(
+                    { userId: product.creatorUserId },
+                    { 'metadata.displayName': 1, _id: 0 }
+                ).lean();
+                const name = (typeof creator?.metadata?.displayName === 'string')
+                    ? creator.metadata.displayName.trim()
+                    : '';
+                if (name && !isLikelyClerkUserId(name)) {
+                    creatorDisplayName = name;
+                    creatorSlug = name;
+                }
+            }
+
+            return NextResponse.json(
+                {
+                    product: {
+                        ...product,
+                        creatorDisplayName,
+                        creatorSlug,
+                    },
+                },
+                { status: 200 }
+            );
         }
 
         if (productType) filter.productType = productType;
@@ -364,10 +399,21 @@ export async function GET(req) {
         }
 
         if (ids) {
-            const idArr = ids.split(",").map(id => id.trim()).filter(Boolean);
-            if (idArr.length > 0) filter._id = { $in: idArr };
+            const idArrRaw = ids.split(",").map(id => id.trim()).filter(Boolean);
+            const idArr = idArrRaw.filter(isObjectIdString);
+            if (idArr.length > 0) {
+                filter._id = { $in: idArr };
+            } else {
+                // Avoid Mongoose CastErrors when callers pass non-ObjectId ids.
+                return NextResponse.json({ products: [] }, { status: 200 });
+            }
         }
-        if (productId) filter._id = productId;
+        if (productId) {
+            if (!isObjectIdString(productId)) {
+                return NextResponse.json({ error: "Invalid productId" }, { status: 400 });
+            }
+            filter._id = productId;
+        }
         if (creatorUserId) filter.creatorUserId = creatorUserId;
 
         if (usingNumericCategories) {

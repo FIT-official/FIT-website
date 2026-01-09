@@ -32,7 +32,7 @@ function SignInForm() {
                 await signIn.authenticateWithRedirect({
                     strategy: 'oauth_google',
                     redirectUrl: '/sign-in/sso-callback',
-                    redirectUrlComplete: '/dashboard',
+                    redirectUrlComplete: '/',
                 });
             } else if (signInMethod === 'email') {
                 if (!email || !password) {
@@ -45,7 +45,7 @@ function SignInForm() {
                     password: password,
                 });
                 if (result.status === 'complete') {
-                    router.push('/dashboard');
+                    router.push('/');
                 }
             }
         } catch (error) {

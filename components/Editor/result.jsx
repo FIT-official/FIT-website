@@ -24,7 +24,7 @@ const whiteTheme = {
 }
 
 const Result = () => {
-  const { fileName, scene, generateScene, orderId, productId, variantId } = useStore()
+  const { fileName, scene, buffers, generateScene, orderId, productId, variantId } = useStore()
   const { showToast } = useToast()
   const [meshNames, setMeshNames] = useState([])
   const [submittingConfig, setSubmittingConfig] = useState(false)
@@ -68,7 +68,6 @@ const Result = () => {
 
         if (response.ok) {
           const data = await response.json()
-          console.log('Loaded configuration from MongoDB:', data.request?.printConfiguration)
         }
       } catch (e) {
         console.error('Failed to load configuration from MongoDB:', e)
@@ -331,14 +330,22 @@ const Result = () => {
   }, [printability])
 
   useEffect(() => {
+    if (!buffers || !fileName) return
     startTransition(() => {
-      generateScene({
-        ...visualConfig,
-        ...lighting,
-        ...printability,
+      Promise.resolve(
+        generateScene({
+          ...visualConfig,
+          ...lighting,
+          ...printability,
+        })
+      ).catch((e) => {
+        console.error('Failed to generate scene:', e)
+        showToast(e?.message ? `Failed to load model: ${e.message}` : 'Failed to load model', 'error')
       })
     })
-  }, [visualConfig, lighting, printability])
+    // Only regenerate when the underlying model changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [buffers, fileName, productId, variantId])
 
   return (
     <div className="h-full w-screen">

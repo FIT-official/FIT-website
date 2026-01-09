@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import Logo from '../Logo'
 import { SignOutButton, useUser, SignUpButton } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation';
 import Image from 'next/image'
 import { FcMenu } from "react-icons/fc";
 import { PiSignIn, PiSignOut } from "react-icons/pi";
@@ -20,6 +21,7 @@ import useEntitlements from '@/utils/useEntitlements';
 
 function Navbar() {
     const { user, isLoaded, isSignedIn } = useUser();
+    const router = useRouter();
     const { loading: entitlementsLoading, canUseMessaging, canAccessDashboard } = useEntitlements();
     const [unreadMessages, setUnreadMessages] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
@@ -163,7 +165,7 @@ function Navbar() {
                             style={{ pointerEvents: dropdownOpen ? 'auto' : 'none' }}
                         >
                             <div className={`flex flex-row gap-16 h-full w-full`}>
-                                <Link href='/' className="flex bg-gradient-to-br from-amber-300 to-red-400 flex flex-col rounded-md h-fit items-start justify-center p-4 font-medium text-xs text-pretty text-white shadow-lg transition hover:scale-[1.01] cursor-pointer">
+                                <Link href='/products/custom-print-request' className="flex bg-gradient-to-br from-amber-300 to-red-400 flex flex-col rounded-md h-fit items-start justify-center p-4 font-medium text-xs text-pretty text-white shadow-lg transition hover:scale-[1.01] cursor-pointer">
                                     {/* <div className='animate-spin border-1 border-t-transparent mr-1 h-4 w-4 rounded-full' />
                                     <div className="mt-3">Loading...</div> */}
                                     <div className='gap-3 font-semibold mb-2 items-center flex w-full'>
@@ -241,7 +243,7 @@ function Navbar() {
                             {isSignedIn && isLoaded && user ? (
                                 <div className='flex flex-row items-center gap-1 cursor-pointer w-full'>
                                     <PiSignOut />
-                                    <SignOutButton>
+                                    <SignOutButton redirectUrl="/">
                                         Log Out
                                     </SignOutButton>
                                 </div>

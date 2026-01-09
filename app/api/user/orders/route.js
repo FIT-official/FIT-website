@@ -137,7 +137,8 @@ export async function PUT(req) {
         let isCreator = false;
         if (!isAdmin && !isCustomer) {
             const productId = order.cartItem?.productId;
-            if (productId) {
+            const isObjectIdString = (value) => typeof value === "string" && /^[0-9a-fA-F]{24}$/.test(value);
+            if (productId && isObjectIdString(productId)) {
                 const product = await Product.findById(productId).lean();
                 if (product && product.creatorUserId === userId) {
                     isCreator = true;

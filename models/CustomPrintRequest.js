@@ -11,11 +11,12 @@ const CustomPrintRequestSchema = new mongoose.Schema({
 
     // Uploaded model
     modelFile: {
-        originalName: { type: String, required: true },
-        s3Key: { type: String, required: true }, // S3 storage key
-        s3Url: { type: String, required: true }, // Public URL
-        fileSize: { type: Number, required: true }, // in bytes
-        uploadedAt: { type: Date, default: Date.now }
+        originalName: { type: String, required: false },
+        s3Key: { type: String, required: false }, // S3 storage key
+        s3Url: { type: String, required: false }, // Public URL
+        fileSize: { type: Number, required: false }, // in bytes
+        // Only set when an actual model is uploaded.
+        uploadedAt: { type: Date, required: false }
     },
 
     // Print configuration
@@ -54,15 +55,13 @@ const CustomPrintRequestSchema = new mongoose.Schema({
     // Order status
     status: {
         type: String,
-        enum: ['pending_upload', 'pending_config', 'configured', 'payment_pending', 'paid', 'printing', 'printed', 'shipped', 'delivered', 'cancelled'],
+        enum: ['pending_upload', 'pending_config', 'configured', 'quoted', 'payment_pending', 'paid', 'printing', 'printed', 'shipped', 'delivered', 'cancelled'],
         default: 'pending_upload'
     },
 
     // Pricing
-    basePrice: { type: Number, required: true, default: 0 }, // Base print cost
-    printFee: { type: Number, default: 0 }, // Calculated based on volume/material
-    deliveryFee: { type: Number, default: 0 },
-    totalAmount: { type: Number, default: 0 },
+    basePrice: { type: Number, required: true, default: 0 }, // Base print cost (copied from product at request creation)
+    printFee: { type: Number, default: 0 }, // Admin-specified extra print fee
     currency: { type: String, default: 'sgd' },
 
     // Payment info
@@ -86,15 +85,38 @@ const CustomPrintRequestSchema = new mongoose.Schema({
         country: { type: String }
     },
 
-    // Chosen delivery type for this request (e.g. local-pickup, express-courier)
-    deliveryType: { type: String },
+    // Available delivery types for this request (admin can set, customer picks from these)
+    delivery: {
+        deliveryTypes: [
+            {
+                type: { type: String, required: true },
+                price: { type: Number, required: false, default: 0 },
+                customPrice: { type: Number, default: null, required: false },
+                customDescription: { type: String, default: null, required: false },
+                pickupLocation: { type: String, default: null, required: false },
+                deliveryTypeConfigId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'AppSettings.additionalDeliveryTypes',
+                    required: false
+                },
+            }
+        ]
+    },
+
+    // Dimensions (used for delivery pricing)
+    dimensions: {
+        length: { type: Number, default: null }, // cm
+        width: { type: Number, default: null },  // cm
+        height: { type: Number, default: null }, // cm
+        weight: { type: Number, default: null }  // kg
+    },
 
     trackingNumber: { type: String },
     estimatedDelivery: { type: Date },
     deliveredAt: { type: Date },
 
     // Admin notes and history
-    notes: { type: String },
+    adminNote: { type: String },
     statusHistory: [{
         status: { type: String, required: true },
         updatedAt: { type: Date, default: Date.now },
@@ -118,4 +140,11 @@ CustomPrintRequestSchema.pre('save', function (next) {
     next()
 })
 
-export default mongoose.models.CustomPrintRequest || mongoose.model('CustomPrintRequest', CustomPrintRequestSchema)
+// In Next.js dev with hot reload, Mongoose can keep an old compiled model/schema.
+// If the schema changes (e.g. adding `dimensions`), the cached model may silently drop fields.
+if (process.env.NODE_ENV === 'development' && mongoose.models.CustomPrintRequest) {
+    delete mongoose.models.CustomPrintRequest
+}
+
+export default mongoose.model('CustomPrintRequest', CustomPrintRequestSchema)
+

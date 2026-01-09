@@ -13,6 +13,24 @@ import { convertToGlobalCurrency } from '@/utils/convertCurrency';
 import { getDiscountedPrice } from '@/utils/discount';
 import { useCurrency } from '@/components/General/CurrencyContext';
 import CustomPrintUpload from '@/components/Cart/CustomPrintUpload';
+import { HiCheck, HiExclamationCircle } from 'react-icons/hi';
+import { FaRegCircleCheck } from 'react-icons/fa6';
+
+// Helper to fetch delivery type metadata from /api/admin/settings (AppSettings)
+async function fetchDeliveryTypesMeta() {
+    try {
+        const res = await fetch('/api/admin/settings');
+        if (!res.ok) return {};
+        const data = await res.json();
+        const types = (data?.settings?.additionalDeliveryTypes || []).reduce((acc, dt) => {
+            acc[dt.name] = dt;
+            return acc;
+        }, {});
+        return types;
+    } catch (e) {
+        return {};
+    }
+}
 
 function Cart() {
     const { user, isLoaded } = useUser();
@@ -21,8 +39,10 @@ function Cart() {
     const [products, setProducts] = useState({});
     const [convertedPrices, setConvertedPrices] = useState({});
     const [loading, setLoading] = useState(true);
+    const [deliveryTypesMeta, setDeliveryTypesMeta] = useState({});
     const [localOrderNotes, setLocalOrderNotes] = useState({});
     const [showAddressPrompt, setShowAddressPrompt] = useState(false);
+    const [initializedCustomPrintDelivery, setInitializedCustomPrintDelivery] = useState({});
     const searchParams = useSearchParams();
     const redirectUrl = searchParams.get("redirect") || "/";
     const { showToast } = useToast();
@@ -47,6 +67,11 @@ function Cart() {
         }
         setLoading(false);
     };
+
+    // Fetch delivery type metadata on mount
+    useEffect(() => {
+        fetchDeliveryTypesMeta().then(setDeliveryTypesMeta);
+    }, []);
 
     useEffect(() => {
         if (!isLoaded || !user) return;
@@ -198,14 +223,31 @@ function Cart() {
     }, [products, cartBreakdown, globalCurrency]);
 
     const handleDeliveryChange = async (cartItem, newType) => {
+        // Optimistically update local UI
+        setCart(prev => prev.map(item => {
+            const variantsMatch = JSON.stringify(item.selectedVariants || {}) === JSON.stringify(cartItem.selectedVariants || {});
+            if (
+                item.productId === cartItem.productId &&
+                (item.variantId || null) === (cartItem.variantId || null) &&
+                variantsMatch
+            ) {
+                return { ...item, chosenDeliveryType: newType };
+            }
+            return item;
+        }));
+
         setLoading(true);
+        const selectedVariantsToSend =
+            cartItem.selectedVariants && typeof cartItem.selectedVariants === 'object' && Object.keys(cartItem.selectedVariants).length > 0
+                ? cartItem.selectedVariants
+                : null;
         const res = await fetch("/api/user/cart/delivery", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 productId: cartItem.productId,
                 variantId: cartItem.variantId || null,
-                selectedVariants: cartItem.selectedVariants || {},
+                selectedVariants: selectedVariantsToSend,
                 chosenDeliveryType: newType,
             }),
         });
@@ -215,6 +257,15 @@ function Cart() {
             const cartData = await cartRes.json();
             setCart(cartData.cart || []);
             refreshCartBreakdown();
+        } else {
+            // Re-sync if save failed
+            try {
+                const cartRes = await fetch(`/api/user/cart`);
+                const cartData = await cartRes.json();
+                setCart(cartData.cart || []);
+            } catch (e) {
+                // ignore
+            }
         }
     };
 
@@ -363,6 +414,81 @@ function Cart() {
         }
     };
 
+    // Helper: Use only status field for pending logic
+    function isCustomPrintPending(cartItem, customPrintRequest) {
+        if (!customPrintRequest) return false; // Assume not pending if request not loaded
+        // Pending if status is not quoted, payment_pending, paid, printing, printed, shipped, delivered
+        const status = customPrintRequest.status;
+        return [
+            'pending_upload',
+            'pending_config',
+            'configured'
+        ].includes(status);
+    }
+
+    // Track custom print requests for all custom print cart items
+    const [customPrintRequests, setCustomPrintRequests] = useState({});
+
+    const refreshCustomPrintRequests = async () => {
+        const requests = {};
+        const customPrintCartItems = cart.filter(item => String(item.productId || '').startsWith('custom-print:'));
+        await Promise.all(customPrintCartItems.map(async (item) => {
+            const requestId = item.customPrintRequestId || item.requestId || (item.productId || '').split(':')[1];
+            if (!requestId) return;
+            try {
+                const res = await fetch(`/api/custom-print?requestId=${requestId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data?.request?.requestId) {
+                        requests[requestId] = data.request;
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+        }));
+        setCustomPrintRequests(requests);
+    };
+
+    // Fetch custom print request details for all custom print cart items
+    useEffect(() => {
+        if (cart.some(item => String(item.productId || '').startsWith('custom-print:'))) {
+            refreshCustomPrintRequests();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [cart]);
+
+    // Ensure a valid default delivery type is selected for quoted custom print items.
+    // This persists the default to the cart so the <select> shows the actual selection.
+    useEffect(() => {
+        const customPrintCartItems = cart.filter(item => String(item.productId || '').startsWith('custom-print:'));
+        for (const cartItem of customPrintCartItems) {
+            const requestId = cartItem.customPrintRequestId || cartItem.requestId || (cartItem.productId || '').split(':')[1];
+            if (!requestId) continue;
+            if (initializedCustomPrintDelivery[requestId]) continue;
+
+            const req = customPrintRequests[requestId];
+            const availableTypes = (req?.delivery?.deliveryTypes || []).map(dt => dt.type).filter(Boolean);
+            if (availableTypes.length === 0) continue;
+
+            const current = cartItem.chosenDeliveryType || '';
+            const effective = availableTypes.includes(current) ? current : availableTypes[0];
+            setInitializedCustomPrintDelivery(prev => ({ ...prev, [requestId]: true }));
+            if (effective && effective !== current) {
+                handleDeliveryChange(cartItem, effective);
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [cart, customPrintRequests, initializedCustomPrintDelivery]);
+
+    // Determine if any custom print item is pending (block checkout if so)
+    const hasPendingCustomPrint = cart.some(cartItem => {
+        if (!String(cartItem.productId || '').startsWith('custom-print:')) return false;
+        const requestId = cartItem.customPrintRequestId || cartItem.requestId || (cartItem.productId || '').split(':')[1];
+        const customPrintRequest = customPrintRequests[requestId];
+        return isCustomPrintPending(cartItem, customPrintRequest);
+    });
+
     return (
         <div className='flex w-full flex-col min-h-[92vh] py-12 border-b border-borderColor px-8'>
             <Link href={redirectUrl} className='flex w-full items-center text-sm font-normal gap-2 toggleXbutton'>
@@ -405,16 +531,34 @@ function Cart() {
                                     return !item.variantId && (!item.selectedVariants || Object.keys(item.selectedVariants).length === 0);
                                 });
 
+                                // For custom print, get the requestId and request details
+                                let customPrintRequest = null;
+                                let needsModelUpload = false;
+                                let needsConfig = false;
+                                let uploadedModelName = null;
+                                let requestId = null;
+                                if (isCustomPrint) {
+                                    requestId = cartItem.customPrintRequestId || cartItem.requestId || (cartItem.productId || '').split(':')[1];
+                                    customPrintRequest = customPrintRequests[requestId];
+
+                                    const hasModel = !!(customPrintRequest?.modelFile?.s3Key && customPrintRequest?.modelFile?.originalName);
+                                    const isConfigured = !!customPrintRequest?.printConfiguration?.isConfigured;
+
+                                    needsModelUpload = !hasModel;
+                                    needsConfig = hasModel && !isConfigured;
+                                    uploadedModelName = hasModel ? customPrintRequest.modelFile.originalName : null;
+                                }
+
                                 return (
                                     <div key={index} className='grid grid-cols-1 md:grid-rows-1 md:grid-cols-5 gap-2 md:gap-4 py-8 md:py-6 px-6'>
                                         {isCustomPrint ? (
-                                            <>
+                                            <React.Fragment>
                                                 {/* custom print display */}
                                                 <div className='flex w-full h-full items-center justify-start'>
                                                     <Image
                                                         src={product.images?.[0]
                                                             ? `/api/proxy?key=${encodeURIComponent(product.images[0])}`
-                                                            : '/placeholder.svg'}
+                                                            : '/placeholder.jpg'}
                                                         alt={product.name || 'Custom 3D Print'}
                                                         width={64}
                                                         height={64}
@@ -427,9 +571,40 @@ function Cart() {
                                                         {product.name || 'Custom 3D Print'}
                                                     </p>
                                                     <span className='text-xs text-lightColor'>
-                                                        Request #{String(cartItem.customPrintRequestId || '').slice(0, 8)}
+                                                        Request ID: <span className='font-mono'>{requestId ? requestId : 'N/A'}</span>
                                                     </span>
                                                 </div>
+
+                                                {/* Delivery selection for custom print */}
+                                                {customPrintRequest?.delivery?.deliveryTypes?.length > 0 ? (
+                                                    <div className='flex flex-col gap-1 md:items-center md:justify-center'>
+                                                        <label className='text-[11px] font-medium text-lightColor'>Delivery option</label>
+                                                        <select
+                                                            value={(() => {
+                                                                const availableTypes = (customPrintRequest.delivery?.deliveryTypes || []).map(dt => dt.type).filter(Boolean);
+                                                                const current = cartItem.chosenDeliveryType || '';
+                                                                return availableTypes.includes(current) ? current : (availableTypes[0] || '');
+                                                            })()}
+                                                            onChange={e => handleDeliveryChange(cartItem, e.target.value)}
+                                                            className="py-1 px-2 rounded border border-borderColor bg-background md:text-xs text-lightColor focus:outline-none appearance-none transition-all cursor-pointer"
+                                                            style={{ minWidth: 120, maxWidth: 160 }}
+                                                            aria-label="Delivery option"
+                                                            disabled={loading}
+                                                        >
+                                                            {customPrintRequest.delivery.deliveryTypes.map(dt => (
+                                                                <option key={dt.type} value={dt.type}>
+                                                                    {dt.type}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                ) : (
+                                                    <div className='flex items-center md:justify-center text-sm font-medium '>
+                                                        <div className='flex flex-row rounded border border-borderColor py-1 px-3 text-xs'>
+                                                            No delivery options
+                                                        </div>
+                                                    </div>
+                                                )}
 
                                                 <div className='flex items-center md:justify-center text-sm font-medium '>
                                                     <div className='flex flex-row rounded border border-borderColor py-1 px-3 text-xs'>
@@ -437,10 +612,27 @@ function Cart() {
                                                     </div>
                                                 </div>
 
-                                                <div className='flex flex-col justify-center items-end font-semibold md:text-sm text-base'>
-                                                    <span className='font-bold'>
-                                                        SGD {Number(breakdownItem?.price ?? cartItem.price).toFixed(2)}
-                                                    </span>
+                                                <div className='flex flex-col justify-center items-end font-medium md:text-sm text-base'>
+                                                    {customPrintRequest?.status === 'quoted' ? (
+                                                        <div className="text-right">
+                                                            <span className=' text-green-600'>
+                                                                SGD {Number((customPrintRequest?.basePrice || 0) + (customPrintRequest?.printFee || 0)).toFixed(2)}
+                                                            </span>
+                                                            <div className="text-xs text-green-600 font-medium">
+                                                                Quoted
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <span className=' flex items-center gap-1'>
+                                                            SGD {Number(breakdownItem?.price ?? cartItem.price).toFixed(2)}
+                                                            <span className="relative group">
+                                                                <HiExclamationCircle className="text-yellow-500 text-base cursor-pointer" />
+                                                                <span className="absolute left-1/2 font-normal -translate-x-1/2 mt-2 w-64 text-xs rounded p-4 items-center justify-center text-center opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity duration-200 whitespace-normal bg-background border border-borderColor shadow-lg">
+                                                                    This may not be the final price and will be affected by the final quote.<br />For help, please contact <a href="mailto:fixitoday.contact@gmail.com" className="underline">fixitoday.contact@gmail.com</a>
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                    )}
                                                     <button
                                                         onClick={() => handleRemove(cartItem)}
                                                         className='mt-1 text-[11px] text-red-500 hover:text-red-700'
@@ -448,10 +640,67 @@ function Cart() {
                                                         Remove
                                                     </button>
                                                 </div>
-                                            </>
+
+                                                {/* Custom Print Upload/Configure Button */}
+                                                <div className="md:col-span-5 mt-4">
+                                                    {/* Step-by-step checklist for custom print */}
+                                                    <div className="flex flex-col gap-4 p-4 bg-background border border-borderColor rounded-lg mb-4">
+                                                        {/* Step 1: Upload Model */}
+                                                        <div className="flex items-center gap-3">
+                                                            <FaRegCircleCheck className={`text-base ${(customPrintRequest?.modelFile?.s3Key && customPrintRequest?.modelFile?.originalName) ? 'text-green-600' : 'text-extraLight'}`} />
+                                                            <span className={`text-sm font-medium ${(customPrintRequest?.modelFile?.s3Key && customPrintRequest?.modelFile?.originalName) ? 'text-green-700' : 'text-extraLight'}`}>Upload 3D Model</span>
+                                                        </div>
+                                                        {/* Step 2: Configure Print */}
+                                                        <div className="flex items-center gap-3">
+                                                            <FaRegCircleCheck className={`text-base ${(customPrintRequest?.printConfiguration?.isConfigured || ['configured','quoted','payment_pending','paid','printing','printed','shipped','delivered'].includes(customPrintRequest?.status || 'pending_upload')) ? 'text-green-600' : 'text-extraLight'}`} />
+                                                            <span className={`text-sm font-medium ${(customPrintRequest?.printConfiguration?.isConfigured || ['configured','quoted','payment_pending','paid','printing','printed','shipped','delivered'].includes(customPrintRequest?.status || 'pending_upload')) ? 'text-green-700' : 'text-extraLight'}`}>Configure Print Settings</span>
+                                                        </div>
+                                                        {/* Step 3: Await Quote */}
+                                                        <div className="flex items-center gap-3">
+                                                            <FaRegCircleCheck className={`text-base ${['quoted','payment_pending','paid','printing','printed','shipped','delivered'].includes(customPrintRequest?.status || 'pending_upload') ? 'text-green-600' : 'text-extraLight'}`} />
+                                                            <span className={`text-sm font-medium ${['quoted','payment_pending','paid','printing','printed','shipped','delivered'].includes(customPrintRequest?.status || 'pending_upload') ? 'text-green-700' : 'text-extraLight'}`}>Await Quote</span>
+                                                        </div>
+                                                    </div>
+                                                    {/* Show model upload or uploaded model info */}
+                                                    {needsModelUpload ? (
+                                                        <div className="flex flex-col gap-2">
+                                                            {(!uploadedModelName) && (
+                                                                <div className="flex items-center gap-2 text-yellow-600 text-xs font-medium">
+                                                                    <HiExclamationCircle className="text-lg" />
+                                                                    <span>
+                                                                        Please upload your 3D model to proceed.
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                            <CustomPrintUpload
+                                                                cartItem={{
+                                                                    ...cartItem,
+                                                                    requestId: requestId,
+                                                                    customPrintRequestId: cartItem.customPrintRequestId
+                                                                }}
+                                                                onUploadComplete={async () => {
+                                                                    await refreshCartBreakdown();
+                                                                    await refreshCustomPrintRequests();
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <CustomPrintUpload
+                                                            cartItem={{
+                                                                ...cartItem,
+                                                                requestId: requestId,
+                                                                customPrintRequestId: cartItem.customPrintRequestId
+                                                            }}
+                                                            onUploadComplete={async () => {
+                                                                await refreshCartBreakdown();
+                                                                await refreshCustomPrintRequests();
+                                                            }}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </React.Fragment>
                                         ) : (
-                                            <>
-                                                {/* image */}
+                                            <React.Fragment>
                                                 <div className='flex w-full h-full items-center justify-start'>
                                                     <Image
                                                         src={`/api/proxy?key=${encodeURIComponent(product.images[0])}`}
@@ -566,7 +815,6 @@ function Cart() {
                                                             {hasConfiguration && (() => {
                                                                 try {
                                                                     const config = JSON.parse(localStorage.getItem(configKey))
-                                                                    console.log('Cart loading configuration:', config)
                                                                     return (
                                                                         <div className="bg-gray-50 border border-gray-200 rounded p-3 text-xs">
                                                                             <div className="flex items-center gap-2 text-green-600 mb-2">
@@ -692,7 +940,6 @@ function Cart() {
                                                                             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                                                             </svg>
-                                                                            Print settings configured
                                                                         </div>
                                                                     )
                                                                 }
@@ -716,7 +963,7 @@ function Cart() {
                                                         {(cartItem.orderNote || "").length}/500 characters
                                                     </div>
                                                 </div>
-                                            </>
+                                            </React.Fragment>
                                         )}
                                     </div>
                                 );
@@ -733,6 +980,18 @@ function Cart() {
                 <div className='flex w-full justify-end mt-8'>
                     <div className='flex flex-col border border-borderColor rounded p-4 w-full md:w-fit min-w-1/2'>
                         <h2 className="font-semibold text-lg mb-4">Cart Summary</h2>
+                        {/* Block checkout if any custom print is pending */}
+                        {hasPendingCustomPrint && (
+                            <div className="mb-4 rounded-lg border border-yellow-400 bg-yellow-50 p-4 flex items-center gap-3">
+                                <HiExclamationCircle className="text-yellow-600 text-xl" />
+                                <div>
+                                    <div className="font-semibold text-yellow-800 text-sm">Custom Print Request Incomplete</div>
+                                    <div className="text-xs text-yellow-700">
+                                        Please upload your 3D model, configure your print request and await a quote before proceeding to checkout.
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         {loading ? (
                             <CartSummarySkeleton />
                         ) : showAddressPrompt ? (
@@ -776,18 +1035,32 @@ function Cart() {
                                             <span className='font-medium text-textColor text-right'>{`${currency} ${subtotal.toFixed(2)}`}</span>
                                         </div>
                                         {/* Delivery fees per item */}
-                                        {cartBreakdown.map((item, idx) => (
-                                            <div key={idx} className="flex justify-between font-normal text-lightColor gap-20 py-2">
-                                                <span>
-                                                    {item.chosenDeliveryType === "digital" ? "Digital Delivery" :
-                                                        item.chosenDeliveryType === "printDelivery" ? "Print Service Fee" : "Delivery Fee"} for {item.name}
-                                                    {item.quantity > 1 ? ` x${item.quantity}` : ""}
-                                                </span>
-                                                <span className='font-medium text-textColor text-right'>
-                                                    {`${currency} ${(item.deliveryFee ? item.deliveryFee * (item.quantity || 1) : 0).toFixed(2)}`}
-                                                </span>
-                                            </div>
-                                        ))}
+                                        {cartBreakdown.map((item, idx) => {
+                                            // Fetch delivery type meta from AppSettings
+                                            const deliveryMeta = deliveryTypesMeta[item.chosenDeliveryType] || null;
+                                            return (
+                                                <div key={idx} className="flex flex-col gap-1 py-2 border-b border-borderColor last:border-b-0">
+                                                    <div className="flex justify-between font-normal text-lightColor gap-20">
+                                                        <span>
+                                                            {deliveryMeta?.displayName || item.chosenDeliveryType || 'Delivery'} for {item.name}
+                                                            {item.quantity > 1 ? ` x${item.quantity}` : ""}
+                                                        </span>
+                                                        <span className='font-medium text-textColor text-right'>
+                                                            {`${currency} ${(item.deliveryFee ? item.deliveryFee * (item.quantity || 1) : 0).toFixed(2)}`}
+                                                        </span>
+                                                    </div>
+                                                    {deliveryMeta && (
+                                                        <div className="flex flex-col text-[11px] text-lightColor ml-1 mt-0.5">
+                                                            <span><b>Type:</b> {deliveryMeta.displayName} ({deliveryMeta.name})</span>
+                                                            {deliveryMeta.description && <span><b>About:</b> {deliveryMeta.description}</span>}
+                                                            {deliveryMeta.hasDefaultPrice && deliveryMeta.basePricing?.basePrice != null && (
+                                                                <span><b>Default Price:</b> SGD {Number(deliveryMeta.basePricing.basePrice).toFixed(2)}</span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                         {/* Grand Total */}
                                         <div className='py-2 flex justify-between font-bold mt-2 w-full whitespace-nowrap'>
                                             <span>Grand Total</span>
@@ -800,13 +1073,17 @@ function Cart() {
                         <Link
                             href="/checkout"
                             onClick={async (e) => {
-                                e.preventDefault();
+                                if (hasPendingCustomPrint) {
+                                    e.preventDefault();
+                                    showToast('Please complete your custom print request before checking out.', 'error');
+                                    return;
+                                }
                                 await submitOrderNotes();
                                 window.location.href = "/checkout";
                             }}
-                            className={`formBlackButton mt-4${cart.length === 0 ? " opacity-60 pointer-events-none cursor-not-allowed" : ""}`}
-                            tabIndex={cart.length === 0 ? -1 : 0}
-                            aria-disabled={cart.length === 0}
+                            className={`formBlackButton mt-4${cart.length === 0 || hasPendingCustomPrint ? " opacity-60 pointer-events-none cursor-not-allowed" : ""}`}
+                            tabIndex={cart.length === 0 || hasPendingCustomPrint ? -1 : 0}
+                            aria-disabled={cart.length === 0 || hasPendingCustomPrint}
                         >
                             Proceed to Checkout
                         </Link>

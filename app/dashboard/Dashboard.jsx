@@ -19,6 +19,11 @@ function Dashboard() {
     const { user, isLoaded } = useUser()
     const [myProducts, setMyProducts] = useState([]);
     const { isAdmin } = useAccess();
+    const [displayName, setDisplayName] = useState('');
+    const [displayNameLoaded, setDisplayNameLoaded] = useState(false);
+    const [savingDisplayName, setSavingDisplayName] = useState(false);
+    const [displayNameError, setDisplayNameError] = useState('');
+    const [displayNameSaved, setDisplayNameSaved] = useState(false);
 
     useEffect(() => {
         if (!user || !isLoaded) return;
@@ -29,6 +34,53 @@ function Dashboard() {
         };
         fetchProducts();
     }, [user, isLoaded]);
+
+    useEffect(() => {
+        if (!user || !isLoaded) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch('/api/user/display-name');
+                if (!res.ok) {
+                    // Non-subscribed users may not have access; keep editor hidden.
+                    if (!cancelled) setDisplayNameLoaded(true);
+                    return;
+                }
+                const data = await res.json();
+                if (!cancelled) {
+                    setDisplayName(data.displayName || '');
+                    setDisplayNameLoaded(true);
+                }
+            } catch (e) {
+                if (!cancelled) setDisplayNameLoaded(true);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [user, isLoaded]);
+
+    const saveDisplayName = async () => {
+        try {
+            setSavingDisplayName(true);
+            setDisplayNameError('');
+            setDisplayNameSaved(false);
+            const res = await fetch('/api/user/display-name', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ displayName }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                setDisplayNameError(data.error || 'Failed to save');
+                return;
+            }
+            setDisplayName(data.displayName || displayName);
+            setDisplayNameSaved(true);
+        } catch (e) {
+            setDisplayNameError(e?.message || 'Failed to save');
+        } finally {
+            setSavingDisplayName(false);
+        }
+    }
 
 
     if (!isLoaded) {
@@ -48,10 +100,41 @@ function Dashboard() {
             </div>
             <div className="flex w-full flex-row items-stretch min-w-0">
                 <div className="flex self-stretch bg-background border-r border-t border-borderColor flex-col p-4 basis-48 shrink-0 gap-3">
+                    {isLoaded && user && displayNameLoaded && (
+                        <div className="flex flex-col gap-2 border border-borderColor rounded-md p-3 bg-white">
+                            <div className="flex flex-col gap-1">
+                                <span className="formLabel">Shop display name</span>
+                                <input
+                                    className="formInput"
+                                    value={displayName}
+                                    onChange={(e) => {
+                                        setDisplayName(e.target.value);
+                                        setDisplayNameSaved(false);
+                                    }}
+                                    placeholder="e.g. Lorem Ipsum"
+                                />
+                            </div>
+                            {displayNameError && (
+                                <div className="text-xs text-red-500">{displayNameError}</div>
+                            )}
+                            {displayNameSaved && !displayNameError && (
+                                <div className="text-xs text-lightColor">Saved</div>
+                            )}
+                            <button
+                                type="button"
+                                className="accountSaveButton justify-center"
+                                onClick={saveDisplayName}
+                                disabled={savingDisplayName}
+                            >
+                                {savingDisplayName ? 'Saving…' : 'Save'}
+                            </button>
+                        </div>
+                    )}
+
                     {isAdmin && (
                         <Link
                             href="/admin"
-                            className="flex flex-col items-start justify-center rounded-md bg-gradient-to-br from-amber-300 to-red-400 px-3 py-3 text-xs font-medium text-white shadow-lg transition hover:scale-[1.02]"
+                            className="flex flex-col items-start justify-center rounded-md bg-linear-to-br from-amber-300 to-red-400 px-3 py-3 text-xs font-medium text-white shadow-lg transition hover:scale-[1.02]"
                         >
                             <span className="text-[10px] uppercase tracking-wide opacity-80">Admin</span>
                             <span className="mt-1 text-sm">Open admin dashboard</span>

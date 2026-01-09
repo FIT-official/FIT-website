@@ -34,7 +34,9 @@ function ActionItems({ user, myProducts }) {
 
             const myProductMap = Object.fromEntries(myProducts.map(p => [p._id, p.name]));
             const results = [];
-            users.forEach(u => {
+            const userList = Array.isArray(users) ? users : [];
+            userList.forEach(u => {
+                if (!u.orderHistory || !Array.isArray(u.orderHistory)) return;
                 u.orderHistory.forEach(order => {
                     const item = order.cartItem;
                     if (productIds.includes(item.productId)) {
@@ -43,7 +45,7 @@ function ActionItems({ user, myProducts }) {
                             productName: myProductMap[item.productId],
                             buyerId: u.userId,
                             buyerFirstName: u.firstName || "",
-                            buyerEmail: u.emailAddresses[0]?.emailAddress || "",
+                            buyerEmail: u.emailAddresses?.[0]?.emailAddress || "",
                             orderStatus: order.status,
                             orderType: order.orderType || "order", // Include order type
                             printStatus: order.printStatus || null, // Include print status if available

@@ -22,9 +22,6 @@ export async function PUT(req) {
             return NextResponse.json({ error: "User not found" }, { status: 404 })
         }
 
-        console.log('User cart before update:', JSON.stringify(user.cart, null, 2))
-
-        // Find the custom print request in cart and update it with requestId
         const cartItemIndex = user.cart.findIndex(item => item.productId === 'custom-print-request')
 
         if (cartItemIndex === -1) {
@@ -35,11 +32,7 @@ export async function PUT(req) {
         user.cart[cartItemIndex].set('requestId', requestId)
         user.markModified('cart')
 
-        console.log('Updated cart item:', JSON.stringify(user.cart[cartItemIndex].toObject(), null, 2))
-
         await user.save()
-
-        console.log('User cart after save:', JSON.stringify(user.cart.map(item => item.toObject()), null, 2))
 
         return NextResponse.json({ success: true, cart: user.cart }, { status: 200 })
     } catch (error) {

@@ -22,8 +22,8 @@ const useStore = create((set, get) => ({
   requestId: null,
   isCustomPrint: false,
 
-  setFileName: (fileName) => set({ fileName }),
-  setBuffers: (buffers) => set({ buffers }),
+  setFileName: (fileName) => set({ fileName, scene: null }),
+  setBuffers: (buffers) => set({ buffers, scene: null }),
   setScene: (scene) => set({ scene }),
   setOrderId: (orderId) => set({ orderId }),
   setProductId: (productId) => set({ productId }),
@@ -95,18 +95,38 @@ const useStore = create((set, get) => ({
 
             case '3mf':
               loader = new ThreeMFLoader()
-              loader.parse(buffer, (object) => {
-                // Ensure all meshes have names and shadows
-                object.traverse((child) => {
-                  if (child.isMesh) {
-                    child.name = child.name || `3MF_Mesh_${Math.random().toString(36).substr(2, 9)}`
-                    child.castShadow = true
-                    child.receiveShadow = true
-                  }
-                })
-                scene.add(object)
-                resolve({ scene, animations: [] })
-              }, reject)
+              ;(() => {
+                let settled = false
+                const finish = (object) => {
+                  if (settled) return
+                  settled = true
+                  // Ensure all meshes have names and shadows
+                  object.traverse((child) => {
+                    if (child.isMesh) {
+                      child.name = child.name || `3MF_Mesh_${Math.random().toString(36).substr(2, 9)}`
+                      child.castShadow = true
+                      child.receiveShadow = true
+                    }
+                  })
+                  scene.add(object)
+                  resolve({ scene, animations: [] })
+                }
+                const fail = (err) => {
+                  if (settled) return
+                  settled = true
+                  reject(err)
+                }
+
+                try {
+                  // three.js versions differ:
+                  // - some expose parse(data) => Group (sync)
+                  // - others expose parse(data, onLoad, onError) (async)
+                  const maybeObject = loader.parse(buffer, finish, fail)
+                  if (maybeObject) finish(maybeObject)
+                } catch (e) {
+                  fail(e)
+                }
+              })()
               break
 
             default:
@@ -182,9 +202,8 @@ const useStore = create((set, get) => ({
       animations: !!result.animations?.length,
     })
 
-    if (!get().scene) {
-      set({ scene: result.scene })
-    }
+    // Always replace the scene when regenerating from new buffers.
+    set({ scene: result.scene })
   },
 }))
 

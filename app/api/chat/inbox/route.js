@@ -5,6 +5,16 @@ import ChatReadState from "@/models/ChatReadState";
 import ChannelSummary from "@/models/ChannelSummary";
 import { clerkClient } from "@clerk/nextjs/server";
 
+const isLikelyClerkUserId = (value) => typeof value === 'string' && /^user_[a-zA-Z0-9]+$/.test(value);
+
+const sanitizeDisplayName = (value, fallback = 'Unnamed Store') => {
+    if (typeof value !== 'string') return fallback;
+    const trimmed = value.trim();
+    if (!trimmed) return fallback;
+    if (isLikelyClerkUserId(trimmed)) return fallback;
+    return trimmed;
+};
+
 export async function GET(request) {
     try {
         const { userId } = await authenticate(request);
@@ -45,12 +55,13 @@ export async function GET(request) {
 
                 participants.push({
                     id: memberId,
-                    name:
+                    name: sanitizeDisplayName(
                         profile?.firstName ||
                         profile?.username ||
-                        profile?.emailAddresses?.[0]?.emailAddress ||
                         p.name ||
-                        memberId,
+                        '',
+                        'Unnamed Store'
+                    ),
                     imageUrl: profile?.imageUrl || p.imageUrl || null,
                 });
             }

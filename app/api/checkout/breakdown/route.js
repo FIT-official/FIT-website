@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
 import Event from "@/models/Event";
+import CustomPrintRequest from "@/models/CustomPrintRequest";
 import { calculateCartItemBreakdown } from "../calculateBreakdown";
 import { authenticate } from "@/lib/authenticate";
 
@@ -45,14 +46,83 @@ export async function GET(req) {
 
         const cartBreakdown = [];
         for (const item of user.cart) {
-            const product = await fetchProduct(item.productId);
+            let product = null;
+            let customPrintRequest = null;
+
+            if (String(item.productId || '').startsWith('custom-print:')) {
+                // Handle custom print
+                const requestId = item.customPrintRequestId || (item.productId || '').split(':')[1];
+                customPrintRequest = await CustomPrintRequest.findOne({ requestId, userId });
+
+                // Fetch custom print base product
+                try {
+                    const customPrintRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/product/custom-print-config`);
+                    if (customPrintRes.ok) {
+                        const customPrintData = await customPrintRes.json();
+                        product = customPrintData.product;
+                    }
+                } catch (err) {
+                    console.error('Error fetching custom print product:', err);
+                }
+            } else {
+                product = await fetchProduct(item.productId);
+            }
+
+            if (!product) continue;
+
             try {
-                const breakdown = await calculateCartItemBreakdown({
-                    item,
-                    product,
-                    address,
-                    extraDiscountRules,
-                });
+                let breakdown;
+                const isFixedPricedCustomPrint = customPrintRequest && [
+                    'quoted',
+                    'payment_pending',
+                    'paid',
+                    'printing',
+                    'printed',
+                    'shipped',
+                    'delivered',
+                ].includes(customPrintRequest.status);
+
+                if (isFixedPricedCustomPrint) {
+                    // Use quoted pricing for custom prints
+                    const base = Number(customPrintRequest.basePrice || 0);
+                    const fee = Number(customPrintRequest.printFee || 0);
+                    const quotedPrice = base + fee;
+
+                    const availableDeliveryTypes = customPrintRequest.delivery?.deliveryTypes || [];
+                    const requestedDeliveryType = item.chosenDeliveryType || '';
+                    const requestedExists = availableDeliveryTypes.some(dt => dt.type === requestedDeliveryType);
+                    const chosenDeliveryType = requestedExists
+                        ? requestedDeliveryType
+                        : (availableDeliveryTypes[0]?.type || '');
+                    const chosenDeliveryObj = availableDeliveryTypes.find(dt => dt.type === chosenDeliveryType);
+                    const deliveryFee = Number(chosenDeliveryObj?.customPrice ?? chosenDeliveryObj?.price ?? 0);
+
+                    breakdown = {
+                        productId: item.productId,
+                        selectedVariants: item.selectedVariants || {},
+                        name: product.name,
+                        quantity: 1,
+                        price: quotedPrice,
+                        priceBeforeDiscount: quotedPrice,
+                        basePrice: base,
+                        variantInfo: [],
+                        chosenDeliveryType,
+                        deliveryFee,
+                        total: quotedPrice + deliveryFee,
+                        creatorUserId: product.creatorUserId,
+                        currency: (customPrintRequest.currency || 'sgd').toUpperCase(),
+                        customPrintRequestId: customPrintRequest.requestId,
+                        customPrintStatus: customPrintRequest.status
+                    };
+                } else {
+                    // Normal product breakdown
+                    breakdown = await calculateCartItemBreakdown({
+                        item,
+                        product,
+                        address,
+                        extraDiscountRules,
+                    });
+                }
                 // Add order note to the breakdown
                 breakdown.orderNote = item.orderNote || "";
                 cartBreakdown.push(breakdown);

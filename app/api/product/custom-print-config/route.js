@@ -8,10 +8,8 @@ import { checkAdminPrivileges } from '@/lib/checkPrivileges'
 export async function GET(req) {
     try {
         const { userId } = await authenticate(req);
-        await checkAdminPrivileges(userId);
 
         await connectToDatabase()
-        // Find or return the custom print product by slug
         let product = await Product.findOne({ slug: 'custom-print-request' })
 
         return NextResponse.json({ product })

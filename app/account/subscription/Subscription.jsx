@@ -6,27 +6,11 @@ import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
+import { useUserSubscription } from '@/utils/UserSubscriptionContext';
+
 function Subscription() {
     const [updating, setUpdating] = useState(false);
-    const [hasSubscription, setHasSubscription] = useState(undefined);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchSubscription = async () => {
-            setLoading(true);
-            const res = await fetch('/api/user/subscription');
-            if (res.ok) {
-                const data = await res.json();
-                setHasSubscription(!!data?.priceId);
-            } else if (res.status === 404) {
-                setHasSubscription(false);
-            } else {
-                setHasSubscription(false);
-            }
-            setLoading(false);
-        };
-        fetchSubscription();
-    }, []);
+    const { subscription, loading: subLoading, error: subError } = useUserSubscription();
 
     const updateSubButton = () => setUpdating((prev) => !prev);
 
@@ -34,17 +18,19 @@ function Subscription() {
         const res = await fetch('/api/user/subscription/cancel', { method: 'POST' });
         if (res.ok) {
             alert('Subscription cancelled successfully');
-            setHasSubscription(false);
+            // No need to manually update state, context will refresh
         } else {
             alert('Failed to cancel subscription');
         }
     };
 
-    if (loading) {
+    if (subLoading) {
         return <div className='flex items-center justify-center h-[92vh] w-full border-b border-borderColor'>
             <div className='loader' />
         </div>;
     }
+
+    const hasSubscription = !!subscription?.priceId;
 
     return (
         <div className='flex flex-col items-center justify-center h-[92vh] w-full gap-5  border-b border-borderColor'>

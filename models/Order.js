@@ -100,7 +100,6 @@ const OrderSchema = new mongoose.Schema({
 
 // Index for faster queries
 OrderSchema.index({ userId: 1, createdAt: -1 });
-OrderSchema.index({ stripeSessionId: 1 });
-OrderSchema.index({ orderId: 1 });
+// stripeSessionId and orderId already have inline unique/index definitions
 
 export default mongoose.models.Order || mongoose.model("Order", OrderSchema);

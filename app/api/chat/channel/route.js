@@ -31,21 +31,26 @@ export async function POST(request) {
         }
 
         // Ensure the counterpart user exists in Stream before creating the channel
-        if (kind === "support") {
-            await serverClient.upsertUsers([
-                {
-                    id: otherUserId,
-                    name: "Support",
-                },
-            ]);
-        } else if (otherUserId) {
-            // Minimal upsert for creator or other target users; you can
-            // enrich this later with display names or avatars.
-            await serverClient.upsertUsers([
-                {
-                    id: otherUserId,
-                },
-            ]);
+        {
+            const usersToUpsert = [];
+
+            // Upsert the caller as well; Stream may reject channel creation if
+            // created_by_id/members are not known to Stream.
+            if (userId) {
+                usersToUpsert.push({ id: userId });
+            }
+
+            if (kind === "support") {
+                usersToUpsert.push({ id: otherUserId, name: "Support" });
+            } else if (otherUserId) {
+                // Minimal upsert for creator or other target users; you can
+                // enrich this later with display names or avatars.
+                usersToUpsert.push({ id: otherUserId });
+            }
+
+            if (usersToUpsert.length > 0) {
+                await serverClient.upsertUsers(usersToUpsert);
+            }
         }
 
         // Deduplicate members in case of misconfiguration and let Stream

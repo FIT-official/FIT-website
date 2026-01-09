@@ -1,4 +1,4 @@
-function getMimeType(ext) {
+export function getMimeType(ext) {
     const mimeTypes = {
         obj: "application/octet-stream",
         glb: "model/gltf-binary",
@@ -8,7 +8,8 @@ function getMimeType(ext) {
         fbx: "application/octet-stream",
         zip: "application/zip",
         rar: "application/x-rar-compressed",
-        "7z": "application/x-7z-compressed"
+        "7z": "application/x-7z-compressed",
+        "3mf": "model/3mf"
     };
     return mimeTypes[ext] || "application/octet-stream";
 }
@@ -32,7 +33,7 @@ export async function uploadImages(pendingImages) {
 
 export async function uploadModels(pendingModels) {
     const ALLOWED_MODEL_EXTS = [
-        "obj", "glb", "gltf", "stl", "blend", "fbx", "zip", "rar", "7z"
+        "obj", "glb", "gltf", "stl", "blend", "fbx", "zip", "rar", "7z", "3mf"
     ];
     const MAX_SIZE = 100 * 1024 * 1024; // 100MB
     const uploadedKeys = [];

@@ -4,11 +4,17 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
 import CheckoutSession from "@/models/CheckoutSession";
+import CustomPrintRequest from "@/models/CustomPrintRequest";
 import { calculateCartItemBreakdown } from "../calculateBreakdown";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2025-05-28.basil",
 });
+
+function isLikelyPublicUrl(value) {
+    if (!value || typeof value !== "string") return false;
+    return value.startsWith("https://") || value.startsWith("http://");
+}
 
 async function fetchProductDetails(productId) {
     const res = await fetch(
@@ -63,15 +69,98 @@ export async function POST(req) {
         for (const item of user.cart) {
             try {
                 // console.log("Processing cart item:", item);
-                const { product } = await fetchProductDetails(item.productId);
-                // console.log("Fetched product details:", product);
+                let product = null;
+                let customPrintRequest = null;
+                let breakdown;
 
-                // Use calculateCartItemBreakdown for all pricing calculations
-                const breakdown = await calculateCartItemBreakdown({
-                    item,
-                    product,
-                    address,
-                });
+                if (String(item.productId || '').startsWith('custom-print:')) {
+                    // Handle custom print
+                    const requestId = item.customPrintRequestId || (item.productId || '').split(':')[1];
+                    customPrintRequest = await CustomPrintRequest.findOne({ requestId, userId });
+
+                    // Fetch custom print base product
+                    try {
+                        const customPrintRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/product/custom-print-config`);
+                        if (customPrintRes.ok) {
+                            const customPrintData = await customPrintRes.json();
+                            product = customPrintData.product;
+                        }
+                    } catch (err) {
+                        console.error('Error fetching custom print product:', err);
+                    }
+
+                    // Ensure we always have a safe product object for downstream logic
+                    if (!product) {
+                        product = {
+                            name: 'Custom 3D Print',
+                            images: [],
+                            creatorUserId: null,
+                            paidAssets: [],
+                        };
+                    }
+
+                    const isFixedPricedCustomPrint = customPrintRequest && [
+                        'quoted',
+                        'payment_pending',
+                        'paid',
+                        'printing',
+                        'printed',
+                        'shipped',
+                        'delivered',
+                    ].includes(customPrintRequest.status);
+
+                    if (isFixedPricedCustomPrint) {
+                        // Use quoted pricing for custom prints
+                        const base = Number(customPrintRequest.basePrice || 0);
+                        const fee = Number(customPrintRequest.printFee || 0);
+                        const quotedPrice = base + fee;
+
+                        const availableDeliveryTypes = customPrintRequest.delivery?.deliveryTypes || [];
+                        const requestedDeliveryType = item.chosenDeliveryType || '';
+                        const requestedExists = availableDeliveryTypes.some(dt => dt.type === requestedDeliveryType);
+                        const chosenDeliveryType = requestedExists
+                            ? requestedDeliveryType
+                            : (availableDeliveryTypes[0]?.type || '');
+                        const chosenDeliveryObj = availableDeliveryTypes.find(dt => dt.type === chosenDeliveryType);
+                        const deliveryFee = Number(chosenDeliveryObj?.customPrice ?? chosenDeliveryObj?.price ?? 0);
+
+                        breakdown = {
+                            productId: item.productId,
+                            selectedVariants: item.selectedVariants || {},
+                            name: product?.name || 'Custom 3D Print',
+                            quantity: 1,
+                            price: quotedPrice,
+                            priceBeforeDiscount: quotedPrice,
+                            basePrice: base,
+                            variantInfo: [],
+                            chosenDeliveryType,
+                            deliveryFee,
+                            total: quotedPrice + deliveryFee,
+                            creatorUserId: product?.creatorUserId,
+                            currency: (customPrintRequest.currency || 'sgd').toUpperCase(),
+                            customPrintRequestId: customPrintRequest.requestId,
+                            customPrintStatus: customPrintRequest.status
+                        };
+                    } else {
+                        // Fallback to calculateCartItemBreakdown
+                        breakdown = await calculateCartItemBreakdown({
+                            item,
+                            product,
+                            address,
+                        });
+                    }
+                } else {
+                    const { product: fetchedProduct } = await fetchProductDetails(item.productId);
+                    product = fetchedProduct;
+                    // console.log("Fetched product details:", product);
+
+                    // Use calculateCartItemBreakdown for all pricing calculations
+                    breakdown = await calculateCartItemBreakdown({
+                        item,
+                        product,
+                        address,
+                    });
+                }
                 // console.log("Breakdown:", breakdown);
 
                 const { price, deliveryFee, quantity, chosenDeliveryType, basePrice, priceBeforeDiscount, variantInfo, currency } = breakdown;
@@ -86,18 +175,21 @@ export async function POST(req) {
                 }
 
                 // Build product name with variant info if available
-                let productName = product.name || "Unknown Product";
+                let productName = product?.name || "Unknown Product";
                 if (variantInfo && variantInfo.length > 0) {
                     const variantText = variantInfo.map(v => `${v.option}`).join(", ");
                     productName = `${productName} (${variantText})`;
                 }
+
+                const firstImage = Array.isArray(product?.images) ? product.images[0] : undefined;
+                const stripeImages = isLikelyPublicUrl(firstImage) ? [firstImage] : undefined;
 
                 line_items.push({
                     price_data: {
                         currency: "sgd",
                         product_data: {
                             name: productName,
-                            images: [product.images?.[0] || ""],
+                            ...(stripeImages ? { images: stripeImages } : {}),
                         },
                         unit_amount,
                     },
@@ -109,7 +201,7 @@ export async function POST(req) {
                         price_data: {
                             currency: "sgd",
                             product_data: {
-                                name: `Delivery (${chosenDeliveryType}) for ${product.name}`,
+                                name: `Delivery (${chosenDeliveryType}) for ${product?.name || 'Item'}`,
                             },
                             unit_amount: Math.round(deliveryFee * 100),
                         },

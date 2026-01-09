@@ -15,7 +15,8 @@ import PaidAssetsField from './ProductFormFields/PaidAssetsField';
 import ShippingFields from './ProductFormFields/ShippingFields';
 import PricingFields from './ProductFormFields/PricingFields';
 import VariantTypesField from './ProductFormFields/VariantTypesField';
-import DiscountsField from './ProductFormFields/DiscountsField';
+import DiscountsField from "./ProductFormFields/DiscountsField";
+import { useAdminSettings } from '@/utils/AdminSettingsContext';
 import {
     mapProductToForm,
     buildProductPayload,
@@ -127,6 +128,8 @@ function ProductForm({ mode = "Create", product = null }) {
 
     const [form, setForm] = useState(product ? { ...defaultForm, ...product } : defaultForm);
 
+    // (Debug log removed)
+
     // If not admin, force productType to 'print' and reset category/subcategory if needed
     useEffect(() => {
         if (!isAdmin && form.productType !== "print") {
@@ -139,85 +142,56 @@ function ProductForm({ mode = "Create", product = null }) {
         }
     }, [isAdmin]);
 
-    // Fetch admin-configurable options
+    // Fetch admin-configurable options from context
+    const { settings: adminSettings, loading: adminSettingsLoading, error: adminSettingsError } = useAdminSettings();
     useEffect(() => {
-        const fetchAdminConfig = async () => {
-            try {
-                // Fetch delivery types and categories from AppSettings
-                const settingsRes = await fetch('/api/admin/settings');
-                if (settingsRes.ok) {
-                    const settingsData = await settingsRes.json();
+        if (adminSettingsLoading) return;
+        if (adminSettings && adminSettings.deliveryTypes && adminSettings.categories) {
+            // Handle delivery types
+            const applicableDeliveryTypes = (adminSettings.deliveryTypes || []).filter(dt =>
+                dt.isActive && dt.applicableToProductTypes?.includes(form.productType)
+            );
+            setAdminDeliveryTypes(applicableDeliveryTypes);
 
-                    // Handle delivery types
-                    const applicableDeliveryTypes = (settingsData.deliveryTypes || []).filter(dt =>
-                        dt.isActive && dt.applicableToProductTypes?.includes(form.productType)
-                    );
-                    setAdminDeliveryTypes(applicableDeliveryTypes);
+            // Handle categories - filter by type and isActive
+            const activeCats = (adminSettings.categories || [])
+                .filter(cat => cat.type === form.productType && cat.isActive);
 
-                    // Handle categories - filter by type and isActive
-                    const activeCats = (settingsData.categories || [])
-                        .filter(cat => cat.type === form.productType && cat.isActive);
+            setAdminCategories(activeCats);
 
-                    setAdminCategories(activeCats);
-
-                    // Extract active subcategories for the currently selected category
-                    // We'll update this when category changes
-                    if (activeCats.length > 0) {
-                        const currentCat = activeCats.find(c => c.displayName === form.categoryId) || activeCats[0];
-                        const activeSubs = (currentCat.subcategories || []).filter(sub => sub.isActive);
-                        setAdminSubcategories(activeSubs);
-                    } else {
-                        setAdminSubcategories([]);
-                    }
-                } else {
-                    // Fallback to legacy hardcoded categories
-                    const hardcodedCategories = form.productType === "shop" ? SHOP_CATEGORIES : PRINT_CATEGORIES;
-                    const hardcodedSubcategories = form.productType === "shop" ? SHOP_SUBCATEGORIES : PRINT_SUBCATEGORIES;
-
-                    // Convert legacy format to new format
-                    const legacyCats = hardcodedCategories.map((cat, idx) => ({
-                        name: cat.toLowerCase().replace(/\s+/g, '-'),
-                        displayName: cat,
-                        type: form.productType,
-                        isActive: true,
-                        subcategories: hardcodedSubcategories[idx]?.map(sub => ({
-                            name: sub.toLowerCase().replace(/\s+/g, '-'),
-                            displayName: sub,
-                            isActive: true
-                        })) || []
-                    }));
-
-                    setAdminCategories(legacyCats);
-                    if (legacyCats.length > 0) {
-                        setAdminSubcategories(legacyCats[0].subcategories || []);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching admin config:', error);
-                const hardcodedCategories = form.productType === "shop" ? SHOP_CATEGORIES : PRINT_CATEGORIES;
-                const hardcodedSubcategories = form.productType === "shop" ? SHOP_SUBCATEGORIES : PRINT_SUBCATEGORIES;
-
-                const legacyCats = hardcodedCategories.map((cat, idx) => ({
-                    name: cat.toLowerCase().replace(/\s+/g, '-'),
-                    displayName: cat,
-                    type: form.productType,
-                    isActive: true,
-                    subcategories: hardcodedSubcategories[idx]?.map(sub => ({
-                        name: sub.toLowerCase().replace(/\s+/g, '-'),
-                        displayName: sub,
-                        isActive: true
-                    })) || []
-                }));
-
-                setAdminCategories(legacyCats);
-                if (legacyCats.length > 0) {
-                    setAdminSubcategories(legacyCats[0].subcategories || []);
-                }
+            // Extract active subcategories for the currently selected category
+            // We'll update this when category changes
+            if (activeCats.length > 0) {
+                const currentCat = activeCats.find(c => c.displayName === form.categoryId) || activeCats[0];
+                const activeSubs = (currentCat.subcategories || []).filter(sub => sub.isActive);
+                setAdminSubcategories(activeSubs);
+            } else {
+                setAdminSubcategories([]);
             }
-        };
+        } else if (!adminSettingsLoading && adminSettingsError) {
+            // Fallback to legacy hardcoded categories
+            const hardcodedCategories = form.productType === "shop" ? SHOP_CATEGORIES : PRINT_CATEGORIES;
+            const hardcodedSubcategories = form.productType === "shop" ? SHOP_SUBCATEGORIES : PRINT_SUBCATEGORIES;
 
-        fetchAdminConfig();
-    }, [form.productType]);
+            // Convert legacy format to new format
+            const legacyCats = hardcodedCategories.map((cat, idx) => ({
+                name: cat.toLowerCase().replace(/\s+/g, '-'),
+                displayName: cat,
+                type: form.productType,
+                isActive: true,
+                subcategories: hardcodedSubcategories[idx]?.map(sub => ({
+                    name: sub.toLowerCase().replace(/\s+/g, '-'),
+                    displayName: sub,
+                    isActive: true
+                })) || []
+            }));
+
+            setAdminCategories(legacyCats);
+            if (legacyCats.length > 0) {
+                setAdminSubcategories(legacyCats[0].subcategories || []);
+            }
+        }
+    }, [adminSettings, adminSettingsLoading, adminSettingsError, form.productType, form.categoryId]);
 
     // Admin-configurable options state
     const [adminCategories, setAdminCategories] = useState([]);
@@ -480,8 +454,15 @@ function ProductForm({ mode = "Create", product = null }) {
             if (uploadedViewable) {
                 allUploadedFiles.push(uploadedViewable);
             }
+
+            // Log S3 URLs for reference
+            // eslint-disable-next-line no-console
+            console.log('[ProductForm] Uploaded model S3 keys:', uploadedModels);
+            // eslint-disable-next-line no-console
+            console.log('[ProductForm] Uploaded viewable model S3 key:', uploadedViewable);
         } catch (error) {
-            console.error("Error uploading files:", error);
+            // eslint-disable-next-line no-console
+            console.error("Error uploading files:", error, error?.stack || '');
 
             // Cleanup any uploaded files
             if (allUploadedFiles.length > 0) {
@@ -489,7 +470,8 @@ function ProductForm({ mode = "Create", product = null }) {
                 try {
                     await cleanupUploadedFiles(allUploadedFiles);
                 } catch (cleanupError) {
-                    console.error("Cleanup failed:", cleanupError);
+                    // eslint-disable-next-line no-console
+                    console.error("Cleanup failed:", cleanupError, cleanupError?.stack || '');
                 }
             }
 
@@ -497,7 +479,6 @@ function ProductForm({ mode = "Create", product = null }) {
             setIsLoading(false);
             return;
         }
-
         const payload = buildProductPayload(form, user, uploadedImages, uploadedModels, uploadedViewable);
 
         const isEditing = !!(product && (product._id));

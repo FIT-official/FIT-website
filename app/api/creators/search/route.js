@@ -3,6 +3,8 @@ import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
 import { clerkClient } from "@clerk/nextjs/server";
 
+const isLikelyClerkUserId = (value) => typeof value === 'string' && /^user_[a-zA-Z0-9]+$/.test(value);
+
 // Search creators by simple text query. We treat users with metadata.role === "Creator"
 // or non-empty creatorProducts as creators. Enriches results with Clerk profile data.
 export async function GET(request) {
@@ -14,22 +16,24 @@ export async function GET(request) {
         const limit = Math.min(Number(searchParams.get("limit")) || 20, 50);
 
         const baseFilter = {
+            // A "creator" is a subscribed/admin user who has set a shop display name,
+            // or an existing creator with products/role.
             $or: [
                 { "metadata.role": "Creator" },
                 { creatorProducts: { $exists: true, $not: { $size: 0 } } },
+                { "metadata.displayName": { $exists: true, $type: "string", $ne: "" } },
             ],
         };
 
         let filter = { ...baseFilter };
 
         if (q) {
-            const nameOrId = {
+            const nameOnly = {
                 $or: [
-                    { userId: { $regex: q, $options: "i" } },
                     { "metadata.displayName": { $regex: q, $options: "i" } },
                 ],
             };
-            filter = { $and: [baseFilter, nameOrId] };
+            filter = { $and: [baseFilter, nameOnly] };
         }
 
         const creators = await User.find(filter)
@@ -53,12 +57,8 @@ export async function GET(request) {
 
         const result = creators.map((u) => {
             const profile = profileCache[u.userId];
-            const displayName =
-                u.metadata?.displayName ||
-                profile?.firstName ||
-                profile?.username ||
-                profile?.emailAddresses?.[0]?.emailAddress?.split("@")[0] ||
-                "Creator";
+            const raw = (typeof u.metadata?.displayName === 'string') ? u.metadata.displayName.trim() : '';
+            const displayName = raw && !isLikelyClerkUserId(raw) ? raw : 'Unnamed Store';
             const imageUrl = profile?.imageUrl || null;
 
             return {

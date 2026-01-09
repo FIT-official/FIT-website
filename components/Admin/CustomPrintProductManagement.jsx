@@ -247,13 +247,7 @@ export default function CustomPrintProductManagement() {
                     allCurrencies={allCurrencies}
                 />
 
-                <ShippingFields
-                    form={form}
-                    handleChange={handleChange}
-                    setForm={setForm}
-                    hideDimensions
-                    hidePriceEditor
-                />
+                {/* Delivery types removed for custom print product config. Only set in print requests. */}
 
                 <DiscountsField
                     form={form}

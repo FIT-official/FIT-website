@@ -1,40 +1,44 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { getEntitlements } from "./entitlements";
+import { useAccessContext } from "./AccessContext";
+import { useUserRole } from "./UserRoleContext";
+import { useUserSubscription } from "./UserSubscriptionContext";
+import { useStripePriceIds } from "./StripePriceIdsContext";
 
 export default function useAccess() {
+    const context = useAccessContext && useAccessContext();
+    if (context && typeof context.loading !== 'undefined') {
+        return {
+            loading: context.loading,
+            canAccess: context.canAccess,
+            isAdmin: context.isAdmin,
+        };
+    }
+
+    // Use shared contexts for role and subscription
+    const userRoleCtx = useUserRole() || {};
+    const userSubCtx = useUserSubscription() || {};
+    const { role, loading: roleLoading } = userRoleCtx;
+    const { subscription, loading: subLoading } = userSubCtx;
     const [canAccess, setCanAccess] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const { stripePriceIds, loading: priceIdsLoading } = useStripePriceIds();
 
     useEffect(() => {
-        const fetchAccess = async () => {
-            try {
-                const roleRes = await fetch('/api/user/role');
-                let role = null;
-                if (roleRes.ok) {
-                    const roleData = await roleRes.json();
-                    role = roleData.role;
-                }
-
-                const subRes = await fetch('/api/user/subscription');
-                let priceId = null;
-                if (subRes.ok) {
-                    const subData = await subRes.json();
-                    priceId = subData.priceId;
-                }
-
-                const { isAdmin: adminFlag, canAccessDashboard } = getEntitlements({ role, priceId });
-                setIsAdmin(adminFlag);
-                setCanAccess(!!canAccessDashboard);
-            } catch (e) {
-                setCanAccess(false);
-                setIsAdmin(false);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchAccess();
-    }, []);
+        if (roleLoading || subLoading || priceIdsLoading) {
+            setLoading(true);
+            return;
+        }
+        async function checkAccess() {
+            const priceId = subscription?.priceId;
+            const { isAdmin: adminFlag, canAccessDashboard } = await getEntitlements({ role, priceId, priceIds: stripePriceIds });
+            setIsAdmin(adminFlag);
+            setCanAccess(!!canAccessDashboard);
+            setLoading(false);
+        }
+        checkAccess();
+    }, [role, roleLoading, subscription, subLoading, stripePriceIds, priceIdsLoading]);
 
     return { loading, canAccess, isAdmin };
 }

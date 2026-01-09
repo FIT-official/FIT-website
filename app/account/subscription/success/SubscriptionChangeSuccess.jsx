@@ -6,30 +6,20 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 
 
+import { useUserSubscription } from '@/utils/UserSubscriptionContext';
+
 function SubscriptionChangeSuccess() {
-    const { user, isLoaded } = useUser()
-    const [pendingUpdate, setPendingUpdate] = useState(false)
-    const [expiryDate, setExpiryDate] = useState('')
+    const { subscription, loading: subLoading, error: subError } = useUserSubscription();
+    const [pendingUpdate, setPendingUpdate] = useState(false);
+    const [expiryDate, setExpiryDate] = useState('');
     const { showToast } = useToast();
 
     useEffect(() => {
-        if (!isLoaded || !user) return
-        const fetchSubscription = async () => {
-            try {
-                const res = await fetch('/api/user/subscription')
-                if (res.ok) {
-                    const data = await res.json()
-                    setPendingUpdate(data.pending_update || false)
-                    setExpiryDate(data.pending_update_expiry ? new Date(data.pending_update_expiry * 1000).toLocaleDateString() : '')
-                } else {
-                    showToast('Failed to fetch subscription: ' + res.statusText, 'error')
-                }
-            } catch (error) {
-                showToast('Failed to fetch subscription: ' + error, 'error')
-            }
+        if (!subLoading && subscription) {
+            setPendingUpdate(subscription.pending_update || false);
+            setExpiryDate(subscription.pending_update_expiry ? new Date(subscription.pending_update_expiry * 1000).toLocaleDateString() : '');
         }
-        fetchSubscription()
-    }, [user, isLoaded])
+    }, [subLoading, subscription]);
 
     return (
         <div className="min-h-[92vh] flex flex-col items-center p-12 border-b border-borderColor justify-center">

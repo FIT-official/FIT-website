@@ -14,7 +14,7 @@ export async function PUT(req) {
         let { productId, variantId, orderNote, selectedVariants } = await req.json();
 
         productId = sanitizeString(productId);
-        variantId = variantId === undefined ? null : sanitizeString(variantId);
+        variantId = variantId == null ? null : sanitizeString(variantId);
         orderNote = sanitizeString(orderNote || "").substring(0, 500); // Limit to 500 chars
 
         if (!productId) {
@@ -27,23 +27,35 @@ export async function PUT(req) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
+        const normalizeSelectedVariants = (value) => {
+            if (!value) return {};
+            const obj = value instanceof Map ? Object.fromEntries(value.entries()) : value;
+            if (!obj || typeof obj !== "object") return {};
+            const sorted = {};
+            for (const key of Object.keys(obj).sort()) {
+                sorted[key] = obj[key];
+            }
+            return sorted;
+        };
+
         // Helper function to compare selectedVariants Maps
         const selectedVariantsMatch = (item1, item2) => {
-            const variants1 = item1.selectedVariants || {};
-            const variants2 = item2.selectedVariants || {};
+            const variants1 = normalizeSelectedVariants(item1.selectedVariants);
+            const variants2 = normalizeSelectedVariants(item2.selectedVariants);
             return JSON.stringify(variants1) === JSON.stringify(variants2);
         };
 
-        const cartItem = user.cart.find(
-            item =>
-                item.productId === productId &&
-                (
-                    // For new variant system, compare selectedVariants
-                    (selectedVariants && selectedVariantsMatch(item, { selectedVariants })) ||
-                    // For legacy system, compare variantId
-                    (!selectedVariants && String(item.variantId || "") === String(variantId || ""))
-                )
-        );
+        const isCustomPrint = String(productId || '').startsWith('custom-print:');
+        const cartItem = user.cart.find(item => {
+            if (item.productId !== productId) return false;
+            if (isCustomPrint) return true;
+            return (
+                // For new variant system, compare selectedVariants
+                (selectedVariants && selectedVariantsMatch(item, { selectedVariants })) ||
+                // For legacy system, compare variantId
+                (!selectedVariants && String(item.variantId || "") === String(variantId || ""))
+            );
+        });
 
         if (!cartItem) {
             return NextResponse.json({ error: "Cart item not found" }, { status: 404 });

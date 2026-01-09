@@ -41,7 +41,7 @@ export default function AdminPage() {
         <div className="container mx-auto py-16 max-w-6xl">
             <div className='flex flex-col px-6 md:px-12 mb-12'>
                 <h3>Admin Dashboard</h3>
-                <h1 className="flex font-bold mb-6 mt-2">Hello, {user.firstName}.</h1>
+                <h1 className="flex font-bold mb-6 mt-2">Hello{user && user.firstName ? `, ${user.firstName}` : ''}.</h1>
                 <p className='text-xs flex md:w-md'>
                     You can manage your site content, payments and settings here. This includes updating dynamic content, managing creator payments, categories, delivery types, and order statuses.
                 </p>

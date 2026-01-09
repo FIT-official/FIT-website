@@ -4,9 +4,11 @@ import { useUser } from "@clerk/nextjs"
 import Link from "next/link"
 
 const statusLabel = {
+  pending_upload: "Awaiting model upload",
   pending_config: "Awaiting configuration",
-  configured: "Configured",
-  payment_pending: "Awaiting quote payment",
+  configured: "Configured - Awaiting quote",
+  quoted: "Quote received",
+  payment_pending: "Awaiting payment",
   paid: "Paid",
   printing: "Printing",
   printed: "Printed",
@@ -76,31 +78,45 @@ export default function AccountPrintRequestsPage() {
         <ul className="space-y-3">
           {requests.map((r) => (
             <li key={r.requestId} className="border rounded px-4 py-3 text-sm flex flex-col gap-1">
-              <div className="flex items-center justify-between">
-                <div className="font-medium">{r.modelFile?.originalName || "Custom print"}</div>
-                <span className="text-xs px-2 py-0.5 rounded bg-gray-100">
-                  {statusLabel[r.status] || r.status}
-                </span>
-              </div>
-              <div className="text-xs text-gray-500">
-                Request ID: {r.requestId}
-              </div>
-              <div className="flex gap-3 mt-1 text-xs">
-                <Link
-                  href={`/editor?requestId=${encodeURIComponent(r.requestId)}`}
-                  className="underline"
-                >
-                  Open in editor
-                </Link>
-                {r.status === "payment_pending" && r.totalAmount > 0 && (
-                  <Link
-                    href={`/cart?addCustomRequest=${encodeURIComponent(r.requestId)}`}
-                    className="underline"
-                  >
-                    Add quoted print to cart
-                  </Link>
-                )}
-              </div>
+              {(() => {
+                const base = Number(r.basePrice || 0)
+                const fee = Number(r.printFee || 0)
+                const quoted = base + fee
+                const currency = (r.currency || "SGD").toUpperCase()
+
+                return (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div className="font-medium">{r.modelFile?.originalName || "Custom print"}</div>
+                      <span className="text-xs px-2 py-0.5 rounded bg-gray-100">
+                        {statusLabel[r.status] || r.status}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500">Request ID: {r.requestId}</div>
+                    <div className="flex gap-3 mt-1 text-xs">
+                      <Link
+                        href={`/editor?requestId=${encodeURIComponent(r.requestId)}`}
+                        className="underline"
+                      >
+                        Open in editor
+                      </Link>
+                      {(r.status === "quoted" || r.status === "payment_pending") && quoted > 0 && (
+                        <Link
+                          href={`/cart?addCustomRequest=${encodeURIComponent(r.requestId)}`}
+                          className="underline"
+                        >
+                          {r.status === "quoted" ? "Add quoted print to cart" : "Add to cart"}
+                        </Link>
+                      )}
+                    </div>
+                    {r.status === "quoted" && quoted > 0 && (
+                      <div className="text-xs text-green-600 font-medium mt-1">
+                        Quote: {currency} {quoted.toFixed(2)} (Base: {base.toFixed(2)} + Print fee: {fee.toFixed(2)}; delivery chosen at checkout)
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
             </li>
           ))}
         </ul>

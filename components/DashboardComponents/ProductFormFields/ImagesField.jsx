@@ -2,7 +2,7 @@ import React from 'react'
 import ImageDrop from '@/components/General/ImageDrop'
 import FieldErrorBanner from './FieldErrorBanner'
 
-export default function ImagesField({
+const ImagesField = function ImagesField({
     images,
     imageValidationErrors,
     imageInputRef,
@@ -64,3 +64,5 @@ export default function ImagesField({
         </div>
     )
 }
+
+export default React.memo(ImagesField);

@@ -3,11 +3,11 @@ set -euo pipefail
 
 # ============================================================================
 # dev-tunnel.sh
-# Starts Next.js dev server, launches ngrok, updates Clerk + Stripe webhook URLs.
+# Starts Next.js dev server, launches localtunnel, updates Clerk + Stripe webhook URLs.
 # ----------------------------------------------------------------------------
 # Requirements:
 #  - jq (for JSON parsing)
-#  - ngrok installed and authenticated (ngrok config add-authtoken ...)
+#  - localtunnel installed globally (npm install -g localtunnel)
 #  - curl
 #  - Stripe CLI OR stripe API key (for updating webhook endpoints)
 #  - Environment variables (see CONFIG section)
@@ -17,18 +17,16 @@ set -euo pipefail
 # Resolve script directory so we can place .env.tunnel inside scripts/.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-# Attempts to load environment variables from (in order) INSIDE script dir:
-#   scripts/.env.tunnel, scripts/.env.local, scripts/.env
-# Falls back to current working directory if none found there.
-# Only loads the first one found. Variables already present are NOT overridden.
-for candidate in "$SCRIPT_DIR/.env.tunnel" "$SCRIPT_DIR/.env.local" "$SCRIPT_DIR/.env" ./.env.tunnel ./.env.local ./.env; do
+# Source both .env.tunnel and .env.local from scripts/ and project root, in order of priority
+# Source and export all env variables for child processes
+# Only source .env.tunnel (for tunnel-specific envs); let Next.js load .env.local/.env
+for candidate in "$SCRIPT_DIR/.env.tunnel" "$PROJECT_ROOT/.env.tunnel"; do
   if [ -f "$candidate" ]; then
-    echo "[dev-tunnel] Loading environment variables from $candidate" >&2
+    echo "[dev-tunnel] Sourcing environment variables from $candidate" >&2
     set -a
     # shellcheck disable=SC1090
     . "$candidate"
     set +a
-    break
   fi
 done
 
@@ -50,7 +48,7 @@ COMBINE_STRIPE_ENDPOINTS=${COMBINE_STRIPE_ENDPOINTS:-0}
 DEV_PORT=${DEV_PORT:-3000}
 
 # Timeouts (seconds)
-NGROK_WAIT_TIMEOUT=${NGROK_WAIT_TIMEOUT:-20}
+TUNNEL_WAIT_TIMEOUT=${TUNNEL_WAIT_TIMEOUT:-20}
 DEV_WAIT_LOG="started server on" # substring to detect dev readiness
 
 # ----------------------------------------------------------------------------
@@ -61,28 +59,42 @@ err(){ printf "[dev-tunnel][ERROR] %s\n" "$*" >&2; }
 # ----------------------------------------------------------------------------
 # Start Next.js dev server (background)
 log "Starting Next.js dev server on port ${DEV_PORT}..."
-### Start dev server directly (no subshell grouping) so $! is actual parent PID
+# Always run yarn dev from the project root
+cd "$PROJECT_ROOT"
 yarn dev >/tmp/dev-server.log 2>&1 &
 DEV_PID=$!
+echo $DEV_PID > /tmp/dev-server.pid
 DEV_PGID=$(ps -o pgid= -p "$DEV_PID" | tr -d ' ' || echo "")
-log "Dev server PID: ${DEV_PID} PGID: ${DEV_PGID}"
+log "Dev server PID: ${DEV_PID} PGID: ${DEV_PGID} (saved to /tmp/dev-server.pid)"
 
-# Optional: wait a bit (or watch log). We'll proceed; ngrok only needs port open.
+# Open a new Terminal window to tail the dev server logs (macOS only)
+if command -v osascript >/dev/null 2>&1; then
+  osascript -e 'tell application "Terminal"
+    do script "tail -f /tmp/dev-server.log"
+    activate
+  end tell'
+fi
+
+# Optional: wait a bit (or watch log). We'll proceed; localtunnel only needs port open.
 # Simple wait to avoid race conditions.
 sleep 3 || true
 
 # ----------------------------------------------------------------------------
-# Start ngrok (background)
-if pgrep -f "ngrok http ${DEV_PORT}" >/dev/null 2>&1; then
-  log "Existing ngrok tunnel for port ${DEV_PORT} detected. Skipping new launch."
+# Start localtunnel (background)
+if pgrep -f "localtunnel --port ${DEV_PORT}" >/dev/null 2>&1; then
+  log "Existing localtunnel tunnel for port ${DEV_PORT} detected. Skipping new launch."
 else
-  log "Launching ngrok tunnel..."
-  ngrok http ${DEV_PORT} >/tmp/ngrok.log 2>&1 &
-  echo $! > /tmp/ngrok.pid
+  log "Launching localtunnel tunnel..."
+  log "(debug) About to launch localtunnel with real-time log..."
+  (
+    npx localtunnel --port ${DEV_PORT} --print-requests 2>&1 | tee /tmp/localtunnel.log
+  ) &
+  echo $! > /tmp/localtunnel.pid
+  log "(debug) localtunnel launched, PID saved."
 fi
-NGROK_PID=$(cat /tmp/ngrok.pid 2>/dev/null || true)
-NGROK_PGID=$(ps -o pgid= -p "$NGROK_PID" | tr -d ' ' || echo "")
-[ -n "${NGROK_PID}" ] && log "ngrok PID: ${NGROK_PID}"
+LOCALTUNNEL_PID=$(cat /tmp/localtunnel.pid 2>/dev/null || true)
+LOCALTUNNEL_PGID=$(ps -o pgid= -p "$LOCALTUNNEL_PID" | tr -d ' ' || echo "")
+[ -n "${LOCALTUNNEL_PID}" ] && log "localtunnel PID: ${LOCALTUNNEL_PID}"
 
 # ----------------------------------------------------------------------------
 # Lifecycle management: cleanup on exit / Ctrl+C and keep foreground active
@@ -91,73 +103,69 @@ cleanup(){
   CLEANED_UP=1
   log "Cleaning up background processes..."
   # Attempt graceful termination of entire process groups first
-  for pg in "${DEV_PGID:-}" "${NGROK_PGID:-}"; do
+  for pg in "${DEV_PGID:-}" "${LOCALTUNNEL_PGID:-}"; do
     if [ -n "$pg" ]; then
       kill -TERM -"$pg" 2>/dev/null || true
     fi
   done
   # Fallback: kill individual PIDs if still running
-  for pid in "${DEV_PID:-}" "${NGROK_PID:-}"; do
+  for pid in "${DEV_PID:-}" "${LOCALTUNNEL_PID:-}"; do
     if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
       kill -TERM "$pid" 2>/dev/null || true
     fi
   done
   sleep 1
   # Force kill lingering groups
-  for pg in "${DEV_PGID:-}" "${NGROK_PGID:-}"; do
+  for pg in "${DEV_PGID:-}" "${LOCALTUNNEL_PGID:-}"; do
     if [ -n "$pg" ]; then
       # shellcheck disable=SC2046
-      if ps -o pgid= -p "$DEV_PID" 2>/dev/null | grep -q "$pg" || ps -o pgid= -p "$NGROK_PID" 2>/dev/null | grep -q "$pg"; then
+      if ps -o pgid= -p "$DEV_PID" 2>/dev/null | grep -q "$pg" || ps -o pgid= -p "$LOCALTUNNEL_PID" 2>/dev/null | grep -q "$pg"; then
         kill -KILL -"$pg" 2>/dev/null || true
       fi
     fi
   done
   # Final sweep individual PIDs
-  for pid in "${DEV_PID:-}" "${NGROK_PID:-}"; do
+  for pid in "${DEV_PID:-}" "${LOCALTUNNEL_PID:-}"; do
     if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
       kill -KILL "$pid" 2>/dev/null || true
     fi
   done
-  log "Shutdown complete."
-  # Fallback aggressive cleanup if processes still linger and FORCE_KILL_REPO_PROCS=1
-  if [ "${FORCE_KILL_REPO_PROCS:-0}" = "1" ]; then
-    log "FORCE_KILL_REPO_PROCS=1 set; scanning for lingering Next.js/ngrok processes for project root ${PROJECT_ROOT}" 
-    # Find any next or transform processes whose command contains the project root path
-    mapfile -t linger_pids < <(ps aux | grep -E "(next dev|next-server|.next/transform|ngrok http)" | grep "${PROJECT_ROOT}" | grep -v grep | awk '{print $2}') || true
-    if [ ${#linger_pids[@]} -gt 0 ]; then
-      log "Force killing lingering PIDs: ${linger_pids[*]}"
-      for lp in "${linger_pids[@]}"; do
-        kill -KILL "$lp" 2>/dev/null || true
-      done
-    else
-      log "No lingering project-scoped processes found."
-    fi
+  # Extra: kill any next dev or localtunnel processes using the project root or port
+  log "Killing any remaining next dev or localtunnel processes for this project root or port..."
+  # Kill by port (DEV_PORT)
+  if command -v lsof >/dev/null 2>&1; then
+    lsof -ti tcp:${DEV_PORT} | xargs -r kill -9 2>/dev/null || true
   fi
+  # Kill by project root in process args (POSIX compatible)
+  linger_pids=$(ps aux | grep -E "(next dev|next-server|.next/transform|localtunnel --port)" | grep "${PROJECT_ROOT}" | grep -v grep | awk '{print $2}')
+  if [ -n "$linger_pids" ]; then
+    log "Force killing lingering PIDs: $linger_pids"
+    for lp in $linger_pids; do
+      kill -KILL "$lp" 2>/dev/null || true
+    done
+  else
+    log "No lingering project-scoped processes found."
+  fi
+  log "Shutdown complete."
 }
 
 trap cleanup INT TERM EXIT
 
 
 # ----------------------------------------------------------------------------
-# Obtain public URL via ngrok local API
-log "Waiting for ngrok public URL..."
+# Obtain public URL via localtunnel log parsing
+log "Waiting for localtunnel public URL... (no timeout)"
 PUBLIC_URL=""
-ATTEMPT=0
-while [ ${ATTEMPT} -lt ${NGROK_WAIT_TIMEOUT} ]; do
-  if curl -s localhost:4040/api/tunnels >/dev/null 2>&1; then
-    PUBLIC_URL=$(curl -s localhost:4040/api/tunnels | jq -r '.tunnels[] | select(.proto=="https") | .public_url' | head -n1)
+while true; do
+  if [ -f /tmp/localtunnel.log ]; then
+    PUBLIC_URL=$(grep "your url is:" /tmp/localtunnel.log | sed 's/your url is: //' | tr -d '\n' | xargs)
     if [ -n "${PUBLIC_URL}" ] && [ "${PUBLIC_URL}" != "null" ]; then
       break
     fi
   fi
-  ATTEMPT=$((ATTEMPT+1))
   sleep 1
 done
-
-if [ -z "${PUBLIC_URL}" ]; then
-  err "Failed to obtain ngrok public URL within timeout."; exit 1
-fi
-log "ngrok public URL: ${PUBLIC_URL}"
+log "localtunnel public URL: ${PUBLIC_URL}"
 
 # ----------------------------------------------------------------------------
 # Clerk manual step (no public API to update URL)
@@ -215,7 +223,7 @@ Stripe Digital Transaction: ${PUBLIC_URL}/api/asset/transaction/complete
 Stripe Subscription Delete: ${PUBLIC_URL}/api/user/subscription/webhook
 
 To stop:
-  kill ${DEV_PID} ${NGROK_PID} 2>/dev/null || true
+  kill ${DEV_PID} ${LOCALTUNNEL_PID} 2>/dev/null || true
 -------------------------------------------------------------------------------
 EOF
 
@@ -225,12 +233,12 @@ if [ "${QUIET_EXIT:-0}" = "1" ]; then
   exit 0
 fi
 
-log "Press Ctrl+C to stop dev server and ngrok tunnel. Monitoring processes..."
+log "Press Ctrl+C to stop dev server and localtunnel tunnel. Monitoring processes..."
 
 # Wait until either process exits, then cleanup triggers via trap.
 while true; do
   alive=0
-  for pid in "${DEV_PID}" "${NGROK_PID}"; do
+  for pid in "${DEV_PID}" "${LOCALTUNNEL_PID}"; do
     if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
       alive=$((alive+1))
     fi

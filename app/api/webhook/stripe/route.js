@@ -6,6 +6,7 @@ import Product from "@/models/Product";
 import PrintOrder from "@/models/PrintOrder";
 import CheckoutSession from "@/models/CheckoutSession";
 import Order from "@/models/Order";
+import CustomPrintRequest from "@/models/CustomPrintRequest";
 import mongoose from "mongoose";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -73,8 +74,9 @@ export async function POST(req) {
             try {
                 if (session.payment_intent) {
                     const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
-                    if (paymentIntent.charges.data.length > 0) {
-                        const charge = paymentIntent.charges.data[0];
+                    const charges = paymentIntent?.charges?.data || [];
+                    if (charges.length > 0) {
+                        const charge = charges[0];
                         const paymentMethod = charge.payment_method_details;
 
                         if (paymentMethod) {
@@ -95,8 +97,55 @@ export async function POST(req) {
             // Get shipping address from session
             const shippingAddress = session.shipping_details?.address || null;
 
+            // Load the base product used to represent custom print requests in orders
+            const customPrintBaseProduct = await Product.findOne({ slug: 'custom-print-request' });
+
             for (const item of user.cart) {
-                const product = await Product.findById(item.productId);
+                let product = null;
+                let customPrintRequest = null;
+                let isCustomPrint = false;
+                let customPrintQuotedPrice = null;
+                let customPrintDeliveryFee = null;
+                let customPrintChosenDeliveryType = null;
+
+                if (String(item.productId || '').startsWith('custom-print:')) {
+                    isCustomPrint = true;
+                    const requestId = item.requestId || item.customPrintRequestId || (item.productId || '').split(':')[1];
+                    customPrintRequest = await CustomPrintRequest.findOne({ requestId });
+
+                    if (customPrintRequest) {
+                        // Update custom print request status to paid
+                        customPrintRequest.status = 'paid';
+                        customPrintRequest.stripeSessionId = session.id;
+                        customPrintRequest.stripePaymentIntentId = session.payment_intent;
+                        customPrintRequest.paidAt = new Date();
+                        customPrintRequest.statusHistory.push({
+                            status: 'paid',
+                            note: 'Payment completed via Stripe checkout',
+                        });
+                        await customPrintRequest.save();
+
+                        // Use the configured base product for order linkage
+                        product = customPrintBaseProduct;
+
+                        // Compute quoted pricing (base + print fee) and delivery fee from chosen delivery type
+                        const base = Number(customPrintRequest.basePrice || 0);
+                        const fee = Number(customPrintRequest.printFee || 0);
+                        customPrintQuotedPrice = base + fee;
+
+                        const availableDeliveryTypes = customPrintRequest.delivery?.deliveryTypes || [];
+                        const requestedDeliveryType = item.chosenDeliveryType || '';
+                        const requestedExists = availableDeliveryTypes.some(dt => dt.type === requestedDeliveryType);
+                        const chosenDeliveryType = requestedExists
+                            ? requestedDeliveryType
+                            : (availableDeliveryTypes[0]?.type || '');
+                        customPrintChosenDeliveryType = chosenDeliveryType;
+                        const chosenDeliveryObj = availableDeliveryTypes.find(dt => dt.type === chosenDeliveryType);
+                        customPrintDeliveryFee = Number(chosenDeliveryObj?.customPrice ?? chosenDeliveryObj?.price ?? 0);
+                    }
+                } else {
+                    product = await Product.findById(item.productId);
+                }
 
                 if (!product) {
                     console.error(`Product not found: ${item.productId}`);
@@ -126,32 +175,47 @@ export async function POST(req) {
                 }
 
                 // Calculate pricing breakdown
-                const basePrice = product.basePrice?.presentmentAmount || 0;
-                const priceBeforeDiscount = basePrice + variantFees;
-                const discount = (item.priceBeforeDiscount || priceBeforeDiscount) - (item.finalPrice || priceBeforeDiscount);
-                const finalPrice = item.finalPrice || priceBeforeDiscount;
-                const deliveryFee = item.deliveryFee || 0;
-                const totalPrice = item.price || (finalPrice + deliveryFee);
+                let basePrice, priceBeforeDiscount, discount, finalPrice, deliveryFee, totalPrice, currency;
+
+                if (isCustomPrint && customPrintRequest) {
+                    const computedQuoted = Number(customPrintQuotedPrice ?? (Number(customPrintRequest.basePrice || 0) + Number(customPrintRequest.printFee || 0)));
+                    const computedDelivery = Number(customPrintDeliveryFee ?? 0);
+                    basePrice = Number(customPrintRequest.basePrice || 0);
+                    priceBeforeDiscount = computedQuoted;
+                    discount = 0;
+                    finalPrice = computedQuoted;
+                    deliveryFee = computedDelivery;
+                    totalPrice = computedQuoted + computedDelivery;
+                    currency = (customPrintRequest.currency || 'SGD');
+                } else {
+                    basePrice = product.basePrice?.presentmentAmount || 0;
+                    priceBeforeDiscount = basePrice + variantFees;
+                    discount = (item.priceBeforeDiscount || priceBeforeDiscount) - (item.finalPrice || priceBeforeDiscount);
+                    finalPrice = item.finalPrice || priceBeforeDiscount;
+                    deliveryFee = item.deliveryFee || 0;
+                    totalPrice = item.price || (finalPrice + deliveryFee);
+                    currency = item.currency || product.basePrice?.presentmentCurrency || 'SGD';
+                }
 
                 // Create order item for new Order model
                 orderItems.push({
-                    productId: item.productId,
-                    productName: product.name,
-                    productSlug: product.slug,
+                    productId: isCustomPrint ? product._id : item.productId,
+                    productName: isCustomPrint ? `Custom 3D Print - ${customPrintRequest?.requestId}` : product.name,
+                    productSlug: isCustomPrint ? 'custom-print' : product.slug,
                     quantity: item.quantity || 1,
                     selectedVariants: item.selectedVariants || {},
                     variantInfo: variantInfo,
                     basePrice: basePrice,
-                    variantFees: variantFees,
+                    variantFees: isCustomPrint ? 0 : variantFees,
                     priceBeforeDiscount: priceBeforeDiscount,
                     discount: discount,
                     finalPrice: finalPrice,
                     deliveryFee: deliveryFee,
                     totalPrice: totalPrice,
-                    currency: item.currency || product.basePrice?.presentmentCurrency || 'SGD',
-                    chosenDeliveryType: item.chosenDeliveryType,
+                    currency: currency,
+                    chosenDeliveryType: isCustomPrint ? (customPrintChosenDeliveryType || item.chosenDeliveryType) : item.chosenDeliveryType,
                     orderNote: item.orderNote || "",
-                    requestId: item.requestId || null,
+                    requestId: isCustomPrint ? customPrintRequest?.requestId : item.requestId || null,
                     reviewed: false,
                     reviewId: null
                 });
@@ -159,10 +223,10 @@ export async function POST(req) {
                 // Add to order history with complete pricing breakdown (keep for backward compatibility)
                 orders.push({
                     cartItem: {
-                        productId: item.productId,
+                        productId: isCustomPrint ? String(product?._id || item.productId) : item.productId,
                         quantity: item.quantity,
                         selectedVariants: item.selectedVariants || {},
-                        chosenDeliveryType: item.chosenDeliveryType,
+                        chosenDeliveryType: isCustomPrint ? (customPrintChosenDeliveryType || item.chosenDeliveryType) : item.chosenDeliveryType,
                         orderNote: item.orderNote || "", // Include customer's order note
                         price: totalPrice, // Total price paid (final + delivery)
                         finalPrice: finalPrice, // Price after discount, before delivery
@@ -170,93 +234,126 @@ export async function POST(req) {
                         priceBeforeDiscount: priceBeforeDiscount, // Base + variants before discount
                         variantInfo: variantInfo, // Array of variant selections with fees
                         deliveryFee: deliveryFee,
-                        currency: item.currency || 'SGD',
+                        currency: currency,
+                        requestId: isCustomPrint ? (customPrintRequest?.requestId || null) : (item.requestId || null),
                     },
                     status: item.chosenDeliveryType === "digital" ? "delivered" : "pending",
                     stripeSessionId: session.id, // Store Stripe session ID for payment method retrieval
                 });
 
-                // Update product sales
-                product.sales.push({
-                    userId,
-                    quantity: item.quantity,
-                    price: item.price || 0,
-                });
-                await product.save();
+                // Update product sales (skip for custom prints)
+                if (!isCustomPrint) {
+                    product.sales.push({
+                        userId,
+                        quantity: item.quantity,
+                        price: item.price || 0,
+                    });
+                    await product.save();
+                }
 
                 // Create print orders for print delivery items
                 if (item.chosenDeliveryType === "printDelivery") {
-                    // Find creator user
-                    const creatorUser = await User.findOne({ userId: product.creatorUserId });
-                    if (!creatorUser) {
-                        console.error(`Creator user not found for userId: ${product.creatorUserId}`);
-                        continue;
-                    }
+                    let printOrderData;
 
-                    // Generate unique order ID
-                    const orderId = `PO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    if (isCustomPrint && customPrintRequest) {
+                        const computedQuoted = Number(customPrintQuotedPrice ?? (Number(customPrintRequest.basePrice || 0) + Number(customPrintRequest.printFee || 0)));
+                        const computedDelivery = Number(customPrintDeliveryFee ?? 0);
+                        // For custom prints, no specific creator, handled by admin
+                        printOrderData = {
+                            orderId: `PO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                            stripeSessionId: session.id,
+                            userId: new mongoose.Types.ObjectId(user._id),
+                            creatorId: null, // Admin handled
+                            productId: null,
+                            productTitle: 'Custom 3D Print',
+                            quantity: 1,
+                            basePrice: Number(customPrintRequest.basePrice || 0),
+                            printFee: Number(customPrintRequest.printFee || 0),
+                            deliveryFee: computedDelivery,
+                            totalAmount: computedQuoted + computedDelivery,
+                            selectedVariants: {},
+                            variantInfo: [],
+                            variantName: null,
+                            currency: customPrintRequest.currency || 'SGD',
+                            modelUrl: customPrintRequest.modelFile?.s3Url,
+                            status: 'pending_config',
+                            customPrintRequestId: customPrintRequest._id,
+                            isCustomUpload: true,
+                            printConfiguration: customPrintRequest.printConfiguration,
+                        };
+                    } else {
+                        // Find creator user
+                        const creatorUser = await User.findOne({ userId: product.creatorUserId });
+                        if (!creatorUser) {
+                            console.error(`Creator user not found for userId: ${product.creatorUserId}`);
+                            continue;
+                        }
 
-                    // Get variant info from selectedVariants
-                    let variantName = null;
-                    let variantInfo = [];
-                    if (item.selectedVariants && Object.keys(item.selectedVariants).length > 0) {
-                        variantName = Object.entries(item.selectedVariants)
-                            .map(([type, option]) => `${type}: ${option}`)
-                            .join(", ");
+                        // Generate unique order ID
+                        const orderId = `PO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-                        // Build variantInfo with fees
-                        if (product.variantTypes && product.variantTypes.length > 0) {
-                            for (const [variantTypeName, selectedOption] of Object.entries(item.selectedVariants)) {
-                                const variantType = product.variantTypes.find(vt => vt.name === variantTypeName);
-                                if (variantType) {
-                                    const option = variantType.options.find(opt => opt.name === selectedOption);
-                                    if (option) {
-                                        variantInfo.push({
-                                            type: variantTypeName,
-                                            option: selectedOption,
-                                            additionalFee: option.additionalFee || 0
-                                        });
+                        // Get variant info from selectedVariants
+                        let variantName = null;
+                        let variantInfo = [];
+                        if (item.selectedVariants && Object.keys(item.selectedVariants).length > 0) {
+                            variantName = Object.entries(item.selectedVariants)
+                                .map(([type, option]) => `${type}: ${option}`)
+                                .join(", ");
+
+                            // Build variantInfo with fees
+                            if (product.variantTypes && product.variantTypes.length > 0) {
+                                for (const [variantTypeName, selectedOption] of Object.entries(item.selectedVariants)) {
+                                    const variantType = product.variantTypes.find(vt => vt.name === variantTypeName);
+                                    if (variantType) {
+                                        const option = variantType.options.find(opt => opt.name === selectedOption);
+                                        if (option) {
+                                            variantInfo.push({
+                                                type: variantTypeName,
+                                                option: selectedOption,
+                                                additionalFee: option.additionalFee || 0
+                                            });
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    // Calculate base price
-                    let basePrice = product.basePrice?.presentmentAmount || 0;
-                    let totalPrice = basePrice;
+                        // Calculate base price
+                        let basePrice = product.basePrice?.presentmentAmount || 0;
+                        let totalPrice = basePrice;
 
-                    // Add variant fees
-                    if (variantInfo.length > 0) {
-                        const variantFees = variantInfo.reduce((sum, v) => sum + v.additionalFee, 0);
-                        totalPrice += variantFees;
-                    }
+                        // Add variant fees
+                        if (variantInfo.length > 0) {
+                            const variantFees = variantInfo.reduce((sum, v) => sum + v.additionalFee, 0);
+                            totalPrice += variantFees;
+                        }
 
-                    const printOrderData = {
-                        orderId: orderId,
-                        stripeSessionId: session.id,
-                        userId: new mongoose.Types.ObjectId(user._id),
-                        creatorId: new mongoose.Types.ObjectId(creatorUser._id),
-                        productId: item.productId,
-                        productTitle: product.name,
-                        quantity: item.quantity || 1,
-                        basePrice: basePrice,
-                        printFee: 0, // Can be calculated later
-                        deliveryFee: item.deliveryFee || 0,
-                        totalAmount: totalPrice,
-                        selectedVariants: item.selectedVariants || {},
-                        variantInfo: variantInfo,
-                        variantName: variantName,
-                        currency: product.basePrice?.presentmentCurrency || 'SGD',
-                        modelUrl: product.viewableModel,
-                        status: 'pending_config',
-                    };
+                        printOrderData = {
+                            orderId: orderId,
+                            stripeSessionId: session.id,
+                            userId: new mongoose.Types.ObjectId(user._id),
+                            creatorId: new mongoose.Types.ObjectId(creatorUser._id),
+                            productId: item.productId,
+                            productTitle: product.name,
+                            quantity: item.quantity || 1,
+                            basePrice: basePrice,
+                            printFee: 0, // Can be calculated later
+                            deliveryFee: item.deliveryFee || 0,
+                            totalAmount: totalPrice,
+                            selectedVariants: item.selectedVariants || {},
+                            variantInfo: variantInfo,
+                            variantName: variantName,
+                            currency: product.basePrice?.presentmentCurrency || 'SGD',
+                            modelUrl: product.viewableModel,
+                            status: 'pending_config',
+                        };
 
-                    // If print configuration was stored in cart item before checkout, use it
-                    if (item.printConfiguration) {
-                        printOrderData.printConfiguration = item.printConfiguration;
-                        printOrderData.status = 'configured';
-                        printOrderData.printConfiguration.configuredAt = new Date();
+                        // If print configuration was stored in cart item before checkout, use it
+                        if (item.printConfiguration) {
+                            printOrderData.printConfiguration = item.printConfiguration;
+                            printOrderData.status = 'configured';
+                            printOrderData.printConfiguration.configuredAt = new Date();
+                        }
                     }
 
                     printOrderPromises.push(new PrintOrder(printOrderData).save());

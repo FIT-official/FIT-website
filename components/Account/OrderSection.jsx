@@ -24,7 +24,7 @@ function OrderSkeleton() {
                         <div className="h-4 w-16 bg-borderColor/30 rounded"></div>
                     </div>
                 </div>
-                <div className="flex flex-col items-end min-w-[90px] gap-2">
+                <div className="flex flex-col items-end min-w-22.5 gap-2">
                     <div className="h-3 w-10 bg-borderColor/30 rounded"></div>
                     <div className="h-6 w-16 bg-borderColor/40 rounded"></div>
                 </div>
@@ -39,6 +39,8 @@ function OrderSection() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const { orderStatuses } = useOrderStatuses(); // Get all order statuses
+
+    const isObjectIdString = (value) => typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value);
 
     useEffect(() => {
         (async () => {
@@ -57,6 +59,7 @@ function OrderSection() {
                         ordersArr
                             .map(order => order.cartItem?.productId)
                             .filter(Boolean)
+                            .filter(isObjectIdString)
                     ),
                 ];
 
@@ -95,7 +98,11 @@ function OrderSection() {
             <div className="flex flex-col gap-6">
                 {orders.map((order, idx) => {
                     const cartItem = order.cartItem || {};
+                    const isCustomPrint = Boolean(cartItem.requestId) || String(cartItem.productId || '').startsWith('custom-print:');
                     const product = products[cartItem.productId] || {};
+                    const displayTitle = isCustomPrint
+                        ? `Custom 3D Print${cartItem.requestId ? ` - ${cartItem.requestId}` : ''}`
+                        : (product.name || cartItem.productId);
                     return (
                         <div
                             key={idx}
@@ -155,7 +162,7 @@ function OrderSection() {
                                 <div className="w-20 h-20 rounded-sm bg-borderColor/10 flex items-center justify-center overflow-hidden border border-borderColor/30">
                                     <Image
                                         src={`/api/proxy?key=${encodeURIComponent(product.images?.[0] || "/placeholder.jpg")}`}
-                                        alt={product.name || "Product"}
+                                        alt={displayTitle || "Product"}
                                         width={80}
                                         height={80}
                                         className="object-cover w-full h-full"
@@ -163,7 +170,7 @@ function OrderSection() {
                                 </div>
                                 <div className="flex flex-col flex-1 w-full md:w-xs">
                                     <div className="font-semibold text-textColor text-base truncate">
-                                        {product.name || cartItem.productId}
+                                        {displayTitle}
                                     </div>
                                     <div className="text-xs text-lightColor truncate">
                                         {product.description || ""}
@@ -176,6 +183,13 @@ function OrderSection() {
                                             <span className="font-medium text-textColor">Delivery:</span> {cartItem.chosenDeliveryType}
                                         </div>
                                     </div>
+                                    {isCustomPrint && (
+                                        <div className="mt-2 text-xs">
+                                            <Link href="/account/prints" className="underline">
+                                                Track custom print
+                                            </Link>
+                                        </div>
+                                    )}
                                     {/* Display selected variant options from new system */}
                                     {cartItem.selectedVariants && Object.keys(cartItem.selectedVariants).length > 0 && (
                                         <div className="mt-2 text-xs">
@@ -228,7 +242,7 @@ function OrderSection() {
                                         </div>
                                     )}
                                 </div>
-                                <div className="flex flex-col md:items-end min-w-[90px]">
+                                <div className="flex flex-col md:items-end min-w-22.5">
                                     <span className="text-xs text-lightColor">Paid</span>
                                     <span className="font-semibold text-textColor text-lg">
                                         {cartItem.currency || 'S'}${((cartItem.finalPrice || cartItem.price || 0) * (cartItem.quantity || 1)).toFixed(2)}

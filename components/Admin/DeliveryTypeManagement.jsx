@@ -71,6 +71,26 @@ export default function DeliveryTypeManagement() {
             return
         }
 
+        // Validate formula-based pricing fields if any are filled
+        const bp = formData.basePricing || {}
+        const hasFormula = bp.basePrice !== '' || bp.volumeFactor !== '' || bp.weightFactor !== '' || bp.minPrice !== '' || bp.maxPrice !== ''
+        if (hasFormula) {
+            const basePrice = parseFloat(bp.basePrice)
+            const volumeFactor = parseFloat(bp.volumeFactor)
+            const weightFactor = parseFloat(bp.weightFactor)
+            const minPrice = parseFloat(bp.minPrice)
+            const maxPrice = parseFloat(bp.maxPrice)
+
+            if ([basePrice, volumeFactor, weightFactor].some(v => isNaN(v) || v < 0)) {
+                showToast('Base price, volume factor, and weight factor must be non-negative numbers', 'error')
+                return
+            }
+            if (!isNaN(minPrice) && !isNaN(maxPrice) && minPrice > maxPrice) {
+                showToast('Minimum price cannot exceed maximum price', 'error')
+                return
+            }
+        }
+
         setSaving(true)
         try {
             const response = await fetch('/api/admin/settings', {

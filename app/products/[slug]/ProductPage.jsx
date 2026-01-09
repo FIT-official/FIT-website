@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { GoChevronLeft, GoChevronRight, GoDownload, GoPlus, GoStar, GoStarFill } from 'react-icons/go';
 import Image from 'next/image';
+import Link from 'next/link';
 import { HiCubeTransparent } from 'react-icons/hi';
 import { BiPrinter } from 'react-icons/bi';
 import dynamic from 'next/dynamic';
@@ -192,7 +193,7 @@ function ProductPage() {
 
     const handleAddToCart = async (product) => {
         if (isOwnProduct) {
-            return;
+            return; 
         }
 
         if (!isLoaded || !user) {
@@ -210,6 +211,41 @@ function ProductPage() {
 
         setIsAdding(true);
         try {
+            if (isCustomPrint) {
+                setIsAdding(true);
+                try {
+                    // 1. Create a new custom print request
+                    const res = await fetch('/api/custom-print', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: user.id, userEmail: user.emailAddresses?.[0]?.emailAddress || '', userName: user.fullName || user.firstName || 'Unknown' })
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.requestId) {
+                        throw new Error(data.error || 'Failed to create custom print request');
+                    }
+                    const requestId = data.requestId;
+
+                    // 2. Add to cart with the new requestId
+                    const cartRes = await fetch('/api/cart/custom-print', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ requestId })
+                    });
+                    if (!cartRes.ok) {
+                        throw new Error('Failed to add custom print to cart');
+                    }
+                    setShowAdded(true);
+                    setTimeout(() => setShowAdded(false), 3000);
+                    router.push('/cart');
+                } catch (error) {
+                    alert(error.message || "Failed to add to cart.");
+                } finally {
+                    setIsAdding(false);
+                }
+                return;
+            }
+
             const cartItem = {
                 productId: product._id,
                 quantity: 1,
@@ -490,7 +526,7 @@ function ProductPage() {
                         >
                             <GoChevronLeft size={20} />
                         </button>
-                        <div className='flex w-full max-w-[332px] overflow-hidden'>
+                        <div className='flex w-full max-w-83 overflow-hidden'>
                             <div
                                 className='flex gap-4'
                                 style={{ transform: `translateX(-${tabIdx * 116}px)`, transition: 'transform 0.3s ease-in-out' }}
@@ -498,7 +534,7 @@ function ProductPage() {
                                 {displayModelUrl && (
                                     <button
                                         onClick={() => handleTabClick(0)}
-                                        className='flex h-[100px] aspect-square border border-extraLight border-dashed bg-baseColor hover:bg-borderColor/20 text-lightColor transition-all duration-300 ease-in-out items-center rounded-sm justify-center cursor-pointer'
+                                        className='flex h-25 aspect-square border border-extraLight border-dashed bg-baseColor hover:bg-borderColor/20 text-lightColor transition-all duration-300 ease-in-out items-center rounded-sm justify-center cursor-pointer'
                                     >
                                         <HiCubeTransparent size={25} />
                                     </button>
@@ -508,7 +544,7 @@ function ProductPage() {
                                     product?.images?.map((image, idx) => (
                                         <div
                                             key={idx}
-                                            className='flex h-[100px] aspect-square bg-borderColor cursor-pointer'
+                                            className='flex h-25 aspect-square bg-borderColor cursor-pointer'
                                             onClick={() => handleTabClick(idx + (displayModelUrl ? 1 : 0))}
                                         >
                                             <Image
@@ -548,6 +584,15 @@ function ProductPage() {
                     ) : (
                         <>
                             <h1>{product.name}</h1>
+                            {!!product?.creatorUserId && (
+                                <Link
+                                    href={`/creators/${encodeURIComponent(product?.creatorSlug || product.creatorUserId)}`}
+                                    className='flex w-fit items-center gap-1 uppercase font-light underline text-lightColor'
+                                >
+                                    see shop
+                                    <GoChevronRight size={14} />
+                                </Link>
+                            )}
                             <div className='font-medium text-lg mb-6'>
                                 {(() => {
                                     const priceInfo = calculateTotalPrice();
@@ -688,7 +733,12 @@ function ProductPage() {
                                             )}
                                         </button>
                                     )}                                    {/* Print Button - only show if product has a 3D model */}
-                                    {product.viewableModel && (
+                                    {/* Only show print order button if NOT digital-only product */}
+                                    {product.viewableModel && !(
+                                        Array.isArray(product.delivery?.deliveryTypes) &&
+                                        product.delivery.deliveryTypes.length === 1 &&
+                                        product.delivery.deliveryTypes[0]?.type === 'digital'
+                                    ) && (
                                         <button
                                             className='flex items-center justify-center gap-2 px-4 py-2 border border-borderColor text-sm font-medium rounded hover:bg-borderColor/10 transition-colors'
                                             onClick={() => handleAddToPrintCart(product)}

@@ -18,10 +18,21 @@ export async function POST(req) {
 
         const user = await User.findOne({ userId });
 
+        const normalizeSelectedVariants = (value) => {
+            if (!value) return {};
+            const obj = value instanceof Map ? Object.fromEntries(value.entries()) : value;
+            if (!obj || typeof obj !== "object") return {};
+            const sorted = {};
+            for (const key of Object.keys(obj).sort()) {
+                sorted[key] = obj[key];
+            }
+            return sorted;
+        };
+
         // Helper function to compare selectedVariants Maps
         const selectedVariantsMatch = (item1, item2) => {
-            const variants1 = item1.selectedVariants || {};
-            const variants2 = item2.selectedVariants || {};
+            const variants1 = normalizeSelectedVariants(item1.selectedVariants);
+            const variants2 = normalizeSelectedVariants(item2.selectedVariants);
             return JSON.stringify(variants1) === JSON.stringify(variants2);
         };
 
@@ -83,10 +94,21 @@ export async function DELETE(req) {
             return NextResponse.json({ error: "Missing product" }, { status: 400 });
         }
 
+        const normalizeSelectedVariants = (value) => {
+            if (!value) return {};
+            const obj = value instanceof Map ? Object.fromEntries(value.entries()) : value;
+            if (!obj || typeof obj !== "object") return {};
+            const sorted = {};
+            for (const key of Object.keys(obj).sort()) {
+                sorted[key] = obj[key];
+            }
+            return sorted;
+        };
+
         // Helper function to compare selectedVariants Maps
         const selectedVariantsMatch = (item1, item2) => {
-            const variants1 = item1.selectedVariants || {};
-            const variants2 = item2.selectedVariants || {};
+            const variants1 = normalizeSelectedVariants(item1.selectedVariants);
+            const variants2 = normalizeSelectedVariants(item2.selectedVariants);
             return JSON.stringify(variants1) === JSON.stringify(variants2);
         };
 

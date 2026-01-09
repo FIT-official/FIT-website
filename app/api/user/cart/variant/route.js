@@ -14,8 +14,8 @@ export async function PUT(req) {
         let { productId, oldVariantId, newVariantId, chosenDeliveryType } = await req.json();
 
         productId = sanitizeString(productId);
-        oldVariantId = oldVariantId === undefined ? null : sanitizeString(oldVariantId);
-        newVariantId = newVariantId === undefined ? null : sanitizeString(newVariantId);
+        oldVariantId = oldVariantId == null ? null : sanitizeString(oldVariantId);
+        newVariantId = newVariantId == null ? null : sanitizeString(newVariantId);
         chosenDeliveryType = sanitizeString(chosenDeliveryType);
 
         if (!productId || !newVariantId || !chosenDeliveryType) {

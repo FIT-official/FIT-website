@@ -1,10 +1,11 @@
 'use client'
 import { useState, useCallback, useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { HiUpload, HiCheck, HiX, HiCube, HiTrash } from 'react-icons/hi'
+import { HiUpload, HiCheck, HiCube, HiTrash } from 'react-icons/hi'
 import { useToast } from '@/components/General/ToastProvider'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
+import { getMimeType } from '@/utils/uploadHelpers'
 
 export default function CustomPrintUpload({ cartItem, onUploadComplete }) {
     const [uploading, setUploading] = useState(false)
@@ -17,44 +18,43 @@ export default function CustomPrintUpload({ cartItem, onUploadComplete }) {
     const { user } = useUser()
     const router = useRouter()
 
-    // Check if cart item already has a requestId and fetch that data
+    // Always resolve the requestId for this cart item
+    const requestId = cartItem?.requestId || cartItem?.customPrintRequestId
+
+    // Fetch upload status for this request
     useEffect(() => {
-        const checkExistingUpload = async () => {
-            console.log('Checking existing upload for cartItem:', cartItem)
-            if (cartItem?.requestId) {
-                console.log('Found requestId in cartItem:', cartItem.requestId)
-                try {
-                    const response = await fetch(`/api/custom-print?requestId=${cartItem.requestId}`)
-                    if (response.ok) {
-                        const data = await response.json()
-                        console.log('Fetched existing upload data:', data)
-                        if (data.request?.modelFile) {
-                            setUploadedFile({
-                                name: data.request.modelFile.originalName,
-                                size: data.request.modelFile.fileSize,
-                                requestId: data.request.requestId,
-                                modelUrl: data.request.modelFile.s3Url
-                            })
-                        }
-                    } else {
-                        console.error('Failed to fetch existing upload:', response.status)
+        async function checkExistingUpload() {
+            if (!requestId) {
+                setLoading(false)
+                return
+            }
+            try {
+                const response = await fetch(`/api/custom-print?requestId=${requestId}`)
+                if (response.ok) {
+                    const data = await response.json()
+                    // `modelFile` can exist on new requests due to schema defaults.
+                    // Only treat as "uploaded" if it has a real stored file.
+                    if (data.request?.modelFile?.s3Key && data.request?.modelFile?.originalName) {
+                        setUploadedFile({
+                            name: data.request.modelFile.originalName,
+                            size: data.request.modelFile.fileSize,
+                            requestId: data.request.requestId,
+                            modelKey: data.request.modelFile.s3Key
+                        })
                     }
-                } catch (error) {
-                    console.error('Error fetching existing upload:', error)
                 }
-            } else {
-                console.log('No requestId found in cartItem')
+            } catch (error) {
+                // ignore
             }
             setLoading(false)
         }
         checkExistingUpload()
-    }, [cartItem?.requestId])
+    }, [requestId])
 
-    // Load print configuration when uploadedFile changes
+    // Fetch print configuration if model is uploaded
     useEffect(() => {
-        if (!uploadedFile) return
-
-        const loadConfig = async () => {
+        if (!uploadedFile) return;
+        async function loadConfig() {
             try {
                 const response = await fetch(`/api/custom-print?requestId=${uploadedFile.requestId}`)
                 if (response.ok) {
@@ -64,100 +64,111 @@ export default function CustomPrintUpload({ cartItem, onUploadComplete }) {
                     }
                 }
             } catch (e) {
-                console.error('Failed to load config:', e)
+                // ignore
             }
         }
-        loadConfig()
+        loadConfig();
+
+        // If file size is missing, try to fetch from S3
+        if ((uploadedFile.size === undefined || uploadedFile.size === null || isNaN(uploadedFile.size)) && uploadedFile.modelKey) {
+            (async () => {
+                try {
+                    const res = await fetch(`/api/proxy?key=${encodeURIComponent(uploadedFile.modelKey)}`, { method: 'HEAD' });
+                    if (res.ok) {
+                        const size = res.headers.get('content-length');
+                        if (size && !isNaN(Number(size))) {
+                            setUploadedFile(prev => prev ? { ...prev, size: Number(size) } : prev);
+                        }
+                    }
+                } catch (e) {
+                    // ignore
+                }
+            })();
+        }
     }, [uploadedFile])
 
     const onDrop = useCallback(async (acceptedFiles) => {
-        if (acceptedFiles.length === 0) return
-
-        const file = acceptedFiles[0]
-
-        // Validate file type
-        const allowedExtensions = ['.stl', '.obj', '.glb', '.gltf', '.3mf', '.ply']
-        const fileName = file.name.toLowerCase()
-        const isValidFile = allowedExtensions.some(ext => fileName.endsWith(ext))
-
+        if (acceptedFiles.length === 0) return;
+        const file = acceptedFiles[0];
+        const allowedExtensions = ['.stl', '.obj', '.glb', '.gltf', '.3mf', '.ply'];
+        const fileName = file.name.toLowerCase();
+        const isValidFile = allowedExtensions.some(ext => fileName.endsWith(ext));
         if (!isValidFile) {
-            showToast('Invalid file type. Please upload a 3D model file (.stl, .obj, .glb, .gltf, .3mf, .ply)', 'error')
-            return
+            showToast('Invalid file type. Please upload a 3D model file (.stl, .obj, .glb, .gltf, .3mf, .ply)', 'error');
+            return;
         }
-
-        // Validate file size (max 50MB)
-        const maxSize = 50 * 1024 * 1024 // 50MB
+        const maxSize = 50 * 1024 * 1024;
         if (file.size > maxSize) {
-            showToast('File too large. Maximum size is 50MB', 'error')
-            return
+            showToast('File too large. Maximum size is 50MB', 'error');
+            return;
         }
-
-        setUploading(true)
-        setUploadProgress(0)
-
+        setUploading(true);
+        setUploadProgress(0);
+        let key = null;
         try {
-            const formData = new FormData()
-            formData.append('file', file)
-            formData.append('userEmail', user?.emailAddresses?.[0]?.emailAddress || '')
-            formData.append('userName', user?.fullName || user?.firstName || 'Unknown')
-
-            // Simulate upload progress
-            const progressInterval = setInterval(() => {
-                setUploadProgress(prev => Math.min(prev + 10, 90))
-            }, 200)
-
-            const response = await fetch('/api/custom-print', {
+            // Step 1: Get signed URL and S3 key
+            const ext = file.name.split('.').pop().toLowerCase();
+            const contentType = file.type || getMimeType(ext);
+            const signedRes = await fetch('/api/upload/models', {
                 method: 'POST',
-                body: formData
-            })
-
-            clearInterval(progressInterval)
-            setUploadProgress(100)
-
-            if (!response.ok) {
-                const error = await response.json()
-                throw new Error(error.error || 'Upload failed')
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: file.name, contentType })
+            });
+            if (!signedRes.ok) {
+                const error = await signedRes.json();
+                throw new Error(error.error || 'Failed to get upload URL');
             }
-
-            const data = await response.json()
-            setUploadedFile({
-                name: file.name,
-                size: file.size,
-                requestId: data.requestId,
-                modelUrl: data.modelUrl
-            })
-
-            // Update cart item with requestId
-            console.log('Updating cart with requestId:', data.requestId)
-            const updateResponse = await fetch('/api/user/cart/update-custom-print', {
+            const { url, key: s3Key } = await signedRes.json();
+            key = s3Key;
+            // Step 2: Upload to S3
+            const uploadRes = await fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': contentType },
+                body: file
+            });
+            if (!uploadRes.ok) {
+                throw new Error('Failed to upload model to S3');
+            }
+            // Step 3: Update custom print request with model file info (store only the S3 key)
+            const putRes = await fetch('/api/custom-print', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    productId: 'custom-print-request',
-                    requestId: data.requestId
+                    requestId,
+                    modelFile: {
+                        originalName: file.name,
+                        s3Key,
+                        fileSize: file.size,
+                        uploadedAt: new Date().toISOString()
+                    }
                 })
-            })
-
-            if (updateResponse.ok) {
-                console.log('Successfully updated cart with requestId')
-            } else {
-                console.error('Failed to update cart with requestId:', updateResponse.status)
+            });
+            if (!putRes.ok) {
+                // Clean up S3 if backend update fails
+                await fetch(`/api/upload/models?key=${encodeURIComponent(s3Key)}`, { method: 'DELETE' });
+                const error = await putRes.json();
+                throw new Error(error.error || 'Failed to update print request');
             }
-
-            showToast('Model uploaded successfully! Configure your print settings next.', 'success')
-
-            if (onUploadComplete) {
-                onUploadComplete(data)
-            }
-
+            setUploadProgress(100);
+            setUploadedFile({
+                name: file.name,
+                size: file.size,
+                requestId,
+                modelKey: s3Key
+            });
+            showToast('Model uploaded successfully! Configure your print settings next.', 'success');
+            if (onUploadComplete) onUploadComplete();
         } catch (error) {
-            console.error('Upload error:', error)
-            showToast(error.message || 'Failed to upload model', 'error')
-            setUploadProgress(0)
+            // Clean up S3 if upload succeeded but backend failed
+            if (key) {
+                await fetch(`/api/upload/models?key=${encodeURIComponent(key)}`, { method: 'DELETE' });
+            }
+            showToast(error.message || 'Failed to upload model', 'error');
+            setUploadProgress(0);
         } finally {
-            setUploading(false)
+            setUploading(false);
         }
-    }, [user, showToast, onUploadComplete])
+    }, [user, showToast, onUploadComplete, requestId]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -182,26 +193,18 @@ export default function CustomPrintUpload({ cartItem, onUploadComplete }) {
 
     const handleDeleteModel = async () => {
         if (!uploadedFile) return
-
-        const confirmed = window.confirm('Are you sure you want to delete this model? This action cannot be undone.')
-        if (!confirmed) return
-
+        if (!window.confirm('Are you sure you want to delete this model? This action cannot be undone.')) return
         setDeleting(true)
         try {
             const response = await fetch(`/api/custom-print/delete?requestId=${uploadedFile.requestId}`, {
                 method: 'DELETE'
             })
-
             if (!response.ok) {
                 const error = await response.json()
                 throw new Error(error.error || 'Failed to delete model')
             }
-
-            // Clear the uploaded file state
             setUploadedFile(null)
             setSavedConfig(null)
-
-            // Update cart item to remove requestId
             await fetch('/api/user/cart/update-custom-print', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -210,10 +213,8 @@ export default function CustomPrintUpload({ cartItem, onUploadComplete }) {
                     requestId: null
                 })
             })
-
             showToast('Model deleted successfully', 'success')
         } catch (error) {
-            console.error('Error deleting model:', error)
             showToast(error.message || 'Failed to delete model', 'error')
         } finally {
             setDeleting(false)
@@ -242,11 +243,24 @@ export default function CustomPrintUpload({ cartItem, onUploadComplete }) {
                         <div className="flex-1 min-w-0">
                             <h4 className="text-sm font-semibold text-textColor mb-1">3D Model Ready</h4>
                             <p className="text-xs text-lightColor mb-1">{uploadedFile.name}</p>
-                            <p className="text-xs text-extraLight">{formatFileSize(uploadedFile.size)}</p>
+                            <p className="text-xs text-extraLight">
+                                {/* Show file format/extension from key or filename */}
+                                {(() => {
+                                    let ext = '';
+                                    if (uploadedFile?.modelKey) {
+                                        const match = uploadedFile.modelKey.match(/\.([a-zA-Z0-9]+)(\?|$)/);
+                                        if (match) ext = match[1].toUpperCase();
+                                    }
+                                    if (!ext && uploadedFile?.name) {
+                                        const nameParts = uploadedFile.name.split('.');
+                                        if (nameParts.length > 1) ext = nameParts.pop().toUpperCase();
+                                    }
+                                    return ext ? `${ext} file` : '';
+                                })()}
+                            </p>
                         </div>
                     </div>
                 </div>
-
                 {savedConfig?.printSettings && (
                     <div className="border-t border-borderColor bg-background p-6">
                         <div className="flex items-center justify-between mb-4">
@@ -285,7 +299,6 @@ export default function CustomPrintUpload({ cartItem, onUploadComplete }) {
                         </div>
                     </div>
                 )}
-
                 <div className="border-t border-borderColor bg-baseColor p-6">
                     <div className="flex gap-3">
                         <button

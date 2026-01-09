@@ -17,16 +17,20 @@ const CheckoutForm = () => {
     const { user, isLoaded } = useUser();
     const [message, setMessage] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!isLoaded || !user) {
-            return
+            return;
         }
         setIsLoading(true);
         const confirmResult = await checkout.confirm();
         if (confirmResult.type === 'error') {
             setMessage(confirmResult.error.message);
+        } else if (confirmResult.type === 'success' && confirmResult.sessionId) {
+            // Redirect to return page with session_id
+            router.push(`/checkout/return?session_id=${confirmResult.sessionId}`);
         }
         setIsLoading(false);
     };
@@ -261,8 +265,8 @@ const CheckOut = () => {
     return (
         <div className="min-h-[92vh] flex flex-col items-center p-12 border-b border-borderColor">
             <h1 className="text-3xl font-bold mb-4 text-textColor">Checkout</h1>
-            <div className="text-xs text-lightColor mb-8 w-sm text-center">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            <div className="text-xs text-lightColor mb-8 w-75 text-center">
+                Please review your order and billing information before proceeding with the payment.
             </div>
             <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="flex flex-col gap-8">

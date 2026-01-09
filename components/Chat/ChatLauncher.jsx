@@ -30,6 +30,134 @@ export default function ChatLauncher() {
 
     const isSignedIn = isLoaded && !!user;
 
+    const startCreatorChat = async (creator) => {
+        const targetUserId = creator?.id;
+        if (!isSignedIn || !targetUserId) return;
+        try {
+            setConnecting(true);
+            setError(null);
+
+            const channelRes = await fetch('/api/chat/channel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ kind: 'creator', targetUserId }),
+            });
+            if (!channelRes.ok) {
+                let detail = '';
+                try {
+                    const errBody = await channelRes.json();
+                    if (errBody?.error) detail = String(errBody.error);
+                } catch {
+                    // ignore
+                }
+
+                if (channelRes.status === 401) {
+                    throw new Error(detail || 'Unauthorized. Please sign in again.');
+                }
+                if (channelRes.status === 400) {
+                    throw new Error(detail || 'Invalid request.');
+                }
+                throw new Error(detail || 'Failed to create chat channel');
+            }
+            const channelData = await channelRes.json();
+
+            let streamClient = client;
+            if (!streamClient) {
+                const tokenRes = await fetch('/api/chat/token');
+                if (!tokenRes.ok) throw new Error('Failed to get chat token');
+                const tokenData = await tokenRes.json();
+                if (!tokenData.token || !tokenData.apiKey) {
+                    throw new Error('Stream Chat not fully configured');
+                }
+                streamClient = StreamChat.getInstance(tokenData.apiKey);
+                await streamClient.connectUser({ id: tokenData.userId }, tokenData.token);
+                setClient(streamClient);
+            }
+
+            const streamChannel = streamClient.channel('messaging', channelData.channelId);
+            await streamChannel.watch();
+
+            setMessages(
+                (streamChannel.state.messages || []).map(m => ({
+                    id: m.id,
+                    from: m.user?.id === user?.id ? 'user' : 'other',
+                    text: m.text,
+                })),
+            );
+
+            // Ensure only a single message.new listener is attached per channel
+            streamChannel.off('message.new');
+            streamChannel.on('message.new', (event) => {
+                const m = event.message;
+                if (!m || !m.id) return;
+                setMessages(prev => {
+                    if (prev.some(msg => msg.id === m.id)) return prev;
+                    return [
+                        ...prev,
+                        {
+                            id: m.id,
+                            from: m.user?.id === user?.id ? 'user' : 'other',
+                            text: m.text,
+                        },
+                    ];
+                });
+            });
+
+            setChannel(streamChannel);
+            setChatInfo(prev => ({ ...(prev || {}), channelId: channelData.channelId }));
+            setInitialised(true);
+            setCreatorSearchOpen(false);
+            setSearchQuery('');
+            setActiveChannelId(channelData.channelId);
+
+            const safeName = (creator?.displayName || 'Unnamed Store').trim();
+            setConversations(prev => {
+                const exists = prev.some(conv => conv.channelId === channelData.channelId);
+                if (exists) return prev;
+                return [
+                    {
+                        channelId: channelData.channelId,
+                        kind: 'creator',
+                        participants: [
+                            {
+                                id: targetUserId,
+                                name: safeName,
+                                imageUrl: creator?.imageUrl || null,
+                            },
+                        ],
+                        lastMessage: null,
+                        unreadCount: 0,
+                    },
+                    ...prev,
+                ];
+            });
+        } catch (err) {
+            console.error('Failed to start creator chat', err);
+            setError('Unable to start creator chat right now');
+        } finally {
+            setConnecting(false);
+        }
+    }
+
+    // Allow other pages to open a creator chat without exposing user ids in the UI.
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const handler = (e) => {
+            const detail = e?.detail || {};
+            const targetUserId = detail.targetUserId;
+            if (!targetUserId) return;
+            setOpen(true);
+            startCreatorChat({
+                id: targetUserId,
+                displayName: detail.displayName || 'Unnamed Store',
+                imageUrl: detail.imageUrl || null,
+            });
+        };
+        window.addEventListener('fit:openCreatorChat', handler);
+        return () => window.removeEventListener('fit:openCreatorChat', handler);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isSignedIn, client]);
+
     // Load unread counts for the launcher badge even when closed
     useEffect(() => {
         const loadUnread = async () => {
@@ -317,7 +445,7 @@ export default function ChatLauncher() {
                 className="fixed bottom-6 left-6 z-50 rounded-full bg-black text-white shadow-2xl px-5 py-3 flex items-center gap-2.5 text-sm hover:bg-[#111111] transition-all duration-200 hover:scale-105 active:scale-95"
             >
                 {!open && unreadTotal > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-[9px] px-1.5 py-0.5 min-w-[18px] text-center">
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-[9px] px-1.5 py-0.5 min-w-4.5 text-center">
                         {unreadTotal > 9 ? '9+' : unreadTotal}
                     </span>
                 )}
@@ -330,8 +458,8 @@ export default function ChatLauncher() {
             </button>
 
             {open && (
-                <div className="fixed bottom-24 left-6 z-40 w-[420px] h-[600px] bg-white dark:bg-background border border-gray-200 dark:border-borderColor rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-4">
-                    <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-borderColor bg-gradient-to-r from-gray-50 to-white dark:from-borderColor/20 dark:to-transparent">
+                <div className="fixed bottom-24 left-6 z-40 w-105 h-150 bg-white dark:bg-background border border-gray-200 dark:border-borderColor rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-4">
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-borderColor bg-linear-to-r from-gray-50 to-white dark:from-borderColor/20 dark:to-transparent">
                         <div className="flex flex-col gap-0.5">
                             <span className="text-base font-semibold text-gray-900 dark:text-textColor">Messages</span>
                             <span className="text-xs text-gray-600 dark:text-lightColor flex items-center gap-1.5">
@@ -431,109 +559,20 @@ export default function ChatLauncher() {
                                                                     key={c.id}
                                                                     type="button"
                                                                     className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-borderColor/20 transition-colors border-b border-gray-100 dark:border-borderColor/50 last:border-b-0"
-                                                                    onClick={async () => {
-                                                                        try {
-                                                                            setConnecting(true);
-                                                                                const channelRes = await fetch('/api/chat/channel', {
-                                                                                method: 'POST',
-                                                                                headers: { 'Content-Type': 'application/json' },
-                                                                                body: JSON.stringify({ kind: 'creator', targetUserId: c.id }),
-                                                                            });
-                                                                            if (!channelRes.ok) throw new Error('Failed to create chat channel');
-                                                                            const channelData = await channelRes.json();
-
-                                                                                let streamClient = client;
-                                                                                if (!streamClient) {
-                                                                                    const tokenRes = await fetch('/api/chat/token');
-                                                                                    if (!tokenRes.ok) throw new Error('Failed to get chat token');
-                                                                                    const tokenData = await tokenRes.json();
-                                                                                    if (!tokenData.token || !tokenData.apiKey) {
-                                                                                        throw new Error('Stream Chat not fully configured');
-                                                                                    }
-                                                                                    streamClient = StreamChat.getInstance(tokenData.apiKey);
-                                                                                    await streamClient.connectUser({ id: tokenData.userId }, tokenData.token);
-                                                                                    setClient(streamClient);
-                                                                                }
-
-                                                                                const streamChannel = streamClient.channel('messaging', channelData.channelId);
-                                                                            await streamChannel.watch();
-
-                                                                            setMessages(
-                                                                                (streamChannel.state.messages || []).map(m => ({
-                                                                                    id: m.id,
-                                                                                        from: m.user?.id === user?.id ? 'user' : 'other',
-                                                                                    text: m.text,
-                                                                                })),
-                                                                            );
-
-                                                                                // Ensure only a single message.new listener is attached per channel
-                                                                                streamChannel.off('message.new');
-                                                                                streamChannel.on('message.new', (event) => {
-                                                                                const m = event.message;
-                                                                                if (!m || !m.id) return;
-                                                                                setMessages(prev => {
-                                                                                    if (prev.some(msg => msg.id === m.id)) return prev;
-                                                                                    return [
-                                                                                        ...prev,
-                                                                                        {
-                                                                                            id: m.id,
-                                                                                                from: m.user?.id === user?.id ? 'user' : 'other',
-                                                                                            text: m.text,
-                                                                                        },
-                                                                                    ];
-                                                                                });
-                                                                            });
-
-                                                                            setChannel(streamChannel);
-                                                                            setChatInfo(prev => ({ ...(prev || {}), channelId: channelData.channelId }));
-                                                                            setInitialised(true);
-                                                                            setCreatorSearchOpen(false);
-                                                                            setSearchQuery('');
-                                                                            setActiveChannelId(channelData.channelId);
-                                                                            
-                                                                            // Only add to conversations if it doesn't already exist
-                                                                            setConversations(prev => {
-                                                                                const exists = prev.some(conv => conv.channelId === channelData.channelId);
-                                                                                if (exists) {
-                                                                                    return prev;
-                                                                                }
-                                                                                return [
-                                                                                    {
-                                                                                        channelId: channelData.channelId,
-                                                                                        kind: 'creator',
-                                                                                        participants: [
-                                                                                            {
-                                                                                                id: c.id,
-                                                                                                name: c.displayName || c.id,
-                                                                                                imageUrl: c.imageUrl || null,
-                                                                                            },
-                                                                                        ],
-                                                                                        lastMessage: null,
-                                                                                        unreadCount: 0,
-                                                                                    },
-                                                                                    ...prev,
-                                                                                ];
-                                                                            });
-                                                                        } catch (err) {
-                                                                            console.error('Failed to start creator chat', err);
-                                                                            setError('Unable to start creator chat right now');
-                                                                        } finally {
-                                                                            setConnecting(false);
-                                                                        }
-                                                                    }}
+                                                                    onClick={() => startCreatorChat(c)}
                                                                 >
                                                                     <div className="flex items-center gap-2">
-                                                                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-borderColor dark:to-borderColor/50 overflow-hidden flex items-center justify-center text-xs font-semibold text-gray-700 dark:text-textColor flex-shrink-0">
+                                                                        <div className="w-7 h-7 rounded-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-borderColor dark:to-borderColor/50 overflow-hidden flex items-center justify-center text-xs font-semibold text-gray-700 dark:text-textColor shrink-0">
                                                                             {c.imageUrl ? (
                                                                                 // eslint-disable-next-line @next/next/no-img-element
-                                                                                <img src={c.imageUrl} alt={c.displayName || c.id} className="w-full h-full object-cover" />
+                                                                                <img src={c.imageUrl} alt={c.displayName || 'Creator'} className="w-full h-full object-cover" />
                                                                             ) : (
-                                                                                (c.displayName || c.id || '?')[0].toUpperCase()
+                                                                                (c.displayName || 'C')[0].toUpperCase()
                                                                             )}
                                                                         </div>
                                                                         <div className="flex flex-col gap-0.5 min-w-0">
                                                                             <span className="text-xs font-medium text-gray-900 dark:text-textColor truncate">
-                                                                                {c.displayName || c.id}
+                                                                                {c.displayName || 'Unnamed Store'}
                                                                             </span>
                                                                             {c.hasProducts && (
                                                                                 <span className="text-[10px] text-gray-500 dark:text-lightColor/80">Creator</span>
@@ -570,8 +609,8 @@ export default function ChatLauncher() {
                                                                 isActive ? 'bg-gray-100 dark:bg-borderColor/30' : ''
                                                             }`}
                                                         >
-                                                            <div className="relative flex-shrink-0">
-                                                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-borderColor dark:to-borderColor/50 overflow-hidden flex items-center justify-center text-xs font-semibold text-gray-700 dark:text-textColor">
+                                                            <div className="relative shrink-0">
+                                                                <div className="w-9 h-9 rounded-full bg-linear-to-br from-gray-200 to-gray-300 dark:from-borderColor dark:to-borderColor/50 overflow-hidden flex items-center justify-center text-xs font-semibold text-gray-700 dark:text-textColor">
                                                                     {p?.imageUrl ? (
                                                                         // eslint-disable-next-line @next/next/no-img-element
                                                                         <img src={p.imageUrl} alt={p.name || p.id} className="w-full h-full object-cover" />
@@ -580,14 +619,14 @@ export default function ChatLauncher() {
                                                                     )}
                                                                 </div>
                                                                 {c.unreadCount > 0 && (
-                                                                    <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white rounded-full text-[9px] font-bold px-1.5 py-0.5 min-w-[18px] text-center shadow-sm">
+                                                                    <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white rounded-full text-[9px] font-bold px-1.5 py-0.5 min-w-4.5 text-center shadow-sm">
                                                                         {c.unreadCount > 9 ? '9+' : c.unreadCount}
                                                                     </span>
                                                                 )}
                                                             </div>
                                                             <div className="flex-1 min-w-0 flex flex-col gap-0.5">
                                                                 <span className="text-xs font-medium text-gray-900 dark:text-textColor truncate">
-                                                                    {p?.name || p?.id || 'Chat'}
+                                                                    {p?.name || 'Unnamed Store'}
                                                                 </span>
                                                                 {c.lastMessage?.text && (
                                                                     <span className="text-[10px] text-gray-500 dark:text-lightColor/80 truncate">
@@ -621,7 +660,7 @@ export default function ChatLauncher() {
                                                         </div>
                                                     ))
                                                 ) : (
-                                                    <div className="flex-1 flex items-center justify-center h-full min-h-[200px]">
+                                                    <div className="flex-1 flex items-center justify-center h-full min-h-50">
                                                         <div className="text-center max-w-xs">
                                                             <IoChatbubblesOutline size={40} className="mx-auto mb-3 text-gray-300 dark:text-borderColor" />
                                                             <p className="text-sm text-gray-600 dark:text-lightColor/70 mb-1">

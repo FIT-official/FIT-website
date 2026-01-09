@@ -5,33 +5,32 @@ import { completeOnboarding, updateRoleFromStripe } from './_actions'
 import { useEffect, useState } from 'react'
 import Logo from '@/components/Logo'
 
+
 function Onboarding() {
     const { user, isLoaded } = useUser()
     const router = useRouter()
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
 
+    // No client-side redirect; handled by server layout
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (!isLoaded) return
         setLoading(true)
         setError(null)
-        
         const formData = new FormData(e.currentTarget)
         const res = await completeOnboarding(formData)
-        
         if (res?.error) {
             setError(res.error)
             setLoading(false)
             return
         }
-        
         if (res?.message) {
             // Update role from Stripe if subscription exists
             if (user.publicMetadata?.stripeSubscriptionId) {
                 await updateRoleFromStripe(user.publicMetadata.stripeSubscriptionId)
             }
-            
             // Use window.location for a hard redirect to ensure middleware gets fresh session
             window.location.href = '/'
         }

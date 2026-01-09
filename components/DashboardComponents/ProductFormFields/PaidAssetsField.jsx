@@ -65,7 +65,7 @@ export default function PaidAssetsField({
                 Click to choose files or drag and drop here
                 <input
                     type="file"
-                    accept=".obj,.glb,.gltf,.stl,.blend,.fbx,.zip,.rar,.7z"
+                    accept=".obj,.glb,.gltf,.stl,.blend,.fbx,.zip,.rar,.7z,.3mf"
                     multiple
                     onChange={handleModelChange}
                     style={{ display: "none" }}

@@ -4,9 +4,7 @@ const CartItemSchema = new mongoose.Schema(
     {
         productId: { type: String, required: true },
         quantity: { type: Number, default: 1 },
-        // Legacy variant system (for backward compatibility)
         variantId: { type: String, default: null },
-        // New variant selection system
         selectedVariants: {
             type: Map,
             of: String, // Maps variant type name to selected option name
