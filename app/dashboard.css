@@ -24,8 +24,8 @@
   --dash-bad-bg: #f9ede9;
 
   /* Radii */
-  --dash-r-card: 16px;
-  --dash-r-inner: 12px;
+  --dash-r-card: 4px;
+  --dash-r-inner: 2px;
 
   /* Elevation (warm-hued, single light source above) */
   --dash-shadow-card: 0 1px 2px rgb(120 90 20 / 0.04), 0 2px 8px rgb(120 90 20 / 0.04);

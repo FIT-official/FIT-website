@@ -29,7 +29,7 @@ function money(amount, currency = 'sgd') {
  */
 const DEFAULT_OPTIONS = { postProcessing: false, specialRequest: false, priority: false, expedite: false }
 
-export default function QuotePanel({ metrics, settings, deliveryTypeName, options: optionsProp, onOptionsChange }) {
+export default function QuotePanel({ metrics, settings, deliveryTypeName, options: optionsProp, onOptionsChange, requestId }) {
   // Controlled when `options`/`onOptionsChange` are supplied (so the editor can
   // persist the exact selection at submit); otherwise self-managed.
   const [internalOptions, setInternalOptions] = useState(DEFAULT_OPTIONS)
@@ -68,6 +68,12 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
             settings,
             options,
             ...(deliveryTypeName ? { deliveryTypeName } : {}),
+            // With a saved request the server can recompute print time from the
+            // STORED model, which is what the cart will charge. `preview` asks
+            // for that number without saving anything. Without a requestId
+            // (ad-hoc drag-and-drop) there is no stored model, so the quote
+            // stays a heuristic estimate until the request is saved.
+            ...(requestId ? { requestId, preview: true } : {}),
           }),
         })
         if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error || 'Quote failed')
@@ -87,7 +93,7 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
       }
     }, 500)
     return () => clearTimeout(t)
-  }, [hasModel, metrics, settings, options, deliveryTypeName])
+  }, [hasModel, metrics, settings, options, deliveryTypeName, requestId])
 
   if (!hasModel) return null
 

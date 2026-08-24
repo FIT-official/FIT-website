@@ -658,6 +658,10 @@ const Result = () => {
           settings={quoteSettings}
           options={quoteOptions}
           onOptionsChange={setQuoteOptions}
+          // variantId is the requestId for custom prints; with it the panel can
+          // show the authoritative (stored-model) quote rather than an estimate.
+          // Product prints have no per-customer request until checkout.
+          requestId={isProductPrint ? null : variantId}
         />
       )}
       {/* Simple/Advanced mode toggle — anchored to the canvas, bottom-right */}
