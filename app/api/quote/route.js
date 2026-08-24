@@ -26,6 +26,40 @@ const MAX_BODY_BYTES = 50_000
 const MAX_RECOMPUTE_BYTES = 75 * 1024 * 1024
 
 /**
+ * Read a request body up to a hard byte ceiling, enforced against bytes
+ * actually read off the stream — not the client-supplied Content-Length
+ * header, which can understate the real size.
+ * @returns {Promise<{ tooLarge: true } | { tooLarge: false, text: string }>}
+ */
+async function readBodyWithLimit(req, maxBytes) {
+  if (!req.body) {
+    const text = await req.text()
+    if (new TextEncoder().encode(text).byteLength > maxBytes) return { tooLarge: true }
+    return { tooLarge: false, text }
+  }
+  const reader = req.body.getReader()
+  const chunks = []
+  let total = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.byteLength
+    if (total > maxBytes) {
+      reader.cancel().catch(() => {})
+      return { tooLarge: true }
+    }
+    chunks.push(value)
+  }
+  const merged = new Uint8Array(total)
+  let offset = 0
+  for (const chunk of chunks) {
+    merged.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  return { tooLarge: false, text: new TextDecoder().decode(merged) }
+}
+
+/**
  * POST /api/quote — Instant Quoting Engine endpoint.
  *
  * Anonymous callers get a price preview. Supplying a `requestId` persists the
@@ -38,8 +72,8 @@ const MAX_RECOMPUTE_BYTES = 75 * 1024 * 1024
  * anonymous by IP with tighter limits. No-ops when Upstash env vars are unset.
  */
 export async function POST(req) {
-  const contentLength = Number(req.headers.get('content-length') || 0)
-  if (contentLength > MAX_BODY_BYTES) {
+  const { tooLarge, text: bodyText } = await readBodyWithLimit(req, MAX_BODY_BYTES)
+  if (tooLarge) {
     return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
   }
 
@@ -54,7 +88,7 @@ export async function POST(req) {
 
   let body
   try {
-    body = await req.json()
+    body = JSON.parse(bodyText)
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
@@ -83,7 +117,7 @@ export async function POST(req) {
     )
   }
 
-  const { quote, requestId } = result.data
+  const { quote, requestId, preview } = result.data
   let responseQuote = quote
 
   if (requestId) {
@@ -168,19 +202,50 @@ export async function POST(req) {
               dimensionsCm: serverMetrics.dimensionsCm,
               confidence: serverMetrics.confidence,
             },
-            { pricingConfig, deliveryTypes },
+            {
+              pricingConfig,
+              deliveryTypes,
+              // Server-derived: prices the print time once an admin has
+              // calibrated (quotingConfig.layerStackModel), and is recorded
+              // alongside the heuristic either way.
+              printHoursShapeAware: serverMetrics.printHoursShapeAware,
+            },
           )
-          if (serverResult.ok) persistQuote = serverResult.data.quote
-          // Record the shape-aware time alongside the priced (volume-only)
-          // estimate for print-farm validation. Not priced — see
-          // add-lightweight-print-time-estimator tasks 3.2/3.3.
-          if (serverMetrics.printHoursShapeAware > 0 && persistQuote.inputs) {
-            persistQuote.inputs.printHoursShapeAware = serverMetrics.printHoursShapeAware
+          if (serverResult.ok) {
+            // The pre-recompute machine-limit check ran against client-submitted
+            // dimensions. A crafted request can pass that check with a squashed
+            // bounding box while the real (server-recomputed) model is oversized
+            // on one axis — re-check against the authoritative dimensions before
+            // persisting.
+            const serverLimitsCheck = checkMachineLimits(
+              serverResult.data.quote.inputs?.dimensionsCm,
+              (serverResult.data.quote.inputs?.weightGrams ?? 0) / 1000,
+              settings?.machineLimits?.toObject?.() || settings?.machineLimits || null,
+            )
+            if (!serverLimitsCheck.fits) {
+              return NextResponse.json(
+                { error: machineLimitMessage(serverLimitsCheck.violations) },
+                { status: 422 },
+              )
+            }
+            persistQuote = serverResult.data.quote
           }
         }
       }
     } catch (verifyErr) {
       console.error('Server geometry verification failed; using client metrics:', verifyErr)
+    }
+
+    // Preview mode: the caller wanted the authoritative number, not a save.
+    // Return the recomputed quote and write nothing — no status change, no
+    // quotedAt, no delivery re-resolve, no notification. This is what lets the
+    // editor panel show the same total the cart will charge, now that print
+    // time is priced from the stored model's shape.
+    // ponytail: one S3 read + parse per debounced preview. Cache the shape
+    // components per (requestId, geometry-affecting settings) if that cost
+    // ever shows up in the logs.
+    if (preview) {
+      return NextResponse.json({ quote: persistQuote, preview: true }, { headers: rate.headers })
     }
 
     reqDoc.quote = persistQuote
