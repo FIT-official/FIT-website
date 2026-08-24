@@ -1,13 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Boundary mocks (repo convention: mock Clerk/Mongoose at the edges)
-vi.mock('@/lib/authenticate', () => ({ authenticate: vi.fn() }))
+vi.mock('@/lib/authenticate', async (importOriginal) => {
+  const actual = await importOriginal()
+  return { ...actual, authenticate: vi.fn() }
+})
 vi.mock('@/lib/db', () => ({ connectToDatabase: vi.fn() }))
 vi.mock('@clerk/nextjs/server', () => ({ auth: vi.fn() }))
 vi.mock('@/models/User', () => ({ default: { findOne: vi.fn() } }))
 vi.mock('@/models/CustomPrintRequest', () => ({ default: { findOne: vi.fn() } }))
 
-import { authenticate } from '@/lib/authenticate'
+import { authenticate, UnauthorizedError } from '@/lib/authenticate'
 import User from '@/models/User'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
 import { POST } from '@/app/api/cart/custom-print/route'
@@ -44,7 +47,7 @@ beforeEach(() => {
 
 describe('POST /api/cart/custom-print', () => {
   it('rejects unauthenticated callers', async () => {
-    authenticate.mockResolvedValue({ userId: null })
+    authenticate.mockRejectedValue(new UnauthorizedError())
     const res = await post({ requestId: 'anything' })
     expect(res.status).toBe(401)
   })

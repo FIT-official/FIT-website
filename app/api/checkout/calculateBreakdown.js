@@ -1,4 +1,5 @@
 import { getDiscountedPrice } from '@/utils/discount';
+import { resolveDeliveryFee } from '@/lib/quoting/deliveryTypeResolver';
 
 export async function calculateCartItemBreakdown({ item, product, address, extraDiscountRules = [] }) {
     const quantity = item.quantity || 1;
@@ -63,13 +64,14 @@ export async function calculateCartItemBreakdown({ item, product, address, extra
         throw new Error(`Product ${product._id} missing basePrice`);
     }
 
-    // Get delivery fee from product's delivery types configuration
-    const deliveryTypeObj = (product.delivery?.deliveryTypes || []).find(
-        dt => dt.type === item.chosenDeliveryType
-    );
-
-    // Use custom price if set by creator, otherwise use default price
-    const deliveryFee = deliveryTypeObj?.customPrice ?? deliveryTypeObj?.price ?? 0;
+    // Get delivery fee from product's delivery types configuration. An
+    // unmatched chosenDeliveryType is rejected rather than silently priced at
+    // 0 — see lib/quoting/deliveryTypeResolver.js.
+    const deliveryResolution = resolveDeliveryFee(product.delivery?.deliveryTypes, item.chosenDeliveryType, { key: 'type' });
+    if (!deliveryResolution.ok) {
+        throw new Error(`Unknown delivery type "${item.chosenDeliveryType}" for product ${product._id}`);
+    }
+    const deliveryFee = deliveryResolution.fee;
 
     const total = (finalPrice * quantity) + deliveryFee;
 

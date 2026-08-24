@@ -46,6 +46,28 @@ describe('buildQuote — validation', () => {
     expect(r.ok).toBe(false)
     expect(r.status).toBe(400)
   })
+
+  it('rejects an unrecognized materialType instead of silently pricing it as the default material', () => {
+    const r = buildQuote({ ...validInput, settings: { ...validInput.settings, materialType: 'metl' } }, {})
+    expect(r.ok).toBe(false)
+    expect(r.status).toBe(400)
+  })
+
+  it('accepts an omitted materialType (defaults apply downstream)', () => {
+    const { materialType, ...rest } = validInput.settings
+    const r = buildQuote({ ...validInput, settings: rest }, { pricingConfig: { minimumPrice: 0 } })
+    expect(r.ok).toBe(true)
+  })
+
+  it('rejects an unknown deliveryTypeName instead of silently omitting the delivery line', () => {
+    const deliveryTypes = [{ name: 'standard', pricingTiers: [{ minVolume: 0, maxVolume: 1e9, minWeight: 0, maxWeight: 1e9, price: 12 }] }]
+    const r = buildQuote(
+      { ...validInput, deliveryTypeName: 'nonexistent' },
+      { pricingConfig: { minimumPrice: 0 }, deliveryTypes },
+    )
+    expect(r.ok).toBe(false)
+    expect(r.status).toBe(400)
+  })
 })
 
 describe('buildQuote — server-authoritative pricing', () => {

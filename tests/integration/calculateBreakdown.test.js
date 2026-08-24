@@ -46,7 +46,23 @@ describe('calculateCartItemBreakdown', () => {
     expect(result.total).toBe(58)
   })
 
-  it('uses zero delivery when no delivery type matches', async () => {
+  it('resolves zero delivery for a matched digital delivery type', async () => {
+    const product = {
+      _id: 'p3',
+      name: 'Digital Asset',
+      creatorUserId: 'c1',
+      basePrice: { presentmentAmount: 50, presentmentCurrency: 'SGD' },
+      delivery: { deliveryTypes: [{ type: 'digital', price: 0 }] },
+    }
+    const item = { quantity: 1, chosenDeliveryType: 'digital' }
+
+    const result = await calculateCartItemBreakdown({ item, product })
+
+    expect(result.deliveryFee).toBe(0)
+    expect(result.total).toBe(50)
+  })
+
+  it('rejects an unmatched delivery type instead of silently pricing it at 0', async () => {
     const product = {
       _id: 'p3',
       name: 'Digital Asset',
@@ -56,10 +72,9 @@ describe('calculateCartItemBreakdown', () => {
     }
     const item = { quantity: 1, chosenDeliveryType: 'digital' }
 
-    const result = await calculateCartItemBreakdown({ item, product })
-
-    expect(result.deliveryFee).toBe(0)
-    expect(result.total).toBe(50)
+    await expect(calculateCartItemBreakdown({ item, product })).rejects.toThrow(
+      /Unknown delivery type/,
+    )
   })
 
   it('throws when a product has no base price', async () => {

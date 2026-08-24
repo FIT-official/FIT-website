@@ -91,15 +91,19 @@ describe('customPrintChargeBreakdown', () => {
     expect(b.total).toBe(25)
   })
 
-  it('falls back to the first delivery type when the requested one is unknown', () => {
+  it('rejects an explicitly requested delivery type that is unknown, instead of silently substituting the first one', () => {
     const r = { basePrice: 10, printFee: 0, delivery }
-    const b = customPrintChargeBreakdown(r, 'teleport')
-    expect(b.chosenDeliveryType).toBe('pickup')
-    expect(b.deliveryFee).toBe(0)
+    expect(() => customPrintChargeBreakdown(r, 'teleport')).toThrow(/Unknown delivery type/)
   })
 
-  it('handles a request without delivery types', () => {
-    const b = customPrintChargeBreakdown({ basePrice: 10, printFee: 2 }, 'courier')
+  it('rejects an explicitly requested delivery type when the request has no delivery types configured', () => {
+    expect(() =>
+      customPrintChargeBreakdown({ basePrice: 10, printFee: 2 }, 'courier'),
+    ).toThrow(/Unknown delivery type/)
+  })
+
+  it('defaults to no delivery type (not a rejection) when none was requested and none is configured', () => {
+    const b = customPrintChargeBreakdown({ basePrice: 10, printFee: 2 }, '')
     expect(b.chosenDeliveryType).toBe('')
     expect(b.deliveryFee).toBe(0)
     expect(b.total).toBe(12)
