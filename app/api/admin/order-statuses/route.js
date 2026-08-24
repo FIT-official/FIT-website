@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import AppSettings from "@/models/AppSettings";
-import { authenticate } from "@/lib/authenticate";
+import { authenticate, unauthorizedResponse, UnauthorizedError } from "@/lib/authenticate";
 import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 import { getAppSettingsId } from "@/lib/appSettingsId";
 
@@ -78,10 +78,6 @@ export async function POST(request) {
     try {
         const { userId } = await authenticate(request);
 
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
         const isAdmin = await checkAdminPrivileges(userId);
         if (!isAdmin) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -137,6 +133,7 @@ export async function POST(request) {
 
         return NextResponse.json({ orderStatus }, { status: 201 });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error creating order status:", error);
 
         if (error.code === 11000) {
@@ -156,10 +153,6 @@ export async function POST(request) {
 export async function PUT(request) {
     try {
         const { userId } = await authenticate(request);
-
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
 
         const isAdmin = await checkAdminPrivileges(userId);
         if (!isAdmin) {
@@ -228,6 +221,7 @@ export async function PUT(request) {
 
         return NextResponse.json({ orderStatus }, { status: 200 });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error updating order status:", error);
         return NextResponse.json(
             { error: "Failed to update order status" },
@@ -239,10 +233,6 @@ export async function PUT(request) {
 export async function DELETE(request) {
     try {
         const { userId } = await authenticate(request);
-
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
 
         const isAdmin = await checkAdminPrivileges(userId);
         if (!isAdmin) {
@@ -272,6 +262,7 @@ export async function DELETE(request) {
 
         return NextResponse.json({ message: "Order status deleted successfully" }, { status: 200 });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error deleting order status:", error);
         return NextResponse.json(
             { error: "Failed to delete order status" },

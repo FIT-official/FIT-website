@@ -4,7 +4,7 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { connectToDatabase } from "@/lib/db";
 import DigitalProductTransaction from "@/models/DigitalProductTransaction";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { authenticate } from "@/lib/authenticate";
+import { authenticate, unauthorizedResponse } from "@/lib/authenticate";
 
 function isValidIdx(idx, links) {
     const i = Number(idx);
@@ -12,7 +12,12 @@ function isValidIdx(idx, links) {
 }
 
 export async function GET(req, { params }) {
-    const { userId } = await authenticate(req);
+    let userId;
+    try {
+        ({ userId } = await authenticate(req));
+    } catch {
+        return unauthorizedResponse();
+    }
     const awaitedParams = await params;
     const productId = awaitedParams.productId;
     if (!productId) return NextResponse.json({ error: "Invalid Product ID" }, { status: 400 });

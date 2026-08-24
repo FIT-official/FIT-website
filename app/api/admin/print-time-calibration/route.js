@@ -13,6 +13,8 @@ import {
   DEFAULT_LAYER_STACK_MODEL,
 } from '@/lib/quoting/printTime/layerStack'
 import { comparePrintTimes, fitLayerStackConstants } from '@/lib/quoting/printTime/validate'
+import { summarisePricingImpact } from '@/lib/quoting/printTime/pricingImpact'
+import CustomPrintRequest from '@/models/CustomPrintRequest'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -55,7 +57,31 @@ async function requireAdminSettings(req) {
   return { settings }
 }
 
-function calibrationView(settings) {
+// How many recent quotes to summarise for the pricing-impact panel.
+const IMPACT_SAMPLE_SIZE = 100
+
+/**
+ * "Is my calibration moving prices, and where?" — read straight off the two
+ * estimates every persisted quote records. Read-only; failures degrade to null
+ * so the calibration panel still loads.
+ */
+async function pricingImpact() {
+  try {
+    const quotes = await CustomPrintRequest.find({
+      'quote.inputs.printHours': { $exists: true },
+    })
+      .select('requestId quotedAt quote.total quote.currency quote.inputs')
+      .sort({ quotedAt: -1 })
+      .limit(IMPACT_SAMPLE_SIZE)
+      .lean()
+    return summarisePricingImpact(quotes)
+  } catch (err) {
+    console.error('Calibration pricing impact failed:', err)
+    return null
+  }
+}
+
+async function calibrationView(settings) {
   const stored = settings.quotingConfig?.layerStackModel
   const appliedRaw = stored?.toObject?.() || stored || {}
   const hasApplied = appliedRaw.flowMm3PerS > 0
@@ -108,6 +134,7 @@ function calibrationView(settings) {
           fittedAt: settings.printTimeCalibration?.fittedAt || null,
         }
       : null,
+    impact: await pricingImpact(),
   }
 }
 
@@ -115,7 +142,7 @@ export async function GET(req) {
   try {
     const { settings, error } = await requireAdminSettings(req)
     if (error) return NextResponse.json({ error: 'Access denied.' }, { status: error })
-    return NextResponse.json(calibrationView(settings))
+    return NextResponse.json(await calibrationView(settings))
   } catch (err) {
     console.error('Calibration GET failed:', err)
     return NextResponse.json({ error: 'Failed to load calibration' }, { status: 500 })
@@ -169,7 +196,7 @@ export async function POST(req) {
       ...components,
     })
     await settings.save()
-    return NextResponse.json(calibrationView(settings))
+    return NextResponse.json(await calibrationView(settings))
   } catch (err) {
     console.error('Calibration POST failed:', err)
     return NextResponse.json({ error: 'Failed to add test print' }, { status: 500 })
@@ -235,7 +262,7 @@ export async function PUT(req) {
     }
     settings.printTimeCalibration = cal
     await settings.save()
-    return NextResponse.json(calibrationView(settings))
+    return NextResponse.json(await calibrationView(settings))
   } catch (err) {
     console.error('Calibration PUT failed:', err)
     return NextResponse.json({ error: 'Failed to update calibration' }, { status: 500 })

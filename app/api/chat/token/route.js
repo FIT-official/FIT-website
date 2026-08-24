@@ -1,15 +1,11 @@
 import { NextResponse } from "next/server";
-import { authenticate } from "@/lib/authenticate";
+import { authenticate, unauthorizedResponse, UnauthorizedError } from "@/lib/authenticate";
 import { getStreamServerClient } from "@/lib/streamChat";
 
 // Issues a real Stream Chat user token for the authenticated user.
 export async function GET(request) {
     try {
         const { userId } = await authenticate(request);
-
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
 
         const apiKey = process.env.STREAM_API_KEY;
         if (!apiKey) {
@@ -26,6 +22,7 @@ export async function GET(request) {
             token,
         });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error issuing chat token:", error);
         return NextResponse.json({ error: "Failed to issue chat token" }, { status: 500 });
     }

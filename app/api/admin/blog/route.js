@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import BlogPost from '@/models/BlogPost';
 import { sanitizeString } from "@/utils/validate";
-import { authenticate } from "@/lib/authenticate";
+import { authenticate, unauthorizedResponse } from "@/lib/authenticate";
 import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 import { readingTimeMinutes } from '@/lib/blog/readingTime';
 import { extractTextFromTiptap } from '@/lib/blog/tiptapText';
@@ -26,7 +26,12 @@ function computeReadingTime(body) {
 
 // Create or update a blog post. If `slug` or `_id` provided, update; otherwise create.
 export async function POST(req) {
-    const { userId } = await authenticate(req);
+    let userId;
+    try {
+        ({ userId } = await authenticate(req));
+    } catch {
+        return unauthorizedResponse();
+    }
     const isAdmin = await checkAdminPrivileges(userId);
     if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
@@ -120,7 +125,12 @@ const MAX_PAGE_SIZE = 50;
 // - default: paginated lean cards — `page` (1-based), `limit` (default 8,
 //   max 50), optional `status` filter with effectiveStatus semantics.
 export async function GET(req) {
-    const { userId } = await authenticate(req);
+    let userId;
+    try {
+        ({ userId } = await authenticate(req));
+    } catch {
+        return unauthorizedResponse();
+    }
     const isAdmin = await checkAdminPrivileges(userId);
     if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
@@ -179,7 +189,12 @@ export async function GET(req) {
 }
 
 export async function DELETE(req) {
-    const { userId } = await authenticate(req);
+    let userId;
+    try {
+        ({ userId } = await authenticate(req));
+    } catch {
+        return unauthorizedResponse();
+    }
     const isAdmin = await checkAdminPrivileges(userId);
     if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 

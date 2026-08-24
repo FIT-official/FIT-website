@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { authenticate } from "@/lib/authenticate";
+import { authenticate, unauthorizedResponse, UnauthorizedError } from "@/lib/authenticate";
 import { connectToDatabase } from "@/lib/db";
 import ChatReadState from "@/models/ChatReadState";
 import ChannelSummary from "@/models/ChannelSummary";
@@ -18,10 +18,6 @@ const sanitizeDisplayName = (value, fallback = 'Unnamed Store') => {
 export async function GET(request) {
     try {
         const { userId } = await authenticate(request);
-
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
 
         await connectToDatabase();
 
@@ -108,6 +104,7 @@ export async function GET(request) {
 
         return NextResponse.json({ channels });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error loading chat inbox:", error);
         return NextResponse.json({ error: "Failed to load chat inbox" }, { status: 500 });
     }

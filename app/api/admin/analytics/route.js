@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { authenticate } from '@/lib/authenticate'
 import { checkAdminPrivileges } from '@/lib/checkPrivileges'
+import { unauthorizedResponse } from '@/lib/authenticate'
 import { getAnalyticsSnapshot, isConfigured } from '@/lib/analytics/posthog'
 import { RANGE_PRESETS } from '@/lib/analytics/aggregate'
 
@@ -10,7 +11,12 @@ export const dynamic = 'force-dynamic'
 // GET /api/admin/analytics?window=last_7_days — PostHog-backed snapshot for
 // the admin dashboard. { configured: false } when env keys are absent.
 export async function GET(req) {
-    const { userId } = await authenticate(req)
+    let userId
+    try {
+        ({ userId } = await authenticate(req))
+    } catch {
+        return unauthorizedResponse()
+    }
     if (!(await checkAdminPrivileges(userId))) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }

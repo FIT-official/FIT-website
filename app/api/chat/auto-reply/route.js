@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { authenticate } from "@/lib/authenticate";
+import { authenticate, unauthorizedResponse, UnauthorizedError } from "@/lib/authenticate";
 import { getStreamServerClient } from "@/lib/streamChat";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
@@ -8,9 +8,6 @@ import ChannelSummary from "@/models/ChannelSummary";
 export async function POST(request) {
     try {
         const { userId } = await authenticate(request);
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
 
         const body = await request.json();
         const { channelId } = body || {};
@@ -118,6 +115,7 @@ export async function POST(request) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error sending chat auto-reply:", error);
         return NextResponse.json({ error: "Failed to send auto-reply" }, { status: 500 });
     }

@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
+import Product from "@/models/Product";
+import CustomPrintRequest from "@/models/CustomPrintRequest";
 import { sanitizeString } from "@/utils/validate";
 import { auth } from "@clerk/nextjs/server";
+import { resolveDeliveryFee } from "@/lib/quoting/deliveryTypeResolver";
 
 export async function PUT(req) {
     try {
@@ -59,6 +62,24 @@ export async function PUT(req) {
 
         if (!cartItem) {
             return NextResponse.json({ error: "Cart item not found" }, { status: 404 });
+        }
+
+        // Validate chosenDeliveryType against the item's REAL configured
+        // delivery types before persisting it — an unmatched value must not
+        // reach checkout, where it would otherwise silently price at 0 (see
+        // lib/quoting/deliveryTypeResolver.js).
+        let availableDeliveryTypes = [];
+        if (isCustomPrint) {
+            const requestId = productId.split(':')[1];
+            const customPrintRequest = await CustomPrintRequest.findOne({ requestId, userId }).lean();
+            availableDeliveryTypes = customPrintRequest?.delivery?.deliveryTypes || [];
+        } else {
+            const product = await Product.findById(productId).lean();
+            availableDeliveryTypes = product?.delivery?.deliveryTypes || [];
+        }
+        const deliveryResolution = resolveDeliveryFee(availableDeliveryTypes, chosenDeliveryType, { key: 'type' });
+        if (!deliveryResolution.ok) {
+            return NextResponse.json({ error: "Unknown delivery type" }, { status: 400 });
         }
 
         cartItem.chosenDeliveryType = chosenDeliveryType;

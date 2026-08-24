@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import Subscriber from '@/models/Subscriber'
-import { authenticate } from '@/lib/authenticate'
+import { authenticate, unauthorizedResponse } from '@/lib/authenticate'
 import { checkAdminPrivileges } from '@/lib/checkPrivileges'
 
 export const runtime = 'nodejs'
@@ -9,7 +9,12 @@ export const dynamic = 'force-dynamic'
 
 // GET — subscriber list; ?interestId= filters; ?status= filters.
 export async function GET(req) {
-    const { userId } = await authenticate(req)
+    let userId
+    try {
+        ({ userId } = await authenticate(req))
+    } catch {
+        return unauthorizedResponse()
+    }
     if (!(await checkAdminPrivileges(userId))) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }

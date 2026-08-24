@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
-import { authenticate } from '@/lib/authenticate';
+import { authenticate, unauthorizedResponse } from '@/lib/authenticate';
 import { checkAdminPrivileges } from '@/lib/checkPrivileges';
 import AppSettings from '@/models/AppSettings';
 import { calculatePrintCost } from '@/lib/printPricing';
 import { getAppSettingsId } from '@/lib/appSettingsId';
 
 export async function POST(request) {
-    const authResult = await authenticate(request);
-    if (authResult instanceof NextResponse) return authResult;
-    const { userId } = authResult;
+    let userId;
+    try {
+        ({ userId } = await authenticate(request));
+    } catch {
+        return unauthorizedResponse();
+    }
 
     if (!(await checkAdminPrivileges(userId))) {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });

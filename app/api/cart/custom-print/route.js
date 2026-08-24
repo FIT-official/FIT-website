@@ -2,17 +2,13 @@ import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import User from '@/models/User'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
-import { authenticate } from '@/lib/authenticate'
+import { authenticate, unauthorizedResponse, UnauthorizedError } from '@/lib/authenticate'
 import { customPrintDisplayPrice } from '@/lib/customPrintDisplayPrice'
 
 // POST /api/cart/custom-print { requestId }
 export async function POST(request) {
   try {
     const { userId } = await authenticate(request);
-    if (!userId) {
-      console.log('[POST /api/cart/custom-print] Unauthorized: No userId');
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
     const body = await request.json()
     const { requestId } = body
     if (!requestId) {
@@ -58,6 +54,7 @@ export async function POST(request) {
     await user.save()
     return NextResponse.json({ cart: user.cart })
   } catch (error) {
+    if (error instanceof UnauthorizedError) return unauthorizedResponse();
     // Log the full error for debugging
     console.error('Error in /api/cart/custom-print POST:', error);
     if (error && error.errors) {

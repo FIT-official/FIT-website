@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx'
 import { connectToDatabase } from '@/lib/db'
 import Subscriber from '@/models/Subscriber'
 import Interest from '@/models/Interest'
-import { authenticate } from '@/lib/authenticate'
+import { authenticate, unauthorizedResponse } from '@/lib/authenticate'
 import { checkAdminPrivileges } from '@/lib/checkPrivileges'
 
 export const runtime = 'nodejs'
@@ -11,7 +11,12 @@ export const dynamic = 'force-dynamic'
 
 // GET — xlsx export of the subscriber list (optionally ?interestId=).
 export async function GET(req) {
-    const { userId } = await authenticate(req)
+    let userId
+    try {
+        ({ userId } = await authenticate(req))
+    } catch {
+        return unauthorizedResponse()
+    }
     if (!(await checkAdminPrivileges(userId))) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }

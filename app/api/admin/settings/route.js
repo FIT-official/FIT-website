@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import AppSettings from "@/models/AppSettings";
 import { checkAdminPrivileges } from "@/lib/checkPrivileges";
-import { authenticate } from "@/lib/authenticate";
+import { authenticate, unauthorizedResponse, UnauthorizedError } from "@/lib/authenticate";
 import { DEFAULT_PRINT_COLOURS } from "@/lib/quoting/genericPresets";
 import { getAppSettingsId } from "@/lib/appSettingsId";
 
@@ -23,6 +23,12 @@ async function getAppSettings() {
 
 export async function GET(request) {
     try {
+        const { userId } = await authenticate(request);
+
+        if (!(await checkAdminPrivileges(userId))) {
+            return NextResponse.json({ error: "Access denied. Valid subscription or admin role required." }, { status: 403 });
+        }
+
         await connectToDatabase();
         const settings = await getAppSettings();
         const hardcodedDeliveryTypes = [
@@ -56,6 +62,7 @@ export async function GET(request) {
             printColours: settings.printColours?.length ? settings.printColours : DEFAULT_PRINT_COLOURS
         }, { status: 200 });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error fetching app settings:", error);
         return NextResponse.json(
             { error: "Failed to fetch app settings" },

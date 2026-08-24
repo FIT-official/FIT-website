@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
-import { authenticate } from '@/lib/authenticate'
+import { authenticate, unauthorizedResponse, UnauthorizedError } from '@/lib/authenticate'
 import { deleteFromS3 } from '@/lib/s3'
 
 export async function DELETE(request) {
@@ -46,6 +46,7 @@ export async function DELETE(request) {
             message: 'Custom print request deleted successfully'
         })
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse()
         console.error('Error deleting custom print request:', error)
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import DigitalProductTransaction from "@/models/DigitalProductTransaction";
-import { authenticate } from "@/lib/authenticate";
+import { authenticate, UnauthorizedError, unauthorizedResponse } from "@/lib/authenticate";
 
 export async function GET(req) {
     try {
@@ -12,6 +12,7 @@ export async function GET(req) {
         return NextResponse.json({ transactions }, { status: 200 });
 
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error retrieving transactions:", error);
         return NextResponse.json({ error: "Failed to retrieve transactions" }, { status: 500 });
     }

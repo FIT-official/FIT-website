@@ -2,14 +2,20 @@ import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import NewsletterCampaign from '@/models/NewsletterCampaign'
 import NewsletterEvent from '@/models/NewsletterEvent'
-import { authenticate } from '@/lib/authenticate'
+import { authenticate, UnauthorizedError } from '@/lib/authenticate'
 import { checkAdminPrivileges } from '@/lib/checkPrivileges'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 async function requireAdmin(req) {
-    const { userId } = await authenticate(req)
+    let userId
+    try {
+        ({ userId } = await authenticate(req))
+    } catch (e) {
+        if (e instanceof UnauthorizedError) return null
+        throw e
+    }
     return (await checkAdminPrivileges(userId)) ? userId : null
 }
 

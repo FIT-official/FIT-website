@@ -5,7 +5,7 @@ import Event from "@/models/Event";
 import CustomPrintRequest from "@/models/CustomPrintRequest";
 import { calculateCartItemBreakdown } from "../calculateBreakdown";
 import { customPrintChargeBreakdown } from "@/lib/customPrintDisplayPrice";
-import { authenticate } from "@/lib/authenticate";
+import { authenticate, UnauthorizedError, unauthorizedResponse } from "@/lib/authenticate";
 
 async function fetchProduct(productId) {
     try {
@@ -149,6 +149,7 @@ export async function GET(req) {
 
         return NextResponse.json({ cartBreakdown }, { status: 200 });
     } catch (err) {
+        if (err instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Server error in /api/checkout/breakdown:", err);
         return NextResponse.json({ error: "Server error" }, { status: 500 });
     }

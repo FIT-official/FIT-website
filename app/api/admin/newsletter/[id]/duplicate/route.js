@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import NewsletterCampaign from '@/models/NewsletterCampaign'
-import { authenticate } from '@/lib/authenticate'
+import { authenticate, unauthorizedResponse } from '@/lib/authenticate'
 import { checkAdminPrivileges } from '@/lib/checkPrivileges'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(req, { params }) {
-    const { userId } = await authenticate(req)
+    let userId
+    try {
+        ({ userId } = await authenticate(req))
+    } catch {
+        return unauthorizedResponse()
+    }
     if (!(await checkAdminPrivileges(userId))) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }

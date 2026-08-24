@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import Event from "@/models/Event";
-import { authenticate } from "@/lib/authenticate";
+import { authenticate, unauthorizedResponse, UnauthorizedError } from "@/lib/authenticate";
 import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 
 export async function GET() {
@@ -20,10 +20,6 @@ export async function GET() {
 export async function POST(request) {
     try {
         const { userId } = await authenticate(request);
-
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
 
         const isAdmin = await checkAdminPrivileges(userId);
         if (!isAdmin) {
@@ -67,6 +63,7 @@ export async function POST(request) {
 
         return NextResponse.json({ event }, { status: 201 });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error creating event:", error);
         return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
     }
@@ -76,10 +73,6 @@ export async function POST(request) {
 export async function PUT(request) {
     try {
         const { userId } = await authenticate(request);
-
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
 
         const isAdmin = await checkAdminPrivileges(userId);
         if (!isAdmin) {
@@ -109,6 +102,7 @@ export async function PUT(request) {
 
         return NextResponse.json({ event }, { status: 200 });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error updating event:", error);
         return NextResponse.json({ error: "Failed to update event" }, { status: 500 });
     }
@@ -118,10 +112,6 @@ export async function PUT(request) {
 export async function DELETE(request) {
     try {
         const { userId } = await authenticate(request);
-
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
 
         const isAdmin = await checkAdminPrivileges(userId);
         if (!isAdmin) {
@@ -145,6 +135,7 @@ export async function DELETE(request) {
 
         return NextResponse.json({ message: "Event deleted successfully" }, { status: 200 });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error deleting event:", error);
         return NextResponse.json({ error: "Failed to delete event" }, { status: 500 });
     }

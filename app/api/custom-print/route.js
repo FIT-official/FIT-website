@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { connectToDatabase } from "@/lib/db"
 import CustomPrintRequest from "@/models/CustomPrintRequest"
 import { v4 as uuidv4 } from 'uuid'
-import { authenticate } from '@/lib/authenticate'
+import { authenticate, unauthorizedResponse, UnauthorizedError } from '@/lib/authenticate'
 import { clerkClient } from "@clerk/nextjs/server"
 import Product from '@/models/Product'
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'
@@ -63,9 +63,6 @@ async function getCustomPrintBasePrice() {
 export async function POST(req) {
     try {
         const { userId } = await authenticate(req);
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
         const client = await clerkClient();
         const userObj = await client.users.getUser(userId);
         const { emailAddresses, firstName, lastName } = userObj;
@@ -93,6 +90,7 @@ export async function POST(req) {
 
 
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("[POST /api/custom-print] Error:", error);
         if (error && error.errors) {
             Object.entries(error.errors).forEach(([key, val]) => {
@@ -113,9 +111,6 @@ export async function POST(req) {
 export async function DELETE(req) {
     try {
         const { userId } = await authenticate(req);
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
         const { searchParams } = new URL(req.url);
         const requestId = searchParams.get('requestId');
         if (!requestId) {
@@ -143,6 +138,7 @@ export async function DELETE(req) {
         await CustomPrintRequest.deleteOne({ requestId, userId });
         return NextResponse.json({ success: true });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("[DELETE /api/custom-print] Error:", error);
         return NextResponse.json({ error: error.message || "Failed to delete print request" }, { status: 500 });
     }
@@ -151,10 +147,6 @@ export async function DELETE(req) {
 export async function GET(req) {
     try {
         const { userId } = await authenticate(req);
-        if (!userId) {
-            console.log('[GET /api/custom-print] No userId found after authenticate');
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
 
         await connectToDatabase();
 
@@ -216,6 +208,7 @@ export async function GET(req) {
         return NextResponse.json({ requests }, { status: 200 });
 
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("[GET /api/custom-print] Error:", error);
         if (error && error.errors) {
             Object.entries(error.errors).forEach(([key, val]) => {
@@ -232,9 +225,6 @@ export async function GET(req) {
 export async function PUT(req) {
     try {
         const { userId } = await authenticate(req);
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
         const body = await req.json();
         const { requestId, modelFile, printConfiguration, status, statusNote, pricing } = body;
         if (!requestId) {
@@ -348,6 +338,7 @@ export async function PUT(req) {
 
         return NextResponse.json({ request }, { status: 200 });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("[PUT /api/custom-print] Error:", error);
         if (error && error.errors) {
             Object.entries(error.errors).forEach(([key, val]) => {

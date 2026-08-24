@@ -84,9 +84,12 @@ const PRODUCT_ID = '507f1f77bcf86cd799439011'
 const ORDER_A = 'a1b2c3d4e5f6a7b8c9d0e1f2'
 const ORDER_B = 'b1b2c3d4e5f6a7b8c9d0e1f3'
 const ORDER_C = 'c1b2c3d4e5f6a7b8c9d0e1f4'
-const DAY_A = '2026-07-02T09:00:00Z'
-const DAY_B = '2026-07-01T09:00:00Z'
-const DAY_C = '2026-04-01T09:00:00Z' // outside the past-30-days window
+// Relative to now: the time filter is a rolling window, so absolute dates
+// silently expire out of it and turn this suite into a time bomb.
+const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString()
+const DAY_A = daysAgo(2)
+const DAY_B = daysAgo(3)
+const DAY_C = daysAgo(120) // outside the past-30-days window
 
 const hubOrders = [
     {

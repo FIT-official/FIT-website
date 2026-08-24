@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { getContentByPath } from "@/lib/mdx";
-import { authenticate } from "@/lib/authenticate";
+import { authenticate, unauthorizedResponse, UnauthorizedError } from "@/lib/authenticate";
 import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 import { connectToDatabase } from "@/lib/db";
 import ContentBlock from "@/models/ContentBlock";
 
 export async function GET(req) {
     try {
-        await connectToDatabase();
         const { userId } = await authenticate(req);
+        await connectToDatabase();
         const isAdmin = await checkAdminPrivileges(userId);
         if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
@@ -63,6 +63,7 @@ export async function GET(req) {
             content: dbBlock.content || "",
         });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error fetching content:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
@@ -70,8 +71,8 @@ export async function GET(req) {
 
 export async function PUT(req) {
     try {
-        await connectToDatabase();
         const { userId } = await authenticate(req);
+        await connectToDatabase();
         const isAdmin = await checkAdminPrivileges(userId);
         if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         const { contentPath, frontmatter, content } = await req.json();
@@ -94,6 +95,7 @@ export async function PUT(req) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Error updating content:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }

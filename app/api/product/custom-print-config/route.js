@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import Product from '@/models/Product'
 import User from '@/models/User'
-import { authenticate } from '@/lib/authenticate'
+import { authenticate, unauthorizedResponse, UnauthorizedError } from '@/lib/authenticate'
 import { checkAdminPrivileges } from '@/lib/checkPrivileges'
 import { validateDimensions } from '@/lib/validation/dimensions'
 import { checkMachineLimits, machineLimitMessage } from '@/lib/quoting/machineLimits'
@@ -18,6 +18,7 @@ export async function GET(req) {
 
         return NextResponse.json({ product })
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse()
         console.error('Error fetching custom print product:', error)
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
@@ -93,6 +94,7 @@ export async function POST(request) {
 
         return NextResponse.json({ success: true, product })
     } catch (error) {
+        if (error instanceof UnauthorizedError) return unauthorizedResponse()
         console.error('Error saving custom print product:', error)
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
