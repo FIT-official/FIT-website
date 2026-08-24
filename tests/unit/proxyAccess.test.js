@@ -34,6 +34,13 @@ describe('canAccessModelKey', () => {
     expect(await canAccessModelKey(KEY, null)).toBe(false)
   })
 
+  it('denies a non-string userId without issuing a query', async () => {
+    expect(await canAccessModelKey(KEY, { userId: 'user_1' })).toBe(false)
+    expect(await canAccessModelKey(KEY, undefined)).toBe(false)
+    expect(CustomPrintRequest.exists).not.toHaveBeenCalled()
+    expect(DigitalProductTransaction.exists).not.toHaveBeenCalled()
+  })
+
   it('allows the custom-print request owner', async () => {
     CustomPrintRequest.exists.mockResolvedValue({ _id: 'x' })
     expect(await canAccessModelKey(KEY, 'user_1')).toBe(true)
