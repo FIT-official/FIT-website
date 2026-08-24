@@ -107,33 +107,34 @@ const AppSettingsSchema = new mongoose.Schema({
     // Instant Quoting Engine configuration (see lib/quoting/pricingDefaults.js).
     // Money in major units (SGD); material rate per gram, time rate per hour.
     quotingConfig: {
-        materialRatePerGram: { type: Number, default: 0.02 }, // $20/kg
-        printTimeRatePerHour: { type: Number, default: 3 },   // $3/hr
-        baseFee: { type: Number, default: 0 },
-        postProcessingFee: { type: Number, default: 0 },
-        specialRequestFee: { type: Number, default: 0 },
-        priorityFee: { type: Number, default: 0 },
+        materialRatePerGram: { type: Number, default: 0.02, min: 0 }, // $20/kg
+        printTimeRatePerHour: { type: Number, default: 3, min: 0 },   // $3/hr
+        baseFee: { type: Number, default: 0, min: 0 },
+        postProcessingFee: { type: Number, default: 0, min: 0 },
+        specialRequestFee: { type: Number, default: 0, min: 0 },
+        priorityFee: { type: Number, default: 0, min: 0 },
         expediteMode: { type: String, enum: ['percent', 'flat', 'greater'], default: 'greater' },
-        expediteSurchargePercent: { type: Number, default: 50 },
-        expediteSurchargeFlat: { type: Number, default: 20 },
-        minimumPrice: { type: Number, default: 5 },
+        expediteSurchargePercent: { type: Number, default: 50, min: 0 },
+        expediteSurchargeFlat: { type: Number, default: 20, min: 0 },
+        minimumPrice: { type: Number, default: 5, min: 0 },
         // Optional per-material density overrides (g/cm³): { pla: 1.24, ... }
         materialDensities: { type: Map, of: Number, default: undefined },
         // Machine-speed model for the print-time estimate (null = built-in
         // default; see lib/quoting/pricingDefaults.DEFAULT_TIME_MODEL).
+        // (min:0 validators skip null, so "unset = built-in default" is preserved.)
         timeModel: {
-            baseFlowCm3PerHour: { type: Number, default: null },
-            layerHeightRefMm: { type: Number, default: null },
-            supportTimeFactor: { type: Number, default: null },
-            wallTimeFactorPerLoop: { type: Number, default: null },
-            minHours: { type: Number, default: null },
+            baseFlowCm3PerHour: { type: Number, default: null, min: 0 },
+            layerHeightRefMm: { type: Number, default: null, min: 0 },
+            supportTimeFactor: { type: Number, default: null, min: 0 },
+            wallTimeFactorPerLoop: { type: Number, default: null, min: 0 },
+            minHours: { type: Number, default: null, min: 0 },
         },
         // Shape-aware (layer-stack) estimator constants, fitted from the
         // admin's timed test prints (Print Timing panel). Null = built-in
         // defaults (lib/quoting/printTime/layerStack.DEFAULT_LAYER_STACK_MODEL).
         layerStackModel: {
-            flowMm3PerS: { type: Number, default: null },
-            perLayerOverheadS: { type: Number, default: null },
+            flowMm3PerS: { type: Number, default: null, min: 0 },
+            perLayerOverheadS: { type: Number, default: null, min: 0 },
         },
     },
 
