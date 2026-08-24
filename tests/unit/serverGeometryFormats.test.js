@@ -158,6 +158,26 @@ describe('glTF/GLB parser', () => {
   it('returns null for garbage input', () => {
     expect(parseGltfToPositions(new Uint8Array([1, 2, 3, 4]))).toBeNull()
   })
+
+  it('caps total emitted positions against node-graph fan-out (does not hang)', () => {
+    // Chain of nodes, each with `fanFactor` children all pointing at the
+    // previous level -> exponential blow-up if unbounded, but shallow enough
+    // (well under the depth-64 cap) that only a total-emission cap stops it.
+    const { json, bin } = cubeGltfJson(0.01)
+    const nodes = [...json.nodes] // node 0: { mesh: 0 }
+    let current = 0
+    for (let level = 0; level < 5; level++) {
+      nodes.push({ children: Array(50).fill(current) })
+      current = nodes.length - 1
+    }
+    json.nodes = nodes
+    json.scenes = [{ nodes: [current] }]
+
+    const start = Date.now()
+    const result = parseGltfToPositions(toGlb(json, bin))
+    expect(Date.now() - start).toBeLessThan(2000)
+    expect(result).toBeNull() // capped parse degrades like any unsupported/failed recompute
+  })
 })
 
 function cube3mfXml(s, { transform } = {}) {
@@ -216,6 +236,40 @@ describe('3MF parser', () => {
 
   it('returns null for non-zip input', async () => {
     expect(await parse3mfToPositions(enc('not a zip'))).toBeNull()
+  })
+
+  it('caps total emitted positions against <component> fan-out (does not hang)', async () => {
+    // Chain of objects, each with `fanFactor` <component> refs to the
+    // previous level -> exponential blow-up if unbounded, but shallow enough
+    // (well under the depth-32 cap) that only a total-emission cap stops it.
+    const verts = cubeCorners(10)
+      .map(([x, y, z]) => `<vertex x="${x}" y="${y}" z="${z}" />`)
+      .join('\n')
+    let tris = ''
+    for (let i = 0; i < CUBE_INDEX.length; i += 3) {
+      tris += `<triangle v1="${CUBE_INDEX[i]}" v2="${CUBE_INDEX[i + 1]}" v3="${CUBE_INDEX[i + 2]}" />\n`
+    }
+    let objects = `<object id="0" type="model"><mesh><vertices>${verts}</vertices><triangles>${tris}</triangles></mesh></object>`
+    let current = '0'
+    for (let level = 1; level <= 5; level++) {
+      const id = String(level)
+      const components = Array.from({ length: 50 }, () => `<component objectid="${current}" />`).join('')
+      objects += `<object id="${id}" type="model"><components>${components}</components></object>`
+      current = id
+    }
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<model unit="millimeter" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02">
+ <resources>
+  ${objects}
+ </resources>
+ <build><item objectid="${current}" /></build>
+</model>`
+    const bytes = await make3mf(xml)
+
+    const start = Date.now()
+    const result = await parse3mfToPositions(bytes)
+    expect(Date.now() - start).toBeLessThan(2000)
+    expect(result).toBeNull() // capped parse degrades like any unsupported/failed recompute
   })
 })
 

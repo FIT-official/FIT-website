@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { useToast } from '@/components/General/ToastProvider'
-import { DashCard, StatusPill, SegmentPill, EmptyState, SkeletonRow, CoachMarks, useTourOffer, TourOfferStrip, TourHelpButton, TOURS } from '@/components/dashboard-ui'
+import { DashCard, DottedRow, StatusPill, SegmentPill, EmptyState, SkeletonRow, CoachMarks, useTourOffer, TourOfferStrip, TourHelpButton, TOURS } from '@/components/dashboard-ui'
 import { inputCls, dropZoneCls } from '@/components/DashboardComponents/ProductFormFields/dashFormUi'
 import { IoTimerOutline, IoBulbOutline, IoCloudUploadOutline } from 'react-icons/io5'
 
@@ -129,7 +129,7 @@ export default function PrintTimeCalibration({ compact = false }) {
         )
     }
 
-    const { samples, timedCount, fit, applied } = data
+    const { samples, timedCount, fit, applied, impact } = data
 
     return (
         <div className={`flex flex-col gap-4 ${compact ? '' : 'p-4 md:p-6'}`}>
@@ -329,6 +329,48 @@ export default function PrintTimeCalibration({ compact = false }) {
                             : 'These prints are too similar in shape to calibrate from. Add one flat and wide print and one tall and narrow print.'}
                     </p>
                 )
+            )}
+
+            {/* What calibration did to real quotes. Only worth showing once
+                there are quotes to compare — no empty scaffolding. */}
+            {!compact && impact?.comparable > 0 && (
+                <DashCard title="Effect on your quotes">
+                    <div className="flex flex-col gap-4">
+                        <p className="text-[13px] text-[var(--dash-ink)]">
+                            Of the last {impact.total} quote{impact.total === 1 ? '' : 's'},{' '}
+                            <span className="font-semibold dash-data">{impact.shapeAwarePriced}</span> priced from the
+                            shape of the model and{' '}
+                            <span className="font-semibold dash-data">{impact.heuristicPriced}</span> from the rough
+                            volume estimate.
+                            {impact.medianRatio != null && (
+                                <>
+                                    {' '}Typical print time is{' '}
+                                    <span className="font-semibold dash-data">
+                                        {impact.medianRatio >= 1
+                                            ? `${((impact.medianRatio - 1) * 100).toFixed(0)}% longer`
+                                            : `${((1 - impact.medianRatio) * 100).toFixed(0)}% shorter`}
+                                    </span>{' '}
+                                    than the rough estimate said.
+                                </>
+                            )}
+                        </p>
+                        {impact.movers.length > 0 && (
+                            <div className="flex flex-col gap-1">
+                                <p className="text-[13px] dash-soft">
+                                    The quotes calibration changed most. Worth a look if any of these prices seem wrong.
+                                </p>
+                                {impact.movers.map((m) => (
+                                    <DottedRow
+                                        key={m.requestId}
+                                        label={`${m.printHoursHeuristic.toFixed(1)} h to ${m.printHoursShapeAware.toFixed(1)} h`}
+                                    >
+                                        {`${m.currency.toUpperCase()} ${Number(m.total ?? 0).toFixed(2)}`}
+                                    </DottedRow>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </DashCard>
             )}
 
             {/* Guided tour (§9.11), not offered inside the onboarding wizard */}
