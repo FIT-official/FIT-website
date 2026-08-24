@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import { dispatchDueCampaigns, dispatchWelcomeDrip } from '@/lib/newsletter/dispatch'
+import { verifyCronSecret } from '@/lib/verifyCronSecret'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -17,7 +18,7 @@ export async function GET(req) {
         return NextResponse.json({ error: 'Not configured' }, { status: 503 })
     }
     const auth = req.headers.get('authorization') || ''
-    if (auth !== `Bearer ${secret}`) {
+    if (!verifyCronSecret(auth, `Bearer ${secret}`)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
