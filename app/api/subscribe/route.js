@@ -37,19 +37,28 @@ export async function POST(req) {
     const { email, fullName, interestIds } = parsed.data
 
     await connectToDatabase()
-    const existing = await Subscriber.findOne({ email })
-    if (existing) {
-        existing.status = 'active'
-        if (fullName) existing.fullName = fullName
-        if (interestIds) existing.interestIds = interestIds
-        await existing.save()
-        return NextResponse.json({ ok: true, resubscribed: true })
+    // One atomic upsert keyed on the unique email: a read-then-write would let
+    // two concurrent signups (a double-clicked form) both miss, and the loser
+    // would hit the unique index and 500 at the visitor. `new: false` returns
+    // the pre-update doc, so null means we just created them.
+    try {
+        const previous = await Subscriber.findOneAndUpdate(
+            { email },
+            {
+                $set: {
+                    status: 'active',
+                    ...(fullName ? { fullName } : {}),
+                    ...(interestIds ? { interestIds } : {}),
+                },
+                $setOnInsert: { unsubscribeToken: crypto.randomUUID() },
+            },
+            { upsert: true, new: false },
+        )
+        return NextResponse.json(previous ? { ok: true, resubscribed: true } : { ok: true })
+    } catch (e) {
+        // Upsert can still lose a race on the unique index; either way the
+        // address is subscribed, which is all the visitor asked for.
+        if (e?.code === 11000) return NextResponse.json({ ok: true, resubscribed: true })
+        throw e
     }
-    await Subscriber.create({
-        email,
-        fullName: fullName || '',
-        interestIds: interestIds || [],
-        unsubscribeToken: crypto.randomUUID(),
-    })
-    return NextResponse.json({ ok: true })
 }

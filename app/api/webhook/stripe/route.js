@@ -24,7 +24,70 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 const webhookSecret = process.env.STRIPE_SESSION_COMPLETE_SIGNING_SECRET;
 
+// A request already at `paid` or later has already been fulfilled by an
+// earlier session; a second session referencing the same requestId (e.g. a
+// retried checkout) must not overwrite its payment fields or re-notify.
+const FULFILLED_CUSTOM_PRINT_STATUSES = ['paid', 'printing', 'printed', 'shipped', 'delivered'];
+
 export const dynamic = 'force-dynamic';
+
+// Records the sale and decrements stock via a single guarded atomic update
+// (never a read-then-save round trip), so two concurrent/retried webhook
+// deliveries can't both decrement from the same stale in-memory snapshot and
+// oversell. Each stock field's `$inc` carries its own `>= qty` guard; a field
+// whose guard fails is simply left unchanged (never forced negative) rather
+// than blocking the rest of fulfilment — the sale is always recorded.
+async function recordSaleAndDecrementStock(product, { userId, item }) {
+    const qty = item.quantity || 1;
+    const salesEntry = { userId, quantity: item.quantity, price: item.price || 0 };
+
+    if (product.infiniteStock) {
+        await Product.updateOne({ _id: product._id }, { $push: { sales: salesEntry } });
+        return;
+    }
+
+    const incFields = {};
+    const arrayFilters = [];
+
+    if (item.selectedVariants && Object.keys(item.selectedVariants).length > 0 && product.variantTypes) {
+        let idx = 0;
+        for (const [variantTypeName, selectedOption] of Object.entries(item.selectedVariants)) {
+            const variantType = product.variantTypes.find(vt => vt.name === variantTypeName);
+            const option = variantType?.options.find(opt => opt.name === selectedOption);
+            if (option && option.stock !== undefined && option.stock !== null) {
+                const vtId = `vt${idx}`;
+                const optId = `opt${idx}`;
+                incFields[`variantTypes.$[${vtId}].options.$[${optId}].stock`] = -qty;
+                arrayFilters.push({ [`${vtId}._id`]: variantType._id });
+                arrayFilters.push({ [`${optId}._id`]: option._id, [`${optId}.stock`]: { $gte: qty } });
+                idx++;
+            }
+        }
+    }
+
+    const filter = { _id: product._id };
+    if (product.stock !== undefined && product.stock !== null) {
+        incFields.stock = -qty;
+        filter.stock = { $gte: qty };
+    }
+
+    let updated = null;
+    if (Object.keys(incFields).length > 0) {
+        updated = await Product.findOneAndUpdate(
+            filter,
+            { $inc: incFields, $push: { sales: salesEntry } },
+            { new: true, ...(arrayFilters.length ? { arrayFilters } : {}) },
+        );
+    }
+
+    if (!updated) {
+        // Guard failed (insufficient stock at the moment of update) or there
+        // was nothing to decrement — still record the sale so revenue stays
+        // accurate; never block fulfilment on a stock-tracking mismatch.
+        console.error(`Stock guard failed or no stock fields to decrement for product ${product._id}; recording sale without stock change.`);
+        await Product.updateOne({ _id: product._id }, { $push: { sales: salesEntry } });
+    }
+}
 
 export async function POST(req) {
     const body = await req.text();
@@ -46,8 +109,12 @@ export async function POST(req) {
     if (event.type === "checkout.session.completed") {
         const session = event.data.object;
 
-        // Released on failure paths so a Stripe retry can re-attempt fulfilment.
+        // Released (in the `finally` below) on every path that doesn't reach
+        // full success, so a Stripe retry can always re-attempt fulfilment —
+        // including a failure introduced by future code changes, not just the
+        // ones anticipated here.
         let claimed = false;
+        let succeeded = false;
         const releaseClaim = () =>
             CheckoutSession.updateOne({ sessionId: session.id }, { processed: false })
                 .catch((err) => console.error('Failed to release webhook claim:', err));
@@ -83,7 +150,6 @@ export async function POST(req) {
 
             if (!user) {
                 console.error(`User not found for userId: ${userId}`);
-                await releaseClaim();
                 return NextResponse.json(
                     { error: "User not found" },
                     { status: 404 }
@@ -140,19 +206,27 @@ export async function POST(req) {
                 if (String(item.productId || '').startsWith('custom-print:')) {
                     isCustomPrint = true;
                     const requestId = item.requestId || item.customPrintRequestId || (item.productId || '').split(':')[1];
-                    customPrintRequest = await CustomPrintRequest.findOne({ requestId });
+                    // Scoped to the paying session's own user: a requestId that
+                    // exists but belongs to someone else must be indistinguishable
+                    // from an unknown requestId here (no ownership oracle, and no
+                    // path for one user's payment to fulfil another's request).
+                    customPrintRequest = await CustomPrintRequest.findOne({ requestId, userId });
 
                     if (customPrintRequest) {
-                        // Update custom print request status to paid
-                        customPrintRequest.status = 'paid';
-                        customPrintRequest.stripeSessionId = session.id;
-                        customPrintRequest.stripePaymentIntentId = session.payment_intent;
-                        customPrintRequest.paidAt = new Date();
-                        customPrintRequest.statusHistory.push({
-                            status: 'paid',
-                            note: 'Payment completed via Stripe checkout',
-                        });
-                        await customPrintRequest.save();
+                        const alreadyFulfilled = FULFILLED_CUSTOM_PRINT_STATUSES.includes(customPrintRequest.status);
+
+                        if (!alreadyFulfilled) {
+                            // Update custom print request status to paid
+                            customPrintRequest.status = 'paid';
+                            customPrintRequest.stripeSessionId = session.id;
+                            customPrintRequest.stripePaymentIntentId = session.payment_intent;
+                            customPrintRequest.paidAt = new Date();
+                            customPrintRequest.statusHistory.push({
+                                status: 'paid',
+                                note: 'Payment completed via Stripe checkout',
+                            });
+                            await customPrintRequest.save();
+                        }
 
                         // Use the configured base product for order linkage
                         product = customPrintBaseProduct;
@@ -165,19 +239,21 @@ export async function POST(req) {
                         customPrintChosenDeliveryType = charge.chosenDeliveryType;
                         customPrintDeliveryFee = charge.deliveryFee;
 
-                        // Payment received → notify the customer (queued) and
-                        // the admin (start work) by email, and post a chat update
-                        // into the buyer↔vendor thread. Best-effort; never break
-                        // webhook processing on a notification failure.
-                        try {
-                            await notifyCustomPrintEvent({
-                                event: 'paid',
-                                request: customPrintRequest.toObject(),
-                                product: customPrintBaseProduct,
-                                breakdown: { ...charge, lines: customPrintRequest.quote?.lines },
-                            });
-                        } catch (notifyErr) {
-                            console.error('Paid notification failed:', notifyErr);
+                        if (!alreadyFulfilled) {
+                            // Payment received → notify the customer (queued) and
+                            // the admin (start work) by email, and post a chat update
+                            // into the buyer↔vendor thread. Best-effort; never break
+                            // webhook processing on a notification failure.
+                            try {
+                                await notifyCustomPrintEvent({
+                                    event: 'paid',
+                                    request: customPrintRequest.toObject(),
+                                    product: customPrintBaseProduct,
+                                    breakdown: { ...charge, lines: customPrintRequest.quote?.lines },
+                                });
+                            } catch (notifyErr) {
+                                console.error('Paid notification failed:', notifyErr);
+                            }
                         }
                     }
                 } else {
@@ -280,36 +356,7 @@ export async function POST(req) {
 
                 // Update product sales and decrement stock (skip for custom prints)
                 if (!isCustomPrint) {
-                    product.sales.push({
-                        userId,
-                        quantity: item.quantity,
-                        price: item.price || 0,
-                    });
-
-                    // Decrement stock if not infinite
-                    if (!product.infiniteStock) {
-                        const qty = item.quantity || 1;
-
-                        // Decrement variant-level stock
-                        if (item.selectedVariants && Object.keys(item.selectedVariants).length > 0 && product.variantTypes) {
-                            for (const [variantTypeName, selectedOption] of Object.entries(item.selectedVariants)) {
-                                const variantType = product.variantTypes.find(vt => vt.name === variantTypeName);
-                                if (variantType) {
-                                    const option = variantType.options.find(opt => opt.name === selectedOption);
-                                    if (option && option.stock !== undefined && option.stock !== null) {
-                                        option.stock = Math.max(0, option.stock - qty);
-                                    }
-                                }
-                            }
-                        }
-
-                        // Decrement top-level stock
-                        if (product.stock !== undefined && product.stock !== null) {
-                            product.stock = Math.max(0, product.stock - qty);
-                        }
-                    }
-
-                    await product.save();
+                    await recordSaleAndDecrementStock(product, { userId, item });
                 }
 
                 // Product-sourced print jobs become CustomPrintRequests (admin
@@ -536,6 +583,7 @@ export async function POST(req) {
 
             // console.log(`Successfully processed checkout for userId: ${userId}, sessionId: ${session.id}`);
 
+            succeeded = true;
             return NextResponse.json({ received: true }, { status: 200 });
         } catch (error) {
             console.error("Error processing webhook:", error);
@@ -547,11 +595,12 @@ export async function POST(req) {
             } catch (phErr) {
                 console.error("PostHog exception capture failed:", phErr);
             }
-            if (claimed) await releaseClaim();
             return NextResponse.json(
                 { error: "Failed to process webhook" },
                 { status: 500 }
             );
+        } finally {
+            if (claimed && !succeeded) await releaseClaim();
         }
     }
 
