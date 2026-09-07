@@ -7,6 +7,7 @@ import { checkAdminPrivileges } from '@/lib/checkPrivileges'
 import { effectiveStatus } from '@/lib/blog/status'
 import { renderTiptapHtml } from '@/lib/blog/renderTiptap'
 import { pickRelated } from '@/lib/blog/related'
+import { BLOG_SORT_INDEX, ensureBlogSortIndex } from '@/lib/blog/sortIndex'
 import BlogPageClient from './BlogPageClient'
 
 async function viewerIsAdmin() {
@@ -74,9 +75,11 @@ export default async function BlogPage({ params }) {
     const contentHtml = post.contentFormat === 'tiptap' ? renderTiptapHtml(post.contentJson) : null
 
     // Related: same category first, padded with recent.
+    await ensureBlogSortIndex()
     const pool = await BlogPost.find({ published: true })
         .select('title slug excerpt heroImage categories publishDate readingTimeMinutes')
         .sort({ publishDate: -1 })
+        .hint(BLOG_SORT_INDEX)
         .limit(50)
         .lean()
     const related = pickRelated(post, pool, 3)

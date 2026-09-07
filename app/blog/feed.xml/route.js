@@ -1,15 +1,18 @@
 import { connectToDatabase } from '@/lib/db'
 import BlogPost from '@/models/BlogPost'
 import { buildRssXml } from '@/lib/blog/rss'
+import { BLOG_SORT_INDEX, ensureBlogSortIndex } from '@/lib/blog/sortIndex'
 
 export const runtime = 'nodejs'
 
 // RSS 2.0 feed — latest 20 published posts, cached 1h.
 export async function GET() {
     await connectToDatabase()
+    await ensureBlogSortIndex()
     const posts = await BlogPost.find({ published: true })
         .select('title slug excerpt publishDate')
         .sort({ publishDate: -1 })
+        .hint(BLOG_SORT_INDEX)
         .limit(20)
         .lean()
 

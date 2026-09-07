@@ -23,7 +23,7 @@ vi.mock('@/models/BlogPost', () => {
     const makeChain = () => {
         const rec = {}
         const c = {}
-        for (const m of ['sort', 'skip', 'limit', 'select']) {
+        for (const m of ['sort', 'skip', 'limit', 'select', 'hint']) {
             c[m] = (arg) => { rec[m] = arg; return c }
         }
         // The counts query selects exactly 'status published'; everything else
@@ -34,6 +34,7 @@ vi.mock('@/models/BlogPost', () => {
     }
     return {
         default: {
+            collection: { createIndex: vi.fn(async () => 'blog_public_date_order') },
             find: (filter) => {
                 const c = makeChain()
                 state.finds.push({ filter, rec: c.rec })
@@ -163,6 +164,7 @@ describe('GET /api/blog (public lean list)', () => {
         expect(lf.rec.select).not.toMatch(/\bcontent\b/)
         expect(lf.rec.select).not.toMatch(/contentJson/)
         expect(lf.rec.select).toMatch(/\bcreatedAt\b/) // FeaturedArticles sort fallback
+        expect(lf.rec.hint).toEqual({ publishDate: -1, createdAt: -1 })
         expect(body).toEqual({ ok: true, posts: state.listDocs })
     })
 })
