@@ -1,108 +1,63 @@
+import { cache } from 'react'
+import { notFound } from 'next/navigation'
+import { connectToDatabase } from '@/lib/db'
+import Product from '@/models/Product'
+import Event from '@/models/Event'
 import { jsonLdString } from '@/lib/jsonLd'
-import ProductPage from "./ProductPage";
+import { productMetadata, productJsonLd, publicProductSeed } from '@/lib/seo/product'
+import ProductPage from './ProductPage'
 
-export async function generateMetadata(props) {
-    const params = await props.params;
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/product?slug=${params.slug}`, {
-        cache: 'no-store'
-    });
-    const data = await res.json();
-    const product = data.product;
+// Keep inventory and promotions current, with one shared read per render.
+export const dynamic = 'force-dynamic'
 
-    if (!res.ok) return { title: 'Product | Fix It Today®' };
+const getProduct = cache(async (slug) => {
+    await connectToDatabase()
+    return Product.findOne({ slug }).select([
+        '_id', 'slug', 'name', 'description', 'images', 'basePrice', 'productType',
+        'stock', 'infiniteStock', 'viewableModel', 'variantTypes', 'discount', 'discounts',
+        'delivery.deliveryTypes.type', 'hidden', 'flaggedForModeration',
+        'reviews._id', 'reviews.username', 'reviews.userImageUrl', 'reviews.rating',
+        'reviews.comment', 'reviews.mediaUrls', 'reviews.verifiedPurchase', 'reviews.createdAt',
+    ].join(' ')).lean()
+})
 
-    return {
-        title: `${product?.name || "Product"} | Fix It Today®`,
-        description: product?.description || "Browse and purchase products from Fix It Today®",
-        openGraph: {
-            title: `${product?.name || "Product"} | Fix It Today®`,
-            description: product?.description || "Browse and purchase products from Fix It Today®",
-            url: `https://fixitoday.com/products/${params.slug}`,
-            siteName: "Fix It Today®",
-            images: [
-                {
-                    url: product?.image || "/fitogimage.png",
-                    width: 800,
-                    height: 800,
-                    alt: product?.name || "Fix It Today® Photo",
-                },
-            ],
-            locale: "en_SG",
-            type: "website",
-        },
-    };
+async function getGlobalDiscountRules() {
+    const now = new Date()
+    const events = await Event.find({
+        isActive: true,
+        isGlobal: true,
+        startDate: { $lte: now },
+        endDate: { $gte: now },
+    }).select('name percentage minimumPrice startDate endDate').lean()
+    return events.map(event => ({
+        percentage: event.percentage,
+        minimumAmount: event.minimumPrice,
+        startDate: event.startDate?.toISOString(),
+        endDate: event.endDate?.toISOString(),
+        eventName: event.name,
+    }))
 }
 
-export default async function ProductPageLayout(props) {
-    const params = await props.params;
+export async function generateMetadata({ params }) {
+    const { slug } = await params
+    return productMetadata(await getProduct(slug))
+}
 
-    let product = null;
+export default async function ProductPageLayout({ params }) {
+    const { slug } = await params
+    const product = await getProduct(slug)
+    if (!product) notFound()
+
+    let globalDiscountRules = []
+    let includeOffers = true
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/product?slug=${params.slug}`, {
-            cache: 'no-store'
-        });
-
-        if (res.ok) {
-            const data = await res.json();
-            product = data.product;
-        }
-    } catch (e) {
-        // fail silently for JSON-LD if product fetch fails; page still renders via client
-        product = null;
+        globalDiscountRules = await getGlobalDiscountRules()
+    } catch {
+        // Keep the page available when promotions cannot be read, but do not
+        // advertise a price that may be missing an active global discount.
+        includeOffers = false
     }
-
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://fixitoday.com';
-    const productUrl = `${baseUrl}/products/${params.slug}`;
-
-    let imageUrl = `${baseUrl}/fitogimage.png`;
-    if (product?.images && product.images.length > 0) {
-        const primary = product.images[0];
-        imageUrl = primary.startsWith('http') || primary.startsWith('/')
-            ? primary
-            : `${baseUrl}/api/proxy?key=${encodeURIComponent(primary)}`;
-    } else if (product?.image) {
-        const primary = product.image;
-        imageUrl = primary.startsWith('http') || primary.startsWith('/')
-            ? primary
-            : `${baseUrl}/api/proxy?key=${encodeURIComponent(primary)}`;
-    }
-
-    let aggregateRating;
-    if (product?.reviews && product.reviews.length > 0) {
-        const total = product.reviews.reduce((sum, review) => sum + (review.rating || 0), 0);
-        const avg = total / product.reviews.length;
-        aggregateRating = {
-            "@type": "AggregateRating",
-            ratingValue: Number.isFinite(avg) ? avg.toFixed(1) : undefined,
-            reviewCount: product.reviews.length,
-        };
-    }
-
-    const jsonLd = product
-        ? {
-            "@context": "https://schema.org",
-            "@type": "Product",
-            name: product.name,
-            description: product.description,
-            image: [imageUrl],
-            sku: product._id,
-            url: productUrl,
-            brand: {
-                "@type": "Brand",
-                name: "Fix It Today®",
-            },
-            offers: {
-                "@type": "Offer",
-                priceCurrency: product.basePrice?.presentmentCurrency || 'SGD',
-                price: product.basePrice?.presentmentAmount,
-                availability: product.stock > 0
-                    ? 'https://schema.org/InStock'
-                    : 'https://schema.org/OutOfStock',
-                url: productUrl,
-            },
-            aggregateRating,
-        }
-        : null;
+    const jsonLd = productJsonLd(product, globalDiscountRules, includeOffers)
 
     return (
         <>
@@ -112,7 +67,11 @@ export default async function ProductPageLayout(props) {
                     dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }}
                 />
             )}
-            <ProductPage />
+            <ProductPage
+                key={slug}
+                initialProduct={publicProductSeed(product)}
+                initialGlobalDiscountRules={globalDiscountRules}
+            />
         </>
-    );
+    )
 }
