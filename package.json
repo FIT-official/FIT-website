@@ -15,7 +15,6 @@
     "test:coverage": "vitest run --coverage",
     "migrate:content": "node scripts/migrate-content-to-db.js",
     "seed:colours": "node scripts/seed-print-colours.js",
-    "postbuild": "next-sitemap",
     "tunnel": "scripts/dev-tunnel.sh"
   },
   "dependencies": {
