@@ -4,7 +4,8 @@ import { jsonLdString } from '@/lib/jsonLd'
 import { connectToDatabase } from '@/lib/db'
 import BlogPost from '@/models/BlogPost'
 import { checkAdminPrivileges } from '@/lib/checkPrivileges'
-import { effectiveStatus } from '@/lib/blog/status'
+import { effectiveStatus, statusQuery } from '@/lib/blog/status'
+import { SITE_URL, absoluteUrl } from '@/lib/seo/site'
 import { renderTiptapHtml } from '@/lib/blog/renderTiptap'
 import { pickRelated } from '@/lib/blog/related'
 import { BLOG_SORT_INDEX, ensureBlogSortIndex } from '@/lib/blog/sortIndex'
@@ -34,7 +35,7 @@ export default async function BlogPage({ params }) {
         preview = true
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://fixitoday.com'
+    const baseUrl = SITE_URL
     const postUrl = `${baseUrl}/blog/${post.slug}`
     const heroImage = post.heroImage
         ? (heroImageIsAbsolute(post.heroImage)
@@ -55,12 +56,9 @@ export default async function BlogPage({ params }) {
         },
         datePublished: post.publishDate ? new Date(post.publishDate).toISOString() : undefined,
         dateModified: post.updatedAt ? new Date(post.updatedAt).toISOString() : undefined,
-        author: post.authorId
-            ? {
-                "@type": "Person",
-                name: post.authorId,
-            }
-            : undefined,
+        author: post.authorName?.trim() && !post.authorName.startsWith('user_')
+            ? { "@type": "Person", name: post.authorName.trim() }
+            : { "@type": "Organization", name: "Fix It Today®", url: SITE_URL },
         publisher: {
             "@type": "Organization",
             name: "Fix It Today®",
@@ -90,10 +88,10 @@ export default async function BlogPage({ params }) {
 
     return (
         <>
-            <script
+            {!preview && <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }}
-            />
+            />}
             <BlogPageClient post={safePost} contentHtml={contentHtml} related={safeRelated} preview={preview} />
         </>
     )
@@ -106,16 +104,18 @@ function heroImageIsAbsolute(path) {
 export async function generateMetadata({ params }) {
     const { blogSlug } = await params
     await connectToDatabase()
-    const post = await BlogPost.findOne({ slug: blogSlug, published: true }).lean()
-    if (!post) return { title: 'Blog Post' }
+    const post = await BlogPost.findOne({ slug: blogSlug, ...statusQuery('published') }).lean()
+    if (!post) return { title: 'Blog Post', robots: { index: false, follow: false } }
     return {
         title: post.metaTitle || post.title,
         description: post.metaDescription || post.excerpt || '',
+        alternates: { canonical: absoluteUrl(`/blog/${encodeURIComponent(post.slug)}`) },
         openGraph: {
             title: post.metaTitle || post.title,
             description: post.metaDescription || post.excerpt || '',
-            url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/blog/${post.slug}`,
-            images: post.heroImage ? [post.heroImage.startsWith('http') || post.heroImage.startsWith('/') ? post.heroImage : `${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/proxy?key=${encodeURIComponent(post.heroImage)}`] : [],
+            url: absoluteUrl(`/blog/${encodeURIComponent(post.slug)}`),
+            type: 'article',
+            images: post.heroImage ? [post.heroImage.startsWith('http') || post.heroImage.startsWith('/') ? absoluteUrl(post.heroImage) : absoluteUrl(`/api/proxy?key=${encodeURIComponent(post.heroImage)}`)] : [],
         }
     }
 }

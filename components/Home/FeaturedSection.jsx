@@ -123,7 +123,7 @@ function FeaturedSection() {
             source={sectionContent.content}
             className='w-full text-pretty flex text-sm'
           />
-          <ButtonLink lnk={'/prints'} text={'Browse More'} />
+          <ButtonLink lnk={sectionContent.productType === 'shop' ? '/shop' : '/prints'} text={'Browse More'} />
         </div>
 
         <div className='flex flex-col min-w-[255px] gap-6 w-full lg:w-[60%]'>

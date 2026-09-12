@@ -92,7 +92,7 @@ function Main({ adbanner }) {
             <div className="relative z-10 flex flex-col items-center w-full text-background text-center px-4">
                 {isImageLoaded && (
                     <>
-                        <motion.h1
+                        <motion.div
                             variants={containerVariants}
                             initial="hidden"
                             animate="visible"
@@ -111,7 +111,7 @@ function Main({ adbanner }) {
                                     </motion.span>
                                 </div>
                             ))}
-                        </motion.h1>
+                        </motion.div>
                         <motion.div
                             className="font-semibold uppercase text-xs md:text-lg"
                             initial={{ opacity: 0 }}

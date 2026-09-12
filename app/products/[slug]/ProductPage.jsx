@@ -12,10 +12,11 @@ import dynamic from 'next/dynamic';
 import { IoMdCheckmark } from 'react-icons/io';
 import { getDiscountedPrice, getEffectivePercentageForRule } from '@/utils/discount';
 import ReviewSection from '@/components/ProductPage/ReviewSection';
+import { getDefaultVariantSelections } from '@/lib/seo/product';
 
 const ModelViewer = dynamic(() => import("@/components/3D/ModelViewer"), { ssr: false });
 
-function ProductPage() {
+function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] }) {
     const { user, isLoaded, isSignedIn } = useUser();
     const [loading, setLoading] = useState(false);
     const router = useRouter();
@@ -23,8 +24,8 @@ function ProductPage() {
     const slug = params.slug;
 
     const [liked, setLiked] = useState(false);
-    const [product, setProduct] = useState(null);
-    const [selectedVariantOptions, setSelectedVariantOptions] = useState({}); // new variant types system
+    const [product, setProduct] = useState(initialProduct);
+    const [selectedVariantOptions, setSelectedVariantOptions] = useState(() => getDefaultVariantSelections(initialProduct));
     const [isAdding, setIsAdding] = useState(false);
     const [showAdded, setShowAdded] = useState(false);
     const [isOwnProduct, setIsOwnProduct] = useState(false);
@@ -41,7 +42,7 @@ function ProductPage() {
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState(0);
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-    const [globalDiscountRules, setGlobalDiscountRules] = useState([]);
+    const [globalDiscountRules, setGlobalDiscountRules] = useState(initialGlobalDiscountRules);
 
     // User orders for review eligibility
     const [userOrders, setUserOrders] = useState([]);
@@ -64,22 +65,23 @@ function ProductPage() {
     }, []);
 
     useEffect(() => {
+        let cancelled = false;
         async function fetchProduct() {
-            setLoading(true);
-            const res = await fetch(`/api/product?slug=${slug}`);
-
-            if (!res.ok) {
-                setProduct(null);
-                setLoading(false);
-                return;
+            // Keep the server-rendered catalogue visible while user-specific
+            // details (creator, likes and purchase controls) are refreshed.
+            if (!initialProduct) setLoading(true);
+            try {
+                const res = await fetch(`/api/product?slug=${encodeURIComponent(slug)}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (!cancelled) setProduct(data.product);
+            } finally {
+                if (!cancelled) setLoading(false);
             }
-            const data = await res.json();
-
-            setProduct(data.product);
-            setLoading(false);
         }
-        fetchProduct();
-    }, [slug]);
+        fetchProduct().catch(() => {});
+        return () => { cancelled = true; };
+    }, [slug, initialProduct]);
 
     // Fetch active global events so we can reflect their effect in the
     // displayed discount percentage on the product page.
@@ -516,8 +518,8 @@ function ProductPage() {
                                 <div key={idx} className='flex aspect-square h-full'>
                                     <Image
                                         src={`/api/proxy?key=${encodeURIComponent(image)}`}
-                                        alt={`Product Image`}
-                                        priority
+                                        alt={`${product.name}, image ${idx + 1}`}
+                                        priority={idx === 0}
                                         width={600}
                                         height={600}
                                         className='w-full h-full object-cover'
@@ -558,7 +560,7 @@ function ProductPage() {
                                         >
                                             <Image
                                                 src={`/api/proxy?key=${encodeURIComponent(image)}`}
-                                                alt={`Product Image ${idx + 1}`}
+                                                alt={`${product.name}, image ${idx + 1}`}
                                                 width={100}
                                                 height={100}
                                                 className='w-full h-full object-cover'
@@ -696,7 +698,7 @@ function ProductPage() {
                                 </div>
                             )}
 
-                            {!loading && product && user && product.creatorUserId !== user.id && (
+                            {!loading && product?.creatorUserId && user && product.creatorUserId !== user.id && (
                                 <div className="flex flex-col gap-2 mt-2">
                                     {ownsDigitalProduct ? (
                                         <button

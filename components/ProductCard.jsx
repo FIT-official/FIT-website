@@ -12,8 +12,42 @@ import { getDiscountedPrice } from "@/utils/discount";
 function ProductCard({ product }) {
     const { user, isSignedIn, isLoaded } = useUser();
     const [liked, setLiked] = useState(user?.id ? product.likes?.includes?.(user.id) ?? false : false);
-    const [likeCount, setLikeCount] = useState(product.likes?.length ?? 0);
+    const [likeCount, setLikeCount] = useState(product.likeCount ?? product.likes?.length ?? 0);
+    const [relationship, setRelationship] = useState(null);
+    const isPublicSeed = typeof product.likeCount === 'number' && !Array.isArray(product.likes);
+    const viewerId = user?.id;
+    const relationshipReady = !isPublicSeed || (
+        !!viewerId && relationship?.viewerId === viewerId && relationship?.productId === product._id
+    );
+    const creatorUserId = isPublicSeed ? relationship?.creatorUserId : product.creatorUserId;
     const router = useRouter();
+
+    useEffect(() => {
+        if (!isPublicSeed) {
+            setLiked(!!viewerId && (product.likes?.includes?.(viewerId) ?? false));
+            setLikeCount(product.likes?.length ?? 0);
+            return;
+        }
+        // The crawlable catalogue contains counts only. Resolve this viewer's
+        // saved state in the browser before showing interactive like controls.
+        setRelationship(null);
+        setLiked(false);
+        setLikeCount(product.likeCount);
+        if (!isLoaded || !isSignedIn || !viewerId) return;
+        let cancelled = false;
+        const params = new URLSearchParams({ productId: product._id, fields: 'likes,creatorUserId' });
+        fetch(`/api/product?${params}`)
+            .then(response => response.ok ? response.json() : null)
+            .then(data => {
+                const details = data?.product;
+                if (cancelled || !details || typeof details.creatorUserId !== 'string' || !Array.isArray(details.likes)) return;
+                setRelationship({ viewerId, productId: product._id, creatorUserId: details.creatorUserId });
+                setLiked(details.likes.includes(viewerId));
+                setLikeCount(details.likes.length);
+            })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, [isPublicSeed, isLoaded, isSignedIn, viewerId, product._id, product.likes, product.likeCount, product.creatorUserId]);
 
     const [tooltip, setTooltip] = useState(null);
     const [hoveringLink, setHoveringLink] = useState(false);
@@ -25,7 +59,7 @@ function ProductCard({ product }) {
         : '/placeholder.jpg';
 
     const reviews = product.reviews || [];
-    const sales = product.sales || [];
+    const salesCount = product.salesCount ?? product.sales?.length ?? 0;
 
     const isItMyProduct = (creatorId) => {
         if (!isLoaded || !user) return false;
@@ -52,6 +86,7 @@ function ProductCard({ product }) {
             const data = await res.json();
             if (res.ok) {
                 setLiked(data.liked);
+                if (Number.isFinite(data.likeCount)) setLikeCount(data.likeCount);
             } else {
                 setLiked(false);
             }
@@ -81,6 +116,7 @@ function ProductCard({ product }) {
             const data = await res.json();
             if (res.ok) {
                 setLiked(data.liked);
+                if (Number.isFinite(data.likeCount)) setLikeCount(data.likeCount);
             } else {
                 setLiked(true);
             }
@@ -120,7 +156,7 @@ function ProductCard({ product }) {
                 className="flex w-full object-cover bg-borderColor aspect-square mb-2"
             />
             <div className="flex flex-col w-full items-center justify-center relative">
-                <p className="text-xs uppercase font-normal flex">{product.name}</p>
+                <a href={`/products/${encodeURIComponent(product.slug)}`} onClick={e => e.stopPropagation()} className="text-xs uppercase font-normal flex hover:underline">{product.name}</a>
 
                 <p className="text-base font-bold flex items-end">
                     {(() => {
@@ -180,12 +216,13 @@ function ProductCard({ product }) {
                     </span>
                 )}
 
-                <span className='flex text-xs text-lightColor'>{sales.length} sold</span>
-                {!isItMyProduct(product.creatorUserId) && (
+                <span className='flex text-xs text-lightColor'>{salesCount} sold</span>
+                {relationshipReady && !isItMyProduct(creatorUserId) && (
                     <button
                         onClick={liked ? handleUnlike : handleLike}
                         className="absolute top-1 right-1 z-5 cursor-pointer"
                         aria-label={liked ? "Unlike" : "Like"}
+                        title={`${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`}
                         onMouseEnter={() => {
                             setHoveringLink(true);
                             setTooltip(null);

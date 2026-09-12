@@ -6,18 +6,20 @@ import Image from "next/image";
 import { GoChevronDown } from "react-icons/go";
 import { AnimatePresence, motion } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
-import { useToast } from "@/components/General/ToastProvider";
 import { useContent } from "@/utils/useContent";
+import { cataloguePrice } from '@/lib/productCatalogue';
 
-function ShopPage() {
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(false);
+function ShopPage({ initialProducts = [] }) {
+    const products = initialProducts;
     const searchParams = useSearchParams();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [priceRange, setPriceRange] = useState(100);
+    const [priceRange, setPriceRange] = useState(null);
+    const priceCeiling = Math.max(100, ...products.map(p => Math.ceil(cataloguePrice(p))));
+    const effectivePriceRange = Math.min(priceRange ?? priceCeiling, priceCeiling);
     const [sort, setSort] = useState("topRated");
-    const [search, setSearch] = useState("");
-    const { showToast } = useToast();
+    const [search, setSearch] = useState(searchParams.get('search') || "");
+    const urlSearch = searchParams.get('search') || '';
+    useEffect(() => { setSearch(urlSearch); }, [urlSearch]);
 
     const { content: bannerContent } = useContent('shop/banner', {
         bannerImage: '/placeholder.jpg'
@@ -42,36 +44,10 @@ function ShopPage() {
         }
     }, [bannerContent?.bannerImage]);
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            setLoading(true);
-            const categoryName = searchParams.get('productCategory');
-            const subcategoryName = searchParams.get('productSubCategory');
-
-            const params = new URLSearchParams();
-            params.set('productType', 'shop');
-            if (categoryName) params.set('productCategory', categoryName);
-            if (subcategoryName) params.set('productSubCategory', subcategoryName);
-            params.set('fields', '_id,name,images,discount,slug,sales,reviews,variants,likes,creatorUserId,basePrice,variantTypes');
-
-            const res = await fetch(`/api/product?${params.toString()}`);
-            const data = await res.json();
-            if (!res.ok) {
-                showToast('Failed to fetch products', 'error');
-            } else {
-                setProducts(data.products);
-            }
-            setLoading(false);
-        };
-
-        fetchProducts();
-    }, [searchParams]);
-
     const filteredProducts = useMemo(() => {
         let filtered = products.filter(
             (p) =>
-                (!p.price?.presentmentAmount ||
-                    Number(p.price.presentmentAmount) <= priceRange) &&
+                cataloguePrice(p) <= effectivePriceRange &&
                 (
                     !search ||
                     p.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -92,22 +68,22 @@ function ShopPage() {
                 });
                 break;
             case "sales":
-                filtered = filtered.slice().sort((a, b) => (b.sales?.length || 0) - (a.sales?.length || 0));
+                filtered = filtered.slice().sort((a, b) => (b.salesCount ?? b.sales?.length ?? 0) - (a.salesCount ?? a.sales?.length ?? 0));
                 break;
             case "newest":
                 filtered = filtered.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 break;
             case "priceHigh":
-                filtered = filtered.slice().sort((a, b) => (b.price?.presentmentAmount || 0) - (a.price?.presentmentAmount || 0));
+                filtered = filtered.slice().sort((a, b) => cataloguePrice(b) - cataloguePrice(a));
                 break;
             case "priceLow":
-                filtered = filtered.slice().sort((a, b) => (a.price?.presentmentAmount || 0) - (b.price?.presentmentAmount || 0));
+                filtered = filtered.slice().sort((a, b) => cataloguePrice(a) - cataloguePrice(b));
                 break;
             default:
                 break;
         }
         return filtered;
-    }, [products, sort, priceRange, search]);
+    }, [products, sort, effectivePriceRange, search]);
 
     const toggleDropdown = () => {
         setIsDropdownOpen((prev) => !prev);
@@ -207,13 +183,13 @@ function ShopPage() {
                                     <input
                                         type="range"
                                         min={0}
-                                        max={100}
+                                        max={priceCeiling}
                                         step={1}
-                                        value={priceRange}
+                                        value={effectivePriceRange}
                                         onChange={e => setPriceRange(Number(e.target.value))}
                                         className="w-full accent-textColor"
                                     />
-                                    <span className="text-xs mt-1">Up to ${priceRange}</span>
+                                    <span className="text-xs mt-1">Up to ${effectivePriceRange}</span>
                                 </div>
                             </motion.div>
                         )}
@@ -222,20 +198,7 @@ function ShopPage() {
             </div>
 
             <div className="grid w-full lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6">
-                {loading ? (
-                    Array.from({ length: 4 }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="relative flex flex-col gap-3 p-4 animate-pulse"
-                        >
-                            <div className="w-full aspect-square bg-borderColor mb-2" />
-                            <div className="flex flex-col w-full items-center justify-center relative gap-2">
-                                <div className="h-4 w-1/2 bg-borderColor  mb-1" />
-                                <div className="h-6 w-1/3 bg-borderColor  mb-2" />
-                            </div>
-                        </div>
-                    ))
-                ) : filteredProducts.length > 0 ? (
+                {filteredProducts.length > 0 ? (
                     filteredProducts.map((product) => (
                         <ProductCard key={product._id || product.id} product={product} />
                     ))
