@@ -6,6 +6,7 @@ import { slugify } from "@/app/api/product/slugify";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { sanitizeString } from "@/utils/validate";
 import { getAllCategoriesServer, getAllSubcategoriesServer } from "@/lib/categoriesHelper";
+import { literalCategoryFilter } from "@/lib/productCatalogue";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3 } from "@/lib/s3";
 
@@ -313,7 +314,6 @@ export async function GET(req) {
         const fields = searchParams.get("fields"); // comma-separated string
         const search = searchParams.get("search");
         const limit = searchParams.get("limit");
-        const includeHidden = searchParams.get("includeHidden") === "true";
 
         let filter = {};
 
@@ -371,10 +371,10 @@ export async function GET(req) {
         if (!usingNumericCategories) {
             // New path: filter by name-based categoryId / subcategoryId when params are strings
             if (productCategoryParam) {
-                filter.categoryId = productCategoryParam;
+                filter.categoryId = literalCategoryFilter(productCategoryParam);
             }
             if (productSubCategoryParam) {
-                filter.subcategoryId = productSubCategoryParam;
+                filter.subcategoryId = literalCategoryFilter(productSubCategoryParam);
             }
         } else {
             // Legacy path: resolve indices and filter by numeric category/subcategory
@@ -436,7 +436,8 @@ export async function GET(req) {
             }
         }
 
-        // Ensure some form of category filter is provided for catalogue listings
+        // The shop landing page lists its whole catalogue; other unfiltered
+        // requests must still identify a category or another lookup mode.
         const hasAnyCategoryFilter =
             usingNumericCategories
                 ? productCategoryParam !== null && productCategoryParam !== undefined
@@ -447,15 +448,17 @@ export async function GET(req) {
             !productId &&
             !creatorUserId &&
             !search &&
+            productType !== "shop" &&
             !hasAnyCategoryFilter
         ) {
             return NextResponse.json({ error: "Missing productCategory or productSubCategory" }, { status: 400 });
         }
 
-        // Hide products from public catalogue listings by default
-        // Allow hidden products to be fetched explicitly via ids/productId/creatorUserId
-        if (!includeHidden && !ids && !productId && !creatorUserId) {
+        // Public catalogue visibility cannot be bypassed with includeHidden.
+        // Preserve the existing explicit ids/productId/creatorUserId lookup modes.
+        if (!ids && !productId && !creatorUserId) {
             filter.hidden = false;
+            filter.flaggedForModeration = { $ne: true };
         }
 
         const projection = fields ? fields.split(",").map(f => f.trim()).join(" ") : undefined;
