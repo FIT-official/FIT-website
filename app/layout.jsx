@@ -12,6 +12,7 @@ import { Suspense } from "react";
 import { CurrencyProvider } from "@/components/General/CurrencyContext";
 import ClientProviders from "@/components/General/ClientProviders";
 import PostHogProvider from "@/components/General/PostHogProvider";
+import { SITE_URL } from '@/lib/seo/site';
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,24 +24,24 @@ const GEO_JSON_LD = {
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://fixitoday.com/#organization",
+      "@id": "https://www.fixitoday.com/#organization",
       "name": "Fix It Today®",
-      "url": "https://fixitoday.com",
-      "logo": "https://fixitoday.com/fitogimage.png",
+      "url": "https://www.fixitoday.com",
+      "logo": "https://www.fixitoday.com/fitogimage.png",
       "description": "We are a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration. We offer a comprehensive suite of services including 3D printing, printer maintenance, filament supply, and electronics sourcing.",
       "areaServed": "SG"
     },
     {
       "@type": "WebSite",
-      "@id": "https://fixitoday.com/#website",
-      "url": "https://fixitoday.com",
+      "@id": "https://www.fixitoday.com/#website",
+      "url": "https://www.fixitoday.com",
       "name": "Fix It Today®",
       "publisher": {
-        "@id": "https://fixitoday.com/#organization"
+        "@id": "https://www.fixitoday.com/#organization"
       },
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://fixitoday.com/shop?search={search_term_string}",
+        "target": "https://www.fixitoday.com/shop?search={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     }
@@ -48,13 +49,14 @@ const GEO_JSON_LD = {
 };
 
 export const metadata = {
-  title: "Fix It Today® | Home",
+  metadataBase: new URL(SITE_URL),
+  title: "3D Printer Repair & Filament Singapore | Fix It Today",
   description: "We are a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration. We offer a comprehensive suite of services including 3D printing, printer maintenance, filament supply, and electronics sourcing.",
   openGraph: {
     title: "Fix It Today® | Home",
     description:
       "We are a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration.",
-    url: "https://fixitoday.com",
+    url: "https://www.fixitoday.com",
     siteName: "Fix It Today®",
     images: [
       {
@@ -83,23 +85,21 @@ export default function RootLayout({ children }) {
         <body className={`${inter.variable} antialiased`}>
           <CurrencyProvider>
             <Smooth>
-              <Suspense>
                 <ToastProvider>
                   <PostHogProvider>
                   <ClientProviders>
                     <div className="flex flex-row items-center justify-center bg-baseColor">
                       <div className="flex flex-col md:w-[90vw] lg:w-[85vw] max-w-[1350px] w-screen border-l border-r border-borderColor transition-all duration-300 ease-in-out overflow-hidden bg-background">
-                        <Navbar />
+                        <Suspense fallback={<div className="h-14" />}><Navbar /></Suspense>
                         <div className='lg:hidden flex h-14 w-full bg-background' />
-                        {children}
+                        <Suspense>{children}</Suspense>
                         <Footer />
                       </div>
-                      <ChatLauncher />
+                      <Suspense><ChatLauncher /></Suspense>
                     </div>
                   </ClientProviders>
                   </PostHogProvider>
                 </ToastProvider>
-              </Suspense>
             </Smooth>
           </CurrencyProvider>
         </body>
