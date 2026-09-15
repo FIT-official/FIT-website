@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { currentUser } from '@clerk/nextjs/server'
 import { connectToDatabase } from '@/lib/db'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
+import { withCreatorDisplayNames } from '@/lib/creatorPrintService/creatorNames'
 
 export async function GET() {
   const user = await currentUser()
@@ -15,5 +16,13 @@ export async function GET() {
     .sort({ createdAt: -1 })
     .lean()
 
-  return NextResponse.json({ requests: docs })
+  // "Handled by <creator>" for creator-routed jobs (best effort: names only).
+  let requests = docs
+  try {
+    requests = await withCreatorDisplayNames(docs)
+  } catch (err) {
+    console.error('[GET /api/account/custom-print] creator names failed:', err)
+  }
+
+  return NextResponse.json({ requests })
 }

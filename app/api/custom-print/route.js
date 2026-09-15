@@ -6,6 +6,9 @@ import { authenticate, unauthorizedResponse, UnauthorizedError } from '@/lib/aut
 import { clerkClient } from "@clerk/nextjs/server"
 import Product from '@/models/Product'
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import CreatorPrintService from '@/models/CreatorPrintService'
+import { notifyCreatorNewRequest } from '@/lib/notifications/creatorPrint'
+import { sanitizeString } from '@/utils/validate'
 
 export const runtime = "nodejs"
 
@@ -48,6 +51,21 @@ function maybeUpgradeStatusToMatchData(requestDoc, note) {
     return true;
 }
 
+const MAX_CUSTOMER_NOTE = 1000;
+
+// Optional JSON body for POST. The legacy request page sent multipart with no
+// fields the route read, so anything that is not JSON is treated as empty.
+async function readOptionalJsonBody(req) {
+    const contentType = req.headers?.get?.('content-type') || '';
+    if (!/application\/json/i.test(contentType)) return {};
+    try {
+        const body = await req.json();
+        return body && typeof body === 'object' ? body : {};
+    } catch {
+        return {};
+    }
+}
+
 async function getCustomPrintBasePrice() {
     try {
         const product = await Product.findOne({ slug: 'custom-print-request' }).lean();
@@ -59,10 +77,25 @@ async function getCustomPrintBasePrice() {
     }
 }
 
-// POST: Create a blank custom print request (no model, no config, just user info)
+// POST: Create a blank custom print request (no model, no config, just user info).
+// Optional JSON `{ creatorUserId }` routes the job to a creator's print service
+// (must exist and be enabled, else 400); otherwise Fix It Today handles it.
 export async function POST(req) {
     try {
         const { userId } = await authenticate(req);
+        const body = await readOptionalJsonBody(req);
+        let creatorUserId = null;
+        if (body.creatorUserId != null && body.creatorUserId !== '') {
+            if (typeof body.creatorUserId !== 'string' || body.creatorUserId.length > 64) {
+                return NextResponse.json({ error: "Invalid creatorUserId" }, { status: 400 });
+            }
+            await connectToDatabase();
+            const service = await CreatorPrintService.findOne({ creatorUserId: body.creatorUserId }, { enabled: 1 }).lean();
+            if (!service?.enabled) {
+                return NextResponse.json({ error: "This creator is not accepting print requests" }, { status: 400 });
+            }
+            creatorUserId = body.creatorUserId;
+        }
         const client = await clerkClient();
         const userObj = await client.users.getUser(userId);
         const { emailAddresses, firstName, lastName } = userObj;
@@ -74,7 +107,8 @@ export async function POST(req) {
 
                 await connectToDatabase();
                 // Get base price from custom print product
-                const basePrice = await getCustomPrintBasePrice();
+                // Creator jobs carry no platform base price: the creator's quote is the whole price.
+                const basePrice = creatorUserId ? 0 : await getCustomPrintBasePrice();
                 const requestId = uuidv4();
                 const customPrintRequest = new CustomPrintRequest({
                         requestId,
@@ -83,10 +117,11 @@ export async function POST(req) {
                         userName: userName,
                         status: 'pending_upload',
                         basePrice,
-                        statusHistory: [{ status: 'pending_upload', note: 'Request created, awaiting model upload', updatedAt: new Date() }],
+                        creatorUserId,
+                        statusHistory: [{ status: 'pending_upload', note: creatorUserId ? 'Request created for a creator print service, awaiting model upload' : 'Request created, awaiting model upload', updatedAt: new Date() }],
                 });
                 await customPrintRequest.save();
-                return NextResponse.json({ requestId }, { status: 201 });
+                return NextResponse.json({ requestId, creatorUserId }, { status: 201 });
 
 
     } catch (error) {
@@ -226,7 +261,7 @@ export async function PUT(req) {
     try {
         const { userId } = await authenticate(req);
         const body = await req.json();
-        const { requestId, modelFile, printConfiguration, status, statusNote, pricing } = body;
+        const { requestId, modelFile, printConfiguration, status, statusNote, pricing, customerNote } = body;
         if (!requestId) {
             return NextResponse.json({ error: "requestId is required" }, { status: 400 });
         }
@@ -270,6 +305,9 @@ export async function PUT(req) {
             };
         }
         if (printConfiguration) request.printConfiguration = printConfiguration;
+        if (typeof customerNote === 'string') {
+            request.customerNote = sanitizeString(customerNote).trim().slice(0, MAX_CUSTOMER_NOTE);
+        }
 
         // If the caller provides a status, start there (but we will still enforce a minimum based on data).
         if (explicitStatus) {
@@ -311,6 +349,16 @@ export async function PUT(req) {
             });
         }
         await request.save();
+
+        // Creator-handled job just became ready for a quote: tell the creator.
+        // Best-effort, never fails the customer's save.
+        if (request.creatorUserId && request.status === 'configured' && originalStatus !== 'configured') {
+            try {
+                await notifyCreatorNewRequest({ request: request.toObject() });
+            } catch (notifyErr) {
+                console.error('[PUT /api/custom-print] creator notification failed:', notifyErr);
+            }
+        }
 
         // Delete any other empty requests for this user (no modelFile, no config, not this requestId)
         await CustomPrintRequest.deleteMany({
