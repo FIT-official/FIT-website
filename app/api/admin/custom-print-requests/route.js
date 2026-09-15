@@ -9,6 +9,7 @@ import { checkMachineLimits, machineLimitMessage } from '@/lib/quoting/machineLi
 import AppSettings from '@/models/AppSettings'
 import { getAppSettingsId } from '@/lib/appSettingsId'
 import { notifyCustomPrintEvent } from '@/lib/notifications/customPrint'
+import { withCreatorDisplayNames } from '@/lib/creatorPrintService/creatorNames'
 
 // Admin: list all custom print requests
 export async function GET() {
@@ -23,7 +24,14 @@ export async function GET() {
   }
 
   await connectToDatabase()
-  const requests = await CustomPrintRequest.find().sort({ createdAt: -1 }).lean()
+  const docs = await CustomPrintRequest.find().sort({ createdAt: -1 }).lean()
+  // Creator column for creator-routed jobs; the panel defaults to FIT-only.
+  let requests = docs
+  try {
+    requests = await withCreatorDisplayNames(docs)
+  } catch (err) {
+    console.error('[GET /api/admin/custom-print-requests] creator names failed:', err)
+  }
   return NextResponse.json({ requests })
 }
 

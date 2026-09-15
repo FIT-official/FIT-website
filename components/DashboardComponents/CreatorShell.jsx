@@ -28,6 +28,8 @@ export const useShopIdentity = () => useContext(ShopIdentityContext)
 export const NAV_LINKS = [
     { href: '/dashboard', label: 'Home', exact: true },
     { href: '/dashboard/products', label: 'My products', creatorOnly: true },
+    { href: '/dashboard/print-jobs', label: 'Print jobs', creatorOnly: true },
+    { href: '/dashboard/print-service', label: 'Print service', creatorOnly: true },
     { href: '/dashboard/shop', label: 'My shop', icon: IoStorefrontOutline, creatorOnly: true },
     { href: '/dashboard/messages', label: 'Messages', creatorOnly: true },
     { href: '/dashboard/payouts', label: 'Payouts', creatorOnly: true },
