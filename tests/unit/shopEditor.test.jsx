@@ -135,7 +135,7 @@ describe('/dashboard/shop page builder', () => {
         await screen.findByRole('list', { name: 'Page blocks' })
         fireEvent.click(screen.getByRole('switch', { name: 'Published' }))
         fireEvent.click(screen.getByRole('button', { name: /add block/i }))
-        fireEvent.click(screen.getByRole('menuitem', { name: /^Text/ }))
+        fireEvent.click(screen.getByRole('menuitem', { name: /^Information/ }))
         expect(blockRows()).toHaveLength(5)
         fireEvent.change(screen.getByLabelText('Block 5 heading'), { target: { value: 'About' } })
         fireEvent.change(screen.getByLabelText('Block 5 body'), { target: { value: 'We print daily.' } })

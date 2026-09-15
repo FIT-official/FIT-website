@@ -4,6 +4,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const state = vi.hoisted(() => ({ calls: [], byUserId: null, byName: null }))
 
+vi.mock('@/lib/db', () => ({ connectToDatabase: vi.fn(async () => null) }))
+
 vi.mock('@/models/User', () => ({
     default: {
         findOne: vi.fn((filter, projection) => {
