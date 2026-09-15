@@ -1,8 +1,10 @@
-// RTL smokes for the /dashboard/shop editor: fields hydrate from GET
-// /api/user/shop, Save PUTs the bounded payload, and the featured picker
-// caps selections at 8 (order = click order).
+// RTL smokes for the /dashboard/shop page builder: hydrates from GET
+// /api/user/shop (default blocks when none saved), Save PUTs one bounded
+// payload (settings + theme + blocks + published), block add/move/remove
+// with per-block settings, live preview through BlockRenderer, and the Page
+// settings tab keeps the old editor (links cap, featured picker cap).
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, waitFor, within } from '@testing-library/react'
 import ShopEditor from '@/app/dashboard/shop/page'
 
 // Entitlements: creator by default (gating cases override entitlementsState).
@@ -25,6 +27,12 @@ vi.mock('@/components/DashboardComponents/CreatorShell', () => ({
 vi.mock('@/components/DashboardComponents/ShopImageCropModal', () => ({
     default: () => <div data-testid="crop-modal" />,
 }))
+vi.mock('@/components/ProductCard', () => ({
+    default: ({ product }) => <div data-testid="product-card">{product.name}</div>,
+}))
+vi.mock('@/components/General/MarkdownRenderer', () => ({
+    default: ({ source }) => <div data-testid="markdown">{source}</div>,
+}))
 
 const shopFixture = {
     bannerImage: '',
@@ -33,6 +41,9 @@ const shopFixture = {
     links: [{ label: 'Site', url: 'https://example.com' }],
     featuredProductIds: [],
     accentColor: '',
+    theme: { mode: 'light', font: 'sans' },
+    blocks: [],
+    published: true,
 }
 
 const makeProducts = (n) =>
@@ -44,6 +55,9 @@ function stubFetch({ shop = shopFixture, products = [] } = {}) {
     putBodies = []
     global.fetch = vi.fn((url, opts = {}) => {
         const u = String(url)
+        if (u.startsWith('/api/user/shop/upload')) {
+            return Promise.resolve({ ok: true, json: async () => ({ key: `shops/user_1/gallery-${putBodies.length}.jpg` }) })
+        }
         if (u.startsWith('/api/user/shop') && opts.method === 'PUT') {
             const body = JSON.parse(opts.body)
             putBodies.push(body)
@@ -59,6 +73,14 @@ function stubFetch({ shop = shopFixture, products = [] } = {}) {
     })
 }
 
+const openSettings = async () => {
+    fireEvent.click(await screen.findByRole('tab', { name: /page settings/i }))
+    return screen.findByLabelText('Shop description')
+}
+
+const blockList = () => within(screen.getByRole('list', { name: 'Page blocks' }))
+const blockRows = () => blockList().getAllByRole('listitem')
+
 beforeEach(() => {
     showToast.mockClear()
 })
@@ -68,43 +90,73 @@ afterEach(() => {
     vi.restoreAllMocks()
 })
 
-describe('/dashboard/shop editor', () => {
-    it('hydrates the fields from GET /api/user/shop', async () => {
+describe('/dashboard/shop page builder', () => {
+    it('hydrates: default blocks when none are saved, preview renders them, View page link', async () => {
         stubFetch({ products: makeProducts(2) })
         render(<ShopEditor />)
 
-        expect(await screen.findByLabelText('Shop description')).toHaveValue('Handmade 3D prints')
+        await screen.findByRole('list', { name: 'Page blocks' })
+        expect(blockRows().map((r) => r.textContent)).toEqual([
+            expect.stringContaining('Hero'),
+            expect.stringContaining('Products'),
+            expect.stringContaining('Links'),
+            expect.stringContaining('Contact'),
+        ])
+        expect(screen.getByRole('link', { name: /view page/i })).toHaveAttribute('href', '/creators/Ada%20Prints')
+
+        const preview = within(screen.getByTestId('page-preview'))
+        expect(preview.getByRole('heading', { level: 1, name: 'Ada Prints' })).toBeInTheDocument()
+        expect(preview.getByText('Handmade 3D prints')).toBeInTheDocument()
+        expect(await preview.findAllByTestId('product-card')).toHaveLength(2)
+        expect(preview.getByRole('link', { name: /site/i })).toHaveAttribute('href', 'https://example.com')
+        // Owner sees the inert Message button in preview
+        expect(preview.getByRole('button', { name: /message creator/i })).toBeDisabled()
+    })
+
+    it('page settings tab hydrates the old fields', async () => {
+        stubFetch({ products: makeProducts(2) })
+        render(<ShopEditor />)
+        const description = await openSettings()
+        expect(description).toHaveValue('Handmade 3D prints')
         expect(screen.getByText('18/600')).toBeInTheDocument()
         expect(screen.getByLabelText('Link 1 label')).toHaveValue('Site')
         expect(screen.getByLabelText('Link 1 URL')).toHaveValue('https://example.com')
-        expect(screen.getByRole('link', { name: /view shop/i })).toHaveAttribute(
-            'href',
-            '/creators/Ada%20Prints',
-        )
-        // Upload affordances + preview identity
         expect(screen.getByRole('button', { name: /upload banner/i })).toBeInTheDocument()
         expect(screen.getByRole('button', { name: /upload logo/i })).toBeInTheDocument()
-        expect(screen.getByText('Ada Prints')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Dark' })).toHaveAttribute('aria-pressed', 'false')
+        expect(screen.getByRole('button', { name: 'Sans' })).toHaveAttribute('aria-pressed', 'true')
     })
 
-    it('saves via PUT with the cleaned payload', async () => {
+    it('saves everything in one PUT: cleaned links, theme, blocks and published', async () => {
         stubFetch({ products: makeProducts(2) })
         render(<ShopEditor />)
 
-        const description = await screen.findByLabelText('Shop description')
-        fireEvent.change(description, { target: { value: 'New words' } })
+        // Blocks tab: unpublish, add a text block and fill it in.
+        await screen.findByRole('list', { name: 'Page blocks' })
+        fireEvent.click(screen.getByRole('switch', { name: 'Published' }))
+        fireEvent.click(screen.getByRole('button', { name: /add block/i }))
+        fireEvent.click(screen.getByRole('menuitem', { name: /^Text/ }))
+        expect(blockRows()).toHaveLength(5)
+        fireEvent.change(screen.getByLabelText('Block 5 heading'), { target: { value: 'About' } })
+        fireEvent.change(screen.getByLabelText('Block 5 body'), { target: { value: 'We print daily.' } })
+        expect(within(screen.getByTestId('page-preview')).getByTestId('markdown')).toHaveTextContent('We print daily.')
 
+        // Settings tab: description, links, featured, theme.
+        const description = await openSettings()
+        fireEvent.change(description, { target: { value: 'New words' } })
         fireEvent.click(screen.getByRole('button', { name: 'Add link' }))
         fireEvent.change(screen.getByLabelText('Link 2 label'), { target: { value: 'Insta' } })
         fireEvent.change(screen.getByLabelText('Link 2 URL'), { target: { value: 'instagram.com/ada' } })
-
-        // Feature one product (click order)
         fireEvent.click(await screen.findByRole('button', { name: /product 1/i }))
+        fireEvent.click(screen.getByRole('button', { name: 'Dark' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Serif' }))
 
+        expect(screen.getByText('Unsaved changes')).toBeInTheDocument()
         fireEvent.click(screen.getByRole('button', { name: 'Save' }))
 
         await waitFor(() => expect(putBodies).toHaveLength(1))
-        expect(putBodies[0]).toEqual({
+        const body = putBodies[0]
+        expect(body).toMatchObject({
             description: 'New words',
             links: [
                 { label: 'Site', url: 'https://example.com' },
@@ -112,13 +164,87 @@ describe('/dashboard/shop editor', () => {
             ],
             featuredProductIds: ['p1'],
             accentColor: '',
+            theme: { mode: 'dark', font: 'serif' },
+            published: false,
         })
-        await waitFor(() => expect(showToast).toHaveBeenCalledWith('Shop saved', 'success'))
+        expect(body.blocks.map((b) => b.type)).toEqual(['hero', 'products', 'links', 'contact', 'text'])
+        expect(body.blocks[4].settings).toEqual({ heading: 'About', body: 'We print daily.' })
+        expect(body.blocks[4].id).toMatch(/^[a-z0-9]{12}$/)
+        await waitFor(() => expect(showToast).toHaveBeenCalledWith('Page saved', 'success'))
+        await waitFor(() => expect(screen.queryByText('Unsaved changes')).not.toBeInTheDocument())
+    })
+
+    it('moves and removes blocks, and the preview follows', async () => {
+        stubFetch({ products: [] })
+        render(<ShopEditor />)
+        await screen.findByRole('list', { name: 'Page blocks' })
+
+        expect(screen.getByRole('button', { name: 'Move block 1 up' })).toBeDisabled()
+        fireEvent.click(screen.getByRole('button', { name: 'Move block 1 down' }))
+        expect(blockRows()[0]).toHaveTextContent('Products')
+        expect(blockRows()[1]).toHaveTextContent('Hero')
+        const order = Array.from(screen.getByTestId('page-preview').querySelectorAll('[data-block-type]')).map((s) => s.dataset.blockType)
+        expect(order).toEqual(['products', 'hero', 'links', 'contact'])
+
+        fireEvent.click(screen.getByRole('button', { name: 'Remove block 4' }))
+        expect(blockRows()).toHaveLength(3)
+        expect(screen.getByText('3/12 blocks')).toBeInTheDocument()
+    })
+
+    it('caps blocks at 12 and hides the add button', async () => {
+        stubFetch({ products: [] })
+        render(<ShopEditor />)
+        await screen.findByRole('list', { name: 'Page blocks' })
+        for (let i = 0; i < 8; i++) {
+            fireEvent.click(screen.getByRole('button', { name: /add block/i }))
+            fireEvent.click(screen.getByRole('menuitem', { name: /^Gallery/ }))
+        }
+        expect(blockRows()).toHaveLength(12)
+        expect(screen.queryByRole('button', { name: /add block/i })).not.toBeInTheDocument()
+    })
+
+    it('hydrates saved blocks and edits hero/products/contact settings', async () => {
+        stubFetch({
+            shop: {
+                ...shopFixture,
+                blocks: [
+                    { id: 'savedhero1', type: 'hero', settings: { headline: 'Ada', subheadline: '', showBanner: true, showLogo: true } },
+                    { id: 'savedprod1', type: 'products', settings: { heading: '', mode: 'all', limit: 24 } },
+                    { id: 'savedcont1', type: 'contact', settings: { heading: '', blurb: '', showMessageButton: true } },
+                ],
+            },
+            products: makeProducts(1),
+        })
+        render(<ShopEditor />)
+        await screen.findByRole('list', { name: 'Page blocks' })
+        expect(blockRows()).toHaveLength(3)
+
+        fireEvent.click(within(blockRows()[0]).getByRole('button', { name: /hero/i }))
+        fireEvent.click(screen.getByLabelText('Show banner'))
+        expect(within(screen.getByTestId('page-preview')).queryByTestId('banner-fallback')).not.toBeInTheDocument()
+
+        fireEvent.click(within(blockRows()[1]).getByRole('button', { name: /products/i }))
+        fireEvent.change(screen.getByLabelText('Block 2 mode'), { target: { value: 'featured' } })
+        fireEvent.change(screen.getByLabelText('Block 2 limit'), { target: { value: '99' } })
+        expect(screen.getByLabelText('Block 2 limit')).toHaveValue(24)
+
+        fireEvent.click(within(blockRows()[2]).getByRole('button', { name: /contact/i }))
+        fireEvent.click(screen.getByLabelText('Show Message button'))
+        expect(within(screen.getByTestId('page-preview')).queryByRole('button', { name: /message creator/i })).not.toBeInTheDocument()
+
+        fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+        await waitFor(() => expect(putBodies).toHaveLength(1))
+        expect(putBodies[0].blocks).toEqual([
+            { id: 'savedhero1', type: 'hero', settings: { headline: 'Ada', subheadline: '', showBanner: false, showLogo: true } },
+            { id: 'savedprod1', type: 'products', settings: { heading: '', mode: 'featured', limit: 24 } },
+            { id: 'savedcont1', type: 'contact', settings: { heading: '', blurb: '', showMessageButton: false } },
+        ])
     })
 
     it('caps the featured picker at 8 selections in click order', async () => {
         stubFetch({ products: makeProducts(9) })
         render(<ShopEditor />)
+        await openSettings()
 
         for (let i = 0; i < 9; i++) {
             fireEvent.click(await screen.findByRole('button', { name: new RegExp(`product ${i}$`, 'i') }))
@@ -138,7 +264,7 @@ describe('/dashboard/shop editor', () => {
     it('never allows more than 6 links', async () => {
         stubFetch({ products: [] })
         render(<ShopEditor />)
-        await screen.findByLabelText('Shop description')
+        await openSettings()
 
         // 1 existing + 5 more = 6; the add button then disappears
         for (let i = 0; i < 5; i++) {
