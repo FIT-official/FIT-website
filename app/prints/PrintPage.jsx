@@ -64,6 +64,7 @@ function PrintPage() {
             }
             const params = new URLSearchParams();
             params.set('productType', 'print');
+            params.set('listing', 'fit');
             if (categoryName) params.set('productCategory', categoryName);
             if (subcategoryName) params.set('productSubCategory', subcategoryName);
             params.set('fields', 'sales,name,variants,discount,images,reviews,slug,likes,creatorUserId,basePrice,variantTypes');

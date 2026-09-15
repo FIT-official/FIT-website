@@ -116,12 +116,17 @@ export async function POST(req) {
 
         const slug = await generateUniqueSlug(name);
 
+        // Listing is server-authoritative: admin posts land in the FIT
+        // catalogue, creator posts stay on the creator's page.
+        const listing = userRole === "admin" ? "fit" : "creator";
+
         try {
             const product = await Product.create({
                 ...body,
                 name,
                 description,
                 productType,
+                listing,
                 slug,
             });
 
@@ -184,8 +189,10 @@ export async function PUT(req) {
         if (prevProduct.creatorUserId !== userId && userRole !== "admin") {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
-        // Ownership cannot be transferred through an edit.
+        // Ownership cannot be transferred through an edit, and neither can
+        // the storefront listing.
         body.creatorUserId = prevProduct.creatorUserId;
+        body.listing = prevProduct.listing;
 
         // Compare images
         const prevImages = prevProduct.images || [];
@@ -322,8 +329,10 @@ export async function GET(req) {
         const fields = searchParams.get("fields"); // comma-separated string
         const search = searchParams.get("search");
         const limit = searchParams.get("limit");
+        const listing = searchParams.get("listing");
 
         let filter = {};
+        if (listing === "fit" || listing === "creator") filter.listing = listing;
 
         if (slug) {
             const projection = fields ? fields.split(",").map(f => f.trim()).join(" ") : undefined;

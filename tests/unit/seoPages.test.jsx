@@ -125,7 +125,7 @@ describe('server shop catalogue', () => {
         const { getShopProducts } = await import('@/lib/seo/shop')
         await getShopProducts({ productCategory: ' Filament ', productSubCategory: 'PLA+' })
         expect(state.filters[0]).toEqual({
-            productType: 'shop', hidden: false, flaggedForModeration: { $ne: true },
+            productType: 'shop', listing: 'fit', hidden: false, flaggedForModeration: { $ne: true },
             categoryId: { $regex: '^Filament$', $options: 'i' },
             subcategoryId: { $regex: '^PLA\\+$', $options: 'i' },
         })

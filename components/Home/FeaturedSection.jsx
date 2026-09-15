@@ -80,6 +80,7 @@ function FeaturedSection() {
           const params = new URLSearchParams({
             productType,
             productCategory: category,
+            listing: 'fit',
             limit: '20'
           })
 
