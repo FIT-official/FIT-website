@@ -22,26 +22,36 @@ export async function POST(req) {
 
     if (event.type === "customer.subscription.deleted") {
         const subscription = event.data.object;
-        const customerId = subscription.customer;
-        const customer = await stripe.customers.retrieve(customerId);
-        const emailAddress = [customer.email];
+        const customerId = typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id;
+        const client = await clerkClient();
 
-        if (!emailAddress) {
-            console.error("No email found on customer object.");
-            return NextResponse.json({ error: "No email found on customer object" }, { status: 400 });
+        // Find the Clerk user by the Stripe ids stored at signup, never by a
+        // fuzzy email search (which could de-provision the wrong account).
+        let target = null;
+        let customerEmail = null;
+        try {
+            const customer = await stripe.customers.retrieve(customerId);
+            customerEmail = customer?.deleted ? null : customer?.email || null;
+        } catch (err) {
+            console.error("Failed to retrieve Stripe customer:", err.message);
+        }
+        if (customerEmail) {
+            const { data } = await client.users.getUserList({ emailAddress: [customerEmail], limit: 50 });
+            target = (data || []).find(u =>
+                u.publicMetadata?.stripeSubscriptionId === subscription.id ||
+                u.publicMetadata?.stripeCustomerId === customerId
+            ) || null;
         }
 
-        const client = await clerkClient()
-
-        const { data, totalCount } = await client.users.getUserList({ query: emailAddress });
-
-        if (!data) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        if (!target) {
+            console.error("No Clerk user matches subscription", subscription.id, "customer", customerId);
+            // 200 so Stripe stops retrying; nothing to revoke.
+            return NextResponse.json({ received: true, matched: false });
         }
 
-        await client.users.updateUser(data[0].id, {
-            publicMetadata: { ...data[0].publicMetadata, stripeSubscriptionId: "" },
-            unsafeMetadata: { ...data[0].unsafeMetadata, priceId: "" }
+        await client.users.updateUser(target.id, {
+            publicMetadata: { ...target.publicMetadata, stripeSubscriptionId: "" },
+            unsafeMetadata: { ...target.unsafeMetadata, priceId: "" }
         });
     }
 

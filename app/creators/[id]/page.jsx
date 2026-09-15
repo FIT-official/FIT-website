@@ -108,7 +108,7 @@ export default async function CreatorPage(props) {
 		);
 	}
 
-	const products = await Product.find({ creatorUserId: resolvedUserId }).sort({ createdAt: -1 }).lean();
+	const products = await Product.find({ creatorUserId: resolvedUserId, hidden: { $ne: true }, flaggedForModeration: { $ne: true } }).sort({ createdAt: -1 }).lean();
 
 	let profile = null;
 	try {

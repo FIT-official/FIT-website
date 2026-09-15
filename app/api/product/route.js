@@ -173,6 +173,20 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Product not found" }, { status: 404 });
         }
 
+        // Only the product's owner or an admin may edit it. Checked before any
+        // S3 deletes so a stranger cannot wipe another creator's assets.
+        let userRole = "user";
+        const client = await clerkClient()
+        const userObj = await client.users.getUser(userId)
+        if (userObj && userObj.publicMetadata && userObj.publicMetadata.role) {
+            userRole = userObj.publicMetadata.role;
+        }
+        if (prevProduct.creatorUserId !== userId && userRole !== "admin") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+        // Ownership cannot be transferred through an edit.
+        body.creatorUserId = prevProduct.creatorUserId;
+
         // Compare images
         const prevImages = prevProduct.images || [];
         const newImages = body.images || [];
@@ -242,12 +256,6 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
         }
 
-        let userRole = "user";
-        const client = await clerkClient()
-        const userObj = await client.users.getUser(userId)
-        if (userObj && userObj.publicMetadata && userObj.publicMetadata.role) {
-            userRole = userObj.publicMetadata.role;
-        }
         if (productType === "shop" && userRole !== "admin") {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
@@ -502,7 +510,11 @@ export async function DELETE(req) {
         }
 
         if (product.creatorUserId !== userId) {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+            const client = await clerkClient()
+            const userObj = await client.users.getUser(userId)
+            if (userObj?.publicMetadata?.role !== "admin") {
+                return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+            }
         }
 
         for (const img of product.images || []) {
