@@ -14,7 +14,7 @@ function IntroductionSection() {
 
     return (
         <div className="pt-4 md:pt-12 flex flex-col items-center justify-center gap-6 px-8 md:px-12">
-            <CTALink tag="New" text={content.subheading} url="/creators" />
+            <CTALink tag="New" text={content.subheading} url="/creators/join" />
             <h1 className="flex w-full md:w-md text-center">
                 {content.heading}
             </h1>

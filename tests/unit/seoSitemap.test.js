@@ -5,8 +5,8 @@ import robots from '@/app/robots'
 import { GET as legacySitemap } from '@/app/sitemap-0.xml/route'
 
 const db = vi.hoisted(() => ({
-    connect: vi.fn(), products: [], posts: [], productFilter: null,
-    postFilter: null, productFields: '', postFields: '',
+    connect: vi.fn(), products: [], posts: [], creators: [], productFilter: null,
+    postFilter: null, creatorFilter: null, productFields: '', postFields: '', creatorFields: '',
 }))
 
 vi.mock('@/lib/db', () => ({ connectToDatabase: db.connect }))
@@ -28,14 +28,24 @@ vi.mock('@/models/BlogPost', () => ({ default: {
         } }
     }),
 } }))
+vi.mock('@/models/User', () => ({ default: {
+    find: vi.fn(filter => {
+        db.creatorFilter = filter
+        return { select: fields => {
+            db.creatorFields = fields
+            return { lean: async () => db.creators }
+        } }
+    }),
+} }))
 
 beforeEach(() => {
     vi.clearAllMocks()
     db.connect.mockResolvedValue(undefined)
     db.products = []
     db.posts = []
-    db.productFilter = db.postFilter = null
-    db.productFields = db.postFields = ''
+    db.creators = []
+    db.productFilter = db.postFilter = db.creatorFilter = null
+    db.productFields = db.postFields = db.creatorFields = ''
 })
 
 describe('public sitemap URLs', () => {
@@ -44,10 +54,26 @@ describe('public sitemap URLs', () => {
         expect(entries.map(entry => entry.url)).toEqual([
             'https://www.fixitoday.com', 'https://www.fixitoday.com/about',
             'https://www.fixitoday.com/shop', 'https://www.fixitoday.com/prints',
-            'https://www.fixitoday.com/creators', 'https://www.fixitoday.com/blog',
+            'https://www.fixitoday.com/creators', 'https://www.fixitoday.com/creators/join',
+            'https://www.fixitoday.com/blog',
             'https://www.fixitoday.com/privacy', 'https://www.fixitoday.com/terms',
         ])
         expect(entries.every(entry => !('lastModified' in entry))).toBe(true)
+    })
+
+    it('lists published creator pages by display name and skips unpublished, nameless or id-named ones', () => {
+        const entries = buildPublicSitemap({ creators: [
+            { metadata: { displayName: 'Ada Prints' }, shop: { published: true } },
+            { metadata: { displayName: 'Legacy Shop' }, shop: {} },
+            { metadata: { displayName: 'Hidden' }, shop: { published: false } },
+            { metadata: { displayName: '' }, shop: {} },
+            { metadata: { displayName: 'user_abc123' }, shop: {} },
+            { metadata: { displayName: 'No Shop' } },
+        ] })
+        expect(entries.filter(entry => /\/creators\/(?!join$)./.test(entry.url)).map(entry => entry.url)).toEqual([
+            'https://www.fixitoday.com/creators/Ada%20Prints',
+            'https://www.fixitoday.com/creators/Legacy%20Shop',
+        ])
     })
 
     it('includes visible products even when out of stock, excluding hidden and moderated products', () => {
@@ -107,16 +133,24 @@ describe('sitemap database route', () => {
     it('queries current public records with minimal fields and the existing publication semantics', async () => {
         db.products = [{ slug: 'pla', hidden: false }]
         db.posts = [{ slug: '3d-printer-repair', status: 'published' }]
+        db.creators = [{ metadata: { displayName: 'Ada Prints' }, shop: { published: true } }]
         const { default: sitemap, dynamic } = await import('@/app/sitemap')
         const entries = await sitemap()
         expect(dynamic).toBe('force-dynamic')
         expect(db.connect).toHaveBeenCalledOnce()
         expect(db.productFilter).toEqual({ hidden: false, flaggedForModeration: { $ne: true } })
         expect(db.postFilter).toEqual(statusQuery('published'))
+        expect(db.creatorFilter).toEqual({
+            shop: { $exists: true, $ne: null },
+            'shop.published': { $ne: false },
+            'metadata.displayName': { $exists: true, $type: 'string', $ne: '' },
+        })
         expect(db.productFields).not.toMatch(/description|paidAssets|creatorUserId/)
         expect(db.postFields).not.toMatch(/content|authorId/)
+        expect(db.creatorFields).not.toMatch(/orderHistory|cart|contact/)
         expect(entries.some(entry => entry.url.endsWith('/products/pla'))).toBe(true)
         expect(entries.some(entry => entry.url.endsWith('/blog/3d-printer-repair'))).toBe(true)
+        expect(entries.some(entry => entry.url.endsWith('/creators/Ada%20Prints'))).toBe(true)
     })
 
     it('does not publish a successful empty sitemap when the database is unavailable', async () => {

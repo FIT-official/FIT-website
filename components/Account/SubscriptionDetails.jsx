@@ -29,7 +29,7 @@ function SubscriptionDetailsInner() {
     const { subscription, loading: subLoading, error: subError } = require('@/utils/UserSubscriptionContext').useUserSubscription();
     const [priceId, setPriceId] = useState('');
 
-    // Preselect tier from query param (used by /creators pricing cards)
+    // Preselect tier from query param (used by /creators/join pricing cards)
     useEffect(() => {
         const incoming = (searchParams?.get('priceId') || '').trim();
         if (!incoming) return;

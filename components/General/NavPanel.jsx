@@ -70,6 +70,7 @@ export const NAV_MENU_ICONS = {
 export const DEFAULT_MENU_PAGES = [
     { icon: 'newspaper', label: 'Blog', description: 'Guides, updates and print stories.', href: '/blog' },
     { icon: 'people', label: 'Creators', description: 'Meet the makers behind the models.', href: '/creators' },
+    { icon: 'sparkles', label: 'Become a creator', description: 'Plans for selling on Fix It Today.', href: '/creators/join' },
     { icon: 'info', label: 'About', description: 'Who we are and how we work.', href: '/about' },
     { icon: 'print', label: 'Custom 3D print', description: 'Upload a model for an instant quote.', href: '/products/custom-print-request' },
     { icon: 'cube', label: 'Print requests', description: 'Track your custom print orders.', href: '/account/prints' },

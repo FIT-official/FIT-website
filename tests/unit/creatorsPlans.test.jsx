@@ -1,8 +1,9 @@
-// /creators pricing page: plans come from Stripe via /api/stripe/plans and
-// fill the tier cards; the free card and current-plan state are always there.
+// /creators/join pricing page: plans come from Stripe via /api/stripe/plans
+// and fill the tier cards; the free card and current-plan state are always
+// there. (/creators itself is now the public creator directory.)
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
-import Creators from '@/app/creators/Creators'
+import Creators from '@/app/creators/join/Creators'
 
 const subState = { subscription: null }
 vi.mock('@/utils/UserSubscriptionContext', () => ({
