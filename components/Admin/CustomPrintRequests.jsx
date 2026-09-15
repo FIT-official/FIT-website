@@ -8,6 +8,7 @@ import {
     DashCard,
     ViewTabs,
     StatusPill,
+    Tag,
     ConfirmDialog,
     GlassBar,
     EmptyState,
@@ -56,6 +57,9 @@ export default function CustomPrintRequests() {
     const [tourOpen, setTourOpen] = useState(false)
     const tourOffer = useTourOffer('customPrintRequests')
     const [search, setSearch] = useState('')
+    // Creator-handled jobs (creatorUserId set) are fulfilled by the creator, not
+    // FIT, so the queue defaults to FIT-only; the toggle brings them in.
+    const [includeCreatorJobs, setIncludeCreatorJobs] = useState(false)
     const [view, setView] = useUrlSub(VIEWS.map((v) => v.key), 'all')
     const [menuFor, setMenuFor] = useState(null) // requestId whose "…" menu is open
     const [peek, setPeek] = useState(null) // { id, editor }
@@ -84,14 +88,18 @@ export default function CustomPrintRequests() {
 
     // Client-side search across model name, customer email and request ID.
     const searched = useMemo(() => {
-        if (!search) return requests
+        const scoped = includeCreatorJobs ? requests : requests.filter((r) => !r.creatorUserId)
+        if (!search) return scoped
         const q = search.toLowerCase()
-        return requests.filter((r) => (
+        return scoped.filter((r) => (
             (r.modelFile?.originalName || '').toLowerCase().includes(q) ||
             (r.userEmail || '').toLowerCase().includes(q) ||
-            (r.requestId || '').toLowerCase().includes(q)
+            (r.requestId || '').toLowerCase().includes(q) ||
+            (r.creatorDisplayName || '').toLowerCase().includes(q)
         ))
-    }, [search, requests])
+    }, [search, requests, includeCreatorJobs])
+
+    const creatorJobCount = useMemo(() => requests.filter((r) => r.creatorUserId).length, [requests])
 
     const counts = useMemo(() => {
         const byView = {}
@@ -145,6 +153,7 @@ export default function CustomPrintRequests() {
         const exportData = visible.map((r) => ({
             RequestID: r.requestId,
             User: r.userEmail,
+            Creator: r.creatorDisplayName || '',
             Status: r.status,
             ModelName: r.modelFile?.originalName || '',
             ModelSize: r.modelFile?.fileSize || '',
@@ -154,7 +163,7 @@ export default function CustomPrintRequests() {
         }))
         const ws = XLSX.utils.json_to_sheet(exportData)
         ws['!cols'] = [
-            { wch: 36 }, { wch: 24 }, { wch: 16 }, { wch: 24 }, { wch: 12 }, { wch: 60 }, { wch: 24 }, { wch: 24 },
+            { wch: 36 }, { wch: 24 }, { wch: 20 }, { wch: 16 }, { wch: 24 }, { wch: 12 }, { wch: 60 }, { wch: 24 }, { wch: 24 },
         ]
         const wb = XLSX.utils.book_new()
         XLSX.utils.book_append_sheet(wb, ws, 'Print Requests')
@@ -232,6 +241,20 @@ export default function CustomPrintRequests() {
                     </label>
                     <button
                         type="button"
+                        role="switch"
+                        aria-checked={includeCreatorJobs}
+                        onClick={() => setIncludeCreatorJobs((v) => !v)}
+                        title="Jobs routed to a creator's own print service"
+                        className={`dash-hoverable flex items-center gap-1.5 rounded-full border border-[var(--dash-line)] px-3.5 py-1.5 text-[13px] font-medium cursor-pointer ${
+                            includeCreatorJobs
+                                ? 'bg-[var(--dash-ink)] text-[var(--dash-canvas)]'
+                                : 'bg-[var(--dash-card)] hover:bg-[var(--dash-canvas)]'
+                        }`}
+                    >
+                        Include creator jobs{creatorJobCount > 0 ? ` (${creatorJobCount})` : ''}
+                    </button>
+                    <button
+                        type="button"
                         onClick={exportToExcel}
                         disabled={visible.length === 0}
                         data-tour="requests-export"
@@ -304,6 +327,9 @@ export default function CustomPrintRequests() {
                                                     {r.modelFile?.originalName || 'Custom print'}
                                                 </p>
                                                 <p className="text-[13px] dash-soft truncate">{r.userEmail}</p>
+                                                {r.creatorUserId && (
+                                                    <Tag className="!h-5">Creator: {r.creatorDisplayName || 'Creator'}</Tag>
+                                                )}
                                                 <button
                                                     type="button"
                                                     title="Copy request ID"

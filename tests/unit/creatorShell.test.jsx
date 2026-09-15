@@ -49,6 +49,8 @@ afterEach(() => {
 const NAV_EXPECTATIONS = [
     ['Home', '/dashboard'],
     ['My products', '/dashboard/products'],
+    ['Print jobs', '/dashboard/print-jobs'],
+    ['Print service', '/dashboard/print-service'],
     ['Messages', '/dashboard/messages'],
     ['Payouts', '/dashboard/payouts'],
     ['Discounts', '/dashboard/discounts'],

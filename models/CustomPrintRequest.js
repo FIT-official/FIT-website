@@ -16,6 +16,13 @@ const CustomPrintRequestSchema = new mongoose.Schema({
     //                 colour only. `modelFile.s3Key` reuses the product model.
     // See openspec change `migrate-print-delivery-to-custom-requests`.
     source: { type: String, enum: ['upload', 'product'], default: 'upload' },
+
+    // Who fulfils the job. null = Fix It Today (the original behaviour);
+    // otherwise the Clerk userId of a creator whose CreatorPrintService was
+    // enabled when the request was created (/prints/request?creator=).
+    creatorUserId: { type: String, default: null, index: true },
+    // Free-text brief from the customer (deadline, finish, colour notes).
+    customerNote: { type: String, default: '', maxlength: 1000 },
     sourceProduct: {
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
         variantId: { type: mongoose.Schema.Types.ObjectId, default: null },
