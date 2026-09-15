@@ -90,6 +90,9 @@ describe('GET /api/user/shop', () => {
             links: [],
             featuredProductIds: [],
             accentColor: '',
+            theme: { mode: 'light', font: 'sans' },
+            blocks: [],
+            published: true,
         })
     })
 
@@ -220,6 +223,50 @@ describe('PUT /api/user/shop', () => {
         const res = await PUT(putRequest({ bannerImage: 'shops/user_abc/banner-9.jpg' }))
         expect(res.status).toBe(200)
     })
+
+    // Page builder fields: theme, blocks (validateBlocks), published.
+    it('accepts theme, published and a valid blocks list, storing the sanitised blocks', async () => {
+        state.updatedDoc = { shop: {} }
+        const { PUT } = await import('@/app/api/user/shop/route')
+        const res = await PUT(putRequest({
+            theme: { mode: 'dark', font: 'serif' },
+            published: false,
+            blocks: [
+                { id: 'abcdefgh', type: 'hero', settings: { headline: 'Hi <b>', showBanner: false } },
+                { id: 'abcdefgh2', type: 'text', settings: { heading: 'About', body: 'Made in SG' } },
+            ],
+        }))
+        expect(res.status).toBe(200)
+        expect(state.updateArgs.update.$set['shop.theme']).toEqual({ mode: 'dark', font: 'serif' })
+        expect(state.updateArgs.update.$set['shop.published']).toBe(false)
+        expect(state.updateArgs.update.$set['shop.blocks']).toEqual([
+            { id: 'abcdefgh', type: 'hero', settings: { headline: 'Hi b', subheadline: '', showBanner: false, showLogo: true } },
+            { id: 'abcdefgh2', type: 'text', settings: { heading: 'About', body: 'Made in SG' } },
+        ])
+    })
+
+    it('rejects an unknown theme mode/font (422) and an unknown block type (400)', async () => {
+        const { PUT } = await import('@/app/api/user/shop/route')
+        expect((await PUT(putRequest({ theme: { mode: 'neon', font: 'sans' } }))).status).toBe(422)
+        expect((await PUT(putRequest({ theme: { mode: 'light', font: 'comic' } }))).status).toBe(422)
+        const res = await PUT(putRequest({ blocks: [{ id: 'abcdefgh', type: 'iframe', settings: {} }] }))
+        expect(res.status).toBe(400)
+        expect((await res.json()).error).toMatch(/unknown block type/)
+    })
+
+    it('rejects more than 12 blocks and gallery keys outside the caller prefix', async () => {
+        const { PUT } = await import('@/app/api/user/shop/route')
+        const many = Array.from({ length: 13 }, (_, i) => ({ id: `block${String(i).padStart(4, '0')}`, type: 'text', settings: {} }))
+        expect((await PUT(putRequest({ blocks: many }))).status).toBe(422)
+        const foreign = await PUT(putRequest({
+            blocks: [{ id: 'abcdefgh', type: 'gallery', settings: { images: ['shops/user_OTHER/g.jpg'] } }],
+        }))
+        expect(foreign.status).toBe(400)
+        const own = await PUT(putRequest({
+            blocks: [{ id: 'abcdefgh', type: 'gallery', settings: { images: ['shops/user_abc/gallery-1.jpg'] } }],
+        }))
+        expect(own.status).toBe(200)
+    })
 })
 
 describe('POST /api/user/shop/upload', () => {
@@ -271,6 +318,15 @@ describe('POST /api/user/shop/upload', () => {
         const { POST } = await import('@/app/api/user/shop/upload/route')
         const res = await POST(makeUpload(fakeFile(), 'avatar'))
         expect(res.status).toBe(400)
+    })
+
+    it('gallery uploads land under the caller prefix and never delete a previous object', async () => {
+        const { POST } = await import('@/app/api/user/shop/upload/route')
+        const res = await POST(makeUpload(fakeFile(), 'gallery', { existingKey: 'shops/user_abc/gallery-old.jpg' }))
+        expect(res.status).toBe(200)
+        const body = await res.json()
+        expect(body.key).toMatch(/^shops\/user_abc\/gallery-/)
+        expect(state.s3Sends).toHaveLength(1)
     })
 
     it('uploads under shops/<userId>/ and only deletes existing keys in that prefix', async () => {

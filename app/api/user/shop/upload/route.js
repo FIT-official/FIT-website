@@ -9,13 +9,15 @@ const BUCKET_NAME = process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Creator-scoped image upload for shop banner/logo. Same S3 pipeline as the
-// admin images route (sharp compression when available) but auth-only (no
-// admin) and keys are always pinned under shops/<userId>/ so a caller can
-// only ever write — and delete — inside their own prefix.
+// Creator-scoped image upload for shop banner/logo/gallery. Same S3 pipeline
+// as the admin images route (sharp compression when available) but auth-only
+// (no admin) and keys are always pinned under shops/<userId>/ so a caller can
+// only ever write — and delete — inside their own prefix. `gallery` uploads
+// never delete a previous object (a gallery block holds up to 8 keys; the cap
+// is enforced when the page is saved).
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_BODY_BYTES = 6 * 1024 * 1024; // multipart overhead headroom
-const KINDS = new Set(["banner", "logo"]);
+const KINDS = new Set(["banner", "logo", "gallery"]);
 
 export async function POST(req) {
     try {
@@ -43,7 +45,7 @@ export async function POST(req) {
         const kind = KINDS.has(kindRaw) ? kindRaw : null;
 
         if (!kind) {
-            return NextResponse.json({ error: "kind must be banner or logo" }, { status: 400 });
+            return NextResponse.json({ error: "kind must be banner, logo or gallery" }, { status: 400 });
         }
         if (!file || typeof file.arrayBuffer !== "function") {
             return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -95,7 +97,7 @@ export async function POST(req) {
 
         // Replace flow: delete the previous image, but only within the caller's
         // own prefix (never an arbitrary bucket key).
-        const existingKeyRaw = formData.get("existingKey");
+        const existingKeyRaw = kind === "gallery" ? null : formData.get("existingKey");
         if (typeof existingKeyRaw === "string" && existingKeyRaw) {
             const existingKey = existingKeyRaw;
             const safe =

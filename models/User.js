@@ -83,6 +83,19 @@ const ShopLinkSchema = new mongoose.Schema(
     { _id: false }
 );
 
+const ShopBlockSchema = new mongoose.Schema(
+    {
+        id: { type: String, required: true, match: /^[a-z0-9]{8,16}$/ },
+        type: {
+            type: String,
+            required: true,
+            enum: ["hero", "text", "gallery", "products", "printService", "links", "contact"],
+        },
+        settings: { type: mongoose.Schema.Types.Mixed, default: {} },
+    },
+    { _id: false }
+);
+
 const ShopSchema = new mongoose.Schema(
     {
         bannerImage: { type: String, default: "", maxlength: 300 },
@@ -106,6 +119,19 @@ const ShopSchema = new mongoose.Schema(
                 message: "accentColor must be a #rrggbb hex value",
             },
         },
+        // Page builder (lib/creatorPage/blocks.js is the settings authority;
+        // the API validates before anything reaches here).
+        theme: {
+            mode: { type: String, enum: ["light", "dark"], default: "light" },
+            font: { type: String, enum: ["sans", "serif", "mono"], default: "sans" },
+        },
+        blocks: {
+            type: [ShopBlockSchema],
+            default: [],
+            validate: [(arr) => arr.length <= 12, "At most 12 page blocks"],
+        },
+        // false = the public page shows "coming soon" to everyone but the owner.
+        published: { type: Boolean, default: true },
     },
     { _id: false }
 );
