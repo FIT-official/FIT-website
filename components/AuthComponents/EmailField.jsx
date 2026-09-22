@@ -2,8 +2,9 @@
 function EmailField({ setEmail, email, required }) {
     return (
         <input
-            htmlFor="email"
-            type="text"
+            aria-label="Email"
+            autoComplete="email"
+            type="email"
             name='email'
             onChange={(e) => setEmail(e.target.value)}
             value={email}

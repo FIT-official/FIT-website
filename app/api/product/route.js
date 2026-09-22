@@ -9,10 +9,14 @@ import { getAllCategoriesServer, getAllSubcategoriesServer } from "@/lib/categor
 import { literalCategoryFilter } from "@/lib/productCatalogue";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3 } from "@/lib/s3";
+import { reserveCreatorQuota, releaseProductQuota, CreatorQuotaError } from "@/lib/creatorQuota";
+import { editableProduct, productForViewer } from "@/lib/productAccess";
 
 const BUCKET_NAME = process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
 
-async function deleteS3Object(key) {
+async function deleteS3Object(key, ownerId) {
+    // Legacy shared prefixes are not safe to delete automatically.
+    if (!ownerId || !["models", "images", "viewables"].some(prefix => String(key).startsWith(`${prefix}/${ownerId}/`))) return;
     await s3.send(
         new DeleteObjectCommand({
             Bucket: BUCKET_NAME,
@@ -21,28 +25,32 @@ async function deleteS3Object(key) {
     );
 }
 
-async function generateUniqueSlug(baseName) {
+async function generateUniqueSlug(baseName, excludeId = null) {
     let baseSlug = slugify(baseName);
     let slug = baseSlug;
     let attempt = 1;
-    let exists = await Product.findOne({ slug });
+    const lookup = () => Product.findOne({ slug, ...(excludeId ? { _id: { $ne: excludeId } } : {}) });
+    let exists = await lookup();
     while (exists) {
         attempt++;
         slug = `${baseSlug}-${attempt}`;
-        exists = await Product.findOne({ slug });
+        exists = await lookup();
         if (attempt > 100) break;
     }
     return slug;
 }
 
 export async function POST(req) {
+    let reservation;
+    let created = false;
     try {
         const { userId } = await auth();
         if (!userId)
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
         await connectToDatabase();
-        const body = await req.json();
+        const input = await req.json();
+        const body = { ...editableProduct(input), creatorUserId: userId };
         const requiredFields = [
             "creatorUserId",
             "name",
@@ -114,7 +122,11 @@ export async function POST(req) {
             return NextResponse.json({ error: "Invalid basePrice" }, { status: 400 });
         }
 
+        if (body.paidAssets.some(key => !key.startsWith(`models/${userId}/`))) {
+            return NextResponse.json({ error: "Model assets must belong to your account" }, { status: 400 });
+        }
         const slug = await generateUniqueSlug(name);
+        reservation = await reserveCreatorQuota(userId, "products");
 
         // Listing is server-authoritative: admin posts land in the FIT
         // catalogue, creator posts stay on the creator's page.
@@ -130,6 +142,7 @@ export async function POST(req) {
                 slug,
             });
 
+            created = true;
             if (body.creatorUserId) {
                 await User.findOneAndUpdate(
                     { userId: body.creatorUserId },
@@ -145,13 +158,15 @@ export async function POST(req) {
             return NextResponse.json({ success: true, product }, { status: 201 });
         } catch (err) {
             if (err.code === 11000 && err.keyPattern && err.keyPattern.slug) {
+                if (reservation && !created) await reservation.release();
                 return NextResponse.json({ error: "A product with this slug already exists. Please try again." }, { status: 409 });
             }
             throw err;
         }
 
-        return NextResponse.json({ success: true, product }, { status: 201 });
     } catch (err) {
+        if (reservation && !created) await reservation.release().catch(console.error);
+        if (err instanceof CreatorQuotaError) return NextResponse.json({ error: err.message }, { status: err.status });
         console.error(err);
         return NextResponse.json({ error: "Server error" }, { status: 500 });
     }
@@ -164,7 +179,8 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
         await connectToDatabase();
-        const body = await req.json();
+        const input = await req.json();
+        const body = editableProduct(input);
 
         const { searchParams } = new URL(req.url);
         const productId = searchParams.get("productId");
@@ -208,18 +224,6 @@ export async function PUT(req) {
         const prevViewable = prevProduct.viewableModel || "";
         const newViewable = body.viewableModel || "";
         const removedViewable = prevViewable && prevViewable !== newViewable ? prevViewable : null;
-
-        for (const img of removedImages) {
-            await deleteS3Object(img);
-        }
-
-        for (const model of removedModels) {
-            await deleteS3Object(model);
-        }
-
-        if (removedViewable) {
-            await deleteS3Object(removedViewable);
-        }
 
         const requiredFields = [
             "creatorUserId",
@@ -285,10 +289,12 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Invalid basePrice" }, { status: 400 });
         }
 
-        let slug = body.slug;
-        if (body.name) {
-            slug = await generateUniqueSlug(name);
+        if (body.paidAssets.some(key => !(prevProduct.paidAssets || []).includes(key) && !key.startsWith(`models/${prevProduct.creatorUserId}/`))) {
+            return NextResponse.json({ error: "Model assets must belong to the product owner" }, { status: 400 });
         }
+        const slug = name === prevProduct.name && prevProduct.slug
+            ? prevProduct.slug
+            : await generateUniqueSlug(name, productId);
 
         const update = {
             ...body,
@@ -298,11 +304,14 @@ export async function PUT(req) {
             slug,
         };
 
-        const updated = await Product.findByIdAndUpdate(productId, update, { new: true });
+        const updated = await Product.findByIdAndUpdate(productId, update, { new: true, runValidators: true });
         if (!updated) {
             return NextResponse.json({ error: "Product not found" }, { status: 404 });
         }
 
+        for (const key of [...removedImages, ...removedModels, ...(removedViewable ? [removedViewable] : [])]) {
+            await deleteS3Object(key, prevProduct.creatorUserId).catch(console.error);
+        }
         return NextResponse.json({ success: true, product: updated }, { status: 200 });
     } catch (err) {
         console.error(err);
@@ -313,6 +322,8 @@ export async function PUT(req) {
 export async function GET(req) {
     try {
         await connectToDatabase();
+        const { userId } = await auth();
+        const isAdmin = userId ? (await (await clerkClient()).users.getUser(userId))?.publicMetadata?.role === "admin" : false;
         const { searchParams } = new URL(req.url);
 
         const isLikelyClerkUserId = (value) => typeof value === 'string' && /^user_[a-zA-Z0-9]+$/.test(value);
@@ -335,9 +346,9 @@ export async function GET(req) {
         if (listing === "fit" || listing === "creator") filter.listing = listing;
 
         if (slug) {
-            const projection = fields ? fields.split(",").map(f => f.trim()).join(" ") : undefined;
+            const projection = undefined;
             const product = await Product.findOne({ slug }).select(projection).lean();
-            if (!product) {
+            if (!productForViewer(product, userId, isAdmin)) {
                 return NextResponse.json({ product: null }, { status: 200 });
             }
 
@@ -362,7 +373,7 @@ export async function GET(req) {
             return NextResponse.json(
                 {
                     product: {
-                        ...product,
+                        ...productForViewer(product, userId, isAdmin),
                         creatorDisplayName,
                         creatorSlug,
                     },
@@ -375,7 +386,7 @@ export async function GET(req) {
 
         // Handle search query
         if (search) {
-            filter.name = { $regex: search, $options: 'i' }; // Case-insensitive search
+            filter.name = { $regex: search.slice(0, 120).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: 'i' }; // Case-insensitive search
         }
 
         // Determine whether caller is using legacy numeric categories or new name-based ids
@@ -478,16 +489,16 @@ export async function GET(req) {
             filter.flaggedForModeration = { $ne: true };
         }
 
-        const projection = fields ? fields.split(",").map(f => f.trim()).join(" ") : undefined;
+        const projection = undefined;
 
         let query = Product.find(filter).select(projection);
 
         // Apply limit if provided
         if (limit) {
-            query = query.limit(Number(limit));
+            query = query.limit(Math.min(200, Math.max(1, Number(limit) || 20)));
         }
 
-        const products = await query.lean();
+        const products = (await query.lean()).map(product => productForViewer(product, userId, isAdmin)).filter(Boolean);
 
         if (productId) {
             return NextResponse.json({ product: products[0] || null }, { status: 200 });
@@ -527,18 +538,19 @@ export async function DELETE(req) {
         }
 
         for (const img of product.images || []) {
-            await deleteS3Object(img);
+            await deleteS3Object(img, product.creatorUserId);
         }
 
         for (const model of product.paidAssets || []) {
-            await deleteS3Object(model);
+            await deleteS3Object(model, product.creatorUserId);
         }
 
         if (product.viewableModel) {
-            await deleteS3Object(product.viewableModel);
+            await deleteS3Object(product.viewableModel, product.creatorUserId);
         }
 
-        await Product.findByIdAndDelete(productId);
+        const deleted = await Product.findByIdAndDelete(productId);
+        if (deleted) await releaseProductQuota(product.creatorUserId);
 
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (err) {

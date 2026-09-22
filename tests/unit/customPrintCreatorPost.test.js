@@ -14,6 +14,11 @@ const state = vi.hoisted(() => ({
     notifyThrows: false,
 }))
 
+vi.mock('@/lib/creatorQuota', () => ({
+    reserveCreatorQuota: vi.fn(async () => ({ release: vi.fn() })),
+    releaseProductQuota: vi.fn(),
+    CreatorQuotaError: class CreatorQuotaError extends Error {},
+}))
 vi.mock('@/lib/authenticate', () => {
     class UnauthorizedError extends Error { }
     return {
@@ -145,11 +150,30 @@ describe('PUT /api/custom-print for a creator job', () => {
         },
     })
 
+    it('does not let a customer set their own price or mark a request paid', async () => {
+        state.existing = existingCreatorJob()
+        expect((await put({ requestId: 'req-1', pricing: { printFee: 0 } })).status).toBe(403)
+        expect((await put({ requestId: 'req-1', status: 'paid' })).status).toBe(403)
+        expect(state.existing.save).not.toHaveBeenCalled()
+    })
+
+    it('requires store review before changing an already quoted model', async () => {
+        state.existing = { ...existingCreatorJob(), status: 'quoted', printFee: 40 }
+        expect((await put({ requestId: 'req-1', printConfiguration: { isConfigured: true } })).status).toBe(409)
+        expect(state.existing.save).not.toHaveBeenCalled()
+    })
+
+    it('rejects a model key from another customer', async () => {
+        state.existing = existingCreatorJob()
+        expect((await put({ requestId: 'req-1', modelFile: { s3Key: 'models/user_victim/a.stl' } })).status).toBe(400)
+        expect(state.existing.save).not.toHaveBeenCalled()
+    })
+
     it('stores a sanitised customerNote and notifies the creator once configured', async () => {
         state.existing = existingCreatorJob()
         const res = await put({
             requestId: 'req-1',
-            modelFile: { originalName: 'a.stl', s3Key: 'models/a.stl', fileSize: 10 },
+            modelFile: { originalName: 'a.stl', s3Key: 'models/user_buyer/a.stl', fileSize: 10 },
             customerNote: '  Need it by <Friday> $$ ',
             printConfiguration: { generic: { material: 'PLA', colour: 'Red' }, isConfigured: true },
         })
@@ -162,12 +186,12 @@ describe('PUT /api/custom-print for a creator job', () => {
 
     it('does not notify a FIT job, and survives a failing notification', async () => {
         state.existing = { ...existingCreatorJob(), creatorUserId: null }
-        await put({ requestId: 'req-1', printConfiguration: { isConfigured: true }, modelFile: { originalName: 'a.stl', s3Key: 'k' } })
+        await put({ requestId: 'req-1', printConfiguration: { isConfigured: true }, modelFile: { originalName: 'a.stl', s3Key: 'models/user_buyer/a.stl' } })
         expect(state.notifyCalls).toHaveLength(0)
 
         state.existing = existingCreatorJob()
         state.notifyThrows = true
-        const res = await put({ requestId: 'req-1', printConfiguration: { isConfigured: true }, modelFile: { originalName: 'a.stl', s3Key: 'k' } })
+        const res = await put({ requestId: 'req-1', printConfiguration: { isConfigured: true }, modelFile: { originalName: 'a.stl', s3Key: 'models/user_buyer/a.stl' } })
         expect(res.status).toBe(200)
         expect(state.notifyCalls).toHaveLength(1)
     })

@@ -1,5 +1,5 @@
 import { cache } from 'react'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { connectToDatabase } from '@/lib/db'
 import Product from '@/models/Product'
 import Event from '@/models/Event'
@@ -40,11 +40,13 @@ async function getGlobalDiscountRules() {
 
 export async function generateMetadata({ params }) {
     const { slug } = await params
+    if (slug === 'custom-print-request') return { title: 'Request a 3D print | Fix It Today' }
     return productMetadata(await getProduct(slug))
 }
 
 export default async function ProductPageLayout({ params }) {
     const { slug } = await params
+    if (slug === 'custom-print-request') permanentRedirect('/prints/request')
     const product = await getProduct(slug)
     if (!product) notFound()
 

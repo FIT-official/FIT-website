@@ -22,8 +22,8 @@ import { computeGeometryMetrics } from "@/lib/quoting/geometryVolume"
 import { estimateMaterialGrams } from "@/lib/quoting/materialEstimate"
 import { estimateCreatorPrintPrice } from "@/lib/creatorPrintService/estimate"
 
-const FIT_ACCEPT = ".glb,.gltf,.stl,.obj,.3mf,.zip"
-const MAX_FILE_BYTES = 50 * 1024 * 1024
+const FIT_ACCEPT = ".stl,.obj,.3mf"
+const MAX_FILE_BYTES = 25 * 1024 * 1024
 const MAX_NOTE = 1000
 
 const fileExt = (name) => String(name || "").split(".").pop().toLowerCase()
@@ -123,8 +123,12 @@ function CustomPrintRequestForm() {
     setMeasure(null)
     setError("")
     if (!f) return
+    if (!["stl", "obj", "3mf"].includes(fileExt(f.name))) {
+      setError("Please use an STL, OBJ, or 3MF file.")
+      return
+    }
     if (f.size > MAX_FILE_BYTES) {
-      setError("File too large. Maximum size is 50MB.")
+      setError("File too large. Maximum size is 25MB.")
       return
     }
     if (isCreatorFlow) {
@@ -174,7 +178,7 @@ function CustomPrintRequestForm() {
       const signedRes = await fetch("/api/upload/models", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name, contentType }),
+        body: JSON.stringify({ filename: file.name, contentType, fileSize: file.size }),
       })
       const signed = await signedRes.json().catch(() => ({}))
       if (!signedRes.ok || !signed.url) throw new Error(signed.error || "Failed to get upload URL")
@@ -315,8 +319,8 @@ function CustomPrintRequestForm() {
           />
           <p className="mt-1 text-xs text-gray-500">
             {isCreatorFlow
-              ? `Accepted: ${service.acceptedFormats.map((x) => x.toUpperCase()).join(", ")}. Max build ${service.maxBuildMm.x} x ${service.maxBuildMm.y} x ${service.maxBuildMm.z} mm. Max 50MB.`
-              : "Supported: GLB, GLTF, STL, OBJ, 3MF, or ZIP containing these. Max 50MB."}
+              ? `Accepted: ${service.acceptedFormats.map((x) => x.toUpperCase()).join(", ")}. Max build ${service.maxBuildMm.x} x ${service.maxBuildMm.y} x ${service.maxBuildMm.z} mm. Max 25MB.`
+              : "Supported: STL, OBJ, or 3MF. Max 25MB."}
           </p>
         </div>
 

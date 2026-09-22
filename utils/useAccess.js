@@ -25,7 +25,7 @@ export default function useAccess() {
         }
         async function checkAccess() {
             const priceId = subscription?.priceId;
-            const { isAdmin: adminFlag, canAccessDashboard } = await getEntitlements({ role, priceId, priceIds: stripePriceIds });
+            const { isAdmin: adminFlag, canAccessDashboard } = await getEntitlements({ role, priceId, priceIds: stripePriceIds, planId: subscription?.planId, status: subscription?.status });
             setIsAdmin(adminFlag);
             setCanAccess(!!canAccessDashboard);
             setLoading(false);

@@ -90,16 +90,16 @@ export default function CustomPrintUpload({ cartItem, onUploadComplete, onDelete
     const onDrop = useCallback(async (acceptedFiles) => {
         if (acceptedFiles.length === 0) return;
         const file = acceptedFiles[0];
-        const allowedExtensions = ['.stl', '.obj', '.glb', '.gltf', '.3mf', '.ply'];
+        const allowedExtensions = ['.stl', '.obj', '.3mf'];
         const fileName = file.name.toLowerCase();
         const isValidFile = allowedExtensions.some(ext => fileName.endsWith(ext));
         if (!isValidFile) {
-            showToast('Invalid file type. Please upload a 3D model file (.stl, .obj, .glb, .gltf, .3mf, .ply)', 'error');
+            showToast('Invalid file type. Please upload a 3D model file (.stl, .obj, .3mf)', 'error');
             return;
         }
-        const maxSize = 50 * 1024 * 1024;
+        const maxSize = 25 * 1024 * 1024;
         if (file.size > maxSize) {
-            showToast('File too large. Maximum size is 50MB', 'error');
+            showToast('File too large. Maximum size is 25MB', 'error');
             return;
         }
         setUploading(true);
@@ -112,7 +112,7 @@ export default function CustomPrintUpload({ cartItem, onUploadComplete, onDelete
             const signedRes = await fetch('/api/upload/models', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ filename: file.name, contentType })
+                body: JSON.stringify({ filename: file.name, contentType, fileSize: file.size })
             });
             if (!signedRes.ok) {
                 const error = await signedRes.json();
@@ -171,7 +171,7 @@ export default function CustomPrintUpload({ cartItem, onUploadComplete, onDelete
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         accept: {
-            'model/*': ['.stl', '.obj', '.glb', '.gltf', '.3mf', '.ply']
+            'model/*': ['.stl', '.obj', '.3mf']
         },
         maxFiles: 1,
         disabled: uploading || !!uploadedFile

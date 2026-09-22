@@ -1,161 +1,83 @@
 'use client'
-// Tier selection + payment step for subscription changes. Restyled onto the
-// account design tokens; the Stripe/Clerk flow is unchanged (card token into
-// unsafeMetadata, then POST /api/user/subscription/edit).
 import { useUser } from '@clerk/nextjs'
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
-import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { useStripePriceIds } from '@/utils/StripePriceIdsContext'
+import { useEffect, useState, Suspense } from 'react'
+import { useUserSubscription } from '@/utils/UserSubscriptionContext'
 import { useToast } from '../General/ToastProvider'
-import Tier from '../AuthComponents/Tier'
-import { IoMdLock } from 'react-icons/io'
-import { GoChevronLeft } from 'react-icons/go'
 
 function SubscriptionDetailsInner() {
-    const stripe = useStripe();
-    const elements = useElements();
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const { user, isLoaded } = useUser();
-    const [loading, setLoading] = useState(false);
-    const [step, setStep] = useState('tier_selection');
-    const { showToast } = useToast();
-
-    // Use shared Stripe price IDs context
-    const { stripePriceIds, loading: priceIdsLoading, error: priceIdsError } = useStripePriceIds();
-    // Use shared subscription context
-    const { subscription, loading: subLoading, error: subError } = require('@/utils/UserSubscriptionContext').useUserSubscription();
-    const [priceId, setPriceId] = useState('');
-
-    // Preselect tier from query param (used by /creators/join pricing cards)
+    const stripe = useStripe()
+    const elements = useElements()
+    const { user, isLoaded } = useUser()
+    const params = useSearchParams()
+    const { refresh } = useUserSubscription()
+    const { showToast } = useToast()
+    const [plans, setPlans] = useState([])
+    const [priceId, setPriceId] = useState('')
+    const [busy, setBusy] = useState(false)
+    const [error, setError] = useState('')
+    const [agreed, setAgreed] = useState(false)
     useEffect(() => {
-        const incoming = (searchParams?.get('priceId') || '').trim();
-        if (!incoming) return;
-        // Only preselect if user isn't already subscribed to a tier.
-        if (subLoading) return;
-        if (subscription?.priceId) return;
-        setPriceId(incoming);
-    }, [searchParams, subLoading, subscription?.priceId]);
-
-    // Set priceId from subscription context when loaded
-    useEffect(() => {
-        if (!subLoading && subscription) {
-            setPriceId(subscription?.priceId || '');
-        } else if (!subLoading && subscription === null) {
-            setPriceId('');
-        }
-    }, [subLoading, subscription]);
-
-    const updateSubscription = async (e) => {
-        e.preventDefault();
-        if (!isLoaded && !user) return null
-        let cardToken = ''
-        setLoading(true);
-
+        let cancelled = false
+        fetch('/api/stripe/plans').then(r => r.ok ? r.json() : Promise.reject())
+            .then(data => {
+                if (cancelled) return
+                const paid = (data.plans || []).filter(p => p.id !== 'free' && p.available && p.priceId)
+                setPlans(paid)
+                const incoming = params?.get('priceId')
+                setPriceId(paid.some(p => p.priceId === incoming) ? incoming : '')
+            }).catch(() => { if (!cancelled) setError('Plans could not be loaded. Please try again later.') })
+        return () => { cancelled = true }
+    }, [params])
+    const selected = plans.find(p => p.priceId === priceId)
+    async function submit(e) {
+        e.preventDefault()
+        if (!isLoaded || !user || !stripe || !elements || !selected || !agreed || busy) return
+        setBusy(true)
+        setError('')
         try {
-            if (!elements || !stripe) {
-                setLoading(false);
-                return
-            }
-            const cardEl = elements.getElement(CardElement)
-            if (cardEl) {
-                const tokenRes = await stripe?.createToken(cardEl)
-                cardToken = tokenRes?.token?.id || ''
-            }
-            await user.update({
-                unsafeMetadata: {
-                    ...user.unsafeMetadata,
-                    cardToken: cardToken,
-                    priceId: priceId
-                }
+            const card = elements.getElement(CardElement)
+            if (!card) throw new Error('Please enter your card details.')
+            const token = await stripe.createToken(card)
+            if (token.error || !token.token?.id) throw new Error(token.error?.message || 'Card details could not be verified.')
+            const res = await fetch('/api/user/subscription/edit', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ priceId, cardToken: token.token.id }),
             })
-            const res = await fetch('/api/user/subscription/edit', { method: 'POST' })
-            if (res.ok) {
-                const data = await res.json()
-                setLoading(false);
-                router.push(`/account/subscription/success?id=${data?.subscriptionId}`)
-            } else {
-                setLoading(false);
-            }
-        } catch (error) {
-            setLoading(false);
-            showToast('Error updating subscription: ' + error, 'error');
-        }
+            const data = await res.json()
+            if (data.requires_action && data.clientSecret) {
+                const result = await stripe.confirmCardPayment(data.clientSecret)
+                if (result.error) throw new Error(result.error.message)
+                const fresh = await refresh()
+                if (fresh?.planId !== selected.id || !['active', 'trialing'].includes(fresh?.status)) {
+                    throw new Error('Payment is still being confirmed. Refresh your account shortly; do not submit another payment.')
+                }
+            } else if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Payment is not complete. Your current plan remains available.')
+            } else { await refresh() }
+            await user.reload()
+            showToast('Your subscription is active.', 'success')
+            setAgreed(false)
+        } catch (err) { setError(err.message || 'Unable to update subscription.') }
+        finally { setBusy(false) }
     }
-
-    if (priceIdsLoading) return <p className="text-[13px] dash-soft text-center py-8">Loading subscription tiers...</p>;
-    if (priceIdsError) return <p className="text-[13px] font-medium text-[var(--dash-bad)] text-center py-8">Failed to load subscription tiers.</p>;
-    if (!stripePriceIds) return <p className="text-[13px] dash-soft text-center py-8">No subscription tiers found.</p>;
-
-    return (
-        <div className="flex flex-col items-center w-full max-w-lg mx-auto py-6">
-            <h2 className="dash-section mb-1">Choose your subscription tier</h2>
-            <p className="text-[13px] dash-soft mb-6 text-center">
-                Select a new tier to update your subscription.
-            </p>
-            <form className="flex flex-col gap-4 w-full" onSubmit={updateSubscription}>
-                {step === 'tier_selection' && (
-                    <>
-                        <div className="flex flex-col gap-2 w-full">
-                            <Tier value={stripePriceIds.tier1} priceId={priceId} setPriceId={setPriceId} />
-                            <Tier value={stripePriceIds.tier2} priceId={priceId} setPriceId={setPriceId} />
-                            <Tier value={stripePriceIds.tier3} priceId={priceId} setPriceId={setPriceId} />
-                            <Tier value={stripePriceIds.tier4} priceId={priceId} setPriceId={setPriceId} />
-                            <Tier value="" priceId={priceId} setPriceId={setPriceId} />
-                        </div>
-                        <button
-                            className="dash-hoverable inline-flex items-center justify-center rounded-full bg-[var(--dash-ink)] text-[var(--dash-canvas)] px-4 py-2.5 text-[13px] font-medium w-full mt-2 cursor-pointer disabled:opacity-50 active:scale-[0.97]"
-                            type="button"
-                            onClick={() => setStep('payment')}
-                            disabled={!priceId}
-                        >
-                            Select & Continue
-                        </button>
-                    </>
-                )}
-                {step === 'payment' && (
-                    <>
-                        <div className="flex flex-col w-full gap-2 py-6 px-5 border border-[var(--dash-line)] rounded-[var(--dash-r-card)] bg-[var(--dash-card)] items-center">
-                            <label className="flex items-center text-[13px] font-medium w-full">
-                                <IoMdLock className="mr-2" size={16} />
-                                Card details
-                            </label>
-                            <p className="text-[13px] dash-soft w-full">
-                                This card will be used for automatic billing of your subscription.
-                            </p>
-                            <CardElement
-                                className="w-full mt-3 px-4 py-2.5 border border-[var(--dash-line)] rounded-[var(--dash-r-inner)] bg-[var(--dash-card)]"
-                                required={priceId !== ''}
-                            />
-                            <p className="text-[12px] font-medium dash-soft w-full mt-2 text-center">
-                                You can cancel or change your payment method at anytime.
-                            </p>
-                        </div>
-                        <div className="flex flex-col items-center justify-between w-full gap-3">
-                            <button
-                                type="submit"
-                                className="dash-hoverable inline-flex items-center justify-center rounded-full bg-[var(--dash-ink)] text-[var(--dash-canvas)] px-4 py-2.5 text-[13px] font-medium w-full cursor-pointer disabled:opacity-50 active:scale-[0.97]"
-                                disabled={loading}
-                            >
-                                {loading ? 'Signing Up...' : 'Sign Up'}
-                            </button>
-                            <button
-                                type="button"
-                                className="dash-hoverable inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium dash-soft hover:text-[var(--dash-ink)] cursor-pointer"
-                                onClick={() => setStep('tier_selection')}
-                            >
-                                <GoChevronLeft size={16} /> Go Back
-                            </button>
-                        </div>
-                    </>
-                )}
-            </form>
-        </div>
-    );
-
+    return <form onSubmit={submit} className="flex flex-col gap-4 py-5">
+        <h2 className="text-lg font-semibold">Choose your plan</h2>
+        {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+        {plans.map(plan => <label key={plan.id} className="border rounded-xl p-4 flex gap-3 items-start">
+            <input type="radio" name="plan" checked={priceId === plan.priceId} onChange={() => { setPriceId(plan.priceId); setAgreed(false) }} />
+            <span><strong>{plan.name}  /  S${plan.amount}/month</strong><br /><span className="text-sm">{plan.limits.products} listings  /  {plan.limits.monthlyPrintRequests} requests/month</span></span>
+        </label>)}
+        {!plans.length && <p className="text-sm">Paid plans are not available yet. Your Free storefront is ready to use.</p>}
+        {selected && <>
+            <p className="text-sm">Card details</p>
+            <CardElement className="border rounded-lg p-4" options={{ hidePostalCode: true }} />
+            <label className="flex gap-2 text-sm"><input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} />I agree to S${selected.amount} monthly recurring billing until I cancel. Changes to an existing plan may create a prorated charge. Printing and delivery are separate.</label>
+            <button className="formBlackButton justify-center disabled:opacity-50" disabled={busy || !isLoaded || !stripe || !agreed} type="submit">{busy ? 'Confirming payment...' : 'Confirm subscription'}</button>
+        </>}
+    </form>
 }
-
-// No need to wrap with provider, already provided at app root
-export default SubscriptionDetailsInner;
+export default function SubscriptionDetails() {
+    return <Suspense fallback={<p>Loading plans...</p>}><SubscriptionDetailsInner /></Suspense>
+}

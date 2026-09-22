@@ -9,6 +9,7 @@ import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import CreatorPrintService from '@/models/CreatorPrintService'
 import { notifyCreatorNewRequest } from '@/lib/notifications/creatorPrint'
 import { sanitizeString } from '@/utils/validate'
+import { reserveCreatorQuota, CreatorQuotaError } from '@/lib/creatorQuota'
 
 export const runtime = "nodejs"
 
@@ -81,6 +82,8 @@ async function getCustomPrintBasePrice() {
 // Optional JSON `{ creatorUserId }` routes the job to a creator's print service
 // (must exist and be enabled, else 400); otherwise Fix It Today handles it.
 export async function POST(req) {
+    let reservation;
+    let created = false;
     try {
         const { userId } = await authenticate(req);
         const body = await readOptionalJsonBody(req);
@@ -109,6 +112,7 @@ export async function POST(req) {
                 // Get base price from custom print product
                 // Creator jobs carry no platform base price: the creator's quote is the whole price.
                 const basePrice = creatorUserId ? 0 : await getCustomPrintBasePrice();
+                if (creatorUserId) reservation = await reserveCreatorQuota(creatorUserId, "monthlyPrintRequests");
                 const requestId = uuidv4();
                 const customPrintRequest = new CustomPrintRequest({
                         requestId,
@@ -125,6 +129,8 @@ export async function POST(req) {
 
 
     } catch (error) {
+        if (reservation && !created) await reservation.release().catch(console.error);
+        if (error instanceof CreatorQuotaError) return NextResponse.json({ error: error.message }, { status: error.status });
         if (error instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("[POST /api/custom-print] Error:", error);
         if (error && error.errors) {
@@ -157,7 +163,7 @@ export async function DELETE(req) {
             return NextResponse.json({ error: "Request not found" }, { status: 404 });
         }
         // Delete S3 model if present
-        if (request.modelFile && request.modelFile.s3Key) {
+        if (request.modelFile?.s3Key?.startsWith(`models/${userId}/`)) {
             try {
                 const s3 = new S3Client({ region: process.env.AWS_REGION, credentials: { accessKeyId: process.env.AWS_ACCESS_KEY_ID, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY } });
                 await s3.send(new DeleteObjectCommand({
@@ -292,10 +298,22 @@ export async function PUT(req) {
             });
         }
         const originalStatus = request.status;
+        const draftStatuses = ['pending_upload', 'pending_config', 'configured'];
+        if (pricing || (status && !draftStatuses.includes(status))) {
+            return NextResponse.json({ error: "Pricing and payment status are managed by the store" }, { status: 403 });
+        }
+        if (!draftStatuses.includes(originalStatus) && (modelFile || printConfiguration || status)) {
+            return NextResponse.json({ error: "Contact the store to change a request after it has been quoted" }, { status: 409 });
+        }
         let explicitStatus = status;
 
         // Update fields
         if (modelFile) {
+            const previousKey = request.modelFile?.s3Key;
+            if (typeof modelFile.s3Key !== 'string' ||
+                (modelFile.s3Key !== previousKey && !modelFile.s3Key.startsWith(`models/${userId}/`))) {
+                return NextResponse.json({ error: "The model must belong to your account" }, { status: 400 });
+            }
             request.modelFile = {
                 originalName: modelFile.originalName,
                 s3Key: modelFile.s3Key,
@@ -313,14 +331,6 @@ export async function PUT(req) {
         if (explicitStatus) {
             request.status = explicitStatus;
         }
-        if (pricing) {
-            if (pricing.basePrice !== undefined) request.basePrice = pricing.basePrice;
-            if (pricing.printFee !== undefined) request.printFee = pricing.printFee;
-            if (pricing.deliveryFee !== undefined) request.deliveryFee = pricing.deliveryFee;
-            if (pricing.totalAmount !== undefined) request.totalAmount = pricing.totalAmount;
-            if (pricing.currency !== undefined) request.currency = pricing.currency;
-        }
-
         // Enforce that status is never "behind" the presence of model/config.
         const minStatus = computeMinimumStatusFromData(request);
         const currentRank = STATUS_RANK[request.status];

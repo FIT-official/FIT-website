@@ -1,57 +1,32 @@
-import Stripe from 'stripe'
-import { auth, clerkClient } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
+import { getCreatorEntitlements } from '@/lib/creatorEntitlements';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
-export async function GET(req) {
+export async function GET() {
     try {
         const { userId } = await auth();
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
-        const client = await clerkClient();
-        const user = await client.users.getUser(userId);
-
-        if (!user) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
-        }
-
-        if (!user.publicMetadata.stripeSubscriptionId) {
-            return NextResponse.json({ error: 'No subscription found' }, { status: 404 });
-        }
-
-        const subscription = await stripe.subscriptions.retrieve(user.publicMetadata.stripeSubscriptionId);
-
-        let isUpdatePending = false;
-        if (subscription.pending_update) {
-            isUpdatePending = true;
-        }
-
+        if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const { plan, planId, isAdmin, subscription, status } = await getCreatorEntitlements(userId);
+        const item = subscription?.items?.data?.[0];
         return NextResponse.json({
-            priceId: subscription.items.data[0].price.id,
-            status: subscription.status,
-            current_period_end: subscription.current_period_end,
-            created: subscription.created,
-            cancelled_at: subscription.canceled_at,
-            price: subscription.items.data[0].price.unit_amount,
-            pending_update: isUpdatePending,
-            days_until_due: subscription.days_until_due,
-            trial_end: subscription.trial_end,
-            pending_update_expiry: subscription.pending_update ? subscription.pending_update.expires_at : null,
-            role: user.publicMetadata.role || "user",
+            plan, planId, limits: plan.limits, status,
+            subscriptionId: subscription?.id || null,
+            priceId: item?.price?.id || null,
+            price: item?.price?.unit_amount ?? 0,
+            currency: item?.price?.currency?.toUpperCase() || plan.currency,
+            interval: item?.price?.recurring?.interval || plan.interval,
+            current_period_end: subscription?.current_period_end ?? item?.current_period_end ?? null,
+            created: subscription?.created || null,
+            cancelled_at: subscription?.canceled_at || null,
+            cancel_at_period_end: Boolean(subscription?.cancel_at_period_end),
+            pending_update: Boolean(subscription?.pending_update),
+            pending_update_expiry: subscription?.pending_update?.expires_at || null,
+            days_until_due: subscription?.days_until_due ?? null,
+            trial_end: subscription?.trial_end || null,
+            role: isAdmin ? 'admin' : 'user',
         });
-
     } catch (error) {
-        // A subscription id that no longer exists in the connected Stripe
-        // account (e.g. stale metadata after a test-data reset) means "no
-        // subscription", not a server failure.
-        if (error?.code === 'resource_missing') {
-            console.warn('Stale stripeSubscriptionId in Clerk metadata — treating as no subscription');
-            return NextResponse.json({ error: 'No subscription found' }, { status: 404 });
-        }
-        console.error('Error fetching subscription:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error('Unable to read subscription:', error?.code || error?.type || 'provider_error');
+        return NextResponse.json({ error: 'Unable to load your subscription.' }, { status: error.status || 500 });
     }
 }

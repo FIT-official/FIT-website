@@ -1,15 +1,14 @@
 'use client'
-import { useUser } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
+import { useUser, useSession } from '@clerk/nextjs'
 import { completeOnboarding, updateRoleFromStripe } from './_actions'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Logo from '@/components/Logo'
 import posthog from 'posthog-js'
 
 
 function Onboarding() {
     const { user, isLoaded } = useUser()
-    const router = useRouter()
+    const { session } = useSession()
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
 
@@ -17,24 +16,24 @@ function Onboarding() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        if (!isLoaded) return
+        if (!isLoaded || !user || loading) return
         setLoading(true)
         setError(null)
-        const formData = new FormData(e.currentTarget)
-        const res = await completeOnboarding(formData)
-        if (res?.error) {
-            setError(res.error)
-            setLoading(false)
-            return
-        }
-        if (res?.message) {
-            // Update role from Stripe if subscription exists
+        try {
+            const formData = new FormData(e.currentTarget)
+            const res = await completeOnboarding(formData)
+            if (res?.error || !res?.message) throw new Error(res?.error || 'Unable to complete account setup.')
             if (user.publicMetadata?.stripeSubscriptionId) {
                 await updateRoleFromStripe(user.publicMetadata.stripeSubscriptionId)
             }
-            posthog.capture('onboarding_completed')
-            // Use window.location for a hard redirect to ensure middleware gets fresh session
-            window.location.href = '/'
+            try { posthog.capture('onboarding_completed') } catch { /* Analytics is optional. */ }
+            await user.reload()
+            await session?.getToken({ skipCache: true })
+            window.location.href = '/dashboard/shop'
+        } catch (err) {
+            setError(err?.message || 'Unable to complete account setup. Please try again.')
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -45,7 +44,7 @@ function Onboarding() {
                 height={200}
                 className='flex'
             />
-            <h1>Welcome{isLoaded && user.firstName ? ", " + user?.firstName : ""}.</h1>
+            <h1>Welcome{isLoaded && user?.firstName ? ", " + user.firstName : ""}.</h1>
             <p className='w-1/2 md:w-1/3 text-center text-pretty inline'>
                 <span className='font-medium inline'>FixItTodaySG</span> is a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration. We&apos;re excited to have you on board!
             </p>

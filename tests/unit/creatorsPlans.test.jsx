@@ -1,91 +1,38 @@
-// /creators/join pricing page: plans come from Stripe via /api/stripe/plans
-// and fill the tier cards; the free card and current-plan state are always
-// there. (/creators itself is now the public creator directory.)
-import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import Creators from '@/app/creators/join/Creators'
-
-const subState = { subscription: null }
-vi.mock('@/utils/UserSubscriptionContext', () => ({
-    useUserSubscription: () => subState,
-}))
-
-const PLANS = [
-    {
-        tier: 'tier1', priceId: 'price_basic', name: 'Maker', description: 'Solo sellers',
-        amount: 12, currency: 'SGD', interval: 'month', popular: false,
-        features: ['Sell up to 20 products'],
-    },
-    {
-        tier: 'tier2', priceId: 'price_pro', name: 'Studio', description: 'Growing shops',
-        amount: 29, currency: 'SGD', interval: 'month', popular: true,
-        features: [],
-    },
-]
-
+const state = vi.hoisted(() => ({ signedIn: false, subscription: null }))
+vi.mock('@clerk/nextjs', () => ({ useUser: () => ({ isSignedIn: state.signedIn }) }))
+vi.mock('@/utils/UserSubscriptionContext', () => ({ useUserSubscription: () => state }))
 beforeEach(() => {
-    subState.subscription = null
-    global.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ plans: PLANS }) }))
+    state.signedIn = false; state.subscription = null
+    global.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ plans: [
+        { id: 'standard', available: true, priceId: 'p_standard' },
+        { id: 'pro', available: true, priceId: 'p_pro' },
+    ] }) }))
 })
 afterEach(() => { cleanup(); vi.restoreAllMocks() })
-
-describe('Creators pricing page', () => {
-    it('renders a card per Stripe plan with name, price and interval', async () => {
+describe('Creator plans', () => {
+    it('shows exactly Free, Standard and Pro with explicit SGD prices and real limits', async () => {
         render(<Creators />)
-        expect(await screen.findByText('Maker')).toBeInTheDocument()
-        expect(screen.getByText('Studio')).toBeInTheDocument()
-        expect(screen.getByText('$12')).toBeInTheDocument()
-        expect(screen.getByText('$29')).toBeInTheDocument()
-        expect(screen.getAllByText('/month')).toHaveLength(2)
+        expect(screen.getAllByRole('heading', { level: 2 }).map(n => n.textContent)).toEqual(['Free','Standard','Pro'])
+        expect(screen.getByText('S$39')).toBeInTheDocument()
+        expect(screen.getByText('S$99')).toBeInTheDocument()
+        expect(screen.getByText('10 print requests each month')).toBeInTheDocument()
+        expect(screen.getByText(/arrange payment directly/)).toBeInTheDocument()
+        expect((await screen.findByRole('link', { name: 'Choose Standard' })).getAttribute('href')).toBe('/sign-up')
+        expect(screen.queryByText('Current plan')).not.toBeInTheDocument()
     })
-
-    it('always shows the free Shopper card and marks it current with no subscription', async () => {
+    it('links a signed-in creator only to a verified available price', async () => {
+        state.signedIn = true
         render(<Creators />)
-        await screen.findByText('Maker')
-        expect(screen.getByText('Shopper')).toBeInTheDocument()
-        expect(screen.getByText('Current plan')).toBeInTheDocument()
+        expect((await screen.findByRole('link', { name:'Choose Pro' })).getAttribute('href')).toBe('/account/subscription?priceId=p_pro')
+        expect(screen.getByRole('link', {name:'Open your storefront'})).toHaveAttribute('href','/dashboard/shop')
     })
-
-    it('links each paid plan into the subscription flow with its priceId', async () => {
+    it('keeps free account creation available when billing fails', async () => {
+        global.fetch = vi.fn().mockRejectedValue(new Error('offline'))
         render(<Creators />)
-        await screen.findByText('Maker')
-        const links = screen.getAllByRole('link', { name: 'Choose plan' })
-        const hrefs = links.map((l) => l.getAttribute('href'))
-        expect(hrefs).toContain('/account/subscription?priceId=price_basic')
-        expect(hrefs).toContain('/account/subscription?priceId=price_pro')
-    })
-
-    it('marks the subscribed plan current and honours the popular flag', async () => {
-        subState.subscription = { priceId: 'price_pro' }
-        render(<Creators />)
-        await screen.findByText('Studio')
-        expect(screen.getByText('Current plan')).toBeInTheDocument()
-        expect(screen.getByText('Most popular')).toBeInTheDocument()
-    })
-
-    it('uses Stripe features when present and honest entitlement fallbacks when not', async () => {
-        render(<Creators />)
-        await screen.findByText('Maker')
-        expect(screen.getByText('Sell up to 20 products')).toBeInTheDocument()
-        // Studio has no marketing features -> entitlement-derived fallback.
-        expect(screen.getByText('Creator dashboard with sales and orders')).toBeInTheDocument()
-    })
-
-    it('shows an unavailable note when the plans API fails', async () => {
-        global.fetch = vi.fn(async () => ({ ok: false, json: async () => ({}) }))
-        render(<Creators />)
-        expect(await screen.findByText(/Creator plans are unavailable/)).toBeInTheDocument()
-    })
-})
-
-describe('Creators pricing salience', () => {
-    it('paints the priciest plan ink and the runner-up sun', async () => {
-        render(<Creators />)
-        await screen.findByText('Maker')
-        // Studio ($29) is the priciest -> flat black card; Maker ($12) -> yellow.
-        const studioCard = screen.getByText('Studio').closest('div.relative')
-        const makerCard = screen.getByText('Maker').closest('div.relative')
-        expect(studioCard.className).toContain('bg-textColor')
-        expect(makerCard.className).toContain('bg-amber-300')
+        expect(screen.getByRole('link', {name:'Start free'})).toHaveAttribute('href','/sign-up')
+        expect(screen.queryByRole('link', {name:'Choose Standard'})).not.toBeInTheDocument()
     })
 })

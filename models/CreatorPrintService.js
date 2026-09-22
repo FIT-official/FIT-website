@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 // the service everywhere and makes new requests for it fail with 400.
 // Validation bounds mirror lib/creatorPrintService/validate.js — the API is
 // the authority, the schema is a backstop.
-export const ACCEPTED_FORMATS = ["stl", "3mf", "obj", "step"];
+export const ACCEPTED_FORMATS = ["stl", "3mf", "obj"];
 
 const MaterialSchema = new mongoose.Schema(
     {

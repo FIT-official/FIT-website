@@ -12,7 +12,7 @@ import { money } from '@/components/Account/accountUi'
 import { useToast } from '@/components/General/ToastProvider'
 import { ConfirmDialog, DashCard, DottedRow, StatusPill, SkeletonTile } from '@/components/dashboard-ui'
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) : null
 
 import { useUserSubscription } from '@/utils/UserSubscriptionContext'
 
@@ -23,22 +23,26 @@ function Subscription() {
     const [updating, setUpdating] = useState(false)
     const [confirmCancelOpen, setConfirmCancelOpen] = useState(false)
     const [cancelBusy, setCancelBusy] = useState(false)
-    const { subscription, loading: subLoading, error: subError } = useUserSubscription()
+    const { subscription, loading: subLoading, error: subError, refresh } = useUserSubscription()
     const { showToast } = useToast()
 
     const updateSubButton = () => setUpdating((prev) => !prev)
 
     const cancelSubButton = async () => {
         setCancelBusy(true)
+        try {
         const res = await fetch('/api/user/subscription/cancel', { method: 'POST' })
         if (res.ok) {
-            showToast('Subscription cancelled successfully', 'success')
-            // No need to manually update state, context will refresh
+            showToast('Renewal cancelled. Your plan continues until the end of the billing period.', 'success')
+            await refresh()
         } else {
             showToast('Failed to cancel subscription', 'error')
         }
+        } catch { showToast('Unable to cancel renewal. Please try again.', 'error') }
+        finally {
         setCancelBusy(false)
         setConfirmCancelOpen(false)
+        }
     }
 
     const header = (
@@ -70,9 +74,9 @@ function Subscription() {
                     >
                         Back to plan
                     </button>
-                    <Elements stripe={stripePromise}>
+                    {stripePromise ? <Elements stripe={stripePromise}>
                         <SubscriptionDetails />
-                    </Elements>
+                    </Elements> : <p>Paid plans are not available yet. Your Free storefront is ready to use.</p>}
                 </DashCard>
             ) : hasSubscription ? (
                 <DashCard title="Your plan" className="max-w-xl">
@@ -86,7 +90,7 @@ function Subscription() {
                                     <DottedRow label="Price">S${money(subscription.price / 100)} per cycle</DottedRow>
                                 )}
                                 {subscription.current_period_end && (
-                                    <DottedRow label="Renews">
+                                    <DottedRow label={subscription.cancel_at_period_end ? 'Ends' : 'Renews'}>
                                         {dayjs(subscription.current_period_end * 1000).format('D MMM YYYY')}
                                     </DottedRow>
                                 )}
@@ -119,9 +123,9 @@ function Subscription() {
                     </div>
                 </DashCard>
             ) : (
-                <DashCard title="No subscription" className="max-w-xl">
+                <DashCard title="Free" className="max-w-xl">
                     <p className="text-[13px] dash-soft">
-                        You are currently on the free tier. Upgrade to access premium features.
+                        Your storefront includes 3 product listings and 10 print requests each month. Upgrade when you need more capacity.
                     </p>
                     <button
                         type="button"

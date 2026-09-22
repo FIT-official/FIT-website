@@ -1,4 +1,5 @@
 import Creator from "./Creator";
+import { productForViewer } from "@/lib/productAccess";
 import { connectToDatabase } from "@/lib/db";
 import Product from "@/models/Product";
 import { auth, clerkClient } from "@clerk/nextjs/server";
@@ -137,6 +138,6 @@ export default async function CreatorPage(props) {
 		shop,
 	};
 
-	const safeProducts = serializeForClient(products || []);
+	const safeProducts = serializeForClient((products || []).map(product => productForViewer(product, viewerUserId, isAdmin)).filter(Boolean));
 	return <Creator creator={creator} products={safeProducts} canEdit={isAdmin} />;
 }

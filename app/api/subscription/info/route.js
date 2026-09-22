@@ -1,31 +1,23 @@
-import { NextResponse } from "next/server";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2023-10-16",
-});
+import { NextResponse } from 'next/server';
+import { getCreatorStripe, getPlanForPriceId, isPriceValidForPlan } from '@/lib/creatorEntitlements';
 
 export async function GET(req) {
+    const priceId = new URL(req.url).searchParams.get('priceId');
+    const plan = getPlanForPriceId(priceId);
+    if (!plan) return NextResponse.json({ error: 'Unknown subscription plan' }, { status: 400 });
     try {
-        const { searchParams } = new URL(req.url);
-        const priceId = searchParams.get("priceId");
-        if (!priceId) {
-            return NextResponse.json({ error: "Missing priceId" }, { status: 400 });
+        const price = await getCreatorStripe().prices.retrieve(priceId, { expand: ['product'] });
+        if (!isPriceValidForPlan(price, plan)) {
+            return NextResponse.json({ error: 'This plan is not available for payment.' }, { status: 503 });
         }
-
-        const priceObject = await stripe.prices.retrieve(priceId);
-        const prodID = priceObject.product;
-        const productObject = await stripe.products.retrieve(prodID);
-
         return NextResponse.json({
-            productName: productObject.name || "",
-            price: (priceObject.unit_amount / 100).toFixed(2),
-            interval: priceObject.recurring.interval || "",
-            description: productObject.description || "",
-            features: productObject.marketing_features || [],
+            planId: plan.id, productName: plan.name, price: plan.amount.toFixed(2),
+            currency: plan.currency, interval: plan.interval,
+            description: `${plan.limits.products} listings and ${plan.limits.monthlyPrintRequests} customer print requests per month.`,
+            features: plan.features.map(name => ({ name })), limits: plan.limits,
         });
     } catch (error) {
-        console.error("Failed to fetch Stripe price info:", error);
-        return NextResponse.json({ error: "Failed to fetch product info" }, { status: 500 });
+        console.error('Subscription catalogue unavailable:', error?.code || error?.type || 'provider_error');
+        return NextResponse.json({ error: 'Subscription information is temporarily unavailable.' }, { status: 503 });
     }
 }

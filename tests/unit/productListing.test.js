@@ -11,6 +11,11 @@ const state = vi.hoisted(() => ({
     findFilter: null,
 }))
 
+vi.mock('@/lib/creatorQuota', () => ({
+    reserveCreatorQuota: vi.fn(async () => ({ release: vi.fn() })),
+    releaseProductQuota: vi.fn(),
+    CreatorQuotaError: class CreatorQuotaError extends Error {},
+}))
 vi.mock('@clerk/nextjs/server', () => ({
     auth: vi.fn(async () => ({ userId: state.userId })),
     clerkClient: vi.fn(async () => ({
@@ -72,6 +77,22 @@ beforeEach(() => {
 })
 
 describe('POST /api/product listing', () => {
+    it('binds ownership to the signed-in creator and ignores forged sales and moderation fields', async () => {
+        const { POST } = await import('@/app/api/product/route')
+        const res = await POST(json('http://t/api/product', 'POST', productBody({ creatorUserId: 'user_victim', sales: [{ price: 500 }], flaggedForModeration: false })))
+        expect(res.status).toBe(201)
+        expect(state.created.creatorUserId).toBe('user_creator')
+        expect(state.created).not.toHaveProperty('sales')
+        expect(state.created).not.toHaveProperty('flaggedForModeration')
+    })
+
+    it('rejects another account model asset before creating a listing', async () => {
+        const { POST } = await import('@/app/api/product/route')
+        const res = await POST(json('http://t/api/product', 'POST', productBody({ paidAssets: ['models/user_other/a.stl'] })))
+        expect(res.status).toBe(400)
+        expect(state.created).toBeNull()
+    })
+
     it("creator posts are listing='creator' even when the client claims 'fit'", async () => {
         const { POST } = await import('@/app/api/product/route')
         const res = await POST(json('http://t/api/product', 'POST', productBody({ listing: 'fit' })))
@@ -89,6 +110,21 @@ describe('POST /api/product listing', () => {
 })
 
 describe('PUT /api/product listing', () => {
+    it('preserves an existing URL when only price or stock changes', async () => {
+        state.prevProduct = { _id: 'p1', name: 'Vase', slug: 'vase', creatorUserId: 'user_creator', listing: 'creator', images: ['k1'], paidAssets: [] }
+        const { PUT } = await import('@/app/api/product/route')
+        const res = await PUT(json('http://t/api/product?productId=p1', 'PUT', productBody({ stock: 10, slug: 'forged-url' })))
+        expect(res.status).toBe(200)
+        expect(state.updated.slug).toBe('vase')
+    })
+
+    it('rejects a foreign product before updates or asset deletion', async () => {
+        state.prevProduct = { _id: 'p1', creatorUserId: 'user_other', listing: 'creator', images: ['k1'], paidAssets: [] }
+        const { PUT } = await import('@/app/api/product/route')
+        const res = await PUT(json('http://t/api/product?productId=p1', 'PUT', productBody()))
+        expect(res.status).toBe(403)
+        expect(state.updated).toBeNull()
+    })
     it('keeps the previous listing regardless of the client value', async () => {
         state.prevProduct = { _id: 'p1', creatorUserId: 'user_creator', listing: 'creator', images: ['k1'], paidAssets: [] }
         const { PUT } = await import('@/app/api/product/route')
