@@ -37,6 +37,13 @@ describe('Creator plans', () => {
         render(<Creators />)
         expect(screen.getByRole('link', {name:'Start free'})).toHaveAttribute('href','/sign-up')
         expect(screen.queryByRole('link', {name:'Choose Standard'})).not.toBeInTheDocument()
+        expect(await screen.findAllByText('Unable to check paid plans. Please refresh this page.')).toHaveLength(2)
+    })
+    it('does not claim paid sign-up is closed while checking prices', () => {
+        global.fetch = vi.fn(() => new Promise(() => {}))
+        render(<Creators />)
+        expect(screen.getAllByText('Checking paid plan availability…')).toHaveLength(2)
+        expect(screen.queryByText('Paid sign-up opens soon. You can start with Free.')).not.toBeInTheDocument()
     })
     it('shows the full annual charge, savings and unchanged monthly allowance', async () => {
         render(<Creators />)
