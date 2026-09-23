@@ -9,11 +9,17 @@ export default function Creators() {
     const { isSignedIn } = useUser()
     const { subscription } = useUserSubscription() || {}
     const [catalogue, setCatalogue] = useState([])
+    const [fabricationUploadsAvailable, setFabricationUploadsAvailable] = useState(false)
     const [interval, setInterval] = useState('month')
     useEffect(() => {
         let cancelled = false
         fetch('/api/stripe/plans').then(r => r.ok ? r.json() : Promise.reject())
-            .then(d => { if (!cancelled) setCatalogue(d.plans || []) })
+            .then(d => {
+                if (!cancelled) {
+                    setCatalogue(d.plans || [])
+                    setFabricationUploadsAvailable(d.capabilities?.fabricationUploadsAvailable === true)
+                }
+            })
             .catch(() => { if (!cancelled) setCatalogue([]) })
         return () => { cancelled = true }
     }, [])
@@ -47,7 +53,7 @@ export default function Creators() {
                         <li>{plan.limits.monthlyPrintRequests} {dark ? 'print and custom service' : 'print'} requests each month</li>
                         <li>Page editor and print-service settings</li>
                         <li>Quotes, job tracking and customer messages</li>
-                        {dark && <><li>Unlimited custom service varieties</li><li>Your own materials, finishes and priced options</li><li>Name and image personalisation with editable text areas</li><li>Area, volume, length, per-item or manual quotes</li></>}
+                        {dark && <><li>Unlimited custom service varieties</li><li>Your own materials, finishes and priced options</li><li>{fabricationUploadsAvailable ? 'Name and image personalisation with editable text areas' : 'Image personalisation (not available yet)'}</li><li>Area, volume, length, per-item or manual quotes</li></>}
                     </ul>
                     {free ? <Link className="formBlackButton justify-center" href={isSignedIn ? '/dashboard/shop' : '/sign-up'}>{isSignedIn ? 'Open your storefront' : 'Start free'}</Link>
                     : current ? <Link className="formBlackButton justify-center" href="/account/subscription">Manage plan</Link>
@@ -61,7 +67,7 @@ export default function Creators() {
             <p>Monthly request limits reset on the first day of each calendar month (UTC). Existing jobs remain available when you reach a limit. Cancel renewal from your account; your paid allowance continues until the billing period ends. A lower plan limits new work without deleting existing records.</p>
             <p>Prices are in Singapore dollars. Yearly plans charge the full amount upfront and renew each year until cancelled. The annual price equals 10 monthly payments, saving 16.7% compared with 12 monthly payments. Request allowances still reset monthly. One account operates each storefront. No equipment, repairs, customer acquisition or guaranteed earnings are included.</p>
             <p>Pro lets you build a catalogue around what your shop makes: laser cutting, engraving, name tags, dot peen marking, SLS, metal printing, CNC, sewing, casting and your own services. Add material variants, finishes, mounting choices and priced extras. There is no plan cap on service varieties; the 500-request allowance, file limits and upload safeguards still apply.</p>
-            <p>Custom service estimates require provider confirmation. Image text placement is an editable preview, and customers enter the real dimensions. Existing service jobs remain available after a downgrade; accepting new custom service requests requires Pro.</p>
+            <p>Custom service estimates require provider confirmation. {fabricationUploadsAvailable ? 'Image text placement is an editable preview, and customers enter the real dimensions.' : 'Image uploads and visual text placement are not available yet. Describe customisation in your request notes.'} Existing service jobs remain available after a downgrade; accepting new custom service requests requires Pro.</p>
         </div>
     </main>
 }
