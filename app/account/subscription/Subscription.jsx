@@ -24,6 +24,7 @@ function Subscription() {
     const params = useSearchParams()
     const requestedPriceId = params?.get('priceId')
     const [updating, setUpdating] = useState(() => Boolean(requestedPriceId))
+    const [upgradeToPro, setUpgradeToPro] = useState(false)
     useEffect(() => { if (requestedPriceId) setUpdating(true) }, [requestedPriceId])
     const [confirmCancelOpen, setConfirmCancelOpen] = useState(false)
     const [cancelBusy, setCancelBusy] = useState(false)
@@ -79,7 +80,7 @@ function Subscription() {
                         Back to plan
                     </button>
                     {stripePromise ? <Elements stripe={stripePromise}>
-                        <SubscriptionDetails />
+                        <SubscriptionDetails initialPlanId={upgradeToPro ? 'pro' : undefined} />
                     </Elements> : <p>Paid plans are not available yet. Your Free storefront is ready to use.</p>}
                 </DashCard>
             ) : hasSubscription ? (
@@ -112,6 +113,7 @@ function Subscription() {
                                 : 'You are currently subscribed. You can edit or cancel your subscription at any time.'}
                         </p>
                         <div className="flex flex-wrap gap-2">
+                            {subscription.planId === 'standard' && <button type="button" onClick={() => { setUpgradeToPro(true); setUpdating(true) }} className="dash-hoverable inline-flex items-center rounded-full bg-[var(--dash-ink)] text-[var(--dash-canvas)] px-4 py-2 text-[13px] font-medium cursor-pointer">Upgrade to Pro</button>}
                             <button
                                 type="button"
                                 onClick={updateSubButton}
@@ -130,9 +132,11 @@ function Subscription() {
                     </div>
                 </DashCard>
             ) : (
-                <DashCard title="Free" className="max-w-xl">
+                <DashCard title={subscription?.source === 'complimentary' ? `${subscription.plan?.name || 'Creator'} access` : 'Free'} className="max-w-xl">
                     <p className="text-[13px] dash-soft">
-                        Your storefront includes 3 product listings and 10 print requests each month. Upgrade when you need more capacity.
+                        {subscription?.source === 'complimentary'
+                            ? `Your complimentary access includes ${subscription.limits.products.toLocaleString()} product listings and ${subscription.limits.monthlyPrintRequests.toLocaleString()} requests each month, until ${dayjs(subscription.complimentaryExpiry).format('D MMM YYYY')}.`
+                            : 'Your storefront includes 3 product listings and 10 print requests each month. Upgrade when you need more capacity.'}
                     </p>
                     <button
                         type="button"

@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Store checks', robots: { index: false, follow: false } };
 
-const pricePlans = CREATOR_BILLING_PLANS.filter(plan => plan.id !== 'free');
+const pricePlans = CREATOR_BILLING_PLANS.filter(plan => plan.amount > 0);
 const priceKey = plan => `${plan.id}${plan.interval === 'year' ? 'Yearly' : ''}`;
 const priceIssues = {
     price_not_configured: 'Connect this subscription price before offering this billing option.',

@@ -35,27 +35,29 @@ export default function Creators() {
                 <input className="sr-only" type="radio" name="billing-period" value={value} checked={interval === value} onChange={() => setInterval(value)} />{label}
             </label>)}
         </fieldset>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             {CREATOR_PLANS.map(plan => {
                 const free = plan.id === 'free'
-                const billing = getCreatorBillingPlan(plan.id, free ? 'month' : interval)
+                const student = plan.id === 'student'
+                const billing = getCreatorBillingPlan(plan.id, plan.amount === 0 ? 'month' : interval)
                 const configured = catalogue.find(p => p.id === plan.id && (p.interval || 'month') === billing.interval)
                 const current = isSignedIn && subscription?.planId === plan.id && (subscription?.interval || 'month') === billing.interval
                 const dark = plan.id === 'pro'
                 return <section key={plan.id} className={`relative rounded-2xl border p-7 flex flex-col gap-5 ${dark ? 'bg-textColor text-white border-textColor' : plan.id === 'standard' ? 'bg-amber-300 border-amber-300' : 'bg-white border-borderColor'}`}>
                     <h2 className="text-xl font-semibold" style={{ color: 'inherit' }}>{plan.name}</h2>
-                    <div><p><span className="text-4xl font-semibold">S${billing.amount}</span><span className="text-sm">{free ? ' · always free' : ` / ${billing.interval}`}</span></p>
-                        {!free && interval === 'year' && <p className="mt-2 text-sm">S${billing.monthlyEquivalent.toFixed(2)}/month equivalent<br />Save S${billing.annualSavings} each year · billed yearly</p>}
+                    <div><p><span className="text-4xl font-semibold">S${billing.amount}</span><span className="text-sm">{student ? ' · verified students' : free ? ' · always free' : ` / ${billing.interval}`}</span></p>
+                        {plan.amount > 0 && interval === 'year' && <p className="mt-2 text-sm">S${billing.monthlyEquivalent.toFixed(2)}/month equivalent<br />Save S${billing.annualSavings} each year · billed yearly</p>}
                     </div>
                     <ul className="space-y-3 text-sm flex-1">
                         <li>One creator storefront</li>
-                        <li>{plan.limits.products} product listings</li>
+                        <li>{plan.limits.products.toLocaleString()} product listings</li>
                         <li>{plan.limits.monthlyPrintRequests} {dark ? 'print and custom service' : 'print'} requests each month</li>
                         <li>Page editor and print-service settings</li>
                         <li>Quotes, job tracking and customer messages</li>
                         {dark && <><li>Unlimited custom service varieties</li><li>Your own materials, finishes and priced options</li><li>{fabricationUploadsAvailable ? 'Name and image personalisation with editable text areas' : 'Image personalisation (not available yet)'}</li><li>Area, volume, length, per-item or manual quotes</li></>}
                     </ul>
                     {free ? <Link className="formBlackButton justify-center" href={isSignedIn ? '/dashboard/shop' : '/sign-up'}>{isSignedIn ? 'Open your storefront' : 'Start free'}</Link>
+                    : student ? current ? <Link className="formBlackButton justify-center" href="/account/subscription">Manage plan</Link> : <a className="formBlackButton justify-center" href="mailto:fixittoday.contact@gmail.com?subject=Student%20creator%20access">Ask about student access</a>
                     : current ? <Link className="formBlackButton justify-center" href="/account/subscription">Manage plan</Link>
                     : configured?.available && configured.priceId ? <Link className={`formBlackButton justify-center ${dark ? '!bg-white !text-textColor' : ''}`} href={`${isSignedIn ? '/account/subscription' : '/sign-up'}?priceId=${encodeURIComponent(configured.priceId)}`}>Choose {plan.name}</Link>
                     : <p className="text-sm">Paid sign-up opens soon. You can start with Free.</p>}
@@ -63,9 +65,9 @@ export default function Creators() {
             })}
         </div>
         <div className="max-w-3xl mx-auto mt-10 space-y-4 text-sm text-lightColor">
-            <p>Subscriptions cover the software. Printing, materials, delivery and payment processing charges are separate. For creator print jobs, agree the quote and arrange payment directly with your customer; FIT does not automatically pay out these jobs.</p>
+            <p>Subscriptions cover the software. Printing, materials, delivery and payment processing charges are separate. For creator print jobs, agree the quote and arrange payment directly with your customer; FIT does not automatically pay out these jobs. Student access is free for verified students and expires on the date shown in their account.</p>
             <p>Monthly request limits reset on the first day of each calendar month (UTC). Existing jobs remain available when you reach a limit. Cancel renewal from your account; your paid allowance continues until the billing period ends. A lower plan limits new work without deleting existing records.</p>
-            <p>Prices are in Singapore dollars. Yearly plans charge the full amount upfront and renew each year until cancelled. The annual price equals 10 monthly payments, saving 16.7% compared with 12 monthly payments. Request allowances still reset monthly. One account operates each storefront. No equipment, repairs, customer acquisition or guaranteed earnings are included.</p>
+            <p>Prices are in Singapore dollars. Yearly paid plans charge the full amount upfront and renew each year until cancelled. The annual price equals 10 monthly payments, saving 16.7% compared with 12 monthly payments. Request allowances still reset monthly. One account operates each storefront. No equipment, repairs, customer acquisition or guaranteed earnings are included.</p>
             <p>Pro lets you build a catalogue around what your shop makes: laser cutting, engraving, name tags, dot peen marking, SLS, metal printing, CNC, sewing, casting and your own services. Add material variants, finishes, mounting choices and priced extras. There is no plan cap on service varieties; the 500-request allowance, file limits and upload safeguards still apply.</p>
             <p>Custom service estimates require provider confirmation. {fabricationUploadsAvailable ? 'Image text placement is an editable preview, and customers enter the real dimensions.' : 'Image uploads and visual text placement are not available yet. Describe customisation in your request notes.'} Existing service jobs remain available after a downgrade; accepting new custom service requests requires Pro.</p>
         </div>

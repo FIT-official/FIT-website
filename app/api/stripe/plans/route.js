@@ -10,7 +10,7 @@ export async function GET() {
     const ids = await getStripePriceIds()
     const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null
     const plans = await Promise.all(CREATOR_BILLING_PLANS.map(async (plan) => {
-        if (plan.id === 'free') return { ...plan, available: true, priceId: null }
+        if (plan.amount === 0) return { ...plan, available: true, priceId: null }
         const priceId = ids[`${plan.id}${plan.interval === 'year' ? 'Yearly' : ''}`]
         if (!stripe || !priceId) return { ...plan, available: false, priceId: null }
         try {

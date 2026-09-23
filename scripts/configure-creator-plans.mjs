@@ -5,7 +5,7 @@ import Stripe from 'stripe'
 import { CREATOR_BILLING_PLANS } from '../lib/creatorPlans.js'
 const apply = process.argv.includes('--apply')
 const live = process.argv.includes('--live')
-const paid = CREATOR_BILLING_PLANS.filter(p => p.id !== 'free')
+const paid = CREATOR_BILLING_PLANS.filter(p => p.amount > 0)
 const frequency = plan => plan.interval === 'year' ? 'yearly' : 'monthly'
 const lookupKey = plan => `fit_creator_${plan.id}_sgd_${frequency(plan)}_v1`
 const environmentKey = plan => `STRIPE_${plan.id.toUpperCase()}_${frequency(plan).toUpperCase()}_PRICE_ID`

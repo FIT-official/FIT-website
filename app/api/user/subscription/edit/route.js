@@ -48,6 +48,7 @@ export async function POST(req) {
         // Legacy selections in unsafe metadata are untrusted, just like request bodies.
         const priceId = body.priceId ?? user.unsafeMetadata?.priceId;
         const cardToken = body.cardToken ?? user.unsafeMetadata?.cardToken;
+        const prorationDate = body.prorationDate;
         const requestedPlan = getPlanForPriceId(priceId);
         if (!requestedPlan) return NextResponse.json({ error: 'Choose an available Standard or Pro plan.' }, { status: 400 });
         const stripe = getCreatorStripe();
@@ -119,6 +120,10 @@ export async function POST(req) {
             await saveSubscription(subscription);
             return NextResponse.json(resultFor(subscription, requestedPlan, priceId));
         }
+        if (subscription && prorationDate !== undefined && (!Number.isSafeInteger(prorationDate) ||
+            prorationDate > Math.floor(Date.now() / 1000) || prorationDate < Math.floor(Date.now() / 1000) - 300)) {
+            return NextResponse.json({ error: 'Upgrade amount expired. Please refresh the preview.' }, { status: 409 });
+        }
         if (typeof cardToken !== 'string' || !/^tok_[A-Za-z0-9_]{1,220}$/.test(cardToken)) {
             return NextResponse.json({ error: 'Valid card details are required.' }, { status: 400 });
         }
@@ -153,6 +158,7 @@ export async function POST(req) {
             subscription = await stripe.subscriptions.update(subscription.id, {
                 items: [{ id: subscription.items.data[0].id, price: priceId, quantity: 1 }],
                 proration_behavior: 'always_invoice', payment_behavior: 'pending_if_incomplete',
+                ...(prorationDate !== undefined ? { proration_date: prorationDate } : {}),
                 expand: ['latest_invoice.payment_intent'],
             }, { idempotencyKey: `fit-plan:${userId}:${cardToken}` });
         } else {

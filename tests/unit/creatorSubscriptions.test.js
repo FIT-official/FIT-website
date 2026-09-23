@@ -86,7 +86,7 @@ beforeEach(() => {
 describe('creator entitlement contract', () => {
     it('provides one usable free plan and two bounded SGD monthly plans', () => {
         expect(CREATOR_PLANS.map(({ id, amount, limits }) => [id, amount, limits.products, limits.monthlyPrintRequests])).toEqual([
-            ['free', 0, 3, 10], ['standard', 39, 25, 100], ['pro', 99, 100, 500],
+            ['free', 0, 3, 10], ['student', 0, 10, 30], ['standard', 39, 50, 100], ['pro', 99, 5000, 500],
         ]);
     });
     it('allows an authenticated free creator without a Stripe credential', async () => {
@@ -264,6 +264,18 @@ describe('subscription checkout', () => {
         }, { idempotencyKey: 'fit-plan:user_owner:tok_valid' });
         expect(mocks.subscriptionCreate).not.toHaveBeenCalled();
     });
+    it('reuses the preview proration time for a Standard to Pro upgrade', async () => {
+        user.publicMetadata = { stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_current' };
+        mocks.pricesRetrieve.mockResolvedValue(price('price_pro'));
+        mocks.subscriptionUpdate.mockResolvedValue(subscription({ items: { data: [{ id: 'si_current', price: price('price_pro') }] } }));
+        const prorationDate = Math.floor(Date.now() / 1000) - 10;
+        expect((await edit(request({ priceId: 'price_pro', cardToken: 'tok_valid', prorationDate }))).status).toBe(200);
+        expect(mocks.subscriptionUpdate).toHaveBeenCalledWith('sub_current', expect.objectContaining({ proration_date: prorationDate,
+            proration_behavior: 'always_invoice', payment_behavior: 'pending_if_incomplete' }), expect.anything());
+        mocks.subscriptionUpdate.mockClear();
+        expect((await edit(request({ priceId: 'price_pro', cardToken: 'tok_valid', prorationDate: prorationDate - 600 }))).status).toBe(409);
+        expect(mocks.subscriptionUpdate).not.toHaveBeenCalled();
+    });
     it('does not confirm an interval switch when Stripe still returns the previous price', async () => {
         user.publicMetadata = { stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_current' };
         mocks.pricesRetrieve.mockResolvedValue(price('price_standard_yearly'));
@@ -323,11 +335,11 @@ describe('subscription lifecycle and routing', () => {
         mocks.subscriptionRetrieve.mockResolvedValue(subscription({ items: { data: [{ price: price('price_standard_yearly') }] } }));
         expect(await (await info(new Request('https://fit.example/api/subscription/info?priceId=price_standard_yearly'))).json()).toMatchObject({
             planId: 'standard', price: '390.00', interval: 'year', monthlyEquivalent: 32.5, annualSavings: 78,
-            limits: { products: 25, monthlyPrintRequests: 100 },
+            limits: { products: 50, monthlyPrintRequests: 100 },
         });
         expect(await (await read()).json()).toMatchObject({
             planId: 'standard', price: 39000, priceId: 'price_standard_yearly', interval: 'year', monthlyEquivalent: 32.5, annualSavings: 78,
-            limits: { products: 25, monthlyPrintRequests: 100 },
+            limits: { products: 50, monthlyPrintRequests: 100 },
         });
     });
     it('ignores cancellation of an older subscription for the same customer', async () => {
@@ -384,7 +396,7 @@ describe('subscription lifecycle and routing', () => {
         expect(mocks.subscriptionUpdate).toHaveBeenCalledWith('sub_current', { cancel_at_period_end: true });
         mocks.subscriptionRetrieve.mockResolvedValue({ ...annual, cancel_at_period_end: true });
         expect(await getCreatorEntitlements(user.id)).toMatchObject({ planId: 'pro', status: 'active',
-            plan: { interval: 'year', limits: { products: 100, monthlyPrintRequests: 500 } } });
+            plan: { interval: 'year', limits: { products: 5000, monthlyPrintRequests: 500 } } });
         mocks.subscriptionRetrieve.mockResolvedValue({ ...annual, status: 'canceled' });
         expect(await getCreatorEntitlements(user.id)).toMatchObject({ planId: 'free' });
     });

@@ -15,12 +15,13 @@ beforeEach(() => {
 })
 afterEach(() => { cleanup(); vi.restoreAllMocks() })
 describe('Creator plans', () => {
-    it('shows exactly Free, Standard and Pro with explicit SGD prices and real limits', async () => {
+    it('shows Free, Student, Standard and Pro with clear eligibility and limits', async () => {
         render(<Creators />)
-        expect(screen.getAllByRole('heading', { level: 2 }).map(n => n.textContent)).toEqual(['Free','Standard','Pro'])
+        expect(screen.getAllByRole('heading', { level: 2 }).map(n => n.textContent)).toEqual(['Free','Student','Standard','Pro'])
         expect(screen.getByText('S$39')).toBeInTheDocument()
         expect(screen.getByText('S$99')).toBeInTheDocument()
         expect(screen.getByText('10 print requests each month')).toBeInTheDocument()
+        expect(screen.getByRole('link', { name: 'Ask about student access' })).toHaveAttribute('href', 'mailto:fixittoday.contact@gmail.com?subject=Student%20creator%20access')
         expect(screen.getByText(/arrange payment directly/)).toBeInTheDocument()
         expect((await screen.findByRole('link', { name: 'Choose Standard' })).getAttribute('href')).toBe('/sign-up?priceId=p_standard')
         expect(screen.queryByText('Current plan')).not.toBeInTheDocument()
