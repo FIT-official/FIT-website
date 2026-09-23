@@ -26,6 +26,7 @@ import { reserveCreatorQuota, releaseProductQuota, quotaPeriod } from '@/lib/cre
 import CustomPrintRequest from '@/models/CustomPrintRequest'
 import { getCreatorEntitlements } from '@/lib/creatorEntitlements'
 import { getCreatorBillingPlan } from '@/lib/creatorPlans'
+import { LEGACY_CREATOR_PLANS } from '@/lib/legacyCreatorPlans'
 
 beforeEach(() => { state.counters.clear(); state.existingProducts = 0; state.existingRequests = 0; state.existingFabrication = 0; state.isAdmin = false; state.limit = 3; vi.clearAllMocks() })
 
@@ -60,6 +61,18 @@ describe('creator plan allowances', () => {
     state.isAdmin = true
     await reserveCreatorQuota('admin', 'products')
     expect(state.counters.has('admin:products')).toBe(false)
+  })
+  it('preserves verified legacy product/request allowances without creating a new quota', async () => {
+    const legacy = { isAdmin: false, plan: LEGACY_CREATOR_PLANS[0] }
+    getCreatorEntitlements.mockResolvedValueOnce(legacy).mockResolvedValueOnce(legacy)
+    state.existingProducts = 250
+    state.existingRequests = 750
+    const product = await reserveCreatorQuota('legacy-provider', 'products')
+    const request = await reserveCreatorQuota('legacy-provider', 'monthlyPrintRequests')
+    await product.release()
+    await request.release()
+    expect(state.counters.size).toBe(0)
+    expect(CustomPrintRequest.countDocuments).not.toHaveBeenCalled()
   })
   it('bootstraps one shared allowance from 3D and fabrication requests', async () => {
     state.existingRequests = 6

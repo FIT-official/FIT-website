@@ -8,6 +8,7 @@ import Order from '@/models/Order';
 import CustomPrintRequest from '@/models/CustomPrintRequest';
 import DigitalProductTransaction from '@/models/DigitalProductTransaction';
 import { checkoutPlain, checkoutOrderItem, validateCheckoutPayment, removePurchasedCartItems } from '@/lib/checkoutSnapshot';
+import { isLegacyCheckout, recordLegacyCheckoutPayment } from '@/lib/legacyCheckoutReconciliation';
 import { sendEmail } from '@/lib/email';
 import { buildNewSaleEmail, buildOrderConfirmationEmail } from '@/lib/email/templates/transactional';
 import { notifyCustomPrintEvent } from '@/lib/notifications/customPrint';
@@ -70,8 +71,11 @@ export async function POST(req) {
         const database = await connectToDatabase();
         const checkout = await CheckoutSession.findOne({ sessionId: payment.id });
         if (!checkout) return NextResponse.json({ error: 'Checkout session not found' }, { status: 404 });
-        if (checkout.status === 'completed' || (checkout.snapshotVersion !== 1 && checkout.processed)) {
+        if (checkout.status === 'completed') {
             return NextResponse.json({ received: true, duplicate: true });
+        }
+        if (isLegacyCheckout(checkout)) {
+            return NextResponse.json(await recordLegacyCheckoutPayment(event, checkout));
         }
         const invalid = validateCheckoutPayment(payment, checkout);
         if (invalid) return NextResponse.json({ error: invalid, reconciliationRequired: true }, { status: 409 });

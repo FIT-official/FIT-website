@@ -58,6 +58,7 @@ function RevenueSplitBar({ productCents, shippingCents }) {
 export default function CreatorPayments() {
     const { showToast } = useToast()
     const [sessions, setSessions] = useState([])
+    const [paymentReviews, setPaymentReviews] = useState([])
     const [fetchedAt, setFetchedAt] = useState(null)
     const [sessionsLoading, setSessionsLoading] = useState(false)
     const [sessionFilter, setSessionFilter] = useState('pending')
@@ -272,10 +273,13 @@ export default function CreatorPayments() {
                 throw new Error('Failed to fetch sessions')
             }
             const data = await response.json()
-            setSessions(data.sessions)
+            const received = Array.isArray(data.sessions) ? data.sessions : []
+            const regular = received.filter(session => session.status !== 'reconciliation_required')
+            setPaymentReviews(received.filter(session => session.status === 'reconciliation_required'))
+            setSessions(regular)
 
             // Enrich sessions with product and user data
-            const enriched = await enrichSessionsWithData(data.sessions)
+            const enriched = await enrichSessionsWithData(regular)
             setEnrichedSessions(enriched)
             setFetchedAt(Date.now())
         } catch (error) {
@@ -563,6 +567,7 @@ export default function CreatorPayments() {
     }
 
     const markSessionAsProcessed = async (sessionId, processed) => {
+        if (paymentReviews.some(session => session.sessionId === sessionId)) return
         try {
             const response = await fetch('/api/admin/sessions', {
                 method: 'PATCH',
@@ -727,6 +732,19 @@ export default function CreatorPayments() {
                 </button>
                 <FreshnessStamp at={fetchedAt} />
             </GlassBar>
+
+            {paymentReviews.length > 0 && <section aria-label="Payments requiring review" className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950">
+                <h2 className="font-semibold">Payments requiring review ({paymentReviews.length})</h2>
+                <p className="mt-1 text-sm">Payment was received, but the original order details need reconciliation. These receipts are excluded from payout totals and exports. Review the payment and original records before arranging fulfilment or a refund.</p>
+                <div className="mt-3 flex flex-col gap-3">{paymentReviews.map(session => <article key={session.sessionId} className="rounded-lg border border-amber-200 bg-white p-3">
+                    <p className="font-semibold">Captured: {String(session.reconciliation?.currency || '').toUpperCase()} {money(session.reconciliation?.amountTotalCents || 0)}</p>
+                    <p className="mt-1 break-all text-xs">Session: {session.sessionId}</p>
+                    <p className="mt-1 break-all text-xs">Customer: {session.userId}</p>
+                    {session.reconciliation?.recordedAt && <p className="mt-1 text-xs">Recorded {new Date(session.reconciliation.recordedAt).toLocaleString()}</p>}
+                    {(session.reconciliation?.amountMismatch || session.reconciliation?.currencyMismatch) && <p className="mt-2 text-sm font-medium">The captured amount or currency differs from the original checkout record.</p>}
+                    <p className="mt-2 text-sm">Under review. Marking this payment processed is disabled.</p>
+                </article>)}</div>
+            </section>}
 
             {/* Summary strip — volume is the view's ink hero (§5.9) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">

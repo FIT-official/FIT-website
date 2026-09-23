@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
 import Product from "@/models/Product";
+import CheckoutSession from "@/models/CheckoutSession";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 
@@ -64,11 +65,11 @@ export async function GET(req) {
         if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         await connectToDatabase();
         const user = await User.findOne({ userId }, { orderHistory: 1, contact: 1, _id: 0 });
-        if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
         const { searchParams } = new URL(req.url);
         const orderId = searchParams.get('orderId');
 
         if (orderId) {
+            if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
             const order = user.orderHistory.id(orderId);
             if (!order) {
                 return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -94,8 +95,18 @@ export async function GET(req) {
             }, { status: 200 });
         }
 
-        const orders = user.orderHistory ?? [];
-        return NextResponse.json({ orders }, { status: 200 });
+        const reviews = await CheckoutSession.find({ userId, status: 'reconciliation_required', 'reconciliation.paymentStatus': 'paid' }, {
+            _id: 0, sessionId: 1, status: 1, 'reconciliation.amountTotalCents': 1,
+            'reconciliation.currency': 1, 'reconciliation.recordedAt': 1,
+        }).sort({ 'reconciliation.recordedAt': -1 }).limit(100).lean();
+        const paymentReviews = reviews.map(review => ({
+            sessionId: review.sessionId, status: review.status,
+            receipt: { amountTotalCents: review.reconciliation.amountTotalCents,
+                currency: review.reconciliation.currency, recordedAt: review.reconciliation.recordedAt },
+        }));
+        if (!user && !paymentReviews.length) return NextResponse.json({ error: "User not found" }, { status: 404 });
+        const orders = user?.orderHistory ?? [];
+        return NextResponse.json({ orders, paymentReviews }, { status: 200 });
     } catch (error) {
         console.error("Error fetching user orders:", error);
         return NextResponse.json({ error: "Failed to fetch orders: " + error.message }, { status: 500 });

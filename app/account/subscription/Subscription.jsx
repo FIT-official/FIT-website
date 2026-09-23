@@ -90,6 +90,7 @@ function Subscription() {
                                 {statusText(subscription.status)}
                             </StatusPill>
                             <div className="mt-3">
+                                {subscription.plan?.name && <DottedRow label="Plan">{subscription.plan.name}</DottedRow>}
                                 {Number.isFinite(subscription.price) && (
                                     <DottedRow label="Price">S${money(subscription.price / 100)} per {subscription.interval === 'year' ? 'year' : subscription.interval === 'month' ? 'month' : 'cycle'}</DottedRow>
                                 )}
@@ -106,7 +107,9 @@ function Subscription() {
                             </div>
                         </div>
                         <p className="text-[13px] dash-soft">
-                            You are currently subscribed. You can edit or cancel your subscription at any time.
+                            {subscription.planId === 'legacy'
+                                ? 'Your existing plan and current price are retained. Changing to Standard or Pro replaces this plan; you can also cancel renewal.'
+                                : 'You are currently subscribed. You can edit or cancel your subscription at any time.'}
                         </p>
                         <div className="flex flex-wrap gap-2">
                             <button

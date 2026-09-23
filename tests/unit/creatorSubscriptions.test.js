@@ -26,8 +26,10 @@ vi.mock('@/models/User', () => ({ default: {} }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 
 import { CREATOR_PLANS, getCreatorPlan, getCreatorBillingPlan } from '@/lib/creatorPlans';
+import { LEGACY_CREATOR_PLANS } from '@/lib/legacyCreatorPlans';
 import { getCreatorEntitlements, getPlanForSubscription, getPlanForPriceId, isPriceValidForPlan } from '@/lib/creatorEntitlements';
 import { requireCreator } from '@/lib/requireCreator';
+import { requireFabricationPro } from '@/lib/fabrication/serverAccess';
 import { POST as edit } from '@/app/api/user/subscription/edit/route';
 import { POST as webhook } from '@/app/api/user/subscription/webhook/route';
 import { POST as cancel } from '@/app/api/user/subscription/cancel/route';
@@ -106,6 +108,47 @@ describe('creator entitlement contract', () => {
     it('preserves minimum access for active legacy plans', () => {
         expect(getPlanForSubscription(subscription({ items: { data: [{ price: { id: 'price_legacy' } }] } })).id).toBe('free');
     });
+    it.each(LEGACY_CREATOR_PLANS)('preserves the existing $name plan without making its price available for new sales', plan => {
+        const legacyPrice = price(plan.priceId, { unit_amount: plan.amount * 100 });
+        expect(getPlanForSubscription(subscription({ items: { data: [{ quantity: 1, price: legacyPrice }] } }))).toMatchObject({
+            id: 'legacy', legacy: true, name: plan.name, amount: plan.amount, limits: { products: null, monthlyPrintRequests: null },
+        });
+        expect(getPlanForPriceId(plan.priceId)).toBe(null);
+    });
+    it.each(['past_due', 'unpaid', 'paused', 'incomplete', 'incomplete_expired', 'canceled'])('does not preserve legacy paid capacity for %s', status => {
+        const plan = LEGACY_CREATOR_PLANS[0];
+        const legacyPrice = price(plan.priceId, { unit_amount: plan.amount * 100 });
+        expect(getPlanForSubscription(subscription({ status, items: { data: [{ quantity: 1, price: legacyPrice }] } })).id).toBe('free');
+    });
+    it('preserves a verified legacy trial with an archived price and scheduled cancellation', () => {
+        const plan = LEGACY_CREATOR_PLANS[0];
+        expect(getPlanForSubscription(subscription({ status: 'trialing', cancel_at_period_end: true,
+            items: { data: [{ quantity: 1, price: price(plan.priceId, { unit_amount: 2400, active: false }) }] },
+        })).id).toBe('legacy');
+    });
+    it.each([
+        { unit_amount: 2300 }, { currency: 'usd' },
+        { recurring: { interval: 'year', interval_count: 1, usage_type: 'licensed' } },
+        { recurring: { interval: 'month', interval_count: 1, usage_type: 'metered' } },
+    ])('rejects a legacy ID with unverified price terms %j', extra => {
+        const legacyPrice = price(LEGACY_CREATOR_PLANS[0].priceId, { unit_amount: 2400, ...extra });
+        expect(getPlanForSubscription(subscription({ items: { data: [{ quantity: 1, price: legacyPrice }] } })).id).toBe('free');
+    });
+    it('verifies legacy ownership live even when all new-sale prices are unset', async () => {
+        for (const name of ['STRIPE_STANDARD_MONTHLY_PRICE_ID', 'STRIPE_STANDARD_YEARLY_PRICE_ID', 'STRIPE_PRO_MONTHLY_PRICE_ID', 'STRIPE_PRO_YEARLY_PRICE_ID']) vi.stubEnv(name, '');
+        user.publicMetadata = { stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_current' };
+        mocks.subscriptionRetrieve.mockResolvedValue(subscription({ items: { data: [{ quantity: 1,
+            price: price(LEGACY_CREATOR_PLANS[0].priceId, { unit_amount: 2400 }) }] } }));
+        expect(await getCreatorEntitlements(user.id)).toMatchObject({ planId: 'legacy', status: 'active', isAdmin: false });
+        user.publicMetadata.stripeCustomerId = 'cus_other';
+        expect(await getCreatorEntitlements(user.id)).toMatchObject({ planId: 'free', subscription: null });
+    });
+    it('does not grant new Pro fabrication access to a legacy paid subscription', async () => {
+        user.publicMetadata = { stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_current' };
+        mocks.subscriptionRetrieve.mockResolvedValue(subscription({ items: { data: [{ quantity: 1,
+            price: price(LEGACY_CREATOR_PLANS[0].priceId, { unit_amount: 2400 }) }] } }));
+        await expect(requireFabricationPro(user.id)).rejects.toMatchObject({ status: 403, code: 'pro_required' });
+    });
     it.each(['standard', 'pro'])('recognises %s annual billing with unchanged monthly quotas', planId => {
         const selected = price(`price_${planId}_yearly`);
         const result = getPlanForSubscription(subscription({ items: { data: [{ quantity: 1, price: selected }] } }));
@@ -154,6 +197,12 @@ describe('creator entitlement contract', () => {
 });
 
 describe('subscription checkout', () => {
+    it('rejects creation of a legacy subscription before any payment mutation', async () => {
+        expect((await edit(request({ priceId: LEGACY_CREATOR_PLANS[0].priceId, cardToken: 'tok_valid' }))).status).toBe(400);
+        expect(mocks.pricesRetrieve).not.toHaveBeenCalled();
+        expect(mocks.paymentCreate).not.toHaveBeenCalled();
+        expect(mocks.subscriptionCreate).not.toHaveBeenCalled();
+    });
     it('rejects client metadata arbitrary price before any provider or card mutation', async () => {
         user.unsafeMetadata = { priceId: 'price_attacker', cardToken: 'tok_valid' };
         const response = await edit(new Request('https://fit.example/api/user/subscription/edit', { method: 'POST' }));

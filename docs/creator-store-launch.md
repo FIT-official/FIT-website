@@ -17,7 +17,7 @@ Creator print jobs use customer-agreed quotations and direct customer-to-creator
 9. Perform an operator-reviewed catalogue pass: actual stock, duplicate products, shipping charges, lead times, refund policy and fulfilment contact details need business evidence.
 
 ## Existing paid accounts
-Existing subscriptions remain billable at their current Stripe prices. Unmapped legacy plans retain Free baseline access and their stored records; their subscription status is visible. Map/offer a deliberate transition only after identifying the subscribers and their promised benefits. Do not silently change existing customers' prices.
+Existing subscriptions remain billable at their current Stripe prices. The four production legacy prices (Hobbyist S$3, Basic S$12, Advanced S$18 and Professional S$24 per month) retain their previous storefront, product and print-request access while active or trialing. Live Stripe ownership, exact price ID, amount, currency and recurring terms must match. These plans are not offered for new purchases and do not grant new Pro fabrication features. Other unmapped prices retain Free baseline access and their stored records. A change to Standard or Pro is an explicit customer choice; no existing price or subscription is silently migrated or cancelled.
 
 ## Verification limits
 Local tests mock Clerk/Stripe/Mongo/S3 unless stated otherwise. They cannot establish real email delivery, payment settlement, seller payouts, provider permissions, MongoDB transactions or production availability. Catalogue setup and publication are separate verified deployment steps.
