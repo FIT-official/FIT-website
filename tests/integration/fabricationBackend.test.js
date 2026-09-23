@@ -69,6 +69,23 @@ beforeEach(() => {
 })
 
 describe('fabrication catalog and authoritative estimates', () => {
+  it.each(['', '   ', 'private-test'])('exposes only upload availability for bucket configuration %j', async bucket => {
+    process.env.FABRICATION_S3_BUCKET_NAME = bucket
+    state.actor = 'provider'
+    const responses = [
+      await ownerCatalog(),
+      await publicCatalog(new Request('https://fit.example.org/api'), { params: Promise.resolve({ id: 'provider' }) }),
+      await publish(req({ catalog: state.catalog }, 'PUT')),
+    ]
+    for (const response of responses) {
+      expect(response.status).toBe(200)
+      const body = await response.json()
+      expect(body.uploadsAvailable).toBe(Boolean(bucket.trim()))
+      expect(JSON.stringify(body)).not.toContain('private-test')
+      expect(JSON.stringify(body)).not.toContain('FABRICATION_S3_BUCKET_NAME')
+    }
+    expect((await estimate(req(input))).status).toBe(200)
+  })
   it('allows anonymous server-priced estimates without creating a job or charge', async () => {
     state.actor = null
     const response = await estimate(req(input))

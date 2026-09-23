@@ -21,7 +21,7 @@ const catalogue = () => ({ enabled: true, offers: [{ id: 'tag', kind: 'name_tag'
   materials: [{ id: 'acrylic-3', name: 'Acrylic', thicknessMm: 3, pricePerCm2: .2, pricePerCm3: 0, setupFee: 5, perItemFee: 1, minimumCharge: 10, maxWidthMm: 200, maxHeightMm: 200, maxDepthMm: 3 }],
   template: { assetId: 'template-1', region, fontFamily: 'sans', textColor: '#182c32' },
 }] })
-const publicCatalog = () => { const catalog = catalogue(); catalog.offers[0].template.imageUrl = '/tag.png'; return { ...catalog, creator: { name: 'Studio', userId: 'studio' } } }
+const publicCatalog = () => { const catalog = catalogue(); catalog.offers[0].template.imageUrl = '/tag.png'; return { ...catalog, uploadsAvailable: true, creator: { name: 'Studio', userId: 'studio' } } }
 const response = (body, status = 200) => Promise.resolve({ ok: status >= 200 && status < 300, status, json: async () => body })
 const estimate = input => calculateFabricationEstimate(catalogue(), input).value
 let calls
@@ -31,13 +31,41 @@ beforeEach(() => {
     calls.push({ url, ...options })
     if (url.includes('/creators/')) return response(publicCatalog())
     if (url === '/api/fabrication/estimate') { const { creatorId: _creator, ...input } = JSON.parse(options.body); const result = calculateFabricationEstimate(catalogue(), input); return response(result.ok ? { estimate: result.value } : { error: result.error }, result.ok ? 200 : 400) }
-    if (url === '/api/user/fabrication-service') return response({ catalog: catalogue(), canManage: true, planId: 'pro' })
+    if (url === '/api/user/fabrication-service') return response({ catalog: catalogue(), canManage: true, planId: 'pro', uploadsAvailable: true })
     return response({ error: 'Unexpected route' }, 404)
   })
 })
 afterEach(() => { cleanup(); vi.restoreAllMocks() })
 
 describe('fabrication customer flow', () => {
+  it.each([false, undefined])('keeps a text-only request usable with disabled attachment controls (%s)', async uploadsAvailable => {
+    state.user = { id: 'buyer' }
+    const catalog = { ...publicCatalog(), uploadsAvailable }
+    delete catalog.offers[0].template
+    const original = global.fetch
+    global.fetch = vi.fn((url, options) => {
+      if (url.includes('/creators/')) return response(catalog)
+      if (url === '/api/fabrication/requests') { calls.push({ url, ...options }); return response({ request: { requestId: 'text-request' } }) }
+      return original(url, options)
+    })
+    render(<FabricationRequestFlow />)
+    await screen.findByText('S$10.80')
+    expect(screen.getByText(/Image and reference uploads are not available yet/)).toBeInTheDocument()
+    const imageInput = screen.getByLabelText(/Add your image/)
+    const referenceInput = screen.getByLabelText(/Production or reference file/)
+    expect(imageInput).toBeDisabled(); expect(referenceInput).toBeDisabled()
+    // Even a synthetic change cannot queue an attachment while disabled.
+    fireEvent.change(imageInput, { target: { files: [new File(['photo'], 'photo.png', { type: 'image/png' })] } })
+    fireEvent.change(referenceInput, { target: { files: [new File(['pdf'], 'design.pdf', { type: 'application/pdf' })] } })
+    fireEvent.change(screen.getByLabelText(/Anything else/), { target: { value: 'Please engrave Maya in plain text.' } })
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Send to provider' })).toBeEnabled())
+    fireEvent.click(screen.getByRole('button', { name: 'Send to provider' }))
+    await screen.findByText('Your idea is with the provider.')
+    const request = JSON.parse(calls.find(call => call.url === '/api/fabrication/requests').body)
+    expect(request.customerNote).toBe('Please engrave Maya in plain text.')
+    expect(request).not.toHaveProperty('imageAssetId'); expect(request).not.toHaveProperty('referenceAssetId')
+    expect(calls.some(call => call.url === '/api/fabrication/assets')).toBe(false)
+  })
   it('shows an authoritative estimate before sign-in and updates size without sending prices', async () => {
     render(<FabricationRequestFlow />)
     await screen.findByText('S$10.80')
@@ -96,6 +124,27 @@ describe('fabrication customer flow', () => {
 })
 
 describe('provider surfaces', () => {
+  it.each([false, undefined])('disables template uploads while keeping catalogue prices editable (%s)', async uploadsAvailable => {
+    const catalog = catalogue()
+    delete catalog.offers[0].template
+    global.fetch = vi.fn((url, options) => {
+      calls.push({ url, ...options })
+      return response({ catalog: options?.method === 'PUT' ? JSON.parse(options.body).catalog : catalog,
+        canManage: true, planId: 'pro', uploadsAvailable })
+    })
+    render(<FabricationCatalogEditor />)
+    const input = await screen.findByLabelText(/Upload template image/)
+    expect(input).toBeDisabled()
+    expect(screen.getByText(/Image uploads are not available yet/)).toBeInTheDocument()
+    fireEvent.change(input, { target: { files: [new File(['photo'], 'photo.png', { type: 'image/png' })] } })
+    const rate = screen.getByLabelText('S$ per item')
+    expect(rate).toBeEnabled()
+    fireEvent.change(rate, { target: { value: '4' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save services' }))
+    await screen.findByText(/Services saved/)
+    expect(JSON.parse(calls.find(call => call.method === 'PUT').body).catalog.offers[0].materials[0].perItemFee).toBe(4)
+    expect(calls.some(call => call.url === '/api/fabrication/assets')).toBe(false)
+  })
   it('saves a strict catalog wrapper without leaking signed image fields', async () => {
     global.fetch = vi.fn((url, options) => { calls.push({ url, ...options }); return response({ catalog: publicCatalog(), canManage: true, planId: 'pro' }) })
     render(<FabricationCatalogEditor />)

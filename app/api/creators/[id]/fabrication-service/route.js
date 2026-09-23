@@ -14,6 +14,7 @@ export async function GET(request, props) {
     const service = await loadPublicFabrication(id, catalogPageOptions(request.url))
     if (!service) return json({ enabled: false })
     const catalog = await shapeFabricationCatalog(service.catalog, service.creator.userId)
-    return json({ ...catalog, enabled: true, creator: service.creator, nextCursor: service.nextCursor, total: service.total })
+    return json({ ...catalog, enabled: true, creator: service.creator, nextCursor: service.nextCursor, total: service.total,
+      uploadsAvailable: Boolean(process.env.FABRICATION_S3_BUCKET_NAME?.trim()) })
   } catch (error) { return failure(error) }
 }

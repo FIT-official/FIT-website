@@ -13,10 +13,10 @@ export function Field({ label, hint, children }) {
   </label>
 }
 
-export function AssetInput({ accept, onPick, label = 'Choose file' }) {
+export function AssetInput({ accept, onPick, label = 'Choose file', disabled = false }) {
   const id = useId()
-  return <span className="relative inline-flex w-fit items-center rounded-md border border-borderColor bg-background px-3 py-2 text-sm font-normal focus-within:ring-2 focus-within:ring-borderColor">
-    <span>{label}</span><input id={id} type="file" accept={accept} className="absolute inset-0 h-full w-full cursor-pointer opacity-0" onChange={event => { onPick(event.target.files?.[0]); event.target.value = '' }} />
+  return <span className={`relative inline-flex w-fit items-center rounded-md border border-borderColor bg-background px-3 py-2 text-sm font-normal focus-within:ring-2 focus-within:ring-borderColor ${disabled ? 'opacity-50' : ''}`}>
+    <span>{label}</span><input id={id} type="file" accept={accept} disabled={disabled} className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed" onChange={event => { if (!disabled) onPick(event.target.files?.[0]); event.target.value = '' }} />
   </span>
 }
 

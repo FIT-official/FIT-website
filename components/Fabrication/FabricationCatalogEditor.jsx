@@ -28,6 +28,7 @@ export default function FabricationCatalogEditor() {
   const [savedSignature, setSavedSignature] = useState('')
   const [reload, setReload] = useState(0)
   const dirty = removedOfferIds.length > 0 || JSON.stringify(cleanCatalog(catalog)) !== savedSignature
+  const uploadsAvailable = access?.uploadsAvailable === true
   useEffect(() => {
     const controller = new AbortController()
     setLoading(true)
@@ -40,7 +41,7 @@ export default function FabricationCatalogEditor() {
   const update = (id, patch) => { setMessage(''); setCatalog(current => ({ ...current, offers: current.offers.map(offer => offer.id === id ? { ...offer, ...patch } : offer) })) }
   const materialUpdate = (offer, materialId, key, value) => update(offer.id, { materials: offer.materials.map(material => material.id === materialId ? { ...material, [key]: value, ...(key === 'thicknessMm' ? { maxDepthMm: Math.max(material.maxDepthMm, value) } : {}) } : material) })
   async function addImage(offer, file) {
-    if (!file) return
+    if (!file || !uploadsAvailable) return
     setBusy(true); setError(''); setMessage('')
     try {
       const asset = await uploadFabricationAsset(file)
@@ -93,7 +94,7 @@ export default function FabricationCatalogEditor() {
             </div>)}</div>
             <button type="button" className={minorButtonClass} onClick={() => { const id = createFabricationOffer(offer.kind).materials[0].id; update(offer.id, { materials: [...offer.materials, { ...offer.materials[0], id, name: '' }] }) }} disabled={offer.materials.length >= 40}>Add material / variant</button>
             <ServiceOptionsEditor value={offer.optionGroups || []} onChange={optionGroups => update(offer.id, { optionGroups })} />
-            <div className="space-y-3 border-t border-borderColor pt-5"><h3 className="text-sm font-semibold text-textColor">Personalisation image</h3><p className="text-xs text-lightColor">Optional: add a photo and choose where a customer’s name can go. Use a straight-on photo for a clearer preview. Template images are visible to storefront visitors.</p><Field label={offer.template ? 'Replace template image' : 'Upload template image'} hint="PNG, JPEG or WebP · up to 3 MB"><AssetInput accept="image/png,image/jpeg,image/webp" label="Choose image" onPick={file => addImage(offer, file)} /></Field>
+            <div className="space-y-3 border-t border-borderColor pt-5"><h3 className="text-sm font-semibold text-textColor">Personalisation image</h3><p className="text-xs text-lightColor">Optional: add a photo and choose where a customer’s name can go. Use a straight-on photo for a clearer preview. Template images are visible to storefront visitors.</p>{!uploadsAvailable && <p role="status" className="text-sm text-lightColor">Image uploads are not available yet. You can still save your services and prices.</p>}<Field label={offer.template ? 'Replace template image' : 'Upload template image'} hint="PNG, JPEG or WebP · up to 3 MB"><AssetInput accept="image/png,image/jpeg,image/webp" disabled={!uploadsAvailable} label="Choose image" onPick={file => addImage(offer, file)} /></Field>
               {offer.template?.imageUrl && <><PersonalizationEditor readOnly={busy || !access?.canManage} imageUrl={offer.template.imageUrl} imageWidth={offer.template.width} imageHeight={offer.template.height} value={{ ...offer.template, text: 'Your name' }} onChange={value => update(offer.id, { template: { ...offer.template, region: value.region, fontFamily: value.fontFamily, textColor: value.textColor } })} /><button type="button" className="text-xs underline" onClick={() => update(offer.id, { template: undefined })}>Remove template</button></>}
             </div>
           </article>

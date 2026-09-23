@@ -17,7 +17,8 @@ export async function GET(request) {
     const entitlements = await fabricationEntitlements(userId)
     const page = await fabricationCatalogPage(userId, catalogPageOptions(request?.url || 'https://local.invalid/'))
     const catalog = await shapeFabricationCatalog(page.catalog, userId)
-    return json({ catalog, nextCursor: page.nextCursor, total: page.total, planId: entitlements.planId, canManage: entitlements.canManage })
+    return json({ catalog, nextCursor: page.nextCursor, total: page.total, planId: entitlements.planId, canManage: entitlements.canManage,
+      uploadsAvailable: Boolean(process.env.FABRICATION_S3_BUCKET_NAME?.trim()) })
   } catch (error) { return failure(error) }
 }
 
@@ -32,6 +33,7 @@ export async function PUT(request) {
     await connectToDatabase()
     await validateCatalogAssets(catalog, userId)
     await saveFabricationCatalogBatch(userId, catalog, removedOfferIds)
-    return json({ catalog: await shapeFabricationCatalog(catalog, userId), planId: 'pro', canManage: true })
+    return json({ catalog: await shapeFabricationCatalog(catalog, userId), planId: 'pro', canManage: true,
+      uploadsAvailable: Boolean(process.env.FABRICATION_S3_BUCKET_NAME?.trim()) })
   } catch (error) { return failure(error) }
 }

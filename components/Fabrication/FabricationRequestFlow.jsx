@@ -64,6 +64,7 @@ export default function FabricationRequestFlow() {
   }, [photo])
 
   const offer = catalog?.offers?.find(item => item.id === offerId)
+  const uploadsAvailable = catalog?.uploadsAvailable === true
   const material = offer?.materials?.find(item => item.id === materialId)
   const basis = pricingBasisForOffer(offer || { kind: 'custom' })
   const imageUrl = photoUrl || offer?.template?.imageUrl || ''
@@ -99,19 +100,20 @@ export default function FabricationRequestFlow() {
     setPersonalization({ ...defaultPersonalization(), ...(selected.template || {}) }); setError('')
   }
   function choosePhoto(file) {
-    if (!file) return
+    if (!file || !uploadsAvailable) return
     setError('')
     if (file.size > MAX_BYTES || !['image/png','image/jpeg','image/webp'].includes(file.type)) { setError('Choose a PNG, JPEG or WebP image up to 3 MB.'); return }
     setPhoto(file); setPersonalization(current => ({ text: current.text, fontFamily: current.fontFamily, textColor: current.textColor }))
   }
   function chooseReference(file) {
-    if (!file) return
+    if (!file || !uploadsAvailable) return
     setError('')
     if (file.size > MAX_BYTES || !/\.(stl|obj|3mf|pdf)$/i.test(file.name)) { setError('Choose an STL, OBJ, 3MF or PDF file up to 3 MB.'); return }
     setReference(file)
   }
   async function submit() {
     if (!user || busy || needsRegion || (!snapshot && !draft.current)) return
+    if (!uploadsAvailable && (photo || reference)) { setError('Image and reference uploads are not available yet. Remove the attachments to send your request.'); return }
     setBusy(true); setLocked(true); setError('')
     try {
       if (!draft.current) draft.current = { creatorId, ...input, clientRequestId: crypto.randomUUID(), imageAssetId: photo ? undefined : offer?.template?.assetId }
@@ -146,10 +148,11 @@ export default function FabricationRequestFlow() {
             <p className="text-xs text-lightColor">{basis.requiresWidth ? 'Enter the real finished size. Photos do not establish physical dimensions. ' : ''}Typical lead time: {offer?.leadTimeDays} days after approval.</p>
           </section>
           <section className={`${cardClass} space-y-4`}><h2 className="text-lg font-semibold">2. Your design</h2>
-            <Field label="Add your image (optional)" hint="PNG, JPEG or WebP · up to 3 MB · a straight-on photo works best"><AssetInput accept="image/png,image/jpeg,image/webp" label={photo ? 'Replace image' : 'Choose image'} onPick={choosePhoto} /></Field>
+            {!uploadsAvailable && <p role="status" className="text-sm text-lightColor">Image and reference uploads are not available yet. You can still describe your request below.</p>}
+            <Field label="Add your image (optional)" hint="PNG, JPEG or WebP · up to 3 MB · a straight-on photo works best"><AssetInput accept="image/png,image/jpeg,image/webp" disabled={!uploadsAvailable} label={photo ? 'Replace image' : 'Choose image'} onPick={choosePhoto} /></Field>
             {photo && <div className="flex flex-wrap items-center gap-2 text-xs"><span className="break-all">{photo.name}</span><button type="button" className="underline" onClick={() => { setPhoto(null); setPersonalization({ ...defaultPersonalization(), ...(offer.template || {}) }) }}>Use provider template / remove photo</button></div>}
-            {imageUrl ? <><PersonalizationEditor readOnly={busy || locked} imageUrl={imageUrl} imageWidth={photo ? undefined : offer.template?.width} imageHeight={photo ? undefined : offer.template?.height} value={personalization} onChange={setPersonalization} allowRegionEdit={Boolean(photo)} allowAutoSuggest={Boolean(photo)} /><p className="text-xs text-lightColor">{photo ? 'Suggested placement is a starting point. Adjust it if needed; the provider can revise the text area before production.' : 'The text area is set by your provider. Upload your own image to use a different design.'} Preview colour represents the layout; the marking process determines the final finish.</p></> : <p className="rounded-lg bg-baseColor p-4 text-sm text-lightColor">Upload an image to preview a name or marking area.</p>}
-            <Field label="Production or reference file (optional)" hint="STL, OBJ, 3MF or PDF · up to 3 MB · reviewed by the provider"><AssetInput accept=".stl,.obj,.3mf,.pdf" label={reference ? 'Replace file' : 'Choose file'} onPick={chooseReference} /></Field>
+            {imageUrl ? <><PersonalizationEditor readOnly={busy || locked} imageUrl={imageUrl} imageWidth={photo ? undefined : offer.template?.width} imageHeight={photo ? undefined : offer.template?.height} value={personalization} onChange={setPersonalization} allowRegionEdit={Boolean(photo)} allowAutoSuggest={Boolean(photo)} /><p className="text-xs text-lightColor">{photo ? 'Suggested placement is a starting point. Adjust it if needed; the provider can revise the text area before production.' : 'The text area is set by your provider.'} Preview colour represents the layout; the marking process determines the final finish.</p></> : uploadsAvailable && <p className="rounded-lg bg-baseColor p-4 text-sm text-lightColor">Upload an image to preview a name or marking area.</p>}
+            <Field label="Production or reference file (optional)" hint="STL, OBJ, 3MF or PDF · up to 3 MB · reviewed by the provider"><AssetInput accept=".stl,.obj,.3mf,.pdf" disabled={!uploadsAvailable} label={reference ? 'Replace file' : 'Choose file'} onPick={chooseReference} /></Field>
             {reference && <div className="flex flex-wrap items-center gap-2 text-xs"><span className="break-all">{reference.name}</span><button type="button" className="underline" onClick={() => setReference(null)}>Remove file</button></div>}
             <Field label="Anything else? (optional)" hint="Finish, artwork details, deadline or a design reference link"><textarea className={fieldClass} rows={3} maxLength={1000} value={note} onChange={event => setNote(event.target.value)} /></Field>
           </section>
@@ -160,7 +163,7 @@ export default function FabricationRequestFlow() {
           <EstimateBreakdown snapshot={snapshot} />
           {needsRegion && <p className="text-sm text-amber-800">Choose or confirm a text area on your image before sending.</p>}
           {!isLoaded ? <p className="text-sm">Loading account…</p> : user ? <button type="button" className={`${buttonClass} w-full`} onClick={submit} disabled={busy || needsRegion || (!snapshot && !draft.current)}>{busy ? 'Sending request…' : locked ? 'Retry submitting request' : 'Send to provider'}</button> : <SignInButton mode="modal"><button type="button" className={`${buttonClass} w-full`} disabled={!snapshot || needsRegion}>Sign in to send request</button></SignInButton>}
-          <p className="text-xs leading-relaxed text-lightColor">Preview before signing in. Your files are uploaded when you send the request and are shared with the provider. No payment is collected here.</p>
+          <p className="text-xs leading-relaxed text-lightColor">Preview before signing in. {uploadsAvailable && 'Your files are uploaded when you send the request and are shared with the provider. '}No payment is collected here.</p>
           {locked && !busy && <Link href="/account/services" className={`${minorButtonClass} w-full`}>Check my existing requests</Link>}
         </aside>
       </div>
