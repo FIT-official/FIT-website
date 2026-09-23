@@ -67,7 +67,10 @@ export async function GET(req) {
     const [checkoutTransactions, subscriptionPrices, fabricationStorage] = await Promise.all([
         checkoutReadiness(), priceReadiness(), fabricationReadiness(),
     ]);
-    const ready = checkoutTransactions.ready && fabricationStorage.ready &&
+    // Presence cannot prove delivery, but a missing verifier must block payment.
+    const checkoutWebhook = process.env.STRIPE_SESSION_COMPLETE_SIGNING_SECRET?.trim()
+        ? result(true, 'ready') : result(false, 'checkout_webhook_not_configured');
+    const ready = checkoutTransactions.ready && checkoutWebhook.ready && fabricationStorage.ready &&
         Object.values(subscriptionPrices).every(price => price.ready);
-    return response({ ready, checkoutTransactions, subscriptionPrices, fabricationStorage });
+    return response({ ready, checkoutTransactions, checkoutWebhook, subscriptionPrices, fabricationStorage });
 }

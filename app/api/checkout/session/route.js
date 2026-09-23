@@ -127,6 +127,12 @@ export async function POST() {
         }
         const totalAmount = items.reduce((sum, item) => sum + item.totalAmount, 0);
         if (!totalAmount) return NextResponse.json({ error: 'Free product checkout is not available yet. Please contact FIT to obtain this item.' }, { status: 409 });
+        if (!process.env.STRIPE_SESSION_COMPLETE_SIGNING_SECRET?.trim()) {
+            return NextResponse.json({
+                error: 'Checkout is temporarily unavailable. No payment has been started. Please try again later.',
+                code: 'checkout_webhook_not_configured',
+            }, { status: 503 });
+        }
         // Fulfilment requires MongoDB transactions. Verify support before a
         // payable session exists, so unsupported deployments cannot take money.
         await verifyCheckoutTransactions(database);

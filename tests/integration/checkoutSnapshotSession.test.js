@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
     auth: vi.fn(), customer: vi.fn(), user: vi.fn(), product: vi.fn(), request: vi.fn(),
     createSession: vi.fn(), expire: vi.fn(), saveSnapshot: vi.fn(), isAdmin: vi.fn(), preflight: vi.fn(),
@@ -20,6 +20,7 @@ import { CheckoutTransactionUnavailableError } from '@/lib/checkoutTransactionRe
 let user, product;
 beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv('STRIPE_SESSION_COMPLETE_SIGNING_SECRET', 'whsec_test');
     m.auth.mockResolvedValue({ userId: 'buyer' });
     m.isAdmin.mockResolvedValue(false);
     m.preflight.mockResolvedValue();
@@ -33,8 +34,18 @@ beforeEach(() => {
     m.createSession.mockResolvedValue({ id: 'cs_created', client_secret: 'secret_for_buyer' });
     m.saveSnapshot.mockResolvedValue({}); m.expire.mockResolvedValue({});
 });
+afterEach(() => vi.unstubAllEnvs());
 
 describe('Checkout session purchase contract', () => {
+    it.each(['', '   '])('does not create a payment when the checkout webhook verifier is missing (%j)', async secret => {
+        vi.stubEnv('STRIPE_SESSION_COMPLETE_SIGNING_SECRET', secret);
+        const response = await POST();
+        expect(response.status).toBe(503);
+        expect(await response.json()).toMatchObject({ code: 'checkout_webhook_not_configured' });
+        expect(m.preflight).not.toHaveBeenCalled();
+        expect(m.createSession).not.toHaveBeenCalled();
+        expect(m.saveSnapshot).not.toHaveBeenCalled();
+    });
     it('waits for the transaction preflight before creating a payable session', async () => {
         let finish;
         m.preflight.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));

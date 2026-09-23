@@ -22,6 +22,7 @@ const req = () => new Request('https://fit.test/api/admin/store-readiness');
 beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_never_return');
+    vi.stubEnv('STRIPE_SESSION_COMPLETE_SIGNING_SECRET', 'whsec_never_return');
     vi.stubEnv('FABRICATION_S3_BUCKET_NAME', 'private-bucket-never-return');
     for (const key of Object.keys(ids)) vi.stubEnv(env[key], ids[key]);
     m.auth.mockResolvedValue({ userId: 'admin' });
@@ -70,12 +71,22 @@ describe('Admin store readiness', () => {
         expect(response.headers.get('Cache-Control')).toBe('private, no-store');
         expect(await response.json()).toEqual({ ready: true,
             checkoutTransactions: { ready: true, code: 'ready' },
+            checkoutWebhook: { ready: true, code: 'ready' },
             subscriptionPrices: Object.fromEntries(Object.keys(ids).map(key => [key, { ready: true, code: 'ready' }])),
             fabricationStorage: { ready: true, code: 'ready' } });
         expect(m.preflight).toHaveBeenCalledWith(m.database, { force: true });
         expect(m.retrieve).toHaveBeenCalledTimes(4);
         for (const id of Object.values(ids)) expect(m.retrieve).toHaveBeenCalledWith(id, { expand: ['product'] });
         expect(m.privateBucket).toHaveBeenCalledWith();
+    });
+    it.each(['', '   '])('reports a missing checkout webhook verifier (%j) even if all other probes pass', async secret => {
+        vi.stubEnv('STRIPE_SESSION_COMPLETE_SIGNING_SECRET', secret);
+        const body = await (await GET(req())).json();
+        expect(body.ready).toBe(false);
+        expect(body.checkoutWebhook).toEqual({ ready: false, code: 'checkout_webhook_not_configured' });
+        expect(body.checkoutTransactions.ready).toBe(true);
+        expect(body.fabricationStorage.ready).toBe(true);
+        expect(Object.values(body.subscriptionPrices).every(price => price.ready)).toBe(true);
     });
     it('reports safe actionable codes for missing optional integrations without hiding checkout readiness', async () => {
         for (const key of Object.keys(ids)) vi.stubEnv(env[key], '');
@@ -96,6 +107,7 @@ describe('Admin store readiness', () => {
         const response = await GET(req());
         expect(await response.json()).toEqual({ ready: false,
             checkoutTransactions: { ready: false, code: 'checkout_transaction_unavailable' },
+            checkoutWebhook: { ready: true, code: 'ready' },
             subscriptionPrices: Object.fromEntries(Object.keys(ids).map(key => [key, { ready: false, code: 'price_unavailable' }])),
             fabricationStorage: { ready: false, code: 'fabrication_storage_unverified' } });
     });
