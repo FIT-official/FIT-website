@@ -9,6 +9,7 @@ export default function Creators() {
     const { isSignedIn } = useUser()
     const { subscription } = useUserSubscription() || {}
     const [catalogue, setCatalogue] = useState([])
+    const [catalogueStatus, setCatalogueStatus] = useState('loading')
     const [fabricationUploadsAvailable, setFabricationUploadsAvailable] = useState(false)
     const [interval, setInterval] = useState('month')
     useEffect(() => {
@@ -18,9 +19,10 @@ export default function Creators() {
                 if (!cancelled) {
                     setCatalogue(d.plans || [])
                     setFabricationUploadsAvailable(d.capabilities?.fabricationUploadsAvailable === true)
+                    setCatalogueStatus('ready')
                 }
             })
-            .catch(() => { if (!cancelled) setCatalogue([]) })
+            .catch(() => { if (!cancelled) { setCatalogue([]); setCatalogueStatus('error') } })
         return () => { cancelled = true }
     }, [])
     return <main className="mx-auto max-w-6xl px-6 py-16">
@@ -60,7 +62,7 @@ export default function Creators() {
                     : student ? current ? <Link className="formBlackButton justify-center" href="/account/subscription">Manage plan</Link> : <a className="formBlackButton justify-center" href="mailto:fixittoday.contact@gmail.com?subject=Student%20creator%20access">Ask about student access</a>
                     : current ? <Link className="formBlackButton justify-center" href="/account/subscription">Manage plan</Link>
                     : configured?.available && configured.priceId ? <Link className={`formBlackButton justify-center ${dark ? '!bg-white !text-textColor' : ''}`} href={`${isSignedIn ? '/account/subscription' : '/sign-up'}?priceId=${encodeURIComponent(configured.priceId)}`}>Choose {plan.name}</Link>
-                    : <p className="text-sm">Paid sign-up opens soon. You can start with Free.</p>}
+                    : <p className="text-sm">{catalogueStatus === 'loading' ? 'Checking paid plan availability…' : catalogueStatus === 'error' ? 'Unable to check paid plans. Please refresh this page.' : 'Paid sign-up opens soon. You can start with Free.'}</p>}
                 </section>
             })}
         </div>
