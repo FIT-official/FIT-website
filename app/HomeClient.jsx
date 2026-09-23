@@ -10,7 +10,7 @@ import { useContent } from '@/utils/useContent'
 import FeaturedArticles from "@/components/Home/FeaturedArticles";
 import { useEffect, useState } from 'react';
 
-export default function Home({ children }) {
+export default function Home({ children, initialHeroContent }) {
   const { content: adBannerContent } = useContent('home/ad-banner', {
     text: ''
   })
@@ -32,7 +32,7 @@ export default function Home({ children }) {
 
   return (
     <div className="flex flex-col items-center justify-center w-full ">
-      <Main adbanner={adBannerContent.text || null} />
+      <Main adbanner={adBannerContent.text || null} initialHeroContent={initialHeroContent} />
       {children}
       <Divider />
       <FeaturedSection />
