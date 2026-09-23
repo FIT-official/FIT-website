@@ -88,9 +88,9 @@ describe('Admin store readiness', () => {
         expect(body.fabricationStorage.ready).toBe(true);
         expect(Object.values(body.subscriptionPrices).every(price => price.ready)).toBe(true);
     });
-    it('reports safe actionable codes for missing optional integrations without hiding checkout readiness', async () => {
+    it.each(['', '   '])('reports missing optional integrations without hiding checkout readiness (%j)', async bucket => {
         for (const key of Object.keys(ids)) vi.stubEnv(env[key], '');
-        vi.stubEnv('FABRICATION_S3_BUCKET_NAME', '');
+        vi.stubEnv('FABRICATION_S3_BUCKET_NAME', bucket);
         const body = await (await GET(req())).json();
         expect(body.ready).toBe(false);
         expect(body.checkoutTransactions.ready).toBe(true);
