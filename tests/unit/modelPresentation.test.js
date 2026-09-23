@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import * as THREE from 'three';
 import JSZip from 'jszip';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { cameraFit, createPrintedMaterial, disposePrintModel, filamentSurface, modelConvention, preparePrintModel, stylePrintModel } from '@/lib/modelPresentation';
 import { declared3mfUnit, threeMfMillimetresPerUnit, validate3mfArchive } from '@/lib/modelUnits';
 import { computeMetricsFromObject } from '@/lib/quoting/threeGeometryAdapter';
@@ -11,6 +12,20 @@ function sourceModel(dimensions = [20, 30, 40]) {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(...dimensions), new THREE.MeshStandardMaterial({ color: '#ff0000' }));
     mesh.name = 'Body'; source.add(mesh);
     return { source, mesh };
+}
+
+function zeroNormalStl(format) {
+    const vertices = [0, 0, 0, 10, 0, 0, 0, 10, 0];
+    let contents = 'solid triangle\nfacet normal 0 0 0\nouter loop\nvertex 0 0 0\nvertex 10 0 0\nvertex 0 10 0\nendloop\nendfacet\nendsolid triangle';
+    if (format === 'binary') {
+        contents = new ArrayBuffer(134);
+        const view = new DataView(contents);
+        view.setUint32(80, 1, true);
+        vertices.forEach((value, index) => view.setFloat32(96 + index * 4, value, true));
+    }
+    const mesh = new THREE.Mesh(new STLLoader().parse(contents), new THREE.MeshStandardMaterial());
+    mesh.name = 'STL_Mesh';
+    return mesh;
 }
 
 describe('printed model presentation', () => {
@@ -78,6 +93,61 @@ describe('printed model presentation', () => {
         const model = preparePrintModel(source);
         disposePrintModel(model.root);
         expect(geometryDispose).not.toHaveBeenCalled();
+    });
+    it.each(['ascii', 'binary'])('repairs zero normals from a real %s STL without changing the source or quote geometry', format => {
+        const source = zeroNormalStl(format);
+        const positions = Array.from(source.geometry.attributes.position.array);
+        const before = computeMetricsFromObject(source, 'triangle.stl');
+        const model = preparePrintModel(source, { fileName: 'triangle.stl' });
+        const displayed = model.root.getObjectByName('STL_Mesh');
+        expect(Array.from(displayed.geometry.attributes.normal.array)).toEqual([0, 0, 1, 0, 0, 1, 0, 0, 1]);
+        expect(displayed.geometry).not.toBe(source.geometry);
+        expect(Array.from(source.geometry.attributes.normal.array)).toEqual(new Array(9).fill(0));
+        expect(Array.from(displayed.geometry.attributes.position.array)).toEqual(positions);
+        expect(computeMetricsFromObject(source, 'triangle.stl')).toEqual(before);
+        expect(model.dimensionsMm).toMatchObject({ width: 10, depth: 10 });
+        stylePrintModel(model.root, { meshColors: { default: '#ffffff' } });
+        expect(displayed.material.color.getHexString()).toBe('ffffff');
+    });
+    it('replaces only invalid normal vectors and preserves valid authored shading', () => {
+        const source = zeroNormalStl('ascii');
+        source.geometry.attributes.normal.setXYZ(0, 0.6, 0.8, 0);
+        source.geometry.attributes.normal.setXYZ(1, NaN, Infinity, 0);
+        const originalValid = Array.from(source.geometry.attributes.normal.array.slice(0, 3));
+        const model = preparePrintModel(source, { fileName: 'triangle.stl' });
+        const normal = model.root.getObjectByName('STL_Mesh').geometry.attributes.normal;
+        expect(Array.from(normal.array.slice(0, 3))).toEqual(originalValid);
+        expect(Array.from(normal.array.slice(3))).toEqual([0, 0, 1, 0, 0, 1]);
+        expect(Number.isNaN(source.geometry.attributes.normal.getX(1))).toBe(true);
+    });
+    it('generates missing normals for another uploaded format', () => {
+        const source = zeroNormalStl('ascii');
+        source.geometry.deleteAttribute('normal');
+        const model = preparePrintModel(source, { fileName: 'triangle.obj' });
+        expect(Array.from(model.root.getObjectByName('STL_Mesh').geometry.attributes.normal.array))
+            .toEqual([0, 0, 1, 0, 0, 1, 0, 0, 1]);
+        expect(source.geometry.getAttribute('normal')).toBeUndefined();
+    });
+    it('keeps valid hard-edge geometry and normals unchanged', () => {
+        const { source, mesh } = sourceModel();
+        const normals = Array.from(mesh.geometry.attributes.normal.array);
+        const model = preparePrintModel(source, { fileName: 'part.stl' });
+        expect(model.root.getObjectByName('Body').geometry).toBe(mesh.geometry);
+        expect(Array.from(mesh.geometry.attributes.normal.array)).toEqual(normals);
+    });
+    it('shares one repaired preview geometry between instances and disposes it without disposing the source', () => {
+        const mesh = zeroNormalStl('ascii');
+        const source = new THREE.Group();
+        const other = mesh.clone(); other.name = 'Other'; source.add(mesh, other);
+        const sourceDispose = vi.spyOn(mesh.geometry, 'dispose');
+        const model = preparePrintModel(source);
+        const geometry = model.root.getObjectByName('STL_Mesh').geometry;
+        expect(model.root.getObjectByName('Other').geometry).toBe(geometry);
+        expect(geometry).not.toBe(mesh.geometry);
+        const previewDispose = vi.spyOn(geometry, 'dispose');
+        disposePrintModel(model.root);
+        expect(previewDispose).toHaveBeenCalledTimes(1);
+        expect(sourceDispose).not.toHaveBeenCalled();
     });
     it('rejects empty models with a useful error', () => {
         expect(() => preparePrintModel(new THREE.Group())).toThrow('visible 3D geometry');
