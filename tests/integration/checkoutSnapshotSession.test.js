@@ -1,23 +1,28 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
     auth: vi.fn(), customer: vi.fn(), user: vi.fn(), product: vi.fn(), request: vi.fn(),
-    createSession: vi.fn(), expire: vi.fn(), saveSnapshot: vi.fn(), isAdmin: vi.fn(),
+    createSession: vi.fn(), expire: vi.fn(), saveSnapshot: vi.fn(), isAdmin: vi.fn(), preflight: vi.fn(),
 }));
 vi.mock('stripe', () => ({ default: class { checkout = { sessions: { create: m.createSession, expire: m.expire } }; } }));
 vi.mock('@clerk/nextjs/server', () => ({ auth: m.auth, clerkClient: async () => ({ users: { getUser: m.customer } }) }));
 vi.mock('@/lib/db', () => ({ connectToDatabase: async () => {} }));
+vi.mock('@/lib/checkoutTransactionReadiness', async importOriginal => ({
+    ...await importOriginal(), verifyCheckoutTransactions: m.preflight,
+}));
 vi.mock('@/lib/checkPrivileges', () => ({ checkAdminPrivileges: m.isAdmin }));
 vi.mock('@/models/User', () => ({ default: { findOne: m.user } }));
 vi.mock('@/models/Product', () => ({ default: { findById: (...args) => ({ lean: () => m.product(...args) }), findOne: (...args) => ({ lean: () => m.product(...args) }) } }));
 vi.mock('@/models/CustomPrintRequest', () => ({ default: { findOne: (...args) => ({ lean: () => m.request(...args) }) } }));
 vi.mock('@/models/CheckoutSession', () => ({ default: { create: m.saveSnapshot } }));
 import { POST } from '@/app/api/checkout/session/route';
+import { CheckoutTransactionUnavailableError } from '@/lib/checkoutTransactionReadiness';
 
 let user, product;
 beforeEach(() => {
     vi.clearAllMocks();
     m.auth.mockResolvedValue({ userId: 'buyer' });
     m.isAdmin.mockResolvedValue(false);
+    m.preflight.mockResolvedValue();
     m.customer.mockResolvedValue({ emailAddresses: [{ emailAddress: 'buyer@example.test' }], firstName: 'Buyer', publicMetadata: {} });
     user = { userId: 'buyer', contact: { address: { country: 'SG', street: 'Original street' } },
         cart: [{ _id: 'cart1', productId: 'p1', quantity: 2, chosenDeliveryType: 'shipping', selectedVariants: {}, price: .01 }], save: vi.fn() };
@@ -30,6 +35,26 @@ beforeEach(() => {
 });
 
 describe('Checkout session purchase contract', () => {
+    it('waits for the transaction preflight before creating a payable session', async () => {
+        let finish;
+        m.preflight.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+        const pending = POST();
+        await vi.waitFor(() => expect(m.preflight).toHaveBeenCalledTimes(1));
+        expect(m.createSession).not.toHaveBeenCalled();
+        expect(m.saveSnapshot).not.toHaveBeenCalled();
+        finish();
+        expect((await pending).status).toBe(200);
+        expect(m.preflight.mock.invocationCallOrder[0]).toBeLessThan(m.createSession.mock.invocationCallOrder[0]);
+    });
+    it('fails before a payment can be created when MongoDB transactions are unavailable', async () => {
+        m.preflight.mockRejectedValueOnce(new CheckoutTransactionUnavailableError());
+        const response = await POST();
+        expect(response.status).toBe(503);
+        expect(await response.json()).toMatchObject({ code: 'checkout_transaction_unavailable' });
+        expect(m.createSession).not.toHaveBeenCalled();
+        expect(m.expire).not.toHaveBeenCalled();
+        expect(m.saveSnapshot).not.toHaveBeenCalled();
+    });
     it('uses server prices and private asset references without calling the public product API', async () => {
         const fetch = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('No public fetch allowed'));
         const res = await POST();

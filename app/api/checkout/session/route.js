@@ -11,6 +11,7 @@ import { customPrintChargeBreakdown } from '@/lib/customPrintDisplayPrice';
 import { buildProductPrintRequestInput, colourNameFromVariants } from '@/lib/customPrint/productRequest';
 import { buildCheckoutItem, checkoutPlain } from '@/lib/checkoutSnapshot';
 import { checkAdminPrivileges } from '@/lib/checkPrivileges';
+import { verifyCheckoutTransactions, CheckoutTransactionUnavailableError } from '@/lib/checkoutTransactionReadiness';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
 
@@ -19,7 +20,7 @@ export async function POST() {
     try {
         const { userId } = await auth();
         if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        await connectToDatabase();
+        const database = await connectToDatabase();
         const user = await User.findOne({ userId });
         if (!user?.cart?.length) return NextResponse.json({ error: 'Your cart is empty' }, { status: 400 });
         if (user.cart.length > 50) return NextResponse.json({ error: 'Too many cart items' }, { status: 400 });
@@ -126,6 +127,9 @@ export async function POST() {
         }
         const totalAmount = items.reduce((sum, item) => sum + item.totalAmount, 0);
         if (!totalAmount) return NextResponse.json({ error: 'Free product checkout is not available yet. Please contact FIT to obtain this item.' }, { status: 409 });
+        // Fulfilment requires MongoDB transactions. Verify support before a
+        // payable session exists, so unsupported deployments cannot take money.
+        await verifyCheckoutTransactions(database);
         stripeSession = await stripe.checkout.sessions.create({
             payment_method_types: ['card', 'paynow'], line_items, mode: 'payment', ui_mode: 'custom',
             return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
@@ -140,6 +144,9 @@ export async function POST() {
     } catch (error) {
         // A session whose purchase contract could not be saved must not stay payable.
         if (stripeSession?.id) await stripe.checkout.sessions.expire(stripeSession.id).catch(() => {});
+        if (error instanceof CheckoutTransactionUnavailableError) {
+            return NextResponse.json({ error: error.message, code: error.code }, { status: error.status });
+        }
         console.error('Checkout creation failed:', error);
         return NextResponse.json({ error: 'Unable to create checkout. Please review your cart and try again.' }, { status: 500 });
     }
