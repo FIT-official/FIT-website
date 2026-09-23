@@ -7,7 +7,7 @@ import Product from '@/models/Product'
 import { buildQuote } from '@/lib/quoting/quoteRequest'
 import { getAppSettingsId } from '@/lib/appSettingsId'
 import { recomputeMetricsFromModel, supportsServerRecompute } from '@/lib/quoting/serverGeometry'
-import { geometryDeviation } from '@/lib/quoting/geometryDeviation'
+import { getFilamentAvailability, rushAvailability } from '@/lib/filamentInventory'
 import { printSettingsToQuoteSettings } from '@/lib/quoting/printSettingsToQuote'
 import { MUTABLE_PRINT_STATUSES } from '@/lib/quoting/validatePrintConfiguration'
 import { validate3mfBytes } from '@/lib/modelImport/file'
@@ -102,6 +102,13 @@ export async function POST(req) {
     if (!result.ok) return NextResponse.json({ error: result.error, issues: result.issues }, { status: result.status })
     const { quote, requestId, preview } = result.data
     if (!requestId) {
+      if (body.options?.priority || body.options?.expedite) {
+        let colours
+        try { colours = await getFilamentAvailability() }
+        catch { return NextResponse.json({ error: 'Rush availability cannot be checked right now. Try again shortly.' }, { status: 503 }) }
+        if (rushAvailability(colours, body.selection?.filament, body.selection?.colour) !== 'in_stock')
+          return NextResponse.json({ error: 'This colour is unavailable for rush or priority. Choose an in-stock colour.' }, { status: 409 })
+      }
       const limits = checkLimits(quote, settings)
       if (!limits.fits) return NextResponse.json({ error: machineLimitMessage(limits.violations) }, { status: 422 })
       return NextResponse.json({ quote, estimateOnly: true }, { headers: rate.headers })
@@ -121,8 +128,19 @@ export async function POST(req) {
     // Previews can explore unsaved settings. Persisted prices must describe the
     // saved print configuration, not cheaper settings supplied independently.
     const quoteSettings = preview ? body.settings : printSettingsToQuoteSettings(request.printConfiguration.printSettings)
-    if (!preview && quoteSettings.materialType !== 'plastic') {
+    if (!preview && request.printConfiguration.printSettings?.materialType !== 'plastic') {
       return NextResponse.json({ error: 'This material needs a manual quote.', manualReviewRequired: true }, { status: 422 })
+    }
+    if (body.options?.priority || body.options?.expedite) {
+      const chosen = preview && body.selection ? body.selection : {
+        filament: request.printConfiguration?.printSettings?.filamentType || 'pla',
+        colour: request.printConfiguration?.generic?.colour,
+      }
+      let colours
+      try { colours = await getFilamentAvailability() }
+      catch { return NextResponse.json({ error: 'Rush availability cannot be checked right now. Try again shortly.' }, { status: 503 }) }
+      if (rushAvailability(colours, chosen.filament, chosen.colour) !== 'in_stock')
+        return NextResponse.json({ error: 'This colour is unavailable for rush or priority. Choose an in-stock colour.' }, { status: 409 })
     }
     const model = request.modelFile || {}
     const name = model.originalName || model.s3Key || ''
@@ -139,8 +157,8 @@ export async function POST(req) {
     }
     if (!(metrics?.volumeCm3 > 0) || !Number.isFinite(metrics.volumeCm3) ||
         !['length', 'width', 'height'].every(axis => Number.isFinite(metrics.dimensionsCm?.[axis]) && metrics.dimensionsCm[axis] > 0)) return manualReview()
-    const deviation = geometryDeviation({ volumeCm3: body.volumeCm3 }, { volumeCm3: metrics.volumeCm3 })
-    if (deviation.suspicious) return NextResponse.json({ error: 'The model measurements do not match the uploaded file. Reload the model and try again.' }, { status: 400 })
+    // Different mesh loaders can disagree on volume, particularly for open or
+    // zero-normal STL meshes. Price and machine limits use only the saved file.
     const verified = buildQuote({ ...body, settings: quoteSettings, volumeCm3: metrics.volumeCm3,
       dimensionsCm: metrics.dimensionsCm, confidence: metrics.confidence },
     { pricingConfig, deliveryTypes, printHoursShapeAware: metrics.printHoursShapeAware })

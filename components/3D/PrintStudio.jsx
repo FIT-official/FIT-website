@@ -121,7 +121,7 @@ export default function PrintStudio({ scene, fileName = '', upAxis = 'auto', mes
                     {[dimensions.width, dimensions.depth, dimensions.height].map(value => value.toLocaleString(undefined, { maximumFractionDigits: 1 })).join(' × ')} mm
                 </span><span className="ml-2">W × D × H</span></div>
                 <div className="rounded-lg bg-white/80 px-3 py-2">{layersEnabled && materialType !== 'resin'
-                    ? `${layerHeight} mm layer shading · approximate, not a toolpath` : 'Drag to orbit · scroll to zoom'}</div>
+                    ? `${layerHeight} mm layer texture` : 'Drag to orbit · scroll to zoom'}</div>
             </div>
         </>}
     </div>;

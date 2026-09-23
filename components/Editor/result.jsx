@@ -8,9 +8,10 @@ import Viewer from './viewer'
 import QuotePanel from './QuotePanel'
 import SimplePrintSettings from './SimplePrintSettings'
 import AdvancedPrintSettings from './AdvancedPrintSettings'
-import { applySimpleSelection, DEFAULT_PRINT_COLOURS, DEFAULT_SIMPLE_SELECTION,
+import { applySimpleSelection, DEFAULT_SIMPLE_SELECTION,
   mapPurposeToConfiguration, purposeFromPrintSettings, restorePrintConfiguration } from '@/lib/quoting/genericPresets'
 import { printSettingsToQuoteSettings } from '@/lib/quoting/printSettingsToQuote'
+import { DEFAULT_FIT_COLOURS } from '@/lib/filamentCatalogue'
 import { useToast } from '@/components/General/ToastProvider'
 import posthog from 'posthog-js'
 
@@ -24,7 +25,7 @@ export default function Result() {
   const router = useRouter()
   const isProductPrint = !!productPrintConfig
   const savedRequestId = isProductPrint ? null : requestId || variantId
-  const [colours, setColours] = useState(DEFAULT_PRINT_COLOURS)
+  const [colours, setColours] = useState(DEFAULT_FIT_COLOURS)
   const [configuration, setConfiguration] = useState(() => restorePrintConfiguration())
   const [quoteOptions, setQuoteOptions] = useState(INITIAL_OPTIONS)
   const [advanced, setAdvanced] = useState(false)
@@ -51,15 +52,22 @@ export default function Result() {
   const meshColors = useMemo(() => Object.fromEntries(meshNames.map(name =>
     [name, configuration.meshColors[name] || selectedHex])), [meshNames, configuration.meshColors, selectedHex])
   const quoteSettings = useMemo(() => printSettingsToQuoteSettings(printSettings), [printSettings])
+  const stockStatus = colours.find(item => item.filament === selection.filament && item.name === selection.colour)?.stockStatus || 'unknown'
   const matchedPurpose = purposeFromPrintSettings(printSettings)
   const needsReview = printSettings.materialType !== 'plastic'
 
   useEffect(() => {
     let active = true
-    fetch('/api/quote/config').then(response => response.ok ? response.json() : null)
-      .then(data => { if (active && data?.printColours?.length) setColours(data.printColours) }).catch(() => {})
+    fetch(isProductPrint ? '/api/quote/config' : '/api/filament-availability')
+      .then(response => response.ok ? response.json() : null)
+      .then(data => { if (active) setColours(data?.colours?.length ? data.colours : data?.printColours?.length ? data.printColours : DEFAULT_FIT_COLOURS) }).catch(() => {})
     return () => { active = false }
-  }, [])
+  }, [isProductPrint])
+
+  useEffect(() => {
+    if (stockStatus !== 'in_stock' && (quoteOptions.priority || quoteOptions.expedite))
+      setQuoteOptions(current => ({ ...current, priority: false, expedite: false }))
+  }, [stockStatus, quoteOptions.priority, quoteOptions.expedite])
 
   useEffect(() => {
     if (!buffers || !fileName) return
@@ -136,11 +144,16 @@ export default function Result() {
     setSubmitting(true)
     try {
       const mapped = mapPurposeToConfiguration({ ...selection, purpose: matchedPurpose }, effectiveColours)
+      const singleCatalogueColour = effectiveColours.some(colour => colour.name === selection.colour)
+        && Object.values(meshColors).every(hex => hex.toLowerCase() === selectedHex.toLowerCase())
+      const generic = singleCatalogueColour
+        ? matchedPurpose ? mapped.generic : { material: printSettings.materialType,
+          filament: printSettings.filamentType || 'pla', colour: selection.colour }
+        : null
       const response = await fetch('/api/custom-print/config', {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId: savedRequestId, printSettings, meshColors, mode,
-          generic: matchedPurpose && effectiveColours.some(colour => colour.name === selection.colour)
-            && Object.values(meshColors).every(hex => hex.toLowerCase() === selectedHex.toLowerCase()) ? mapped.generic : null }),
+          generic }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Could not save print settings')
@@ -205,6 +218,7 @@ export default function Result() {
             : locked ? <Link href="/account/prints" className="text-sm underline underline-offset-4">View your request and confirmed pricing</Link>
             : needsReview ? <p className="text-sm leading-relaxed text-amber-800">This material needs a manual quote. Availability and the printing process will be confirmed during review.</p>
             : <QuotePanel embedded metrics={geometryMetrics} settings={quoteSettings} options={quoteOptions}
+              selection={selection} stockStatus={stockStatus}
               onOptionsChange={setQuoteOptions} requestId={savedRequestId} disabled={disabled} />}
         </div>
         <SimplePrintSettings value={selection} onChange={changeSimple} colours={effectiveColours}

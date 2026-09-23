@@ -15,7 +15,7 @@ describe('purpose settings and saved configurations', () => {
     const mapped = mapPurposeToConfiguration({ purpose, colour: 'Blue' })
     const validated = validatePrintConfiguration({ ...mapped, meshColors: { Model: '#2356c7' } })
     const restored = restorePrintConfiguration(JSON.parse(JSON.stringify(validated)))
-    expect(restored.selection).toEqual({ purpose, colour: 'Blue', material: 'plastic' })
+    expect(restored.selection).toEqual({ purpose, colour: 'Blue', material: 'plastic', filament: 'pla' })
     expect(restored.printSettings).toEqual(mapped.printSettings)
     expect(restored.meshColors.Model).toBe('#2356c7')
   })

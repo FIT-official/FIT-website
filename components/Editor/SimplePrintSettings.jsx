@@ -1,12 +1,20 @@
 'use client'
 import { useId } from 'react'
-import { PURPOSE_PRESETS, SIMPLE_MATERIALS, DEFAULT_PRINT_COLOURS, DEFAULT_SIMPLE_SELECTION, coloursForMaterial } from '@/lib/quoting/genericPresets'
+import { PURPOSE_PRESETS, SIMPLE_MATERIALS, FILAMENT_MATERIALS, DEFAULT_PRINT_COLOURS, DEFAULT_SIMPLE_SELECTION, coloursForMaterial } from '@/lib/quoting/genericPresets'
 
 export default function SimplePrintSettings({ value = DEFAULT_SIMPLE_SELECTION, onChange,
   colours = DEFAULT_PRINT_COLOURS, disabled = false, fixed = false, customSettings = false }) {
   const id = useId()
-  const availableColours = fixed ? colours : coloursForMaterial(colours, value.material)
+  const fitFilaments = !fixed && colours.some(colour => colour.filament)
+  const availableColours = fixed ? colours : fitFilaments
+    ? colours.filter(colour => colour.filament === (value.filament || 'pla'))
+    : coloursForMaterial(colours, value.material)
   const change = patch => onChange({ ...value, ...patch }, { field: Object.keys(patch)[0] })
+  const changeFilament = filament => {
+    const first = colours.find(item => item.filament === filament)
+    onChange({ ...value, material: 'plastic', filament, colour: first?.name || '' }, { field: 'filament' })
+  }
+  const selected = availableColours.find(colour => colour.name === value.colour)
   return (
     <div className="space-y-5 text-textColor">
       {!fixed && value.material === 'plastic' && <fieldset disabled={disabled}>
@@ -29,6 +37,13 @@ export default function SimplePrintSettings({ value = DEFAULT_SIMPLE_SELECTION, 
       </fieldset>}
 
       {fixed ? <p className="text-sm leading-relaxed text-light">The maker has set this product’s print settings. Choose an available colour.</p>
+        : fitFilaments ? <label htmlFor={`${id}-filament`} className="block text-sm font-semibold">Material
+          <select id={`${id}-filament`} value={value.filament || 'pla'} disabled={disabled}
+            onChange={event => changeFilament(event.target.value)}
+            className="mt-2 min-h-11 w-full rounded-lg border border-borderColor bg-background px-3 text-sm font-normal">
+            {FILAMENT_MATERIALS.map(material => <option key={material.value} value={material.value}>{material.label}</option>)}
+          </select>
+        </label>
         : <label htmlFor={`${id}-material`} className="block text-sm font-semibold">Material
           <select id={`${id}-material`} value={value.material} disabled={disabled}
             onChange={event => change({ material: event.target.value })}
@@ -43,12 +58,14 @@ export default function SimplePrintSettings({ value = DEFAULT_SIMPLE_SELECTION, 
           onChange={event => change({ colour: event.target.value })}
           className="mt-2 min-h-11 w-full rounded-lg border border-borderColor bg-background px-3 text-sm font-normal">
           {!availableColours.some(colour => colour.name === value.colour) && <option value={value.colour}>{value.colour} (saved selection)</option>}
-          {availableColours.map(colour => <option key={colour.name} value={colour.name}>{colour.name}</option>)}
+          {availableColours.map(colour => <option key={colour.name} value={colour.name}>{colour.name}{colour.stockStatus === 'out_of_stock' ? ' · 4–6 weeks' : colour.stockStatus === 'unknown' ? ' · stock check pending' : ''}</option>)}
         </select>
       </label>
+      {selected?.stockStatus === 'out_of_stock' && <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">This colour is out of stock. Allow 4–6 weeks, or choose another colour. Rush and priority are unavailable.</p>}
+      {selected?.stockStatus === 'unknown' && <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">Stock cannot be confirmed right now. Rush and priority are unavailable until the inventory check succeeds.</p>}
       <div className="flex flex-wrap gap-2" aria-label="Available colours">
         {availableColours.slice(0, 12).map(colour => <button key={colour.name} type="button" disabled={disabled}
-          aria-label={`Choose ${colour.name}`} title={colour.name} aria-pressed={value.colour === colour.name}
+          aria-label={`Choose ${colour.name}`} title={`${colour.name}${colour.stockStatus === 'out_of_stock' ? ' · 4–6 weeks' : ''}`} aria-pressed={value.colour === colour.name}
           onClick={() => change({ colour: colour.name })}
           className={`h-8 w-8 rounded-full border-2 ${value.colour === colour.name ? 'border-textColor ring-2 ring-textColor/20' : 'border-borderColor'}`}
           style={{ backgroundColor: colour.hex }} />)}

@@ -56,13 +56,29 @@ describe('QuotePanel', () => {
 
   it('shows a low-confidence warning for non-watertight models', () => {
     render(<QuotePanel metrics={metrics} settings={settings} />)
-    expect(screen.getByText(/approximate/i)).toBeInTheDocument()
+    expect(screen.getByText(/geometry review/i)).toBeInTheDocument()
   })
 
   it('fetches and displays the server quote total', async () => {
     render(<QuotePanel metrics={metrics} settings={settings} />)
     expect(await screen.findByText('SGD 5.00')).toBeInTheDocument()
     expect(global.fetch).toHaveBeenCalledWith('/api/quote', expect.objectContaining({ method: 'POST' }))
+  })
+
+  it('shows the saved-model dimensions returned with a verified quote', async () => {
+    global.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ quote: {
+      ...mockQuote, inputs: { volumeCm3: 64, dimensionsCm: { length: 2.8, width: 2.8, height: 0.5 } },
+    } }) }))
+    render(<QuotePanel metrics={metrics} settings={settings} />)
+    expect(await screen.findByText('28.0 × 28.0 × 5.0 mm')).toBeInTheDocument()
+    expect(screen.getByText('64.0 cm³')).toBeInTheDocument()
+  })
+
+  it('disables priority and rush when the chosen colour is out of stock', () => {
+    render(<QuotePanel metrics={metrics} settings={settings} stockStatus="out_of_stock" />)
+    expect(screen.getByRole('checkbox', { name: 'Priority' })).toBeDisabled()
+    expect(screen.getByRole('checkbox', { name: /Expedite \/ rush/ })).toBeDisabled()
+    expect(screen.getByText(/4–6 weeks/)).toBeInTheDocument()
   })
 
   it('never sends a client-supplied price in the request body', async () => {

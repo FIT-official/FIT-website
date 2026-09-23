@@ -29,7 +29,7 @@ function money(amount, currency = 'sgd') {
  */
 const DEFAULT_OPTIONS = { postProcessing: false, specialRequest: false, priority: false, expedite: false }
 
-export default function QuotePanel({ metrics, settings, deliveryTypeName, options: optionsProp, onOptionsChange, requestId, embedded = false, disabled = false }) {
+export default function QuotePanel({ metrics, settings, deliveryTypeName, options: optionsProp, onOptionsChange, requestId, selection, stockStatus = 'unknown', embedded = false, disabled = false }) {
   // Controlled when `options`/`onOptionsChange` are supplied (so the editor can
   // persist the exact selection at submit); otherwise self-managed.
   const [internalOptions, setInternalOptions] = useState(DEFAULT_OPTIONS)
@@ -65,6 +65,7 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
             confidence: metrics.confidence || 'high',
             settings,
             options,
+            ...(selection ? { selection: { filament: selection.filament || 'pla', colour: selection.colour } } : {}),
             ...(deliveryTypeName ? { deliveryTypeName } : {}),
             // With a saved request the server can recompute print time from the
             // STORED model, which is what the cart will charge. `preview` asks
@@ -92,11 +93,12 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
       }
     }, 500)
     return () => { clearTimeout(t); controller.abort() }
-  }, [hasModel, metrics, settings, options, deliveryTypeName, requestId])
+  }, [hasModel, metrics, settings, options, deliveryTypeName, requestId, selection])
 
   if (!hasModel) return null
 
   const toggle = (key) => {
+    if (['priority', 'expedite'].includes(key) && stockStatus !== 'in_stock') return
     const next = { ...options, [key]: !options[key] }
     if (onOptionsChange) onOptionsChange(next)
     else setInternalOptions(next)
@@ -111,7 +113,7 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
 
       {metrics.confidence === 'low' && (
         <p className="mb-2 rounded bg-amber-50 border border-amber-200 px-2 py-1 text-[11px] text-amber-700">
-          This model isn’t watertight, so the estimate is approximate.
+          This model may need a geometry review before printing.
         </p>
       )}
 
@@ -119,14 +121,14 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
         <div className="flex justify-between">
           <span>Material volume</span>
           <span className="text-textColor whitespace-nowrap">
-            {Number(metrics.volumeCm3) < 0.1 ? '<0.1' : Number(metrics.volumeCm3).toFixed(1)} cm³
+            {Number(quote?.inputs?.volumeCm3 ?? metrics.volumeCm3) < 0.1 ? '<0.1' : Number(quote?.inputs?.volumeCm3 ?? metrics.volumeCm3).toFixed(1)} cm³
           </span>
         </div>
         <div className="flex justify-between" title="Bounding size of the model: length × width × height">
           <span>Size (L×W×H)</span>
           <span className="text-textColor whitespace-nowrap">
-            {(Number(metrics.dimensionsCm?.length || 0) * 10).toFixed(1)} × {(Number(metrics.dimensionsCm?.width || 0) * 10).toFixed(1)} ×{' '}
-            {(Number(metrics.dimensionsCm?.height || 0) * 10).toFixed(1)} mm
+            {(Number(quote?.inputs?.dimensionsCm?.length ?? metrics.dimensionsCm?.length ?? 0) * 10).toFixed(1)} × {(Number(quote?.inputs?.dimensionsCm?.width ?? metrics.dimensionsCm?.width ?? 0) * 10).toFixed(1)} ×{' '}
+            {(Number(quote?.inputs?.dimensionsCm?.height ?? metrics.dimensionsCm?.height ?? 0) * 10).toFixed(1)} mm
           </span>
         </div>
       </div>
@@ -182,7 +184,7 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
           const enabledAtZero = options[key] && line && !(line.amount > 0)
           return (
             <label key={key} className="flex items-center gap-2 text-[11px] text-light cursor-pointer">
-              <input type="checkbox" checked={options[key]} onChange={() => toggle(key)} />
+              <input type="checkbox" checked={options[key]} disabled={key === 'priority' && stockStatus !== 'in_stock'} onChange={() => toggle(key)} />
               <span>
                 {OPTION_LABELS[key]}
                 {options[key] && line?.amount > 0 && (
@@ -194,7 +196,7 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
           )
         })}
         <label className="flex items-center gap-2 text-[11px] font-medium text-textColor cursor-pointer">
-          <input type="checkbox" checked={options.expedite} onChange={() => toggle('expedite')} />
+          <input type="checkbox" checked={options.expedite} disabled={stockStatus !== 'in_stock'} onChange={() => toggle('expedite')} />
           <span>
             Expedite / rush
             {options.expedite && quote?.expedite?.applied && quote.expedite.amount > 0 && (
@@ -206,6 +208,7 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
           </span>
         </label>
       </fieldset>
+      {stockStatus !== 'in_stock' && <p className="mt-2 text-[11px] text-amber-800">{stockStatus === 'out_of_stock' ? 'Rush and priority need an in-stock colour. Allow 4–6 weeks for this colour, or choose another.' : 'Rush and priority are paused until stock can be checked.'}</p>}
       </details>
     </div>
   )

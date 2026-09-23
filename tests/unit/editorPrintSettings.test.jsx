@@ -61,15 +61,15 @@ describe('simple and advanced editor settings', () => {
     fireEvent.change(screen.getByLabelText('Infill (%)'), { target: { value: '31' } })
     fireEvent.change(screen.getByLabelText('Walls'), { target: { value: '3' } })
     fireEvent.click(screen.getByText('Advanced settings'))
-    fireEvent.change(screen.getByLabelText('Colour', { selector: 'select' }), { target: { value: 'Blue' } })
+    fireEvent.change(screen.getByLabelText('Colour', { selector: 'select' }), { target: { value: 'Cobalt Blue' } })
     expect(JSON.parse(screen.getByTestId('quote-settings').textContent)).toMatchObject({ wallLoops: 3, infillPercent: 31 })
     fireEvent.click(screen.getByRole('button', { name: 'Save settings & quote' }))
     await waitFor(() => expect(state.push).toHaveBeenCalledWith('/cart'))
     const [, init] = global.fetch.mock.calls.find(([url]) => url === '/api/custom-print/config')
     const saved = JSON.parse(init.body)
     expect(saved.printSettings).toMatchObject({ wallLoops: 3, sparseInfillDensity: 31 })
-    expect(saved.meshColors).toEqual({ Model: '#2356c7' })
-    expect(saved.generic).toBeNull()
+    expect(saved.meshColors).toEqual({ Model: '#0056b8' })
+    expect(saved.generic).toEqual({ material: 'plastic', filament: 'pla', colour: 'Cobalt Blue' })
   })
   it('restores custom details without substituting a purpose preset', async () => {
     state.request.printConfiguration.printSettings.wallLoops = 5

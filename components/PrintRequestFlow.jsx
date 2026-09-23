@@ -9,10 +9,11 @@ import { getMimeType, putWithProgress } from '@/utils/uploadHelpers'
 import useStore from '@/utils/store'
 import DesignLinkInput from '@/components/Editor/DesignLinkInput'
 import SimplePrintSettings from '@/components/Editor/SimplePrintSettings'
-import { DEFAULT_PRINT_COLOURS, DEFAULT_SIMPLE_SELECTION, PURPOSE_PRESETS, mapPurposeToConfiguration } from '@/lib/quoting/genericPresets'
+import { DEFAULT_SIMPLE_SELECTION, PURPOSE_PRESETS, mapPurposeToConfiguration } from '@/lib/quoting/genericPresets'
 import { printSettingsToQuoteSettings } from '@/lib/quoting/printSettingsToQuote'
 import { estimateMaterialGrams } from '@/lib/quoting/materialEstimate'
 import { estimateCreatorPrintPrice } from '@/lib/creatorPrintService/estimate'
+import { DEFAULT_FIT_COLOURS } from '@/lib/filamentCatalogue'
 import { exceedsBuild, normalizeDesignSource, validatePrintFile } from '@/lib/printRequestDraft'
 
 const Viewer = dynamic(() => import('@/components/Editor/viewer'), { ssr: false, loading: () => <p className="p-6 text-sm">Preparing preview…</p> })
@@ -36,7 +37,7 @@ export default function PrintRequestFlow() {
   const [metrics, setMetrics] = useState(null)
   const [source, setSource] = useState(null)
   const [selection, setSelection] = useState(DEFAULT_SIMPLE_SELECTION)
-  const [colours, setColours] = useState(DEFAULT_PRINT_COLOURS)
+  const [colours, setColours] = useState(DEFAULT_FIT_COLOURS)
   const [parsing, setParsing] = useState(false)
   const [importing, setImporting] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -50,8 +51,8 @@ export default function PrintRequestFlow() {
 
   useEffect(() => {
     let cancelled = false
-    fetch('/api/quote/config').then((res) => res.ok ? res.json() : null).then((data) => {
-      if (!cancelled && data?.printColours?.length) setColours(data.printColours)
+    fetch('/api/filament-availability').then((res) => res.ok ? res.json() : null).then((data) => {
+      if (!cancelled && data?.colours?.length) setColours(data.colours)
     }).catch(() => {})
     return () => { cancelled = true; loadVersion.current += 1 }
   }, [])
@@ -215,8 +216,7 @@ export default function PrintRequestFlow() {
                   meshColors={isCreatorFlow ? {} : { default: configuration.colourHex || '#e5e7eb' }} />
                   : <div className="flex h-full items-center justify-center px-8 text-center text-sm text-lightColor">{parsing ? 'Reading your model…' : 'Upload a model or import a link to explore the part in 3D.'}</div>}
               </div>
-              <div className="px-5 py-3 text-xs text-lightColor">{metrics?.dimensionsCm ? `${Object.values(metrics.dimensionsCm).map((value) => (value * 10).toFixed(1)).join(' × ')} mm · ` : ''}Colour and layer finish are approximate. The preview is not a slicer toolpath.</div>
-              {file && /\.(stl|obj)$/i.test(file.name) && <p className="px-5 pb-3 text-xs text-lightColor">STL and OBJ files are interpreted in millimetres. Check the displayed dimensions.{/\.obj$/i.test(file.name) ? ' The preview assumes the OBJ Y axis points up.' : ''}</p>}
+              {metrics?.dimensionsCm && <div className="px-5 py-3 text-xs text-lightColor">Size (L×W×H): {['length', 'width', 'height'].map(axis => (metrics.dimensionsCm[axis] * 10).toFixed(1)).join(' × ')} mm</div>}
             </section>
           </div>
           <div className="min-w-0 space-y-5">
@@ -250,7 +250,7 @@ export default function PrintRequestFlow() {
               {metrics?.confidence === 'low' && <p className="mt-3 text-xs text-amber-700">The mesh may be open or incomplete. This estimate needs a geometry check.</p>}
               {(error || fileError) && <p role="alert" className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error || fileError}</p>}
               {isLoaded && !user ? <SignInButton mode="modal"><button type="button" disabled={!file || parsing || importing} className={primary}>Sign in to continue</button></SignInButton> : <button type="submit" disabled={!file || Boolean(fileError) || submitting || parsing || importing || !isLoaded} className={primary}>{submitting ? progress > 0 && progress < 100 ? `Uploading ${progress}%` : 'Saving your request…' : isCreatorFlow ? `Send to ${creator.displayName}` : 'Continue to print settings'}</button>}
-              <p className="mt-3 text-center text-xs text-lightColor">{user ? 'No payment is taken at this step.' : 'Preview and estimate first. Sign in only when you are ready to save.'}</p>
+              {!user && <p className="mt-3 text-center text-xs text-lightColor">Sign in to save your print request.</p>}
             </section>
           </div>
         </form>
