@@ -59,6 +59,13 @@ describe('QuotePanel', () => {
     expect(screen.getByText(/geometry review/i)).toBeInTheDocument()
   })
 
+  it('shows the saved model warning when its geometry is less certain than the browser preview', async () => {
+    render(<QuotePanel metrics={{ ...metrics, confidence: 'high' }} settings={settings} />)
+    expect(screen.queryByText(/geometry review/i)).not.toBeInTheDocument()
+    expect(await screen.findByText('SGD 5.00')).toBeInTheDocument()
+    expect(screen.getByText(/geometry review/i)).toBeInTheDocument()
+  })
+
   it('fetches and displays the server quote total', async () => {
     render(<QuotePanel metrics={metrics} settings={settings} />)
     expect(await screen.findByText('SGD 5.00')).toBeInTheDocument()
