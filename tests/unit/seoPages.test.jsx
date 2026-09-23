@@ -3,12 +3,16 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { statusQuery } from '@/lib/blog/status'
+import { getHomeHeroContent } from '@/lib/homeHero'
 
 const state = vi.hoisted(() => ({
     products: [], post: null, filters: [], productFields: '', postFilter: null,
     search: '', fetch: vi.fn(),
 }))
 vi.mock('@/lib/db', () => ({ connectToDatabase: vi.fn(async () => {}) }))
+vi.mock('@/lib/homeHero', () => ({ getHomeHeroContent: vi.fn(async () => ({
+    text: 'Current creator services', heroImage: 'admin/uploads/home/current.jpg', darkOverlay: 20,
+})) }))
 vi.mock('@/models/Product', () => ({ default: {
     find: filter => {
         state.filters.push(filter)
@@ -81,8 +85,14 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
 describe('public landing pages before browser effects', () => {
     it('renders the homepage repair heading and crawlable service/shop links with its canonical URL', async () => {
-        const { default: Home, metadata } = await import('@/app/page')
-        const html = renderToStaticMarkup(<Home />)
+        const { default: Home, metadata, dynamic } = await import('@/app/page')
+        const page = await Home()
+        const html = renderToStaticMarkup(page)
+        expect(dynamic).toBe('force-dynamic')
+        expect(getHomeHeroContent).toHaveBeenCalledTimes(1)
+        expect(page.props.initialHeroContent).toEqual({
+            text: 'Current creator services', heroImage: 'admin/uploads/home/current.jpg', darkOverlay: 20,
+        })
         expect(html).toContain('3D Printer Repair and Filament in Singapore')
         expect(html).toContain('href="/blog/3d-printer-repair"')
         expect(html).toContain('href="/shop"')
