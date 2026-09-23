@@ -144,11 +144,16 @@ export default function Result() {
     setSubmitting(true)
     try {
       const mapped = mapPurposeToConfiguration({ ...selection, purpose: matchedPurpose }, effectiveColours)
+      const singleCatalogueColour = effectiveColours.some(colour => colour.name === selection.colour)
+        && Object.values(meshColors).every(hex => hex.toLowerCase() === selectedHex.toLowerCase())
+      const generic = singleCatalogueColour
+        ? matchedPurpose ? mapped.generic : { material: printSettings.materialType,
+          filament: printSettings.filamentType || 'pla', colour: selection.colour }
+        : null
       const response = await fetch('/api/custom-print/config', {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId: savedRequestId, printSettings, meshColors, mode,
-          generic: matchedPurpose && effectiveColours.some(colour => colour.name === selection.colour)
-            && Object.values(meshColors).every(hex => hex.toLowerCase() === selectedHex.toLowerCase()) ? mapped.generic : null }),
+          generic }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Could not save print settings')

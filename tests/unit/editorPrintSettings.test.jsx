@@ -69,7 +69,7 @@ describe('simple and advanced editor settings', () => {
     const saved = JSON.parse(init.body)
     expect(saved.printSettings).toMatchObject({ wallLoops: 3, sparseInfillDensity: 31 })
     expect(saved.meshColors).toEqual({ Model: '#0056b8' })
-    expect(saved.generic).toBeNull()
+    expect(saved.generic).toEqual({ material: 'plastic', filament: 'pla', colour: 'Cobalt Blue' })
   })
   it('restores custom details without substituting a purpose preset', async () => {
     state.request.printConfiguration.printSettings.wallLoops = 5
