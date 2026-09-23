@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import posthog from 'posthog-js'
 
 const OPTION_LABELS = {
@@ -29,7 +29,7 @@ function money(amount, currency = 'sgd') {
  */
 const DEFAULT_OPTIONS = { postProcessing: false, specialRequest: false, priority: false, expedite: false }
 
-export default function QuotePanel({ metrics, settings, deliveryTypeName, options: optionsProp, onOptionsChange, requestId }) {
+export default function QuotePanel({ metrics, settings, deliveryTypeName, options: optionsProp, onOptionsChange, requestId, embedded = false, disabled = false }) {
   // Controlled when `options`/`onOptionsChange` are supplied (so the editor can
   // persist the exact selection at submit); otherwise self-managed.
   const [internalOptions, setInternalOptions] = useState(DEFAULT_OPTIONS)
@@ -37,21 +37,19 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
   const [quote, setQuote] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const abortRef = useRef(null)
 
   const hasModel = !!(metrics && metrics.volumeCm3 > 0)
 
   useEffect(() => {
+    setQuote(null)
+    setError(null)
     if (!hasModel) {
-      setQuote(null)
+      setLoading(false)
       return
     }
+    const controller = new AbortController()
+    setLoading(true)
     const t = setTimeout(async () => {
-      abortRef.current?.abort()
-      const controller = new AbortController()
-      abortRef.current = controller
-      setLoading(true)
-      setError(null)
       try {
         const res = await fetch('/api/quote', {
           method: 'POST',
@@ -78,6 +76,7 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
         })
         if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error || 'Quote failed')
         const data = await res.json()
+        if (controller.signal.aborted) return
         setQuote(data.quote)
         posthog.capture('instant_quote_received', {
           total: data.quote.total,
@@ -87,12 +86,12 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
           expedite: options.expedite,
         })
       } catch (e) {
-        if (e.name !== 'AbortError') setError(e.message || 'Could not get a quote')
+        if (!controller.signal.aborted && e.name !== 'AbortError') setError(e.message || 'Could not get a quote')
       } finally {
-        setLoading(false)
+        if (!controller.signal.aborted) setLoading(false)
       }
     }, 500)
-    return () => clearTimeout(t)
+    return () => { clearTimeout(t); controller.abort() }
   }, [hasModel, metrics, settings, options, deliveryTypeName, requestId])
 
   if (!hasModel) return null
@@ -104,9 +103,9 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
   }
 
   return (
-    <div className="absolute top-4 left-4 z-40 w-72 rounded-md border border-borderColor bg-baseColor p-4 shadow-sm">
+    <div className={embedded ? 'w-full' : 'absolute top-4 left-4 z-40 w-72 rounded-md border border-borderColor bg-baseColor p-4 shadow-sm'} aria-live="polite">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold text-textColor tracking-tight">Instant Quote</h3>
+        <h3 className="text-sm font-semibold text-textColor tracking-tight">Price estimate</h3>
         {loading && <span className="text-[10px] text-light">updating…</span>}
       </div>
 
@@ -120,14 +119,14 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
         <div className="flex justify-between">
           <span>Material volume</span>
           <span className="text-textColor whitespace-nowrap">
-            {Number(metrics.volumeCm3).toFixed(1)} cm³
+            {Number(metrics.volumeCm3) < 0.1 ? '<0.1' : Number(metrics.volumeCm3).toFixed(1)} cm³
           </span>
         </div>
         <div className="flex justify-between" title="Bounding size of the model: length × width × height">
           <span>Size (L×W×H)</span>
           <span className="text-textColor whitespace-nowrap">
-            {Number(metrics.dimensionsCm?.length).toFixed(1)} × {Number(metrics.dimensionsCm?.width).toFixed(1)} ×{' '}
-            {Number(metrics.dimensionsCm?.height).toFixed(1)} cm
+            {(Number(metrics.dimensionsCm?.length || 0) * 10).toFixed(1)} × {(Number(metrics.dimensionsCm?.width || 0) * 10).toFixed(1)} ×{' '}
+            {(Number(metrics.dimensionsCm?.height || 0) * 10).toFixed(1)} mm
           </span>
         </div>
       </div>
@@ -136,6 +135,12 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
 
       {quote && (
         <>
+          <div className="mb-3 flex items-baseline justify-between text-textColor">
+            <span className="text-xs text-light">1 model file</span>
+            <span className="text-2xl font-semibold">{money(quote.total, quote.currency)}</span>
+          </div>
+          <details>
+          <summary className="mb-2 cursor-pointer text-xs font-medium">Price breakdown</summary>
           <ul className="flex flex-col gap-1 text-xs text-textColor">
             {quote.lines
               .filter((l) => l.amount > 0 || ['material', 'printTime', 'baseFee'].includes(l.key))
@@ -159,11 +164,7 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
               </li>
             )}
           </ul>
-
-          <div className="mt-2 flex justify-between border-t border-borderColor pt-2 text-sm font-semibold text-textColor">
-            <span>Total</span>
-            <span>{money(quote.total, quote.currency)}</span>
-          </div>
+          </details>
 
           {quote.minimumApplied && (
             <p className="mt-1.5 rounded bg-borderColor/20 px-2 py-1 text-[10px] text-light">
@@ -174,7 +175,8 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
         </>
       )}
 
-      <div className="mt-3 flex flex-col gap-1.5">
+      <details className="mt-3"><summary className="cursor-pointer text-xs font-medium">Optional services for instant quotes</summary>
+      <fieldset disabled={disabled} className="mt-2 flex flex-col gap-2">
         {Object.keys(OPTION_LABELS).map((key) => {
           const line = quote?.lines?.find((l) => l.key === OPTION_LINE_KEYS[key])
           const enabledAtZero = options[key] && line && !(line.amount > 0)
@@ -203,7 +205,8 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
             )}
           </span>
         </label>
-      </div>
+      </fieldset>
+      </details>
     </div>
   )
 }

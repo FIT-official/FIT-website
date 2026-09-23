@@ -13,8 +13,8 @@ vi.mock('@/lib/rateLimit', () => ({
     limitQuoteRequest: vi.fn(async () => ({ allowed: true, headers: {} })),
 }))
 vi.mock('@/models/AppSettings', () => ({ default: { findById: vi.fn() } }))
-vi.mock('@/models/CustomPrintRequest', () => ({ default: { findOne: vi.fn() } }))
-vi.mock('@/models/Product', () => ({ default: { findOne: vi.fn() } }))
+vi.mock('@/models/CustomPrintRequest', () => ({ default: { findOne: vi.fn(), findOneAndUpdate: vi.fn() } }))
+vi.mock('@/models/Product', () => ({ default: { findOne: vi.fn(), findOneAndUpdate: vi.fn() } }))
 vi.mock('@/lib/quoting/serverGeometry', () => ({
     recomputeMetricsFromModel: vi.fn(),
     supportsServerRecompute: vi.fn(() => true),
@@ -60,6 +60,9 @@ const requestDoc = () => ({
     requestId: REQUEST_ID,
     userId: 'user_1',
     status: 'configured',
+    quoteMode: 'instant',
+    updatedAt: new Date('2026-09-22T10:00:00Z'),
+    printConfiguration: { isConfigured: true, configuredAt: new Date('2026-09-22T09:00:00Z'), printSettings: { materialType: 'plastic', sparseInfillDensity: 20, wallLoops: 2, layerHeight: 0.2 } },
     statusHistory: [],
     modelFile: { s3Key: 'models/tower.stl', originalName: 'tower.stl' },
     save: vi.fn().mockResolvedValue({}),
@@ -68,11 +71,12 @@ const requestDoc = () => ({
 beforeEach(() => {
     vi.clearAllMocks()
     auth.mockResolvedValue({ userId: 'user_1' })
+    CustomPrintRequest.findOneAndUpdate.mockImplementation(async (_filter, update) => ({ ...update.$set, toObject: () => ({ ...update.$set, userId: 'user_1', requestId: REQUEST_ID }) }))
     AppSettings.findById.mockReturnValue({ lean: () => Promise.resolve(CALIBRATED_CONFIG) })
     Product.findOne.mockReturnValue({ lean: () => Promise.resolve(null) })
     s3.send.mockResolvedValue({
         ContentLength: 1024,
-        Body: { transformToByteArray: async () => new Uint8Array([1, 2, 3]) },
+        Body: { async *[Symbol.asyncIterator]() { yield new Uint8Array([1, 2, 3]) } },
     })
     // The tower's shape-aware time, as the server would recompute it.
     recomputeMetricsFromModel.mockResolvedValue({
@@ -97,6 +101,7 @@ describe('POST /api/quote — preview mode', () => {
         expect(data.quote.inputs.printHours).toBe(2.2)
         // Nothing persisted: no save, no status change, no notification.
         expect(doc.save).not.toHaveBeenCalled()
+        expect(CustomPrintRequest.findOneAndUpdate).not.toHaveBeenCalled()
         expect(doc.status).toBe('configured')
         expect(doc.statusHistory).toEqual([])
         expect(doc.quotedAt).toBeUndefined()
@@ -132,9 +137,12 @@ describe('POST /api/quote — preview mode', () => {
 
         await post({ ...baseBody, requestId: REQUEST_ID })
 
-        expect(doc.save).toHaveBeenCalled()
-        expect(doc.status).toBe('quoted')
-        expect(doc.quoteMode).toBe('instant')
+        expect(CustomPrintRequest.findOneAndUpdate).toHaveBeenCalledWith(
+            expect.objectContaining({ status: 'configured', paidAt: null, updatedAt: doc.updatedAt }),
+            expect.objectContaining({ $set: expect.objectContaining({ status: 'quoted', quoteMode: 'instant' }) }),
+            { new: true, runValidators: true },
+        )
+        expect(notifyCustomPrintEvent).toHaveBeenCalledOnce()
     })
 
     it('requires sign-in and ownership, exactly like a persist', async () => {
@@ -158,14 +166,16 @@ describe('POST /api/quote — preview mode', () => {
         expect(res.status).toBe(404)
     })
 
-    it('falls back to the heuristic when the stored model cannot be recomputed', async () => {
+    it('requires manual review when the stored model cannot be recomputed', async () => {
         CustomPrintRequest.findOne.mockResolvedValue(requestDoc())
         recomputeMetricsFromModel.mockResolvedValue(null)
 
-        const data = await (await post({ ...baseBody, requestId: REQUEST_ID, preview: true })).json()
-
-        expect(data.quote.inputs.printTimeSource).toBe('heuristic')
-        expect(data.quote.total).toBeGreaterThan(0)
+        const response = await post({ ...baseBody, requestId: REQUEST_ID, preview: true })
+        const data = await response.json()
+        expect(response.status).toBe(422)
+        expect(data.manualReviewRequired).toBe(true)
+        expect(data.quote).toBeUndefined()
+        expect(CustomPrintRequest.findOneAndUpdate).not.toHaveBeenCalled()
     })
 
     it('rejects a client that understates the volume (deviation policy still applies)', async () => {

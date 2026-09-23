@@ -1,217 +1,105 @@
 'use client'
 import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import JSZip from 'jszip'
 import { encode as arrayBufferToBase64 } from 'base64-arraybuffer'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import FileDrop from '@/components/Editor/fileDrop'
 import useStore from '@/utils/store'
-import { is3DModel, isZip } from '@/utils/isExtension'
 import { loadFileAsArrayBuffer } from '@/utils/buffers'
 import { safeInternalPath } from '@/utils/safeReturnPath'
-import { useUser } from '@clerk/nextjs'
+import { SignInButton, useUser } from '@clerk/nextjs'
 import posthog from 'posthog-js'
 
-const Loading = () => <div className="loader" />
-
 const Result = dynamic(() => import('@/components/Editor/result'), {
-    ssr: false,
-    loading: Loading,
+  ssr: false, loading: () => <p className="p-8 text-sm">Preparing the print editor…</p>,
 })
+const MAX_BYTES = 25 * 1024 * 1024
 
-const Editor = () => {
-    const { user, isLoaded } = useUser()
-    const searchParams = useSearchParams()
-    const productId = searchParams.get('productId')
-    const variantId = searchParams.get('variantId')
-    const requestId = searchParams.get('requestId') // NEW: Custom print request ID
-    const returnTo = searchParams.get('returnTo') // optional, validated same-origin path
-    const buffers = useStore((state) => state.buffers)
+export default function Editor() {
+  const { user, isLoaded } = useUser()
+  const searchParams = useSearchParams()
+  const productId = searchParams.get('productId')
+  const variantId = searchParams.get('variantId')
+  const requestId = searchParams.get('requestId')
+  const returnTo = searchParams.get('returnTo')
+  const buffers = useStore(state => state.buffers)
+  const [loading, setLoading] = useState(Boolean(productId || requestId))
+  const [error, setError] = useState('')
 
-    // Capture a safe return destination so the editor can route back to where it
-    // was launched from after saving (falls back to context defaults in Result).
-    useEffect(() => {
-        useStore.getState().setReturnTo(safeInternalPath(returnTo))
-    }, [returnTo])
-    const [productData, setProductData] = useState(null)
-    const [customRequestData, setCustomRequestData] = useState(null) // NEW
-    const [loading, setLoading] = useState(false)
+  useEffect(() => {
+    const state = useStore.getState()
+    state.setReturnTo(safeInternalPath(returnTo))
+  }, [returnTo])
 
-    // NEW: Load custom print request data when requestId is provided
-    useEffect(() => {
-        if (!requestId || !isLoaded || !user) return
+  useEffect(() => {
+    useStore.setState({ productId: productId || null, variantId: variantId || null,
+      requestId: requestId || null, isCustomPrint: Boolean(requestId),
+      productPrintConfig: null, productColours: null, colourVariantName: null })
+  }, [productId, variantId, requestId])
 
-        const loadCustomRequest = async () => {
-            setLoading(true)
-            try {
-                const requestRes = await fetch(`/api/custom-print?requestId=${requestId}`)
-                if (!requestRes.ok) {
-                    throw new Error('Failed to load custom print request')
-                }
-                const { request } = await requestRes.json()
-                setCustomRequestData(request)
-
-                // Load the 3D model file using s3Key
-                if (request.modelFile?.s3Key) {
-                    const modelRes = await fetch(`/api/proxy?key=${encodeURIComponent(request.modelFile.s3Key)}`)
-                    if (modelRes.ok) {
-                        const modelBuffer = await modelRes.arrayBuffer()
-                        const buffers = new Map()
-
-                        const fileName = request.modelFile.originalName || 'model.glb'
-                        buffers.set(fileName, modelBuffer)
-
-                        const { setBuffers, setFileName, setProductId, setVariantId } = useStore.getState()
-                        setBuffers(buffers)
-                        setFileName(fileName)
-                        setProductId('custom-print-request')
-                        setVariantId(requestId)
-
-                        useStore.setState({
-                            textOriginalFile: arrayBufferToBase64(modelBuffer),
-                            requestId: requestId, // Store request ID in state
-                            isCustomPrint: true
-                        })
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading custom print request:', error)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        loadCustomRequest()
-    }, [requestId, isLoaded, user])
-
-    // Load product data and associated 3D model when productId is provided (for cart items)
-    useEffect(() => {
-        if (!productId || !isLoaded || !user) return
-
-        const loadProductData = async () => {
-            setLoading(true)
-            try {
-                // Get product details
-                const productRes = await fetch(`/api/product/${productId}`)
-                if (!productRes.ok) {
-                    throw new Error('Failed to load product')
-                }
-                const product = await productRes.json()
-                setProductData(product)
-
-                // Product-print mode: surface the vendor's fixed config + the
-                // colour-type variant's options so the editor can lock settings
-                // and constrain the colour picker.
-                const colourVariant = (product.variantTypes || []).find((vt) => /colou?r/i.test(vt.name))
-                const isProductPrint = product.productType === 'print' && !!product.printConfig
-                useStore.setState({
-                    productPrintConfig: isProductPrint ? product.printConfig : null,
-                    productColours: isProductPrint ? (colourVariant?.options || []).map((o) => ({ name: o.name, hex: o.hex })) : null,
-                    colourVariantName: colourVariant?.name || null,
-                })
-
-                // Load the 3D model file
-                if (product.viewableModel) {
-                    const modelRes = await fetch(`/api/proxy?key=${encodeURIComponent(product.viewableModel)}`)
-                    if (modelRes.ok) {
-                        const modelBuffer = await modelRes.arrayBuffer()
-                        const buffers = new Map()
-
-                        // Determine file extension from the model URL
-                        const fileName = product.viewableModel.split('/').pop() || 'model.glb'
-                        buffers.set(fileName, modelBuffer)
-
-                        const { setBuffers, setFileName } = useStore.getState()
-                        setBuffers(buffers)
-                        setFileName(fileName)
-
-                        useStore.setState({
-                            textOriginalFile: arrayBufferToBase64(modelBuffer),
-                            productId: productId,
-                            variantId: variantId,
-                        })
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading product:', error)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        loadProductData()
-    }, [productId, variantId, isLoaded, user])
-
-    // The store is module-level, so clear product-print mode when this editor
-    // session isn't a product (e.g. navigating to a custom upload) — otherwise a
-    // stale `productPrintConfig` would wrongly lock settings.
-    useEffect(() => {
-        if (!productId) {
-            useStore.setState({ productPrintConfig: null, productColours: null, colourVariantName: null })
-        }
-    }, [productId])
-
-    const onDrop = useCallback(async (acceptedFiles) => {
-        const buffers = new Map()
-
-        await Promise.all(
-            acceptedFiles.map((file) =>
-                loadFileAsArrayBuffer(file).then((buffer) => {
-                    const arrayBuffer = buffer instanceof ArrayBuffer ? buffer : new ArrayBuffer(0)
-                    buffers.set(file.name?.replace(/^\//, '') ?? file.name, arrayBuffer)
-                })
-            )
-        )
-
-        for (const [path, buffer] of buffers.entries()) {
-            if (isZip(path)) {
-                const { files } = await JSZip.loadAsync(buffer)
-                for (const [innerPath, file] of Object.entries(files)) {
-                    const innerBuffer = await file.async('arraybuffer')
-                    buffers.set(innerPath, innerBuffer)
-                }
-                buffers.delete(path)
-            }
-        }
-
-        const filePath = Array.from(buffers.keys()).find((path) => is3DModel(path))
-
-        if (!filePath) return
-
-        const { setBuffers, setFileName } = useStore.getState()
-        setBuffers(buffers)
-        setFileName(filePath)
-
+  useEffect(() => {
+    if (!requestId && !productId) { setLoading(false); return }
+    useStore.setState({ buffers: null, scene: null, geometryMetrics: null })
+    if (!isLoaded || !user) { setLoading(false); return }
+    const abort = new AbortController()
+    setLoading(true); setError('')
+    ;(async () => {
+      try {
+        const endpoint = requestId ? `/api/custom-print?requestId=${encodeURIComponent(requestId)}` : `/api/product/${encodeURIComponent(productId)}`
+        const response = await fetch(endpoint, { signal: abort.signal })
+        const data = await response.json()
+        if (!response.ok) throw new Error(data.error || 'This print request could not be opened.')
+        const item = requestId ? data.request : data
+        if (!item) throw new Error('This print request was not found.')
+        const key = requestId ? item.modelFile?.s3Key : item.viewableModel
+        if (!key) throw new Error('No model is attached to this request yet.')
+        const modelResponse = await fetch(`/api/proxy?key=${encodeURIComponent(key)}`, { signal: abort.signal })
+        if (!modelResponse.ok) throw new Error('The model could not be downloaded. Reload this page to retry.')
+        if (Number(modelResponse.headers.get('content-length')) > MAX_BYTES) throw new Error('This model is larger than the 25 MB preview limit.')
+        const buffer = await modelResponse.arrayBuffer()
+        if (buffer.byteLength > MAX_BYTES) throw new Error('This model is larger than the 25 MB preview limit.')
+        if (abort.signal.aborted) return
+        const filename = requestId ? item.modelFile.originalName || key.split('/').pop() : key.split('/').pop()
+        const state = useStore.getState()
+        state.setFileName(filename)
+        state.setBuffers(new Map([[filename, buffer]]))
+        const colourVariant = item.variantTypes?.find(variant => /colou?r/i.test(variant.name))
+        const fixed = !requestId && item.productType === 'print' && item.printConfig
         useStore.setState({
-            textOriginalFile: buffers.get(filePath) ? arrayBufferToBase64(buffers.get(filePath)) : '',
+          textOriginalFile: arrayBufferToBase64(buffer),
+          productId: requestId ? 'custom-print-request' : productId,
+          variantId: requestId || variantId, requestId: requestId || null,
+          isCustomPrint: Boolean(requestId), productPrintConfig: fixed ? item.printConfig : null,
+          productColours: fixed ? (colourVariant?.options || []).map(option => ({ name: option.name, hex: option.hex })) : null,
+          colourVariantName: fixed ? colourVariant?.name || null : null,
         })
+      } catch (err) { if (!abort.signal.aborted) setError(err.message || 'The model could not be opened.') }
+      finally { if (!abort.signal.aborted) setLoading(false) }
+    })()
+    return () => abort.abort()
+  }, [requestId, productId, variantId, isLoaded, user])
 
-        posthog.capture('model_uploaded', {
-            file_extension: (filePath.split('.').pop() || '').toLowerCase(),
-            file_size_bytes: buffers.get(filePath)?.byteLength || 0,
-            from_zip: acceptedFiles.length !== buffers.size,
-        })
-    }, [])
+  const onDrop = useCallback(async files => {
+    setError('')
+    try {
+      if (files.reduce((bytes, file) => bytes + file.size, 0) > MAX_BYTES) throw new Error('Keep model files below 25 MB in total.')
+      const nextBuffers = new Map()
+      for (const file of files) nextBuffers.set(file.name, await loadFileAsArrayBuffer(file))
+      const filePath = [...nextBuffers.keys()].find(name => /\.(glb|gltf|obj|stl|3mf)$/i.test(name))
+      if (!filePath) throw new Error('Choose an STL, OBJ, 3MF, GLB or GLTF model.')
+      const state = useStore.getState()
+      state.setFileName(filePath); state.setBuffers(nextBuffers)
+      useStore.setState({ textOriginalFile: arrayBufferToBase64(nextBuffers.get(filePath)), requestId: null,
+        productId: null, variantId: null, isCustomPrint: false })
+      posthog.capture('model_uploaded', { file_extension: filePath.split('.').pop().toLowerCase(), file_size_bytes: nextBuffers.get(filePath).byteLength })
+    } catch (err) { setError(err.message); throw err }
+  }, [])
 
-
-    return (
-        <div className="flex flex-col items-center justify-center h-screen">
-            <main className="flex flex-col items-center justify-center flex-1 w-full" style={{ height: 'calc(100vh - 56px)' }}>
-                {loading ? (
-                    <div className="loader" />
-                ) : buffers ? (
-                    <Result />
-                ) : (productId || requestId) ? (
-                    <div className="flex flex-col items-center justify-center gap-4">
-                        <div className="loader" />
-                        <p className="text-lightColor text-sm">Loading 3D model...</p>
-                    </div>
-                ) : (
-                    <FileDrop onDrop={onDrop} />
-                )}
-            </main>
-        </div>
-    )
+  return <main className="w-full min-h-[calc(100vh-56px)]" style={{ height: 'calc(100dvh - 56px)' }}>
+    {error ? <div className="mx-auto flex max-w-xl flex-col gap-4 p-8"><p role="alert" className="text-red-700">{error}</p><Link href="/prints/request" className="underline">Start a new print request</Link><button type="button" onClick={() => window.location.reload()} className="text-left underline">Reload this model</button></div>
+      : loading ? <p className="p-8 text-center text-sm">Loading your model…</p>
+      : (productId || requestId) && !user ? <div className="p-8 text-center"><p className="mb-4">Sign in to open your saved print request.</p><SignInButton mode="modal"><button type="button" className="rounded bg-black px-5 py-3 text-white">Sign in</button></SignInButton></div>
+      : buffers ? <Result /> : <FileDrop onDrop={onDrop} />}
+  </main>
 }
-
-export default Editor

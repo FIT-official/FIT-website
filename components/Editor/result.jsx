@@ -1,828 +1,250 @@
-import React, { useEffect, useMemo, useCallback, startTransition, useRef } from 'react'
+'use client'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import saveAs from 'file-saver'
-import { Leva, useControls, button, levaStore } from 'leva'
 import useStore from '@/utils/store'
 import Viewer from './viewer'
 import QuotePanel from './QuotePanel'
-import { mapGenericToPrintSettings, DEFAULT_PRINT_COLOURS, QUALITY_MAP, STRENGTH_MAP } from '@/lib/quoting/genericPresets'
-import { modifiedSettings } from '@/lib/editor/modifiedSettings'
+import SimplePrintSettings from './SimplePrintSettings'
+import AdvancedPrintSettings from './AdvancedPrintSettings'
+import { applySimpleSelection, DEFAULT_PRINT_COLOURS, DEFAULT_SIMPLE_SELECTION,
+  mapPurposeToConfiguration, purposeFromPrintSettings, restorePrintConfiguration } from '@/lib/quoting/genericPresets'
+import { printSettingsToQuoteSettings } from '@/lib/quoting/printSettingsToQuote'
 import { useToast } from '@/components/General/ToastProvider'
-import { useState } from 'react'
 import posthog from 'posthog-js'
 
-const whiteTheme = {
-  colors: {
-    elevation1: '#fcfcfc',
-    elevation2: '#e6e6e6',
-    elevation3: '#eeeeee',
-    // Leva text emphasis (light theme). highlight3 is the value text typed
-    // inside number/string fields — keep it near-black so it's clearly legible
-    // (was too light at #666). highlight1 is subtle text (units/placeholders).
-    highlight1: '#888888',
-    highlight2: '#333333',
-    highlight3: '#1f1f1f',
-    accent1: '#ffffff',
-    accent2: '#aaaaaa',
-    accent3: '#666666',
-    folder: '#666666',
-    toolTip: '#000000',
-  },
-  fonts: { mono: 'Montserrat' },
-}
+const EDITABLE_STATUSES = ['pending_upload', 'pending_config', 'configured', 'quoted']
+const INITIAL_OPTIONS = { postProcessing: false, specialRequest: false, priority: false, expedite: false }
 
-// Default settings (module-scope so they're stable references for reset logic).
-const defaultPrintability = {
-  layerHeight: 0.2, initialLayerHeight: 0.2, wallLoops: 2,
-  internalSolidInfillPattern: 'Rectilinear', sparseInfillDensity: 20,
-  sparseInfillPattern: 'Rectilinear', nozzleDiameter: 0.4,
-  enableSupport: false, supportType: 'Normal', printPlate: 'Textured',
-}
-const defaultVisual = {
-  background: '#e3e3e3', wireframe: false, materialType: 'plastic',
-}
-const defaultLighting = {
-  autoRotate: true, lightIntensity: 1, preset: 'rembrandt', environment: 'city',
-}
-const defaultGeneric = { strength: 'Normal', quality: 'Medium', colour: 'White' }
-
-const Result = () => {
-  const { fileName, scene, buffers, generateScene, orderId, productId, variantId, geometryMetrics, returnTo,
-    productPrintConfig, productColours, colourVariantName } = useStore()
+export default function Result() {
+  const { fileName, scene, buffers, generateScene, productId, variantId, requestId, geometryMetrics,
+    returnTo, productPrintConfig, productColours, colourVariantName, loadError: modelLoadError } = useStore()
   const { showToast } = useToast()
   const router = useRouter()
-  // Product-print mode: a productType:"print" item bought via "Order Print".
-  // Settings are vendor-fixed and the colour picker is limited to the product's
-  // offered colours. See openspec `migrate-print-delivery-to-custom-requests`.
   const isProductPrint = !!productPrintConfig
-  // Colour/material catalogue (admin-curated via AppSettings.printColours), with
-  // the built-in defaults as fallback.
-  const [colourCatalogue, setColourCatalogue] = useState(DEFAULT_PRINT_COLOURS)
-  // Customer's quote options/expedite, shared with QuotePanel so they persist at submit.
-  const [quoteOptions, setQuoteOptions] = useState({
-    postProcessing: false, specialRequest: false, priority: false, expedite: false,
-  })
-  const [meshNames, setMeshNames] = useState([])
-  const [submittingConfig, setSubmittingConfig] = useState(false)
-  const [configLoaded, setConfigLoaded] = useState(false)
-  const [advancedMode, setAdvancedMode] = useState(false)
-  // Generic (plain-language) configuration: Strength × Quality × Colour.
-  const [generic, setGeneric] = useState(defaultGeneric)
-  const [genericMaterial, setGenericMaterial] = useState('plastic')
+  const savedRequestId = isProductPrint ? null : requestId || variantId
+  const [colours, setColours] = useState(DEFAULT_PRINT_COLOURS)
+  const [configuration, setConfiguration] = useState(() => restorePrintConfiguration())
+  const [quoteOptions, setQuoteOptions] = useState(INITIAL_OPTIONS)
+  const [advanced, setAdvanced] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [configLoaded, setConfigLoaded] = useState(!savedRequestId)
+  const [loadError, setLoadError] = useState('')
+  const [locked, setLocked] = useState(false)
+  const [creatorManaged, setCreatorManaged] = useState(false)
+  const [wireframe, setWireframe] = useState(false)
+  const [autoRotate, setAutoRotate] = useState(false)
+  const [background, setBackground] = useState('#f4f3ef')
+  const viewerContainer = useRef(null)
+  const { printSettings, selection } = configuration
+  const meshNames = useMemo(() => {
+    const names = []
+    scene?.traverse(object => { if (object.isMesh && object.name) names.push(object.name) })
+    return [...new Set(names)]
+  }, [scene])
+  const effectiveColours = useMemo(() => isProductPrint && productColours?.length
+    ? productColours.map(colour => ({ name: colour.name,
+      hex: colour.hex || colours.find(entry => entry.name === colour.name)?.hex || '#cccccc' }))
+    : colours, [isProductPrint, productColours, colours])
+  const selectedHex = effectiveColours.find(colour => colour.name === selection.colour)?.hex || '#ffffff'
+  const meshColors = useMemo(() => Object.fromEntries(meshNames.map(name =>
+    [name, configuration.meshColors[name] || selectedHex])), [meshNames, configuration.meshColors, selectedHex])
+  const quoteSettings = useMemo(() => printSettingsToQuoteSettings(printSettings), [printSettings])
+  const matchedPurpose = purposeFromPrintSettings(printSettings)
+  const needsReview = printSettings.materialType !== 'plastic'
 
-  // Load the admin-curated colour catalogue (falls back to defaults on failure).
   useEffect(() => {
     let active = true
-    fetch('/api/quote/config')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (active && d?.printColours?.length) setColourCatalogue(d.printColours) })
-      .catch(() => {})
+    fetch('/api/quote/config').then(response => response.ok ? response.json() : null)
+      .then(data => { if (active && data?.printColours?.length) setColours(data.printColours) }).catch(() => {})
     return () => { active = false }
   }, [])
 
-  // The colours the customer may pick. For product prints this is the product's
-  // offered colours only (hex resolved from the admin catalogue by name when an
-  // option was saved without one); otherwise the full admin catalogue.
-  const effectiveColours = useMemo(() => {
-    if (isProductPrint && productColours?.length) {
-      return productColours.map((c) => ({
-        name: c.name,
-        hex: c.hex || colourCatalogue.find((x) => x.name === c.name)?.hex || '#cccccc',
-      }))
-    }
-    return colourCatalogue
-  }, [isProductPrint, productColours, colourCatalogue])
-
-  // Refs to store current values for submission
-  const currentPrintabilityRef = useRef({})
-  const currentVisualRef = useRef({})
-  const currentLightingRef = useRef({})
-
-  // Reset configLoaded when productId or variantId changes
-  useEffect(() => {
-    setConfigLoaded(false)
-  }, [productId, variantId])
-
-  // Collect mesh names when scene changes
-  useEffect(() => {
-    if (!scene) return
-    const names = []
-    scene.traverse((obj) => {
-      if (obj.isMesh && obj.name) {
-        names.push(obj.name)
-      }
-    })
-    setMeshNames(names)
-  }, [scene])
-
-  // Load the previously saved configuration when re-editing a request, and
-  // apply it to the editor state (generic selection, leva print settings, mesh
-  // colours). Waits for the scene so the per-mesh leva controls exist before
-  // their colours are set.
-  useEffect(() => {
-    if (!productId) {
-      setConfigLoaded(true)
-      return
-    }
-
-    if (configLoaded || !scene) return
-
-    // Product prints: no saved request to load — apply the vendor's fixed
-    // settings and default to the first offered colour. Settings are locked.
-    if (isProductPrint) {
-      applyGeneric({ ...defaultGeneric, colour: effectiveColours[0]?.name || defaultGeneric.colour })
-      setConfigLoaded(true)
-      return
-    }
-
-    const loadConfigFromDB = async () => {
-      try {
-        const requestId = variantId // variantId is the requestId for custom prints
-        const response = await fetch(`/api/custom-print?requestId=${requestId}`)
-
-        if (response.ok) {
-          const data = await response.json()
-          const cfg = data?.request?.printConfiguration
-          if (cfg?.isConfigured) {
-            const ps = cfg.printSettings || {}
-            const levaValues = {}
-            const setIf = (key, value) => {
-              if (value !== undefined && value !== null) levaValues[key] = value
-            }
-            setIf('printability.layerHeight', ps.layerHeight)
-            setIf('printability.initialLayerHeight', ps.initialLayerHeight)
-            setIf('printability.wallLoops', ps.wallLoops)
-            setIf('printability.internalSolidInfillPattern', ps.internalSolidInfillPattern)
-            setIf('printability.sparseInfillDensity', ps.sparseInfillDensity)
-            setIf('printability.sparseInfillPattern', ps.sparseInfillPattern)
-            setIf('printability.nozzleDiameter', ps.nozzleDiameter)
-            setIf('printability.enableSupport', ps.enableSupport)
-            setIf('printability.supportType', ps.supportType)
-            setIf('printability.printPlate', ps.printPlate)
-            setIf('visual.materialType', ps.materialType)
-            for (const [meshName, hex] of Object.entries(cfg.meshColors || {})) {
-              setIf(`visual.${meshName}`, hex)
-            }
-            levaStore.set(levaValues, false)
-
-            const g = cfg.generic
-            if (g?.strength || g?.quality || g?.colour) {
-              setGeneric({
-                strength: g.strength || defaultGeneric.strength,
-                quality: g.quality || defaultGeneric.quality,
-                colour: g.colour || defaultGeneric.colour,
-              })
-              setGenericMaterial(g.material || 'plastic')
-            } else if (data?.request?.quoteMode === 'manual') {
-              // Saved through the advanced flow — reopen it that way.
-              setAdvancedMode(true)
-            }
-          }
-        }
-      } catch (e) {
-        console.error('Failed to load configuration from MongoDB:', e)
-      } finally {
-        setConfigLoaded(true)
-      }
-    }
-
-    loadConfigFromDB()
-    // applyGeneric intentionally omitted (defined below; stable enough here).
-  }, [productId, variantId, configLoaded, scene, isProductPrint, effectiveColours])
-
-  // Leva controls for visual config, including mesh colors. Mesh colours are a
-  // dropdown of the admin-curated catalogue (AppSettings.printColours) — not a
-  // free hex picker — so customers can only choose colours the farm stocks.
-  // The control value is the colour's hex; the dropdown label is its name.
-  const [visualConfig, setVisualConfig] = useControls('visual', () => {
-    const controls = {
-      background: '#e3e3e3',
-      wireframe: false,
-      materialType: {
-        value: 'plastic',
-        options: ['plastic', 'resin', 'metal', 'sandstone'],
-      },
-    }
-
-    // Map { colourName: hex } for the leva select; de-dupe hexes so leva can
-    // resolve a value back to a single option.
-    const colourOptions = {}
-    colourCatalogue.forEach((c) => {
-      if (c?.name && c?.hex && !Object.values(colourOptions).includes(c.hex)) {
-        colourOptions[c.name] = c.hex
-      }
-    })
-    const defaultHex = colourOptions['White'] || Object.values(colourOptions)[0] || '#ffffff'
-
-    meshNames.forEach((name) => {
-      controls[name] = { value: defaultHex, options: colourOptions, label: `${name}` }
-    })
-
-    return controls
-  }, { collapsed: true }, [meshNames, colourCatalogue])
-
-
-  const [lighting] = useControls('lighting', () => ({
-    autoRotate: true,
-    lightIntensity: {
-      value: 1,
-      min: 0,
-      max: 2,
-      step: 0.1
-    },
-    preset: {
-      value: 'rembrandt',
-      options: ['rembrandt', 'portrait', 'upfront', 'soft'],
-    },
-    environment: {
-      value: 'city',
-      options: [
-        'sunset', 'dawn', 'night', 'warehouse', 'forest',
-        'apartment', 'studio', 'city', 'park', 'lobby',
-      ],
-    },
-  }), { collapsed: true })
-
-  const [printability, setPrintability] = useControls('printability', () => ({
-    // Layer Height
-    layerHeight: {
-      value: 0.2,
-      min: 0.1,
-      max: 0.4,
-      step: 0.01,
-      label: 'Layer height (mm)'
-    },
-    initialLayerHeight: {
-      value: 0.2,
-      min: 0.1,
-      max: 0.4,
-      step: 0.01,
-      label: 'Initial layer height (mm)'
-    },
-    // Walls
-    wallLoops: {
-      value: 2,
-      min: 1,
-      max: 4,
-      step: 1,
-      label: 'Wall loops'
-    },
-    internalSolidInfillPattern: {
-      value: 'Rectilinear',
-      options: [
-        'Rectilinear',
-        'Concentric',
-        'Monotonic',
-        'Monotonic line',
-        'Aligned Rectilinear',
-      ],
-      label: 'Internal solid infill pattern',
-    },
-    // Sparse Infill
-    sparseInfillDensity: {
-      value: 20,
-      min: 5,
-      max: 40,
-      step: 1,
-      label: 'Sparse infill density (%)'
-    },
-    sparseInfillPattern: {
-      value: 'Rectilinear',
-      options: [
-        'Rectilinear',
-        'Grid',
-        'HoneyComb',
-        'Triangles',
-        'Lightning',
-        'Concentric',
-        'Aligned Rectilinear',
-      ],
-      label: 'Sparse infill pattern',
-    },
-    nozzleDiameter: {
-      value: 0.4,
-      options: [0.2, 0.4, 0.6, 0.8],
-      label: 'Nozzle diameter (mm)',
-    },
-    // Support
-    enableSupport: {
-      value: false,
-      label: 'Enable support'
-    },
-    supportType: {
-      value: 'Normal',
-      options: ['Tree', 'Normal'],
-      label: 'Support type',
-    },
-    // Print plate
-    printPlate: {
-      value: 'Textured',
-      options: ['Textured', 'Smooth'],
-      label: 'Print plate',
-    },
-  }), { collapsed: true })  // Update refs whenever control values change
-  useEffect(() => {
-    currentPrintabilityRef.current = printability
-  }, [printability])
-
-  useEffect(() => {
-    currentVisualRef.current = visualConfig
-  }, [visualConfig])
-
-  useEffect(() => {
-    currentLightingRef.current = lighting
-  }, [lighting])
-
-  // Map the editor's print controls to the Instant Quoting Engine's settings shape.
-  // In generic mode the colour can imply a denser material (wood/marble/etc.),
-  // so the quote uses the generic material; advanced mode uses the leva value.
-  const quoteSettings = useMemo(() => ({
-    materialType: advancedMode ? visualConfig.materialType : genericMaterial,
-    infillPercent: printability.sparseInfillDensity,
-    wallLoops: printability.wallLoops,
-    nozzleMm: printability.nozzleDiameter,
-    layerHeightMm: printability.layerHeight,
-    enableSupport: printability.enableSupport,
-  }), [
-    advancedMode,
-    genericMaterial,
-    visualConfig.materialType,
-    printability.sparseInfillDensity,
-    printability.wallLoops,
-    printability.nozzleDiameter,
-    printability.layerHeight,
-    printability.enableSupport,
-  ])
-
-  // Apply a generic (Strength/Quality/Colour) selection to the underlying leva
-  // print settings + mesh colours, so generic mode is a friendly front-end over
-  // the same printSettings advanced mode edits.
-  const applyGeneric = useCallback((next) => {
-    setGeneric(next)
-    // Product prints: settings are vendor-fixed; only the colour changes.
-    if (isProductPrint && productPrintConfig) {
-      const colour = effectiveColours.find((c) => c.name === next.colour)
-      levaStore.set({
-        'printability.layerHeight': productPrintConfig.layerHeight,
-        'printability.wallLoops': productPrintConfig.wallLoops,
-        'printability.sparseInfillDensity': productPrintConfig.sparseInfillDensity,
-        'printability.nozzleDiameter': productPrintConfig.nozzleDiameter,
-        'printability.enableSupport': productPrintConfig.enableSupport,
-        ...(colour?.hex ? Object.fromEntries(meshNames.map((n) => [`visual.${n}`, colour.hex])) : {}),
-      }, false)
-      setGenericMaterial(productPrintConfig.materialType || 'plastic')
-      return
-    }
-    const m = mapGenericToPrintSettings(next, colourCatalogue)
-    setGenericMaterial(m.materialType)
-    levaStore.set({
-      'printability.layerHeight': m.layerHeight,
-      'printability.initialLayerHeight': m.initialLayerHeight,
-      'printability.wallLoops': m.wallLoops,
-      'printability.sparseInfillDensity': m.sparseInfillDensity,
-      ...(m.colourHex
-        ? Object.fromEntries(meshNames.map((n) => [`visual.${n}`, m.colourHex]))
-        : {}),
-    }, false)
-  }, [meshNames, colourCatalogue, isProductPrint, productPrintConfig, effectiveColours])
-
-  // Reset every setting (visual/lighting/printability + mesh colours) and the
-  // generic selection back to defaults. Shared by the leva control and the
-  // generic-mode button so "default" is single-sourced.
-  // Stable mesh-colour map so the viewer's scene-styler only re-runs when a
-  // colour actually changes (not on every unrelated re-render).
-  const meshColors = useMemo(
-    () =>
-      Object.fromEntries(
-        meshNames
-          .map((name) => [name, visualConfig[name]])
-          .filter(([, color]) => color),
-      ),
-    [meshNames, visualConfig],
-  )
-
-  const resetAllToDefaults = useCallback(() => {
-    levaStore.set({
-      'visual.background': defaultVisual.background,
-      'visual.wireframe': defaultVisual.wireframe,
-      'visual.materialType': defaultVisual.materialType,
-      'lighting.autoRotate': defaultLighting.autoRotate,
-      'lighting.lightIntensity': defaultLighting.lightIntensity,
-      'lighting.preset': defaultLighting.preset,
-      'lighting.environment': defaultLighting.environment,
-      ...Object.fromEntries(
-        Object.entries(defaultPrintability).map(([k, v]) => [`printability.${k}`, v])
-      ),
-      ...Object.fromEntries(meshNames.map((name) => [`visual.${name}`, '#ffffff'])),
-    }, false)
-    setGeneric(defaultGeneric)
-    setGenericMaterial('plastic')
-  }, [meshNames])
-
-  const downloadImage = useCallback(async () => {
-    try {
-      showToast('Preparing image...', 'info')
-      const canvas = document.querySelector('canvas')
-      if (!canvas) throw new Error('No canvas found.')
-      const image = canvas
-        .toDataURL('image/png')
-        .replace('image/png', 'image/octet-stream')
-      saveAs(image, `${fileName?.split('.')[0] || 'render'}.png`)
-      showToast('Downloaded!', 'success')
-    } catch (error) {
-      showToast('Failed to download image: ' + error.message, 'error')
-    }
-  }, [fileName, showToast])
-
-  // Submit configuration for print order or save to MongoDB.
-  // `mode` decides the flow: 'instant' (simple) auto-quotes via /api/quote and
-  // makes the request immediately payable; 'manual' (advanced) saves config and
-  // waits for admin review (the API sends an admin notification email).
-  const submitConfiguration = useCallback(async (mode = 'manual') => {
-    setSubmittingConfig(true)
-    try {
-      // Get current values from refs (most up-to-date)
-      const currentPrintability = currentPrintabilityRef.current
-      const currentVisual = currentVisualRef.current
-      const currentLighting = currentLightingRef.current
-
-      // Extract only mesh colors (not background, wireframe, materialType)
-      const meshColors = {}
-      meshNames.forEach(name => {
-        if (currentVisual[name] && currentVisual[name] !== '#ffffff') {
-          meshColors[name] = currentVisual[name]
-        }
-      })
-
-      const configurationData = {
-        printSettings: {
-          layerHeight: currentPrintability.layerHeight,
-          initialLayerHeight: currentPrintability.initialLayerHeight,
-          materialType: currentVisual.materialType,
-          wallLoops: currentPrintability.wallLoops,
-          internalSolidInfillPattern: currentPrintability.internalSolidInfillPattern,
-          sparseInfillDensity: currentPrintability.sparseInfillDensity,
-          sparseInfillPattern: currentPrintability.sparseInfillPattern,
-          nozzleDiameter: currentPrintability.nozzleDiameter,
-          enableSupport: currentPrintability.enableSupport,
-          supportType: currentPrintability.supportType,
-          printPlate: currentPrintability.printPlate,
-        },
-        meshColors: meshColors,
-        // Simple-mode selection — sent only for instant quotes so the cart can
-        // show the friendly Strength/Quality/Colour view.
-        generic: mode === 'instant'
-          ? { strength: generic.strength, quality: generic.quality, colour: generic.colour, material: genericMaterial }
-          : undefined,
-        mode,
-      }
-
-      if (productId) {
-        // Save custom print configuration to MongoDB
-        const cpRequestId = variantId // variantId is the requestId for custom prints
-        const response = await fetch('/api/custom-print/config', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            requestId: cpRequestId,
-            ...configurationData,
-          }),
-        })
-
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.error || 'Failed to save configuration')
-        }
-
-        // Instant mode: persist a server-authoritative quote so the request is
-        // immediately payable. Surface failures (the previous best-effort silent
-        // path left customers stuck on "Preparing your quote").
-        if (mode === 'instant') {
-          if (!(geometryMetrics?.volumeCm3 > 0)) {
-            throw new Error('Geometry not measured yet — please reload the model and try again.')
-          }
-          const quoteRes = await fetch('/api/quote', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              requestId: cpRequestId,
-              mode: 'instant',
-              volumeCm3: geometryMetrics.volumeCm3,
-              dimensionsCm: {
-                length: geometryMetrics.dimensionsCm?.length || 0,
-                width: geometryMetrics.dimensionsCm?.width || 0,
-                height: geometryMetrics.dimensionsCm?.height || 0,
-              },
-              confidence: geometryMetrics.confidence || 'high',
-              settings: quoteSettings,
-              options: quoteOptions,
-            }),
-          })
-          if (!quoteRes.ok) {
-            const errBody = await quoteRes.json().catch(() => ({}))
-            throw new Error(errBody.error || 'Failed to generate instant quote')
-          }
-          showToast('Instant quote ready, checkout when you’re ready!', 'success')
-        } else {
-          showToast(
-            'Configuration sent for review — we’ll follow up with a quote shortly.',
-            'success',
-          )
-        }
-        posthog.capture('print_config_saved', {
-          mode,
-          volume_cm3: geometryMetrics?.volumeCm3 || 0,
-          confidence: geometryMetrics?.confidence || 'unknown',
-          used_generic_mode: mode === 'instant',
-        })
-        router.push(returnTo || '/cart')
-      }
-    } catch (error) {
-      console.error('Error submitting configuration:', error)
-      showToast(error?.message || 'Failed to save configuration. Please try again.', 'error')
-    } finally {
-      setSubmittingConfig(false)
-    }
-  }, [
-    meshNames, orderId, productId, variantId, showToast, router,
-    geometryMetrics, quoteSettings, quoteOptions, returnTo,
-    generic, genericMaterial,
-  ])
-
-  // Product-print "Add to Cart": settings are vendor-fixed, so we only record
-  // the chosen colour (as the colour variant) on the cart item. The webhook
-  // computes the fixed quote + creates the CustomPrintRequest on payment.
-  const addProductPrintToCart = useCallback(async () => {
-    setSubmittingConfig(true)
-    try {
-      const cartItem = {
-        productId,
-        quantity: 1,
-        chosenDeliveryType: 'printDelivery',
-        selectedVariants: colourVariantName ? { [colourVariantName]: generic.colour } : {},
-      }
-      const res = await fetch('/api/user/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cartItem }),
-      })
-      if (!res.ok) throw new Error('Failed to add to cart')
-      posthog.capture('product_added_to_cart', {
-        product_id: productId,
-        source: 'editor_product_print',
-        colour: generic.colour,
-      })
-      showToast('Added to cart!', 'success')
-      router.push(returnTo || '/cart')
-    } catch (error) {
-      console.error('Add product print to cart failed:', error)
-      showToast(error?.message || 'Failed to add to cart. Please try again.', 'error')
-    } finally {
-      setSubmittingConfig(false)
-    }
-  }, [productId, colourVariantName, generic.colour, showToast, router, returnTo])
-
-  // Add save configuration button in export controls
-  const saveConfigControls = useMemo(() => {
-    const controls = {
-      'Reset All Settings': button(() => resetAllToDefaults()),
-      'Download image': button(() => downloadImage()),
-    }
-
-    // Always show save button if we have a scene (for custom prints or orders).
-    // Leva lives in Advanced Mode → this button is the *manual* quote path
-    // (admin reviews the detailed settings before quoting).
-    if (orderId || productId || variantId) {
-      const buttonText = orderId ? 'Submit Print Configuration' : 'Save Print Config — Manual Quote'
-      controls[buttonText] = button(() => submitConfiguration('manual'), { disabled: submittingConfig })
-    }
-
-    return controls
-  }, [orderId, productId, variantId, submittingConfig, downloadImage, submitConfiguration, resetAllToDefaults])
-
-  useControls('export', saveConfigControls, { collapsed: false })
-
-  // Update refs whenever control values change
-  useEffect(() => {
-    currentPrintabilityRef.current = printability
-  }, [printability])
-
   useEffect(() => {
     if (!buffers || !fileName) return
-    startTransition(() => {
-      Promise.resolve(
-        generateScene({
-          ...visualConfig,
-          ...lighting,
-          ...printability,
-        })
-      ).catch((e) => {
-        console.error('Failed to generate scene:', e)
-        showToast(e?.message ? `Failed to load model: ${e.message}` : 'Failed to load model', 'error')
+    Promise.resolve(generateScene()).catch(error => showToast(error?.message || 'Could not load model', 'error'))
+  }, [buffers, fileName, generateScene, showToast])
+
+  useEffect(() => {
+    let active = true
+    setLoadError('')
+    setLocked(false)
+    setCreatorManaged(false)
+    if (isProductPrint) {
+      setConfiguration(restorePrintConfiguration({ printSettings: productPrintConfig,
+        generic: { colour: productColours?.[0]?.name || 'White' } }))
+      setConfigLoaded(true)
+    } else if (!savedRequestId) {
+      setConfiguration({ ...restorePrintConfiguration(), selection: { ...DEFAULT_SIMPLE_SELECTION } })
+      setConfigLoaded(true)
+    } else {
+      setConfigLoaded(false)
+      fetch('/api/custom-print?requestId=' + encodeURIComponent(savedRequestId))
+        .then(async response => {
+          const data = await response.json()
+          if (!response.ok) throw new Error(data.error || 'Could not load saved settings')
+          return data
+        }).then(data => {
+          if (!active) return
+          const request = data.request
+          if (!request) throw new Error('Saved print request was not found')
+          setConfiguration(restorePrintConfiguration(request.printConfiguration))
+          setQuoteOptions({ ...INITIAL_OPTIONS,
+            ...Object.fromEntries(['postProcessing', 'specialRequest', 'priority'].map(key =>
+              [key, !!request.quote?.lines?.find(line => line.key === key && line.amount > 0)])),
+            expedite: !!request.quote?.expedite?.applied, ...request.quote?.inputs?.options })
+          setCreatorManaged(!!request.creatorUserId)
+          setLocked(!EDITABLE_STATUSES.includes(request.status) || !!request.paidAt || !!request.stripeSessionId
+            || !!request.stripePaymentIntentId || !!request.creatorUserId || request.source === 'product')
+          setConfigLoaded(true)
+        }).catch(error => { if (active) setLoadError(error.message) })
+    }
+    return () => { active = false }
+  }, [isProductPrint, productPrintConfig, productColours, savedRequestId])
+
+  function changeSimple(next, { field } = {}) {
+    const changedField = field || Object.keys(next).find(key => next[key] !== selection[key])
+    setConfiguration(current => applySimpleSelection(current, next, changedField, meshNames, effectiveColours))
+  }
+
+  function changeDetailed(settings) {
+    setConfiguration(current => ({ ...current, printSettings: settings,
+      selection: { ...current.selection, purpose: purposeFromPrintSettings(settings), material: settings.materialType } }))
+  }
+
+  function resetSettings() {
+    setConfiguration(isProductPrint
+      ? restorePrintConfiguration({ printSettings: productPrintConfig, generic: { colour: productColours?.[0]?.name || 'White' } })
+      : { ...restorePrintConfiguration(), selection: { ...DEFAULT_SIMPLE_SELECTION } })
+    setQuoteOptions(INITIAL_OPTIONS)
+    setWireframe(false)
+    setAutoRotate(false)
+    setBackground('#f4f3ef')
+  }
+
+  async function downloadImage() {
+    try {
+      const canvas = viewerContainer.current?.querySelector('canvas')
+      if (!canvas) throw new Error('Model preview is not ready')
+      saveAs(canvas.toDataURL('image/png'), (fileName?.split('.')[0] || 'model') + '.png')
+    } catch (error) { showToast(error.message || 'Could not download image', 'error') }
+  }
+
+  async function saveConfiguration(mode) {
+    if (!savedRequestId || !configLoaded || locked || submitting) return
+    setSubmitting(true)
+    try {
+      const mapped = mapPurposeToConfiguration({ ...selection, purpose: matchedPurpose }, effectiveColours)
+      const response = await fetch('/api/custom-print/config', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: savedRequestId, printSettings, meshColors, mode,
+          generic: matchedPurpose && effectiveColours.some(colour => colour.name === selection.colour)
+            && Object.values(meshColors).every(hex => hex.toLowerCase() === selectedHex.toLowerCase()) ? mapped.generic : null }),
       })
-    })
-    // Only regenerate when the underlying model changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buffers, fileName, productId, variantId])
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Could not save print settings')
+      if (mode === 'instant') {
+        const quoteResponse = await fetch('/api/quote', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requestId: savedRequestId, mode: 'instant',
+            volumeCm3: geometryMetrics?.volumeCm3, dimensionsCm: geometryMetrics?.dimensionsCm,
+            confidence: geometryMetrics?.confidence || 'low', settings: quoteSettings, options: quoteOptions }),
+        })
+        const quoteData = await quoteResponse.json()
+        if (!quoteResponse.ok) throw new Error(quoteData.error || 'Settings saved, but the quote could not be refreshed. Please try again.')
+      }
+      posthog.capture('print_config_saved', { mode, used_generic_mode: !!matchedPurpose })
+      showToast(mode === 'instant' ? 'Settings and quote saved.' : 'Settings sent for a manual quote.', 'success')
+      router.push(returnTo || '/cart')
+    } catch (error) { showToast(error.message || 'Could not save print settings', 'error') }
+    finally { setSubmitting(false) }
+  }
 
-  return (
-    <div className="relative h-full w-full overflow-hidden">
-      {!scene ? (
-        <div className="w-screen h-screen flex justify-center items-center">
-          <div className="loader" />
+  async function addProductPrint() {
+    setSubmitting(true)
+    try {
+      const response = await fetch('/api/user/cart', { method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cartItem: { productId, quantity: 1, chosenDeliveryType: 'printDelivery',
+          selectedVariants: colourVariantName ? { [colourVariantName]: selection.colour } : {} } }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Could not add this print to cart')
+      showToast('Added to cart.', 'success')
+      router.push(returnTo || '/cart')
+    } catch (error) { showToast(error.message || 'Could not add this print to cart', 'error') }
+    finally { setSubmitting(false) }
+  }
+
+  const disabled = submitting || !configLoaded || locked
+  return <div className="h-full w-full overflow-y-auto bg-background text-textColor lg:overflow-hidden">
+    <div className="grid min-h-full grid-cols-1 lg:h-full lg:grid-cols-[minmax(0,1fr)_380px]">
+      <section ref={viewerContainer} aria-label="3D model preview" className="relative flex h-[48vh] min-h-[390px] min-w-0 flex-col lg:h-full">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-borderColor px-4 py-3">
+          <p className="min-w-0 truncate text-sm font-medium">{fileName || 'Your model'}</p>
+          <p className="shrink-0 text-xs text-lightColor">Drag to rotate · scroll to zoom</p>
         </div>
-      ) : (
-        <div className="grid grid-cols-5 h-full">
-          <section className="h-full w-full col-span-5">
-            {scene && (
-              <Viewer
-                {...visualConfig}
-                {...printability}
-                environment={lighting.environment}
-                preset={lighting.preset}
-                intensity={lighting.lightIntensity}
-                autoRotate={lighting.autoRotate}
-                materialType={visualConfig.materialType}
-                meshColors={meshColors}
-              />
-            )}
-          </section>
+        <div className="relative min-h-0 flex-1">
+        {scene ? <Viewer background={background} wireframe={wireframe} materialType={printSettings.materialType}
+          layerHeight={printSettings.layerHeight} showLayers={true} intensity={1} autoRotate={autoRotate} meshColors={meshColors} />
+          : modelLoadError ? <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center text-sm" role="alert">
+            <p>{modelLoadError}</p><a href="/prints/request" className="underline underline-offset-4">Choose another model</a></div>
+            : <div className="flex h-full items-center justify-center text-sm text-light" role="status">Preparing model preview…</div>}
         </div>
-      )}
-      <Leva theme={whiteTheme} hidden={!advancedMode} />
-      {scene && (
-        <QuotePanel
-          metrics={geometryMetrics}
-          settings={quoteSettings}
-          options={quoteOptions}
-          onOptionsChange={setQuoteOptions}
-          // variantId is the requestId for custom prints; with it the panel can
-          // show the authoritative (stored-model) quote rather than an estimate.
-          // Product prints have no per-customer request until checkout.
-          requestId={isProductPrint ? null : variantId}
-        />
-      )}
-      {/* Simple/Advanced mode toggle — anchored to the canvas, bottom-right */}
-      <div className="absolute bottom-4 right-4 z-40 flex flex-col gap-2 items-end">
-        {!isProductPrint && (
-          <button
-            onClick={() => setAdvancedMode(!advancedMode)}
-            className="px-3 py-1.5 text-xs font-medium bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50"
-          >
-            {advancedMode ? 'Simple Mode' : 'Advanced Mode'}
-          </button>
-        )}
-        {advancedMode && (() => {
-          // Per-field reset: list every print setting that differs from its
-          // default with its own reset control (leva has no inline affordance).
-          const changed = modifiedSettings(printability, defaultPrintability, 'printability')
-          if (changed.length === 0) return null
-          return (
-            <div className="flex flex-col gap-1 bg-baseColor border border-borderColor rounded-md shadow-sm p-3 w-64 max-h-60 overflow-y-auto">
-              <span className="text-[10px] font-semibold uppercase text-light px-0.5 mb-0.5">
-                Modified settings
-              </span>
-              {changed.map((m) => (
-                <div key={m.key} className="flex items-center justify-between gap-2 text-[11px]">
-                  <span className="text-textColor truncate" title={m.label}>{m.label}</span>
-                  <span className="flex items-center gap-1.5 whitespace-nowrap">
-                    <span className="text-light">{String(m.value)}</span>
-                    <button
-                      onClick={() => levaStore.set({ [m.path]: m.defaultValue }, false)}
-                      title={`Reset to ${String(m.defaultValue)}`}
-                      className="rounded-full border border-borderColor px-1.5 py-0.5 text-[10px] text-light hover:text-textColor hover:bg-borderColor/20"
-                    >
-                      ↺ {String(m.defaultValue)}
-                    </button>
-                  </span>
-                </div>
-              ))}
-            </div>
-          )
-        })()}
-        {!advancedMode && (
-          <div className="flex flex-col gap-3 bg-baseColor border border-borderColor rounded-md shadow-sm p-3 w-56">
-            {isProductPrint && (
-              <p className="text-[10px] text-light px-0.5">
-                Print settings are fixed for this product — choose a colour.
-              </p>
-            )}
-            {!isProductPrint && (
-              <>
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-semibold uppercase text-light px-0.5">Strength</span>
-                  <div className="grid grid-cols-3 gap-1">
-                    {Object.keys(STRENGTH_MAP).map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => applyGeneric({ ...generic, strength: s })}
-                        className={`text-[11px] px-2 py-1.5 rounded border transition-colors ${
-                          generic.strength === s
-                            ? 'bg-textColor text-background border-textColor'
-                            : 'bg-background text-textColor border-borderColor hover:bg-borderColor/20'
-                        }`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-semibold uppercase text-light px-0.5">Quality</span>
-                  <div className="grid grid-cols-3 gap-1">
-                    {Object.keys(QUALITY_MAP).map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => applyGeneric({ ...generic, quality: q })}
-                        className={`text-[11px] px-2 py-1.5 rounded border transition-colors ${
-                          generic.quality === q
-                            ? 'bg-textColor text-background border-textColor'
-                            : 'bg-background text-textColor border-borderColor hover:bg-borderColor/20'
-                        }`}
-                      >
-                        {q}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {meshNames.length > 0 && (
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-semibold uppercase text-light px-0.5">Colour</span>
-                <select
-                  value={generic.colour}
-                  onChange={(e) => applyGeneric({ ...generic, colour: e.target.value })}
-                  className="formInput text-xs"
-                >
-                  {effectiveColours.map((c) => (
-                    <option key={c.name} value={c.name}>{c.name}</option>
-                  ))}
-                </select>
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {effectiveColours.map((c) => (
-                    <button
-                      key={c.name}
-                      title={c.name}
-                      onClick={() => applyGeneric({ ...generic, colour: c.name })}
-                      className={`w-5 h-5 rounded-full border transition-transform hover:scale-110 ${
-                        generic.colour === c.name ? 'border-textColor ring-1 ring-textColor' : 'border-borderColor'
-                      }`}
-                      style={{ backgroundColor: c.hex }}
-                    />
-                  ))}
-                </div>
-                {!isProductPrint && (
-                  <p className="text-[10px] text-light mt-1">
-                    One colour applies to the whole model. For different colours per part,
-                    use Advanced Mode (per-part colour pickers).
-                  </p>
-                )}
-              </div>
-            )}
-
-            <label className="flex items-center gap-2 text-[11px] text-light cursor-pointer mt-1">
-              <input
-                type="checkbox"
-                checked={lighting.autoRotate}
-                onChange={(e) => levaStore.set({ 'lighting.autoRotate': e.target.checked }, false)}
-              />
-              Auto-rotate model
-            </label>
-
-            <button
-              onClick={resetAllToDefaults}
-              className="text-[11px] text-light hover:text-textColor underline underline-offset-2 self-start mt-1"
-            >
-              Reset to defaults
-            </button>
-
-            {isProductPrint ? (
-              <button
-                onClick={addProductPrintToCart}
-                disabled={submittingConfig}
-                className="mt-2 w-full rounded-full bg-linear-to-r from-amber-300 to-red-400 px-3 py-2 text-xs font-semibold text-textColor shadow-sm hover:opacity-95 active:scale-[0.99] transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submittingConfig ? 'Adding…' : 'Add to Cart'}
-              </button>
-            ) : (orderId || productId || variantId) && (
-              <button
-                onClick={() => submitConfiguration('instant')}
-                disabled={submittingConfig}
-                className="mt-2 w-full rounded-full bg-linear-to-r from-amber-300 to-red-400 px-3 py-2 text-xs font-semibold text-textColor shadow-sm hover:opacity-95 active:scale-[0.99] transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submittingConfig ? 'Saving…' : 'Save & Get Instant Quote'}
-              </button>
-            )}
+      </section>
+      <aside aria-label="Print settings and estimate" className="border-t border-borderColor bg-baseColor p-5 lg:overflow-y-auto lg:border-l lg:border-t-0">
+        <div className="mb-5"><h1 className="text-xl font-semibold">Your print</h1>
+          <p className="mt-1 text-sm leading-relaxed text-light">Choose a finish and see the estimate update.</p></div>
+        {loadError && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">{loadError}. Reload this page before saving.</p>}
+        {locked && <p role="status" className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">{creatorManaged
+          ? 'Your print service manages this request. Contact the creator to change its settings or quote.'
+          : 'This request is in payment or fulfilment. Its saved print settings are locked.'}</p>}
+        <div className="mb-5 rounded-xl border border-borderColor bg-background p-4">
+          {isProductPrint ? <p className="text-sm leading-relaxed">This product uses the maker’s saved print price and settings. Your selected colour and final total are shown in the cart.</p>
+            : locked ? <Link href="/account/prints" className="text-sm underline underline-offset-4">View your request and confirmed pricing</Link>
+            : needsReview ? <p className="text-sm leading-relaxed text-amber-800">This material needs a manual quote. Availability and the printing process will be confirmed during review.</p>
+            : <QuotePanel embedded metrics={geometryMetrics} settings={quoteSettings} options={quoteOptions}
+              onOptionsChange={setQuoteOptions} requestId={savedRequestId} disabled={disabled} />}
+        </div>
+        <SimplePrintSettings value={selection} onChange={changeSimple} colours={effectiveColours}
+          fixed={isProductPrint} disabled={disabled} customSettings={!matchedPurpose} />
+        {!isProductPrint && <details open={advanced} onToggle={event => setAdvanced(event.currentTarget.open)} className="mt-5 border-t border-borderColor pt-4">
+          <summary className="cursor-pointer text-sm font-semibold">Advanced settings</summary>
+          <div className="mt-4 space-y-4">
+            <AdvancedPrintSettings settings={printSettings} onChange={changeDetailed} disabled={disabled} />
+            {meshNames.length > 1 && <fieldset disabled={disabled} className="space-y-2"><legend className="mb-2 text-xs font-semibold">Colour by model part</legend>
+              {meshNames.map(name => <label key={name} className="flex items-center justify-between gap-3 text-xs"><span className="truncate">{name}</span>
+                <input aria-label={'Colour for ' + name} type="color" value={meshColors[name]}
+                  onChange={event => setConfiguration(current => ({ ...current, selection: { ...current.selection, colour: 'Custom colours' },
+                    meshColors: { ...meshColors, [name]: event.target.value } }))} />
+              </label>)}</fieldset>}
           </div>
-        )}
-      </div>
+        </details>}
+        <details className="mt-4 border-t border-borderColor pt-4"><summary className="cursor-pointer text-sm font-medium">Preview options</summary>
+          <div className="mt-3 space-y-3 text-sm">
+            <label className="flex items-center gap-2"><input type="checkbox" checked={autoRotate} onChange={event => setAutoRotate(event.target.checked)} />Auto-rotate</label>
+            <label className="flex items-center gap-2"><input type="checkbox" checked={wireframe} onChange={event => setWireframe(event.target.checked)} />Show mesh edges</label>
+            <label className="flex items-center justify-between">Background<input type="color" value={background} onChange={event => setBackground(event.target.value)} /></label>
+            <button type="button" onClick={downloadImage} className="underline underline-offset-4">Download preview image</button>
+          </div>
+        </details>
+        <div className="mt-5 space-y-3">
+          {isProductPrint ? <button type="button" onClick={addProductPrint} disabled={disabled}
+            className="min-h-11 w-full rounded-full bg-textColor px-4 text-sm font-semibold text-background disabled:opacity-50">{submitting ? 'Adding…' : 'Add to cart'}</button>
+            : savedRequestId ? <>
+              <button type="button" onClick={() => saveConfiguration(needsReview ? 'manual' : 'instant')}
+                disabled={disabled || !scene || (!needsReview && !(geometryMetrics?.volumeCm3 > 0))}
+                className="min-h-11 w-full rounded-full bg-textColor px-4 text-sm font-semibold text-background disabled:opacity-50">
+                {submitting ? 'Saving…' : needsReview ? 'Request a manual quote' : 'Save settings & quote'}</button>
+              {!needsReview && <button type="button" onClick={() => saveConfiguration('manual')} disabled={disabled}
+                className="min-h-10 w-full rounded-full border border-borderColor px-4 text-sm disabled:opacity-50">Ask for a manual quote</button>}
+              {!needsReview && <p className="text-xs leading-relaxed text-light">For a manual quote, confirm any extra services with the store.</p>}
+            </> : <p className="text-sm leading-relaxed text-light">Start a print request to save this model and its settings.</p>}
+          <button type="button" onClick={resetSettings} disabled={disabled}
+            className="text-xs text-light underline underline-offset-4 disabled:opacity-50">Reset print settings</button>
+        </div>
+      </aside>
     </div>
-  )
+  </div>
 }
-
-export default Result

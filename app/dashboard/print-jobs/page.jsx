@@ -259,6 +259,10 @@ function PrintJobs() {
                         <section>
                             <h4 className="dash-label mb-1">Customer note</h4>
                             <p className="text-[13px] whitespace-pre-wrap">{job.customerNote || 'No note left.'}</p>
+                            {job.designSource?.url?.startsWith('https://') && <p className="mt-2 text-xs">
+                                <a href={job.designSource.url} target="_blank" rel="noopener noreferrer" className="underline">Original design</a>
+                                {job.designSource.attribution ? ` · ${job.designSource.attribution}` : ''}
+                            </p>}
                         </section>
 
                         {quoted > 0 && (

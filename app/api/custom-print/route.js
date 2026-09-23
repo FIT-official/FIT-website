@@ -10,6 +10,8 @@ import CreatorPrintService from '@/models/CreatorPrintService'
 import { notifyCreatorNewRequest } from '@/lib/notifications/creatorPrint'
 import { sanitizeString } from '@/utils/validate'
 import { reserveCreatorQuota, CreatorQuotaError } from '@/lib/creatorQuota'
+import { normalizeDesignSource } from '@/lib/printRequestDraft'
+import { PrintConfigurationError, validatePrintConfiguration } from '@/lib/quoting/validatePrintConfiguration'
 
 export const runtime = "nodejs"
 
@@ -267,12 +269,13 @@ export async function PUT(req) {
     try {
         const { userId } = await authenticate(req);
         const body = await req.json();
-        const { requestId, modelFile, printConfiguration, status, statusNote, pricing, customerNote } = body;
+        const { requestId, modelFile, printConfiguration, status, statusNote, pricing, customerNote, designSource } = body;
         if (!requestId) {
             return NextResponse.json({ error: "requestId is required" }, { status: 400 });
         }
         await connectToDatabase();
         let request = await CustomPrintRequest.findOne({ requestId, userId });
+        const existingRequest = !!request;
         if (!request) {
             let userEmail = null;
             let userName = null;
@@ -298,11 +301,17 @@ export async function PUT(req) {
             });
         }
         const originalStatus = request.status;
+        // Mongoose merges document.$where into the actual update filter. A
+        // concurrent quote, payment or model edit must make this save fail.
+        if (existingRequest) request.$where = {
+            status: originalStatus,
+            ...(request.updatedAt ? { updatedAt: request.updatedAt } : {}),
+        };
         const draftStatuses = ['pending_upload', 'pending_config', 'configured'];
         if (pricing || (status && !draftStatuses.includes(status))) {
             return NextResponse.json({ error: "Pricing and payment status are managed by the store" }, { status: 403 });
         }
-        if (!draftStatuses.includes(originalStatus) && (modelFile || printConfiguration || status)) {
+        if (!draftStatuses.includes(originalStatus) && (modelFile || printConfiguration || status || designSource !== undefined)) {
             return NextResponse.json({ error: "Contact the store to change a request after it has been quoted" }, { status: 409 });
         }
         let explicitStatus = status;
@@ -322,7 +331,21 @@ export async function PUT(req) {
                 uploadedAt: modelFile.uploadedAt ? new Date(modelFile.uploadedAt) : new Date()
             };
         }
-        if (printConfiguration) request.printConfiguration = printConfiguration;
+        if (printConfiguration) {
+            const configuration = validatePrintConfiguration(printConfiguration, {
+                creator: !!request.creatorUserId, partial: !!request.creatorUserId,
+            });
+            request.printConfiguration = { ...configuration, configuredAt: new Date(), isConfigured: true };
+            request.quote = undefined;
+            request.quotedAt = undefined;
+        }
+        if (designSource !== undefined) {
+            const normalizedSource = normalizeDesignSource(designSource);
+            if (designSource !== null && !normalizedSource) {
+                return NextResponse.json({ error: 'Enter a public HTTPS design source link' }, { status: 400 });
+            }
+            request.designSource = normalizedSource || undefined;
+        }
         if (typeof customerNote === 'string') {
             request.customerNote = sanitizeString(customerNote).trim().slice(0, MAX_CUSTOMER_NOTE);
         }
@@ -397,6 +420,10 @@ export async function PUT(req) {
         return NextResponse.json({ request }, { status: 200 });
     } catch (error) {
         if (error instanceof UnauthorizedError) return unauthorizedResponse();
+        if (error instanceof PrintConfigurationError) return NextResponse.json({ error: error.message }, { status: 400 });
+        if (error?.name === 'DocumentNotFoundError' || error?.name === 'VersionError') {
+            return NextResponse.json({ error: 'This request changed. Reload it before saving.' }, { status: 409 });
+        }
         console.error("[PUT /api/custom-print] Error:", error);
         if (error && error.errors) {
             Object.entries(error.errors).forEach(([key, val]) => {
