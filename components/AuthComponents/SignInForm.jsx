@@ -10,9 +10,10 @@ import { useRouter } from 'next/navigation';
 import PasswordField from './PasswordField';
 import EmailField from './EmailField';
 import posthog from 'posthog-js';
+import { subscriptionIntentTarget, withSubscriptionIntent } from '@/lib/subscriptionIntent';
 
-function SignInForm() {
-    const { isLoaded, signIn } = useSignIn();
+function SignInForm({ priceId }) {
+    const { isLoaded, signIn, setActive } = useSignIn();
     const router = useRouter();
 
     const [email, setEmail] = useState('');
@@ -23,19 +24,19 @@ function SignInForm() {
     const [loading, setLoading] = useState(false);
     const [signInMethod, setSignInMethod] = useState('email');
 
-    async function handleSubmit(e) {
+    async function handleSubmit(e, method = signInMethod) {
         e.preventDefault();
-        if (!isLoaded && !signIn) return null
+        if (!isLoaded || !signIn || loading) return null
         setLoading(true);
         setError('');
         try {
-            if (signInMethod === 'google') {
+            if (method === 'google') {
                 await signIn.authenticateWithRedirect({
                     strategy: 'oauth_google',
-                    redirectUrl: '/sign-in/sso-callback',
-                    redirectUrlComplete: '/',
+                    redirectUrl: withSubscriptionIntent('/sign-in/sso-callback', priceId),
+                    redirectUrlComplete: subscriptionIntentTarget(priceId, '/'),
                 });
-            } else if (signInMethod === 'email') {
+            } else if (method === 'email') {
                 if (!email || !password) {
                     setError('Email and password are required');
                     setLoading(false);
@@ -46,8 +47,9 @@ function SignInForm() {
                     password: password,
                 });
                 if (result.status === 'complete') {
-                    posthog.capture('sign_in_completed', { method: 'email' });
-                    router.push('/');
+                    await setActive({ session: result.createdSessionId });
+                    try { posthog.capture('sign_in_completed', { method: 'email' }); } catch { /* Analytics is optional. */ }
+                    router.push(subscriptionIntentTarget(priceId, '/'));
                 }
             }
         } catch (error) {
@@ -64,11 +66,11 @@ function SignInForm() {
     return (
         <form
             className='flex w-full md:w-[30vw] items-center justify-center flex-col rounded-lg gap-4 transition-all duration-300 ease-in-out'
-            onSubmit={handleSubmit}
+            onSubmit={event => handleSubmit(event, 'email')}
         >
             <h1> Sign In </h1>
             <h3 className="text-xs uppercase mb-3 mt-2">Don&apos;t have an account? <span className="underline hover:text-textColor transition-colors ease-in-out duration-300">
-                <Link href='/sign-up'>
+                <Link href={withSubscriptionIntent('/sign-up', priceId)}>
                     Sign up
                 </Link>
             </span>.
@@ -88,7 +90,7 @@ function SignInForm() {
 
 
 
-            <button onClick={() => setSignInMethod('email')} type='submit' className='authButton2'>
+            <button onClick={() => setSignInMethod('email')} type='submit' disabled={!isLoaded || loading} className='authButton2'>
                 {loading && signInMethod === 'email' ? (
                     <>
                         Signing In
@@ -101,8 +103,8 @@ function SignInForm() {
 
             <AuthDivider />
 
-            <button onClick={() => setSignInMethod('google')} type='submit' className='authButton1'>
-                {loading && signInMethod === 'email' ? (
+            <button onClick={event => { setSignInMethod('google'); handleSubmit(event, 'google') }} type='button' disabled={!isLoaded || loading} className='authButton1'>
+                {loading && signInMethod === 'google' ? (
                     <>
                         Signing In
                         <div className='animate-spin ml-3 border-1 border-t-transparent h-3 w-3 rounded-full' />

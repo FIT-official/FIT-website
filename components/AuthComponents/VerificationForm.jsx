@@ -1,12 +1,15 @@
 'use client'
 import { useSignUp } from '@clerk/nextjs'
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { IoMdLock } from 'react-icons/io'
 import CodeField from './CodeField'
 import Error from './Error'
 import { useToast } from '../General/ToastProvider'
+import { subscriptionIntentTarget } from '@/lib/subscriptionIntent'
 
-function VerificationForm() {
+function VerificationForm({ priceId }) {
+    const router = useRouter()
     const { isLoaded, signUp, setActive } = useSignUp()
     const [code, setCode] = useState('')
     const inputsRef = useRef([])
@@ -18,7 +21,7 @@ function VerificationForm() {
 
     async function handleVerification(e) {
         e.preventDefault()
-        if (!isLoaded && !signUp) return null
+        if (!isLoaded || !signUp || loading) return null
         setError('')
         setLoading(true)
         try {
@@ -27,6 +30,7 @@ function VerificationForm() {
             })
             if (signInAttempt.status === 'complete') {
                 await setActive({ session: signInAttempt.createdSessionId })
+                router.replace(subscriptionIntentTarget(priceId, '/onboarding'))
             } else {
                 setError('Verification failed. Please try again.')
             }
@@ -89,7 +93,7 @@ function VerificationForm() {
 
             { /* verify */}
             <button
-                type="submit" disabled={!isLoaded} className='authButton2 my-2'
+                type="submit" disabled={!isLoaded || loading} className='authButton2 my-2'
             >
                 {loading ? (
                     <>

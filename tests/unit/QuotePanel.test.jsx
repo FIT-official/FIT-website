@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, waitFor, act } from '@testing-library/react'
 import QuotePanel from '@/components/Editor/QuotePanel'
 
 const metrics = {
@@ -30,6 +30,25 @@ afterEach(() => {
 })
 
 describe('QuotePanel', () => {
+  it('shows thin dimensions in millimetres and does not round small positive volume to zero', () => {
+    render(<QuotePanel metrics={{ ...metrics, volumeCm3: 0.03, dimensionsCm: { length: 1, width: 1, height: 0.02 } }} settings={settings} />)
+    expect(screen.getByText('10.0 × 10.0 × 0.2 mm')).toBeInTheDocument()
+    expect(screen.getByText('<0.1 cm³')).toBeInTheDocument()
+  })
+  it('aborts and ignores an older estimate after the settings change', async () => {
+    let finishFirst
+    global.fetch = vi.fn()
+      .mockImplementationOnce(() => new Promise(resolve => { finishFirst = resolve }))
+      .mockResolvedValue({ ok: true, json: async () => ({ quote: { ...mockQuote, total: 9 } }) })
+    const { rerender } = render(<QuotePanel embedded metrics={metrics} settings={settings} />)
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1))
+    const firstSignal = global.fetch.mock.calls[0][1].signal
+    rerender(<QuotePanel embedded metrics={metrics} settings={{ ...settings, infillPercent: 40 }} />)
+    expect(firstSignal.aborted).toBe(true)
+    await act(async () => finishFirst({ ok: true, json: async () => ({ quote: mockQuote }) }))
+    expect(screen.queryByText('SGD 5.00')).not.toBeInTheDocument()
+    expect(await screen.findByText('SGD 9.00')).toBeInTheDocument()
+  })
   it('renders nothing when there is no measurable model', () => {
     const { container } = render(<QuotePanel metrics={null} settings={settings} />)
     expect(container.firstChild).toBeNull()

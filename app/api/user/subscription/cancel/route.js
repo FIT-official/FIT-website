@@ -1,52 +1,37 @@
-import Stripe from "stripe";
-import { auth, clerkClient } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
-import { getPostHogClient } from "@/lib/posthog-server";
+import { auth, clerkClient } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
+import { getCreatorStripe, subscriptionBelongsToUser, subscriptionMetadata } from '@/lib/creatorEntitlements';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-export async function POST(req) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const client = await clerkClient();
-  const user = await client.users.getUser(userId);
-  const currentPublicMetadata = user.publicMetadata || {};
-
-  if (!currentPublicMetadata.stripeSubscriptionId) {
-    return NextResponse.json(
-      { error: "No active subscription found" },
-      { status: 404 }
-    );
-  } else {
+export async function POST() {
     try {
-      await stripe.subscriptions.update(
-        currentPublicMetadata.stripeSubscriptionId,
-        {
-          cancel_at_period_end: true,
+        const { userId } = await auth();
+        if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const client = await clerkClient();
+        const user = await client.users.getUser(userId);
+        const subscriptionId = user.publicMetadata?.stripeSubscriptionId;
+        if (!subscriptionId) return NextResponse.json({ error: 'No paid subscription found' }, { status: 404 });
+        const stripe = getCreatorStripe();
+        const current = await stripe.subscriptions.retrieve(subscriptionId);
+        if (!subscriptionBelongsToUser(current, user)) {
+            return NextResponse.json({ error: 'Subscription ownership could not be verified.' }, { status: 403 });
         }
-      );
-      try {
-        getPostHogClient().capture({
-          distinctId: userId,
-          event: "subscription_cancelled",
-          properties: { cancel_at_period_end: true },
+        if (['canceled', 'incomplete_expired'].includes(current.status)) {
+            return NextResponse.json({ error: 'This subscription has already ended.' }, { status: 409 });
+        }
+        const subscription = await stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
+        const latest = await client.users.getUser(userId);
+        if (latest.publicMetadata?.stripeSubscriptionId === subscriptionId) {
+            await client.users.updateUser(userId, { publicMetadata: {
+                ...latest.publicMetadata, ...subscriptionMetadata(subscription),
+            } });
+        }
+        return NextResponse.json({
+            success: true, message: 'Cancellation scheduled for the end of the billing period.',
+            cancel_at_period_end: true,
+            current_period_end: subscription.current_period_end ?? subscription.items?.data?.[0]?.current_period_end ?? null,
         });
-      } catch (phErr) {
-        console.error("PostHog subscription_cancelled capture failed:", phErr);
-      }
-      return NextResponse.json(
-        { message: "Subscription cancellation scheduled successfully" },
-        { status: 200 }
-      );
     } catch (error) {
-      console.error("Error canceling subscription:", error);
-      return NextResponse.json(
-        { error: "Failed to cancel subscription" },
-        { status: 500 }
-      );
+        console.error('Subscription cancellation failed:', error?.code || error?.type || 'provider_error');
+        return NextResponse.json({ error: 'Unable to schedule cancellation. Please retry or contact support.' }, { status: error.status || 500 });
     }
-  }
 }

@@ -8,8 +8,12 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import { ThreeMFLoader } from 'three/examples/jsm/loaders/3MFLoader.js'
 import { computeMetricsFromObject } from '@/lib/quoting/threeGeometryAdapter'
+import { threeMfMillimetresPerUnit } from '@/lib/modelUnits'
+import { normaliseMeshNames } from '@/lib/modelMeshNames'
 
 // Code generation removed - not needed for 3D model viewer
+
+let loadSequence = 0
 
 const useStore = create((set, get) => ({
   fileName: '',
@@ -17,6 +21,8 @@ const useStore = create((set, get) => ({
   textOriginalFile: '',
   animations: false,
   scene: null,
+  loading: false,
+  loadError: null,
   geometryMetrics: null, // { volumeCm3, dimensionsCm, watertight, confidence } from the loaded model
   orderId: null,
   productId: null,
@@ -32,8 +38,8 @@ const useStore = create((set, get) => ({
   productColours: null, // [{name,hex}] offered colours, or null
   colourVariantName: null, // the colour-type variant's name (for selectedVariants)
 
-  setFileName: (fileName) => set({ fileName, scene: null, geometryMetrics: null }),
-  setBuffers: (buffers) => set({ buffers, scene: null, geometryMetrics: null }),
+  setFileName: (fileName) => { loadSequence++; set({ fileName, scene: null, geometryMetrics: null, loadError: null, loading: false }) },
+  setBuffers: (buffers) => { loadSequence++; set({ buffers, scene: null, geometryMetrics: null, loadError: null, loading: false }) },
   setScene: (scene) => set({ scene }),
   setReturnTo: (returnTo) => set({ returnTo }),
   setOrderId: (orderId) => set({ orderId }),
@@ -41,9 +47,12 @@ const useStore = create((set, get) => ({
   setVariantId: (variantId) => set({ variantId }),
   setRequestId: (requestId) => set({ requestId }),
 
-  generateScene: async (config) => {
+  generateScene: async (config = {}) => {
     const { fileName: rawFileName, buffers } = get()
     if (!buffers) return
+    const requestSequence = ++loadSequence
+    set({ loading: true, loadError: null })
+    try {
 
     const fileName =
       config.pathPrefix && config.pathPrefix !== ''
@@ -51,6 +60,8 @@ const useStore = create((set, get) => ({
         : rawFileName
 
     const fileExtension = fileName.toLowerCase().split('.').pop()
+    const threeMfScale = fileExtension === '3mf'
+      ? await threeMfMillimetresPerUnit(buffers.entries().next().value[1]) : 1
     let result
 
     // Handle different file formats
@@ -113,7 +124,6 @@ const useStore = create((set, get) => ({
                   // Ensure all meshes have names and shadows
                   object.traverse((child) => {
                     if (child.isMesh) {
-                      child.name = child.name || `3MF_Mesh_${Math.random().toString(36).substr(2, 9)}`
                       child.castShadow = true
                       child.receiveShadow = true
                     }
@@ -208,21 +218,30 @@ const useStore = create((set, get) => ({
       throw new Error(`Unsupported file format: ${fileExtension}`)
     }
 
-    set({
-      animations: !!result.animations?.length,
-    })
+    normaliseMeshNames(result.scene)
+    if (fileExtension === '3mf') {
+      result.scene.scale.multiplyScalar(threeMfScale)
+      result.scene.userData.units = 'mm'
+    }
+    // An earlier, slower parse must not replace the user's newer upload.
+    if (requestSequence !== loadSequence) return
+    set({ animations: !!result.animations?.length })
 
     // Always replace the scene when regenerating from new buffers.
-    set({ scene: result.scene })
+    set({ scene: result.scene, loading: false, loadError: null })
 
     // Compute pricing-ready geometry metrics for the Instant Quoting Engine.
     // Best-effort: never let a measurement error break model loading.
     try {
-      const geometryMetrics = computeMetricsFromObject(result.scene, get().fileName)
+      const geometryMetrics = computeMetricsFromObject(result.scene, rawFileName)
       set({ geometryMetrics })
     } catch (err) {
       console.error('Failed to compute geometry metrics:', err)
       set({ geometryMetrics: null })
+    }
+    } catch (error) {
+      if (requestSequence === loadSequence) set({ scene: null, geometryMetrics: null, loading: false, loadError: error?.message || 'The model could not be loaded.' })
+      throw error
     }
   },
 }))

@@ -68,9 +68,9 @@ export async function uploadImages(pendingImages) {
 
 export async function uploadModels(pendingModels) {
     const ALLOWED_MODEL_EXTS = [
-        "obj", "glb", "gltf", "stl", "blend", "fbx", "zip", "rar", "7z", "3mf"
+        "stl", "obj", "3mf"
     ];
-    const MAX_SIZE = 100 * 1024 * 1024; // 100MB
+    const MAX_SIZE = 25 * 1024 * 1024; // 25MB
     const uploadedKeys = [];
 
     for (const model of pendingModels) {
@@ -82,7 +82,7 @@ export async function uploadModels(pendingModels) {
         }
         if (model.size > MAX_SIZE) {
             const sizeMB = (model.size / (1024 * 1024)).toFixed(1);
-            throw new Error(`File "${name}" is too large (${sizeMB}MB). Maximum size is 100MB.`);
+            throw new Error(`File "${name}" is too large (${sizeMB}MB). Maximum size is 25MB.`);
         }
         const contentType = model.type || getMimeType(ext);
 
@@ -90,7 +90,7 @@ export async function uploadModels(pendingModels) {
             const res = await fetch("/api/upload/models", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ filename: name, contentType }),
+                body: JSON.stringify({ filename: name, contentType, fileSize: model.size }),
             });
             if (!res.ok) {
                 const errorText = await res.text();
@@ -140,7 +140,7 @@ export async function uploadViewable(pendingViewableModel) {
             const res = await fetch("/api/upload/viewable", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ filename: name, contentType }),
+                body: JSON.stringify({ filename: name, contentType, fileSize: pendingViewableModel.size }),
             });
             if (!res.ok) {
                 const errorText = await res.text();

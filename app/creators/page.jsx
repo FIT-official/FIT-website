@@ -1,11 +1,11 @@
-import Creators from "./Creators";
+import CreatorsDirectory from "./CreatorsDirectory";
 
 export const metadata = {
     title: "Creators | Fix It Today®",
-    description: "Browse creator subscription packages at Fix It Today®",
+    description: "Meet the makers selling on Fix It Today® and browse their pages.",
     openGraph: {
         title: "Creators | Fix It Today®",
-        description: "Browse creator subscription packages at Fix It Today®",
+        description: "Meet the makers selling on Fix It Today® and browse their pages.",
         url: "https://fixitoday.com/creators",
         siteName: "Fix It Today®",
         images: [
@@ -22,9 +22,7 @@ export const metadata = {
 };
 
 function CreatorsPage() {
-    return (
-        <Creators/>
-    )
+    return <CreatorsDirectory />;
 }
 
-export default CreatorsPage
+export default CreatorsPage;

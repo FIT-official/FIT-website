@@ -7,7 +7,7 @@ function PasswordField({ setPassword, password, required }) {
     return (
         <div className='flex w-full relative'>
             <input
-                htmlFor="password"
+                aria-label="Password"
                 name='password'
                 type={showPassword ? 'text' : 'password'}
                 onChange={(e) => setPassword(e.target.value)}
@@ -18,6 +18,7 @@ function PasswordField({ setPassword, password, required }) {
             />
             <button
                 type="button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
                 className='absolute right-4 top-3.25 text-extraLight cursor-pointer'
                 onClick={() => setShowPassword((prev) => !prev)}
             >

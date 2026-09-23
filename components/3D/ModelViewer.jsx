@@ -1,38 +1,22 @@
-"use client";
-import React, { Suspense } from "react";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Environment } from "@react-three/drei";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { useLoader } from "@react-three/fiber";
-import * as THREE from "three";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import PrintStudio from './PrintStudio';
 
-function ModelContent({ url }) {
-    const glb = useLoader(GLTFLoader, url);
-    return <primitive object={glb.scene} />;
-}
-
-export default function ModelViewer({ url }) {
-    return (
-        <Canvas
-            gl={{ preserveDrawingBuffer: true }}
-            shadows
-            dpr={[1, 1.5]}
-            camera={{ position: new THREE.Vector3(0, 0, 150), fov: 50 }}
-            className="w-full"
-        >
-            <ambientLight intensity={0.8} />
-            <directionalLight castShadow position={[10, 10, 5]} intensity={1.5} />
-            <directionalLight position={[-10, -10, -5]} intensity={0.5} />
-            <Suspense fallback={null}>
-                <Environment preset="studio" />
-                <ModelContent url={url} />
-            </Suspense>
-            <OrbitControls
-                autoRotate
-                enablePan={true}
-                enableZoom={true}
-                enableRotate={true}
-            />
-        </Canvas>
-    );
+export default function ModelViewer({ url, fileName, ...props }) {
+    const [state, setState] = useState({ scene: null, loading: Boolean(url), error: null });
+    useEffect(() => {
+        if (!url) { setState({ scene: null, loading: false, error: null }); return; }
+        let cancelled = false;
+        setState({ scene: null, loading: true, error: null });
+        const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+        loader.load(url, gltf => {
+            if (!cancelled) setState({ scene: gltf.scene, loading: false, error: null });
+        }, undefined, () => {
+            if (!cancelled) setState({ scene: null, loading: false, error: 'The model could not be loaded. Please refresh or try another model.' });
+        });
+        return () => { cancelled = true; };
+    }, [url]);
+    return <PrintStudio {...props} {...state} fileName={fileName || 'model.glb'} />;
 }

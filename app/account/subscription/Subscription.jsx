@@ -2,7 +2,8 @@
 // Subscription management on the "Sunlit Paper" language: plan facts as
 // dotted-leader rows, cancel behind a ConfirmDialog (window.confirm/alert are
 // banned), the edit flow unchanged (Stripe Elements + SubscriptionDetails).
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import dayjs from 'dayjs'
@@ -12,7 +13,7 @@ import { money } from '@/components/Account/accountUi'
 import { useToast } from '@/components/General/ToastProvider'
 import { ConfirmDialog, DashCard, DottedRow, StatusPill, SkeletonTile } from '@/components/dashboard-ui'
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) : null
 
 import { useUserSubscription } from '@/utils/UserSubscriptionContext'
 
@@ -20,25 +21,32 @@ const statusText = (key) =>
     key ? key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ') : 'Unknown'
 
 function Subscription() {
-    const [updating, setUpdating] = useState(false)
+    const params = useSearchParams()
+    const requestedPriceId = params?.get('priceId')
+    const [updating, setUpdating] = useState(() => Boolean(requestedPriceId))
+    useEffect(() => { if (requestedPriceId) setUpdating(true) }, [requestedPriceId])
     const [confirmCancelOpen, setConfirmCancelOpen] = useState(false)
     const [cancelBusy, setCancelBusy] = useState(false)
-    const { subscription, loading: subLoading, error: subError } = useUserSubscription()
+    const { subscription, loading: subLoading, error: subError, refresh } = useUserSubscription()
     const { showToast } = useToast()
 
     const updateSubButton = () => setUpdating((prev) => !prev)
 
     const cancelSubButton = async () => {
         setCancelBusy(true)
+        try {
         const res = await fetch('/api/user/subscription/cancel', { method: 'POST' })
         if (res.ok) {
-            showToast('Subscription cancelled successfully', 'success')
-            // No need to manually update state, context will refresh
+            showToast('Renewal cancelled. Your plan continues until the end of the billing period.', 'success')
+            await refresh()
         } else {
             showToast('Failed to cancel subscription', 'error')
         }
+        } catch { showToast('Unable to cancel renewal. Please try again.', 'error') }
+        finally {
         setCancelBusy(false)
         setConfirmCancelOpen(false)
+        }
     }
 
     const header = (
@@ -49,7 +57,7 @@ function Subscription() {
         </div>
     )
 
-    if (subLoading) {
+    if (subLoading && !subscription) {
         return (
             <AccountShell active="subscription" header={header}>
                 <SkeletonTile className="max-w-xl" />
@@ -70,9 +78,9 @@ function Subscription() {
                     >
                         Back to plan
                     </button>
-                    <Elements stripe={stripePromise}>
+                    {stripePromise ? <Elements stripe={stripePromise}>
                         <SubscriptionDetails />
-                    </Elements>
+                    </Elements> : <p>Paid plans are not available yet. Your Free storefront is ready to use.</p>}
                 </DashCard>
             ) : hasSubscription ? (
                 <DashCard title="Your plan" className="max-w-xl">
@@ -82,11 +90,12 @@ function Subscription() {
                                 {statusText(subscription.status)}
                             </StatusPill>
                             <div className="mt-3">
+                                {subscription.plan?.name && <DottedRow label="Plan">{subscription.plan.name}</DottedRow>}
                                 {Number.isFinite(subscription.price) && (
-                                    <DottedRow label="Price">S${money(subscription.price / 100)} per cycle</DottedRow>
+                                    <DottedRow label="Price">S${money(subscription.price / 100)} per {subscription.interval === 'year' ? 'year' : subscription.interval === 'month' ? 'month' : 'cycle'}</DottedRow>
                                 )}
                                 {subscription.current_period_end && (
-                                    <DottedRow label="Renews">
+                                    <DottedRow label={subscription.cancel_at_period_end ? 'Ends' : 'Renews'}>
                                         {dayjs(subscription.current_period_end * 1000).format('D MMM YYYY')}
                                     </DottedRow>
                                 )}
@@ -98,7 +107,9 @@ function Subscription() {
                             </div>
                         </div>
                         <p className="text-[13px] dash-soft">
-                            You are currently subscribed. You can edit or cancel your subscription at any time.
+                            {subscription.planId === 'legacy'
+                                ? 'Your existing plan and current price are retained. Changing to Standard or Pro replaces this plan; you can also cancel renewal.'
+                                : 'You are currently subscribed. You can edit or cancel your subscription at any time.'}
                         </p>
                         <div className="flex flex-wrap gap-2">
                             <button
@@ -119,9 +130,9 @@ function Subscription() {
                     </div>
                 </DashCard>
             ) : (
-                <DashCard title="No subscription" className="max-w-xl">
+                <DashCard title="Free" className="max-w-xl">
                     <p className="text-[13px] dash-soft">
-                        You are currently on the free tier. Upgrade to access premium features.
+                        Your storefront includes 3 product listings and 10 print requests each month. Upgrade when you need more capacity.
                     </p>
                     <button
                         type="button"

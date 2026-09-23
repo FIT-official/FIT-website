@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
+import { requireCreator } from "@/lib/requireCreator";
 
 const normalizeDisplayName = (value) => {
   if (typeof value !== "string") return "";
@@ -31,12 +32,7 @@ export async function PUT(req) {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const client = await clerkClient();
-    const clerkUser = await client.users.getUser(userId);
-    const isAdmin = clerkUser?.publicMetadata?.role === "admin";
-    const isSubscribed = Boolean(clerkUser?.publicMetadata?.stripeSubscriptionId);
-
-    if (!isAdmin && !isSubscribed) {
+    if (!(await requireCreator(userId))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -70,7 +66,7 @@ export async function PUT(req) {
       {
         $set: {
           "metadata.displayName": displayName,
-          // Treat subscribed users and admins as creators for shop/chat discovery.
+          // A named Free storefront also participates in shop/chat discovery.
           "metadata.role": "Creator",
         },
         $setOnInsert: { userId },

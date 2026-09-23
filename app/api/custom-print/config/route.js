@@ -6,181 +6,66 @@ import Product from '@/models/Product'
 import { sendEmail } from '@/lib/email'
 import { buildManualQuoteAdminEmail } from '@/lib/manualQuoteEmail'
 import { notifyCustomPrintEvent } from '@/lib/notifications/customPrint'
-
-const STATUS_RANK = {
-    pending_upload: 0,
-    pending_config: 1,
-    configured: 2,
-    quoted: 3,
-    payment_pending: 4,
-    paid: 5,
-    printing: 6,
-    printed: 7,
-    shipped: 8,
-    delivered: 9,
-};
-
-function computeMinimumStatusFromData(requestDoc) {
-    const hasModel = !!(requestDoc?.modelFile?.s3Key && requestDoc?.modelFile?.originalName);
-    const isConfigured = !!requestDoc?.printConfiguration?.isConfigured;
-    if (isConfigured) return 'configured';
-    if (hasModel) return 'pending_config';
-    return 'pending_upload';
-}
-
-function maybeUpgradeStatusToMatchData(requestDoc, note) {
-    const target = computeMinimumStatusFromData(requestDoc);
-    const current = requestDoc?.status || 'pending_upload';
-    const currentRank = STATUS_RANK[current];
-    const targetRank = STATUS_RANK[target];
-    if (currentRank == null || targetRank == null) return false;
-    if (currentRank >= targetRank) return false;
-
-    requestDoc.status = target;
-    requestDoc.statusHistory = requestDoc.statusHistory || [];
-    requestDoc.statusHistory.push({
-        status: target,
-        updatedAt: new Date(),
-        note: note || 'Auto-reconciled status based on uploaded model/configuration',
-    });
-    return true;
-}
+import { MUTABLE_PRINT_STATUSES, PrintConfigurationError, validatePrintConfiguration } from '@/lib/quoting/validatePrintConfiguration'
 
 export async function PUT(req) {
-    try {
-        const { userId } = await auth()
-        if (!userId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        await connectToDatabase()
-
-        const body = await req.json()
-        const { requestId, printSettings, meshColors, generic, mode } = body
-
-        if (!requestId) {
-            return NextResponse.json({ error: 'Request ID is required' }, { status: 400 })
-        }
-
-        // Find the custom print request
-        const customPrintRequest = await CustomPrintRequest.findOne({
-            requestId,
-            userId
-        })
-
-        if (!customPrintRequest) {
-            return NextResponse.json({ error: 'Custom print request not found' }, { status: 404 })
-        }
-
-        const isManual = mode === 'manual'
-
-        // Update print configuration (persist mode). Never assign
-        // `generic: undefined` — Mongoose fails casting undefined to the
-        // subdocument. A MANUAL (advanced) save supersedes any earlier
-        // simple-mode selection entirely, so its generic block is dropped;
-        // instant saves carry the sent generic; otherwise preserve what's there.
-        const existingGeneric = customPrintRequest.printConfiguration?.generic
-        const nextGeneric = isManual
-            ? null
-            : generic && typeof generic === 'object'
-                ? {
-                    strength: generic.strength ?? null,
-                    quality: generic.quality ?? null,
-                    colour: generic.colour ?? null,
-                    material: generic.material ?? null,
-                }
-                : (existingGeneric && typeof existingGeneric.toObject === 'function'
-                    ? existingGeneric.toObject()
-                    : existingGeneric) || null
-        customPrintRequest.printConfiguration = {
-            ...(nextGeneric ? { generic: nextGeneric } : {}),
-            meshColors: meshColors || {},
-            printSettings: {
-                layerHeight: printSettings.layerHeight,
-                initialLayerHeight: printSettings.initialLayerHeight,
-                materialType: printSettings.materialType,
-                wallLoops: printSettings.wallLoops,
-                internalSolidInfillPattern: printSettings.internalSolidInfillPattern,
-                sparseInfillDensity: printSettings.sparseInfillDensity,
-                sparseInfillPattern: printSettings.sparseInfillPattern,
-                nozzleDiameter: printSettings.nozzleDiameter,
-                enableSupport: printSettings.enableSupport,
-                supportType: printSettings.supportType,
-                printPlate: printSettings.printPlate
-            },
-            configuredAt: new Date(),
-            isConfigured: true
-        }
-
-        // Persist the quote mode (instant vs manual). The instant path will
-        // separately POST /api/quote to compute and persist the actual quote;
-        // the manual path stays at `configured` until an admin sets a quote.
-        if (mode === 'instant' || mode === 'manual') {
-            customPrintRequest.quoteMode = mode
-        }
-
-        // A manual save supersedes any prior instant quote: clear the stale
-        // server quote so the cart stops showing the old instant price, and
-        // step the request back to `configured` to await a fresh admin quote.
-        if (isManual) {
-            customPrintRequest.quote = undefined
-            customPrintRequest.quotedAt = undefined
-            if (customPrintRequest.status === 'quoted') {
-                customPrintRequest.status = 'configured'
-                customPrintRequest.statusHistory = customPrintRequest.statusHistory || []
-                customPrintRequest.statusHistory.push({
-                    status: 'configured',
-                    updatedAt: new Date(),
-                    note: 'Switched to advanced (manual) configuration — awaiting admin quote',
-                })
-            }
-        }
-
-        // Ensure status never lags behind stored data (e.g. pending_upload -> configured)
-        maybeUpgradeStatusToMatchData(customPrintRequest, 'Print configuration saved');
-
-        await customPrintRequest.save()
-
-        // Manual mode: best-effort notify the admin so they know to quote, and
-        // tell the customer their config is in and a quote is coming (email +
-        // buyer↔vendor chat). Never block the save on notification failure —
-        // credentials/Stream may be unset in some envs.
-        if (customPrintRequest.quoteMode === 'manual') {
-            const adminEmail = process.env.ADMIN_EMAIL || process.env.GMAIL_USER
-            if (adminEmail) {
-                try {
-                    const { subject, html } = buildManualQuoteAdminEmail({
-                        request: customPrintRequest.toObject(),
-                    })
-                    await sendEmail({ to: adminEmail, subject, html })
-                } catch (emailErr) {
-                    console.error('Manual-quote admin notification failed:', emailErr)
-                }
-            }
-
-            try {
-                const product = await Product.findOne({ slug: 'custom-print-request' })
-                    .select('creatorUserId')
-                    .lean()
-                await notifyCustomPrintEvent({
-                    event: 'awaiting-quote',
-                    request: customPrintRequest.toObject(),
-                    product,
-                })
-            } catch (notifyErr) {
-                console.error('Awaiting-quote customer notification failed:', notifyErr)
-            }
-        }
-
-        return NextResponse.json({
-            success: true,
-            message: 'Configuration saved successfully',
-            request: customPrintRequest
-        })
-
-    } catch (error) {
-        console.error('Error saving print configuration:', error)
-        // Full detail is logged above; never echo internals to the client.
-        return NextResponse.json({ error: 'Failed to save configuration' }, { status: 500 })
+  try {
+    const { userId } = await auth()
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    let body
+    try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid request body' }, { status: 400 }) }
+    const { requestId, mode = 'manual' } = body || {}
+    if (typeof requestId !== 'string' || !requestId || requestId.length > 100) {
+      return NextResponse.json({ error: 'Request ID is required' }, { status: 400 })
     }
+    if (!['instant', 'manual'].includes(mode)) return NextResponse.json({ error: 'Invalid quote mode' }, { status: 400 })
+    const configuration = validatePrintConfiguration(body)
+    if (mode === 'instant' && configuration.printSettings.materialType !== 'plastic') {
+      return NextResponse.json({ error: 'This material needs a manual quote' }, { status: 400 })
+    }
+    await connectToDatabase()
+    const existing = await CustomPrintRequest.findOne({ requestId, userId })
+    if (!existing) return NextResponse.json({ error: 'Custom print request not found' }, { status: 404 })
+    if (!MUTABLE_PRINT_STATUSES.includes(existing.status) || existing.paidAt || existing.stripeSessionId
+      || existing.stripePaymentIntentId || existing.source === 'product') {
+      return NextResponse.json({ error: 'This request is in payment or fulfilment and its print settings are locked' }, { status: 409 })
+    }
+    if (existing.creatorUserId) {
+      return NextResponse.json({ error: 'Contact your print service to change this request' }, { status: 409 })
+    }
+    const now = new Date()
+    // Status and version guards close the race with payment or another editor.
+    // Every settings change invalidates the old price before any new quote.
+    const customPrintRequest = await CustomPrintRequest.findOneAndUpdate({
+      requestId, userId, status: { $in: MUTABLE_PRINT_STATUSES }, paidAt: null,
+      stripeSessionId: null, stripePaymentIntentId: null,
+      ...(existing.updatedAt ? { updatedAt: existing.updatedAt } : {}),
+    }, {
+      $set: { printConfiguration: { ...configuration, configuredAt: now, isConfigured: true },
+        quoteMode: mode, status: 'configured' },
+      $unset: { quote: 1, quotedAt: 1 },
+      $push: { statusHistory: { status: 'configured', updatedAt: now,
+        note: mode === 'manual' ? 'Print settings saved, awaiting manual quote' : 'Print settings saved, quote refresh required' } },
+    }, { new: true, runValidators: true })
+    if (!customPrintRequest) return NextResponse.json({ error: 'This request changed. Reload it before saving settings.' }, { status: 409 })
+
+    if (mode === 'manual') {
+      const adminEmail = process.env.ADMIN_EMAIL || process.env.GMAIL_USER
+      if (adminEmail) {
+        try {
+          const { subject, html } = buildManualQuoteAdminEmail({ request: customPrintRequest.toObject() })
+          await sendEmail({ to: adminEmail, subject, html })
+        } catch (error) { console.error('Manual-quote admin notification failed:', error) }
+      }
+      try {
+        const product = await Product.findOne({ slug: 'custom-print-request' }).select('creatorUserId').lean()
+        await notifyCustomPrintEvent({ event: 'awaiting-quote', request: customPrintRequest.toObject(), product })
+      } catch (error) { console.error('Awaiting-quote customer notification failed:', error) }
+    }
+    return NextResponse.json({ success: true, message: 'Configuration saved successfully', request: customPrintRequest })
+  } catch (error) {
+    if (error instanceof PrintConfigurationError) return NextResponse.json({ error: error.message }, { status: 400 })
+    console.error('Error saving print configuration:', error)
+    return NextResponse.json({ error: 'Failed to save configuration' }, { status: 500 })
+  }
 }

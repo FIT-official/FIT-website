@@ -101,6 +101,23 @@ afterEach(() => {
 })
 
 describe('CreatorPayments — accounting views', () => {
+    it('separates paid reviews from payout totals, exports and processed controls', async () => {
+        const review = { sessionId: 'cs_legacy_review', userId: 'legacy-buyer', status: 'reconciliation_required', processed: true,
+            totalAmount: 99999, currency: 'usd', createdAt: '2026-07-16T10:00:00Z',
+            salesData: { creator_3: { totalAmount: 99999, items: [] } },
+            reconciliation: { amountTotalCents: 1234, currency: 'sgd', recordedAt: '2026-07-16T10:01:00Z', amountMismatch: true } }
+        const originalFetch = global.fetch
+        global.fetch = vi.fn((url, init) => String(url).includes('/api/admin/sessions')
+            ? ok({ sessions: [review, ...sessionsFixture] }) : originalFetch(url, init))
+        render(<CreatorPayments />)
+        const reviewSection = await screen.findByRole('region', { name: 'Payments requiring review' })
+        expect(within(reviewSection).getByText('Captured: SGD $12.34')).toBeInTheDocument()
+        expect(within(reviewSection).getByText('Session: cs_legacy_review')).toBeInTheDocument()
+        expect(within(reviewSection).queryByRole('button')).not.toBeInTheDocument()
+        await screen.findByText('$75.00')
+        expect(screen.queryByText('$999.99')).not.toBeInTheDocument()
+        expect(global.fetch.mock.calls.some(([url]) => String(url).includes('legacy-buyer'))).toBe(false)
+    })
     it('renders the summary tiles and the transactions ledger from the fixture', async () => {
         render(<CreatorPayments />)
 

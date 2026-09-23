@@ -23,7 +23,7 @@ export default function useEntitlements() {
         }
         async function fetchEntitlements() {
             try {
-                const result = await getEntitlements({ role, priceId, priceIds: stripePriceIds });
+                const result = await getEntitlements({ role, priceId, priceIds: stripePriceIds, planId: subscription?.planId, status: subscription?.status });
                 setEntitlements(result);
                 setError(null);
             } catch (e) {
@@ -34,7 +34,7 @@ export default function useEntitlements() {
             }
         }
         fetchEntitlements();
-    }, [role, roleLoading, priceId, subLoading, stripePriceIds, priceIdsLoading]);
+    }, [role, roleLoading, priceId, subLoading, stripePriceIds, priceIdsLoading, subscription?.planId, subscription?.status]);
 
     return {
         loading: loading,

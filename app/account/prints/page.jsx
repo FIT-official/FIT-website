@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation'
 import AccountShell from '@/components/Account/AccountShell'
 import { printRequestTone, printStatusLabel, money } from '@/components/Account/accountUi'
 import { useToast } from '@/components/General/ToastProvider'
-import { DashCard, DottedRow, EmptyState, StatusPill, Timeline, SkeletonTile } from '@/components/dashboard-ui'
+import { DashCard, DottedRow, EmptyState, StatusPill, Tag, Timeline, SkeletonTile } from '@/components/dashboard-ui'
 
 export default function AccountPrintRequestsPage() {
     const { user, isLoaded } = useUser()
@@ -105,8 +105,11 @@ export default function AccountPrintRequestsPage() {
                         const fee = Number(r.printFee || 0)
                         const quoted = base + fee
                         const currency = (r.currency || 'SGD').toUpperCase()
+                        const creatorJob = Boolean(r.creatorUserId)
+                        // TODO(phase5-connect): creator jobs become payable in-cart once
+                        // Stripe Connect lands; until then payment is arranged off-platform.
                         const canAddToCart =
-                            (r.status === 'quoted' || r.status === 'payment_pending') && quoted > 0
+                            !creatorJob && (r.status === 'quoted' || r.status === 'payment_pending') && quoted > 0
                         const quoteLines = r.quote?.lines || []
                         const history = r.statusHistory || []
 
@@ -117,9 +120,14 @@ export default function AccountPrintRequestsPage() {
                                         <p className="dash-section min-w-0 truncate">
                                             {r.modelFile?.originalName || 'Custom print'}
                                         </p>
-                                        <StatusPill tone={printRequestTone(r.status)}>
-                                            {printStatusLabel[r.status] || r.status}
-                                        </StatusPill>
+                                        <span className="flex items-center gap-2">
+                                            {creatorJob && (
+                                                <Tag>Handled by {r.creatorDisplayName || 'creator'}</Tag>
+                                            )}
+                                            <StatusPill tone={printRequestTone(r.status)}>
+                                                {printStatusLabel[r.status] || r.status}
+                                            </StatusPill>
+                                        </span>
                                     </div>
 
                                     {/* Request ids are admin-facing only; the model name identifies
@@ -160,7 +168,9 @@ export default function AccountPrintRequestsPage() {
                                                 </DottedRow>
                                             </div>
                                             <p className="dash-data dash-soft mt-1.5">
-                                                Delivery is chosen at checkout.
+                                                {creatorJob
+                                                    ? 'Payment is arranged directly with the creator.'
+                                                    : 'Delivery is chosen at checkout.'}
                                             </p>
                                         </section>
                                     )}

@@ -95,6 +95,7 @@ function QuietRow({ label, children, className = '' }) {
 
 function OrderSection() {
     const [orders, setOrders] = useState([])
+    const [paymentReviews, setPaymentReviews] = useState([])
     const [products, setProducts] = useState({})
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -119,6 +120,7 @@ function OrderSection() {
                 const ordersData = await ordersRes.json()
                 const ordersArr = ordersData.orders || []
                 setOrders(ordersArr)
+                setPaymentReviews(Array.isArray(ordersData.paymentReviews) ? ordersData.paymentReviews : [])
 
                 const productIds = [
                     ...new Set(
@@ -307,7 +309,17 @@ function OrderSection() {
             )}
             {error && <p className="text-[12px] font-medium text-[var(--dash-bad)]">{error}</p>}
 
-            {!loading && !error && sorted.length === 0 && (
+            {!loading && !error && paymentReviews.length > 0 && <section aria-label="Payments under review" className="flex flex-col gap-3">
+                {paymentReviews.map(review => <article key={review.sessionId} className="rounded-xl border border-amber-300 bg-amber-50 p-5 text-amber-950">
+                    <h3 className="font-semibold">Payment received — order details under review</h3>
+                    <p className="mt-2 text-sm">We received your payment and are checking the order details. Please do not pay again. Contact FIT if you need help.</p>
+                    <p className="mt-3 text-sm font-medium">{String(review.receipt?.currency || '').toUpperCase()} {money((review.receipt?.amountTotalCents || 0) / 100)}</p>
+                    {review.receipt?.recordedAt && <p className="mt-1 text-sm">Recorded {dayjs(review.receipt.recordedAt).format('D MMM YYYY')}</p>}
+                    <p className="mt-2 break-all text-xs">Payment reference: {review.sessionId}</p>
+                </article>)}
+            </section>}
+
+            {!loading && !error && sorted.length === 0 && paymentReviews.length === 0 && (
                 <div className="bg-[var(--dash-card)] border border-[var(--dash-line)] rounded-[var(--dash-r-card)]">
                     <EmptyState
                         title="No Orders Yet"

@@ -547,7 +547,7 @@ export default function ContentManagement() {
         if (sectionId.startsWith('privacy/')) return '/privacy'
         if (sectionId.startsWith('shop/')) return '/shop'
         if (sectionId.startsWith('products/')) return '/products'
-        if (sectionId.startsWith('creators/')) return '/creators'
+        if (sectionId.startsWith('creators/')) return '/creators/join'
         if (sectionId.startsWith('prints/')) return '/prints'
         if (sectionId.startsWith('dashboard/')) return '/dashboard'
         if (sectionId.startsWith('onboarding/')) return '/onboarding'

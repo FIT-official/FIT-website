@@ -4,12 +4,14 @@ import { auth } from "@clerk/nextjs/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
 import { requireCreator } from "@/lib/requireCreator";
+import { validateBlocks, THEME_MODES, THEME_FONTS, DEFAULT_THEME } from "@/lib/creatorPage/blocks";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// 6 links * (40 + 300) chars + description + keys fits comfortably in 8KB.
-const MAX_BODY_BYTES = 8 * 1024;
+// 12 blocks * (2000-char text body + 8 gallery keys) plus links/description
+// fits comfortably in 64KB.
+const MAX_BODY_BYTES = 64 * 1024;
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 // S3 keys produced by /api/user/shop/upload: shops/<userId>/<file>. Ownership
@@ -24,6 +26,9 @@ const emptyShop = () => ({
     links: [],
     featuredProductIds: [],
     accentColor: "",
+    theme: { ...DEFAULT_THEME },
+    blocks: [],
+    published: true,
 });
 
 const imageKeySchema = z
@@ -57,6 +62,17 @@ const shopUpdateSchema = z
             .max(7)
             .refine((v) => v === "" || HEX_COLOR.test(v), { message: "accentColor must be #rrggbb" })
             .optional(),
+        theme: z
+            .object({
+                mode: z.enum(THEME_MODES),
+                font: z.enum(THEME_FONTS),
+            })
+            .strict()
+            .optional(),
+        // Shape-checked by validateBlocks below (400 on failure), so the zod
+        // layer only needs to know it is an array.
+        blocks: z.array(z.unknown()).max(12).optional(),
+        published: z.boolean().optional(),
     })
     .strict();
 
@@ -111,6 +127,20 @@ export async function PUT(req) {
             if (key && !key.startsWith(ownPrefix)) {
                 return NextResponse.json({ error: "Invalid input" }, { status: 422 });
             }
+        }
+
+        if (parsed.data.blocks !== undefined) {
+            const result = validateBlocks(parsed.data.blocks);
+            if (!result.ok) {
+                return NextResponse.json({ error: `Invalid blocks: ${result.error}` }, { status: 400 });
+            }
+            for (const block of result.blocks) {
+                if (block.type !== "gallery") continue;
+                if (block.settings.images.some((key) => !key.startsWith(ownPrefix))) {
+                    return NextResponse.json({ error: "Invalid blocks: gallery image outside your uploads" }, { status: 400 });
+                }
+            }
+            parsed.data.blocks = result.blocks;
         }
 
         const $set = {};

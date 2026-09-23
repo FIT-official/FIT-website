@@ -1,10 +1,15 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+vi.mock('@/lib/creatorQuota', () => ({
+    reserveCreatorQuota: vi.fn(async () => ({ release: vi.fn() })),
+    releaseProductQuota: vi.fn(),
+    CreatorQuotaError: class CreatorQuotaError extends Error {},
+}))
 vi.mock('@/lib/db', () => ({ connectToDatabase: vi.fn() }))
 vi.mock('@/models/Product', () => ({ default: { find: vi.fn(), findOne: vi.fn() } }))
 vi.mock('@/models/User', () => ({ default: { findOne: vi.fn() } }))
-vi.mock('@clerk/nextjs/server', () => ({ auth: vi.fn(), clerkClient: vi.fn() }))
+vi.mock('@clerk/nextjs/server', () => ({ auth: vi.fn(async () => ({ userId: null })), clerkClient: vi.fn() }))
 vi.mock('@/lib/categoriesHelper', () => ({
     getAllCategoriesServer: vi.fn(),
     getAllSubcategoriesServer: vi.fn(),
@@ -93,10 +98,10 @@ describe('GET public product catalogue', () => {
         })
     })
 
-    it('preserves explicit productId lookup mode', async () => {
+    it('does not expose a hidden product through an explicit public ID lookup', async () => {
         const response = await get({ productId: catalogue[1]._id })
         expect(response.status).toBe(200)
-        expect((await response.json()).product._id).toBe(catalogue[1]._id)
+        expect((await response.json()).product).toBeNull()
         expect(Product.find).toHaveBeenCalledWith({ _id: catalogue[1]._id })
     })
 })

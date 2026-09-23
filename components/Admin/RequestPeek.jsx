@@ -285,6 +285,10 @@ export default function RequestPeek({
 
             <div className="mt-4">
                 <DottedRow label="Customer">{r.userEmail || '–'}</DottedRow>
+                {r.designSource?.url?.startsWith('https://') && <DottedRow label="Design source">
+                    <a href={r.designSource.url} target="_blank" rel="noopener noreferrer" className="underline">Original design</a>
+                    {r.designSource.attribution ? ` · ${r.designSource.attribution}` : ''}
+                </DottedRow>}
                 <DottedRow label="Request ID">
                     <button
                         type="button"

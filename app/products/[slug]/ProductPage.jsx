@@ -196,7 +196,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
 
     const handleAddToCart = async (product) => {
         if (isOwnProduct) {
-            return; 
+            return;
         }
 
         if (!isLoaded || !user) {
@@ -698,7 +698,14 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                 </div>
                             )}
 
-                            {!loading && product?.creatorUserId && user && product.creatorUserId !== user.id && (
+                            {!loading && product?.listing === 'creator' && product?.creatorUserId && (
+                                <div className="flex flex-col gap-3 mt-4 border border-borderColor rounded-xl p-4">
+                                    <p className="text-sm text-lightColor">Contact this creator to agree a quote, payment and delivery. Creator purchases are arranged directly with the seller.</p>
+                                    <Link className="formBlackButton justify-center" href={`/creators/${encodeURIComponent(product.creatorUserId)}`}>Contact the creator</Link>
+                                    {ownsDigitalProduct && <button className="underline text-sm" onClick={handleViewInDownloads}>View purchased downloads</button>}
+                                </div>
+                            )}
+                            {!loading && product?.listing !== 'creator' && product?.creatorUserId && user && product.creatorUserId !== user.id && (
                                 <div className="flex flex-col gap-2 mt-2">
                                     {ownsDigitalProduct ? (
                                         <button

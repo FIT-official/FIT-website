@@ -197,6 +197,7 @@ describe('Navbar desktop bar', () => {
         ;[
             ['Blog', '/blog'],
             ['Creators', '/creators'],
+            ['Become a creator', '/creators/join'],
             ['About', '/about'],
             ['Custom 3D print', '/products/custom-print-request'],
             ['Print requests', '/account/prints'],

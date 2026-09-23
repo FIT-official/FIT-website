@@ -3,10 +3,8 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { connectToDatabase } from '@/lib/db'
 import User from '@/models/User'
-import Stripe from 'stripe'
+import { getCreatorStripe, subscriptionBelongsToUser, subscriptionMetadata } from '@/lib/creatorEntitlements'
 import { revalidatePath } from 'next/cache'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 export const completeOnboarding = async (formData) => {
     const { userId } = await auth()
@@ -62,29 +60,24 @@ export const updateRoleFromStripe = async (subscriptionId) => {
             return { error: 'You do not have access to this subscription.' }
         }
 
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-        const priceId = subscription.items.data[0]?.price?.id
-        let role = "Customer"
-        if (priceId) {
-            const price = await stripe.prices.retrieve(priceId)
-            if (price.product) {
-                const product = await stripe.products.retrieve(price.product)
-                if (product.name) {
-                    role = product.name
-                }
-            }
+        const subscription = await getCreatorStripe().subscriptions.retrieve(subscriptionId)
+        if (!subscriptionBelongsToUser(subscription, userObj)) {
+            return { error: 'You do not have access to this subscription.' }
         }
-
-        // Persist role only in Clerk publicMetadata, not in the local DB
-        const currentMetadata = userObj.publicMetadata || {}
+        const latestUser = await client.users.getUser(userId)
+        if (latestUser.publicMetadata?.stripeSubscriptionId !== subscriptionId) {
+            return { error: 'Your subscription has changed. Refresh the page.' }
+        }
+        // Billing changes the plan only. Administrative roles are independent.
+        const currentMetadata = latestUser.publicMetadata || {}
         const updatedUser = await client.users.updateUser(userId, {
             publicMetadata: {
                 ...currentMetadata,
-                role,
+                ...subscriptionMetadata(subscription),
             },
         })
 
-        return { message: 'Role updated', role: updatedUser.publicMetadata?.role }
+        return { message: 'Subscription refreshed', role: updatedUser.publicMetadata?.role, planId: updatedUser.publicMetadata?.creatorPlanId }
     } catch (error) {
         console.error('Error updating role from Stripe:', error)
         return { error: 'Failed to update role' }

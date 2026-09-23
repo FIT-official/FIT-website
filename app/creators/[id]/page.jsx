@@ -1,29 +1,15 @@
 import Creator from "./Creator";
+import { productForViewer } from "@/lib/productAccess";
 import { connectToDatabase } from "@/lib/db";
-import User from "@/models/User";
 import Product from "@/models/Product";
-import { clerkClient } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
+import { checkAdminPrivileges } from "@/lib/checkPrivileges";
+import { resolveCreatorByIdOrName } from "@/lib/creatorPage/resolveCreator";
+import { validateBlocks, normalizeTheme } from "@/lib/creatorPage/blocks";
 
 export const metadata = {
 	title: "Creator | Fix It Today®",
 	description: "Browse this creator's products at Fix It Today®",
-};
-
-const normalizeDisplayName = (value) => {
-	if (typeof value !== 'string') return '';
-	return value.trim().replace(/\s+/g, ' ');
-};
-
-const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-const isLikelyClerkUserId = (value) => typeof value === 'string' && /^user_[a-zA-Z0-9]+$/.test(value);
-
-const sanitizeDisplayName = (value, fallback = 'Unnamed Store') => {
-	if (typeof value !== 'string') return fallback;
-	const trimmed = value.trim();
-	if (!trimmed) return fallback;
-	if (isLikelyClerkUserId(trimmed)) return fallback;
-	return trimmed;
 };
 
 function serializeForClient(value) {
@@ -60,69 +46,37 @@ function serializeForClient(value) {
 	return value;
 }
 
+function Notice({ children }) {
+	return (
+		<div className="flex min-h-[92vh] w-full items-center justify-center border-b border-borderColor">
+			<div className="text-sm text-lightColor">{children}</div>
+		</div>
+	);
+}
+
 export default async function CreatorPage(props) {
 	const params = await props.params;
 	const creatorSlug = params?.id;
 
 	if (!creatorSlug) {
-		return (
-			<div className="flex min-h-[92vh] w-full items-center justify-center border-b border-borderColor">
-				<div className="text-sm text-lightColor">Creator not found.</div>
-			</div>
-		);
+		return <Notice>Creator not found.</Notice>;
 	}
 
 	await connectToDatabase();
 
-	const decodedSlug = (() => {
-		try {
-			return decodeURIComponent(String(creatorSlug));
-		} catch {
-			return String(creatorSlug);
-		}
-	})();
-	const normalizedSlug = normalizeDisplayName(decodedSlug);
-
-	// Backward compatibility:
-	// - if the slug matches a known userId, use it
-	// - otherwise, resolve by metadata.displayName
-	// Public-safe fields ONLY: display name, role, and the shop customisation
-	// subdocument. Never widen this projection to carts/orders/contact details.
-	const baseProjection = { "metadata.displayName": 1, "metadata.role": 1, userId: 1, shop: 1, _id: 0 };
-	const byUserId = await User.findOne({ userId: normalizedSlug }, baseProjection).lean();
-	const byDisplayName = !byUserId
-		? await User.findOne(
-			{ "metadata.displayName": { $regex: `^${escapeRegex(normalizedSlug)}$`, $options: 'i' } },
-			baseProjection
-		).lean()
-		: null;
-
-	const resolvedUserId = byUserId?.userId || byDisplayName?.userId || null;
-	const mongoUser = byUserId || byDisplayName || null;
-
-	if (!resolvedUserId) {
-		return (
-			<div className="flex min-h-[92vh] w-full items-center justify-center border-b border-borderColor">
-				<div className="text-sm text-lightColor">Creator not found.</div>
-			</div>
-		);
+	// Backward compatibility: a slug that matches a known userId wins,
+	// otherwise resolve by metadata.displayName (shared helper, public
+	// projection only).
+	const resolved = await resolveCreatorByIdOrName(creatorSlug);
+	if (!resolved) {
+		return <Notice>Creator not found.</Notice>;
 	}
-
-	const products = await Product.find({ creatorUserId: resolvedUserId }).sort({ createdAt: -1 }).lean();
-
-	let profile = null;
-	try {
-		const client = await clerkClient();
-		profile = await client.users.getUser(resolvedUserId);
-	} catch {
-		profile = null;
-	}
-
-	const displayName = sanitizeDisplayName(mongoUser?.metadata?.displayName, 'Unnamed Store');
+	const resolvedUserId = resolved.userId;
 
 	// Shop customisation — an explicit public allowlist (never spread the raw
 	// subdocument, which could grow private fields later).
-	const rawShop = mongoUser?.shop || {};
+	const rawShop = resolved.shop || {};
+	const blocksResult = validateBlocks(Array.isArray(rawShop.blocks) ? rawShop.blocks : []);
 	const shop = {
 		bannerImage: typeof rawShop.bannerImage === 'string' ? rawShop.bannerImage : '',
 		logoImage: typeof rawShop.logoImage === 'string' ? rawShop.logoImage : '',
@@ -139,7 +93,34 @@ export default async function CreatorPage(props) {
 		accentColor: typeof rawShop.accentColor === 'string' && /^#[0-9a-fA-F]{6}$/.test(rawShop.accentColor)
 			? rawShop.accentColor
 			: '',
+		theme: normalizeTheme(rawShop.theme),
+		blocks: blocksResult.ok ? blocksResult.blocks : [],
+		published: rawShop.published !== false,
 	};
+
+	// Unpublished pages are visible to the owner and admins only.
+	let viewerUserId = null;
+	try {
+		const session = await auth();
+		viewerUserId = session?.userId || null;
+	} catch {
+		viewerUserId = null;
+	}
+	const isOwner = !!viewerUserId && viewerUserId === resolvedUserId;
+	const isAdmin = !!viewerUserId && !isOwner ? await checkAdminPrivileges(viewerUserId) : false;
+	if (!shop.published && !isOwner && !isAdmin) {
+		return <Notice>This creator page is not published yet.</Notice>;
+	}
+
+	const products = await Product.find({ creatorUserId: resolvedUserId, hidden: { $ne: true }, flaggedForModeration: { $ne: true } }).sort({ createdAt: -1 }).lean();
+
+	let profile = null;
+	try {
+		const client = await clerkClient();
+		profile = await client.users.getUser(resolvedUserId);
+	} catch {
+		profile = null;
+	}
 
 	const joinedYear = (() => {
 		const ts = profile?.createdAt;
@@ -150,13 +131,13 @@ export default async function CreatorPage(props) {
 
 	const creator = {
 		id: resolvedUserId,
-		displayName,
+		displayName: resolved.displayName,
 		imageUrl: profile?.imageUrl || null,
-		role: mongoUser?.metadata?.role || 'Customer',
+		role: resolved.role || 'Customer',
 		joinedYear,
 		shop,
 	};
 
-	const safeProducts = serializeForClient(products || []);
-	return <Creator creator={creator} products={safeProducts} />;
+	const safeProducts = serializeForClient((products || []).map(product => productForViewer(product, viewerUserId, isAdmin)).filter(Boolean));
+	return <Creator creator={creator} products={safeProducts} canEdit={isAdmin} />;
 }

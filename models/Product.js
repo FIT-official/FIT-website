@@ -167,6 +167,11 @@ const ProductSchema = new mongoose.Schema(
         likes: { type: [String], default: [] },
         hidden: { type: Boolean, default: false },
         flaggedForModeration: { type: Boolean, default: false },
+        // Which storefront lists the product: 'fit' = Fix It Today's own
+        // catalogue (/shop, /prints, homepage), 'creator' = only on the
+        // creator's page. Set server-side from the poster's role; never
+        // changed on edit. Backfill: scripts/migrate-product-listing.js.
+        listing: { type: String, enum: ["fit", "creator"], default: "creator", index: true },
         slug: { type: String, required: true, unique: true, index: true },
         schemaVersion: { type: Number, default: 3 },
     },
