@@ -82,8 +82,8 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
         posthog.capture('instant_quote_received', {
           total: data.quote.total,
           currency: data.quote.currency,
-          confidence: metrics.confidence || 'high',
-          volume_cm3: metrics.volumeCm3,
+          confidence: data.quote.confidence || metrics.confidence || 'low',
+          volume_cm3: data.quote.inputs?.volumeCm3 ?? metrics.volumeCm3,
           expedite: options.expedite,
         })
       } catch (e) {
@@ -111,7 +111,7 @@ export default function QuotePanel({ metrics, settings, deliveryTypeName, option
         {loading && <span className="text-[10px] text-light">updating…</span>}
       </div>
 
-      {metrics.confidence === 'low' && (
+      {(quote?.confidence === 'low' || (!quote && metrics.confidence === 'low')) && (
         <p className="mb-2 rounded bg-amber-50 border border-amber-200 px-2 py-1 text-[11px] text-amber-700">
           This model may need a geometry review before printing.
         </p>
