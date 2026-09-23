@@ -54,6 +54,7 @@ const CustomPrintRequestSchema = new mongoose.Schema({
             quality: { type: String, default: null },
             colour: { type: String, default: null },
             material: { type: String, default: null },
+            filament: { type: String, default: null },
         },
         meshColors: { type: Map, of: String }, // { meshName: colorHex }
         printSettings: {
@@ -63,6 +64,7 @@ const CustomPrintRequestSchema = new mongoose.Schema({
 
             // Material
             materialType: { type: String, enum: ['plastic', 'resin', 'metal', 'sandstone'], default: 'plastic' },
+            filamentType: { type: String, enum: ['pla', 'pla_matte', 'petg', 'asa', 'abs', 'tpu'], default: 'pla' },
 
             // Walls
             wallLoops: { type: Number, default: 2 },

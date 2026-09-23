@@ -22,6 +22,10 @@ vi.mock('@/lib/s3', () => ({ s3: { send: vi.fn() } }))
 vi.mock('@aws-sdk/client-s3', () => ({ GetObjectCommand: class {} }))
 vi.mock('@/lib/notifications/customPrint', () => ({ notifyCustomPrintEvent: vi.fn() }))
 vi.mock('@/lib/posthog-server', () => ({ getPostHogClient: () => ({ capture: vi.fn() }) }))
+vi.mock('@/lib/filamentInventory', () => ({
+    getFilamentAvailability: vi.fn(async () => [{ filament: 'pla', name: 'Jade White', stockStatus: 'in_stock' }]),
+    rushAvailability: (colours, filament, colour) => colours.find(item => item.filament === filament && item.name === colour)?.stockStatus || 'unknown',
+}))
 
 import { POST } from '@/app/api/quote/route'
 import AppSettings from '@/models/AppSettings'
@@ -30,6 +34,7 @@ import Product from '@/models/Product'
 import { recomputeMetricsFromModel, supportsServerRecompute } from '@/lib/quoting/serverGeometry'
 import { s3 } from '@/lib/s3'
 import { notifyCustomPrintEvent } from '@/lib/notifications/customPrint'
+import { getFilamentAvailability } from '@/lib/filamentInventory'
 
 const REQUEST_ID = '3f7c1e2a-5b4d-4c8e-9a1b-2d3e4f5a6b7c'
 const SETTINGS = { materialType: 'PLA', infillPercent: 20, wallLoops: 2, layerHeightMm: 0.2 }
@@ -46,7 +51,9 @@ const requestDoc = () => ({
     status: 'configured',
     quoteMode: 'instant',
     updatedAt: new Date('2026-09-22T10:00:00Z'),
-    printConfiguration: { isConfigured: true, configuredAt: new Date('2026-09-22T09:00:00Z'), printSettings: { materialType: 'plastic', sparseInfillDensity: 20, wallLoops: 2, layerHeight: 0.2 } },
+    printConfiguration: { isConfigured: true, configuredAt: new Date('2026-09-22T09:00:00Z'),
+        generic: { colour: 'Jade White', filament: 'pla' },
+        printSettings: { materialType: 'plastic', filamentType: 'pla', sparseInfillDensity: 20, wallLoops: 2, layerHeight: 0.2 } },
     statusHistory: [],
     modelFile: { s3Key: 'models/tower.stl', originalName: 'tower.stl' },
     save: vi.fn().mockResolvedValue({}),
@@ -105,6 +112,16 @@ describe('POST /api/quote — stored quote authority and payment locks', () => {
         const write = CustomPrintRequest.findOneAndUpdate.mock.calls[0][1]
         const browserEstimate = await (await post({ requestId: undefined, settings: { ...SETTINGS, infillPercent: 1 } })).json()
         expect(write.$set.quote.inputs.weightGrams).toBeGreaterThan(browserEstimate.quote.inputs.weightGrams)
+    })
+
+    it('prices and displays the stored model when browser measurements disagree', async () => {
+        const response = await post({ volumeCm3: 2.1,
+            dimensionsCm: { length: 2.8, width: 2.8, height: 0.5 } })
+        expect(response.status).toBe(200)
+        const quote = (await response.json()).quote
+        expect(quote.inputs.volumeCm3).toBe(64)
+        expect(quote.inputs.dimensionsCm).toEqual({ length: 1.6, width: 1.6, height: 25 })
+        expect(CustomPrintRequest.findOneAndUpdate.mock.calls[0][1].$set.quote.inputs.volumeCm3).toBe(64)
     })
 
     it('requires manual review for an unsupported stored model instead of saving client geometry', async () => {
@@ -176,6 +193,13 @@ describe('POST /api/quote — stored quote authority and payment locks', () => {
         expect(response.status).toBe(200)
         const quote = CustomPrintRequest.findOneAndUpdate.mock.calls[0][1].$set.quote
         expect(quote.inputs.options).toEqual({ postProcessing: true, priority: true, specialRequest: false, expedite: false })
+    })
+
+    it('blocks rush on a colour that the inventory lists at zero', async () => {
+        getFilamentAvailability.mockResolvedValueOnce([{ filament: 'pla', name: 'Jade White', stockStatus: 'out_of_stock' }])
+        const response = await post({ options: { expedite: true } })
+        expect(response.status).toBe(409)
+        expect(s3.send).not.toHaveBeenCalled()
     })
 })
 

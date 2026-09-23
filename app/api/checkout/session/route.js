@@ -12,6 +12,7 @@ import { buildProductPrintRequestInput, colourNameFromVariants } from '@/lib/cus
 import { buildCheckoutItem, checkoutPlain } from '@/lib/checkoutSnapshot';
 import { checkAdminPrivileges } from '@/lib/checkPrivileges';
 import { verifyCheckoutTransactions, CheckoutTransactionUnavailableError } from '@/lib/checkoutTransactionReadiness';
+import { getFilamentAvailability, rushAvailability } from '@/lib/filamentInventory';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
 
@@ -61,6 +62,16 @@ export async function POST() {
                 }
                 // Creator jobs use seller-arranged payments until payouts exist.
                 if (customRequest.creatorUserId) return NextResponse.json({ error: 'Arrange payment with this print provider directly' }, { status: 409 });
+                if (customRequest.quoteMode === 'instant' &&
+                    (customRequest.quote?.inputs?.options?.priority || customRequest.quote?.inputs?.options?.expedite)) {
+                    let colours;
+                    try { colours = await getFilamentAvailability(); }
+                    catch { return NextResponse.json({ error: 'Rush availability cannot be checked right now. Try again shortly.' }, { status: 503 }); }
+                    const filament = customRequest.printConfiguration?.printSettings?.filamentType || 'pla';
+                    const colour = customRequest.printConfiguration?.generic?.colour;
+                    if (rushAvailability(colours, filament, colour) !== 'in_stock')
+                        return NextResponse.json({ error: 'The selected colour is no longer available for rush or priority. Choose another colour before payment.' }, { status: 409 });
+                }
                 product = await Product.findOne({ slug: 'custom-print-request' }).lean();
                 if (!product) return NextResponse.json({ error: 'Custom printing is not configured' }, { status: 409 });
                 const charge = customPrintChargeBreakdown(customRequest, item.chosenDeliveryType);

@@ -178,11 +178,12 @@ describe('POST /api/quote — preview mode', () => {
         expect(CustomPrintRequest.findOneAndUpdate).not.toHaveBeenCalled()
     })
 
-    it('rejects a client that understates the volume (deviation policy still applies)', async () => {
+    it('uses the stored model when the browser understates the volume', async () => {
         CustomPrintRequest.findOne.mockResolvedValue(requestDoc())
 
         const res = await post({ ...baseBody, volumeCm3: 1, requestId: REQUEST_ID, preview: true })
 
-        expect(res.status).toBe(400)
+        expect(res.status).toBe(200)
+        expect((await res.json()).quote.inputs.volumeCm3).toBe(64)
     })
 })
