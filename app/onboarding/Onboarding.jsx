@@ -4,9 +4,10 @@ import { completeOnboarding, updateRoleFromStripe } from './_actions'
 import { useState } from 'react'
 import Logo from '@/components/Logo'
 import posthog from 'posthog-js'
+import { subscriptionIntentTarget } from '@/lib/subscriptionIntent'
 
 
-function Onboarding() {
+function Onboarding({ priceId }) {
     const { user, isLoaded } = useUser()
     const { session } = useSession()
     const [error, setError] = useState(null)
@@ -29,7 +30,7 @@ function Onboarding() {
             try { posthog.capture('onboarding_completed') } catch { /* Analytics is optional. */ }
             await user.reload()
             await session?.getToken({ skipCache: true })
-            window.location.href = '/dashboard/shop'
+            window.location.href = subscriptionIntentTarget(priceId, '/dashboard/shop')
         } catch (err) {
             setError(err?.message || 'Unable to complete account setup. Please try again.')
         } finally {

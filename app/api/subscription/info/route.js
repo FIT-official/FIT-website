@@ -13,7 +13,9 @@ export async function GET(req) {
         return NextResponse.json({
             planId: plan.id, productName: plan.name, price: plan.amount.toFixed(2),
             currency: plan.currency, interval: plan.interval,
-            description: `${plan.limits.products} listings and ${plan.limits.monthlyPrintRequests} customer print requests per month.`,
+            monthlyEquivalent: plan.monthlyEquivalent ?? plan.amount,
+            annualSavings: plan.annualSavings ?? 0,
+            description: `${plan.limits.products} listings and ${plan.limits.monthlyPrintRequests} customer ${plan.id === 'pro' ? 'print and custom service' : 'print'} requests per month.`,
             features: plan.features.map(name => ({ name })), limits: plan.limits,
         });
     } catch (error) {

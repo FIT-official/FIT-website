@@ -1,5 +1,6 @@
 import { clerkMiddleware, clerkClient, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import { subscriptionIntentTarget, subscriptionPriceId, withSubscriptionIntent } from '@/lib/subscriptionIntent'
 
 const isPrivateRoute = createRouteMatcher(['/dashboard(.*)', '/account(.*)', '/onboarding', '/checkout(.*)', '/cart(.*)'])
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
@@ -15,7 +16,8 @@ export default clerkMiddleware(async (auth, req) => {
     // onboarding or authenticated-signin redirect can run.
     if (isSsoCallback(req)) return NextResponse.next()
     const { userId, sessionClaims } = await auth()
-    const homeUrl = new URL('/', req.url)
+    const priceId = subscriptionPriceId(new URL(req.url).searchParams.get('priceId'))
+    const homeUrl = new URL(subscriptionIntentTarget(priceId, '/'), req.url)
     let onboardingComplete = sessionClaims?.metadata?.onboardingComplete === true
 
     // Stripe return URLs must always be reachable (even if auth state is lost)
@@ -36,7 +38,7 @@ export default clerkMiddleware(async (auth, req) => {
 
     // for users who finished onboarding, redirect to home
     if (userId && isOnboardingRoute(req) && onboardingComplete) {
-        return NextResponse.redirect(new URL('/dashboard/shop', req.url))
+        return NextResponse.redirect(new URL(subscriptionIntentTarget(priceId, '/dashboard/shop'), req.url))
     }
 
     // for users visiting /onboarding to complete, don't try to redirect
@@ -46,12 +48,13 @@ export default clerkMiddleware(async (auth, req) => {
 
     // protect private routes
     if (!userId && isPrivateRoute(req)) {
+        if (priceId) return NextResponse.redirect(new URL(withSubscriptionIntent('/sign-in', priceId), req.url))
         await auth.protect()
     }
 
     // if metadata doesn't include onboardingComplete, redirect to onboarding
     if (userId && !onboardingComplete) {
-        const onboardingUrl = new URL('/onboarding', req.url)
+        const onboardingUrl = new URL(withSubscriptionIntent('/onboarding', priceId), req.url)
         return NextResponse.redirect(onboardingUrl)
     }
 

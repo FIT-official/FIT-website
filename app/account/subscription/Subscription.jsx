@@ -2,7 +2,8 @@
 // Subscription management on the "Sunlit Paper" language: plan facts as
 // dotted-leader rows, cancel behind a ConfirmDialog (window.confirm/alert are
 // banned), the edit flow unchanged (Stripe Elements + SubscriptionDetails).
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import dayjs from 'dayjs'
@@ -20,7 +21,10 @@ const statusText = (key) =>
     key ? key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ') : 'Unknown'
 
 function Subscription() {
-    const [updating, setUpdating] = useState(false)
+    const params = useSearchParams()
+    const requestedPriceId = params?.get('priceId')
+    const [updating, setUpdating] = useState(() => Boolean(requestedPriceId))
+    useEffect(() => { if (requestedPriceId) setUpdating(true) }, [requestedPriceId])
     const [confirmCancelOpen, setConfirmCancelOpen] = useState(false)
     const [cancelBusy, setCancelBusy] = useState(false)
     const { subscription, loading: subLoading, error: subError, refresh } = useUserSubscription()
@@ -53,7 +57,7 @@ function Subscription() {
         </div>
     )
 
-    if (subLoading) {
+    if (subLoading && !subscription) {
         return (
             <AccountShell active="subscription" header={header}>
                 <SkeletonTile className="max-w-xl" />
@@ -87,7 +91,7 @@ function Subscription() {
                             </StatusPill>
                             <div className="mt-3">
                                 {Number.isFinite(subscription.price) && (
-                                    <DottedRow label="Price">S${money(subscription.price / 100)} per cycle</DottedRow>
+                                    <DottedRow label="Price">S${money(subscription.price / 100)} per {subscription.interval === 'year' ? 'year' : subscription.interval === 'month' ? 'month' : 'cycle'}</DottedRow>
                                 )}
                                 {subscription.current_period_end && (
                                     <DottedRow label={subscription.cancel_at_period_end ? 'Ends' : 'Renews'}>

@@ -4,8 +4,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import EmailField from './EmailField'
 import PasswordField from './PasswordField'
+import { subscriptionIntentTarget, withSubscriptionIntent } from '@/lib/subscriptionIntent'
 
-export default function SignUpForm({ setVerifying }) {
+export default function SignUpForm({ setVerifying, priceId }) {
     const { isLoaded, signUp } = useSignUp()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -30,7 +31,8 @@ export default function SignUpForm({ setVerifying }) {
         setError('')
         try {
             await signUp.authenticateWithRedirect({
-                strategy: 'oauth_google', redirectUrl: '/sign-up/sso-callback', redirectUrlComplete: '/dashboard/shop',
+                strategy: 'oauth_google', redirectUrl: withSubscriptionIntent('/sign-up/sso-callback', priceId),
+                redirectUrlComplete: subscriptionIntentTarget(priceId, '/dashboard/shop'),
             })
         } catch (err) {
             setError(err?.errors?.[0]?.longMessage || err?.message || 'Unable to continue with Google.')
@@ -40,7 +42,7 @@ export default function SignUpForm({ setVerifying }) {
     return <form onSubmit={submit} className="flex w-full max-w-md flex-col gap-4">
         <h1>Create your account</h1>
         <p className="text-sm text-lightColor">Start free with your own creator page, 3 product listings and 10 print requests each month. No card required.</p>
-        <p className="text-sm">Already registered? <Link href="/sign-in" className="underline">Sign in</Link></p>
+        <p className="text-sm">Already registered? <Link href={withSubscriptionIntent('/sign-in', priceId)} className="underline">Sign in</Link></p>
         {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
         <label className="text-sm">Email<EmailField email={email} setEmail={setEmail} required /></label>
         <label className="text-sm">Password<PasswordField password={password} setPassword={setPassword} required /></label>

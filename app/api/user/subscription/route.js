@@ -15,6 +15,8 @@ export async function GET() {
             price: item?.price?.unit_amount ?? 0,
             currency: item?.price?.currency?.toUpperCase() || plan.currency,
             interval: item?.price?.recurring?.interval || plan.interval,
+            monthlyEquivalent: plan.monthlyEquivalent ?? plan.amount,
+            annualSavings: plan.annualSavings ?? 0,
             current_period_end: subscription?.current_period_end ?? item?.current_period_end ?? null,
             created: subscription?.created || null,
             cancelled_at: subscription?.canceled_at || null,

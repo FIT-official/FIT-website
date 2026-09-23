@@ -25,7 +25,7 @@ vi.mock('@/lib/db', () => ({ connectToDatabase: vi.fn() }));
 vi.mock('@/models/User', () => ({ default: {} }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 
-import { CREATOR_PLANS, getCreatorPlan } from '@/lib/creatorPlans';
+import { CREATOR_PLANS, getCreatorPlan, getCreatorBillingPlan } from '@/lib/creatorPlans';
 import { getCreatorEntitlements, getPlanForSubscription, getPlanForPriceId, isPriceValidForPlan } from '@/lib/creatorEntitlements';
 import { requireCreator } from '@/lib/requireCreator';
 import { POST as edit } from '@/app/api/user/subscription/edit/route';
@@ -37,7 +37,11 @@ import { updateRoleFromStripe } from '@/app/onboarding/_actions';
 import middleware from '@/middleware';
 
 let user;
-const price = (id = 'price_standard', extra = {}) => ({ id, active: true, unit_amount: id === 'price_pro' ? 9900 : 3900, currency: 'sgd', recurring: { interval: 'month', interval_count: 1 }, product: { active: true }, ...extra });
+const price = (id = 'price_standard', extra = {}) => ({
+    id, active: true, unit_amount: { price_standard: 3900, price_pro: 9900, price_standard_yearly: 39000, price_pro_yearly: 99000 }[id],
+    currency: 'sgd', recurring: { interval: id.endsWith('_yearly') ? 'year' : 'month', interval_count: 1, usage_type: 'licensed' },
+    product: { active: true }, ...extra,
+});
 const subscription = (extra = {}) => ({
     id: 'sub_current', customer: 'cus_owner', status: 'active', metadata: { clerkUserId: 'user_owner' },
     items: { data: [{ id: 'si_current', price: price() }] }, ...extra,
@@ -51,7 +55,9 @@ beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_unit');
     vi.stubEnv('STRIPE_STANDARD_MONTHLY_PRICE_ID', 'price_standard');
+    vi.stubEnv('STRIPE_STANDARD_YEARLY_PRICE_ID', 'price_standard_yearly');
     vi.stubEnv('STRIPE_PRO_MONTHLY_PRICE_ID', 'price_pro');
+    vi.stubEnv('STRIPE_PRO_YEARLY_PRICE_ID', 'price_pro_yearly');
     vi.stubEnv('STRIPE_SUBSCRIPTION_SIGNING_SECRET', 'whsec_unit');
     user = { id: 'user_owner', publicMetadata: { role: 'user' }, unsafeMetadata: {}, emailAddresses: [{ emailAddress: 'owner@example.test' }] };
     mocks.auth.mockResolvedValue({ userId: user.id });
@@ -99,6 +105,30 @@ describe('creator entitlement contract', () => {
     });
     it('preserves minimum access for active legacy plans', () => {
         expect(getPlanForSubscription(subscription({ items: { data: [{ price: { id: 'price_legacy' } }] } })).id).toBe('free');
+    });
+    it.each(['standard', 'pro'])('recognises %s annual billing with unchanged monthly quotas', planId => {
+        const selected = price(`price_${planId}_yearly`);
+        const result = getPlanForSubscription(subscription({ items: { data: [{ quantity: 1, price: selected }] } }));
+        expect(result).toMatchObject({ id: planId, interval: 'year', amount: planId === 'standard' ? 390 : 990 });
+        expect(result.limits).toEqual(getCreatorPlan(planId).limits);
+    });
+    it('rejects duplicate price IDs across monthly and annual mappings', () => {
+        vi.stubEnv('STRIPE_STANDARD_YEARLY_PRICE_ID', 'price_standard');
+        expect(getPlanForPriceId('price_standard')).toBe(null);
+        expect(getPlanForSubscription(subscription()).id).toBe('free');
+    });
+    it.each([
+        { unit_amount: 3900 }, { unit_amount: 46800 }, { currency: 'usd' },
+        { recurring: { interval: 'month', interval_count: 12, usage_type: 'licensed' } },
+        { recurring: { interval: 'year', interval_count: 2, usage_type: 'licensed' } },
+        { recurring: { interval: 'year', interval_count: 1, usage_type: 'metered' } },
+        { recurring: { interval: 'year', interval_count: 1 } },
+        { recurring: { interval: 'year', usage_type: 'licensed' } },
+        { transform_quantity: { divide_by: 10, round: 'down' } },
+    ])('rejects annual price terms that do not match the published plan: %j', extra => {
+        const selected = price('price_standard_yearly', extra);
+        expect(isPriceValidForPlan(selected, getCreatorBillingPlan('standard', 'year'))).toBe(false);
+        expect(getPlanForSubscription(subscription({ items: { data: [{ quantity: 1, price: selected }] } })).id).toBe('free');
     });
     it('keeps an existing paid subscription when its price is archived', () => {
         expect(getPlanForSubscription(subscription({ items: { data: [{ quantity: 1, price: price('price_standard', { active: false }) }] } })).id).toBe('standard');
@@ -168,6 +198,64 @@ describe('subscription checkout', () => {
         mocks.subscriptionUpdate.mockResolvedValue(subscription({ pending_update: { subscription_items: [{ price: 'price_pro' }] }, latest_invoice: { payment_intent: { status: 'requires_action', client_secret: 'secret_upgrade' } } }));
         expect(await (await edit(request({ priceId: 'price_pro', cardToken: 'tok_valid' }))).json()).toMatchObject({ success: false, planId: 'standard', pending_update: true, requires_action: true });
     });
+    it.each([
+        ['price_standard', 'price_standard_yearly', 'year'],
+        ['price_standard_yearly', 'price_standard', 'month'],
+        ['price_pro', 'price_pro_yearly', 'year'],
+    ])('switches the same tier from %s to %s', async (currentPrice, nextPrice, interval) => {
+        user.publicMetadata = { stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_current' };
+        mocks.subscriptionRetrieve.mockResolvedValue(subscription({ items: { data: [{ id: 'si_current', price: price(currentPrice) }] } }));
+        mocks.pricesRetrieve.mockResolvedValue(price(nextPrice));
+        mocks.subscriptionUpdate.mockResolvedValue(subscription({ items: { data: [{ id: 'si_current', price: price(nextPrice) }] } }));
+        const response = await edit(request({ priceId: nextPrice, cardToken: 'tok_valid' }));
+        expect(await response.json()).toMatchObject({ success: true, interval, priceId: nextPrice, pending_update: false });
+        expect(mocks.subscriptionUpdate).toHaveBeenCalledWith('sub_current', {
+            items: [{ id: 'si_current', price: nextPrice, quantity: 1 }],
+            proration_behavior: 'always_invoice', payment_behavior: 'pending_if_incomplete', expand: ['latest_invoice.payment_intent'],
+        }, { idempotencyKey: 'fit-plan:user_owner:tok_valid' });
+        expect(mocks.subscriptionCreate).not.toHaveBeenCalled();
+    });
+    it('does not confirm an interval switch when Stripe still returns the previous price', async () => {
+        user.publicMetadata = { stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_current' };
+        mocks.pricesRetrieve.mockResolvedValue(price('price_standard_yearly'));
+        expect(await (await edit(request({ priceId: 'price_standard_yearly', cardToken: 'tok_valid' }))).json()).toMatchObject({
+            success: false, planId: 'standard', interval: 'month', priceId: 'price_standard',
+        });
+    });
+    it('keeps monthly entitlements while an annual payment awaits authentication and safely resumes it', async () => {
+        user.publicMetadata = { stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_current' };
+        mocks.pricesRetrieve.mockResolvedValue(price('price_standard_yearly'));
+        mocks.subscriptionRetrieve.mockResolvedValue(subscription({ pending_update: { subscription_items: [{ price: 'price_standard_yearly' }] },
+            latest_invoice: { payment_intent: { status: 'requires_action', client_secret: 'annual_owner_secret' } } }));
+        expect(await (await edit(request({ priceId: 'price_standard_yearly' }))).json()).toMatchObject({
+            success: false, planId: 'standard', interval: 'month', pending_update: true, requires_action: true, clientSecret: 'annual_owner_secret',
+        });
+        expect(mocks.paymentCreate).not.toHaveBeenCalled();
+        expect(mocks.subscriptionUpdate).not.toHaveBeenCalled();
+        expect(mocks.subscriptionCreate).not.toHaveBeenCalled();
+    });
+    it('blocks another interval selection until a pending annual payment is resolved', async () => {
+        user.publicMetadata = { stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_current' };
+        mocks.subscriptionRetrieve.mockResolvedValue(subscription({ pending_update: { subscription_items: [{ price: 'price_standard_yearly' }] } }));
+        expect((await edit(request())).status).toBe(409);
+        expect(mocks.paymentCreate).not.toHaveBeenCalled();
+        expect(mocks.subscriptionUpdate).not.toHaveBeenCalled();
+    });
+    it('treats an exact paid annual selection as a no-op without requiring a new card', async () => {
+        user.publicMetadata = { stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_current' };
+        mocks.pricesRetrieve.mockResolvedValue(price('price_standard_yearly'));
+        mocks.subscriptionRetrieve.mockResolvedValue(subscription({ items: { data: [{ id: 'si_current', price: price('price_standard_yearly') }] } }));
+        expect(await (await edit(request({ priceId: 'price_standard_yearly' }))).json()).toMatchObject({ success: true, interval: 'year', priceId: 'price_standard_yearly' });
+        expect(mocks.paymentCreate).not.toHaveBeenCalled();
+        expect(mocks.subscriptionUpdate).not.toHaveBeenCalled();
+    });
+    it('creates annual subscriptions with the existing duplicate-submission protection', async () => {
+        mocks.pricesRetrieve.mockResolvedValue(price('price_pro_yearly'));
+        mocks.subscriptionCreate.mockResolvedValue(subscription({ items: { data: [{ id: 'si_current', price: price('price_pro_yearly') }] } }));
+        expect(await (await edit(request({ priceId: 'price_pro_yearly', cardToken: 'tok_valid' }))).json()).toMatchObject({ success: true, planId: 'pro', interval: 'year' });
+        expect(mocks.subscriptionCreate).toHaveBeenCalledWith(expect.objectContaining({ items: [{ price: 'price_pro_yearly', quantity: 1 }] }),
+            { idempotencyKey: 'fit-subscription:user_owner:cus_owner:first' });
+    });
 });
 
 describe('subscription lifecycle and routing', () => {
@@ -179,6 +267,19 @@ describe('subscription lifecycle and routing', () => {
     it('does not reveal arbitrary Stripe product information', async () => {
         expect((await info(new Request('https://fit.example/api/subscription/info?priceId=price_unlisted'))).status).toBe(400);
         expect(mocks.pricesRetrieve).not.toHaveBeenCalled();
+    });
+    it('returns annual billing information and monthly usage limits', async () => {
+        user.publicMetadata = { stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_current' };
+        mocks.pricesRetrieve.mockResolvedValue(price('price_standard_yearly'));
+        mocks.subscriptionRetrieve.mockResolvedValue(subscription({ items: { data: [{ price: price('price_standard_yearly') }] } }));
+        expect(await (await info(new Request('https://fit.example/api/subscription/info?priceId=price_standard_yearly'))).json()).toMatchObject({
+            planId: 'standard', price: '390.00', interval: 'year', monthlyEquivalent: 32.5, annualSavings: 78,
+            limits: { products: 25, monthlyPrintRequests: 100 },
+        });
+        expect(await (await read()).json()).toMatchObject({
+            planId: 'standard', price: 39000, priceId: 'price_standard_yearly', interval: 'year', monthlyEquivalent: 32.5, annualSavings: 78,
+            limits: { products: 25, monthlyPrintRequests: 100 },
+        });
     });
     it('ignores cancellation of an older subscription for the same customer', async () => {
         user.publicMetadata = { stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_replacement' };
@@ -224,6 +325,19 @@ describe('subscription lifecycle and routing', () => {
         user.publicMetadata = { stripeCustomerId: 'cus_other', stripeSubscriptionId: 'sub_current' };
         expect((await cancel()).status).toBe(403);
         expect(mocks.subscriptionUpdate).not.toHaveBeenCalled();
+    });
+    it('keeps annual Pro allowances until the paid year ends after cancellation is scheduled', async () => {
+        user.publicMetadata = { stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_current' };
+        const annual = subscription({ current_period_end: 1821657600, items: { data: [{ quantity: 1, price: price('price_pro_yearly') }] } });
+        mocks.subscriptionRetrieve.mockResolvedValue(annual);
+        mocks.subscriptionUpdate.mockResolvedValue({ ...annual, cancel_at_period_end: true });
+        expect(await (await cancel()).json()).toMatchObject({ success: true, cancel_at_period_end: true, current_period_end: 1821657600 });
+        expect(mocks.subscriptionUpdate).toHaveBeenCalledWith('sub_current', { cancel_at_period_end: true });
+        mocks.subscriptionRetrieve.mockResolvedValue({ ...annual, cancel_at_period_end: true });
+        expect(await getCreatorEntitlements(user.id)).toMatchObject({ planId: 'pro', status: 'active',
+            plan: { interval: 'year', limits: { products: 100, monthlyPrintRequests: 500 } } });
+        mocks.subscriptionRetrieve.mockResolvedValue({ ...annual, status: 'canceled' });
+        expect(await getCreatorEntitlements(user.id)).toMatchObject({ planId: 'free' });
     });
     it('cannot replace an admin role with a billing product name', async () => {
         user.publicMetadata = { role: 'admin', stripeCustomerId: 'cus_owner', stripeSubscriptionId: 'sub_current' };

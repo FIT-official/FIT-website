@@ -24,6 +24,8 @@ vi.mock('@/models/CreatorQuota', () => ({ default: {
 
 import { reserveCreatorQuota, releaseProductQuota, quotaPeriod } from '@/lib/creatorQuota'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
+import { getCreatorEntitlements } from '@/lib/creatorEntitlements'
+import { getCreatorBillingPlan } from '@/lib/creatorPlans'
 
 beforeEach(() => { state.counters.clear(); state.existingProducts = 0; state.existingRequests = 0; state.existingFabrication = 0; state.isAdmin = false; state.limit = 3; vi.clearAllMocks() })
 
@@ -65,5 +67,20 @@ describe('creator plan allowances', () => {
     await reserveCreatorQuota('u1', 'monthlyPrintRequests', new Date('2026-09-23T00:00:00Z'))
     expect(state.counters.get('u1:requests:2026-09')).toBe(10)
     await expect(reserveCreatorQuota('u1', 'monthlyPrintRequests', new Date('2026-09-23T00:00:00Z'))).rejects.toThrow(/10 print requests/)
+  })
+  it('renews an annual Pro plan shared request allowance each UTC calendar month', async () => {
+    const annual = { isAdmin: false, plan: getCreatorBillingPlan('pro', 'year') }
+    getCreatorEntitlements.mockResolvedValueOnce(annual).mockResolvedValueOnce(annual).mockResolvedValueOnce(annual)
+    state.existingRequests = 300
+    state.existingFabrication = 199
+    await reserveCreatorQuota('annual-provider', 'monthlyPrintRequests', new Date('2026-09-30T23:59:00Z'))
+    expect(state.counters.get('annual-provider:requests:2026-09')).toBe(500)
+    await expect(reserveCreatorQuota('annual-provider', 'monthlyPrintRequests', new Date('2026-09-30T23:59:30Z'))).rejects.toThrow(/500 print requests/)
+    state.existingRequests = 0
+    state.existingFabrication = 0
+    await reserveCreatorQuota('annual-provider', 'monthlyPrintRequests', new Date('2026-10-01T00:00:00Z'))
+    expect(state.counters.get('annual-provider:requests:2026-10')).toBe(1)
+    expect(CustomPrintRequest.countDocuments).toHaveBeenLastCalledWith({ creatorUserId: 'annual-provider',
+      createdAt: { $gte: new Date('2026-10-01T00:00:00Z'), $lt: new Date('2026-11-01T00:00:00Z') } })
   })
 })

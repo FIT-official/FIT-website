@@ -6,8 +6,9 @@ import { IoMdLock } from 'react-icons/io'
 import CodeField from './CodeField'
 import Error from './Error'
 import { useToast } from '../General/ToastProvider'
+import { subscriptionIntentTarget } from '@/lib/subscriptionIntent'
 
-function VerificationForm() {
+function VerificationForm({ priceId }) {
     const router = useRouter()
     const { isLoaded, signUp, setActive } = useSignUp()
     const [code, setCode] = useState('')
@@ -29,7 +30,7 @@ function VerificationForm() {
             })
             if (signInAttempt.status === 'complete') {
                 await setActive({ session: signInAttempt.createdSessionId })
-                router.replace('/onboarding')
+                router.replace(subscriptionIntentTarget(priceId, '/onboarding'))
             } else {
                 setError('Verification failed. Please try again.')
             }

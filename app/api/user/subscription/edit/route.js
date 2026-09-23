@@ -5,15 +5,27 @@ import {
     isPriceValidForPlan, subscriptionBelongsToUser, subscriptionMetadata,
 } from '@/lib/creatorEntitlements';
 
-function resultFor(subscription, requestedPlan) {
+function subscriptionPriceId(subscription) {
+    const price = subscription?.items?.data?.[0]?.price;
+    return typeof price === 'string' ? price : price?.id;
+}
+
+function matchesRequestedPlan(subscription, requestedPlan, requestedPriceId) {
+    const plan = getPlanForSubscription(subscription);
+    return ['active', 'trialing'].includes(subscription.status) && !subscription.pending_update &&
+        subscriptionPriceId(subscription) === requestedPriceId &&
+        plan.id === requestedPlan.id && plan.interval === requestedPlan.interval;
+}
+
+function resultFor(subscription, requestedPlan, requestedPriceId) {
     const intent = subscription.latest_invoice?.payment_intent;
     const plan = getPlanForSubscription(subscription);
-    const success = ['active', 'trialing'].includes(subscription.status) &&
-        !subscription.pending_update && plan.id === requestedPlan.id;
+    const success = matchesRequestedPlan(subscription, requestedPlan, requestedPriceId);
     const requiresAction = !success && ['requires_action', 'requires_confirmation'].includes(intent?.status);
     return {
         success, subscriptionId: subscription.id, status: subscription.status,
-        planId: plan.id, pending_update: Boolean(subscription.pending_update),
+        planId: plan.id, interval: plan.interval, priceId: subscriptionPriceId(subscription) || null,
+        pending_update: Boolean(subscription.pending_update),
         requires_action: requiresAction,
         clientSecret: requiresAction ? intent.client_secret : null,
         ...(!success ? { error: requiresAction
@@ -90,7 +102,7 @@ export async function POST(req) {
         };
 
         const unfinishedPayment = Boolean(subscription?.pending_update || subscription?.status === 'incomplete');
-        const unfinishedPrice = subscription?.pending_update?.subscription_items?.[0]?.price || subscription?.items?.data?.[0]?.price?.id;
+        const unfinishedPrice = subscription?.pending_update?.subscription_items?.[0]?.price || subscriptionPriceId(subscription);
         if (unfinishedPayment && (typeof unfinishedPrice === 'string' ? unfinishedPrice : unfinishedPrice?.id) !== priceId) {
             return NextResponse.json({ success: false, error: 'Complete the pending plan payment before selecting a different plan.' }, { status: 409 });
         }
@@ -98,14 +110,14 @@ export async function POST(req) {
             subscription.latest_invoice?.payment_intent?.status === 'requires_payment_method';
         if (unfinishedPayment && !replacingDeclinedCard) {
             await saveSubscription(subscription);
-            return NextResponse.json(resultFor(subscription, requestedPlan));
+            return NextResponse.json(resultFor(subscription, requestedPlan, priceId));
         }
         if (subscription && !unfinishedPayment && !['active', 'trialing'].includes(subscription.status)) {
             return NextResponse.json({ success: false, status: subscription.status, error: 'Resolve the existing subscription payment before changing plans.' }, { status: 409 });
         }
-        if (subscription && !unfinishedPayment && getPlanForSubscription(subscription).id === requestedPlan.id) {
+        if (subscription && !unfinishedPayment && matchesRequestedPlan(subscription, requestedPlan, priceId)) {
             await saveSubscription(subscription);
-            return NextResponse.json(resultFor(subscription, requestedPlan));
+            return NextResponse.json(resultFor(subscription, requestedPlan, priceId));
         }
         if (typeof cardToken !== 'string' || !/^tok_[A-Za-z0-9_]{1,220}$/.test(cardToken)) {
             return NextResponse.json({ error: 'Valid card details are required.' }, { status: 400 });
@@ -134,7 +146,7 @@ export async function POST(req) {
             await stripe.paymentIntents.update(subscription.latest_invoice.payment_intent.id, { payment_method: paymentMethod.id });
             subscription = await stripe.subscriptions.retrieve(subscription.id, { expand: ['latest_invoice.payment_intent'] });
             await saveSubscription(subscription);
-            return NextResponse.json(resultFor(subscription, requestedPlan));
+            return NextResponse.json(resultFor(subscription, requestedPlan, priceId));
         }
         if (subscription) {
             await stripe.subscriptions.update(subscription.id, { default_payment_method: paymentMethod.id });
@@ -156,7 +168,7 @@ export async function POST(req) {
             }, { idempotencyKey: `fit-subscription:${userId}:${customerId}:${creationPredecessor}` });
         }
         await saveSubscription(subscription);
-        return NextResponse.json(resultFor(subscription, requestedPlan));
+        return NextResponse.json(resultFor(subscription, requestedPlan, priceId));
     } catch (error) {
         console.error('Subscription update failed:', error?.code || error?.type || 'provider_error');
         const status = error.status || (error.type === 'StripeCardError' ? 402 : 500);

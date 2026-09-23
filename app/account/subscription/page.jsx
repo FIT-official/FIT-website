@@ -1,4 +1,5 @@
 import Subscription from "./Subscription";
+import { Suspense } from 'react';
 
 export const metadata = {
     title: "Subscription | Fix It Today®",
@@ -24,7 +25,7 @@ export const metadata = {
 
 function SubscriptionLayout() {
     return (
-        <Subscription />
+        <Suspense fallback={<p>Loading subscription…</p>}><Subscription /></Suspense>
     )
 }
 

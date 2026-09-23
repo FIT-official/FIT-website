@@ -1,4 +1,5 @@
 import SignUpPage from "./SignUpPage";
+import { subscriptionPriceId } from '@/lib/subscriptionIntent';
 
 export const metadata = {
     title: "Sign Up | Fix It Today®",
@@ -21,9 +22,10 @@ export const metadata = {
     },
 };
 
-function SignUpLayout() {
+async function SignUpLayout({ searchParams }) {
+    const priceId = subscriptionPriceId((await searchParams)?.priceId);
     return (
-        <SignUpPage />
+        <SignUpPage priceId={priceId} />
     )
 }
 

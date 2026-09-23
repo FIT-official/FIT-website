@@ -4,20 +4,21 @@ import SignInForm from "@/components/AuthComponents/SignInForm";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { subscriptionIntentTarget } from '@/lib/subscriptionIntent';
 
-function SignInPage() {
+function SignInPage({ priceId }) {
     const { isSignedIn, isLoaded } = useUser();
     const router = useRouter();
 
     useEffect(() => {
         if (isLoaded && isSignedIn) {
-            router.replace("/dashboard");
+            router.replace(subscriptionIntentTarget(priceId, '/dashboard'));
         }
-    }, [isLoaded, isSignedIn, router]);
+    }, [isLoaded, isSignedIn, router, priceId]);
 
     return (
         <div className='flex w-full items-center h-[92vh] justify-center border-b border-borderColor px-8'>
-            <SignInForm />
+            <SignInForm priceId={priceId} />
         </div>
     )
 }
