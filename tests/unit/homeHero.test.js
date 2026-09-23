@@ -68,6 +68,12 @@ describe('homepage hero content', () => {
         expect(await getHomeHeroContent()).toEqual({ text: '', heroImage: 'https://example.com/current.jpg', darkOverlay: true })
     })
 
+    it.each([['30', 30], [' 90 ', 80], ['-10', 0], ['false', false], ['Infinity', false], ['', false]])
+        ('preserves the legacy numeric overlay %j safely', async (darkOverlay, expected) => {
+            block = { frontmatter: { darkOverlay } }
+            expect((await getHomeHeroContent()).darkOverlay).toBe(expected)
+        })
+
     it('reads current content on a later request without caching the previous override', async () => {
         block = { frontmatter: { heroImage: 'old.jpg' } }
         expect((await getHomeHeroContent()).heroImage).toBe('old.jpg')
