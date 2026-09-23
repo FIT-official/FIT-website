@@ -16,6 +16,7 @@ import ProductsBlock from './blocks/ProductsBlock'
 import PrintServiceBlock from './blocks/PrintServiceBlock'
 import LinksBlock from './blocks/LinksBlock'
 import ContactBlock from './blocks/ContactBlock'
+import FabricationServiceBlock from '@/components/Fabrication/FabricationServiceBlock'
 
 export const BLOCK_COMPONENTS = {
     hero: HeroBlock,
@@ -42,6 +43,7 @@ export default function BlockRenderer({ blocks, creator, products = [], preview 
                     </section>
                 )
             })}
+            <FabricationServiceBlock creator={creator} />
         </div>
     )
 }

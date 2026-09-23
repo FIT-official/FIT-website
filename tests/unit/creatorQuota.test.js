@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const state = vi.hoisted(() => ({ counters: new Map(), existingProducts: 0, existingRequests: 0, isAdmin: false, limit: 3 }))
+const state = vi.hoisted(() => ({ counters: new Map(), existingProducts: 0, existingRequests: 0, existingFabrication: 0, isAdmin: false, limit: 3 }))
 vi.mock('@/lib/db', () => ({ connectToDatabase: vi.fn() }))
 vi.mock('@/lib/creatorEntitlements', () => ({ getCreatorEntitlements: vi.fn(async () => ({
   isAdmin: state.isAdmin, plan: { limits: { products: state.limit, monthlyPrintRequests: 10 } },
 })) }))
 vi.mock('@/models/Product', () => ({ default: { countDocuments: vi.fn(async () => state.existingProducts) } }))
 vi.mock('@/models/CustomPrintRequest', () => ({ default: { countDocuments: vi.fn(async () => state.existingRequests) } }))
+vi.mock('@/models/FabricationRequest', () => ({ default: { countDocuments: vi.fn(async () => state.existingFabrication) } }))
 vi.mock('@/models/CreatorQuota', () => ({ default: {
   findById: vi.fn((id) => ({ lean: async () => state.counters.has(id) ? { used: state.counters.get(id) } : null })),
   updateOne: vi.fn(async (filter, update) => {
@@ -24,7 +25,7 @@ vi.mock('@/models/CreatorQuota', () => ({ default: {
 import { reserveCreatorQuota, releaseProductQuota, quotaPeriod } from '@/lib/creatorQuota'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
 
-beforeEach(() => { state.counters.clear(); state.existingProducts = 0; state.existingRequests = 0; state.isAdmin = false; state.limit = 3; vi.clearAllMocks() })
+beforeEach(() => { state.counters.clear(); state.existingProducts = 0; state.existingRequests = 0; state.existingFabrication = 0; state.isAdmin = false; state.limit = 3; vi.clearAllMocks() })
 
 describe('creator plan allowances', () => {
   it('reserves only the remaining slots when requests arrive concurrently', async () => {
@@ -57,5 +58,12 @@ describe('creator plan allowances', () => {
     state.isAdmin = true
     await reserveCreatorQuota('admin', 'products')
     expect(state.counters.has('admin:products')).toBe(false)
+  })
+  it('bootstraps one shared allowance from 3D and fabrication requests', async () => {
+    state.existingRequests = 6
+    state.existingFabrication = 3
+    await reserveCreatorQuota('u1', 'monthlyPrintRequests', new Date('2026-09-23T00:00:00Z'))
+    expect(state.counters.get('u1:requests:2026-09')).toBe(10)
+    await expect(reserveCreatorQuota('u1', 'monthlyPrintRequests', new Date('2026-09-23T00:00:00Z'))).rejects.toThrow(/10 print requests/)
   })
 })

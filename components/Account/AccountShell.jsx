@@ -23,6 +23,7 @@ export const ACCOUNT_SECTIONS = [
 // Standalone account routes that share the shell.
 export const ACCOUNT_PAGES = [
     { key: 'prints', label: 'Print requests', href: '/account/prints' },
+    { key: 'services', label: 'Service requests', href: '/account/services' },
     { key: 'subscription', label: 'Subscription', href: '/account/subscription' },
 ]
 

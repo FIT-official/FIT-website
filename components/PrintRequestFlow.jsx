@@ -17,8 +17,8 @@ import { exceedsBuild, normalizeDesignSource, validatePrintFile } from '@/lib/pr
 
 const Viewer = dynamic(() => import('@/components/Editor/viewer'), { ssr: false, loading: () => <p className="p-6 text-sm">Preparing preview…</p> })
 const money = (value) => new Intl.NumberFormat('en-SG', { style: 'currency', currency: 'SGD' }).format(value)
-const card = 'min-w-0 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6'
-const primary = 'mt-5 w-full rounded-lg bg-slate-900 px-5 py-3 text-sm font-medium text-white disabled:opacity-50'
+const card = 'min-w-0 rounded-md border border-borderColor bg-background p-5 sm:p-6'
+const primary = 'mt-5 w-full rounded-lg bg-textColor px-5 py-3 text-sm font-medium text-background disabled:opacity-50'
 
 export default function PrintRequestFlow() {
   const { user, isLoaded } = useUser()
@@ -182,12 +182,12 @@ export default function PrintRequestFlow() {
   if (creatorState === 'unavailable') return <div className="mx-auto max-w-2xl p-8"><h1 className="text-2xl font-semibold">Print service unavailable</h1><p className="my-4">This creator is not accepting print requests right now.</p><Link href="/prints/request" className="underline">Request a print from Fix It Today</Link></div>
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa] px-4 py-8 text-slate-900 sm:px-8">
+    <div className="min-h-screen bg-[#f7f8fa] px-4 py-8 text-textColor sm:px-8">
       <div className="mx-auto max-w-6xl">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">{isCreatorFlow ? creator.displayName : 'Fix It Today'} · 3D printing</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-lightColor">{isCreatorFlow ? creator.displayName : 'Fix It Today'} · 3D printing</p>
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Your design, ready to print.</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">Add a model or paste a design link. Preview the part, choose its finish and see an estimate before you send it.</p>
-        {isCreatorFlow && <p className="mt-3 text-sm text-slate-600">{service.headline} · About {service.leadTimeDays} days. Payment is arranged directly with the creator.</p>}
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-lightColor">Add a model or paste a design link. Preview the part, choose its finish and see an estimate before you send it.</p>
+        {isCreatorFlow && <p className="mt-3 text-sm text-lightColor">{service.headline} · About {service.leadTimeDays} days. Payment is arranged directly with the creator.</p>}
         <form onSubmit={submitRequest} className="mt-7 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
           <div className="min-w-0 space-y-5">
             <section className={card}>
@@ -198,25 +198,25 @@ export default function PrintRequestFlow() {
                 setSource(normalizeDesignSource(value))
               }} />
               <div className="my-5 flex items-center gap-3 text-xs text-slate-400"><span className="h-px flex-1 bg-slate-200" />or upload a file<span className="h-px flex-1 bg-slate-200" /></div>
-              <label htmlFor="file" className="block cursor-pointer rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm focus-within:ring-2 focus-within:ring-slate-700">
+              <label htmlFor="file" className="block cursor-pointer rounded-xl border border-dashed border-borderColor bg-baseColor p-5 text-sm focus-within:ring-2 focus-within:ring-slate-700">
                 <span className="mb-2 block font-medium">{file ? file.name : 'Choose your 3D model'}</span>
                 <input id="file" name="file" type="file" aria-label="Choose a 3D model file" accept={formats.map((format) => `.${format}`).join(',')} disabled={submitting || parsing || importing}
                   onChange={(event) => { const nextFile = event.target.files?.[0]; event.target.value = ''; chooseFile(nextFile, source).catch(() => {}) }} className="sr-only" />
                 <span className="inline-block rounded-lg bg-slate-200 px-3 py-2 text-xs font-medium">{file ? 'Replace file' : 'Choose file'}</span>
-                <span className="mt-2 block text-xs text-slate-500">{formats.map((format) => format.toUpperCase()).join(', ')} · up to 25 MB</span>
+                <span className="mt-2 block text-xs text-lightColor">{formats.map((format) => format.toUpperCase()).join(', ')} · up to 25 MB</span>
               </label>
-              {source && <p className="mt-3 break-all text-xs text-slate-500">Design source: <a href={source.url} target="_blank" rel="noopener noreferrer" className="underline">{new URL(source.url).hostname}</a>{source.attribution ? ` · ${source.attribution}` : ''}</p>}
-              <p className="mt-3 text-xs text-slate-500">Use designs you have permission to print. Selling prints may require the designer’s commercial licence.</p>
+              {source && <p className="mt-3 break-all text-xs text-lightColor">Design source: <a href={source.url} target="_blank" rel="noopener noreferrer" className="underline">{new URL(source.url).hostname}</a>{source.attribution ? ` · ${source.attribution}` : ''}</p>}
+              <p className="mt-3 text-xs text-lightColor">Use designs you have permission to print. Selling prints may require the designer’s commercial licence.</p>
             </section>
-            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <div className="flex items-center justify-between gap-3 px-5 py-4"><h2 className="shrink-0 text-sm font-semibold">Part preview</h2><span className="min-w-0 truncate text-xs text-slate-500">{file ? file.name : 'Your model appears here'}</span></div>
+            <section className="overflow-hidden rounded-md border border-borderColor bg-background">
+              <div className="flex items-center justify-between gap-3 px-5 py-4"><h2 className="shrink-0 text-sm font-semibold">Part preview</h2><span className="min-w-0 truncate text-xs text-lightColor">{file ? file.name : 'Your model appears here'}</span></div>
               <div className="relative h-[360px] bg-[#f4f3ef] sm:h-[430px]">
                 {scene ? <Viewer scene={scene} fileName={file?.name} layerHeight={configuration.printSettings.layerHeight}
                   meshColors={isCreatorFlow ? {} : { default: configuration.colourHex || '#e5e7eb' }} />
-                  : <div className="flex h-full items-center justify-center px-8 text-center text-sm text-slate-500">{parsing ? 'Reading your model…' : 'Upload a model or import a link to explore the part in 3D.'}</div>}
+                  : <div className="flex h-full items-center justify-center px-8 text-center text-sm text-lightColor">{parsing ? 'Reading your model…' : 'Upload a model or import a link to explore the part in 3D.'}</div>}
               </div>
-              <div className="px-5 py-3 text-xs text-slate-500">{metrics?.dimensionsCm ? `${Object.values(metrics.dimensionsCm).map((value) => (value * 10).toFixed(1)).join(' × ')} mm · ` : ''}Colour and layer finish are approximate. The preview is not a slicer toolpath.</div>
-              {file && /\.(stl|obj)$/i.test(file.name) && <p className="px-5 pb-3 text-xs text-slate-500">STL and OBJ files are interpreted in millimetres. Check the displayed dimensions.{/\.obj$/i.test(file.name) ? ' The preview assumes the OBJ Y axis points up.' : ''}</p>}
+              <div className="px-5 py-3 text-xs text-lightColor">{metrics?.dimensionsCm ? `${Object.values(metrics.dimensionsCm).map((value) => (value * 10).toFixed(1)).join(' × ')} mm · ` : ''}Colour and layer finish are approximate. The preview is not a slicer toolpath.</div>
+              {file && /\.(stl|obj)$/i.test(file.name) && <p className="px-5 pb-3 text-xs text-lightColor">STL and OBJ files are interpreted in millimetres. Check the displayed dimensions.{/\.obj$/i.test(file.name) ? ' The preview assumes the OBJ Y axis points up.' : ''}</p>}
             </section>
           </div>
           <div className="min-w-0 space-y-5">
@@ -224,33 +224,33 @@ export default function PrintRequestFlow() {
               <h2 className="mb-4 text-lg font-semibold">2. Choose your finish</h2>
               {isCreatorFlow ? <div className="space-y-4">
                 <fieldset disabled={submitting}>
-                  <legend className="text-sm font-medium">Purpose <span className="font-normal text-slate-500">(optional)</span></legend>
+                  <legend className="text-sm font-medium">Purpose <span className="font-normal text-lightColor">(optional)</span></legend>
                   <div className="mt-2 grid grid-cols-3 gap-2">{Object.keys(PURPOSE_PRESETS).map(purpose => <button key={purpose} type="button" aria-pressed={selection.purpose === purpose}
                     onClick={() => setSelection(current => ({ ...current, purpose }))}
-                    className={`min-h-11 rounded-lg border px-2 text-sm ${selection.purpose === purpose ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300'}`}>{purpose}</button>)}</div>
+                    className={`min-h-11 rounded-lg border px-2 text-sm ${selection.purpose === purpose ? 'border-slate-900 bg-textColor text-background' : 'border-borderColor'}`}>{purpose}</button>)}</div>
                   <button type="button" onClick={() => setSelection(current => ({ ...current, purpose: '' }))} className="mt-2 text-xs underline underline-offset-4">Use balanced defaults</button>
-                  <p className="mt-2 text-xs text-slate-500">These are preferences for the creator to review. They will confirm the material, printing process and final settings.</p>
+                  <p className="mt-2 text-xs text-lightColor">These are preferences for the creator to review. They will confirm the material, printing process and final settings.</p>
                 </fieldset>
                 <label className="block text-sm">Material<select aria-label="Material" value={material} onChange={(event) => { setMaterial(event.target.value); setColour(materials.find((item) => item.name === event.target.value)?.colours?.[0] || '') }} className="mt-2 block w-full rounded-lg border p-3">{materials.map((item) => <option key={item.name}>{item.name}</option>)}</select></label>
                 {selectedMaterial?.colours?.length > 0 && <label className="block text-sm">Colour<select aria-label="Colour" value={colour} onChange={(event) => setColour(event.target.value)} className="mt-2 block w-full rounded-lg border p-3">{selectedMaterial.colours.map((item) => <option key={item}>{item}</option>)}</select></label>}
-                <p className="text-xs text-slate-500">Tell the creator about strength or appearance needs in your note. They will confirm the print settings.</p>
-              </div> : <><SimplePrintSettings value={selection} onChange={setSelection} colours={colours} disabled={submitting} /><p className="mt-4 text-xs text-slate-500">Advanced layer, wall, infill and support settings are available on the next screen.</p></>}
-              <label htmlFor="notes" className="mt-5 block text-sm font-medium">Anything else? <span className="font-normal text-slate-500">Optional</span></label>
-              <textarea id="notes" rows={3} maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Deadline, fit, finish or how you will use the part" className="mt-2 w-full rounded-lg border border-slate-300 p-3 text-sm" />
+                <p className="text-xs text-lightColor">Tell the creator about strength or appearance needs in your note. They will confirm the print settings.</p>
+              </div> : <><SimplePrintSettings value={selection} onChange={setSelection} colours={colours} disabled={submitting} /><p className="mt-4 text-xs text-lightColor">Advanced layer, wall, infill and support settings are available on the next screen.</p></>}
+              <label htmlFor="notes" className="mt-5 block text-sm font-medium">Anything else? <span className="font-normal text-lightColor">Optional</span></label>
+              <textarea id="notes" rows={3} maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Deadline, fit, finish or how you will use the part" className="mt-2 w-full rounded-lg border border-borderColor p-3 text-sm" />
             </section>
             <section className={card} aria-live="polite">
               <h2 className="text-lg font-semibold">3. Your estimate</h2>
-              {!file ? <p className="mt-3 text-sm text-slate-500">Add a model to see your estimate.</p> : isCreatorFlow ? <>
+              {!file ? <p className="mt-3 text-sm text-lightColor">Add a model to see your estimate.</p> : isCreatorFlow ? <>
                 {creatorEstimate?.ok ? <p className="mt-3 text-3xl font-semibold">From {money(creatorEstimate.amount)}</p> : <p className="mt-3 text-sm">Quote on review</p>}
-                <p className="mt-2 text-xs text-slate-500">Indicative price for one model file. {creator.displayName} confirms the final quote, material and settings.</p>
+                <p className="mt-2 text-xs text-lightColor">Indicative price for one model file. {creator.displayName} confirms the final quote, material and settings.</p>
               </> : quoteState === 'loading' ? <p className="mt-3 text-sm">Calculating your estimate…</p> : quote ? <>
-                <p className="mt-3 text-3xl font-semibold">{money(quote.total)}</p><p className="mt-2 text-xs text-slate-500">Estimated print price for this file. Delivery and optional services are confirmed later. Final measurements are checked when saved.</p>
-              </> : <p className="mt-3 text-sm text-slate-600">{quoteError || 'This model needs a review before it can be priced.'}</p>}
+                <p className="mt-3 text-3xl font-semibold">{money(quote.total)}</p><p className="mt-2 text-xs text-lightColor">Estimated print price for this file. Delivery and optional services are confirmed later. Final measurements are checked when saved.</p>
+              </> : <p className="mt-3 text-sm text-lightColor">{quoteError || 'This model needs a review before it can be priced.'}</p>}
               {tooBig && <p className="mt-3 text-sm text-amber-700">This model may exceed the creator’s build size and need splitting. The creator will review it.</p>}
               {metrics?.confidence === 'low' && <p className="mt-3 text-xs text-amber-700">The mesh may be open or incomplete. This estimate needs a geometry check.</p>}
               {(error || fileError) && <p role="alert" className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error || fileError}</p>}
               {isLoaded && !user ? <SignInButton mode="modal"><button type="button" disabled={!file || parsing || importing} className={primary}>Sign in to continue</button></SignInButton> : <button type="submit" disabled={!file || Boolean(fileError) || submitting || parsing || importing || !isLoaded} className={primary}>{submitting ? progress > 0 && progress < 100 ? `Uploading ${progress}%` : 'Saving your request…' : isCreatorFlow ? `Send to ${creator.displayName}` : 'Continue to print settings'}</button>}
-              <p className="mt-3 text-center text-xs text-slate-500">{user ? 'No payment is taken at this step.' : 'Preview and estimate first. Sign in only when you are ready to save.'}</p>
+              <p className="mt-3 text-center text-xs text-lightColor">{user ? 'No payment is taken at this step.' : 'Preview and estimate first. Sign in only when you are ready to save.'}</p>
             </section>
           </div>
         </form>

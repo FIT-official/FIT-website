@@ -19,7 +19,7 @@ export default function Creators() {
     return <main className="mx-auto max-w-6xl px-6 py-16">
         <div className="text-center max-w-2xl mx-auto mb-10">
             <p className="text-sm text-lightColor mb-3">Creator plans</p>
-            <h1>Build your printing business</h1>
+            <h1>Build your making business</h1>
             <p className="text-sm text-lightColor mt-4">Create your page, showcase your work and manage print requests from your own customers. Start free, then expand as your business grows.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -34,9 +34,10 @@ export default function Creators() {
                     <ul className="space-y-3 text-sm flex-1">
                         <li>One creator storefront</li>
                         <li>{plan.limits.products} product listings</li>
-                        <li>{plan.limits.monthlyPrintRequests} print requests each month</li>
+                        <li>{plan.limits.monthlyPrintRequests} {dark ? 'print and custom service' : 'print'} requests each month</li>
                         <li>Page editor and print-service settings</li>
                         <li>Quotes, job tracking and customer messages</li>
+                        {dark && <><li>Unlimited custom service varieties</li><li>Your own materials, finishes and priced options</li><li>Name and image personalisation with editable text areas</li><li>Area, volume, length, per-item or manual quotes</li></>}
                     </ul>
                     {free ? <Link className="formBlackButton justify-center" href={isSignedIn ? '/dashboard/shop' : '/sign-up'}>{isSignedIn ? 'Open your storefront' : 'Start free'}</Link>
                     : current ? <Link className="formBlackButton justify-center" href="/account/subscription">Manage plan</Link>
@@ -49,6 +50,8 @@ export default function Creators() {
             <p>Subscriptions cover the software. Printing, materials, delivery and payment processing charges are separate. For creator print jobs, agree the quote and arrange payment directly with your customer; FIT does not automatically pay out these jobs.</p>
             <p>Monthly request limits reset on the first day of each calendar month (UTC). Existing jobs remain available when you reach a limit. Cancel renewal from your account; your paid allowance continues until the billing period ends. A lower plan limits new work without deleting existing records.</p>
             <p>Prices shown are monthly subscription totals in Singapore dollars. One account operates each storefront. No equipment, repairs, customer acquisition or guaranteed earnings are included.</p>
+            <p>Pro lets you build a catalogue around what your shop makes: laser cutting, engraving, name tags, dot peen marking, SLS, metal printing, CNC, sewing, casting and your own services. Add material variants, finishes, mounting choices and priced extras. There is no plan cap on service varieties; the 500-request allowance, file limits and upload safeguards still apply.</p>
+            <p>Custom service estimates require provider confirmation. Image text placement is an editable preview, and customers enter the real dimensions. Existing service jobs remain available after a downgrade; accepting new custom service requests requires Pro.</p>
         </div>
     </main>
 }
