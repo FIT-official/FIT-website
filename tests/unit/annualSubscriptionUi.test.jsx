@@ -24,13 +24,13 @@ const variants = () => [
   { id: 'free', name: 'Free', amount: 0, currency: 'SGD', interval: 'month', available: true, priceId: null,
     limits: { products: 3, monthlyPrintRequests: 10 } },
   { id: 'standard', name: 'Standard', amount: 39, currency: 'SGD', interval: 'month', available: true, priceId: 'price_standard_month',
-    limits: { products: 25, monthlyPrintRequests: 100 } },
+    limits: { products: 50, monthlyPrintRequests: 100 } },
   { id: 'standard', name: 'Standard', amount: 390, currency: 'SGD', interval: 'year', available: true, priceId: 'price_standard_year',
-    annualSavings: 78, monthlyEquivalent: 32.5, limits: { products: 25, monthlyPrintRequests: 100 } },
+    annualSavings: 78, monthlyEquivalent: 32.5, limits: { products: 50, monthlyPrintRequests: 100 } },
   { id: 'pro', name: 'Pro', amount: 99, currency: 'SGD', interval: 'month', available: true, priceId: 'price_pro_month',
-    limits: { products: 100, monthlyPrintRequests: 500 } },
+    limits: { products: 5000, monthlyPrintRequests: 500 } },
   { id: 'pro', name: 'Pro', amount: 990, currency: 'SGD', interval: 'year', available: true, priceId: 'price_pro_year',
-    annualSavings: 198, monthlyEquivalent: 82.5, limits: { products: 100, monthlyPrintRequests: 500 } },
+    annualSavings: 198, monthlyEquivalent: 82.5, limits: { products: 5000, monthlyPrintRequests: 500 } },
 ]
 const activeAnnual = extra => ({
   planId: 'standard', priceId: 'price_standard_year', interval: 'year', status: 'active', pending_update: null, ...extra,
@@ -48,6 +48,7 @@ const proAnnual = () => screen.getByRole('radio', { name: /Pro.*S\$990\s*\/\s*ye
 const consent = () => screen.getByRole('checkbox', { name: /S\$390 upfront for one year, renewing yearly/i })
 const confirm = () => screen.getByRole('button', { name: 'Confirm subscription' })
 let editResponse
+let previewResponse
 let apiPlans
 let calls
 
@@ -62,11 +63,13 @@ beforeEach(() => {
   state.confirmCardPayment.mockResolvedValue({ paymentIntent: { status: 'succeeded' } })
   state.refresh.mockResolvedValue(activeAnnual())
   editResponse = response({ success: true })
+  previewResponse = response({ amountDue: 2750, currency: 'SGD', prorationDate: 1790000000, priceId: 'price_pro_year' })
   apiPlans = variants()
   calls = []
   vi.stubGlobal('fetch', vi.fn(async (url, options = {}) => {
     calls.push({ url, ...options })
     if (url === '/api/stripe/plans') return response({ plans: apiPlans })
+    if (url.startsWith('/api/user/subscription/preview?')) return previewResponse
     if (url === '/api/user/subscription/edit') return editResponse
     throw new Error(`Unexpected request: ${url}`)
   }))
@@ -101,8 +104,8 @@ describe('annual subscription selection and consent', () => {
     expect(standardAnnual()).toBeInTheDocument()
     expect(proAnnual()).toBeInTheDocument()
     expect(screen.getAllByRole('radio')).toHaveLength(4) // two periods and two paid tiers
-    expect(screen.getByText(/25 listings\s*\/\s*100 requests\/month/i)).toBeInTheDocument()
-    expect(screen.getByText(/100 listings\s*\/\s*500 requests\/month/i)).toBeInTheDocument()
+    expect(screen.getByText(/50 listings\s*\/\s*100 requests\/month/i)).toBeInTheDocument()
+    expect(screen.getByText(/5000 listings\s*\/\s*500 requests\/month/i)).toBeInTheDocument()
     expect(screen.getByText(/S\$32\.50\/month equivalent.*Save S\$78\/year/i)).toBeInTheDocument()
     expect(screen.queryByRole('radio', { name: /^Free/ })).not.toBeInTheDocument()
   })
@@ -279,5 +282,31 @@ describe('annual payment response without additional authentication', () => {
     expect(state.refresh).toHaveBeenCalledTimes(1)
     expect(state.showToast).not.toHaveBeenCalled()
     expect(state.user.reload).not.toHaveBeenCalled()
+  })
+})
+
+describe('paid upgrade preview', () => {
+  it('shows the Stripe amount and carries its proration timestamp into the plan change', async () => {
+    state.subscription = activeAnnual({ subscriptionId: 'sub_current' })
+    state.params = new URLSearchParams('priceId=price_pro_year')
+    state.refresh.mockResolvedValue(activeAnnual({ planId: 'pro', priceId: 'price_pro_year' }))
+    render(<SubscriptionDetails />)
+    expect(await screen.findByText(/Estimated amount due today: SGD 27\.50/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('checkbox', { name: /S\$990 upfront for one year/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm plan change' }))
+    await waitFor(() => expect(state.showToast).toHaveBeenCalledWith('Your subscription is active.', 'success'))
+    expect(JSON.parse(calls.find(call => call.url === '/api/user/subscription/edit').body)).toEqual({
+      priceId: 'price_pro_year', cardToken: 'tok_card', prorationDate: 1790000000,
+    })
+  })
+  it('blocks payment if Stripe cannot show the amount', async () => {
+    state.subscription = activeAnnual({ subscriptionId: 'sub_current' })
+    state.params = new URLSearchParams('priceId=price_pro_year')
+    previewResponse = response({ error: 'Unable to show the upgrade amount.' }, 503)
+    render(<SubscriptionDetails />)
+    expect(await screen.findByRole('alert')).toHaveTextContent('Unable to show the upgrade amount.')
+    fireEvent.click(screen.getByRole('checkbox', { name: /S\$990 upfront for one year/ }))
+    expect(screen.getByRole('button', { name: 'Confirm plan change' })).toBeDisabled()
+    expect(calls.some(call => call.url === '/api/user/subscription/edit')).toBe(false)
   })
 })

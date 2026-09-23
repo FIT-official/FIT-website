@@ -15,6 +15,7 @@ import QuotingPricingManagement from '@/components/Admin/QuotingPricingManagemen
 import PrintTimeCalibration from '@/components/Admin/PrintTimeCalibration'
 import ReviewManagement from '@/components/Admin/ReviewManagement'
 import CustomersPanel from '@/components/Admin/CustomersPanel'
+import CreatorSubscriptions from '@/components/Admin/CreatorSubscriptions'
 import NotificationsBell from '@/components/DashboardComponents/NotificationsBell'
 import EventManagement from '@/components/Admin/EventManagement'
 import Overview from '@/components/Admin/Overview'
@@ -105,6 +106,12 @@ const NAV_GROUPS = [
                 icon: IoPeopleOutline,
                 description: 'Customer list with orders, value and requests. Coming soon.',
             },
+            {
+                key: 'creatorSubscriptions',
+                label: 'Creator Plans',
+                icon: IoPeopleOutline,
+                description: 'Subscriptions, complimentary access and creator limits.',
+            },
         ],
     },
     {
@@ -193,6 +200,7 @@ const PANELS = {
     printTiming: PrintTimeCalibration,
     reviews: ReviewManagement,
     customers: CustomersPanel,
+    creatorSubscriptions: CreatorSubscriptions,
 }
 
 const VALID_TABS = new Set(['overview', ...Object.keys(PANELS)])
