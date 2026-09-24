@@ -203,14 +203,6 @@ export default function CustomPrintUpload({ cartItem, onUploadComplete, onDelete
             }
             setUploadedFile(null)
             setSavedConfig(null)
-            await fetch('/api/user/cart/update-custom-print', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    productId: 'custom-print-request',
-                    requestId: null
-                })
-            })
             showToast('Model deleted successfully', 'success')
             // Let the cart refresh its request map so the step checklist
             // (upload/configure) goes back to incomplete immediately.

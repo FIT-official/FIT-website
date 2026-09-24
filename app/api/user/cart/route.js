@@ -115,8 +115,9 @@ export async function DELETE(req) {
         const user = await User.findOne({ userId });
         user.cart = user.cart.filter(
             item => {
-                // Special handling for custom print items - match by productId only
-                if (productId === 'custom-print-request' || item.productId === 'custom-print-request') {
+                // Custom print lines (custom-print:<requestId>) carry no
+                // variants, so they match by productId alone.
+                if (String(productId).startsWith('custom-print:') || String(item.productId || '').startsWith('custom-print:')) {
                     return item.productId !== productId;
                 }
 

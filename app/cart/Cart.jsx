@@ -285,19 +285,14 @@ function Cart() {
         });
         setLoading(false);
         if (res.ok) {
-            // Special handling for custom print items - remove by productId only
-            if (cartItem.productId === 'custom-print-request') {
-                setCart(cart => cart.filter(item => item.productId !== 'custom-print-request'));
-            } else {
-                setCart(cart =>
-                    cart.filter(item => {
-                        const variantsMatch = JSON.stringify(item.selectedVariants || {}) === JSON.stringify(cartItem.selectedVariants || {});
-                        return !(item.productId === cartItem.productId &&
-                            item.variantId === cartItem.variantId &&
-                            variantsMatch);
-                    })
-                );
-            }
+            setCart(cart =>
+                cart.filter(item => {
+                    const variantsMatch = JSON.stringify(item.selectedVariants || {}) === JSON.stringify(cartItem.selectedVariants || {});
+                    return !(item.productId === cartItem.productId &&
+                        item.variantId === cartItem.variantId &&
+                        variantsMatch);
+                })
+            );
             refreshCartBreakdown();
         }
     };
