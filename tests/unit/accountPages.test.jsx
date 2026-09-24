@@ -624,9 +624,9 @@ describe('Prints page', () => {
         expect(document.body.textContent).toContain('SGD 15.00')
         expect(document.body.textContent).toContain('SGD 20.00')
         expect(screen.getByText('Quoted by the print farm')).toBeInTheDocument()
-        expect(screen.getByRole('link', { name: 'Open in editor' })).toHaveAttribute(
+        expect(screen.getByRole('link', { name: 'Open request' })).toHaveAttribute(
             'href',
-            '/editor?requestId=REQ-123',
+            '/prints/request?requestId=REQ-123',
         )
         expect(screen.getByRole('link', { name: 'Add quoted print to cart' })).toHaveAttribute(
             'href',

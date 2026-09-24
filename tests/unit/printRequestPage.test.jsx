@@ -106,7 +106,7 @@ describe('checklist gating', () => {
     expect(screen.getByRole('button', { name: 'Add to cart' })).toBeEnabled()
     fireEvent.click(screen.getByRole('button', { name: 'Save address' }))
     await screen.findByText('Deliver to')
-    expect(JSON.parse(calls('/api/user/contact/address', 'POST')[0][1].body).address).toMatchObject({ street: ADDRESS.street, unitNumber: '-', postalCode: ADDRESS.postalCode })
+    expect(JSON.parse(calls('/api/user/contact/address', 'POST')[0][1].body).address).toMatchObject({ street: ADDRESS.street, unitNumber: '', postalCode: ADDRESS.postalCode })
   })
   it('shows the saved address card for courier with a Change action', async () => {
     state.user = { id: 'buyer' }; state.savedAddress = ADDRESS

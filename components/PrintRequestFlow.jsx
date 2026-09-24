@@ -145,7 +145,7 @@ export default function PrintRequestFlow() {
 
   async function persistAddress(address) {
     // The contact API requires every field, including the unit number.
-    const body = { address: { ...address, unitNumber: address.unitNumber || '-' } }
+    const body = { address }
     const res = await fetch('/api/user/contact/address', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     const data = await readJson(res)
     if (!res.ok) throw new Error(data.error || 'The address could not be saved. Check the fields and try again.')

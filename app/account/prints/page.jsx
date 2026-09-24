@@ -3,7 +3,7 @@
 // request (StatusPill vocabulary), the quote breakdown as dotted-leader rows
 // when quoted, and a progress Timeline from statusHistory. The customer-facing
 // mirror of the admin job queue. Endpoints and action links are unchanged
-// (/api/account/custom-print, /editor?requestId=, /cart?addCustomRequest=).
+// (/api/account/custom-print, /prints/request?requestId=, /cart?addCustomRequest=).
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
@@ -198,10 +198,10 @@ export default function AccountPrintRequestsPage() {
 
                                     <div className="flex flex-wrap items-center gap-2 pt-1">
                                         <Link
-                                            href={`/editor?requestId=${encodeURIComponent(r.requestId)}`}
+                                            href={`/prints/request?requestId=${encodeURIComponent(r.requestId)}`}
                                             className="dash-hoverable inline-flex items-center rounded-full border border-[var(--dash-line)] bg-[var(--dash-card)] px-3.5 py-1.5 text-[12px] font-medium dash-soft hover:text-[var(--dash-ink)] hover:bg-[var(--dash-canvas)]"
                                         >
-                                            Open in editor
+                                            Open request
                                         </Link>
                                         {canAddToCart && (
                                             <Link

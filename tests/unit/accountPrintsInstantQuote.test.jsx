@@ -70,7 +70,7 @@ describe('account prints add-to-cart for instant quotes', () => {
             { requestId: 'req_creator', status: 'quoted', quoteMode: 'instant', quote: { total: 9 }, creatorUserId: 'creator_1', statusHistory: [] },
         ]
         render(<AccountPrintRequestsPage />)
-        await screen.findAllByText('Open in editor')
+        await screen.findAllByText('Open request')
         expect(screen.queryByRole('link', { name: /Add quoted print to cart/ })).not.toBeInTheDocument()
     })
 })
