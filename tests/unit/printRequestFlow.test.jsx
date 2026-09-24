@@ -1,5 +1,10 @@
+// Behaviours carried over from the first request page: anonymous preview
+// before any request exists, invalid replacements clearing the estimate, the
+// retained upload on a failed save, and the creator (?creator=) flow. The CTA
+// is now "Add to cart" (the page completes the request itself) and the print
+// choices are Strength / Surface quality instead of a purpose preset.
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 const state = vi.hoisted(() => ({ user: null, store: {}, push: vi.fn(), creator: '', failSave: false }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: state.push }), useSearchParams: () => new URLSearchParams(state.creator ? { creator: state.creator } : {}) }))
 vi.mock('next/link', () => ({ default: ({ children, ...props }) => <a {...props}>{children}</a> }))
@@ -18,6 +23,7 @@ function file(name = 'part.stl') {
 }
 const upload = (model = file()) => fireEvent.change(screen.getByLabelText('Choose a 3D model file'), { target: { files: [model] } })
 const requests = (url, method) => global.fetch.mock.calls.filter(([calledUrl, init]) => calledUrl === url && (!method || init?.method === method))
+const bigPrice = () => within(screen.getByRole('complementary', { name: 'Your price' })).findAllByText('$12.34')
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -39,6 +45,8 @@ beforeEach(() => {
       if (state.failSave) { state.failSave = false; return { ok: false, json: async () => ({ error: 'Could not save this time' }) } }
       return ok({ success: true })
     }
+    if (url === '/api/custom-print/config') return ok({ success: true })
+    if (url === '/api/cart/custom-print') return ok({ cart: [] })
     if (url.startsWith('/api/upload/models?') && init.method === 'DELETE') return ok({ success: true })
     if (url === '/api/models/import') return new Response(JSON.stringify({ status: 'upload_required',
       message: 'This site requires a login. Download the file and upload it below.' }), { status: 422, headers: { 'content-type': 'application/json' } })
@@ -54,8 +62,8 @@ describe('preview before sign-in', () => {
   it('quotes an anonymous local model before creating or uploading any request', async () => {
     render(<PrintRequestFlow />); upload()
     expect(await screen.findByTestId('model-preview')).toHaveTextContent('part.stl')
-    expect(await screen.findByText('$12.34')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Sign in to continue' })).toBeEnabled()
+    expect((await bigPrice()).length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: 'Sign in to add to cart' })).toBeEnabled()
     expect(requests('/api/custom-print', 'POST')).toHaveLength(0)
     expect(putWithProgress).not.toHaveBeenCalled()
     const quoteBody = JSON.parse(requests('/api/quote')[0][1].body)
@@ -63,35 +71,35 @@ describe('preview before sign-in', () => {
     expect(quoteBody.price).toBeUndefined()
     expect(quoteBody.settings).toMatchObject({ wallLoops: 2, infillPercent: 20 })
   })
-  it('re-quotes with actual Strong and Appearance parameters', async () => {
+  it('re-quotes with the actual Strong and High quality parameters', async () => {
     render(<PrintRequestFlow />); upload()
-    await screen.findByText('$12.34')
-    fireEvent.click(screen.getByRole('button', { name: 'Strong' }))
+    await bigPrice()
+    fireEvent.click(within(screen.getByRole('group', { name: 'Strength' })).getByRole('button', { name: 'Strong' }))
     await waitFor(() => expect(requests('/api/quote')).toHaveLength(2))
     expect(JSON.parse(requests('/api/quote')[1][1].body).settings).toMatchObject({ wallLoops: 4, infillPercent: 40 })
-    fireEvent.click(screen.getByRole('button', { name: 'Appearance' }))
+    fireEvent.click(within(screen.getByRole('group', { name: 'Surface quality' })).getByRole('button', { name: 'High' }))
     await waitFor(() => expect(requests('/api/quote')).toHaveLength(3))
     expect(JSON.parse(requests('/api/quote')[2][1].body).settings.layerHeightMm).toBe(0.12)
   })
   it('clears an earlier model and estimate when an invalid replacement is selected', async () => {
     state.user = { id: 'buyer' }
     render(<PrintRequestFlow />); upload()
-    await screen.findByText('$12.34')
+    await bigPrice()
     upload(file('picture.png'))
     expect(await screen.findByRole('alert')).toHaveTextContent('Use a STL, OBJ, 3MF file.')
     expect(screen.queryByText('$12.34')).not.toBeInTheDocument()
     expect(screen.queryByTestId('model-preview')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Continue to print settings' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Add to cart' })).toBeDisabled()
   })
   it('clears a previous model on an import fallback instead of leaving an old payable-looking price', async () => {
     render(<PrintRequestFlow />); upload()
-    await screen.findByText('$12.34')
+    await bigPrice()
     fireEvent.change(screen.getByLabelText('Paste a design link'), { target: { value: 'https://makerworld.com/en/models/123' } })
     fireEvent.click(screen.getByRole('button', { name: 'Import design' }))
     await screen.findByText(/This site requires a login/)
     expect(screen.queryByText('$12.34')).not.toBeInTheDocument()
     expect(screen.queryByTestId('model-preview')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Sign in to continue' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Sign in to add to cart' })).toBeDisabled()
     expect(screen.getByRole('link', { name: 'makerworld.com' })).toBeInTheDocument()
   })
   it('blocks another upload while a design import is still pending', async () => {
@@ -110,19 +118,24 @@ describe('saving the selected model', () => {
     else state.failSave = true
     render(<PrintRequestFlow />); upload()
     await screen.findByTestId('model-preview')
-    fireEvent.click(screen.getByRole('button', { name: 'Continue to print settings' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Add to cart' })).toBeEnabled())
+    fireEvent.click(screen.getByRole('button', { name: 'Add to cart' }))
     await screen.findByRole('alert')
     expect(global.fetch.mock.calls.some(([, init]) => init?.method === 'DELETE')).toBe(false)
     expect(state.push).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByRole('button', { name: 'Continue to print settings' }))
-    await waitFor(() => expect(state.push).toHaveBeenCalledWith('/editor?requestId=draft-1'))
+    fireEvent.click(screen.getByRole('button', { name: 'Add to cart' }))
+    await waitFor(() => expect(state.push).toHaveBeenCalledWith('/cart'))
     expect(requests('/api/custom-print', 'POST')).toHaveLength(1)
     expect(requests('/api/upload/models', 'POST')).toHaveLength(2)
     const saved = JSON.parse(requests('/api/custom-print', 'PUT').at(-1)[1].body)
     expect(saved.requestId).toBe('draft-1')
+    expect(saved.modelFile).toMatchObject({ originalName: 'part.stl', s3Key: 'models/user/part.stl' })
     expect(saved.printConfiguration.printSettings).toMatchObject({ layerHeight: 0.2, wallLoops: 2 })
     expect(saved.printConfiguration.meshColors).toEqual({ Model: '#ffffff' })
     expect(saved).not.toHaveProperty('price')
+    const config = JSON.parse(requests('/api/custom-print/config', 'PUT').at(-1)[1].body)
+    expect(config).toMatchObject({ requestId: 'draft-1', mode: 'instant', meshColors: { Model: '#ffffff' } })
+    expect(config.printSettings).toMatchObject({ layerHeight: 0.2, wallLoops: 2, filamentType: 'pla' })
   })
   it('saves creator preferences without presenting a platform instant quote or charging payment', async () => {
     state.user = { id: 'buyer' }; state.creator = 'print-studio'
@@ -130,11 +143,14 @@ describe('saving the selected model', () => {
     await screen.findByRole('button', { name: 'Strong' })
     fireEvent.click(screen.getByRole('button', { name: 'Strong' })); upload()
     await screen.findByTestId('model-preview')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Send to Print Studio' })).toBeEnabled())
     fireEvent.click(screen.getByRole('button', { name: 'Send to Print Studio' }))
     await waitFor(() => expect(state.push).toHaveBeenCalledWith('/account/prints'))
     const saved = JSON.parse(requests('/api/custom-print', 'PUT')[0][1].body)
     expect(saved.printConfiguration.generic).toMatchObject({ strength: 'Strong', quality: 'Medium', material: 'PETG', colour: 'Blue' })
     expect(saved.printConfiguration.printSettings).toBeUndefined()
     expect(requests('/api/quote')).toHaveLength(0)
+    expect(requests('/api/custom-print/config')).toHaveLength(0)
+    expect(requests('/api/cart/custom-print')).toHaveLength(0)
   })
 })

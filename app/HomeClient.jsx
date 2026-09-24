@@ -8,6 +8,7 @@ import Divider from "@/components/General/Divider";
 import Testimonials from "@/components/Home/Testimonials";
 import { useContent } from '@/utils/useContent'
 import FeaturedArticles from "@/components/Home/FeaturedArticles";
+import PrintRequestCta from "@/components/Home/PrintRequestCta";
 import { useEffect, useState } from 'react';
 
 export default function Home({ children, initialHeroContent }) {
@@ -34,6 +35,7 @@ export default function Home({ children, initialHeroContent }) {
     <div className="flex flex-col items-center justify-center w-full ">
       <Main adbanner={adBannerContent.text || null} initialHeroContent={initialHeroContent} />
       {children}
+      <PrintRequestCta />
       <Divider />
       <FeaturedSection />
       <Divider />

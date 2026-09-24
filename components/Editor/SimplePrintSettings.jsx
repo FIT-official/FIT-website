@@ -1,13 +1,14 @@
 'use client'
 import { useId } from 'react'
 import { PURPOSE_PRESETS, SIMPLE_MATERIALS, FILAMENT_MATERIALS, DEFAULT_PRINT_COLOURS, DEFAULT_SIMPLE_SELECTION, coloursForMaterial } from '@/lib/quoting/genericPresets'
+import { coloursForFilament } from '@/lib/customPrint/materials'
 
 export default function SimplePrintSettings({ value = DEFAULT_SIMPLE_SELECTION, onChange,
   colours = DEFAULT_PRINT_COLOURS, disabled = false, fixed = false, customSettings = false }) {
   const id = useId()
   const fitFilaments = !fixed && colours.some(colour => colour.filament)
   const availableColours = fixed ? colours : fitFilaments
-    ? colours.filter(colour => colour.filament === (value.filament || 'pla'))
+    ? coloursForFilament(colours, value.filament || 'pla')
     : coloursForMaterial(colours, value.material)
   const change = patch => onChange({ ...value, ...patch }, { field: Object.keys(patch)[0] })
   const changeFilament = filament => {

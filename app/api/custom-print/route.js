@@ -198,42 +198,10 @@ export async function GET(req) {
 
         if (requestId) {
             const request = await CustomPrintRequest.findOne({ requestId, userId });
+            // Requests are created explicitly by POST (the request page). An
+            // unknown id is a 404, never a silently created empty document.
             if (!request) {
-                // If a cart references a requestId that doesn't exist yet, create an empty request.
-                // Guard against obviously invalid IDs to avoid creating junk documents.
-                const uuidLike = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-                if (!uuidLike.test(requestId)) {
-                    return NextResponse.json({ error: "Invalid requestId" }, { status: 400 });
-                }
-
-                let userEmail = `${userId}@unknown.local`;
-                let userName = 'Unknown';
-                try {
-                    const client = await clerkClient();
-                    const userObj = await client.users.getUser(userId);
-                    const { emailAddresses, firstName, lastName } = userObj;
-                    userEmail = (emailAddresses && emailAddresses.length > 0 && emailAddresses[0]?.emailAddress)
-                        ? emailAddresses[0].emailAddress
-                        : userEmail;
-                    userName = [firstName, lastName].filter(Boolean).join(' ') || userObj?.username || userName;
-                } catch (e) {
-                    console.error('[GET /api/custom-print] Failed to fetch user info for auto-create:', e);
-                }
-
-                // Base price from custom print product (best-effort)
-                const basePrice = await getCustomPrintBasePrice();
-
-                const created = new CustomPrintRequest({
-                    requestId,
-                    userId,
-                    userEmail,
-                    userName,
-                    status: 'pending_upload',
-                    basePrice,
-                    statusHistory: [{ status: 'pending_upload', note: 'Request auto-created on GET (cart reference)', updatedAt: new Date() }],
-                });
-                await created.save();
-                return NextResponse.json({ request: created }, { status: 200 });
+                return NextResponse.json({ error: "Request not found" }, { status: 404 });
             }
 
             // Ensure status never lags behind the data we already have.
@@ -274,36 +242,15 @@ export async function PUT(req) {
             return NextResponse.json({ error: "requestId is required" }, { status: 400 });
         }
         await connectToDatabase();
-        let request = await CustomPrintRequest.findOne({ requestId, userId });
-        const existingRequest = !!request;
+        const request = await CustomPrintRequest.findOne({ requestId, userId });
+        // PUT only updates a request that POST created; it never creates one.
         if (!request) {
-            let userEmail = null;
-            let userName = null;
-            try {
-                const client = await clerkClient();
-                const userObj = await client.users.getUser(userId);
-                const { emailAddresses, firstName, lastName } = userObj;
-                userEmail = (emailAddresses && emailAddresses.length > 0 && emailAddresses[0]?.emailAddress)
-                    ? emailAddresses[0].emailAddress
-                    : `${userId}@unknown.local`;
-                userName = [firstName, lastName].filter(Boolean).join(' ') || userObj?.username || 'Unknown';
-            } catch (e) {
-                console.error('[PUT /api/custom-print] Failed to fetch user info:', e);
-            }
-            request = new CustomPrintRequest({
-                requestId,
-                userId,
-                userEmail,
-                userName,
-                status: 'pending_upload',
-                basePrice: await getCustomPrintBasePrice(),
-                statusHistory: [{ status: 'pending_upload', note: 'Request created via PUT, awaiting model upload', updatedAt: new Date() }],
-            });
+            return NextResponse.json({ error: "Request not found" }, { status: 404 });
         }
         const originalStatus = request.status;
         // Mongoose merges document.$where into the actual update filter. A
         // concurrent quote, payment or model edit must make this save fail.
-        if (existingRequest) request.$where = {
+        request.$where = {
             status: originalStatus,
             ...(request.updatedAt ? { updatedAt: request.updatedAt } : {}),
         };

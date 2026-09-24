@@ -98,6 +98,20 @@ beforeEach(() => {
     vi.clearAllMocks()
 })
 
+describe('unknown request ids are never auto-created (D13)', () => {
+    it('GET with a UUID-shaped id that does not exist returns 404 and constructs nothing', async () => {
+        const { GET } = await import('@/app/api/custom-print/route')
+        const res = await GET(new Request('http://t/api/custom-print?requestId=11111111-2222-4333-8444-555555555555'))
+        expect(res.status).toBe(404)
+        expect(state.constructed).toHaveLength(0)
+    })
+    it('PUT for an unknown id returns 404 instead of creating a request', async () => {
+        const res = await put({ requestId: '11111111-2222-4333-8444-555555555555', customerNote: 'hello' })
+        expect(res.status).toBe(404)
+        expect(state.constructed).toHaveLength(0)
+    })
+})
+
 describe('POST /api/custom-print with creatorUserId', () => {
     it('without a body behaves as before: FIT job with the platform base price', async () => {
         const res = await post(undefined)

@@ -169,7 +169,8 @@ export default function Result() {
       }
       posthog.capture('print_config_saved', { mode, used_generic_mode: !!matchedPurpose })
       showToast(mode === 'instant' ? 'Settings and quote saved.' : 'Settings sent for a manual quote.', 'success')
-      router.push(returnTo || '/cart')
+      // The request page adds to cart; the editor only returns to it (D8).
+      router.push(returnTo || `/prints/request?requestId=${encodeURIComponent(savedRequestId)}`)
     } catch (error) { showToast(error.message || 'Could not save print settings', 'error') }
     finally { setSubmitting(false) }
   }

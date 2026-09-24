@@ -36,6 +36,12 @@ const defaultContentSections = [
         fields: ['text']
     },
     {
+        id: 'home/print-cta',
+        name: 'Home - Print Request Strip',
+        description: 'Short call to action that sends visitors to the 3D print request page',
+        fields: ['eyebrow', 'title', 'text', 'buttonText']
+    },
+    {
         id: 'home/testimonials',
         name: 'Home - Testimonials',
         description: 'Customer testimonials with name, role, text, and avatar',
@@ -103,6 +109,7 @@ const defaultContentSections = [
 const REGION_META = {
     'home/ad-banner': { label: 'Announcement bar', hint: 'The thin message strip above everything else on the homepage.', h: 'h-8' },
     'home/hero-banner': { label: 'Hero banner', hint: 'The big image and headline at the top of the homepage.', h: 'h-24' },
+    'home/print-cta': { label: 'Print request strip', hint: 'The short "get a 3D print made" call to action under the hero, linking to the request page.', h: 'h-10' },
     'home/featured-section': { label: 'Featured products', hint: 'The product showcase under the hero. Pick a category or hand-pick products.', h: 'h-16' },
     'home/testimonials': { label: 'Testimonials', hint: 'Customer quotes shown lower on the homepage.', h: 'h-12' },
     'about/introduction': { label: 'Introduction', hint: 'The heading and welcome text that opens the About page.', h: 'h-16' },
@@ -122,7 +129,7 @@ const REGION_META = {
 const PAGE_TABS = [
     {
         key: 'home', label: 'Home', pages: [
-            { title: 'Homepage', regions: ['home/ad-banner', 'home/hero-banner', 'home/featured-section', 'home/testimonials', { fixed: 'Footer', h: 'h-8' }] },
+            { title: 'Homepage', regions: ['home/ad-banner', 'home/hero-banner', 'home/print-cta', 'home/featured-section', 'home/testimonials', { fixed: 'Footer', h: 'h-8' }] },
         ],
     },
     {

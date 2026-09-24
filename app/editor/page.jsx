@@ -1,15 +1,12 @@
 'use client'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { encode as arrayBufferToBase64 } from 'base64-arraybuffer'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import FileDrop from '@/components/Editor/fileDrop'
 import useStore from '@/utils/store'
-import { loadFileAsArrayBuffer } from '@/utils/buffers'
 import { safeInternalPath } from '@/utils/safeReturnPath'
 import { SignInButton, useUser } from '@clerk/nextjs'
-import posthog from 'posthog-js'
 
 const Result = dynamic(() => import('@/components/Editor/result'), {
   ssr: false, loading: () => <p className="p-8 text-sm">Preparing the print editor…</p>,
@@ -80,26 +77,18 @@ export default function Editor() {
     return () => abort.abort()
   }, [requestId, productId, variantId, isLoaded, user])
 
-  const onDrop = useCallback(async files => {
-    setError('')
-    try {
-      if (files.reduce((bytes, file) => bytes + file.size, 0) > MAX_BYTES) throw new Error('Keep model files below 25 MB in total.')
-      const nextBuffers = new Map()
-      for (const file of files) nextBuffers.set(file.name, await loadFileAsArrayBuffer(file))
-      const filePath = [...nextBuffers.keys()].find(name => /\.(glb|gltf|obj|stl|3mf)$/i.test(name))
-      if (!filePath) throw new Error('Choose an STL, OBJ, 3MF, GLB or GLTF model.')
-      const state = useStore.getState()
-      state.setFileName(filePath); state.setBuffers(nextBuffers)
-      useStore.setState({ textOriginalFile: arrayBufferToBase64(nextBuffers.get(filePath)), requestId: null,
-        productId: null, variantId: null, isCustomPrint: false })
-      posthog.capture('model_uploaded', { file_extension: filePath.split('.').pop().toLowerCase(), file_size_bytes: nextBuffers.get(filePath).byteLength })
-    } catch (err) { setError(err.message); throw err }
-  }, [])
-
+  // A model dropped here without a request could never be saved (D6). The
+  // request page creates the request, uploads the model and opens the editor
+  // with it, so the editor sends people there instead of offering a drop zone.
   return <main className="w-full min-h-[calc(100vh-56px)]" style={{ height: 'calc(100dvh - 56px)' }}>
     {error ? <div className="mx-auto flex max-w-xl flex-col gap-4 p-8"><p role="alert" className="text-red-700">{error}</p><Link href="/prints/request" className="underline">Start a new print request</Link><button type="button" onClick={() => window.location.reload()} className="text-left underline">Reload this model</button></div>
       : loading ? <p className="p-8 text-center text-sm">Loading your model…</p>
       : (productId || requestId) && !user ? <div className="p-8 text-center"><p className="mb-4">Sign in to open your saved print request.</p><SignInButton mode="modal"><button type="button" className="rounded bg-black px-5 py-3 text-white">Sign in</button></SignInButton></div>
-      : buffers ? <Result /> : <FileDrop onDrop={onDrop} />}
+      : buffers ? <Result />
+      : <div className="mx-auto flex min-h-[65vh] max-w-2xl flex-col justify-center gap-4 p-6 text-center">
+        <h1 className="text-2xl font-semibold">Start with a print request</h1>
+        <p className="text-sm text-lightColor">Upload your model on the request page, choose material and colour and see the price. The 3D editor opens from there for per-part colours and detailed settings.</p>
+        <Link href="/prints/request" className="mx-auto rounded-lg bg-textColor px-5 py-3 text-sm font-semibold text-background">Get a 3D print made</Link>
+      </div>}
   </main>
 }
