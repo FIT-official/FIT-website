@@ -86,6 +86,32 @@ describe('Checkout session purchase contract', () => {
         m.saveSnapshot.mockRejectedValueOnce(new Error('Database unavailable'));
         expect((await POST()).status).toBe(500); expect(m.expire).toHaveBeenCalledWith('cs_created');
     });
+    it('refuses a shipping cart without a complete delivery address', async () => {
+        user.contact = {};
+        const response = await POST();
+        expect(response.status).toBe(400); expect(await response.json()).toEqual({ error: 'Missing delivery address' });
+        expect(m.createSession).not.toHaveBeenCalled();
+    });
+    it('does not require an address when nothing in the cart ships', async () => {
+        user.contact = {};
+        user.cart[0].chosenDeliveryType = 'digital';
+        user.cart[0].quantity = 1;
+        product.delivery = { deliveryTypes: [{ type: 'digital', price: 0 }] };
+        const response = await POST();
+        expect(response.status).toBe(200);
+        expect(m.saveSnapshot).toHaveBeenCalledWith(expect.objectContaining({ shippingAddress: null, totalAmount: 1000 }));
+    });
+    it('accepts an address with no unit number and no state', async () => {
+        user.contact.address = { street: '1 Test St', city: 'Singapore', postalCode: '123456', country: 'SG' };
+        expect((await POST()).status).toBe(200);
+    });
+    it('answers 409 with a cart hint when a line holds a delivery option the product no longer offers', async () => {
+        user.cart[0].chosenDeliveryType = 'drone';
+        const response = await POST();
+        expect(response.status).toBe(409);
+        expect(await response.json()).toEqual({ error: 'Pick a delivery option for Product in the cart.' });
+        expect(m.createSession).not.toHaveBeenCalled();
+    });
     it('rejects an empty cart before creating a Stripe session', async () => {
         user.cart = []; expect((await POST()).status).toBe(400); expect(m.createSession).not.toHaveBeenCalled();
     });

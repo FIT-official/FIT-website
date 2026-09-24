@@ -6,7 +6,7 @@ import Product from "@/models/Product";
 import CustomPrintRequest from "@/models/CustomPrintRequest";
 import { calculateCartItemBreakdown } from "../calculateBreakdown";
 import { customPrintChargeBreakdown } from "@/lib/customPrintDisplayPrice";
-import { isAddressComplete, lineNeedsDeliveryAddress } from "@/lib/checkoutAddressGate";
+import { isAddressComplete, lineNeedsDeliveryAddress, pickAddressFields } from "@/lib/checkoutAddressGate";
 import { authenticate, UnauthorizedError, unauthorizedResponse } from "@/lib/authenticate";
 
 const FIXED_PRICE_STATUSES = [
@@ -171,11 +171,13 @@ export async function GET(req) {
 
         const needsDeliveryAddress = cartBreakdown.some(line => line.needsDeliveryAddress);
 
+        // The raw (possibly partial) address is returned so the inline form
+        // can prefill what the customer already saved.
         return NextResponse.json({
             cartBreakdown,
             addressMissing,
             needsDeliveryAddress,
-            address: addressMissing ? null : address,
+            address: address ? pickAddressFields(address) : null,
         }, { status: 200 });
     } catch (err) {
         if (err instanceof UnauthorizedError) return unauthorizedResponse();

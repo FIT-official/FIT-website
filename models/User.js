@@ -65,10 +65,10 @@ const ContactSchema = new mongoose.Schema({
     address: {
         street: { type: String, required: true },
         city: { type: String, required: true },
-        state: { type: String, required: true },
+        state: { type: String, required: false, default: '' },
         postalCode: { type: String, required: true },
         country: { type: String, required: true },
-        unitNumber: { type: String, required: true },
+        unitNumber: { type: String, required: false, default: '' },
     },
 });
 

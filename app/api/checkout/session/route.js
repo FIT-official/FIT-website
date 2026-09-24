@@ -13,6 +13,11 @@ import { buildCheckoutItem, checkoutPlain } from '@/lib/checkoutSnapshot';
 import { checkAdminPrivileges } from '@/lib/checkPrivileges';
 import { verifyCheckoutTransactions, CheckoutTransactionUnavailableError } from '@/lib/checkoutTransactionReadiness';
 import { getFilamentAvailability, rushAvailability } from '@/lib/filamentInventory';
+import { lineNeedsDeliveryAddress, pickDeliveryOptionMessage } from '@/lib/checkoutAddressGate';
+
+// calculateCartItemBreakdown and customPrintChargeBreakdown throw this when
+// the cart's chosenDeliveryType is not one the product/request offers.
+const isDeliveryTypeMismatch = (error) => /Unknown delivery type/.test(error?.message || '');
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
 
@@ -26,7 +31,10 @@ export async function POST() {
         if (!user?.cart?.length) return NextResponse.json({ error: 'Your cart is empty' }, { status: 400 });
         if (user.cart.length > 50) return NextResponse.json({ error: 'Too many cart items' }, { status: 400 });
         const address = user.contact?.address;
-        if (!address?.country) return NextResponse.json({ error: 'Missing delivery address' }, { status: 400 });
+        // Same rule as the cart and checkout pages: an address is only needed
+        // when something in the cart ships (digital/pickup lines do not).
+        const needsAddress = user.cart.some(cartItem => lineNeedsDeliveryAddress(cartItem.chosenDeliveryType));
+        if (needsAddress && !address?.country) return NextResponse.json({ error: 'Missing delivery address' }, { status: 400 });
         const client = await clerkClient();
         const customer = await client.users.getUser(userId);
         const email = customer.emailAddresses?.[0]?.emailAddress;
@@ -74,7 +82,13 @@ export async function POST() {
                 }
                 product = await Product.findOne({ slug: 'custom-print-request' }).lean();
                 if (!product) return NextResponse.json({ error: 'Custom printing is not configured' }, { status: 409 });
-                const charge = customPrintChargeBreakdown(customRequest, item.chosenDeliveryType);
+                let charge;
+                try {
+                    charge = customPrintChargeBreakdown(customRequest, item.chosenDeliveryType);
+                } catch (error) {
+                    if (isDeliveryTypeMismatch(error)) return NextResponse.json({ error: pickDeliveryOptionMessage(product.name) }, { status: 409 });
+                    throw error;
+                }
                 breakdown = {
                     quantity: 1, price: charge.amount, priceBeforeDiscount: charge.amount,
                     basePrice: Number(customRequest.basePrice || 0), variantInfo: [],
@@ -112,7 +126,12 @@ export async function POST() {
                         return NextResponse.json({ error: 'The selected option is not in stock' }, { status: 409 });
                     }
                 }
-                breakdown = await calculateCartItemBreakdown({ item, product, address });
+                try {
+                    breakdown = await calculateCartItemBreakdown({ item, product, address });
+                } catch (error) {
+                    if (isDeliveryTypeMismatch(error)) return NextResponse.json({ error: pickDeliveryOptionMessage(product.name) }, { status: 409 });
+                    throw error;
+                }
                 if (item.chosenDeliveryType === 'printDelivery' && product.productType === 'print') {
                     productPrintInput = buildProductPrintRequestInput({ product,
                         chosenColour: colourNameFromVariants(item.selectedVariants),
@@ -156,7 +175,7 @@ export async function POST() {
         if (!stripeSession.client_secret) throw new Error('Checkout session has no client secret');
         await CheckoutSession.create({ sessionId: stripeSession.id, userId, snapshotVersion: 1,
             items, totalAmount, currency: 'sgd', salesData, digitalProductData,
-            shippingAddress: checkoutPlain(address), customerEmail: email, customerName: name });
+            shippingAddress: address ? checkoutPlain(address) : null, customerEmail: email, customerName: name });
         return NextResponse.json({ clientSecret: stripeSession.client_secret });
     } catch (error) {
         // A session whose purchase contract could not be saved must not stay payable.

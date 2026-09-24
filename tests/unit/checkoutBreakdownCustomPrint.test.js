@@ -117,6 +117,19 @@ describe('GET /api/checkout/breakdown with a quoted custom print', () => {
         expect(data.address).toBeNull()
     })
 
+    it('returns a partial saved address raw (known keys only) so the form can prefill it', async () => {
+        state.user.contact = { address: { _id: 'addr1', street: '9 Partial Rd', city: 'Singapore', country: 'Singapore' } }
+        const { data } = await get()
+        expect(data.addressMissing).toBe(true)
+        expect(data.address).toEqual({ street: '9 Partial Rd', unitNumber: '', city: 'Singapore', state: '', postalCode: '', country: 'Singapore' })
+    })
+
+    it('treats an address without unit number or state as complete', async () => {
+        state.user.contact = { address: { ...fullAddress, unitNumber: '', state: '' } }
+        const { data } = await get()
+        expect(data.addressMissing).toBe(false)
+    })
+
     it('marks a pickup line as not needing an address', async () => {
         state.user.cart[0].chosenDeliveryType = 'pickup'
         const { data } = await get()
