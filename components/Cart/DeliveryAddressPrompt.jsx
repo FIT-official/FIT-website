@@ -1,23 +1,20 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { HiLocationMarker } from 'react-icons/hi'
 import { useToast } from '@/components/General/ToastProvider'
-import { missingAddressFields } from '@/lib/checkoutAddressGate'
+import { ADDRESS_FIELDS, addressesEqual, missingAddressFields, pickAddressFields } from '@/lib/checkoutAddressGate'
 
-const EMPTY_ADDRESS = {
-    street: '',
-    unitNumber: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: ''
-}
+const EMPTY_ADDRESS = Object.fromEntries(ADDRESS_FIELDS.map((field) => [field, '']))
+
+// Only the known keys, so an _id or other document field never leaks into
+// form state or the POST payload.
+const toFormAddress = (address) => ({ ...EMPTY_ADDRESS, ...pickAddressFields(address) })
 
 const FIELD_LABELS = {
     street: 'Street address',
-    unitNumber: 'Unit / apt number',
+    unitNumber: 'Unit / apt number (optional)',
     city: 'City',
-    state: 'State / province',
+    state: 'State / province (optional)',
     postalCode: 'Postal code',
     country: 'Country'
 }
@@ -43,13 +40,18 @@ export default function DeliveryAddressPrompt({
     description = 'Add your delivery address to see shipping costs and proceed to checkout.',
     saveLabel = 'Save delivery address',
 }) {
-    const [address, setAddress] = useState({ ...EMPTY_ADDRESS, ...(initialAddress || {}) })
+    const [address, setAddress] = useState(() => toFormAddress(initialAddress))
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
     const { showToast } = useToast()
+    const appliedInitial = useRef(initialAddress)
 
+    // Re-prefill only when the saved address actually changes; a parent
+    // re-fetching the same address must not wipe what is being typed.
     useEffect(() => {
-        setAddress({ ...EMPTY_ADDRESS, ...(initialAddress || {}) })
+        if (addressesEqual(appliedInitial.current, initialAddress)) return
+        appliedInitial.current = initialAddress
+        setAddress(toFormAddress(initialAddress))
     }, [initialAddress])
 
     const handleAddressChange = (e) => {
@@ -69,7 +71,7 @@ export default function DeliveryAddressPrompt({
         setSaving(true)
         setError('')
         try {
-            const trimmed = Object.fromEntries(Object.entries(address).map(([k, v]) => [k, String(v || '').trim()]))
+            const trimmed = pickAddressFields(address)
             const response = await fetch('/api/user/contact/address', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -135,10 +137,10 @@ export default function DeliveryAddressPrompt({
 
             <div className="p-4 space-y-3">
                 {field('street', { placeholder: '123 Main Street' })}
-                {field('unitNumber', { placeholder: '#04-12' })}
+                {field('unitNumber', { placeholder: '#04-12', required: false })}
                 <div className="grid grid-cols-2 gap-3">
                     {field('city', { placeholder: 'Singapore' })}
-                    {field('state', { placeholder: 'Singapore' })}
+                    {field('state', { placeholder: 'Singapore', required: false })}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                     {field('postalCode', { placeholder: '123456' })}

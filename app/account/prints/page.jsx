@@ -114,7 +114,9 @@ export default function AccountPrintRequestsPage() {
                         // Stripe Connect lands; until then payment is arranged off-platform.
                         const canAddToCart =
                             !creatorJob && (r.status === 'quoted' || r.status === 'payment_pending') && quoted > 0
-                        const quoteLines = r.quote?.lines || []
+                        // Instant-quote lines only; a manual quote's price is
+                        // basePrice + printFee even if an old quote object lingers.
+                        const quoteLines = priced.source === 'instant' ? (r.quote?.lines || []) : []
                         const history = r.statusHistory || []
 
                         return (

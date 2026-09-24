@@ -7,14 +7,14 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from 'next/navigation';
 import posthog from 'posthog-js';
 import DeliveryAddressPrompt from '@/components/Cart/DeliveryAddressPrompt';
-import { ADD_ADDRESS_TO_PAY, cartNeedsDeliveryAddress, isAddressComplete } from '@/lib/checkoutAddressGate';
+import { ADD_ADDRESS_TO_PAY, addressesEqual, cartNeedsDeliveryAddress, deliveryMismatchReason, isAddressComplete } from '@/lib/checkoutAddressGate';
 
 if (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === undefined) {
     throw new Error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not defined');
 }
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
-const PayButton = ({ disabled, busy, reason }) => (
+const PayButton = ({ disabled, busy, reason, onRetry }) => (
     <div className="flex flex-col gap-2 mt-2">
         <button
             disabled={disabled}
@@ -25,6 +25,15 @@ const PayButton = ({ disabled, busy, reason }) => (
         </button>
         {reason && (
             <p data-testid="pay-blocked-reason" className="text-xs text-lightColor">{reason}</p>
+        )}
+        {onRetry && (
+            <button
+                type="button"
+                onClick={onRetry}
+                className="self-start text-sm font-medium text-textColor underline underline-offset-4 hover:text-lightColor"
+            >
+                Retry
+            </button>
         )}
     </div>
 );
@@ -170,7 +179,7 @@ const BillingInfo = ({ address, phone, needsAddress, editing, onEdit, onCancelEd
 
             {showForm ? (
                 <DeliveryAddressPrompt
-                    initialAddress={complete ? address : null}
+                    initialAddress={address}
                     title={null}
                     saveLabel={complete ? 'Save changes' : 'Save delivery address'}
                     onCancel={complete ? onCancelEdit : undefined}
@@ -301,10 +310,13 @@ const CheckOut = () => {
     }, [createSession]);
 
     const handleAddressSaved = async (saved) => {
+        const unchanged = addressesEqual(saved, address);
         setAddress(saved);
         setEditingAddress(false);
         // The session was refused (or priced) without an address; recreate it
-        // now that one exists so Stripe has the delivery details.
+        // now that one exists so Stripe has the delivery details. Saving the
+        // same address again with a live session changes nothing.
+        if (unchanged && clientSecret) return;
         await createSession();
     };
 
@@ -329,8 +341,11 @@ const CheckOut = () => {
     const needsAddress = cartNeedsDeliveryAddress(cartBreakdown);
     const addressOk = isAddressComplete(address);
     const addressBlocked = needsAddress && !addressOk;
-    const blockedReason = addressBlocked ? ADD_ADDRESS_TO_PAY : (checkoutError || null);
-    const canPay = Boolean(clientSecret) && !addressBlocked && !sessionLoading;
+    const mismatchReason = deliveryMismatchReason(cartBreakdown);
+    const blockedReason = addressBlocked ? ADD_ADDRESS_TO_PAY : (mismatchReason || checkoutError || null);
+    const canPay = Boolean(clientSecret) && !addressBlocked && !mismatchReason && !sessionLoading;
+    // A session error that is not about the address can be retried in place.
+    const retryable = !clientSecret && !sessionLoading && !addressBlocked && !mismatchReason && Boolean(checkoutError);
 
     return (
         <div className="min-h-[92vh] flex flex-col items-center p-12 border-b border-borderColor">
@@ -372,6 +387,7 @@ const CheckOut = () => {
                                     disabled
                                     busy={sessionLoading}
                                     reason={sessionLoading ? null : (blockedReason || 'Unable to start checkout. Please try again.')}
+                                    onRetry={retryable ? createSession : undefined}
                                 />
                             </form>
                         )

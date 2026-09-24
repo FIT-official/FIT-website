@@ -17,7 +17,7 @@ import { customPrintDisplayPrice } from '@/lib/customPrintDisplayPrice';
 import { useCurrency } from '@/components/General/CurrencyContext';
 import CustomPrintUpload from '@/components/Cart/CustomPrintUpload';
 import DeliveryAddressPrompt from '@/components/Cart/DeliveryAddressPrompt';
-import { ADD_ADDRESS_TO_CHECKOUT } from '@/lib/checkoutAddressGate';
+import { ADD_ADDRESS_TO_CHECKOUT, deliveryMismatchReason } from '@/lib/checkoutAddressGate';
 import { HiCheck, HiExclamationCircle } from 'react-icons/hi';
 import { FaRegCircleCheck } from 'react-icons/fa6';
 
@@ -51,6 +51,7 @@ function Cart() {
     // shows the inline address form next to a summary that stays visible.
     const [addressMissing, setAddressMissing] = useState(false);
     const [needsDeliveryAddress, setNeedsDeliveryAddress] = useState(false);
+    const [savedAddress, setSavedAddress] = useState(null);
     const [initializedCustomPrintDelivery, setInitializedCustomPrintDelivery] = useState({});
     const searchParams = useSearchParams();
     const redirectUrl = searchParams.get("redirect") || "/";
@@ -59,23 +60,35 @@ function Cart() {
 
     const refreshCartBreakdown = async () => {
         setLoading(true);
-        const res = await fetch('/api/checkout/breakdown');
-        if (res.ok) {
-            const data = await res.json();
-            const lines = data.cartBreakdown || [];
-            setCartBreakdown(lines);
-            setAddressMissing(Boolean(data.addressMissing));
-            setNeedsDeliveryAddress(
-                typeof data.needsDeliveryAddress === 'boolean'
-                    ? data.needsDeliveryAddress
-                    : lines.some(line => line.needsDeliveryAddress !== false)
-            );
-        } else {
-            const data = await res.json().catch(() => ({}));
-            showToast(data.error || 'Could not load your cart summary', 'error');
+        try {
+            const res = await fetch('/api/checkout/breakdown');
+            if (res.ok) {
+                const data = await res.json();
+                const lines = data.cartBreakdown || [];
+                setCartBreakdown(lines);
+                setAddressMissing(Boolean(data.addressMissing));
+                setSavedAddress(data.address || null);
+                setNeedsDeliveryAddress(
+                    typeof data.needsDeliveryAddress === 'boolean'
+                        ? data.needsDeliveryAddress
+                        : lines.some(line => line.needsDeliveryAddress !== false)
+                );
+            } else {
+                const data = await res.json().catch(() => ({}));
+                showToast(data.error || 'Could not load your cart summary', 'error');
+                setCartBreakdown([]);
+                setAddressMissing(false);
+                setNeedsDeliveryAddress(false);
+            }
+        } catch (e) {
+            console.error('Error loading cart breakdown:', e);
+            showToast('Could not load your cart summary', 'error');
             setCartBreakdown([]);
+            setAddressMissing(false);
+            setNeedsDeliveryAddress(false);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     // Fetch delivery type metadata on mount
@@ -488,16 +501,20 @@ function Cart() {
         return isCustomPrintPending(cartItem, customPrintRequest);
     });
 
-    // Checkout needs an address only when something in the cart ships.
+    // Checkout needs an address only when something in the cart ships, and
+    // every line must hold a delivery option its product/request still offers.
     const addressBlocked = needsDeliveryAddress && addressMissing;
+    const mismatchReason = deliveryMismatchReason(cartBreakdown);
     const checkoutBlockedReason = cart.length === 0
         ? null
         : hasPendingCustomPrint
             ? 'Finish your custom print request to check out.'
-            : addressBlocked
-                ? ADD_ADDRESS_TO_CHECKOUT
-                : null;
-    const checkoutDisabled = cart.length === 0 || Boolean(checkoutBlockedReason);
+            : mismatchReason
+                ? mismatchReason
+                : addressBlocked
+                    ? ADD_ADDRESS_TO_CHECKOUT
+                    : null;
+    const checkoutDisabled = loading || cart.length === 0 || Boolean(checkoutBlockedReason);
 
     return (
         <div className='flex w-full flex-col min-h-[92vh] py-12 border-b border-borderColor px-8'>
@@ -1029,10 +1046,14 @@ function Cart() {
                                 </div>
                             );
                         })()}
-                        {!loading && addressBlocked && (
+                        {/* Mounted independent of `loading` so typing survives a
+                            summary refresh (e.g. a delivery option change). */}
+                        {addressBlocked && (
                             <div className="mb-4">
                                 <DeliveryAddressPrompt
-                                    onAddressSaved={() => {
+                                    initialAddress={savedAddress}
+                                    onAddressSaved={(saved) => {
+                                        setSavedAddress(saved);
                                         setAddressMissing(false);
                                         refreshCartBreakdown();
                                     }}

@@ -11,6 +11,7 @@ const state = vi.hoisted(() => ({
     sessionOk: true,
     breakdown: [],
     savedAddress: null,
+    sessionCalls: 0,
 }))
 
 vi.mock('@clerk/nextjs', () => ({ useUser: () => ({ user: { id: 'user_1' }, isLoaded: true }) }))
@@ -50,15 +51,18 @@ beforeEach(() => {
     state.sessionOk = true
     state.breakdown = [shippingLine]
     state.savedAddress = null
+    state.sessionCalls = 0
     global.fetch = vi.fn(async (url, init) => {
         const json = (data, status = 200) => ({ ok: status < 400, status, json: async () => data })
         if (url === '/api/checkout/breakdown') {
             return json({ cartBreakdown: state.breakdown, addressMissing: !state.address, needsDeliveryAddress: true, address: state.address })
         }
         if (url === '/api/checkout/session') {
-            if (!state.address) return json({ error: 'Missing delivery address' }, 400)
+            state.sessionCalls += 1
+            const ships = state.breakdown.some((line) => line.needsDeliveryAddress !== false)
+            if (ships && !state.address) return json({ error: 'Missing delivery address' }, 400)
             if (!state.sessionOk) return json({ error: 'A product is no longer available' }, 409)
-            return json({ clientSecret: `cs_${state.address.postalCode}` })
+            return json({ clientSecret: `cs_${state.sessionCalls}` })
         }
         if (url === '/api/user/contact/address' && init?.method === 'POST') {
             const body = JSON.parse(init.body)
@@ -163,10 +167,65 @@ describe('checkout Pay gating', () => {
     })
 
     it('does not require an address when nothing ships', async () => {
-        state.address = fullAddress
+        state.address = null
         state.breakdown = [{ ...shippingLine, chosenDeliveryType: 'pickup', deliveryFee: 0, total: 18.5, needsDeliveryAddress: false }]
         await renderCheckout()
         expect(await screen.findByTestId('stripe-provider')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Pay Now' })).toBeEnabled()
+        expect(screen.queryByTestId('pay-blocked-reason')).not.toBeInTheDocument()
+        expect(screen.getByText('Nothing in this order ships, so an address is optional.')).toBeInTheDocument()
+    })
+
+    it('accepts an address with no unit number and no state', async () => {
+        await renderCheckout()
+        fillAddress({ ...fullAddress, unitNumber: '', state: '' })
+        fireEvent.click(screen.getByRole('button', { name: 'Save delivery address' }))
+        await waitFor(() => expect(state.savedAddress).toEqual({ ...fullAddress, unitNumber: '', state: '' }))
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Pay Now' })).toBeEnabled())
+        expect(screen.getByTestId('saved-address')).toHaveTextContent('1 Test St')
+    })
+
+    it('prefills the form from a partial saved address instead of a blank form', async () => {
+        state.address = { street: '9 Partial Rd', city: 'Singapore', postalCode: '', country: 'Singapore', _id: 'ignored' }
+        await renderCheckout()
+        expect(screen.getByRole('button', { name: 'Pay Now' })).toBeDisabled()
+        expect(screen.getByLabelText(/Street address/)).toHaveValue('9 Partial Rd')
+        expect(screen.getByLabelText(/Postal code/)).toHaveValue('')
+        fireEvent.change(screen.getByLabelText(/Postal code/), { target: { value: '123456' } })
+        fireEvent.click(screen.getByRole('button', { name: 'Save delivery address' }))
+        await waitFor(() => expect(state.savedAddress).toEqual({ street: '9 Partial Rd', unitNumber: '', city: 'Singapore', state: '', postalCode: '123456', country: 'Singapore' }))
+        expect(state.savedAddress).not.toHaveProperty('_id')
+    })
+
+    it('does not recreate the session when the saved address is unchanged', async () => {
+        state.address = fullAddress
+        await renderCheckout()
+        await screen.findByTestId('stripe-provider')
+        fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }))
+        await waitFor(() => expect(state.savedAddress).toEqual(fullAddress))
+        await screen.findByTestId('saved-address')
+        expect(calls('/api/checkout/session', 'POST')).toHaveLength(1)
+    })
+
+    it('offers Retry for a non-address session error and recovers', async () => {
+        state.address = fullAddress
+        state.sessionOk = false
+        await renderCheckout()
+        expect(screen.getByRole('button', { name: 'Pay Now' })).toBeDisabled()
+        state.sessionOk = true
+        fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+        expect(await screen.findByTestId('stripe-provider')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Pay Now' })).toBeEnabled()
+    })
+
+    it('blocks Pay while a line holds a delivery option the request no longer offers', async () => {
+        state.address = fullAddress
+        state.breakdown = [{ ...shippingLine, deliveryTypeMismatch: true, warning: 'The delivery option "drone" is no longer offered for this print.' }]
+        await renderCheckout()
+        await screen.findByTestId('stripe-provider')
+        expect(screen.getByRole('button', { name: 'Pay Now' })).toBeDisabled()
+        expect(screen.getByTestId('pay-blocked-reason')).toHaveTextContent('Pick a delivery option for Custom 3D Print in the cart.')
+        expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument()
     })
 })

@@ -5,7 +5,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent, waitFor, within } from '@testing-library/react'
 
-const state = vi.hoisted(() => ({ address: null, savedAddress: null, requestStatus: 'quoted' }))
+const state = vi.hoisted(() => ({ address: null, savedAddress: null, requestStatus: 'quoted', mismatch: false }))
 
 vi.mock('@clerk/nextjs', () => ({ useUser: () => ({ user: { id: 'user_1' }, isLoaded: true }) }))
 vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams() }))
@@ -47,6 +47,7 @@ const breakdownLine = () => ({
     customPrintRequestId: 'req_1',
     customPrintStatus: state.requestStatus,
     needsDeliveryAddress: true,
+    ...(state.mismatch ? { deliveryTypeMismatch: true, warning: 'The delivery option "drone" is no longer offered for this print.' } : {}),
 })
 
 const fullAddress = { street: '1 Test St', unitNumber: '#01-01', city: 'Singapore', state: 'Singapore', postalCode: '123456', country: 'Singapore' }
@@ -56,6 +57,7 @@ beforeEach(() => {
     state.address = null
     state.savedAddress = null
     state.requestStatus = 'quoted'
+    state.mismatch = false
     global.fetch = vi.fn(async (url, init) => {
         const json = (data, status = 200) => ({ ok: status < 400, status, json: async () => data })
         if (url === '/api/admin/settings') return json({ settings: { additionalDeliveryTypes: [] } })
@@ -66,7 +68,8 @@ beforeEach(() => {
             return json({ product: { _id: 'prod_cp', name: 'Custom 3D Print', images: [], delivery: { deliveryTypes: [{ type: 'courier', price: 4 }] } } })
         }
         if (url === '/api/checkout/breakdown') {
-            return json({ cartBreakdown: [breakdownLine()], addressMissing: !state.address, needsDeliveryAddress: true, address: state.address })
+            const addressMissing = !(state.address && state.address.street && state.address.city && state.address.postalCode && state.address.country)
+            return json({ cartBreakdown: [breakdownLine()], addressMissing, needsDeliveryAddress: true, address: state.address })
         }
         if (url === '/api/custom-print?requestId=req_1') return json({ request: request() })
         if (url === '/api/user/contact/address' && init?.method === 'POST') {
@@ -118,6 +121,37 @@ describe('cart address gate', () => {
         await screen.findByText('Grand Total')
         expect(screen.queryByTestId('delivery-address-form')).not.toBeInTheDocument()
         expect(proceed()).toHaveAttribute('aria-disabled', 'false')
+    })
+
+    it('saves an address with no unit number and no state', async () => {
+        render(<Cart />)
+        const form = await screen.findByTestId('delivery-address-form')
+        const type = (label, value) => fireEvent.change(within(form).getByLabelText(label), { target: { value } })
+        type(/Street address/, fullAddress.street)
+        type(/^City/, fullAddress.city)
+        type(/Postal code/, fullAddress.postalCode)
+        type(/^Country/, fullAddress.country)
+        fireEvent.click(within(form).getByRole('button', { name: 'Save delivery address' }))
+        await waitFor(() => expect(state.savedAddress).toEqual({ ...fullAddress, unitNumber: '', state: '' }))
+        await waitFor(() => expect(proceed()).toHaveAttribute('aria-disabled', 'false'))
+    })
+
+    it('prefills the inline form from a partial saved address', async () => {
+        state.address = { street: '9 Partial Rd', unitNumber: '', city: 'Singapore', state: '', postalCode: '', country: 'Singapore' }
+        render(<Cart />)
+        const form = await screen.findByTestId('delivery-address-form')
+        expect(within(form).getByLabelText(/Street address/)).toHaveValue('9 Partial Rd')
+        expect(within(form).getByLabelText(/Postal code/)).toHaveValue('')
+    })
+
+    it('blocks checkout with a reason when a line holds a delivery option no longer offered', async () => {
+        state.address = fullAddress
+        state.mismatch = true
+        render(<Cart />)
+        await screen.findByText('Grand Total')
+        await waitFor(() => expect(proceed()).toHaveAttribute('aria-disabled', 'true'))
+        expect(screen.getByTestId('checkout-blocked-reason')).toHaveTextContent('Pick a delivery option for Custom 3D Print in the cart.')
+        expect(screen.getByText(/"drone" is no longer offered/)).toBeInTheDocument()
     })
 
     it('blocks checkout for an unquoted custom print even with an address', async () => {

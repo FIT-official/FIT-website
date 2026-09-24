@@ -494,9 +494,12 @@ export async function GET(req) {
 
         let query = Product.find(filter).select(projection);
 
-        // Apply limit if provided
+        // Apply limit if provided; the category-less catalogue listings are
+        // bounded at 200 even when the caller passes none.
         if (limit) {
             query = query.limit(Math.min(200, Math.max(1, Number(limit) || 20)));
+        } else if (isPublicCatalogueListing && !hasAnyCategoryFilter && !ids && !productId && !creatorUserId && !search) {
+            query = query.limit(200);
         }
 
         const products = (await query.lean()).map(product => productForViewer(product, userId, isAdmin)).filter(Boolean);
