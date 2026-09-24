@@ -72,7 +72,7 @@ export const DEFAULT_MENU_PAGES = [
     { icon: 'people', label: 'Creators', description: 'Meet the makers behind the models.', href: '/creators' },
     { icon: 'sparkles', label: 'Become a creator', description: 'Plans for selling on Fix It Today.', href: '/creators/join' },
     { icon: 'info', label: 'About', description: 'Who we are and how we work.', href: '/about' },
-    { icon: 'print', label: 'Custom 3D print', description: 'Upload a model for an instant quote.', href: '/products/custom-print-request' },
+    { icon: 'print', label: 'Custom 3D print', description: 'Upload a model for an instant quote.', href: '/prints/request' },
     { icon: 'cube', label: 'Print requests', description: 'Track your custom print orders.', href: '/account/prints' },
 ]
 
@@ -140,7 +140,7 @@ function NavPanel({
                                 onNavigate={onNavigate}
                             />
                             <IconRow
-                                href="/products/custom-print-request"
+                                href="/prints/request"
                                 icon={IoPrintOutline}
                                 label="Print your model"
                                 description="Upload a 3D model and get an instant quote."

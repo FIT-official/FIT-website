@@ -166,10 +166,10 @@ describe('Navbar desktop bar', () => {
             'href',
             '/shop?productType=shop&productCategory=Figurines&productSubCategory=Anime',
         )
-        // The old featured tile is now a plain icon row; hrefs are unchanged.
+        // The old featured tile is now a plain icon row; it opens the request page.
         expect(within(panel).getByRole('link', { name: /Print your model/ })).toHaveAttribute(
             'href',
-            '/products/custom-print-request',
+            '/prints/request',
         )
         expect(within(panel).getByRole('link', { name: /Browse all shop/ })).toHaveAttribute(
             'href',
@@ -199,7 +199,7 @@ describe('Navbar desktop bar', () => {
             ['Creators', '/creators'],
             ['Become a creator', '/creators/join'],
             ['About', '/about'],
-            ['Custom 3D print', '/products/custom-print-request'],
+            ['Custom 3D print', '/prints/request'],
             ['Print requests', '/account/prints'],
         ].forEach(([name, href]) => {
             expect(within(panel).getByRole('link', { name })).toHaveAttribute('href', href)
