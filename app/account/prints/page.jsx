@@ -12,6 +12,7 @@ import AccountShell from '@/components/Account/AccountShell'
 import { printRequestTone, printStatusLabel, money } from '@/components/Account/accountUi'
 import { useToast } from '@/components/General/ToastProvider'
 import { DashCard, DottedRow, EmptyState, StatusPill, Tag, Timeline, SkeletonTile } from '@/components/dashboard-ui'
+import { customPrintDisplayPrice } from '@/lib/customPrintDisplayPrice'
 
 export default function AccountPrintRequestsPage() {
     const { user, isLoaded } = useUser()
@@ -103,7 +104,10 @@ export default function AccountPrintRequestsPage() {
                     {requests.map((r) => {
                         const base = Number(r.basePrice || 0)
                         const fee = Number(r.printFee || 0)
-                        const quoted = base + fee
+                        // Same selector the cart and checkout use: instant quotes
+                        // store quote.total, manual quotes basePrice + printFee.
+                        const priced = customPrintDisplayPrice(r)
+                        const quoted = priced.amount
                         const currency = (r.currency || 'SGD').toUpperCase()
                         const creatorJob = Boolean(r.creatorUserId)
                         // TODO(phase5-connect): creator jobs become payable in-cart once
@@ -163,7 +167,7 @@ export default function AccountPrintRequestsPage() {
                                             <div className="mt-1 pt-1 border-t border-[var(--dash-line)]">
                                                 <DottedRow label="Total">
                                                     <span className="font-medium">
-                                                        {currency} {money(r.quote?.total ?? quoted)}
+                                                        {currency} {money(quoted)}
                                                     </span>
                                                 </DottedRow>
                                             </div>
