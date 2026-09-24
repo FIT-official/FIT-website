@@ -16,6 +16,8 @@ import { customPrintStage, isCustomPrintBlockingCheckout } from '@/utils/customP
 import { customPrintDisplayPrice } from '@/lib/customPrintDisplayPrice';
 import { useCurrency } from '@/components/General/CurrencyContext';
 import CustomPrintUpload from '@/components/Cart/CustomPrintUpload';
+import DeliveryAddressPrompt from '@/components/Cart/DeliveryAddressPrompt';
+import { ADD_ADDRESS_TO_CHECKOUT } from '@/lib/checkoutAddressGate';
 import { HiCheck, HiExclamationCircle } from 'react-icons/hi';
 import { FaRegCircleCheck } from 'react-icons/fa6';
 
@@ -44,7 +46,11 @@ function Cart() {
     const [loading, setLoading] = useState(true);
     const [deliveryTypesMeta, setDeliveryTypesMeta] = useState({});
     const [localOrderNotes, setLocalOrderNotes] = useState({});
-    const [showAddressPrompt, setShowAddressPrompt] = useState(false);
+    // Delivery-address gating. The breakdown no longer 400s without an
+    // address; it reports `addressMissing` and which lines ship, and the cart
+    // shows the inline address form next to a summary that stays visible.
+    const [addressMissing, setAddressMissing] = useState(false);
+    const [needsDeliveryAddress, setNeedsDeliveryAddress] = useState(false);
     const [initializedCustomPrintDelivery, setInitializedCustomPrintDelivery] = useState({});
     const searchParams = useSearchParams();
     const redirectUrl = searchParams.get("redirect") || "/";
@@ -56,16 +62,17 @@ function Cart() {
         const res = await fetch('/api/checkout/breakdown');
         if (res.ok) {
             const data = await res.json();
-            setCartBreakdown(data.cartBreakdown || []);
-            setShowAddressPrompt(false); // Hide prompt if breakdown loads successfully
+            const lines = data.cartBreakdown || [];
+            setCartBreakdown(lines);
+            setAddressMissing(Boolean(data.addressMissing));
+            setNeedsDeliveryAddress(
+                typeof data.needsDeliveryAddress === 'boolean'
+                    ? data.needsDeliveryAddress
+                    : lines.some(line => line.needsDeliveryAddress !== false)
+            );
         } else {
             const data = await res.json().catch(() => ({}));
-            // Check if error is due to missing address
-            if (data.error?.includes('delivery address') || data.error?.includes('address')) {
-                setShowAddressPrompt(true);
-            } else {
-                showToast(data.error, 'error');
-            }
+            showToast(data.error || 'Could not load your cart summary', 'error');
             setCartBreakdown([]);
         }
         setLoading(false);
@@ -480,6 +487,17 @@ function Cart() {
         const customPrintRequest = customPrintRequests[requestId];
         return isCustomPrintPending(cartItem, customPrintRequest);
     });
+
+    // Checkout needs an address only when something in the cart ships.
+    const addressBlocked = needsDeliveryAddress && addressMissing;
+    const checkoutBlockedReason = cart.length === 0
+        ? null
+        : hasPendingCustomPrint
+            ? 'Finish your custom print request to check out.'
+            : addressBlocked
+                ? ADD_ADDRESS_TO_CHECKOUT
+                : null;
+    const checkoutDisabled = cart.length === 0 || Boolean(checkoutBlockedReason);
 
     return (
         <div className='flex w-full flex-col min-h-[92vh] py-12 border-b border-borderColor px-8'>
@@ -1011,23 +1029,18 @@ function Cart() {
                                 </div>
                             );
                         })()}
+                        {!loading && addressBlocked && (
+                            <div className="mb-4">
+                                <DeliveryAddressPrompt
+                                    onAddressSaved={() => {
+                                        setAddressMissing(false);
+                                        refreshCartBreakdown();
+                                    }}
+                                />
+                            </div>
+                        )}
                         {loading ? (
                             <CartSummarySkeleton />
-                        ) : showAddressPrompt ? (
-                            <div className="mb-4 rounded-lg border border-borderColor bg-baseColor p-6 space-y-4">
-                                <div className="space-y-2">
-                                    <h3 className="text-sm font-semibold text-textColor">Delivery Address Required</h3>
-                                    <p className="text-xs text-lightColor leading-relaxed">
-                                        Please add your delivery address to see accurate shipping costs and proceed with checkout.
-                                    </p>
-                                </div>
-                                <Link
-                                    href="/account?tab=billing"
-                                    className="block w-full px-4 py-3 bg-textColor text-background rounded-md text-sm font-medium hover:bg-textColor/90 transition-all duration-200 text-center"
-                                >
-                                    Add Delivery Address
-                                </Link>
-                            </div>
                         ) : cartBreakdown.length === 0 ? (
                             <div className="text-lightColor text-xs mb-4">No items in cart.</div>
                         ) : (
@@ -1068,6 +1081,9 @@ function Cart() {
                                                             {`${currency} ${(item.deliveryFee ? item.deliveryFee * (item.quantity || 1) : 0).toFixed(2)}`}
                                                         </span>
                                                     </div>
+                                                    {item.warning && (
+                                                        <span className="text-[11px] text-yellow-700">{item.warning}</span>
+                                                    )}
                                                     {deliveryMeta && (
                                                         <div className="flex flex-col text-[11px] text-lightColor ml-1 mt-0.5">
                                                             <span><b>Type:</b> {deliveryMeta.displayName} ({deliveryMeta.name})</span>
@@ -1092,21 +1108,26 @@ function Cart() {
                         <Link
                             href="/checkout"
                             onClick={async (e) => {
-                                if (hasPendingCustomPrint) {
+                                if (checkoutDisabled) {
                                     e.preventDefault();
-                                    showToast('Please complete your custom print request before checking out.', 'error');
+                                    if (checkoutBlockedReason) showToast(checkoutBlockedReason, 'error');
                                     return;
                                 }
                                 posthog.capture('checkout_started', { item_count: cart.length });
                                 await submitOrderNotes();
                                 window.location.href = "/checkout";
                             }}
-                            className={`formBlackButton mt-4${cart.length === 0 || hasPendingCustomPrint ? " opacity-60 pointer-events-none cursor-not-allowed" : ""}`}
-                            tabIndex={cart.length === 0 || hasPendingCustomPrint ? -1 : 0}
-                            aria-disabled={cart.length === 0 || hasPendingCustomPrint}
+                            className={`formBlackButton mt-4${checkoutDisabled ? " opacity-60 pointer-events-none cursor-not-allowed" : ""}`}
+                            tabIndex={checkoutDisabled ? -1 : 0}
+                            aria-disabled={checkoutDisabled}
                         >
                             Proceed to Checkout
                         </Link>
+                        {!loading && checkoutBlockedReason && (
+                            <p data-testid="checkout-blocked-reason" className="text-xs text-lightColor mt-2">
+                                {checkoutBlockedReason}
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

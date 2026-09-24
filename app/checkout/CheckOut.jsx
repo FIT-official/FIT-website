@@ -1,19 +1,35 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { CheckoutProvider, PaymentElement, useCheckout } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/components/General/ToastProvider';
 import posthog from 'posthog-js';
+import DeliveryAddressPrompt from '@/components/Cart/DeliveryAddressPrompt';
+import { ADD_ADDRESS_TO_PAY, cartNeedsDeliveryAddress, isAddressComplete } from '@/lib/checkoutAddressGate';
 
 if (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === undefined) {
     throw new Error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not defined');
 }
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
-const CheckoutForm = () => {
+const PayButton = ({ disabled, busy, reason }) => (
+    <div className="flex flex-col gap-2 mt-2">
+        <button
+            disabled={disabled}
+            type="submit"
+            className="px-6 py-3 bg-textColor text-white rounded hover:bg-lightColor disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-textColor"
+        >
+            {busy ? <div className="spinner"></div> : 'Pay Now'}
+        </button>
+        {reason && (
+            <p data-testid="pay-blocked-reason" className="text-xs text-lightColor">{reason}</p>
+        )}
+    </div>
+);
+
+const CheckoutForm = ({ canPay, blockedReason }) => {
     const checkout = useCheckout();
     const { user, isLoaded } = useUser();
     const [message, setMessage] = useState(null);
@@ -22,7 +38,7 @@ const CheckoutForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!isLoaded || !user) {
+        if (!isLoaded || !user || !canPay) {
             return;
         }
         setIsLoading(true);
@@ -43,13 +59,7 @@ const CheckoutForm = () => {
             <div className="border border-borderColor rounded bg-extraLight p-4">
                 <PaymentElement id="payment-element" />
             </div>
-            <button
-                disabled={isLoading}
-                type="submit"
-                className="px-6 py-3 bg-textColor text-white rounded hover:bg-lightColor disabled:opacity-50 mt-2"
-            >
-                {isLoading ? <div className="spinner"></div> : 'Pay Now'}
-            </button>
+            <PayButton disabled={isLoading || !canPay} busy={isLoading} reason={canPay ? null : blockedReason} />
             {message && <div id="payment-message" className="text-red-500">{message}</div>}
         </form>
     );
@@ -103,6 +113,11 @@ const CartBreakdown = ({ cartBreakdown }) => {
                                 </span>
                             )}
                         </div>
+                        {item.warning && (
+                            <div className="text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 p-2 rounded mt-1">
+                                {item.warning}
+                            </div>
+                        )}
                         {item.orderNote && (
                             <div className="text-xs text-textColor bg-extraLight p-2 rounded mt-2">
                                 <span className="font-medium">Note:</span> {item.orderNote}
@@ -115,41 +130,69 @@ const CartBreakdown = ({ cartBreakdown }) => {
     );
 };
 
-const BillingInfo = ({ userContact }) => (
-    <div className="flex flex-col gap-4 border border-borderColor rounded bg-white p-6">
-        <h3 className="font-semibold text-lg mb-2 text-textColor">Billing Info</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label className="text-xs text-lightColor">Country</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.country || ""} disabled />
+const formatAddressLines = (address) => {
+    if (!address) return [];
+    return [
+        [address.street, address.unitNumber].filter(Boolean).join(', '),
+        [address.city, address.state, address.postalCode].filter(Boolean).join(' '),
+        address.country,
+    ].filter(Boolean);
+};
+
+/**
+ * Delivery address panel, editable in place. Shows the saved address with an
+ * Edit button, or the inline form when there is no complete address yet.
+ */
+const BillingInfo = ({ address, phone, needsAddress, editing, onEdit, onCancelEdit, onAddressSaved }) => {
+    const complete = isAddressComplete(address);
+    const showForm = editing || !complete;
+    const lines = formatAddressLines(address);
+
+    return (
+        <div className="flex flex-col gap-4 border border-borderColor rounded bg-white p-6">
+            <div className="flex items-start justify-between gap-4">
+                <div>
+                    <h3 className="font-semibold text-lg text-textColor">Delivery address</h3>
+                    {!needsAddress && (
+                        <p className="text-xs text-lightColor mt-1">Nothing in this order ships, so an address is optional.</p>
+                    )}
+                </div>
+                {complete && !editing && (
+                    <button
+                        type="button"
+                        onClick={onEdit}
+                        className="text-sm font-medium text-textColor underline underline-offset-4 hover:text-lightColor"
+                    >
+                        Edit
+                    </button>
+                )}
             </div>
-            <div>
-                <label className="text-xs text-lightColor">Postal Code</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.postalCode || ""} disabled />
-            </div>
-            <div>
-                <label className="text-xs text-lightColor">City</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.city || ""} disabled />
-            </div>
-            <div>
-                <label className="text-xs text-lightColor">State</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.state || ""} disabled />
-            </div>
-            <div className="md:col-span-2">
-                <label className="text-xs text-lightColor">Street Address</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.street || ""} disabled />
-            </div>
-            <div className="md:col-span-2">
-                <label className="text-xs text-lightColor">Unit Number</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.unitNumber || ""} disabled />
-            </div>
+
+            {showForm ? (
+                <DeliveryAddressPrompt
+                    initialAddress={complete ? address : null}
+                    title={null}
+                    saveLabel={complete ? 'Save changes' : 'Save delivery address'}
+                    onCancel={complete ? onCancelEdit : undefined}
+                    onAddressSaved={onAddressSaved}
+                />
+            ) : (
+                <address data-testid="saved-address" className="not-italic text-sm text-textColor leading-relaxed">
+                    {lines.map((line, i) => (
+                        <div key={i}>{line}</div>
+                    ))}
+                </address>
+            )}
+
             <div>
                 <label className="text-xs text-lightColor">Phone</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.phone || ""} disabled />
+                <div className="text-sm text-textColor">
+                    {phone || <span className="text-lightColor">Not set</span>}
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 const OrderSummary = ({ cartBreakdown }) => {
     // Subtotal: sum of all product prices × quantity
@@ -167,7 +210,7 @@ const OrderSummary = ({ cartBreakdown }) => {
             <CartBreakdown cartBreakdown={cartBreakdown} />
             <div className="flex justify-between text-base font-bold mt-4">
                 <span className="text-textColor">Order Total</span>
-                <span className="text-textColor">S${total.toFixed(2)}</span>
+                <span data-testid="order-total" className="text-textColor">S${total.toFixed(2)}</span>
             </div>
         </div>
     );
@@ -177,13 +220,18 @@ const CheckOut = () => {
     const [clientSecret, setClientSecret] = useState(undefined);
     const [freeCheckout, setFreeCheckout] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [sessionLoading, setSessionLoading] = useState(false);
     const [cartBreakdown, setCartBreakdown] = useState([]);
-    const [userContact, setUserContact] = useState({});
+    const [address, setAddress] = useState(null);
+    const [phone, setPhone] = useState('');
+    const [checkoutError, setCheckoutError] = useState('');
+    const [editingAddress, setEditingAddress] = useState(false);
     const router = useRouter();
 
-    useEffect(() => {
-        const fetchClientSecret = async () => {
-            setLoading(true);
+    const createSession = useCallback(async () => {
+        setSessionLoading(true);
+        setCheckoutError('');
+        try {
             const res = await fetch('/api/checkout/session', {
                 method: 'POST',
                 headers: {
@@ -196,31 +244,37 @@ const CheckOut = () => {
                     const data = await res.json();
                     if (data?.error) errorMsg = data.error;
                 } catch { }
-                if (errorMsg.toLowerCase().includes('missing delivery address')) {
-                    alert('Please add a delivery address to your account before checking out.');
-                }
-                setLoading(false);
+                setClientSecret(undefined);
+                setFreeCheckout(false);
+                // The server keeps its 400 for a missing address; here it is an
+                // inline reason under the Pay button, not an alert().
+                setCheckoutError(errorMsg.toLowerCase().includes('missing delivery address') ? ADD_ADDRESS_TO_PAY : errorMsg);
                 return;
             }
             const data = await res.json();
             setClientSecret(data.clientSecret);
             setFreeCheckout(data.free || false);
-            setLoading(false);
-        };
+        } catch {
+            setClientSecret(undefined);
+            setCheckoutError('Could not start checkout. Please try again.');
+        } finally {
+            setSessionLoading(false);
+        }
+    }, []);
 
+    useEffect(() => {
         const fetchBreakdown = async () => {
             const res = await fetch('/api/checkout/breakdown');
             if (res.ok) {
                 const data = await res.json();
                 setCartBreakdown(data.cartBreakdown || []);
+                if (data.address) setAddress(data.address);
             } else {
                 setCartBreakdown([]);
             }
         };
 
         const fetchContact = async () => {
-            let address = {};
-            let phone = {};
             try {
                 const [addressRes, phoneRes] = await Promise.all([
                     fetch('/api/user/contact/address'),
@@ -228,23 +282,31 @@ const CheckOut = () => {
                 ]);
                 if (addressRes.ok) {
                     const data = await addressRes.json();
-                    address = data.address || {};
+                    if (data.address) setAddress(data.address);
                 }
                 if (phoneRes.ok) {
                     const data = await phoneRes.json();
-                    phone = data.phone || {};
+                    const p = data.phone || {};
+                    setPhone(p.number ? `${p.countryCode} ${p.number}` : '');
                 }
             } catch { }
-            setUserContact({
-                ...address,
-                phone: phone.number ? `${phone.countryCode} ${phone.number}` : ""
-            });
         };
 
-        fetchClientSecret();
-        fetchBreakdown();
-        fetchContact();
-    }, []);
+        const load = async () => {
+            setLoading(true);
+            await Promise.all([fetchBreakdown(), fetchContact(), createSession()]);
+            setLoading(false);
+        };
+        load();
+    }, [createSession]);
+
+    const handleAddressSaved = async (saved) => {
+        setAddress(saved);
+        setEditingAddress(false);
+        // The session was refused (or priced) without an address; recreate it
+        // now that one exists so Stripe has the delivery details.
+        await createSession();
+    };
 
     if (loading) {
         return (
@@ -264,22 +326,36 @@ const CheckOut = () => {
         );
     }
 
+    const needsAddress = cartNeedsDeliveryAddress(cartBreakdown);
+    const addressOk = isAddressComplete(address);
+    const addressBlocked = needsAddress && !addressOk;
+    const blockedReason = addressBlocked ? ADD_ADDRESS_TO_PAY : (checkoutError || null);
+    const canPay = Boolean(clientSecret) && !addressBlocked && !sessionLoading;
+
     return (
         <div className="min-h-[92vh] flex flex-col items-center p-12 border-b border-borderColor">
             <h1 className="text-3xl font-bold mb-4 text-textColor">Checkout</h1>
             <div className="text-xs text-lightColor mb-8 w-75 text-center">
-                Please review your order and billing information before proceeding with the payment.
+                Please review your order and delivery details before proceeding with the payment.
             </div>
             <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="flex flex-col gap-8">
-                    <BillingInfo userContact={userContact} />
+                    <BillingInfo
+                        address={address}
+                        phone={phone}
+                        needsAddress={needsAddress}
+                        editing={editingAddress}
+                        onEdit={() => setEditingAddress(true)}
+                        onCancelEdit={() => setEditingAddress(false)}
+                        onAddressSaved={handleAddressSaved}
+                    />
                 </div>
                 <div className="flex flex-col gap-8">
                     <OrderSummary cartBreakdown={cartBreakdown} />
                     {clientSecret
                         ? (
-                            <CheckoutProvider stripe={stripePromise} options={{ fetchClientSecret: async () => clientSecret }}>
-                                <CheckoutForm />
+                            <CheckoutProvider key={clientSecret} stripe={stripePromise} options={{ fetchClientSecret: async () => clientSecret }}>
+                                <CheckoutForm canPay={canPay} blockedReason={blockedReason} />
                             </CheckoutProvider>
                         )
                         : freeCheckout ? (
@@ -290,7 +366,14 @@ const CheckOut = () => {
                                 Confirm Purchase
                             </button>
                         ) : (
-                            <div className="text-red-500">Unable to process checkout.</div>
+                            <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-4">
+                                <h4 className="font-semibold text-lg text-textColor">Payment</h4>
+                                <PayButton
+                                    disabled
+                                    busy={sessionLoading}
+                                    reason={sessionLoading ? null : (blockedReason || 'Unable to start checkout. Please try again.')}
+                                />
+                            </form>
                         )
                     }
                 </div>
