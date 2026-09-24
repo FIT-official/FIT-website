@@ -144,4 +144,26 @@ describe('GET /api/product listing filter', () => {
         await GET(new Request('http://t/api/product?creatorUserId=user_creator'))
         expect(state.findFilter).toEqual({ creatorUserId: 'user_creator' })
     })
+
+    // /prints loads its whole catalogue with productType=print and no category
+    // (LIVE-B: this used to 400 "Missing productCategory" and the page toasted
+    // "Failed to fetch products").
+    it('lists the public print catalogue without a category, still hiding hidden/flagged products', async () => {
+        const { GET } = await import('@/app/api/product/route')
+        const res = await GET(new Request('http://t/api/product?productType=print&listing=fit'))
+        expect(res.status).toBe(200)
+        expect(await res.json()).toEqual({ products: [] })
+        expect(state.findFilter).toMatchObject({
+            productType: 'print',
+            listing: 'fit',
+            hidden: false,
+            flaggedForModeration: { $ne: true },
+        })
+    })
+
+    it('still requires a category for other unfiltered product types', async () => {
+        const { GET } = await import('@/app/api/product/route')
+        const res = await GET(new Request('http://t/api/product?productType=service'))
+        expect(res.status).toBe(400)
+    })
 })

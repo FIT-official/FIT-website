@@ -464,19 +464,20 @@ export async function GET(req) {
             }
         }
 
-        // The shop landing page lists its whole catalogue; other unfiltered
-        // requests must still identify a category or another lookup mode.
+        // The shop and prints landing pages list their whole catalogue; other
+        // unfiltered requests must still identify a category or another lookup mode.
         const hasAnyCategoryFilter =
             usingNumericCategories
                 ? productCategoryParam !== null && productCategoryParam !== undefined
                 : Boolean(productCategoryParam || productSubCategoryParam);
+        const isPublicCatalogueListing = productType === "shop" || productType === "print";
 
         if (
             !ids &&
             !productId &&
             !creatorUserId &&
             !search &&
-            productType !== "shop" &&
+            !isPublicCatalogueListing &&
             !hasAnyCategoryFilter
         ) {
             return NextResponse.json({ error: "Missing productCategory or productSubCategory" }, { status: 400 });
