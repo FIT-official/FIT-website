@@ -64,7 +64,8 @@ describe('simple and advanced editor settings', () => {
     fireEvent.change(screen.getByLabelText('Colour', { selector: 'select' }), { target: { value: 'Cobalt Blue' } })
     expect(JSON.parse(screen.getByTestId('quote-settings').textContent)).toMatchObject({ wallLoops: 3, infillPercent: 31 })
     fireEvent.click(screen.getByRole('button', { name: 'Save settings & quote' }))
-    await waitFor(() => expect(state.push).toHaveBeenCalledWith('/cart'))
+    // The editor returns to the request page, which owns "Add to cart" (D8).
+    await waitFor(() => expect(state.push).toHaveBeenCalledWith('/prints/request?requestId=request-1'))
     const [, init] = global.fetch.mock.calls.find(([url]) => url === '/api/custom-print/config')
     const saved = JSON.parse(init.body)
     expect(saved.printSettings).toMatchObject({ wallLoops: 3, sparseInfillDensity: 31 })

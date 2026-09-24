@@ -32,6 +32,13 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('editor page model context', () => {
+  it('sends people to the request page instead of offering an unsaveable drop zone (D6)', async () => {
+    state.params = new URLSearchParams()
+    render(<Editor />)
+    expect(await screen.findByRole('link', { name: 'Get a 3D print made' })).toHaveAttribute('href', '/prints/request')
+    expect(screen.queryByText('Choose file')).toBeNull()
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
   it('keeps vendor fixed settings when only the return destination changes', async () => {
     const { rerender } = render(<Editor />)
     await screen.findByTestId('editor-result')
