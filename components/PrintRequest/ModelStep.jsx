@@ -9,7 +9,7 @@ const Viewer = dynamic(() => import('@/components/Editor/viewer'), { ssr: false,
 const mm = value => (Number(value) * 10).toFixed(1)
 
 export default function ModelStep({ file, fileName, scene, metrics, source, formats, parsing, importing, disabled, modelLocked,
-  colourHex, layerHeight, grams, tooBig, limitMessage, onChooseFile, onImport, onSource, onBusyChange }) {
+  colourHex, meshColors, layerHeight, grams, tooBig, limitMessage, onChooseFile, onImport, onSource, onBusyChange }) {
   const [dragging, setDragging] = useState(false)
   const hasModel = Boolean(scene)
   const busy = disabled || parsing || importing
@@ -28,7 +28,7 @@ export default function ModelStep({ file, fileName, scene, metrics, source, form
   return (
     <div className="grid gap-5 sm:grid-cols-[260px_minmax(0,1fr)]">
       <div className="relative aspect-square overflow-hidden rounded-md border border-borderColor bg-[#f4f3ef]">
-        {hasModel ? <Viewer scene={scene} fileName={fileName} layerHeight={layerHeight} autoRotate meshColors={{ default: colourHex || '#e5e7eb' }} />
+        {hasModel ? <Viewer scene={scene} fileName={fileName} layerHeight={layerHeight} autoRotate meshColors={meshColors || { default: colourHex || '#e5e7eb' }} />
           : <div className="flex h-full items-center justify-center px-6 text-center text-sm text-lightColor">{parsing ? 'Reading your model…' : 'Your model appears here, and rotates so you can check it.'}</div>}
         {hasModel && fileName && <span className="absolute left-2 top-2 max-w-[90%] truncate rounded bg-background/80 px-2 py-0.5 font-mono text-[11px]">{fileName}</span>}
       </div>
@@ -36,7 +36,7 @@ export default function ModelStep({ file, fileName, scene, metrics, source, form
         {hasModel ? <>
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0"><p className="truncate text-sm font-semibold">{fileName}</p><p className="text-xs text-lightColor">Checked and measured</p></div>
-            {!modelLocked && <label className={`shrink-0 cursor-pointer rounded-md border border-borderColor px-3 py-1.5 text-xs font-semibold ${busy ? 'opacity-50' : 'hover:border-textColor'}`}>Change file
+            {!modelLocked && <label className={`shrink-0 cursor-pointer rounded-md border border-borderColor px-3 py-1.5 text-xs font-semibold focus-within:ring-2 focus-within:ring-textColor/40 ${busy ? 'opacity-50' : 'hover:border-textColor'}`}>Change file
               <input type="file" aria-label="Choose a 3D model file" accept={accept} disabled={busy} onChange={pick} className="sr-only" /></label>}
           </div>
           {metrics && <dl className="grid grid-cols-3 gap-2">

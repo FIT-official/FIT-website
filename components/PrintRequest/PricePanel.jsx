@@ -20,7 +20,6 @@ export function priceLines({ quote, delivery, filament }) {
   if (amount('postProcessing') > 0) lines.push({ key: 'postProcessing', label: 'Finishing', amount: amount('postProcessing') })
   if (amount('priority') > 0) lines.push({ key: 'priority', label: 'Priority', amount: amount('priority') })
   if (quote.expedite?.applied && quote.expedite.amount > 0) lines.push({ key: 'expedite', label: 'Rush', amount: quote.expedite.amount })
-  if (quote.minimumApplied) lines.push({ key: 'minimum', label: 'Minimum order', amount: Number(quote.total) || 0, note: true })
   if (delivery) lines.push({ key: 'delivery', label: delivery.displayName, amount: Number(delivery.price) || 0, free: !(delivery.price > 0) })
   return lines
 }
@@ -44,6 +43,7 @@ export default function PricePanel({ quote, quoteState, quoteError, delivery, fi
       {lines.length > 0 && <ul className="border-b border-borderColor px-5 py-2 text-sm">
         {lines.map(line => <li key={line.key} className="flex justify-between gap-3 py-1"><span className="text-lightColor">{line.label}</span><span className="font-mono">{line.free ? 'Free' : money(line.amount)}</span></li>)}
         <li className="mt-1.5 flex justify-between gap-3 border-t border-dashed border-borderColor pt-2 font-semibold"><span>Total</span><span className="font-mono">{money(total)}</span></li>
+        {quote?.minimumApplied && <li className="pb-1 text-xs text-lightColor">Minimum order {money(Number(quote.total) || 0)} applied</li>}
       </ul>}
       <ul aria-label="Before you add to cart" className="space-y-1 border-b border-borderColor px-5 py-3 text-xs text-lightColor">
         {checklist.map(item => <li key={item.key} data-ok={item.ok} className="flex items-center gap-2"><span aria-hidden="true" className={item.ok ? 'text-green-700' : 'text-borderColor'}>{item.ok ? '●' : '○'}</span><span className={item.ok ? 'text-textColor' : ''}>{item.label}</span></li>)}

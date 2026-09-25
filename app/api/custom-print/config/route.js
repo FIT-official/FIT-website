@@ -43,6 +43,11 @@ export async function PUT(req) {
     if (existing.creatorUserId) {
       return NextResponse.json({ error: 'Contact your print service to change this request' }, { status: 409 })
     }
+    // A price set by hand must not be replaced by an instant quote from the
+    // customer's side; the store re-quotes if the settings need to change.
+    if (mode === 'instant' && existing.quoteMode === 'manual' && existing.status === 'quoted') {
+      return NextResponse.json({ error: 'This request was quoted by Fix It Today. Add it to the cart from your account, or contact the store to change it.' }, { status: 409 })
+    }
     const now = new Date()
     // An instant request that already carried a verified price is re-quoted
     // below with its new settings; the old quote is never left chargeable

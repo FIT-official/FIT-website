@@ -27,6 +27,7 @@ const bigPrice = () => within(screen.getByRole('complementary', { name: 'Your pr
 
 beforeEach(() => {
   vi.clearAllMocks()
+  window.sessionStorage.clear()
   state.user = null; state.creator = ''; state.failSave = false
   state.store = {
     setFileName: vi.fn(), setBuffers: vi.fn(), scene: null, geometryMetrics: null,
@@ -37,7 +38,7 @@ beforeEach(() => {
   }
   putWithProgress.mockResolvedValue(undefined)
   global.fetch = vi.fn(async (url, init) => {
-    if (url === '/api/quote/config') return ok({})
+    if (url === '/api/quote/config') return ok({ deliveryTypes: [{ type: 'pickup', displayName: 'Collect', price: 0, needsAddress: false }] })
     if (url === '/api/quote') return ok({ quote: { total: 12.34, currency: 'sgd' } })
     if (url === '/api/custom-print' && init.method === 'POST') return ok({ requestId: 'draft-1' })
     if (url === '/api/upload/models' && init.method === 'POST') return ok({ url: 'https://upload.example/model', key: 'models/user/part.stl' })
@@ -103,7 +104,7 @@ describe('preview before sign-in', () => {
     expect(screen.getByRole('link', { name: 'makerworld.com' })).toBeInTheDocument()
   })
   it('blocks another upload while a design import is still pending', async () => {
-    global.fetch.mockImplementation(async url => url === '/api/quote/config' ? ok({}) : new Promise(() => {}))
+    global.fetch.mockImplementation(async url => url === '/api/quote/config' ? ok({ deliveryTypes: [{ type: 'pickup', displayName: 'Collect', price: 0, needsAddress: false }] }) : new Promise(() => {}))
     render(<PrintRequestFlow />)
     fireEvent.change(screen.getByLabelText('Paste a design link'), { target: { value: 'https://example.com/file.stl' } })
     fireEvent.click(screen.getByRole('button', { name: 'Import design' }))

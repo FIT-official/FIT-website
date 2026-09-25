@@ -24,6 +24,9 @@ export default function PrintSettingsStep({ printSettings, onSettings, note, onN
   const quality = qualityFromSettings(printSettings)
   const fee = key => quoteLines?.find(line => line.key === key)?.amount
   const finishingFee = fee('postProcessing')
+  const extra = (key, label, note) => <label key={key} className={`flex items-center gap-2 ${key === 'priority' && !rushAllowed ? 'text-lightColor' : ''}`}>
+    <input type="checkbox" checked={Boolean(options[key])} disabled={disabled || (key === 'priority' && !rushAllowed)}
+      onChange={event => onOptions({ ...options, [key]: event.target.checked })} />{label}{fee(key) > 0 ? ` (+${money(fee(key))})` : note || ''}</label>
   const select = 'mt-1 min-h-10 w-full rounded-md border border-borderColor bg-background px-2 text-sm'
   return (
     <div className="space-y-5">
@@ -49,6 +52,8 @@ export default function PrintSettingsStep({ printSettings, onSettings, note, onN
           onChange={event => onOptions({ ...options, postProcessing: event.target.checked })} />Sand and finish{finishingFee > 0 ? ` (+${money(finishingFee)})` : ''}</label>
         <label className={`flex items-center gap-2 ${rushAllowed ? '' : 'text-lightColor'}`}><input type="checkbox" checked={options.expedite} disabled={disabled || !rushAllowed}
           onChange={event => onOptions({ ...options, expedite: event.target.checked })} />Rush, sooner{rushAllowed ? '' : ' (needs an in-stock colour)'}</label>
+        {extra('priority', 'Priority', rushAllowed ? '' : ' (needs an in-stock colour)')}
+        {extra('specialRequest', 'Special request', '')}
       </div>
       <details className="rounded-md border border-borderColor bg-baseColor px-4">
         <summary className="cursor-pointer py-2.5 text-sm font-semibold">Advanced options</summary>

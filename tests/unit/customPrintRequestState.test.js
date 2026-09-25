@@ -21,10 +21,12 @@ describe('delivery options', () => {
     expect(needsDeliveryAddress({ type: 'standard', displayName: 'Pick up in store' })).toBe(false)
     expect(needsDeliveryAddress({ type: 'standard', displayName: 'Standard' })).toBe(true)
   })
-  it('requires the same fields as the cart address prompt', () => {
+  it('requires the same fields as the cart, checkout and contact API', () => {
     const address = { street: '1 Sunview Road', city: 'Singapore', state: 'SG', postalCode: '627615', country: 'Singapore' }
     expect(addressComplete(address)).toBe(true)
     expect(addressComplete({ ...address, unitNumber: '' })).toBe(true)
+    expect(addressComplete({ ...address, state: '' })).toBe(true)
+    expect(addressComplete({ ...address, city: '' })).toBe(false)
     expect(addressComplete({ ...address, postalCode: ' ' })).toBe(false)
     expect(addressComplete(null)).toBe(false)
   })
@@ -83,7 +85,21 @@ describe('print choices <-> print settings', () => {
     expect(restored).toMatchObject({ filament: 'pla', colour: 'Black', note: 'note', locked: false, modelLocked: true,
       options: { postProcessing: true, expedite: true }, source: { url: 'https://x.y/z' } })
     expect(strengthFromSettings(restored.printSettings)).toBe('Strong')
-    expect(restoreFromRequest({ status: 'paid', paidAt: 'x' }).locked).toBe(true)
+    expect(restored.perPartColours).toBe(false)
+    expect(restored.meshColors).toEqual({ A: '#000000', B: '#000000' })
+    expect(restoreFromRequest({ status: 'paid', paidAt: 'x' })).toMatchObject({ locked: true, lockReason: /payment or fulfilment/ })
     expect(restoreFromRequest({ status: 'configured', creatorUserId: 'c' }).locked).toBe(true)
+  })
+  it('recognises per-part editor colours and manual quotes', () => {
+    const perPart = restoreFromRequest({ status: 'configured', printConfiguration: { generic: { colour: null, filament: 'pla' }, meshColors: { A: '#000000', B: '#FFFFFF' } } })
+    expect(perPart).toMatchObject({ perPartColours: true, colour: '', meshColors: { A: '#000000', B: '#ffffff' }, locked: false })
+    const single = restoreFromRequest({ status: 'configured', printConfiguration: { generic: { colour: 'Black' }, meshColors: { A: '#000000', B: '#ffffff' } } })
+    expect(single).toMatchObject({ perPartColours: false, colour: 'Black' })
+    const manual = restoreFromRequest({ status: 'quoted', quoteMode: 'manual', printConfiguration: {} })
+    expect(manual).toMatchObject({ locked: true, lockReason: /quoted by Fix It Today/ })
+    expect(restoreFromRequest({ status: 'configured', quoteMode: 'manual', printConfiguration: {} }).locked).toBe(false)
+    expect(restoreFromRequest({ status: 'quoted', quoteMode: 'instant', printConfiguration: {} }).locked).toBe(false)
+    expect(restoreFromRequest({ status: 'quoted', quote: { inputs: { options: { priority: true, specialRequest: true } } } }).options)
+      .toEqual({ postProcessing: false, specialRequest: true, priority: true, expedite: false })
   })
 })

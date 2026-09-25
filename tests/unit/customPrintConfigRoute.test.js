@@ -86,6 +86,16 @@ describe('PUT /api/custom-print/config', () => {
         expect(state.quoteCalls).toHaveLength(0)
         expect(state.emails).toHaveLength(1)
     })
+    it('refuses to turn a manually quoted request into an instant quote', async () => {
+        state.existing = { ...quoted(), quoteMode: 'manual', quote: undefined, basePrice: 30 }
+        const res = await put({ requestId: 'req-1', mode: 'instant', ...settings('Normal') })
+        expect(res.status).toBe(409)
+        expect((await res.json()).error).toMatch(/quoted by Fix It Today/)
+        expect(state.updates).toHaveLength(0)
+        // A manual request still in configuration (not yet priced) may switch.
+        state.existing = { ...quoted(), status: 'configured', quoteMode: 'manual', quote: undefined }
+        expect((await put({ requestId: 'req-1', mode: 'instant', ...settings('Normal') })).status).toBe(200)
+    })
     it('rejects unknown requests, locked requests and unauthenticated callers', async () => {
         state.existing = null
         expect((await put({ requestId: 'req-1', mode: 'instant', ...settings('Normal') })).status).toBe(404)

@@ -3,7 +3,7 @@ import { colourStockLabel, colourStockNote, materialOptions } from '@/lib/custom
 
 // Material cards (one per filament family) and the colour swatches of the
 // chosen material. Stock badges come from the live filament inventory.
-export default function MaterialColourStep({ colours, filament, colour, disabled = false, onChange }) {
+export default function MaterialColourStep({ colours, filament, colour, perPart = false, disabled = false, onChange }) {
   const materials = materialOptions(colours)
   const current = materials.find(material => material.value === filament) || materials[0]
   const selected = current?.colours.find(item => item.name === colour)
@@ -26,7 +26,11 @@ export default function MaterialColourStep({ colours, filament, colour, disabled
           </button>
         })}
       </div>
-      <div className="mt-4 flex flex-wrap gap-2.5" role="group" aria-label="Colour">
+      {perPart ? <div className="mt-4 flex flex-wrap items-center gap-3">
+        <span role="status" className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800">Colours set per part in the 3D editor</span>
+        <button type="button" disabled={disabled} onClick={() => onChange({ filament: current.value, colour: (current.colours.find(item => item.stockStatus === 'in_stock') || current.colours[0])?.name || '' })}
+          className="text-xs underline underline-offset-4 disabled:opacity-50">Use one colour instead</button>
+      </div> : <div className="mt-4 flex flex-wrap gap-2.5" role="group" aria-label="Colour">
         {(current?.colours || []).map(item => {
           const out = item.stockStatus === 'out_of_stock'
           const active = item.name === colour
@@ -38,7 +42,7 @@ export default function MaterialColourStep({ colours, filament, colour, disabled
             {out && <span aria-hidden="true" className="absolute inset-0 grid place-items-center text-[10px] font-bold text-textColor">✕</span>}
           </button>
         })}
-      </div>
+      </div>}
       <p className="mt-2 text-sm">{current?.label}{colour ? ` · ${colour}` : ''}{selected && colourStockLabel(selected.stockStatus) ? <span className="text-lightColor"> · {colourStockLabel(selected.stockStatus)}</span> : ''}</p>
       {selected && colourStockNote(selected.stockStatus) && <p role="status" className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">{colourStockNote(selected.stockStatus)}</p>}
       <p className="mt-2 text-xs text-lightColor">One colour for the whole part. Need several colours or a specific filament? Use Advanced options below.</p>

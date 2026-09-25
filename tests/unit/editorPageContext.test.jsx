@@ -11,7 +11,6 @@ vi.mock('@/utils/store', () => {
   hook.setState = update => { Object.assign(state.store, update) }
   return { default: hook }
 })
-vi.mock('@/components/Editor/fileDrop', () => ({ default: () => <div>Choose file</div> }))
 vi.mock('posthog-js', () => ({ default: { capture: vi.fn() } }))
 import Editor from '@/app/editor/page'
 

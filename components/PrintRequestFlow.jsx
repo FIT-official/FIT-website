@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { SignInButton, useUser } from '@clerk/nextjs'
+import { useToast } from '@/components/General/ToastProvider'
 import { getMimeType, putWithProgress } from '@/utils/uploadHelpers'
 import useStore from '@/utils/store'
 import StepCard from '@/components/PrintRequest/StepCard'
@@ -19,14 +20,16 @@ import { checkMachineLimits } from '@/lib/quoting/machineLimits'
 import { estimateCreatorPrintPrice } from '@/lib/creatorPrintService/estimate'
 import { DEFAULT_FIT_COLOURS } from '@/lib/filamentCatalogue'
 import { coloursForFilament } from '@/lib/customPrint/materials'
-import { FALLBACK_DELIVERY_OPTION, addressComplete } from '@/lib/customPrint/deliveryOptions'
-import { DEFAULT_OPTIONS, buildChecklist, buildGeneric, buildPrintSettings, restoreFromRequest,
+import { addressComplete } from '@/lib/customPrint/deliveryOptions'
+import { addressesEqual } from '@/lib/checkoutAddressGate'
+import { DEFAULT_OPTIONS, buildChecklist, buildGeneric, buildPrintSettings, pickOptions, restoreFromRequest,
   strengthFromSettings, qualityFromSettings } from '@/lib/customPrint/requestState'
+import { clearStoredDraft, readStoredDraft, writeStoredDraft } from '@/lib/customPrint/draftStorage'
 import { exceedsBuild, normalizeDesignSource, validatePrintFile } from '@/lib/printRequestDraft'
 
 const money = (value) => new Intl.NumberFormat('en-SG', { style: 'currency', currency: 'SGD' }).format(value)
 const primary = 'min-h-11 w-full rounded-lg bg-textColor px-5 py-3 text-sm font-semibold text-background disabled:opacity-50'
-const DEFAULT_CONFIG = { deliveryTypes: [FALLBACK_DELIVERY_OPTION], machineLimits: null }
+const DEFAULT_CONFIG = { deliveryTypes: [], machineLimits: null, state: 'loading' }
 const TOO_LARGE = /larger than we can print/i
 
 async function readJson(response) { return response.json().catch(() => ({})) }
@@ -34,6 +37,7 @@ async function readJson(response) { return response.json().catch(() => ({})) }
 export default function PrintRequestFlow() {
   const { user, isLoaded } = useUser()
   const router = useRouter()
+  const toast = useToast()
   const searchParams = useSearchParams()
   const creatorSlug = searchParams?.get('creator') || ''
   const requestIdParam = searchParams?.get('requestId') || ''
@@ -63,12 +67,14 @@ export default function PrintRequestFlow() {
   // Steps 2 and 3: material, colour and print settings.
   const [filament, setFilament] = useState('pla')
   const [colour, setColour] = useState('Jade White')
+  // Colours chosen per part in the 3D editor travel with the request unchanged.
+  const [perPartColours, setPerPartColours] = useState(null)
   const [printSettings, setPrintSettings] = useState(DEFAULT_EDITOR_PRINT_SETTINGS)
   const [note, setNote] = useState('')
   const [options, setOptions] = useState(DEFAULT_OPTIONS)
 
   // Step 4: delivery and address.
-  const [deliveryType, setDeliveryType] = useState(FALLBACK_DELIVERY_OPTION.type)
+  const [deliveryType, setDeliveryType] = useState('')
   const [savedAddress, setSavedAddress] = useState(null)
   const [addressDraft, setAddressDraft] = useState(EMPTY_ADDRESS)
   const [editingAddress, setEditingAddress] = useState(false)
@@ -79,6 +85,8 @@ export default function PrintRequestFlow() {
   const [loadState, setLoadState] = useState(requestIdParam ? 'loading' : 'ready')
   const [loadError, setLoadError] = useState('')
   const [locked, setLocked] = useState(false)
+  const [lockReason, setLockReason] = useState('')
+  const [notice, setNotice] = useState('')
   const [modelLocked, setModelLocked] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [busyAction, setBusyAction] = useState('')
@@ -96,11 +104,35 @@ export default function PrintRequestFlow() {
       if (!cancelled && data?.colours?.length) setColours(data.colours)
     }).catch(() => {})
     fetch('/api/quote/config').then((res) => res.ok ? res.json() : null).then((data) => {
-      if (cancelled || !data) return
-      setConfig({ deliveryTypes: data.deliveryTypes?.length ? data.deliveryTypes : DEFAULT_CONFIG.deliveryTypes, machineLimits: data.machineLimits || null })
-    }).catch(() => {})
+      if (cancelled) return
+      // Without the real options the cart would charge a delivery type this
+      // page never showed, so a failed config disables Add to cart instead.
+      if (!data?.deliveryTypes?.length) { setConfig({ deliveryTypes: [], machineLimits: null, state: 'error' }); return }
+      setConfig({ deliveryTypes: data.deliveryTypes, machineLimits: data.machineLimits || null, state: 'ready' })
+    }).catch(() => { if (!cancelled) setConfig({ deliveryTypes: [], machineLimits: null, state: 'error' }) })
     return () => { cancelled = true; loadVersion.current += 1 }
   }, [])
+
+  // A full-page sign-in (social providers) reloads this page: keep the choices
+  // and address, though not the file, so only the model needs adding again.
+  const draftRestored = useRef(false)
+  useEffect(() => {
+    if (requestIdParam || creatorSlug || draftRestored.current) return
+    draftRestored.current = true
+    const stored = readStoredDraft()
+    if (!stored) return
+    if (stored.filament) setFilament(stored.filament)
+    if (stored.colour) setColour(stored.colour)
+    if (stored.printSettings) setPrintSettings({ ...DEFAULT_EDITOR_PRINT_SETTINGS, ...stored.printSettings })
+    if (stored.options) setOptions(pickOptions(stored.options))
+    if (typeof stored.note === 'string') setNote(stored.note)
+    if (stored.deliveryType) setDeliveryType(stored.deliveryType)
+    if (stored.address) setAddressDraft({ ...EMPTY_ADDRESS, ...stored.address })
+  }, [requestIdParam, creatorSlug])
+  useEffect(() => {
+    if (requestIdParam || creatorSlug || !draftRestored.current) return
+    writeStoredDraft({ filament, colour, printSettings, options, note, deliveryType, address: addressDraft })
+  }, [requestIdParam, creatorSlug, filament, colour, printSettings, options, note, deliveryType, addressDraft])
 
   useEffect(() => {
     if (!creatorSlug) { setCreatorState('none'); setCreator(null); setService(null); return }
@@ -124,16 +156,21 @@ export default function PrintRequestFlow() {
     if (!deliveryOptions.some((option) => option.type === deliveryType)) setDeliveryType(deliveryOptions[0]?.type || '')
   }, [deliveryOptions, deliveryType])
 
-  // Saved address for courier delivery; an address typed while signed out is
-  // saved to the account as soon as the customer signs in.
+  // Saved address for courier delivery. An address typed while signed out is
+  // saved to the account on sign-in when the account has none; when the two
+  // differ, the typed one stays in the form for the customer to confirm.
   const pendingAddress = useRef(null)
   useEffect(() => {
     if (!signedIn) return
     let cancelled = false
     fetch('/api/user/contact/address').then((res) => res.ok ? res.json() : null).then(async (data) => {
       if (cancelled) return
-      if (addressComplete(data?.address)) { setSavedAddress(data.address); return }
       const typed = pendingAddress.current
+      if (addressComplete(data?.address)) {
+        setSavedAddress(data.address)
+        if (addressComplete(typed) && !addressesEqual(typed, data.address)) setEditingAddress(true)
+        return
+      }
       if (addressComplete(typed)) {
         const saved = await persistAddress(typed)
         if (!cancelled && saved) setSavedAddress(saved)
@@ -144,7 +181,6 @@ export default function PrintRequestFlow() {
   useEffect(() => { pendingAddress.current = addressDraft }, [addressDraft])
 
   async function persistAddress(address) {
-    // The contact API requires every field, including the unit number.
     const body = { address }
     const res = await fetch('/api/user/contact/address', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     const data = await readJson(res)
@@ -182,21 +218,22 @@ export default function PrintRequestFlow() {
   const hasModel = Boolean(scene && metrics)
   const useStoredModel = Boolean(requestId && storedModel && !file)
   const deliveryOption = deliveryOptions.find((option) => option.type === deliveryType) || deliveryOptions[0] || null
-  const effectiveAddress = savedAddress && !editingAddress ? savedAddress : addressDraft
+  const useSavedAddress = Boolean(savedAddress) && !editingAddress
+  const effectiveAddress = useSavedAddress ? savedAddress : addressDraft
   const clientLimits = metrics ? checkMachineLimits(metrics.dimensionsCm, null, config.machineLimits) : { fits: true }
   const tooBig = !isCreatorFlow && hasModel && (!clientLimits.fits || (quoteState === 'error' && TOO_LARGE.test(quoteError)))
   const checklist = useMemo(() => {
-    const items = buildChecklist({ hasModel, fits: !tooBig, hasColour: isCreatorFlow ? Boolean(selectedMaterial) : Boolean(colour),
+    const items = buildChecklist({ hasModel, fits: !tooBig, hasColour: isCreatorFlow ? Boolean(selectedMaterial) : Boolean(colour || perPartColours),
       delivery: deliveryOption, address: effectiveAddress })
     return isCreatorFlow ? items.slice(0, 3) : items
-  }, [hasModel, tooBig, isCreatorFlow, selectedMaterial, colour, deliveryOption, effectiveAddress])
+  }, [hasModel, tooBig, isCreatorFlow, selectedMaterial, colour, perPartColours, deliveryOption, effectiveAddress])
   const ready = checklist.every((item) => item.ok) && !fileError
   const busy = submitting || parsing || importing || loadState === 'loading' || locked
   const estimateOnly = metrics?.confidence === 'low' || quote?.confidence === 'low'
 
   useEffect(() => {
-    if (!rushAllowed && options.expedite) setOptions((current) => ({ ...current, expedite: false }))
-  }, [rushAllowed, options.expedite])
+    if (!rushAllowed && (options.expedite || options.priority)) setOptions((current) => ({ ...current, expedite: false, priority: false }))
+  }, [rushAllowed, options.expedite, options.priority])
 
   useEffect(() => {
     setQuote(null); setQuoteError('')
@@ -207,7 +244,7 @@ export default function PrintRequestFlow() {
       try {
         const res = await fetch('/api/quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: abort.signal,
           body: JSON.stringify({ volumeCm3: metrics.volumeCm3, dimensionsCm: metrics.dimensionsCm, confidence: metrics.confidence,
-            settings: quoteSettings, options: { postProcessing: options.postProcessing, expedite: options.expedite },
+            settings: quoteSettings, options: pickOptions(options),
             ...(colour ? { selection: { filament, colour } } : {}),
             // A saved model is re-measured on the server so the preview shows
             // the same number the cart will charge.
@@ -220,7 +257,7 @@ export default function PrintRequestFlow() {
       }
     }, 350)
     return () => { clearTimeout(timer); abort.abort() }
-  }, [metrics, quoteSettings, options.postProcessing, options.expedite, filament, colour, isCreatorFlow, useStoredModel, requestId])
+  }, [metrics, quoteSettings, options, filament, colour, isCreatorFlow, useStoredModel, requestId])
 
   const loadBuffer = useCallback(async (name, buffer, version) => {
     const store = useStore.getState()
@@ -258,19 +295,27 @@ export default function PrintRequestFlow() {
     if (!requestIdParam || !isLoaded || !user) return
     let cancelled = false
     const version = ++loadVersion.current
-    setLoadState('loading'); setLoadError('')
+    setLoadState('loading'); setLoadError(''); setNotice('')
     ;(async () => {
       const res = await fetch(`/api/custom-print?requestId=${encodeURIComponent(requestIdParam)}`)
       const data = await readJson(res)
-      if (!res.ok || !data.request) throw new Error(data.error || 'This print request could not be opened.')
+      if (!res.ok || !data.request) {
+        // Unknown or not ours: forget the id so nothing below tries to save to it.
+        if (cancelled) return
+        setRequestId(''); draft.current.requestId = null; setStoredModel(null)
+        setNotice(`${data.error || 'That print request could not be found.'} You can start a fresh request below.`)
+        setLoadState('ready')
+        return
+      }
       if (cancelled) return
       const request = data.request
       const restored = restoreFromRequest(request, colours)
       setRequestId(request.requestId); draft.current.requestId = request.requestId
       setPrintSettings(restored.printSettings); setFilament(restored.filament)
-      setColour(restored.colour || coloursForFilament(colours, restored.filament)[0]?.name || '')
+      setPerPartColours(restored.perPartColours ? restored.meshColors : null)
+      setColour(restored.perPartColours ? '' : restored.colour || coloursForFilament(colours, restored.filament)[0]?.name || '')
       setOptions(restored.options); setNote(restored.note); setSource(restored.source)
-      setLocked(restored.locked); setModelLocked(restored.modelLocked)
+      setLocked(restored.locked); setLockReason(restored.lockReason); setModelLocked(restored.modelLocked)
       if (request.modelFile?.s3Key) {
         setStoredModel(request.modelFile)
         const modelResponse = await fetch(`/api/proxy?key=${encodeURIComponent(request.modelFile.s3Key)}`)
@@ -312,11 +357,14 @@ export default function PrintRequestFlow() {
       setRequestId(id)
     }
     const modelFile = file ? await uploadModel() : null
-    const meshColors = {}
-    if (!isCreatorFlow && colourHex) scene?.traverse((mesh) => { if (mesh.isMesh) meshColors[mesh.name] = colourHex })
+    // Per-part colours from the editor are carried unchanged and carry no
+    // single generic colour; otherwise every part takes the chosen swatch.
+    const meshColors = perPartColours ? { ...perPartColours } : {}
+    if (!perPartColours && !isCreatorFlow && colourHex) scene?.traverse((mesh) => { if (mesh.isMesh) meshColors[mesh.name] = colourHex })
+    const generic = perPartColours ? null : buildGeneric({ printSettings: effectiveSettings, colour })
     const printConfiguration = isCreatorFlow
       ? { generic: { ...creatorConfiguration.generic, material: selectedMaterial.name, colour: creatorColour || null }, isConfigured: true }
-      : { generic: buildGeneric({ printSettings: effectiveSettings, colour }), printSettings: effectiveSettings, meshColors, isConfigured: true }
+      : { ...(generic ? { generic } : {}), printSettings: effectiveSettings, meshColors, isConfigured: true }
     // An already quoted request only accepts its note here; its settings go
     // through /api/custom-print/config, which re-quotes them.
     const saved = await fetch('/api/custom-print', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
@@ -324,7 +372,7 @@ export default function PrintRequestFlow() {
         ...(modelFile ? { modelFile, designSource: source } : {}) }) })
     if (!saved.ok) throw new Error((await readJson(saved)).error || 'Unable to save your print request.')
     if (modelFile) { setStoredModel(modelFile); setFile(null) }
-    return { id, meshColors }
+    return { id, meshColors, generic }
   }
 
   async function run(action, work) {
@@ -345,17 +393,22 @@ export default function PrintRequestFlow() {
   const addToCart = (event) => {
     event?.preventDefault?.()
     run('cart', async () => {
-      const { id, meshColors } = await saveDraft()
+      // A typed (or edited) courier address is saved first; checkout needs it.
+      if (!isCreatorFlow && deliveryOption?.needsAddress && !useSavedAddress) {
+        const saved = await persistAddress(addressDraft)
+        setSavedAddress(saved); setEditingAddress(false)
+      }
+      const { id, meshColors, generic } = await saveDraft()
       if (isCreatorFlow) { router.push('/account/prints'); return }
       const configRes = await fetch('/api/custom-print/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId: id, mode: 'instant', printSettings: effectiveSettings, meshColors,
-          generic: buildGeneric({ printSettings: effectiveSettings, colour }), options: { postProcessing: options.postProcessing, expedite: options.expedite } }) })
+          ...(generic ? { generic } : {}), options: pickOptions(options) }) })
       const configData = await readJson(configRes)
       if (!configRes.ok) throw new Error(configData.error || 'Could not save your print settings.')
       if (!configData.quote) {
         const quoteRes = await fetch('/api/quote', { method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ requestId: id, mode: 'instant', volumeCm3: metrics.volumeCm3, dimensionsCm: metrics.dimensionsCm,
-            confidence: metrics.confidence || 'low', settings: quoteSettings, options: { postProcessing: options.postProcessing, expedite: options.expedite } }) })
+            confidence: metrics.confidence || 'low', settings: quoteSettings, options: pickOptions(options) }) })
         const quoteData = await readJson(quoteRes)
         if (!quoteRes.ok) throw new Error(quoteData.error || 'Your settings were saved, but the price could not be confirmed. Please try again.')
       }
@@ -365,9 +418,11 @@ export default function PrintRequestFlow() {
       if (deliveryOption && !deliveryOption.fallback) {
         // The cart stores the delivery choice on its line; a failure here only
         // leaves the cart's default, which the customer can change there.
-        await fetch('/api/user/cart/delivery', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId: `custom-print:${id}`, variantId: null, selectedVariants: null, chosenDeliveryType: deliveryOption.type }) }).catch(() => {})
+        const deliveryRes = await fetch('/api/user/cart/delivery', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: `custom-print:${id}`, variantId: null, selectedVariants: null, chosenDeliveryType: deliveryOption.type }) }).catch(() => null)
+        if (!deliveryRes?.ok) toast?.showToast?.(`Added to cart, but ${deliveryOption.displayName} could not be set. Pick the delivery option in the cart.`, 'error')
       }
+      clearStoredDraft()
       router.push('/cart')
     })
   }
@@ -379,11 +434,11 @@ export default function PrintRequestFlow() {
   })
 
   const requestManualQuote = () => run('manual', async () => {
-    const { id, meshColors } = await saveDraft()
+    const { id, meshColors, generic } = await saveDraft()
     const res = await fetch('/api/custom-print/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requestId: id, mode: 'manual', printSettings: effectiveSettings, meshColors,
-        generic: buildGeneric({ printSettings: effectiveSettings, colour }) }) })
+      body: JSON.stringify({ requestId: id, mode: 'manual', printSettings: effectiveSettings, meshColors, ...(generic ? { generic } : {}) }) })
     if (!res.ok) throw new Error((await readJson(res)).error || 'Could not send your request for a manual quote.')
+    clearStoredDraft()
     router.push('/account/prints')
   })
 
@@ -417,12 +472,13 @@ export default function PrintRequestFlow() {
           {!signedIn && <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-blue-800">No account needed to get a price</span>}
         </div>
         {loadError && <p role="alert" className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{loadError} <Link href="/account/prints" className="underline">Your print requests</Link></p>}
-        {locked && <p role="status" className="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-800">This request is already in payment or fulfilment, so its settings are locked. <Link href="/account/prints" className="underline">View your print requests</Link> or <Link href="/prints/request" className="underline">start a new one</Link>.</p>}
+        {notice && <p role="status" className="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-800">{notice} <Link href="/account/prints" className="underline">Your print requests</Link></p>}
+        {locked && <p role="status" className="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-800">{lockReason} <Link href="/account/prints" className="underline">View your print requests</Link> or <Link href="/prints/request" className="underline">start a new one</Link>.</p>}
         <form onSubmit={addToCart} className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
           <div className="min-w-0 space-y-4">
             <StepCard number={1} title="Your model" summary={modelSummary} done={hasModel}>
               <ModelStep file={file} fileName={fileName} scene={scene} metrics={metrics} source={source} formats={formats} parsing={parsing} importing={importing}
-                disabled={busy} modelLocked={modelLocked} colourHex={isCreatorFlow ? null : colourHex} layerHeight={effectiveSettings.layerHeight}
+                disabled={busy} modelLocked={modelLocked} colourHex={isCreatorFlow ? null : colourHex} meshColors={perPartColours} layerHeight={effectiveSettings.layerHeight}
                 grams={grams} tooBig={tooBig} limitMessage={quoteState === 'error' && TOO_LARGE.test(quoteError) ? quoteError : ''}
                 onChooseFile={(nextFile) => chooseFile(nextFile, source).catch(() => {})} onImport={chooseFile} onBusyChange={setImporting}
                 onSource={(value) => { loadVersion.current += 1; setFile(null); setScene(null); setMetrics(null); setQuote(null); setSource(normalizeDesignSource(value)) }} />
@@ -433,8 +489,8 @@ export default function PrintRequestFlow() {
                 <label className="block text-sm">Material<select aria-label="Material" value={material} disabled={busy} onChange={(event) => { setMaterial(event.target.value); setCreatorColour(materials.find((item) => item.name === event.target.value)?.colours?.[0] || '') }} className="mt-2 block w-full rounded-lg border border-borderColor p-3">{materials.map((item) => <option key={item.name}>{item.name}</option>)}</select></label>
                 {selectedMaterial?.colours?.length > 0 && <label className="block text-sm">Colour<select aria-label="Colour" value={creatorColour} disabled={busy} onChange={(event) => setCreatorColour(event.target.value)} className="mt-2 block w-full rounded-lg border border-borderColor p-3">{selectedMaterial.colours.map((item) => <option key={item}>{item}</option>)}</select></label>}
                 <p className="text-xs text-lightColor">Tell the creator about strength or appearance needs in your note. They will confirm the print settings.</p>
-              </div> : <MaterialColourStep colours={colours} filament={filament} colour={colour} disabled={busy}
-                onChange={(next) => { setFilament(next.filament); setColour(next.colour) }} />}
+              </div> : <MaterialColourStep colours={colours} filament={filament} colour={colour} perPart={Boolean(perPartColours)} disabled={busy}
+                onChange={(next) => { setPerPartColours(null); setFilament(next.filament); setColour(next.colour) }} />}
             </StepCard>
             <StepCard number={3} title="How it should be printed" summary={isCreatorFlow ? (purpose || 'Balanced') : settingsSummary} done>
               {isCreatorFlow ? <div className="space-y-4">
@@ -452,15 +508,17 @@ export default function PrintRequestFlow() {
                 busyAction={busyAction} signedIn={signedIn} canSave={hasModel && !fileError} />}
             </StepCard>
             {!isCreatorFlow && <StepCard number={4} title="Delivery" summary={deliveryOption?.displayName || ''} done={checklist[3]?.ok}>
-              <DeliveryStep options={deliveryOptions} value={deliveryOption?.type || ''} onSelect={setDeliveryType} savedAddress={savedAddress} editing={editingAddress}
+              {config.state === 'error' ? <p role="alert" className="text-sm text-red-700">Delivery options unavailable. Reload this page to try again.</p>
+                : config.state === 'loading' ? <p className="text-sm text-lightColor">Loading delivery options…</p> : <DeliveryStep options={deliveryOptions} value={deliveryOption?.type || ''} onSelect={setDeliveryType} savedAddress={savedAddress} editing={editingAddress}
                 onEdit={() => { setAddressDraft({ ...EMPTY_ADDRESS, ...savedAddress }); setEditingAddress(true) }} address={addressDraft} onAddress={setAddressDraft}
-                onSaveAddress={saveAddress} saving={addressSaving} signedIn={signedIn} disabled={busy} />
+                onSaveAddress={saveAddress} saving={addressSaving} signedIn={signedIn} disabled={busy} />}
             </StepCard>}
           </div>
           <PricePanel quote={isCreatorFlow ? null : quote} quoteState={quoteState} quoteError={quoteError} delivery={isCreatorFlow ? null : deliveryOption} filament={filament}
             checklist={checklist} ready={ready} printedBy={printedBy} estimateOnly={estimateOnly} submitting={submitting} progress={progress} error={error || fileError}
             hasModel={hasModel} hint={isCreatorFlow ? `${creator.displayName} confirms the final quote before printing.` : 'You can still edit everything in the cart.'}
-            cta={!signedIn ? <SignInButton mode="modal"><button type="button" disabled={!ready || busy} className={primary}>Sign in to add to cart</button></SignInButton>
+            cta={!signedIn ? <><SignInButton mode="modal"><button type="button" disabled={!ready || busy} className={primary}>Sign in to add to cart</button></SignInButton>
+              <p className="text-center text-xs text-lightColor">Signing in with Google reloads this page; your choices are kept, but the file will need to be added again.</p></>
               : <button type="submit" disabled={!ready || busy || !isLoaded} className={primary}>{cartLabel}</button>}>
             {isCreatorFlow && hasModel && <div className="pb-2">
               {creatorEstimate?.ok ? <p className="font-mono text-3xl font-semibold tracking-tight">From {money(creatorEstimate.amount)}</p> : <p className="text-sm">Quote on review</p>}

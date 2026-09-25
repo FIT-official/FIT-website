@@ -5,12 +5,13 @@
 // cart saves the config, persists the quote and adds the cart line in order.
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-const state = vi.hoisted(() => ({ user: null, store: {}, push: vi.fn(), params: {}, savedAddress: null, request: null, limits: null }))
+const state = vi.hoisted(() => ({ user: null, store: {}, push: vi.fn(), toast: vi.fn(), params: {}, savedAddress: null, request: null, limits: null, configFails: false }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: state.push }), useSearchParams: () => new URLSearchParams(state.params) }))
 vi.mock('next/link', () => ({ default: ({ children, ...props }) => <a {...props}>{children}</a> }))
 vi.mock('next/dynamic', () => ({ default: () => props => <div data-testid="model-preview">{props.fileName}</div> }))
 vi.mock('@clerk/nextjs', () => ({ useUser: () => ({ user: state.user, isLoaded: true }), SignInButton: ({ children }) => <span data-testid="sign-in">{children}</span> }))
 vi.mock('@/utils/store', () => ({ default: { getState: () => state.store } }))
+vi.mock('@/components/General/ToastProvider', () => ({ useToast: () => ({ showToast: state.toast }) }))
 vi.mock('@/utils/uploadHelpers', () => ({ getMimeType: () => 'model/stl', putWithProgress: vi.fn(async () => {}) }))
 import PrintRequestFlow from '@/components/PrintRequestFlow'
 
@@ -49,7 +50,8 @@ const fillAddress = () => {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  state.user = null; state.params = {}; state.savedAddress = null; state.request = null; state.limits = null
+  window.sessionStorage.clear()
+  state.user = null; state.params = {}; state.savedAddress = null; state.request = null; state.limits = null; state.configFails = false
   state.store = {
     setFileName: vi.fn(), setBuffers: vi.fn(), scene: null, geometryMetrics: null,
     generateScene: vi.fn(async () => {
@@ -59,7 +61,7 @@ beforeEach(() => {
   }
   global.fetch = vi.fn(async (url, init) => {
     const method = init?.method || 'GET'
-    if (url === '/api/quote/config') return ok({ printColours: [], deliveryTypes: DELIVERY, machineLimits: state.limits })
+    if (url === '/api/quote/config') return state.configFails ? { ok: false, json: async () => ({}) } : ok({ printColours: [], deliveryTypes: DELIVERY, machineLimits: state.limits })
     if (url === '/api/filament-availability') return ok({ colours: COLOURS, stockChecked: true })
     if (url === '/api/quote') return ok({ quote: QUOTE, estimateOnly: !JSON.parse(init.body).requestId })
     if (url === '/api/user/contact/address' && method === 'GET') return ok({ address: state.savedAddress })
@@ -107,6 +109,49 @@ describe('checklist gating', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save address' }))
     await screen.findByText('Deliver to')
     expect(JSON.parse(calls('/api/user/contact/address', 'POST')[0][1].body).address).toMatchObject({ street: ADDRESS.street, unitNumber: '', postalCode: ADDRESS.postalCode })
+  })
+  it('saves a typed courier address before adding to cart, and stops when that save fails', async () => {
+    state.user = { id: 'buyer' }
+    render(<PrintRequestFlow />); upload()
+    await screen.findByTestId('model-preview')
+    await screen.findByRole('radio', { name: /Courier/ })
+    chooseCourier(); fillAddress()
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Add to cart' })).toBeEnabled())
+    global.fetch.mockImplementationOnce(async () => ({ ok: false, json: async () => ({ error: 'Postal code not recognised' }) }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add to cart' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Postal code not recognised')
+    expect(calls('/api/custom-print', 'POST')).toHaveLength(0)
+    expect(state.push).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Add to cart' }))
+    await waitFor(() => expect(state.push).toHaveBeenCalledWith('/cart'))
+    const order = global.fetch.mock.calls.map(([url, init]) => `${init?.method || 'GET'} ${url}`)
+    expect(order.indexOf('POST /api/user/contact/address')).toBeLessThan(order.lastIndexOf('POST /api/custom-print'))
+    expect(JSON.parse(calls('/api/user/contact/address', 'POST').at(-1)[1].body).address).toMatchObject({ street: ADDRESS.street, postalCode: ADDRESS.postalCode })
+    expect(JSON.parse(calls('/api/user/cart/delivery')[0][1].body).chosenDeliveryType).toBe('courier')
+  })
+  it('keeps a typed address in the form when the account already has a different one', async () => {
+    state.savedAddress = ADDRESS
+    const { rerender } = render(<PrintRequestFlow />)
+    await screen.findByRole('radio', { name: /Courier/ })
+    chooseCourier()
+    fireEvent.change(screen.getByLabelText(/^Street address/), { target: { value: '9 Other Street' } })
+    fireEvent.change(screen.getByLabelText(/^City/), { target: { value: 'Singapore' } })
+    fireEvent.change(screen.getByLabelText(/^Postal code/), { target: { value: '111111' } })
+    fireEvent.change(screen.getByLabelText(/^Country/), { target: { value: 'Singapore' } })
+    state.user = { id: 'buyer' }
+    rerender(<PrintRequestFlow />)
+    await waitFor(() => expect(calls('/api/user/contact/address', 'GET')).toHaveLength(1))
+    await waitFor(() => expect(screen.getByLabelText(/^Street address/)).toHaveValue('9 Other Street'))
+    expect(screen.queryByText('Deliver to')).toBeNull()
+    expect(calls('/api/user/contact/address', 'POST')).toHaveLength(0)
+  })
+  it('disables Add to cart when the delivery options cannot be loaded', async () => {
+    state.user = { id: 'buyer' }; state.configFails = true
+    render(<PrintRequestFlow />); upload()
+    await screen.findByTestId('model-preview')
+    expect(await screen.findByText(/Delivery options unavailable/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add to cart' })).toBeDisabled()
+    expect(screen.queryByRole('radio')).toBeNull()
   })
   it('shows the saved address card for courier with a Change action', async () => {
     state.user = { id: 'buyer' }; state.savedAddress = ADDRESS
@@ -263,6 +308,70 @@ describe('re-opening a request', () => {
     const draft = JSON.parse(calls('/api/custom-print', 'PUT')[0][1].body)
     expect(draft).toEqual({ requestId: 'req-9', customerNote: 'Fits the old hinge' })
     expect(JSON.parse(calls('/api/custom-print/config')[0][1].body)).toMatchObject({ requestId: 'req-9', mode: 'instant' })
+  })
+  it('forgets an unknown ?requestId= and offers a fresh request instead of saving to it', async () => {
+    state.user = { id: 'buyer' }; state.params = { requestId: 'nope' }; state.request = null
+    render(<PrintRequestFlow />)
+    expect(await screen.findByText(/Request not found.*fresh request/)).toBeInTheDocument()
+    upload()
+    await screen.findByTestId('model-preview')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Add to cart' })).toBeEnabled())
+    fireEvent.click(screen.getByRole('button', { name: 'Add to cart' }))
+    await waitFor(() => expect(state.push).toHaveBeenCalledWith('/cart'))
+    expect(calls('/api/custom-print', 'POST')).toHaveLength(1)
+    expect(JSON.parse(calls('/api/custom-print', 'PUT')[0][1].body).requestId).toBe('req-1')
+    expect(JSON.parse(calls('/api/quote').at(-1)[1].body).requestId).toBe('req-1')
+  })
+  it('keeps per-part colours from the 3D editor instead of overwriting them with one swatch', async () => {
+    state.user = { id: 'buyer' }; state.params = { requestId: 'req-9' }
+    const perPart = { Body: '#000000', Lid: '#f7f7f4' }
+    state.request = { ...saved(), status: 'configured', quoteMode: null, quote: undefined,
+      printConfiguration: { ...saved().printConfiguration, generic: { material: 'plastic', filament: 'petg', colour: null }, meshColors: perPart } }
+    render(<PrintRequestFlow />)
+    await screen.findByTestId('model-preview')
+    expect(await screen.findByText('Colours set per part in the 3D editor')).toBeInTheDocument()
+    expect(screen.queryByRole('group', { name: 'Colour' })).toBeNull()
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Add to cart' })).toBeEnabled())
+    fireEvent.click(screen.getByRole('button', { name: 'Add to cart' }))
+    await waitFor(() => expect(state.push).toHaveBeenCalledWith('/cart'))
+    const draft = JSON.parse(calls('/api/custom-print', 'PUT')[0][1].body)
+    expect(draft.printConfiguration.meshColors).toEqual(perPart)
+    expect(draft.printConfiguration.generic).toBeUndefined()
+    const config = JSON.parse(calls('/api/custom-print/config')[0][1].body)
+    expect(config.meshColors).toEqual(perPart)
+    expect(config).not.toHaveProperty('generic')
+    expect(config.options).toEqual({ postProcessing: false, specialRequest: false, priority: false, expedite: false })
+  })
+  it('lets the customer replace per-part colours with one swatch on purpose', async () => {
+    state.user = { id: 'buyer' }; state.params = { requestId: 'req-9' }
+    state.request = { ...saved(), status: 'configured', quoteMode: null, quote: undefined,
+      printConfiguration: { ...saved().printConfiguration, generic: { material: 'plastic', filament: 'petg', colour: null }, meshColors: { Body: '#000000', Lid: '#f7f7f4' } } }
+    render(<PrintRequestFlow />)
+    await screen.findByText('Colours set per part in the 3D editor')
+    fireEvent.click(screen.getByRole('button', { name: 'Use one colour instead' }))
+    expect(screen.getByRole('button', { name: 'Choose White' })).toHaveAttribute('aria-pressed', 'true')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Add to cart' })).toBeEnabled())
+    fireEvent.click(screen.getByRole('button', { name: 'Add to cart' }))
+    await waitFor(() => expect(state.push).toHaveBeenCalledWith('/cart'))
+    expect(JSON.parse(calls('/api/custom-print/config')[0][1].body)).toMatchObject({ meshColors: { Body: '#f7f7f4' }, generic: { colour: 'White' } })
+  })
+  it('locks a request the store quoted by hand', async () => {
+    state.user = { id: 'buyer' }; state.params = { requestId: 'req-9' }
+    state.request = { ...saved(), quoteMode: 'manual', quote: undefined, basePrice: 30, printFee: 5 }
+    render(<PrintRequestFlow />)
+    expect(await screen.findByText(/quoted by Fix It Today; add it to the cart from your account/)).toBeInTheDocument()
+    await screen.findByTestId('model-preview')
+    expect(screen.getByRole('button', { name: 'Add to cart' })).toBeDisabled()
+    expect(calls('/api/custom-print/config')).toHaveLength(0)
+  })
+  it('restores all four optional services from the saved quote', async () => {
+    state.user = { id: 'buyer' }; state.params = { requestId: 'req-9' }
+    state.request = { ...saved(), quote: { ...QUOTE, inputs: { ...QUOTE.inputs, options: { postProcessing: true, specialRequest: true, priority: true, expedite: false } } } }
+    render(<PrintRequestFlow />)
+    await screen.findByTestId('model-preview')
+    expect(screen.getByLabelText(/Special request/)).toBeChecked()
+    expect(screen.getByLabelText(/^Priority/)).toBeChecked()
+    await waitFor(() => expect(JSON.parse(calls('/api/quote')[0][1].body).options).toEqual({ postProcessing: true, specialRequest: true, priority: true, expedite: false }))
   })
   it('asks a signed-out visitor to sign in before opening a saved request', async () => {
     state.params = { requestId: 'req-9' }
