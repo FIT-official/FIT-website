@@ -262,6 +262,13 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Contact the store to change a request after it has been quoted" }, { status: 409 });
         }
         let explicitStatus = status;
+        // A print farm's estimate describes the saved model and settings; once
+        // either changes it is stale and must not prefill the creator's quote.
+        if (modelFile || printConfiguration) {
+            request.estimate = undefined;
+            request.estimatedAt = undefined;
+            request.pricedWith = undefined;
+        }
 
         // Update fields
         if (modelFile) {
