@@ -11,6 +11,8 @@ import { useToast } from '@/components/General/ToastProvider'
 import { useShopIdentity, CreatorGate } from '@/components/DashboardComponents/CreatorShell'
 import { DashCard, SkeletonRow, StatusPill } from '@/components/dashboard-ui'
 import { emptyPrintService, ACCEPTED_FORMATS, MAX_MATERIALS } from '@/lib/creatorPrintService/validate'
+import { compactOverrides, legacyFarmPricing } from '@/lib/quoting/farmProfile'
+import PrintFarmPricing, { deliveryWithTypes } from '@/components/DashboardComponents/PrintFarmPricing'
 
 const inputCls =
     'w-full rounded-[var(--dash-r-inner)] border border-[var(--dash-line)] bg-[var(--dash-card)] px-3 py-2 text-[13px] focus:outline-none focus:border-[var(--dash-focus-line)] focus:shadow-[var(--dash-focus-ring)]'
@@ -40,12 +42,50 @@ function fromColourText(text) {
         .slice(0, 20)
 }
 
+// First switch from the legacy per-gram editor: the same derivation the
+// server applies to a legacy service (lib/quoting/farmProfile.js), so the
+// numbers the farm charged carry over. A service with no legacy material
+// starts with PLA on.
+export function initialFarmPricing(service, recommended) {
+    const derived = legacyFarmPricing(service, recommended?.quotingConfig?.materialRatePerGram)
+    return {
+        overrides: derived.overrides,
+        materials: derived.materials.length ? derived.materials : [{ filament: 'pla', enabled: true, priceMultiplier: null, coloursOff: [] }],
+        delivery: [],
+    }
+}
+
+// What PUT /api/user/print-service receives: only set overrides, delivery
+// rows with a unique key. The server validates and bumps the version.
+function pricingPayload(pricing) {
+    return {
+        overrides: compactOverrides(pricing.overrides),
+        materials: (pricing.materials || []).map((m) => ({
+            filament: m.filament,
+            enabled: Boolean(m.enabled),
+            priceMultiplier: m.priceMultiplier === '' || m.priceMultiplier == null ? null : Number(m.priceMultiplier),
+            coloursOff: m.coloursOff || [],
+        })),
+        delivery: deliveryWithTypes(pricing.delivery || []).map((d) => ({
+            type: d.type,
+            label: d.label,
+            price: Number(d.price) || 0,
+            description: d.description || '',
+            needsAddress: Boolean(d.needsAddress),
+        })),
+    }
+}
+
 function PrintServiceEditor() {
     const { displayName } = useShopIdentity()
     const { showToast } = useToast()
 
     const [service, setService] = useState(emptyPrintService())
     const [colourText, setColourText] = useState([])
+    // Per-farm pricing: `recommended` comes from the server, `pricing` is the
+    // draft (null = still on the legacy per-gram prices).
+    const [recommended, setRecommended] = useState(null)
+    const [pricing, setPricing] = useState(null)
     const [loaded, setLoaded] = useState(false)
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
@@ -61,6 +101,8 @@ function PrintServiceEditor() {
                 const next = { ...emptyPrintService(), ...(data.service || {}) }
                 setService(next)
                 setColourText(next.materials.map((m) => toColourText(m.colours)))
+                setRecommended(data.recommended || null)
+                setPricing(next.pricing || null)
             } catch (e) {
                 if (!cancelled) setError(e.message || 'Failed to load print service')
             } finally {
@@ -124,6 +166,7 @@ function PrintServiceEditor() {
                 },
                 acceptedFormats: service.acceptedFormats,
                 turnaroundNote: service.turnaroundNote,
+                ...(pricing ? { pricing: pricingPayload(pricing) } : {}),
             }
             const res = await fetch('/api/user/print-service', {
                 method: 'PUT',
@@ -138,6 +181,8 @@ function PrintServiceEditor() {
             const next = { ...emptyPrintService(), ...(data.service || {}) }
             setService(next)
             setColourText(next.materials.map((m) => toColourText(m.colours)))
+            if (data.recommended) setRecommended(data.recommended)
+            setPricing(next.pricing || null)
             showToast(next.enabled ? 'Print service saved and live.' : 'Print service saved (not enabled yet).', 'success')
         } catch (e) {
             setError(e.message || 'Failed to save')
@@ -231,6 +276,36 @@ function PrintServiceEditor() {
                 </div>
             </DashCard>
 
+            {!pricing && recommended && (
+                <DashCard title="Pricing">
+                    <div className="flex flex-col gap-3">
+                        <p className="dash-data">
+                            {service.materials.length
+                                ? 'Your print service uses the per-gram prices below. Switch to the new pricing to start from Fix It Today’s recommended rates, override only what differs, and give customers a live estimate. Your current prices carry over.'
+                                : 'Start from Fix It Today’s recommended rates, override only what differs for your farm, and give customers a live estimate.'}
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => setPricing(initialFarmPricing(service, recommended))}
+                            className="dash-hoverable inline-flex w-fit items-center rounded-full bg-[var(--dash-ink)] text-[var(--dash-canvas)] px-4 py-2 text-[13px] font-medium cursor-pointer"
+                        >
+                            Switch to the new pricing
+                        </button>
+                        <span className="text-[12px] text-[var(--dash-ink-soft)]">Nothing changes for customers until you save.</span>
+                    </div>
+                </DashCard>
+            )}
+
+            {pricing && recommended && (
+                <PrintFarmPricing
+                    recommended={recommended}
+                    pricing={pricing}
+                    leadTimeDays={Number(service.leadTimeDays) || null}
+                    onChange={setPricing}
+                />
+            )}
+
+            {!pricing && (
             <DashCard
                 title="Materials"
                 action={
@@ -306,10 +381,11 @@ function PrintServiceEditor() {
                     </div>
                 )}
             </DashCard>
+            )}
 
-            <DashCard title="Pricing and turnaround">
+            <DashCard title={pricing ? 'Turnaround' : 'Pricing and turnaround'}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FieldRow label="Minimum charge (SGD)" help="Quotes never go below this.">
+                    {!pricing && <FieldRow label="Minimum charge (SGD)" help="Quotes never go below this.">
                         <input
                             type="number"
                             min={0}
@@ -318,7 +394,7 @@ function PrintServiceEditor() {
                             onChange={(e) => setNumber('minimumCharge', e.target.value)}
                             className={inputCls}
                         />
-                    </FieldRow>
+                    </FieldRow>}
                     <FieldRow label="Lead time (days)" help="1 to 60 days.">
                         <input
                             type="number"
@@ -343,9 +419,10 @@ function PrintServiceEditor() {
                 </div>
             </DashCard>
 
-            <DashCard title="Machine">
+            <DashCard title={pricing ? 'Files' : 'Machine'}>
                 <div className="flex flex-col gap-4">
-                    <FieldRow label="Max build volume (mm)" help="Each axis 10 to 1000 mm.">
+                    {/* With per-farm pricing the build volume is the Machine limits table above. */}
+                    {!pricing && <FieldRow label="Max build volume (mm)" help="Each axis 10 to 1000 mm.">
                         <div className="grid grid-cols-3 gap-3">
                             {['x', 'y', 'z'].map((axis) => (
                                 <input
@@ -360,7 +437,7 @@ function PrintServiceEditor() {
                                 />
                             ))}
                         </div>
-                    </FieldRow>
+                    </FieldRow>}
                     <FieldRow label="Accepted formats">
                         <div className="flex flex-wrap gap-2">
                             {ACCEPTED_FORMATS.map((fmt) => {
