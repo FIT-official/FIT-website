@@ -229,5 +229,59 @@ describe('creator print farm mode', () => {
     const checklist = screen.getByRole('list', { name: 'Before you send your request' })
     await waitFor(() => expect(within(checklist).getByText('Model fits the printer').closest('li')).toHaveAttribute('data-ok', 'false'))
     expect(screen.getByRole('button', { name: 'Send request to Print Studio' })).toBeDisabled()
+    expect(screen.getByRole('alert')).toHaveTextContent("Print Studio's printer takes parts up to 30 mm long. Scale the model down or split it into parts.")
+  })
+})
+
+describe('creator print farm: review materials and choices', () => {
+  const farm = (profile, name = 'Print Studio', userId = 'creator-1') => ({ enabled: true, creator: { userId, displayName: name },
+    service: { headline: 'Studio prints', acceptedFormats: ['stl'], materials: [], leadTimeDays: 4 },
+    profile: { materials: [], reviewMaterials: [], deliveryOptions: [{ type: 'pickup', displayName: 'Collect', description: '', price: 0, needsAddress: false }],
+      leadTimeDays: 4, machineLimits: null, offers: {}, minimumPrice: 0, ...profile } })
+  const serve = (byCreator) => {
+    const base = global.fetch.getMockImplementation()
+    global.fetch.mockImplementation(async (url, init) => {
+      const match = url.match(/\/api\/creators\/([^/]+)\/print-service/)
+      return match ? ok(byCreator[decodeURIComponent(match[1])]) : base(url, init)
+    })
+  }
+  const pla = { filament: 'pla', label: 'PLA', ratePerGram: 0.1, note: '', colours: [{ filament: 'pla', name: 'Black', code: '1', hex: '#000000' }] }
+  const tpu = { filament: 'tpu', label: 'TPU', ratePerGram: 0.3, note: '', colours: [{ filament: 'tpu', name: 'White', code: '3', hex: '#ffffff' }] }
+
+  it('lets a legacy farm with only uncatalogued materials take requests, priced on review', async () => {
+    serve({ 'print-studio': farm({ reviewMaterials: [{ key: 'review-1', label: 'Nylon', note: 'Dried first', colours: [{ name: 'Black', hex: null }, { name: 'Natural', hex: null }] }] }) })
+    state.user = { id: 'buyer' }; state.creator = 'print-studio'
+    render(<PrintRequestFlow />)
+    const materials = await screen.findByRole('group', { name: 'Material' })
+    expect(within(materials).getByRole('button', { name: 'Nylon' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(screen.getByRole('group', { name: 'Colour' })).getByRole('button', { name: 'Choose Black' })).toHaveTextContent('Black')
+    upload()
+    const panel = screen.getByRole('complementary', { name: 'Your price' })
+    expect(await within(panel).findByText('Print Studio prices this on review.')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Send request to Print Studio' })).toBeEnabled())
+    expect(requests('/api/quote')).toHaveLength(0)
+    fireEvent.click(screen.getByRole('button', { name: 'Send request to Print Studio' }))
+    await waitFor(() => expect(state.push).toHaveBeenCalledWith('/account/prints'))
+    const saved = JSON.parse(requests('/api/custom-print', 'PUT')[0][1].body)
+    expect(saved.printConfiguration.generic).toMatchObject({ material: 'Nylon', colour: 'Black' })
+    expect(saved.printConfiguration.generic).not.toHaveProperty('filament')
+    expect(requests('/api/custom-print/estimate')).toHaveLength(0)
+    expect(requests('/api/cart/custom-print')).toHaveLength(0)
+  })
+
+  it('keeps the chosen material when the next farm also offers it', async () => {
+    serve({ 'studio-a': farm({ materials: [pla, tpu] }, 'Studio A', 'a'), 'studio-b': farm({ materials: [pla, tpu] }, 'Studio B', 'b'),
+      'studio-c': farm({ materials: [pla] }, 'Studio C', 'c') })
+    state.creator = 'studio-a'
+    const view = render(<PrintRequestFlow />)
+    const pressed = async () => within(await screen.findByRole('group', { name: 'Material' })).getAllByRole('button').find((b) => b.getAttribute('aria-pressed') === 'true')
+    expect(await pressed()).toHaveAccessibleName('PLA')
+    fireEvent.click(within(screen.getByRole('group', { name: 'Material' })).getByRole('button', { name: 'TPU' }))
+    state.creator = 'studio-b'; view.rerender(<PrintRequestFlow />)
+    await screen.findByText(/Studio B · 3D printing/)
+    expect(await pressed()).toHaveAccessibleName('TPU')
+    state.creator = 'studio-c'; view.rerender(<PrintRequestFlow />)
+    await screen.findByText(/Studio C · 3D printing/)
+    await waitFor(async () => expect(await pressed()).toHaveAccessibleName('PLA'))
   })
 })

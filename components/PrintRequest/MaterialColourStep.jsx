@@ -37,6 +37,10 @@ export default function MaterialColourStep({ colours, materials: offered = null,
         {(current?.colours || []).map(item => {
           const out = item.stockStatus === 'out_of_stock'
           const active = item.name === colour
+          // Colours without a swatch (a print farm's own materials) are named chips.
+          if (!item.hex) return <button key={item.name} type="button" disabled={disabled} aria-pressed={active} aria-label={`Choose ${item.name}`}
+            onClick={() => onChange({ filament: current.value, colour: item.name })}
+            className={`min-h-9 rounded-full border px-3 text-xs font-semibold transition disabled:opacity-50 ${active ? 'border-textColor ring-2 ring-textColor/25' : 'border-borderColor'}`}>{item.name}</button>
           return <button key={item.name} type="button" disabled={disabled} aria-pressed={active}
             aria-label={`Choose ${item.name}${out ? ' · Out of stock' : ''}`} title={`${item.name}${colourStockLabel(item.stockStatus) ? ` · ${colourStockLabel(item.stockStatus)}` : ''}`}
             onClick={() => onChange({ filament: current.value, colour: item.name })}

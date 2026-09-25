@@ -140,10 +140,10 @@ export default function PrintRequestFlow() {
       .then((res) => res.ok ? res.json() : null).then((data) => {
         if (cancelled) return
         if (!data?.enabled || !data.service) { setCreatorState('unavailable'); return }
-        const profile = data.profile || { materials: [], deliveryOptions: [], machineLimits: null, offers: {}, leadTimeDays: data.service.leadTimeDays }
-        const first = profile.materials.find((item) => item.filament === 'pla') || profile.materials[0]
-        setCreator(data.creator); setService(data.service); setFarmProfile(profile)
-        setFilament(first?.filament || ''); setColour(first?.colours?.[0]?.name || ''); setPerPartColours(null)
+        const profile = data.profile || { materials: [], reviewMaterials: [], deliveryOptions: [], machineLimits: null, offers: {}, leadTimeDays: data.service.leadTimeDays }
+        // Material and colour are kept when this farm offers them; the effect
+        // below falls back to its first material or colour otherwise.
+        setCreator(data.creator); setService(data.service); setFarmProfile(profile); setPerPartColours(null)
         setCreatorState('ready')
       }).catch(() => { if (!cancelled) setCreatorState('unavailable') })
     return () => { cancelled = true }
@@ -201,11 +201,29 @@ export default function PrintRequestFlow() {
   const isCreatorFlow = farmReady && Boolean(creator && service)
   // Material cards for a print farm: only what it offers, with its S$/g.
   // Farm stock is unknown, so colours carry no stock badge.
-  const farmMaterials = useMemo(() => (farmProfile?.materials || []).map((item) => ({
-    value: item.filament, label: item.label, description: MATERIAL_DESCRIPTIONS[item.filament] || '', recommended: false,
-    ratePerGram: item.ratePerGram, colours: (item.colours || []).map((entry) => ({ ...entry, stockStatus: 'farm' })),
-  })), [farmProfile])
+  // Materials outside the catalogue (legacy farms) are priced by the creator
+  // on review: no S$/g and no live estimate.
+  const farmMaterials = useMemo(() => [
+    ...(farmProfile?.materials || []).map((item) => ({
+      value: item.filament, label: item.label, description: item.note || MATERIAL_DESCRIPTIONS[item.filament] || '', recommended: false,
+      ratePerGram: item.ratePerGram, colours: (item.colours || []).map((entry) => ({ ...entry, stockStatus: 'farm' })),
+    })),
+    ...(farmProfile?.reviewMaterials || []).map((item) => ({
+      value: item.key, label: item.label, description: item.note || 'Priced on review', recommended: false, reviewOnly: true,
+      colours: (item.colours || []).map((entry) => ({ ...entry, stockStatus: 'farm' })),
+    })),
+  ], [farmProfile])
   const selectedMaterial = isCreatorFlow ? farmMaterials.find((item) => item.value === filament) || null : null
+  const reviewOnly = Boolean(selectedMaterial?.reviewOnly)
+  useEffect(() => {
+    if (!isCreatorFlow || !farmMaterials.length) return
+    if (!selectedMaterial) {
+      const first = farmMaterials.find((item) => item.value === 'pla') || farmMaterials[0]
+      setFilament(first.value); setColour(first.colours[0]?.name || '')
+    } else if (!selectedMaterial.colours.some((item) => item.name === colour)) {
+      setColour(selectedMaterial.colours[0]?.name || '')
+    }
+  }, [isCreatorFlow, farmMaterials, selectedMaterial, colour])
   const availableColours = useMemo(() => isCreatorFlow ? selectedMaterial?.colours || [] : coloursForFilament(colours, filament),
     [isCreatorFlow, selectedMaterial, colours, filament])
   const selectedColour = availableColours.find((item) => item.name === colour)
@@ -229,6 +247,17 @@ export default function PrintRequestFlow() {
   const machineLimits = isCreatorFlow ? farmProfile.machineLimits : config.machineLimits
   const clientLimits = metrics ? checkMachineLimits(metrics.dimensionsCm, null, machineLimits) : { fits: true }
   const tooBig = hasModel && (!clientLimits.fits || (quoteState === 'error' && TOO_LARGE.test(quoteError)))
+  // A print farm's own printer size, in the farm's name.
+  const farmLimitMessage = useMemo(() => {
+    if (!isCreatorFlow || !machineLimits) return ''
+    const mm = ['maxLengthCm', 'maxWidthCm', 'maxHeightCm'].map((key) => Number(machineLimits[key]) > 0 ? Math.round(Number(machineLimits[key]) * 10) : null)
+    const size = mm.every(Boolean) ? `${mm.join(' × ')} mm`
+      : mm.map((value, i) => value ? `${value} mm ${['long', 'wide', 'high'][i]}` : '').filter(Boolean).join(', ')
+    const weight = Number(machineLimits.maxWeightKg) > 0 ? `${machineLimits.maxWeightKg} kg` : ''
+    const limit = [size, weight].filter(Boolean).join(' and ')
+    return limit ? `${creator.displayName}'s printer takes parts up to ${limit}. Scale the model down or split it into parts.`
+      : `This model is too large for ${creator.displayName}'s printer. Scale it down or split it into parts.`
+  }, [isCreatorFlow, machineLimits, creator])
   const checklist = useMemo(() => {
     // The creator arranges delivery with the customer directly, so a print
     // farm's courier option needs no address on this page.
@@ -251,6 +280,7 @@ export default function PrintRequestFlow() {
   useEffect(() => {
     setQuote(null); setQuoteError('')
     if (!(metrics?.volumeCm3 > 0) || (isCreatorFlow && !(filament && colour))) { setQuoteState('idle'); return }
+    if (isCreatorFlow && reviewOnly) { setQuoteState('review'); setQuoteError(`${creator.displayName} prices this on review.`); return }
     const abort = new AbortController()
     setQuoteState('loading')
     const timer = setTimeout(async () => {
@@ -271,7 +301,7 @@ export default function PrintRequestFlow() {
       }
     }, 350)
     return () => { clearTimeout(timer); abort.abort() }
-  }, [metrics, quoteSettings, options, filament, colour, isCreatorFlow, creator, useStoredModel, requestId])
+  }, [metrics, quoteSettings, options, filament, colour, isCreatorFlow, reviewOnly, creator, useStoredModel, requestId])
 
   const loadBuffer = useCallback(async (name, buffer, version) => {
     const store = useStore.getState()
@@ -377,7 +407,9 @@ export default function PrintRequestFlow() {
     if (!perPartColours && !isCreatorFlow && colourHex) scene?.traverse((mesh) => { if (mesh.isMesh) meshColors[mesh.name] = colourHex })
     const generic = perPartColours ? null : buildGeneric({ printSettings: effectiveSettings, colour })
     const printConfiguration = isCreatorFlow
-      ? { generic: { ...creatorConfiguration.generic, material: selectedMaterial.label, filament, colour: colour || null }, isConfigured: true }
+      // A material outside the catalogue carries only its name; no filament
+      // key, so it is never priced as a catalogue filament.
+      ? { generic: { ...creatorConfiguration.generic, material: selectedMaterial.label, filament: reviewOnly ? undefined : filament, colour: colour || null }, isConfigured: true }
       : { ...(generic ? { generic } : {}), printSettings: effectiveSettings, meshColors, isConfigured: true }
     // An already quoted request only accepts its note here; its settings go
     // through /api/custom-print/config, which re-quotes them.
@@ -417,9 +449,9 @@ export default function PrintRequestFlow() {
         // The farm's estimate is re-measured and saved on the request for the
         // creator to confirm. It is never a cart price: payment is arranged
         // directly with the creator. A failed estimate still sends the request.
-        const estimateRes = await fetch('/api/custom-print/estimate', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        const estimateRes = reviewOnly ? null : await fetch('/api/custom-print/estimate', { method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ requestId: id, options: pickOptions(options), ...(deliveryOption ? { deliveryType: deliveryOption.type } : {}) }) }).catch(() => null)
-        if (!estimateRes?.ok) toast?.showToast?.(`Request sent. ${creator.displayName} will price it on review.`, 'info')
+        if (!reviewOnly && !estimateRes?.ok) toast?.showToast?.(`Request sent. ${creator.displayName} will price it on review.`, 'info')
         router.push('/account/prints'); return
       }
       const configRes = await fetch('/api/custom-print/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
@@ -502,7 +534,7 @@ export default function PrintRequestFlow() {
             <StepCard number={1} title="Your model" summary={modelSummary} done={hasModel}>
               <ModelStep file={file} fileName={fileName} scene={scene} metrics={metrics} source={source} formats={formats} parsing={parsing} importing={importing}
                 disabled={busy} modelLocked={modelLocked} colourHex={colourHex} meshColors={perPartColours} layerHeight={effectiveSettings.layerHeight}
-                grams={grams} tooBig={tooBig} limitMessage={quoteState === 'error' && TOO_LARGE.test(quoteError) ? quoteError : ''}
+                grams={grams} tooBig={tooBig} limitMessage={isCreatorFlow ? farmLimitMessage : quoteState === 'error' && TOO_LARGE.test(quoteError) ? quoteError : ''}
                 onChooseFile={(nextFile) => chooseFile(nextFile, source).catch(() => {})} onImport={chooseFile} onBusyChange={setImporting}
                 onSource={(value) => { loadVersion.current += 1; setFile(null); setScene(null); setMetrics(null); setQuote(null); setSource(normalizeDesignSource(value)) }} />
             </StepCard>
