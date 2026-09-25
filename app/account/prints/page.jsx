@@ -13,6 +13,7 @@ import { printRequestTone, printStatusLabel, money } from '@/components/Account/
 import { useToast } from '@/components/General/ToastProvider'
 import { DashCard, DottedRow, EmptyState, StatusPill, Tag, Timeline, SkeletonTile } from '@/components/dashboard-ui'
 import { customPrintDisplayPrice } from '@/lib/customPrintDisplayPrice'
+import { estimateLines, hasEstimate } from '@/lib/customPrint/estimateLines'
 
 export default function AccountPrintRequestsPage() {
     const { user, isLoaded } = useUser()
@@ -118,6 +119,10 @@ export default function AccountPrintRequestsPage() {
                         // basePrice + printFee even if an old quote object lingers.
                         const quoteLines = priced.source === 'instant' ? (r.quote?.lines || []) : []
                         const history = r.statusHistory || []
+                        // A print farm's estimate (saved when the request was sent);
+                        // the creator's own quote, when sent, is shown below it.
+                        const estimate = creatorJob && hasEstimate(r) ? r.estimate : null
+                        const farmName = r.creatorDisplayName || 'the creator'
 
                         return (
                             <DashCard key={r.requestId}>
@@ -139,10 +144,33 @@ export default function AccountPrintRequestsPage() {
                                     {/* Request ids are admin-facing only; the model name identifies
                                         the job for the customer. */}
 
+                                    {estimate && (
+                                        <section className="max-w-md" aria-label={`Estimate from ${farmName}`}>
+                                            <h4 className="dash-label mb-1">Estimate from {farmName}</h4>
+                                            {estimateLines(estimate).map((line) => (
+                                                <DottedRow key={line.key} label={line.label}>
+                                                    {currency} {money(line.amount)}
+                                                </DottedRow>
+                                            ))}
+                                            <div className="mt-1 pt-1 border-t border-[var(--dash-line)]">
+                                                <DottedRow label="Estimate total">
+                                                    <span className="font-medium">
+                                                        {(estimate.currency || r.currency || 'SGD').toUpperCase()} {money(estimate.total)}
+                                                    </span>
+                                                </DottedRow>
+                                            </div>
+                                            <p className="dash-data dash-soft mt-1.5">
+                                                {farmName} confirms the final price. Payment is arranged directly with the creator.
+                                            </p>
+                                        </section>
+                                    )}
+
                                     {/* Quote breakdown, when a quote exists. */}
-                                    {(r.status === 'quoted' || r.status === 'payment_pending') && quoted > 0 && (
+                                    {/* A creator's quote stays visible after they accept the job. */}
+                                    {quoted > 0 && (r.status === 'quoted' || r.status === 'payment_pending'
+                                        || (creatorJob && fee > 0 && r.status !== 'cancelled')) && (
                                         <section className="max-w-md">
-                                            <h4 className="dash-label mb-1">Quote</h4>
+                                            <h4 className="dash-label mb-1">{creatorJob ? `Quote from ${farmName}` : 'Quote'}</h4>
                                             {quoteLines.length > 0 ? (
                                                 <>
                                                     {quoteLines.map((line) => (
@@ -156,6 +184,8 @@ export default function AccountPrintRequestsPage() {
                                                         </DottedRow>
                                                     )}
                                                 </>
+                                            ) : creatorJob ? (
+                                                r.adminNote ? <p className="dash-data dash-soft mb-1">{r.adminNote}</p> : null
                                             ) : (
                                                 <>
                                                     <DottedRow label="Base price">

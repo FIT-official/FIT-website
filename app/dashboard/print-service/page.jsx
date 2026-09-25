@@ -46,7 +46,7 @@ function fromColourText(text) {
 // server applies to a legacy service (lib/quoting/farmProfile.js), so the
 // numbers the farm charged carry over. A service with no legacy material
 // starts with PLA on.
-export function initialFarmPricing(service, recommended) {
+function initialFarmPricing(service, recommended) {
     const derived = legacyFarmPricing(service, recommended?.quotingConfig?.materialRatePerGram)
     return {
         overrides: derived.overrides,

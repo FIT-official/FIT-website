@@ -2,7 +2,7 @@
 // which store the price on quote.total (basePrice + printFee are 0). The
 // quote breakdown total uses the same customPrintDisplayPrice selector.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, within } from '@testing-library/react'
 import AccountPrintRequestsPage from '@/app/account/prints/page'
 
 vi.mock('@clerk/nextjs', () => ({ useUser: () => ({ user: { id: 'user_1' }, isLoaded: true }) }))
@@ -72,5 +72,53 @@ describe('account prints add-to-cart for instant quotes', () => {
         render(<AccountPrintRequestsPage />)
         await screen.findAllByText('Open request')
         expect(screen.queryByRole('link', { name: /Add quoted print to cart/ })).not.toBeInTheDocument()
+    })
+})
+
+describe('Account prints: creator print farm estimate', () => {
+    const estimate = {
+        currency: 'sgd', subtotal: 16.2, total: 16.2, expedite: { applied: false, amount: 0 },
+        lines: [{ key: 'material', label: 'Material', amount: 4.2 }, { key: 'printTime', label: 'Print time', amount: 2 },
+            { key: 'baseFee', label: 'Base fee', amount: 2 }, { key: 'priority', label: 'Priority', amount: 0 }, { key: 'delivery', label: 'Delivery', amount: 8 }],
+        inputs: { weightGrams: 28, printHours: 0.8 }, delivery: { type: 'courier', label: 'Courier', price: 8 },
+    }
+    const creatorRequest = (extra = {}) => ({ requestId: 'req_farm', status: 'configured', basePrice: 0, printFee: 0, currency: 'sgd',
+        creatorUserId: 'creator_1', creatorDisplayName: 'Kai Prints', modelFile: { originalName: 'bracket.stl' }, statusHistory: [], estimate, ...extra })
+    const load = (requests) => {
+        global.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ requests }) }))
+        render(<AccountPrintRequestsPage />)
+    }
+
+    it('shows the estimate with its dotted-leader breakdown and no add-to-cart link', async () => {
+        load([creatorRequest()])
+        const section = await screen.findByRole('region', { name: 'Estimate from Kai Prints' })
+        expect(within(section).getByText('Estimate from Kai Prints')).toBeInTheDocument()
+        expect(within(section).getByText('Material, 28 g')).toBeInTheDocument()
+        expect(within(section).getByText('Printing, 0.8 h')).toBeInTheDocument()
+        expect(within(section).getByText('Setup')).toBeInTheDocument()
+        expect(within(section).queryByText('Priority')).toBeNull()
+        expect(within(section).getByText('Courier')).toBeInTheDocument()
+        expect(within(section).getByText('Estimate total')).toBeInTheDocument()
+        expect(within(section).getByText('SGD 16.20')).toBeInTheDocument()
+        expect(within(section).getByText('Kai Prints confirms the final price. Payment is arranged directly with the creator.')).toBeInTheDocument()
+        expect(screen.queryByRole('link', { name: /cart/i })).toBeNull()
+    })
+
+    it("adds the creator's quote when it exists, still without a cart link, and keeps it after they accept", async () => {
+        load([creatorRequest({ status: 'quoted', quoteMode: 'manual', printFee: 18, adminNote: 'Collect Friday' }),
+            creatorRequest({ requestId: 'req_farm_2', status: 'paid', quoteMode: 'manual', printFee: 20 })])
+        await screen.findAllByRole('region', { name: 'Estimate from Kai Prints' })
+        expect(screen.getAllByText('Quote from Kai Prints')).toHaveLength(2)
+        expect(screen.getByText('SGD 18.00')).toBeInTheDocument()
+        expect(screen.getByText('SGD 20.00')).toBeInTheDocument()
+        expect(screen.getByText('Collect Friday')).toBeInTheDocument()
+        expect(screen.queryByText('Base price')).toBeNull()
+        expect(screen.queryByRole('link', { name: /cart/i })).toBeNull()
+    })
+
+    it('shows no estimate section when none was saved', async () => {
+        load([creatorRequest({ estimate: { lines: [], expedite: { applied: false, amount: 0 } } })])
+        await screen.findByText('bracket.stl')
+        expect(screen.queryByRole('region', { name: /Estimate from/ })).toBeNull()
     })
 })

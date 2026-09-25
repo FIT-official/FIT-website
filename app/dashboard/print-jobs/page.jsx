@@ -24,6 +24,7 @@ import {
     FreshnessStamp,
 } from '@/components/dashboard-ui'
 import { availableCreatorActions } from '@/lib/creatorPrintService/jobTransitions'
+import { estimateLines, hasEstimate } from '@/lib/customPrint/estimateLines'
 
 // Creator-facing labels over the shared status vocabulary.
 export const JOB_STATUS_LABELS = {
@@ -69,40 +70,6 @@ const downloadHref = (job) => {
     if (!key) return null
     const name = job.modelFile.originalName || key.split('/').pop() || 'model.stl'
     return `/api/proxy?key=${encodeURIComponent(key)}&download=1&filename=${encodeURIComponent(name)}`
-}
-
-// The print farm estimate saved when the customer sent the request
-// (POST /api/custom-print/estimate). Mongoose fills an empty estimate shape,
-// so only a numeric total counts.
-export const hasEstimate = (job) => Number.isFinite(Number(job?.estimate?.total)) && job?.estimate?.total != null
-
-const ESTIMATE_LABELS = {
-    material: 'Material',
-    printTime: 'Printing',
-    baseFee: 'Setup',
-    postProcessing: 'Sand and finish',
-    specialRequest: 'Special request',
-    priority: 'Priority',
-}
-
-/** Itemised estimate lines as the customer saw them (zero fees left out). */
-export function estimateLines(estimate = {}) {
-    const lines = (estimate.lines || [])
-        .filter((line) => ESTIMATE_LABELS[line.key] && (line.key === 'material' || Number(line.amount) > 0))
-        .map((line) => ({ key: line.key, label: ESTIMATE_LABELS[line.key], amount: Number(line.amount) || 0 }))
-    const inputs = estimate.inputs || {}
-    const material = lines.find((line) => line.key === 'material')
-    if (material && Number(inputs.weightGrams) > 0) material.label = `Material, ${Math.round(inputs.weightGrams)} g`
-    const time = lines.find((line) => line.key === 'printTime')
-    if (time && Number(inputs.printHours) > 0) time.label = `Printing, ${Number(inputs.printHours).toFixed(1)} h`
-    const rush = Number(estimate.expedite?.amount) || 0
-    if (estimate.expedite?.applied && rush > 0) lines.push({ key: 'expedite', label: 'Rush', amount: rush })
-    const delivery = Number(estimate.delivery?.price) || 0
-    const beforeDelivery = (Number(estimate.total) || 0) - delivery
-    const itemised = (Number(estimate.subtotal) || 0) - delivery + rush
-    if (beforeDelivery - itemised > 0.004) lines.push({ key: 'minimum', label: 'Minimum order top-up', amount: Math.round((beforeDelivery - itemised) * 100) / 100 })
-    if (estimate.delivery?.label) lines.push({ key: 'delivery', label: estimate.delivery.label, amount: delivery })
-    return lines
 }
 
 const fmtDate = (iso) => (iso ? new Date(iso).toLocaleDateString('en-SG', { day: 'numeric', month: 'short' }) : '')
