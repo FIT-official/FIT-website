@@ -395,7 +395,10 @@ export default function QuotingPricingManagement({ sections, compact = false }) 
         <div className={`flex flex-col gap-4 ${compact ? '' : 'p-4 md:p-6'}`}>
             {!compact && (
                 <div>
-                    <h2 className="dash-title">Quoting &amp; Pricing</h2>
+                    <h2 className="dash-title">Recommended pricing</h2>
+                    <p className="text-[13px] dash-soft mt-1">
+                        Creator print farms start from these values and override what differs.
+                    </p>
                     <p className="text-[13px] dash-soft mt-1">
                         Rates and fees used by the Instant Quoting Engine, plus the colour/material
                         catalogue offered for generic configuration. Money is in your store currency.

@@ -71,6 +71,40 @@ const downloadHref = (job) => {
     return `/api/proxy?key=${encodeURIComponent(key)}&download=1&filename=${encodeURIComponent(name)}`
 }
 
+// The print farm estimate saved when the customer sent the request
+// (POST /api/custom-print/estimate). Mongoose fills an empty estimate shape,
+// so only a numeric total counts.
+export const hasEstimate = (job) => Number.isFinite(Number(job?.estimate?.total)) && job?.estimate?.total != null
+
+const ESTIMATE_LABELS = {
+    material: 'Material',
+    printTime: 'Printing',
+    baseFee: 'Setup',
+    postProcessing: 'Sand and finish',
+    specialRequest: 'Special request',
+    priority: 'Priority',
+}
+
+/** Itemised estimate lines as the customer saw them (zero fees left out). */
+export function estimateLines(estimate = {}) {
+    const lines = (estimate.lines || [])
+        .filter((line) => ESTIMATE_LABELS[line.key] && (line.key === 'material' || Number(line.amount) > 0))
+        .map((line) => ({ key: line.key, label: ESTIMATE_LABELS[line.key], amount: Number(line.amount) || 0 }))
+    const inputs = estimate.inputs || {}
+    const material = lines.find((line) => line.key === 'material')
+    if (material && Number(inputs.weightGrams) > 0) material.label = `Material, ${Math.round(inputs.weightGrams)} g`
+    const time = lines.find((line) => line.key === 'printTime')
+    if (time && Number(inputs.printHours) > 0) time.label = `Printing, ${Number(inputs.printHours).toFixed(1)} h`
+    const rush = Number(estimate.expedite?.amount) || 0
+    if (estimate.expedite?.applied && rush > 0) lines.push({ key: 'expedite', label: 'Rush', amount: rush })
+    const delivery = Number(estimate.delivery?.price) || 0
+    const beforeDelivery = (Number(estimate.total) || 0) - delivery
+    const itemised = (Number(estimate.subtotal) || 0) - delivery + rush
+    if (beforeDelivery - itemised > 0.004) lines.push({ key: 'minimum', label: 'Minimum order top-up', amount: Math.round((beforeDelivery - itemised) * 100) / 100 })
+    if (estimate.delivery?.label) lines.push({ key: 'delivery', label: estimate.delivery.label, amount: delivery })
+    return lines
+}
+
 const fmtDate = (iso) => (iso ? new Date(iso).toLocaleDateString('en-SG', { day: 'numeric', month: 'short' }) : '')
 
 function PrintJobs() {
@@ -119,7 +153,8 @@ function PrintJobs() {
 
     const openPeek = (j) => {
         setPeekId(j.requestId)
-        setQuoteAmount(j.printFee ? String(j.printFee) : '')
+        // Prefill with the farm's saved estimate; the creator's number wins.
+        setQuoteAmount(j.printFee ? String(j.printFee) : hasEstimate(j) ? String(j.estimate.total) : '')
         setQuoteNote(j.adminNote || '')
         setRejectReason('')
     }
@@ -215,9 +250,13 @@ function PrintJobs() {
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
-                                        {Number(j.printFee) > 0 && (
+                                        {Number(j.printFee) > 0 ? (
                                             <span className="dash-data dash-soft whitespace-nowrap">
                                                 {(j.currency || 'SGD').toUpperCase()} {money(Number(j.basePrice || 0) + Number(j.printFee || 0))}
+                                            </span>
+                                        ) : hasEstimate(j) && (
+                                            <span className="dash-data dash-soft whitespace-nowrap">
+                                                Est. {(j.estimate.currency || j.currency || 'SGD').toUpperCase()} {money(j.estimate.total)}
                                             </span>
                                         )}
                                         <StatusPill tone={printRequestTone(j.status)}>{JOB_STATUS_LABELS[j.status] || j.status}</StatusPill>
@@ -264,6 +303,20 @@ function PrintJobs() {
                                 {job.designSource.attribution ? ` · ${job.designSource.attribution}` : ''}
                             </p>}
                         </section>
+
+                        {hasEstimate(job) && (
+                            <section aria-label="Estimate">
+                                <h4 className="dash-label mb-1">Estimate</h4>
+                                {estimateLines(job.estimate).map((line) => (
+                                    <DottedRow key={line.key} label={line.label}>{currency} {money(line.amount)}</DottedRow>
+                                ))}
+                                <DottedRow label="Estimate total"><span className="font-medium">{currency} {money(job.estimate.total)}</span></DottedRow>
+                                <p className="dash-data dash-soft mt-1">
+                                    What the customer saw, priced with your print farm pricing{job.pricedWith?.version ? ` (version ${job.pricedWith.version})` : ''}.
+                                    {' '}It prefills your quote; the price you send is the one that counts.
+                                </p>
+                            </section>
+                        )}
 
                         {quoted > 0 && (
                             <section>

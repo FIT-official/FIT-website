@@ -62,6 +62,18 @@ const jobs = [
     },
 ]
 
+const estimateJob = {
+    requestId: 'req-3', userName: 'Cara', userEmail: 'cara@x.com', status: 'configured', currency: 'sgd',
+    basePrice: 0, printFee: 0, modelFile: { originalName: 'c.stl', s3Key: 'models/c.stl' }, statusHistory: [],
+    printConfiguration: { generic: { material: 'PETG', filament: 'petg', colour: 'White' } },
+    estimate: {
+        currency: 'sgd', subtotal: 17.4, total: 17.4, expedite: { applied: false, amount: 0 },
+        lines: [{ key: 'material', amount: 4.2 }, { key: 'printTime', amount: 3 }, { key: 'baseFee', amount: 2 }, { key: 'postProcessing', amount: 0 }, { key: 'delivery', amount: 8.2 }],
+        inputs: { weightGrams: 28, printHours: 1.2 }, delivery: { type: 'courier', label: 'Courier', price: 8.2 },
+    },
+    pricedWith: { profile: 'farm', creatorUserId: 'user_creator', version: 3 },
+}
+
 let calls
 beforeEach(() => {
     calls = []
@@ -148,6 +160,40 @@ describe('/dashboard/print-jobs', () => {
         await waitFor(() => expect(calls.some((c) => c.init.method === 'PATCH')).toBe(true))
         expect(JSON.parse(calls.find((c) => c.init.method === 'PATCH').init.body)).toEqual({ action: 'reject', reason: 'Too big' })
         expect(confirmSpy).not.toHaveBeenCalled()
+    })
+})
+
+describe('/dashboard/print-jobs: farm estimate', () => {
+    beforeEach(() => {
+        const base = global.fetch
+        global.fetch = vi.fn((url, init = {}) => String(url) === '/api/user/print-jobs'
+            ? (calls.push({ url: String(url), init }), okJson({ jobs: [...jobs, estimateJob] }))
+            : base(url, init))
+    })
+
+    it('shows the saved estimate breakdown and prefills the quote with its total', async () => {
+        render(<PrintJobsPage />)
+        expect(await screen.findByText('Est. SGD 17.40')).toBeInTheDocument()
+        fireEvent.click(screen.getByText('c.stl'))
+        const dialog = await screen.findByRole('dialog')
+        const estimate = within(dialog).getByRole('region', { name: 'Estimate' })
+        expect(within(estimate).getByText('Material, 28 g')).toBeInTheDocument()
+        expect(within(estimate).getByText('Printing, 1.2 h')).toBeInTheDocument()
+        expect(within(estimate).getByText('Courier')).toBeInTheDocument()
+        expect(within(estimate).queryByText('Sand and finish')).toBeNull()
+        expect(within(estimate).getByText(/version 3/)).toBeInTheDocument()
+        expect(within(dialog).getByLabelText('Quote (SGD)')).toHaveValue(17.4)
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Send quote' }))
+        await waitFor(() => expect(calls.some((c) => c.init.method === 'PATCH')).toBe(true))
+        expect(JSON.parse(calls.find((c) => c.init.method === 'PATCH').init.body)).toEqual({ action: 'quote', amount: 17.4, note: '' })
+    })
+
+    it('leaves the quote empty when there is no estimate', async () => {
+        render(<PrintJobsPage />)
+        fireEvent.click(await screen.findByText('a.stl'))
+        const dialog = await screen.findByRole('dialog')
+        expect(within(dialog).queryByRole('region', { name: 'Estimate' })).toBeNull()
+        expect(within(dialog).getByLabelText('Quote (SGD)')).toHaveValue(null)
     })
 })
 
