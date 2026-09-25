@@ -9,6 +9,7 @@ vi.mock('@/lib/db', () => ({ connectToDatabase: vi.fn() }))
 vi.mock('@clerk/nextjs/server', () => ({ auth: vi.fn() }))
 vi.mock('@/models/User', () => ({ default: { findOne: vi.fn() } }))
 vi.mock('@/models/CustomPrintRequest', () => ({ default: { findOne: vi.fn() } }))
+vi.mock('@/lib/creatorPrintService/creatorNames', () => ({ creatorDisplayNames: vi.fn(async (ids) => Object.fromEntries(ids.map((id) => [id, 'Kai Prints']))) }))
 
 import { authenticate, UnauthorizedError } from '@/lib/authenticate'
 import User from '@/models/User'
@@ -105,5 +106,18 @@ describe('POST /api/cart/custom-print', () => {
     expect(res.status).toBe(500)
     const body = await res.json()
     expect(body.details).toBeUndefined()
+  })
+})
+
+describe('POST /api/cart/custom-print: creator print-farm jobs', () => {
+  it('refuses a creator request with 409 naming the farm and never touches the cart', async () => {
+    const user = makeUser()
+    User.findOne.mockResolvedValue(user)
+    CustomPrintRequest.findOne.mockResolvedValue(makeRequestDoc({ creatorUserId: 'creator_1', quoteMode: 'manual', printFee: 18 }))
+    const res = await post({ requestId: 'b1ffcd1c-0000-4000-8000-000000000001' })
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual({ error: 'This request is with Kai Prints; payment is arranged directly with them.' })
+    expect(user.cart).toHaveLength(0)
+    expect(user.save).not.toHaveBeenCalled()
   })
 })

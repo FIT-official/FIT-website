@@ -4,6 +4,7 @@ import User from '@/models/User'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
 import { authenticate, unauthorizedResponse, UnauthorizedError } from '@/lib/authenticate'
 import { customPrintDisplayPrice } from '@/lib/customPrintDisplayPrice'
+import { creatorDisplayNames } from '@/lib/creatorPrintService/creatorNames'
 
 // POST /api/cart/custom-print { requestId }
 export async function POST(request) {
@@ -29,6 +30,17 @@ export async function POST(request) {
     if (!reqDoc) {
       console.log('[POST /api/cart/custom-print] CustomPrintRequest not found for requestId:', requestId);
       return NextResponse.json({ error: 'Request not found' }, { status: 404 })
+    }
+    // Creator print-farm jobs are paid directly to the creator, never through
+    // Fix It Today's cart or checkout. TODO(phase5-connect): Stripe Connect.
+    if (reqDoc.creatorUserId) {
+      let farm = 'the creator'
+      try {
+        farm = (await creatorDisplayNames([reqDoc.creatorUserId]))[reqDoc.creatorUserId] || farm
+      } catch (nameError) {
+        console.error('[POST /api/cart/custom-print] creator name lookup failed:', nameError?.message)
+      }
+      return NextResponse.json({ error: `This request is with ${farm}; payment is arranged directly with them.` }, { status: 409 })
     }
     // Allow adding to cart regardless of status/quote
     // Represent the quoted request in the cart with a synthetic productId

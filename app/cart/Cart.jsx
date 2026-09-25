@@ -41,6 +41,8 @@ function Cart() {
     const { user, isLoaded } = useUser();
     const [cart, setCart] = useState([]);
     const [cartBreakdown, setCartBreakdown] = useState([]);
+    // Why ?addCustomRequest= could not add the request (e.g. a creator job).
+    const [addRequestError, setAddRequestError] = useState('');
     const [products, setProducts] = useState({});
     const [convertedPrices, setConvertedPrices] = useState({});
     const [loading, setLoading] = useState(true);
@@ -111,10 +113,15 @@ function Cart() {
                 });
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
-                    if (data.error) showToast(data.error, 'error');
+                    const message = data.error || 'This print request could not be added to your cart.';
+                    setAddRequestError(message);
+                    showToast(message, 'error');
                 }
             } catch (e) {
                 console.error('Error adding custom print to cart:', e);
+                const message = 'This print request could not be added to your cart. Please try again.';
+                setAddRequestError(message);
+                showToast(message, 'error');
             }
         };
 
@@ -525,6 +532,11 @@ function Cart() {
                 <IoCartOutline />
                 Your Cart
             </h2>
+            {addRequestError && (
+                <p role='alert' className='mx-5 mt-2 rounded-md bg-amber-50 p-3 text-sm text-amber-800'>
+                    {addRequestError} <Link href='/account/prints' className='underline'>View your print requests</Link>
+                </p>
+            )}
             <div className='flex flex-col w-full py-4'>
                 <div className='flex flex-col border-t border-b w-full my-6 divide-y divide-borderColor border-borderColor'>
                     {loading ? (
