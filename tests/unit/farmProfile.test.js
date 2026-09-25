@@ -108,13 +108,30 @@ describe('legacy print services (no pricing saved)', () => {
         expect(profile.deliveryOptions).toEqual(fitDelivery)
     })
 
-    it('keeps exact legacy S$/g when a rate falls outside the multiplier bounds', () => {
+    it('bases out-of-bounds legacy rates on the geometric mean of the lowest and highest rate', () => {
         const derived = legacyFarmPricing({ materials: [{ name: 'PLA', pricePerGram: 0.5 }, { name: 'TPU', pricePerGram: 0.9 }] }, 0.02)
-        expect(derived.overrides.materialRatePerGram).toBe(0.5)
-        expect(derived.materials).toEqual([
-            { filament: 'pla', enabled: true, priceMultiplier: 1, coloursOff: [] },
-            { filament: 'tpu', enabled: true, priceMultiplier: 1.8, coloursOff: [] },
-        ])
+        expect(derived.overrides.materialRatePerGram).toBe(0.6708) // sqrt(0.5 * 0.9)
+        const [pla, tpu] = derived.materials
+        expect(pla.priceMultiplier * 0.6708).toBeCloseTo(0.5, 3)
+        expect(tpu.priceMultiplier * 0.6708).toBeCloseTo(0.9, 3)
+    })
+
+    it('keeps both ends of a wide legacy range inside the multiplier bounds', () => {
+        // 0.05 and 1.0 S$/g: a first-rate base (0.05) would clamp 1.0 to 10x = 0.5.
+        const derived = legacyFarmPricing({ materials: [{ name: 'PLA', pricePerGram: 0.05 }, { name: 'ASA', pricePerGram: 1 }] }, 0.001)
+        const base = derived.overrides.materialRatePerGram
+        expect(base).toBeCloseTo(Math.sqrt(0.05), 4)
+        expect(derived.materials[0].priceMultiplier * base).toBeCloseTo(0.05, 3)
+        expect(derived.materials[1].priceMultiplier * base).toBeCloseTo(1, 2)
+    })
+
+    it('treats a 0 legacy rate as not set', () => {
+        const derived = legacyFarmPricing({ materials: [{ name: 'PLA', pricePerGram: 0 }, { name: 'PETG', pricePerGram: 0.15 }] }, 0.1)
+        expect(derived.overrides).not.toHaveProperty('materialRatePerGram')
+        expect(derived.materials[0].priceMultiplier).toBeNull()
+        expect(derived.materials[1].priceMultiplier).toBe(1.5)
+        // A 0 rate no longer drags the base: without it the bounds hold.
+        expect(legacyFarmPricing({ materials: [{ name: 'PLA', pricePerGram: 0 }, { name: 'TPU', pricePerGram: 5 }] }, 0.02).overrides.materialRatePerGram).toBe(5)
     })
 
     it('leaves a zero minimum charge to follow the recommendation', () => {
@@ -187,7 +204,8 @@ describe('public profile, delivery and sample', () => {
 
     it('publishes materials, colours, S$/g, delivery, lead time and limits without override internals', () => {
         const pub = publicFarmProfile(profile)
-        expect(Object.keys(pub).sort()).toEqual(['deliveryOptions', 'leadTimeDays', 'machineLimits', 'materials', 'offers'])
+        expect(Object.keys(pub).sort()).toEqual(['deliveryOptions', 'leadTimeDays', 'machineLimits', 'materials', 'minimumPrice', 'offers', 'reviewMaterials'])
+        expect(pub.minimumPrice).toBe(5)
         expect(pub.materials[0]).toMatchObject({ filament: 'pla', label: 'PLA', ratePerGram: 0.15 })
         expect(pub.materials[0]).not.toHaveProperty('multiplier')
         expect(JSON.stringify(pub)).not.toContain('printTimeRatePerHour')
@@ -217,5 +235,58 @@ describe('public profile, delivery and sample', () => {
         expect(payload.quotingConfig).not.toHaveProperty('layerStackModel')
         expect(payload.materials).toHaveLength(6)
         expect(resolveFarmPricing({ recommended: payload }).rates).toEqual(resolveFarmPricing({ recommended }).rates)
+    })
+})
+
+describe('legacy materials outside the catalogue (quote on review)', () => {
+    const legacy = { creatorUserId: 'c1', enabled: true, leadTimeDays: 6, materials: [
+        { name: 'Nylon', pricePerGram: 0.3, colours: ['Black', 'Natural'], note: 'Dried before printing' },
+        { name: 'Resin', pricePerGram: 0.5, colours: [] },
+    ] }
+
+    it('keeps a farm with no catalogue material taking requests, priced on review', () => {
+        const profile = resolveFarmPricing({ recommended, service: legacy })
+        expect(profile.materials).toEqual([])
+        expect(profile.reviewMaterials).toEqual([
+            { key: 'review-1', label: 'Nylon', note: 'Dried before printing', colours: [{ name: 'Black', hex: null }, { name: 'Natural', hex: null }] },
+            { key: 'review-2', label: 'Resin', note: '', colours: [{ name: 'Any colour', hex: null }] },
+        ])
+        const pub = publicFarmProfile(profile)
+        expect(pub.reviewMaterials.map(m => m.label)).toEqual(['Nylon', 'Resin'])
+        expect(JSON.stringify(pub.reviewMaterials)).not.toMatch(/pricePerGram|0\.3/)
+    })
+
+    it('lists unmatched materials beside catalogue ones, and keeps legacy notes on the matched ones', () => {
+        const profile = resolveFarmPricing({ recommended, service: { ...legacy, materials: [
+            { name: 'PLA', pricePerGram: 0.1, colours: [], note: 'Most colours in stock' }, ...legacy.materials] } })
+        expect(profile.materials.map(m => [m.filament, m.note])).toEqual([['pla', 'Most colours in stock']])
+        expect(profile.reviewMaterials.map(m => m.label)).toEqual(['Nylon', 'Resin'])
+        expect(publicFarmProfile(profile).materials[0].note).toBe('Most colours in stock')
+    })
+
+    it('has none for Fix It Today itself', () => {
+        expect(resolveFarmPricing({ recommended }).reviewMaterials).toEqual([])
+    })
+})
+
+describe('rush and priority offers', () => {
+    const offersFor = (overrides, config = {}) => resolveFarmPricing({
+        recommended: { quotingConfig: { ...recommended.quotingConfig, ...config } },
+        service: farm({ overrides, materials: [{ filament: 'pla' }] }),
+    }).offers
+
+    it('needs a positive farm-set surcharge that actually charges something', () => {
+        expect(offersFor({ expediteMode: 'percent' }).expedite).toBe(false) // mode only
+        expect(offersFor({ expediteSurchargePercent: 0, expediteSurchargeFlat: 0 }).expedite).toBe(false)
+        expect(offersFor({ expediteSurchargePercent: 30 }).expedite).toBe(true)
+        // Farm set a flat amount, but percent mode ignores it and the percent is 0.
+        expect(offersFor({ expediteMode: 'percent', expediteSurchargeFlat: 10, expediteSurchargePercent: 0 }).expedite).toBe(false)
+        expect(offersFor({ expediteMode: 'flat', expediteSurchargeFlat: 10 }).expedite).toBe(true)
+    })
+
+    it('offers priority only for a positive farm priority fee', () => {
+        expect(offersFor({}).priority).toBe(false) // inherits FIT's 4
+        expect(offersFor({ priorityFee: 0 }).priority).toBe(false)
+        expect(offersFor({ priorityFee: 3 }).priority).toBe(true)
     })
 })

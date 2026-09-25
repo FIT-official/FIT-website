@@ -47,8 +47,10 @@ export async function POST(req) {
             return NextResponse.json({ error: 'The print farm has already priced this request.' }, { status: 409 })
         }
 
-        const { profile } = await loadFarmProfile(request.creatorUserId)
-        if (!profile) return NextResponse.json({ error: 'This print service is no longer available.' }, { status: 409 })
+        const { service, profile } = await loadFarmProfile(request.creatorUserId)
+        if (!profile || !service?.enabled) {
+            return NextResponse.json({ error: 'This print service is not taking requests right now.' }, { status: 409 })
+        }
 
         const outcome = await estimateCreatorRequest({ request, profile,
             body: { options, ...(body.deliveryType != null ? { deliveryType: body.deliveryType } : {}) } })

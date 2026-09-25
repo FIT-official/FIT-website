@@ -21,6 +21,7 @@ async function recommendedPayload() {
 }
 
 // Owner read: the creator's own print service (defaults when none yet).
+// Fix It Today's recommended pricing is only shown to creators.
 export async function GET() {
     try {
         const { userId } = await auth();
@@ -28,7 +29,11 @@ export async function GET() {
 
         await connectToDatabase();
         const doc = await CreatorPrintService.findOne({ creatorUserId: userId }).lean();
-        return NextResponse.json({ service: ownerPrintService(doc), recommended: await recommendedPayload() });
+        const isCreator = await requireCreator(userId);
+        return NextResponse.json({
+            service: ownerPrintService(doc),
+            ...(isCreator ? { recommended: await recommendedPayload() } : {}),
+        });
     } catch (error) {
         console.error("Error reading print service:", error);
         return NextResponse.json({ error: "Failed to read print service" }, { status: 500 });

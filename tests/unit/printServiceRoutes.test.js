@@ -287,3 +287,38 @@ describe('per-farm pricing on the print-service API', () => {
         expect(body.profile.machineLimits).toMatchObject({ maxLengthCm: 20, maxWidthCm: 20, maxHeightCm: 20 })
     })
 })
+
+describe('print-service review fixes', () => {
+    it('GET includes recommended pricing only for creators', async () => {
+        state.isCreator = false
+        const { GET } = await import('@/app/api/user/print-service/route')
+        const body = await (await GET()).json()
+        expect(body.service).toMatchObject({ enabled: false })
+        expect(body).not.toHaveProperty('recommended')
+    })
+
+    it.each([
+        ['every priced material off', { materials: [{ filament: 'pla', enabled: false }] }],
+        ['no priced material at all', { materials: [] }],
+        ['the only material with every colour off', { materials: [{ filament: 'tpu', enabled: true,
+            coloursOff: ['White', 'Yellow', 'Blue', 'Red', 'Gray', 'Black'] }] }],
+    ])('refuses to enable with pricing and %s, even with legacy materials', async (_label, pricing) => {
+        const { PUT } = await import('@/app/api/user/print-service/route')
+        const res = await PUT(putRequest({ ...validService(), pricing }))
+        expect(res.status).toBe(400)
+        expect((await res.json()).issues[0].path).toEqual(['pricing', 'materials'])
+        expect(state.updateArgs).toBeNull()
+    })
+
+    it('uses the stored pricing when the body has none', async () => {
+        state.serviceDoc = { creatorUserId: 'user_abc', pricing: { materials: [{ filament: 'pla', enabled: false }] } }
+        const { PUT } = await import('@/app/api/user/print-service/route')
+        expect((await PUT(putRequest(validService()))).status).toBe(400)
+    })
+
+    it('still allows a disabled service with no priced material', async () => {
+        state.updatedDoc = { creatorUserId: 'user_abc', ...validService(), enabled: false }
+        const { PUT } = await import('@/app/api/user/print-service/route')
+        expect((await PUT(putRequest({ ...validService(), enabled: false, pricing: { materials: [] } }))).status).toBe(200)
+    })
+})

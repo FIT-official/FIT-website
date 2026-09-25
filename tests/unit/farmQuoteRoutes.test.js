@@ -174,6 +174,12 @@ describe('POST /api/custom-print/estimate', () => {
         expect(state.updates).toHaveLength(0)
     })
 
+    it('refuses (409) when the print service is switched off, writing nothing', async () => {
+        state.service = { ...farmService(), enabled: false }
+        expect((await post(estimatePOST, { requestId: REQUEST_ID })).status).toBe(409)
+        expect(state.updates).toHaveLength(0)
+    })
+
     it('asks for review when the stored model cannot be measured', async () => {
         state.metrics = null
         const res = await post(estimatePOST, { requestId: REQUEST_ID })
