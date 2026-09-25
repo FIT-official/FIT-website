@@ -50,6 +50,8 @@ describe('persistInstantQuote', () => {
         expect(filter).toMatchObject({ requestId: request().requestId, userId: 'buyer', status: 'configured', quoteMode: 'instant', 'modelFile.s3Key': 'models/buyer/part.stl' })
         expect(update.$set).toMatchObject({ status: 'quoted', quoteMode: 'instant', delivery: { deliveryTypes: [{ type: 'pickup', price: 0 }, { type: 'courier', price: 6 }] } })
         expect(update.$set.quote.inputs.volumeCm3).toBe(50)
+        // Fix It Today's own quotes record that the recommended profile priced them.
+        expect(update.$set.pricedWith).toEqual({ profile: 'recommended' })
         expect(state.notified).toEqual(['quote-ready'])
     })
     it('previews with unsaved settings and writes nothing', async () => {
