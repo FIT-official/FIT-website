@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import CreatorPrintService from "@/models/CreatorPrintService";
 import { resolveCreatorByIdOrName } from "@/lib/creatorPage/resolveCreator";
 import { publicPrintService } from "@/lib/creatorPrintService/validate";
+import { loadFarmProfile } from "@/lib/quoting/loadFarmProfile";
+import { publicFarmProfile } from "@/lib/quoting/farmProfile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,10 +23,15 @@ export async function GET(_req, props) {
         const service = publicPrintService(doc);
         if (!service) return NextResponse.json({ enabled: false });
 
+        // The farm's resolved pricing profile, reduced to what the request page
+        // shows (materials, colours, S$/g, delivery, lead time, limits).
+        const { profile } = await loadFarmProfile(creator.userId, { service: doc });
+
         return NextResponse.json({
             enabled: true,
             creator: { userId: creator.userId, displayName: creator.displayName },
             service,
+            profile: publicFarmProfile(profile),
         });
     } catch (error) {
         console.error("Error reading creator print service:", error);

@@ -9,6 +9,8 @@ import { getFilamentAvailability, rushAvailability } from '@/lib/filamentInvento
 import { limitQuoteRequest } from '@/lib/rateLimit'
 import { machineLimitMessage } from '@/lib/quoting/machineLimits'
 import { checkQuoteLimits, persistInstantQuote } from '@/lib/quoting/persistInstantQuote'
+import { loadFarmProfile } from '@/lib/quoting/loadFarmProfile'
+import { previewFarmQuote } from '@/lib/quoting/farmQuote'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -46,6 +48,19 @@ export async function POST(req) {
     try { body = JSON.parse(text) } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
     await connectToDatabase()
     const settings = await AppSettings.findById(getAppSettingsId()).lean()
+    // A creator's print farm: a live estimate priced with that farm's profile,
+    // resolved server-side from its saved service. Never persisted or payable
+    // here (see lib/quoting/farmQuote.js).
+    if (body && typeof body === 'object' && body.creatorUserId != null) {
+      const creatorUserId = body.creatorUserId
+      if (typeof creatorUserId !== 'string' || !creatorUserId || creatorUserId.length > 64) {
+        return NextResponse.json({ error: 'Invalid creatorUserId' }, { status: 400 })
+      }
+      const { service, profile } = await loadFarmProfile(creatorUserId, { appSettings: settings || {} })
+      if (!service?.enabled || !profile) return NextResponse.json({ error: 'This creator is not accepting print requests' }, { status: 404 })
+      const outcome = previewFarmQuote({ body, profile, creatorUserId })
+      return NextResponse.json(outcome.body, { status: outcome.status, headers: outcome.status === 200 ? rate.headers : undefined })
+    }
     const pricingConfig = settings?.quotingConfig || {}
     const deliveryTypes = settings?.additionalDeliveryTypes || []
     const result = buildQuote(body, { pricingConfig, deliveryTypes })
