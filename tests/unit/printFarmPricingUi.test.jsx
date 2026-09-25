@@ -138,3 +138,49 @@ describe('pricing editor', () => {
         expect(screen.queryByLabelText('Max build X in mm')).toBeNull()
     })
 })
+
+describe('machine limit overrides and legacy materials outside the catalogue', () => {
+    beforeEach(() => {
+        getResponse = { service: { ...baseService, materials: [], pricing: {
+            overrides: {}, materials: [{ filament: 'pla', enabled: true, priceMultiplier: null, coloursOff: [] }], delivery: [], version: 2,
+        } }, recommended }
+    })
+
+    it('seeds the recommended limit, or an empty field when there is none, and blocks Save until it is filled', async () => {
+        render(<PrintServicePage />)
+        fireEvent.click(await screen.findByLabelText('Override length'))
+        expect(screen.getByLabelText('Your length')).toHaveValue(25.6)
+        fireEvent.click(screen.getByLabelText('Override weight'))
+        const weight = screen.getByLabelText('Your weight')
+        expect(weight).toHaveValue(null)
+        expect(weight).toHaveAttribute('aria-invalid', 'true')
+        expect(screen.getByText('Enter a value or untick Override')).toBeInTheDocument()
+        const save = screen.getByRole('button', { name: 'Save' })
+        expect(save).toBeDisabled()
+        fireEvent.change(weight, { target: { value: '2' } })
+        expect(screen.queryByText('Enter a value or untick Override')).toBeNull()
+        expect(save).toBeEnabled()
+        fireEvent.click(save)
+        await waitFor(() => expect(calls.some((c) => c.init.method === 'PUT')).toBe(true))
+        const { pricing } = JSON.parse(calls.find((c) => c.init.method === 'PUT').init.body)
+        expect(pricing.overrides.machineLimits).toEqual({ maxLengthCm: 25.6, maxWeightKg: 2 })
+    })
+
+    it('unticking an empty override clears the block', async () => {
+        render(<PrintServicePage />)
+        fireEvent.click(await screen.findByLabelText('Override weight'))
+        expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled()
+        fireEvent.click(screen.getByLabelText('Override weight'))
+        expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled()
+    })
+
+    it('tells a legacy farm that uncatalogued materials are still requested and priced by hand', async () => {
+        getResponse = { service: { ...baseService, pricing: null, materials: [
+            { name: 'PLA', colours: [], pricePerGram: 0.1, note: '' }, { name: 'Nylon CF', colours: ['Black'], pricePerGram: 0.4, note: '' },
+        ] }, recommended }
+        render(<PrintServicePage />)
+        const banner = await screen.findByRole('status')
+        expect(banner).toHaveTextContent("Some of your materials aren't in the catalogue yet; customers can still request them and you price them by hand.")
+        expect(banner).toHaveTextContent('Nylon CF')
+    })
+})

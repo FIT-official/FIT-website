@@ -11,8 +11,8 @@ import { useToast } from '@/components/General/ToastProvider'
 import { useShopIdentity, CreatorGate } from '@/components/DashboardComponents/CreatorShell'
 import { DashCard, SkeletonRow, StatusPill } from '@/components/dashboard-ui'
 import { emptyPrintService, ACCEPTED_FORMATS, MAX_MATERIALS } from '@/lib/creatorPrintService/validate'
-import { compactOverrides, legacyFarmPricing } from '@/lib/quoting/farmProfile'
-import PrintFarmPricing, { deliveryWithTypes } from '@/components/DashboardComponents/PrintFarmPricing'
+import { compactOverrides, legacyFarmPricing, reviewMaterialsOf } from '@/lib/quoting/farmProfile'
+import PrintFarmPricing, { blankOverrides, deliveryWithTypes } from '@/components/DashboardComponents/PrintFarmPricing'
 
 const inputCls =
     'w-full rounded-[var(--dash-r-inner)] border border-[var(--dash-line)] bg-[var(--dash-card)] px-3 py-2 text-[13px] focus:outline-none focus:border-[var(--dash-focus-line)] focus:shadow-[var(--dash-focus-ring)]'
@@ -143,7 +143,16 @@ function PrintServiceEditor() {
             return { ...prev, acceptedFormats: next }
         })
 
+    // Overridden fields left empty block saving (each row says why).
+    const blanks = pricing ? blankOverrides(pricing) : []
+    // Saved materials the catalogue does not know yet are requested on review.
+    const reviewMaterials = reviewMaterialsOf(service)
+
     const save = async () => {
+        if (blanks.length) {
+            setError('Enter a value or untick Override for every highlighted setting.')
+            return
+        }
         setSaving(true)
         setError('')
         try {
@@ -228,7 +237,8 @@ function PrintServiceEditor() {
                     <button
                         type="button"
                         onClick={save}
-                        disabled={saving}
+                        disabled={saving || blanks.length > 0}
+                        title={blanks.length ? 'Enter a value or untick Override for every highlighted setting.' : undefined}
                         className="dash-hoverable inline-flex items-center rounded-full bg-[var(--dash-ink)] text-[var(--dash-canvas)] px-4 py-2 text-[13px] font-medium cursor-pointer disabled:opacity-50"
                     >
                         {saving ? 'Saving…' : 'Save'}
@@ -238,6 +248,13 @@ function PrintServiceEditor() {
 
             {error && (
                 <p className="dash-data" style={{ color: 'var(--dash-bad)' }} role="alert">{error}</p>
+            )}
+
+            {reviewMaterials.length > 0 && (
+                <p role="status" className="dash-data rounded-[var(--dash-r-inner)] border border-[var(--dash-line)] bg-[var(--dash-card)] px-4 py-3">
+                    Some of your materials aren&apos;t in the catalogue yet; customers can still request them and you price them by hand.
+                    <span className="dash-soft"> ({reviewMaterials.map((m) => m.label).join(', ')})</span>
+                </p>
             )}
 
             <DashCard title="Availability">

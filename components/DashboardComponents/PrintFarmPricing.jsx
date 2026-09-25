@@ -64,6 +64,24 @@ function readOverride(pricing, group, key) {
     return value === null || value === undefined ? undefined : value
 }
 
+const isBlank = (value) => value === '' || (typeof value === 'number' && !Number.isFinite(value))
+
+/**
+ * Overridden fields left empty in a pricing draft, as "group.key" strings.
+ * The page refuses to save while any remain.
+ */
+export function blankOverrides(pricing) {
+    const out = []
+    const overrides = pricing?.overrides || {}
+    for (const [group, path] of Object.entries(GROUP_PATH)) {
+        const source = path ? overrides[path] : overrides
+        for (const [key, value] of Object.entries(source || {})) {
+            if (typeof value !== 'object' && isBlank(value)) out.push(`${group}.${key}`)
+        }
+    }
+    return out
+}
+
 /** Return a new pricing draft with one override set (or cleared with undefined). */
 export function setOverride(pricing, group, key, value) {
     const overrides = { ...(pricing?.overrides || {}) }
@@ -83,8 +101,13 @@ function OverrideRow({ row, group, recommendedValue, pricing, onChange }) {
     const overridden = current !== undefined
     const shown = overridden ? current : recommendedValue ?? ''
     const id = `farm-${group}-${row.key}`
+    // Ticking Override starts from the recommended value; with none (e.g. a
+    // machine limit Fix It Today leaves open) the field starts empty rather
+    // than at 0, which would read as a real limit.
     const toggle = (checked) => onChange(setOverride(pricing, group, row.key,
-        checked ? (recommendedValue ?? (row.type === 'mode' ? 'greater' : 0)) : undefined))
+        checked ? (recommendedValue ?? (row.type === 'mode' ? 'greater' : '')) : undefined))
+    const missing = overridden && isBlank(current)
+    const errorId = `${id}-error`
     const setValue = (raw) => onChange(setOverride(pricing, group, row.key,
         row.type === 'mode' ? raw : raw === '' ? '' : Number(raw)))
     return (
@@ -100,6 +123,7 @@ function OverrideRow({ row, group, recommendedValue, pricing, onChange }) {
                         </select>
                     ) : (
                         <input id={id} type="number" min={0} step={row.step} value={shown} disabled={!overridden}
+                            aria-invalid={missing || undefined} aria-describedby={missing ? errorId : undefined}
                             aria-label={`Your ${row.label.toLowerCase()}`} placeholder={recommendedValue == null ? 'No limit' : undefined}
                             onChange={(e) => setValue(e.target.value)} className={`${inputCls} max-w-[110px]`} />
                     )}
@@ -109,6 +133,11 @@ function OverrideRow({ row, group, recommendedValue, pricing, onChange }) {
                         Override
                     </label>
                 </div>
+                {missing && (
+                    <p id={errorId} role="alert" className="text-[12px] mt-1" style={{ color: 'var(--dash-bad)' }}>
+                        Enter a value or untick Override
+                    </p>
+                )}
             </td>
         </tr>
     )
