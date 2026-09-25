@@ -15,6 +15,11 @@ export async function POST(req) {
         if (!cartItem || !cartItem.productId || !cartItem.chosenDeliveryType) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
+        // Print requests reach the cart only through /api/cart/custom-print,
+        // which checks ownership, the quote and that it is not a creator job.
+        if (String(cartItem.productId).startsWith("custom-print:")) {
+            return NextResponse.json({ error: "Use Add to cart on the print request page." }, { status: 409 });
+        }
 
         const user = await User.findOne({ userId });
 

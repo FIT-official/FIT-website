@@ -403,7 +403,9 @@ function Cart() {
             }
         } else if (delta === -1) {
             // For digital and printDelivery items, always remove the entire item since they should only have quantity 1
-            if (cartItem.chosenDeliveryType === "digital" || cartItem.chosenDeliveryType === "printDelivery" || cartItem.quantity <= 1) {
+            // A print request is one line of quantity 1 (the cart POST refuses custom-print lines).
+            if (cartItem.chosenDeliveryType === "digital" || cartItem.chosenDeliveryType === "printDelivery" || cartItem.quantity <= 1
+                || String(cartItem.productId || '').startsWith('custom-print:')) {
                 await handleRemove(cartItem);
                 setLoading(false);
                 return;
@@ -815,7 +817,7 @@ function Cart() {
                                                     <div className='flex flex-row rounded border border-borderColor py-1'>
                                                         <button
                                                             onClick={() => handleChangeQuantity(cartItem, 1)}
-                                                            disabled={loading || cartItem.chosenDeliveryType === "digital" || cartItem.chosenDeliveryType === "printDelivery"}
+                                                            disabled={loading || isCustomPrint || cartItem.chosenDeliveryType === "digital" || cartItem.chosenDeliveryType === "printDelivery"}
                                                             className="px-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                                             aria-label="Increase quantity"
                                                         >
