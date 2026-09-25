@@ -15,19 +15,16 @@ import DeliveryStep, { EMPTY_ADDRESS } from '@/components/PrintRequest/DeliveryS
 import PricePanel from '@/components/PrintRequest/PricePanel'
 import { DEFAULT_EDITOR_PRINT_SETTINGS, PURPOSE_PRESETS, mapPurposeToConfiguration } from '@/lib/quoting/genericPresets'
 import { printSettingsToQuoteSettings } from '@/lib/quoting/printSettingsToQuote'
-import { estimateMaterialGrams } from '@/lib/quoting/materialEstimate'
 import { checkMachineLimits } from '@/lib/quoting/machineLimits'
-import { estimateCreatorPrintPrice } from '@/lib/creatorPrintService/estimate'
 import { DEFAULT_FIT_COLOURS } from '@/lib/filamentCatalogue'
-import { coloursForFilament } from '@/lib/customPrint/materials'
+import { MATERIAL_DESCRIPTIONS, coloursForFilament } from '@/lib/customPrint/materials'
 import { addressComplete } from '@/lib/customPrint/deliveryOptions'
 import { addressesEqual } from '@/lib/checkoutAddressGate'
 import { DEFAULT_OPTIONS, buildChecklist, buildGeneric, buildPrintSettings, pickOptions, restoreFromRequest,
   strengthFromSettings, qualityFromSettings } from '@/lib/customPrint/requestState'
 import { clearStoredDraft, readStoredDraft, writeStoredDraft } from '@/lib/customPrint/draftStorage'
-import { exceedsBuild, normalizeDesignSource, validatePrintFile } from '@/lib/printRequestDraft'
+import { normalizeDesignSource, validatePrintFile } from '@/lib/printRequestDraft'
 
-const money = (value) => new Intl.NumberFormat('en-SG', { style: 'currency', currency: 'SGD' }).format(value)
 const primary = 'min-h-11 w-full rounded-lg bg-textColor px-5 py-3 text-sm font-semibold text-background disabled:opacity-50'
 const DEFAULT_CONFIG = { deliveryTypes: [], machineLimits: null, state: 'loading' }
 const TOO_LARGE = /larger than we can print/i
@@ -47,8 +44,9 @@ export default function PrintRequestFlow() {
   const [creator, setCreator] = useState(null)
   const [service, setService] = useState(null)
   const [creatorState, setCreatorState] = useState(creatorSlug ? 'loading' : 'none')
-  const [material, setMaterial] = useState('')
-  const [creatorColour, setCreatorColour] = useState('')
+  // The farm's public pricing profile: materials, colours, delivery options,
+  // lead time and machine limits. Prices come from the server (/api/quote).
+  const [farmProfile, setFarmProfile] = useState(null)
   const [purpose, setPurpose] = useState('')
 
   // Catalogue, stock and delivery options.
@@ -135,23 +133,26 @@ export default function PrintRequestFlow() {
   }, [requestIdParam, creatorSlug, filament, colour, printSettings, options, note, deliveryType, addressDraft])
 
   useEffect(() => {
-    if (!creatorSlug) { setCreatorState('none'); setCreator(null); setService(null); return }
+    if (!creatorSlug) { setCreatorState('none'); setCreator(null); setService(null); setFarmProfile(null); return }
     let cancelled = false
     setCreatorState('loading')
     fetch(`/api/creators/${encodeURIComponent(creatorSlug)}/print-service`)
       .then((res) => res.ok ? res.json() : null).then((data) => {
         if (cancelled) return
         if (!data?.enabled || !data.service) { setCreatorState('unavailable'); return }
-        setCreator(data.creator); setService(data.service)
-        setMaterial(data.service.materials?.[0]?.name || '')
-        setCreatorColour(data.service.materials?.[0]?.colours?.[0] || '')
+        const profile = data.profile || { materials: [], deliveryOptions: [], machineLimits: null, offers: {}, leadTimeDays: data.service.leadTimeDays }
+        const first = profile.materials.find((item) => item.filament === 'pla') || profile.materials[0]
+        setCreator(data.creator); setService(data.service); setFarmProfile(profile)
+        setFilament(first?.filament || ''); setColour(first?.colours?.[0]?.name || ''); setPerPartColours(null)
         setCreatorState('ready')
       }).catch(() => { if (!cancelled) setCreatorState('unavailable') })
     return () => { cancelled = true }
   }, [creatorSlug])
 
-  // Delivery options arrive after mount; keep the choice valid.
-  const deliveryOptions = config.deliveryTypes
+  // Delivery options arrive after mount; keep the choice valid. A creator's
+  // print farm has its own list (or follows Fix It Today's).
+  const farmReady = creatorState === 'ready' && Boolean(farmProfile)
+  const deliveryOptions = farmReady ? farmProfile.deliveryOptions : config.deliveryTypes
   useEffect(() => {
     if (!deliveryOptions.some((option) => option.type === deliveryType)) setDeliveryType(deliveryOptions[0]?.type || '')
   }, [deliveryOptions, deliveryType])
@@ -197,22 +198,27 @@ export default function PrintRequestFlow() {
     } catch (err) { setError(err.message) } finally { setAddressSaving(false) }
   }
 
-  const isCreatorFlow = creatorState === 'ready' && Boolean(creator && service)
-  const materials = service?.materials || []
-  const selectedMaterial = materials.find((item) => item.name === material)
-  const availableColours = useMemo(() => coloursForFilament(colours, filament), [colours, filament])
+  const isCreatorFlow = farmReady && Boolean(creator && service)
+  // Material cards for a print farm: only what it offers, with its S$/g.
+  // Farm stock is unknown, so colours carry no stock badge.
+  const farmMaterials = useMemo(() => (farmProfile?.materials || []).map((item) => ({
+    value: item.filament, label: item.label, description: MATERIAL_DESCRIPTIONS[item.filament] || '', recommended: false,
+    ratePerGram: item.ratePerGram, colours: (item.colours || []).map((entry) => ({ ...entry, stockStatus: 'farm' })),
+  })), [farmProfile])
+  const selectedMaterial = isCreatorFlow ? farmMaterials.find((item) => item.value === filament) || null : null
+  const availableColours = useMemo(() => isCreatorFlow ? selectedMaterial?.colours || [] : coloursForFilament(colours, filament),
+    [isCreatorFlow, selectedMaterial, colours, filament])
   const selectedColour = availableColours.find((item) => item.name === colour)
   const colourHex = selectedColour?.hex || null
   const stockStatus = selectedColour?.stockStatus || 'unknown'
-  const rushAllowed = stockStatus === 'in_stock'
+  // Fix It Today: rush and priority need an in-stock colour. A print farm
+  // offers them only when it set those fees.
+  const rushAllowed = isCreatorFlow ? Boolean(farmProfile?.offers?.expedite) : stockStatus === 'in_stock'
+  const priorityAllowed = isCreatorFlow ? Boolean(farmProfile?.offers?.priority) : rushAllowed
   const effectiveSettings = useMemo(() => buildPrintSettings({ filament, settings: printSettings }), [filament, printSettings])
-  const creatorConfiguration = useMemo(() => mapPurposeToConfiguration({ purpose, colour: creatorColour }, []), [purpose, creatorColour])
+  const creatorConfiguration = useMemo(() => mapPurposeToConfiguration({ purpose, colour, filament: filament || 'pla' }, []), [purpose, colour, filament])
   const quoteSettings = useMemo(() => printSettingsToQuoteSettings(isCreatorFlow ? creatorConfiguration.printSettings : effectiveSettings),
     [isCreatorFlow, creatorConfiguration, effectiveSettings])
-  const creatorGrams = metrics ? estimateMaterialGrams({ ...metrics, ...quoteSettings }) : null
-  const creatorEstimate = isCreatorFlow && selectedMaterial ? estimateCreatorPrintPrice({ grams: creatorGrams,
-    pricePerGram: selectedMaterial.pricePerGram, minimumCharge: service.minimumCharge }) : null
-  const creatorTooBig = isCreatorFlow && exceedsBuild(metrics?.dimensionsCm, service.maxBuildMm)
   const formats = isCreatorFlow ? service.acceptedFormats : ['stl', 'obj', '3mf']
   const fileError = file ? validatePrintFile(file, formats) : null
   const hasModel = Boolean(scene && metrics)
@@ -220,24 +226,31 @@ export default function PrintRequestFlow() {
   const deliveryOption = deliveryOptions.find((option) => option.type === deliveryType) || deliveryOptions[0] || null
   const useSavedAddress = Boolean(savedAddress) && !editingAddress
   const effectiveAddress = useSavedAddress ? savedAddress : addressDraft
-  const clientLimits = metrics ? checkMachineLimits(metrics.dimensionsCm, null, config.machineLimits) : { fits: true }
-  const tooBig = !isCreatorFlow && hasModel && (!clientLimits.fits || (quoteState === 'error' && TOO_LARGE.test(quoteError)))
+  const machineLimits = isCreatorFlow ? farmProfile.machineLimits : config.machineLimits
+  const clientLimits = metrics ? checkMachineLimits(metrics.dimensionsCm, null, machineLimits) : { fits: true }
+  const tooBig = hasModel && (!clientLimits.fits || (quoteState === 'error' && TOO_LARGE.test(quoteError)))
   const checklist = useMemo(() => {
-    const items = buildChecklist({ hasModel, fits: !tooBig, hasColour: isCreatorFlow ? Boolean(selectedMaterial) : Boolean(colour || perPartColours),
-      delivery: deliveryOption, address: effectiveAddress })
-    return isCreatorFlow ? items.slice(0, 3) : items
+    // The creator arranges delivery with the customer directly, so a print
+    // farm's courier option needs no address on this page.
+    const items = buildChecklist({ hasModel, fits: !tooBig, hasColour: isCreatorFlow ? Boolean(selectedMaterial && colour) : Boolean(colour || perPartColours),
+      delivery: isCreatorFlow && deliveryOption ? { ...deliveryOption, needsAddress: false } : deliveryOption, address: effectiveAddress })
+    if (isCreatorFlow) items[3] = { ...items[3], label: 'Delivery option chosen' }
+    return items
   }, [hasModel, tooBig, isCreatorFlow, selectedMaterial, colour, perPartColours, deliveryOption, effectiveAddress])
   const ready = checklist.every((item) => item.ok) && !fileError
   const busy = submitting || parsing || importing || loadState === 'loading' || locked
-  const estimateOnly = metrics?.confidence === 'low' || quote?.confidence === 'low'
+  // A print farm's price is always an estimate: the creator confirms it.
+  const estimateOnly = isCreatorFlow || metrics?.confidence === 'low' || quote?.confidence === 'low'
 
   useEffect(() => {
-    if (!rushAllowed && (options.expedite || options.priority)) setOptions((current) => ({ ...current, expedite: false, priority: false }))
-  }, [rushAllowed, options.expedite, options.priority])
+    if ((!rushAllowed && options.expedite) || (!priorityAllowed && options.priority)) {
+      setOptions((current) => ({ ...current, expedite: rushAllowed && current.expedite, priority: priorityAllowed && current.priority }))
+    }
+  }, [rushAllowed, priorityAllowed, options.expedite, options.priority])
 
   useEffect(() => {
     setQuote(null); setQuoteError('')
-    if (isCreatorFlow || !(metrics?.volumeCm3 > 0)) { setQuoteState('idle'); return }
+    if (!(metrics?.volumeCm3 > 0) || (isCreatorFlow && !(filament && colour))) { setQuoteState('idle'); return }
     const abort = new AbortController()
     setQuoteState('loading')
     const timer = setTimeout(async () => {
@@ -246,9 +259,10 @@ export default function PrintRequestFlow() {
           body: JSON.stringify({ volumeCm3: metrics.volumeCm3, dimensionsCm: metrics.dimensionsCm, confidence: metrics.confidence,
             settings: quoteSettings, options: pickOptions(options),
             ...(colour ? { selection: { filament, colour } } : {}),
-            // A saved model is re-measured on the server so the preview shows
-            // the same number the cart will charge.
-            ...(useStoredModel ? { requestId, preview: true } : {}) }) })
+            // A print farm's estimate is priced on the server with the farm's
+            // saved profile. A saved model is re-measured on the server so the
+            // preview shows the same number the cart will charge.
+            ...(isCreatorFlow ? { creatorUserId: creator.userId, preview: true } : useStoredModel ? { requestId, preview: true } : {}) }) })
         const data = await readJson(res)
         if (!res.ok || !Number.isFinite(data.quote?.total)) throw new Error(data.error || 'The instant estimate is unavailable. You can still send the model for review.')
         if (!abort.signal.aborted) { setQuote(data.quote); setQuoteState('ready') }
@@ -257,7 +271,7 @@ export default function PrintRequestFlow() {
       }
     }, 350)
     return () => { clearTimeout(timer); abort.abort() }
-  }, [metrics, quoteSettings, options, filament, colour, isCreatorFlow, useStoredModel, requestId])
+  }, [metrics, quoteSettings, options, filament, colour, isCreatorFlow, creator, useStoredModel, requestId])
 
   const loadBuffer = useCallback(async (name, buffer, version) => {
     const store = useStore.getState()
@@ -363,7 +377,7 @@ export default function PrintRequestFlow() {
     if (!perPartColours && !isCreatorFlow && colourHex) scene?.traverse((mesh) => { if (mesh.isMesh) meshColors[mesh.name] = colourHex })
     const generic = perPartColours ? null : buildGeneric({ printSettings: effectiveSettings, colour })
     const printConfiguration = isCreatorFlow
-      ? { generic: { ...creatorConfiguration.generic, material: selectedMaterial.name, colour: creatorColour || null }, isConfigured: true }
+      ? { generic: { ...creatorConfiguration.generic, material: selectedMaterial.label, filament, colour: colour || null }, isConfigured: true }
       : { ...(generic ? { generic } : {}), printSettings: effectiveSettings, meshColors, isConfigured: true }
     // An already quoted request only accepts its note here; its settings go
     // through /api/custom-print/config, which re-quotes them.
@@ -399,7 +413,15 @@ export default function PrintRequestFlow() {
         setSavedAddress(saved); setEditingAddress(false)
       }
       const { id, meshColors, generic } = await saveDraft()
-      if (isCreatorFlow) { router.push('/account/prints'); return }
+      if (isCreatorFlow) {
+        // The farm's estimate is re-measured and saved on the request for the
+        // creator to confirm. It is never a cart price: payment is arranged
+        // directly with the creator. A failed estimate still sends the request.
+        const estimateRes = await fetch('/api/custom-print/estimate', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requestId: id, options: pickOptions(options), ...(deliveryOption ? { deliveryType: deliveryOption.type } : {}) }) }).catch(() => null)
+        if (!estimateRes?.ok) toast?.showToast?.(`Request sent. ${creator.displayName} will price it on review.`, 'info')
+        router.push('/account/prints'); return
+      }
       const configRes = await fetch('/api/custom-print/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId: id, mode: 'instant', printSettings: effectiveSettings, meshColors,
           ...(generic ? { generic } : {}), options: pickOptions(options) }) })
@@ -453,10 +475,11 @@ export default function PrintRequestFlow() {
   const printedBy = isCreatorFlow ? creator.displayName : 'Fix It Today'
   const modelSummary = hasModel ? (file?.name || storedModel?.originalName || 'Model ready') : 'STL, OBJ, 3MF'
   const settingsSummary = `${strengthFromSettings(effectiveSettings) || 'Custom'} · ${qualityFromSettings(effectiveSettings) || 'Custom'}`
-  const grams = quote?.inputs?.weightGrams ?? (isCreatorFlow ? creatorGrams : null)
+  const grams = quote?.inputs?.weightGrams ?? null
   const fileName = file?.name || storedModel?.originalName || ''
   const cartLabel = busyAction === 'cart' ? (progress > 0 && progress < 100 ? `Uploading ${progress}%` : 'Saving your request…')
-    : isCreatorFlow ? `Send to ${creator.displayName}` : 'Add to cart'
+    : isCreatorFlow ? `Send request to ${creator.displayName}` : 'Add to cart'
+  const leadTimeDays = farmProfile?.leadTimeDays || service?.leadTimeDays
 
   return (
     <div className="min-h-screen bg-[#f7f8fa] px-4 py-8 text-textColor sm:px-8">
@@ -466,7 +489,7 @@ export default function PrintRequestFlow() {
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-lightColor">{printedBy} · 3D printing</p>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Get a 3D print made</h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-lightColor">{isCreatorFlow
-              ? `${service.headline} · About ${service.leadTimeDays} days. Payment is arranged directly with the creator.`
+              ? `${service.headline} · About ${leadTimeDays} days. Payment is arranged directly with the creator.`
               : 'Upload a model, choose material and colour, and see the price as you go. Nothing is charged until you check out.'}</p>
           </div>
           {!signedIn && <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-blue-800">No account needed to get a price</span>}
@@ -478,18 +501,17 @@ export default function PrintRequestFlow() {
           <div className="min-w-0 space-y-4">
             <StepCard number={1} title="Your model" summary={modelSummary} done={hasModel}>
               <ModelStep file={file} fileName={fileName} scene={scene} metrics={metrics} source={source} formats={formats} parsing={parsing} importing={importing}
-                disabled={busy} modelLocked={modelLocked} colourHex={isCreatorFlow ? null : colourHex} meshColors={perPartColours} layerHeight={effectiveSettings.layerHeight}
+                disabled={busy} modelLocked={modelLocked} colourHex={colourHex} meshColors={perPartColours} layerHeight={effectiveSettings.layerHeight}
                 grams={grams} tooBig={tooBig} limitMessage={quoteState === 'error' && TOO_LARGE.test(quoteError) ? quoteError : ''}
                 onChooseFile={(nextFile) => chooseFile(nextFile, source).catch(() => {})} onImport={chooseFile} onBusyChange={setImporting}
                 onSource={(value) => { loadVersion.current += 1; setFile(null); setScene(null); setMetrics(null); setQuote(null); setSource(normalizeDesignSource(value)) }} />
-              {creatorTooBig && <p className="mt-3 text-sm text-amber-700">This model may exceed the creator’s build size and need splitting. The creator will review it.</p>}
             </StepCard>
-            <StepCard number={2} title="Material and colour" summary={isCreatorFlow ? [material, creatorColour].filter(Boolean).join(' · ') : ''} done={isCreatorFlow ? Boolean(selectedMaterial) : Boolean(colour)}>
-              {isCreatorFlow ? <div className="space-y-4">
-                <label className="block text-sm">Material<select aria-label="Material" value={material} disabled={busy} onChange={(event) => { setMaterial(event.target.value); setCreatorColour(materials.find((item) => item.name === event.target.value)?.colours?.[0] || '') }} className="mt-2 block w-full rounded-lg border border-borderColor p-3">{materials.map((item) => <option key={item.name}>{item.name}</option>)}</select></label>
-                {selectedMaterial?.colours?.length > 0 && <label className="block text-sm">Colour<select aria-label="Colour" value={creatorColour} disabled={busy} onChange={(event) => setCreatorColour(event.target.value)} className="mt-2 block w-full rounded-lg border border-borderColor p-3">{selectedMaterial.colours.map((item) => <option key={item}>{item}</option>)}</select></label>}
-                <p className="text-xs text-lightColor">Tell the creator about strength or appearance needs in your note. They will confirm the print settings.</p>
-              </div> : <MaterialColourStep colours={colours} filament={filament} colour={colour} perPart={Boolean(perPartColours)} disabled={busy}
+            <StepCard number={2} title="Material and colour" summary={isCreatorFlow ? [selectedMaterial?.label, colour].filter(Boolean).join(' · ') : ''} done={isCreatorFlow ? Boolean(selectedMaterial && colour) : Boolean(colour)}>
+              {isCreatorFlow ? farmMaterials.length ? <MaterialColourStep materials={farmMaterials} filament={filament} colour={colour} disabled={busy}
+                note={`Materials and colours ${creator.displayName} offers. Tell them about strength or appearance needs in your note.`}
+                onChange={(next) => { setFilament(next.filament); setColour(next.colour) }} />
+                : <p role="status" className="text-sm text-amber-800">{creator.displayName} has not listed any materials yet. Check back soon.</p>
+                : <MaterialColourStep colours={colours} filament={filament} colour={colour} perPart={Boolean(perPartColours)} disabled={busy}
                 onChange={(next) => { setPerPartColours(null); setFilament(next.filament); setColour(next.colour) }} />}
             </StepCard>
             <StepCard number={3} title="How it should be printed" summary={isCreatorFlow ? (purpose || 'Balanced') : settingsSummary} done>
@@ -501,29 +523,39 @@ export default function PrintRequestFlow() {
                   <button type="button" onClick={() => setPurpose('')} className="mt-2 text-xs underline underline-offset-4">Use balanced defaults</button>
                   <p className="mt-2 text-xs text-lightColor">These are preferences for the creator to review. They will confirm the material, printing process and final settings.</p>
                 </fieldset>
+                <div className="flex flex-wrap gap-5 text-sm">
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={options.postProcessing} disabled={busy}
+                    onChange={(event) => setOptions({ ...options, postProcessing: event.target.checked })} />Sand and finish</label>
+                  {rushAllowed && <label className="flex items-center gap-2"><input type="checkbox" checked={options.expedite} disabled={busy}
+                    onChange={(event) => setOptions({ ...options, expedite: event.target.checked })} />Rush, sooner</label>}
+                  {priorityAllowed && <label className="flex items-center gap-2"><input type="checkbox" checked={options.priority} disabled={busy}
+                    onChange={(event) => setOptions({ ...options, priority: event.target.checked })} />Priority</label>}
+                </div>
                 <label htmlFor="notes" className="block text-sm font-medium">Anything else? <span className="font-normal text-lightColor">Optional</span>
                   <textarea id="notes" rows={3} maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Deadline, fit, finish or how you will use the part" className="mt-2 w-full rounded-lg border border-borderColor p-3 text-sm font-normal" /></label>
               </div> : <PrintSettingsStep printSettings={effectiveSettings} onSettings={setPrintSettings} note={note} onNote={setNote} options={options} onOptions={setOptions}
                 rushAllowed={rushAllowed} quoteLines={quote?.lines} disabled={busy} onOpenEditor={openEditor} onManualQuote={requestManualQuote}
                 busyAction={busyAction} signedIn={signedIn} canSave={hasModel && !fileError} />}
             </StepCard>
-            {!isCreatorFlow && <StepCard number={4} title="Delivery" summary={deliveryOption?.displayName || ''} done={checklist[3]?.ok}>
-              {config.state === 'error' ? <p role="alert" className="text-sm text-red-700">Delivery options unavailable. Reload this page to try again.</p>
+            <StepCard number={4} title="Delivery" summary={deliveryOption?.displayName || ''} done={checklist[3]?.ok}>
+              {isCreatorFlow ? deliveryOptions.length ? <DeliveryStep options={deliveryOptions} value={deliveryOption?.type || ''} onSelect={setDeliveryType} disabled={busy}
+                addressNote={`${creator.displayName} arranges collection or courier with you directly once they confirm the price.`} />
+                : <p className="text-sm text-lightColor">{creator.displayName} arranges collection or courier with you directly.</p>
+                : config.state === 'error' ? <p role="alert" className="text-sm text-red-700">Delivery options unavailable. Reload this page to try again.</p>
                 : config.state === 'loading' ? <p className="text-sm text-lightColor">Loading delivery options…</p> : <DeliveryStep options={deliveryOptions} value={deliveryOption?.type || ''} onSelect={setDeliveryType} savedAddress={savedAddress} editing={editingAddress}
                 onEdit={() => { setAddressDraft({ ...EMPTY_ADDRESS, ...savedAddress }); setEditingAddress(true) }} address={addressDraft} onAddress={setAddressDraft}
                 onSaveAddress={saveAddress} saving={addressSaving} signedIn={signedIn} disabled={busy} />}
-            </StepCard>}
+            </StepCard>
           </div>
-          <PricePanel quote={isCreatorFlow ? null : quote} quoteState={quoteState} quoteError={quoteError} delivery={isCreatorFlow ? null : deliveryOption} filament={filament}
+          <PricePanel quote={quote} quoteState={quoteState} quoteError={quoteError} delivery={deliveryOption} filament={filament}
             checklist={checklist} ready={ready} printedBy={printedBy} estimateOnly={estimateOnly} submitting={submitting} progress={progress} error={error || fileError}
             hasModel={hasModel} hint={isCreatorFlow ? `${creator.displayName} confirms the final quote before printing.` : 'You can still edit everything in the cart.'}
-            cta={!signedIn ? <><SignInButton mode="modal"><button type="button" disabled={!ready || busy} className={primary}>Sign in to add to cart</button></SignInButton>
+            totalNote={isCreatorFlow ? `${creator.displayName} confirms the final price. Payment is arranged directly with the creator.` : undefined}
+            checklistLabel={isCreatorFlow ? 'Before you send your request' : undefined}
+            cta={!signedIn ? <><SignInButton mode="modal"><button type="button" disabled={!ready || busy} className={primary}>{isCreatorFlow ? 'Sign in to send your request' : 'Sign in to add to cart'}</button></SignInButton>
               <p className="text-center text-xs text-lightColor">Signing in with Google reloads this page; your choices are kept, but the file will need to be added again.</p></>
               : <button type="submit" disabled={!ready || busy || !isLoaded} className={primary}>{cartLabel}</button>}>
-            {isCreatorFlow && hasModel && <div className="pb-2">
-              {creatorEstimate?.ok ? <p className="font-mono text-3xl font-semibold tracking-tight">From {money(creatorEstimate.amount)}</p> : <p className="text-sm">Quote on review</p>}
-              <p className="mt-1 text-xs text-lightColor">Indicative price for one model file. {creator.displayName} confirms the final quote, material and settings.</p>
-            </div>}
+            {isCreatorFlow && leadTimeDays && <p className="pb-1 text-xs text-lightColor">Ready in about {leadTimeDays} days once {creator.displayName} confirms.</p>}
           </PricePanel>
         </form>
       </div>

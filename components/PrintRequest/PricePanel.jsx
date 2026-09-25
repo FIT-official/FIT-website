@@ -25,7 +25,8 @@ export function priceLines({ quote, delivery, filament }) {
 }
 
 export default function PricePanel({ quote, quoteState, quoteError, delivery, filament, checklist, ready, printedBy, estimateOnly,
-  submitting, progress, error, cta, hint, hasModel, children }) {
+  submitting, progress, error, cta, hint, hasModel, children, totalNote = 'Nothing is charged until you check out.',
+  checklistLabel = 'Before you add to cart' }) {
   const lines = priceLines({ quote, delivery, filament })
   const total = quote ? (Number(quote.total) || 0) + (Number(delivery?.price) || 0) : null
   return (
@@ -36,7 +37,7 @@ export default function PricePanel({ quote, quoteState, quoteError, delivery, fi
       </div>
       <div className="flex items-center gap-3 border-b border-borderColor px-5 py-2.5 text-sm"><span className="text-[11px] font-semibold uppercase tracking-wider text-lightColor">Printed by</span><span className="font-medium">{printedBy}</span></div>
       <div className="border-b border-borderColor px-5 py-4">
-        {total != null ? <><p className="font-mono text-3xl font-semibold tracking-tight">{money(total)}</p><p className="text-xs text-lightColor">Nothing is charged until you check out.</p></>
+        {total != null ? <><p className="font-mono text-3xl font-semibold tracking-tight">{money(total)}</p><p className="text-xs text-lightColor">{totalNote}</p></>
           : <><p className="font-mono text-3xl font-semibold text-lightColor/60">S$ —</p>
             <p className="text-xs text-lightColor">{quoteState === 'loading' ? 'Calculating your price…' : hasModel ? quoteError || 'This model needs a review before it can be priced.' : 'Upload a model to see the price'}</p></>}
       </div>
@@ -45,7 +46,7 @@ export default function PricePanel({ quote, quoteState, quoteError, delivery, fi
         <li className="mt-1.5 flex justify-between gap-3 border-t border-dashed border-borderColor pt-2 font-semibold"><span>Total</span><span className="font-mono">{money(total)}</span></li>
         {quote?.minimumApplied && <li className="pb-1 text-xs text-lightColor">Minimum order {money(Number(quote.total) || 0)} applied</li>}
       </ul>}
-      <ul aria-label="Before you add to cart" className="space-y-1 border-b border-borderColor px-5 py-3 text-xs text-lightColor">
+      <ul aria-label={checklistLabel} className="space-y-1 border-b border-borderColor px-5 py-3 text-xs text-lightColor">
         {checklist.map(item => <li key={item.key} data-ok={item.ok} className="flex items-center gap-2"><span aria-hidden="true" className={item.ok ? 'text-green-700' : 'text-borderColor'}>{item.ok ? '●' : '○'}</span><span className={item.ok ? 'text-textColor' : ''}>{item.label}</span></li>)}
       </ul>
       <div className="space-y-2 px-5 py-4">

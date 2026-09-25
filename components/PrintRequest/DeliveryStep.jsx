@@ -34,8 +34,10 @@ export function AddressForm({ address, onChange, onSave, saving = false, signedI
   )
 }
 
+// `addressNote` replaces the address step: a creator's print farm arranges
+// collection or courier with the customer directly.
 export default function DeliveryStep({ options, value, onSelect, savedAddress, editing, onEdit, address, onAddress, onSaveAddress,
-  saving = false, signedIn, disabled = false }) {
+  saving = false, signedIn, disabled = false, addressNote = '' }) {
   const chosen = options.find(option => option.type === value)
   const useSaved = Boolean(savedAddress) && !editing
   return (
@@ -50,7 +52,7 @@ export default function DeliveryStep({ options, value, onSelect, savedAddress, e
           </label>
         })}
       </div>
-      {chosen?.needsAddress ? useSaved ? <div className="flex items-start justify-between gap-3 rounded-md border border-green-700/40 bg-green-50 px-3 py-2.5 text-sm">
+      {addressNote ? <p className="text-xs text-lightColor">{addressNote}</p> : chosen?.needsAddress ? useSaved ? <div className="flex items-start justify-between gap-3 rounded-md border border-green-700/40 bg-green-50 px-3 py-2.5 text-sm">
         <div className="min-w-0"><p className="font-semibold">Deliver to</p>
           <p>{savedAddress.street}{savedAddress.unitNumber ? ` ${savedAddress.unitNumber}` : ''}, {savedAddress.city} {savedAddress.postalCode}</p>
           <p className="text-xs text-lightColor">{[savedAddress.state, savedAddress.country].filter(Boolean).join(', ')}</p></div>

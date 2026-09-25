@@ -1,10 +1,13 @@
 'use client'
 import { colourStockLabel, colourStockNote, materialOptions } from '@/lib/customPrint/materials'
 
+const money = value => new Intl.NumberFormat('en-SG', { style: 'currency', currency: 'SGD', minimumFractionDigits: 2, maximumFractionDigits: 3 }).format(value)
+
 // Material cards (one per filament family) and the colour swatches of the
-// chosen material. Stock badges come from the live filament inventory.
-export default function MaterialColourStep({ colours, filament, colour, perPart = false, disabled = false, onChange }) {
-  const materials = materialOptions(colours)
+// chosen material. Stock badges come from the live filament inventory. A
+// creator's print farm passes its own `materials` (what it offers, with S$/g).
+export default function MaterialColourStep({ colours, materials: offered = null, filament, colour, perPart = false, disabled = false, note = '', onChange }) {
+  const materials = offered || materialOptions(colours)
   const current = materials.find(material => material.value === filament) || materials[0]
   const selected = current?.colours.find(item => item.name === colour)
   const chooseMaterial = material => {
@@ -22,7 +25,7 @@ export default function MaterialColourStep({ colours, filament, colour, perPart 
             {material.recommended && <span className="absolute right-2 top-2 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#1a1400]">Recommended</span>}
             <span className="pr-24 text-sm font-semibold">{material.label}</span>
             <span className="text-xs text-lightColor">{material.description}</span>
-            <span className="mt-auto font-mono text-[11px] text-lightColor">{material.colours.length} colour{material.colours.length === 1 ? '' : 's'}</span>
+            <span className="mt-auto font-mono text-[11px] text-lightColor">{material.colours.length} colour{material.colours.length === 1 ? '' : 's'}{Number.isFinite(material.ratePerGram) ? ` · ${money(material.ratePerGram)}/g` : ''}</span>
           </button>
         })}
       </div>
@@ -45,7 +48,7 @@ export default function MaterialColourStep({ colours, filament, colour, perPart 
       </div>}
       <p className="mt-2 text-sm">{current?.label}{colour ? ` · ${colour}` : ''}{selected && colourStockLabel(selected.stockStatus) ? <span className="text-lightColor"> · {colourStockLabel(selected.stockStatus)}</span> : ''}</p>
       {selected && colourStockNote(selected.stockStatus) && <p role="status" className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">{colourStockNote(selected.stockStatus)}</p>}
-      <p className="mt-2 text-xs text-lightColor">One colour for the whole part. Need several colours or a specific filament? Use Advanced options below.</p>
+      <p className="mt-2 text-xs text-lightColor">{note || 'One colour for the whole part. Need several colours or a specific filament? Use Advanced options below.'}</p>
     </div>
   )
 }
