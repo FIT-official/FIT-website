@@ -87,12 +87,14 @@ const routeResponse = {
     },
     profile: {
         materials: [
-            { filament: 'pla', label: 'PLA', ratePerGram: 0.125, colours: [
+            { filament: 'pla', label: 'PLA', ratePerGram: 0.125, note: 'Most colours in stock', colours: [
                 { filament: 'pla', name: 'Jade White', code: '10100', hex: '#ffffff' },
                 { filament: 'pla', name: 'Black', code: '10101', hex: '#000000' },
             ] },
-            { filament: 'petg', label: 'PETG', ratePerGram: 0.18, colours: [{ filament: 'petg', name: 'White', code: '30106', hex: '#f7f7f4' }] },
+            { filament: 'petg', label: 'PETG', ratePerGram: 0.18, note: '', colours: [{ filament: 'petg', name: 'White', code: '30106', hex: '#f7f7f4' }] },
         ],
+        reviewMaterials: [{ key: 'review-1', label: 'Nylon', note: 'Dried first', colours: [{ name: 'Black', hex: null }] }],
+        minimumPrice: 8,
         deliveryOptions: [
             { type: 'pickup', displayName: 'Collect in Tampines', description: '', price: 0, needsAddress: false },
             { type: 'courier', displayName: 'Courier', description: '', price: 8, needsAddress: true },
@@ -109,7 +111,11 @@ describe('PrintServiceBlock with a per-farm pricing profile', () => {
         render(<PrintServiceBlock settings={{}} creator={creator} />)
         expect(await screen.findByText('PETG')).toBeInTheDocument()
         const rows = screen.getAllByRole('row').slice(1)
-        expect(rows).toHaveLength(2)
+        expect(rows).toHaveLength(3)
+        expect(rows[0]).toHaveTextContent('Most colours in stock')
+        expect(rows[2]).toHaveTextContent('Nylon')
+        expect(rows[2]).toHaveTextContent('Dried first')
+        expect(rows[2]).toHaveTextContent('On review')
         expect(rows[0]).toHaveTextContent('PLA')
         expect(rows[0]).toHaveTextContent('Jade White')
         expect(rows[0]).toHaveTextContent('Black')
@@ -119,7 +125,7 @@ describe('PrintServiceBlock with a per-farm pricing profile', () => {
         expect(screen.getByText('4 days')).toBeInTheDocument()
         expect(screen.getByText('256 × 256 × 256 mm')).toBeInTheDocument()
         expect(screen.getByText('Collect in Tampines (free), Courier (S$8.00)')).toBeInTheDocument()
-        expect(screen.queryByText(/Minimum charge/)).toBeNull()
+        expect(screen.getByText('Minimum order').closest('span')).toHaveTextContent('Minimum order S$8.00')
         expect(screen.getByRole('link', { name: 'Upload your model' })).toHaveAttribute('href', '/prints/request?creator=user_creator')
     })
 })

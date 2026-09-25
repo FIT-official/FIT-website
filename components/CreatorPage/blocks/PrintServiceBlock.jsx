@@ -34,13 +34,23 @@ export function printServiceView(data) {
             ? `${[limits.maxLengthCm, limits.maxWidthCm, limits.maxHeightCm].map((cm) => Math.round(Number(cm) * 10)).join(' × ')} mm`
             : ''
         return {
-            materials: (profile.materials || []).map((m) => ({
-                name: m.label || m.filament,
-                colours: (m.colours || []).map((c) => ({ name: c.name, hex: c.hex })),
-                ratePerGram: m.ratePerGram,
-                note: '',
-            })),
-            minimumCharge: null,
+            materials: [
+                ...(profile.materials || []).map((m) => ({
+                    name: m.label || m.filament,
+                    colours: (m.colours || []).map((c) => ({ name: c.name, hex: c.hex })),
+                    ratePerGram: m.ratePerGram,
+                    note: m.note || '',
+                })),
+                // Materials outside the catalogue: the creator prices them on review.
+                ...(profile.reviewMaterials || []).map((m) => ({
+                    name: m.label,
+                    colours: (m.colours || []).map((c) => ({ name: c.name, hex: null })),
+                    ratePerGram: null,
+                    onReview: true,
+                    note: m.note || '',
+                })),
+            ],
+            minimumCharge: Number(profile.minimumPrice) > 0 ? Number(profile.minimumPrice) : null,
             leadTimeDays: profile.leadTimeDays ?? service.leadTimeDays,
             maxSize: size,
             maxWeightKg: Number(limits?.maxWeightKg) > 0 ? Number(limits.maxWeightKg) : null,
@@ -134,7 +144,7 @@ export default function PrintServiceBlock({ settings = {}, creator }) {
                                                 ))}
                                             </div>
                                         </td>
-                                        <td className="py-2 text-right text-textColor whitespace-nowrap">{perGram(m.ratePerGram)}</td>
+                                        <td className="py-2 text-right text-textColor whitespace-nowrap">{m.onReview ? 'On review' : perGram(m.ratePerGram)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -144,7 +154,7 @@ export default function PrintServiceBlock({ settings = {}, creator }) {
 
                 <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-lightColor">
                     {view.minimumCharge != null && (
-                        <span>Minimum charge: <span className="text-textColor">{sgd(view.minimumCharge)}</span></span>
+                        <span>Minimum order <span className="text-textColor">{sgd(view.minimumCharge)}</span></span>
                     )}
                     {Number.isFinite(leadTimeDays) && leadTimeDays > 0 && (
                         <span>
