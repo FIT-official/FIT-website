@@ -37,7 +37,7 @@ export default function BlogPageClient({ post, contentHtml, related = [], previe
             const candidate = post.author.firstName || post.author.name || post.author.username
             if (candidate && candidate.trim()) return candidate
         }
-        return 'Admin'
+        return 'Fix It Today'
     })()
     return (
         <div className="min-h-[92vh] flex flex-col items-center pt-12 pb-32 border-b border-borderColor justify-center">
