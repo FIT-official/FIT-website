@@ -87,6 +87,11 @@ export async function PUT(request) {
   let notifyEvent = null
 
   if (action === 'quote') {
+    // Creator print-farm jobs are quoted by the creator and paid directly to
+    // them; a Fix It Today quote would make them look payable here.
+    if (doc.creatorUserId) {
+      return NextResponse.json({ error: 'This request is with a creator print farm; the creator sends the quote.' }, { status: 409 })
+    }
     if (typeof quoteAmount !== 'number' || quoteAmount < 0) {
       return NextResponse.json({ error: 'quoteAmount must be a non-negative number' }, { status: 400 })
     }

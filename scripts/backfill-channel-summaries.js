@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -88,10 +89,9 @@ async function run() {
     }
 
     console.log(`Backfill complete. Upserted summaries for ${processed} channels.`);
-    process.exit(0);
 }
 
-run().catch((err) => {
+run().finally(() => mongoose.disconnect()).catch((err) => {
     console.error("ChannelSummary backfill failed:", err);
-    process.exit(1);
+    process.exitCode = 1;
 });

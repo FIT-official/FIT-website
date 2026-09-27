@@ -1,7 +1,9 @@
 'use client'
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useUser } from "@clerk/nextjs"
 import posthog from 'posthog-js'
+import { storeFetch, rememberCheckoutAttempt } from '@/lib/storeRequest';
+import { ConnectionNotice, StoreError, useStoreConnection } from '@/components/Cart/StoreFeedback';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { GoChevronLeft } from 'react-icons/go';
@@ -16,13 +18,15 @@ import { customPrintStage, isCustomPrintBlockingCheckout } from '@/utils/customP
 import { customPrintDisplayPrice } from '@/lib/customPrintDisplayPrice';
 import { useCurrency } from '@/components/General/CurrencyContext';
 import CustomPrintUpload from '@/components/Cart/CustomPrintUpload';
+import DeliveryAddressPrompt from '@/components/Cart/DeliveryAddressPrompt';
+import { ADD_ADDRESS_TO_CHECKOUT, deliveryMismatchReason } from '@/lib/checkoutAddressGate';
 import { HiCheck, HiExclamationCircle } from 'react-icons/hi';
 import { FaRegCircleCheck } from 'react-icons/fa6';
 
 // Helper to fetch delivery type metadata from /api/admin/settings (AppSettings)
 async function fetchDeliveryTypesMeta() {
     try {
-        const res = await fetch('/api/admin/settings');
+        const res = await storeFetch('/api/admin/settings');
         if (!res.ok) return {};
         const data = await res.json();
         const types = (data?.settings?.additionalDeliveryTypes || []).reduce((acc, dt) => {
@@ -38,38 +42,78 @@ async function fetchDeliveryTypesMeta() {
 function Cart() {
     const { user, isLoaded } = useUser();
     const [cart, setCart] = useState([]);
+    const [error, setError] = useState('');
+    const [checkoutBusy, setCheckoutBusy] = useState(false);
+    const [attemptId, setAttemptId] = useState('');
+    const mutationLock = useRef(false);
+    const offline = useStoreConnection(() => fetchCartData());
+    async function task(action, mutation = false) {
+        if (mutation && mutationLock.current) return;
+        if (mutation) mutationLock.current = true;
+        setError('');
+        try { return await action(); }
+        catch (err) { setError(err.message || 'Unable to update your cart. Please try again.'); }
+        finally { if (mutation) mutationLock.current = false; setLoading(false); }
+    }
     const [cartBreakdown, setCartBreakdown] = useState([]);
+    // Why ?addCustomRequest= could not add the request (e.g. a creator job).
+    const [addRequestError, setAddRequestError] = useState('');
     const [products, setProducts] = useState({});
     const [convertedPrices, setConvertedPrices] = useState({});
     const [loading, setLoading] = useState(true);
     const [deliveryTypesMeta, setDeliveryTypesMeta] = useState({});
     const [localOrderNotes, setLocalOrderNotes] = useState({});
-    const [showAddressPrompt, setShowAddressPrompt] = useState(false);
+    // Delivery-address gating. The breakdown no longer 400s without an
+    // address; it reports `addressMissing` and which lines ship, and the cart
+    // shows the inline address form next to a summary that stays visible.
+    const [addressMissing, setAddressMissing] = useState(false);
+    const [needsDeliveryAddress, setNeedsDeliveryAddress] = useState(false);
+    const [savedAddress, setSavedAddress] = useState(null);
     const [initializedCustomPrintDelivery, setInitializedCustomPrintDelivery] = useState({});
     const searchParams = useSearchParams();
     const redirectUrl = searchParams.get("redirect") || "/";
     const { showToast } = useToast();
     const globalCurrency = useCurrency();
 
-    const refreshCartBreakdown = async () => {
+    const loadCartBreakdown = async () => {
         setLoading(true);
-        const res = await fetch('/api/checkout/breakdown');
-        if (res.ok) {
-            const data = await res.json();
-            setCartBreakdown(data.cartBreakdown || []);
-            setShowAddressPrompt(false); // Hide prompt if breakdown loads successfully
-        } else {
-            const data = await res.json().catch(() => ({}));
-            // Check if error is due to missing address
-            if (data.error?.includes('delivery address') || data.error?.includes('address')) {
-                setShowAddressPrompt(true);
+        try {
+            const res = await storeFetch('/api/checkout/breakdown');
+            if (res.ok) {
+                const data = await res.json();
+                const lines = data.cartBreakdown || [];
+                setCartBreakdown(lines);
+                setAddressMissing(Boolean(data.addressMissing));
+                setSavedAddress(data.address || null);
+                setNeedsDeliveryAddress(
+                    typeof data.needsDeliveryAddress === 'boolean'
+                        ? data.needsDeliveryAddress
+                        : lines.some(line => line.needsDeliveryAddress !== false)
+                );
             } else {
-                showToast(data.error, 'error');
+                const data = await res.json().catch(() => ({}));
+                showToast(data.error || 'Could not load your cart summary', 'error');
+                setCartBreakdown([]);
+                setAddressMissing(false);
+                setNeedsDeliveryAddress(false);
             }
+        } catch (e) {
+            console.error('Error loading cart breakdown:', e);
+            setError(e.message || 'Could not load your cart summary');
+            showToast('Could not load your cart summary', 'error');
             setCartBreakdown([]);
+            setAddressMissing(false);
+            setNeedsDeliveryAddress(false);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
+
+    const refreshCartBreakdown = (...args) => task(() => loadCartBreakdown(...args), false);
+    const fetchCartData = (...args) => task(() => loadCartData(...args), false);
+    const handleDeliveryChange = (...args) => task(() => saveDeliveryChange(...args), true);
+    const handleRemove = (...args) => task(() => removeItem(...args), true);
+    const handleChangeQuantity = (...args) => task(() => changeQuantity(...args), true);
 
     // Fetch delivery type metadata on mount
     useEffect(() => {
@@ -77,35 +121,44 @@ function Cart() {
     }, []);
 
     useEffect(() => {
-        if (!isLoaded || !user) return;
+
 
         const maybeAddCustomRequest = async () => {
             const addCustomRequest = searchParams.get('addCustomRequest');
-            if (!addCustomRequest) return;
+            if (!addCustomRequest || !user) return;
 
             try {
-                const res = await fetch('/api/cart/custom-print', {
+                const res = await storeFetch('/api/cart/custom-print', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ requestId: addCustomRequest }),
                 });
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
-                    if (data.error) showToast(data.error, 'error');
+                    const message = data.error || 'This print request could not be added to your cart.';
+                    setAddRequestError(message);
+                    showToast(message, 'error');
                 }
             } catch (e) {
                 console.error('Error adding custom print to cart:', e);
+                const message = e.message || 'This print request could not be added to your cart. Please try again.';
+                setAddRequestError(message);
+                showToast(message, 'error');
             }
         };
 
         maybeAddCustomRequest().then(fetchCartData);
+        // Reload on account/URL changes; the request wrapper reads current state.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoaded, user, searchParams]);
 
-    const fetchCartData = async () => {
+    const loadCartData = async () => {
         setLoading(true);
-        const res = await fetch(`/api/user/cart`);
+        const res = await storeFetch(`/api/user/cart`);
         const data = await res.json();
-        setCart(data.cart || []);
+        if (!Array.isArray(data.cart)) throw new Error('Your cart could not be loaded. Please try again.');
+        setCart(data.cart);
+        setAttemptId(data.checkoutAttemptId || '');
 
         // Filter out custom print synthetic IDs and only fetch real products
         const productIds = (data.cart || [])
@@ -118,7 +171,7 @@ function Cart() {
         const hasCustomPrint = (data.cart || []).some(item => String(item.productId || '').startsWith('custom-print:'));
         if (hasCustomPrint) {
             try {
-                const customPrintRes = await fetch('/api/product/custom-print-config');
+                const customPrintRes = await storeFetch('/api/product/custom-print-config');
                 if (customPrintRes.ok) {
                     const customPrintData = await customPrintRes.json();
                     if (customPrintData.product) {
@@ -153,17 +206,18 @@ function Cart() {
         }
 
         if (productIds.length > 0) {
-            const res2 = await fetch(`/api/product?ids=${productIds.join(",")}&fields=_id,name,images,variants,discount,delivery,basePrice,variantTypes`);
+            const res2 = await storeFetch(`/api/product?ids=${productIds.join(",")}&fields=_id,name,images,variants,discount,delivery,basePrice,variantTypes`);
             const data2 = await res2.json();
             (data2.products || []).forEach(p => { prodMap[p._id] = p; });
         }
 
         setProducts(prodMap);
+        if (productIds.some(id => !prodMap[id])) throw new Error('Some cart items could not be loaded. Try again or remove unavailable items.');
         setLoading(false);
         // Fetch cart breakdown after loading cart
         if (data.cart && data.cart.length > 0) {
-            refreshCartBreakdown();
-        }
+            await refreshCartBreakdown();
+        } else { setCartBreakdown([]); }
     };
 
     // Calculate converted prices when products, breakdown or currency changes
@@ -225,7 +279,7 @@ function Cart() {
         }
     }, [products, cartBreakdown, globalCurrency]);
 
-    const handleDeliveryChange = async (cartItem, newType) => {
+    const saveDeliveryChange = async (cartItem, newType) => {
         // Optimistically update local UI
         setCart(prev => prev.map(item => {
             const variantsMatch = JSON.stringify(item.selectedVariants || {}) === JSON.stringify(cartItem.selectedVariants || {});
@@ -244,7 +298,7 @@ function Cart() {
             cartItem.selectedVariants && typeof cartItem.selectedVariants === 'object' && Object.keys(cartItem.selectedVariants).length > 0
                 ? cartItem.selectedVariants
                 : null;
-        const res = await fetch("/api/user/cart/delivery", {
+        const res = await storeFetch("/api/user/cart/delivery", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -256,14 +310,14 @@ function Cart() {
         });
         setLoading(false);
         if (res.ok) {
-            const cartRes = await fetch(`/api/user/cart`);
+            const cartRes = await storeFetch(`/api/user/cart`);
             const cartData = await cartRes.json();
             setCart(cartData.cart || []);
             refreshCartBreakdown();
         } else {
             // Re-sync if save failed
             try {
-                const cartRes = await fetch(`/api/user/cart`);
+                const cartRes = await storeFetch(`/api/user/cart`);
                 const cartData = await cartRes.json();
                 setCart(cartData.cart || []);
             } catch (e) {
@@ -272,9 +326,9 @@ function Cart() {
         }
     };
 
-    const handleRemove = async (cartItem) => {
+    const removeItem = async (cartItem) => {
         setLoading(true);
-        const res = await fetch("/api/user/cart", {
+        const res = await storeFetch("/api/user/cart", {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -285,19 +339,14 @@ function Cart() {
         });
         setLoading(false);
         if (res.ok) {
-            // Special handling for custom print items - remove by productId only
-            if (cartItem.productId === 'custom-print-request') {
-                setCart(cart => cart.filter(item => item.productId !== 'custom-print-request'));
-            } else {
-                setCart(cart =>
-                    cart.filter(item => {
-                        const variantsMatch = JSON.stringify(item.selectedVariants || {}) === JSON.stringify(cartItem.selectedVariants || {});
-                        return !(item.productId === cartItem.productId &&
-                            item.variantId === cartItem.variantId &&
-                            variantsMatch);
-                    })
-                );
-            }
+            setCart(cart =>
+                cart.filter(item => {
+                    const variantsMatch = JSON.stringify(item.selectedVariants || {}) === JSON.stringify(cartItem.selectedVariants || {});
+                    return !(item.productId === cartItem.productId &&
+                        item.variantId === cartItem.variantId &&
+                        variantsMatch);
+                })
+            );
             refreshCartBreakdown();
         }
     };
@@ -335,7 +384,7 @@ function Cart() {
                 variantId = variantKey === 'default' ? null : variantKey;
             }
 
-            await fetch("/api/user/cart/note", {
+            await storeFetch("/api/user/cart/note", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -348,10 +397,10 @@ function Cart() {
         }
     };
 
-    const handleChangeQuantity = async (cartItem, delta) => {
+    const changeQuantity = async (cartItem, delta) => {
         setLoading(true);
         if (delta === 1) {
-            const res = await fetch("/api/user/cart", {
+            const res = await storeFetch("/api/user/cart", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -381,12 +430,14 @@ function Cart() {
             }
         } else if (delta === -1) {
             // For digital and printDelivery items, always remove the entire item since they should only have quantity 1
-            if (cartItem.chosenDeliveryType === "digital" || cartItem.chosenDeliveryType === "printDelivery" || cartItem.quantity <= 1) {
-                await handleRemove(cartItem);
+            // A print request is one line of quantity 1 (the cart POST refuses custom-print lines).
+            if (cartItem.chosenDeliveryType === "digital" || cartItem.chosenDeliveryType === "printDelivery" || cartItem.quantity <= 1
+                || String(cartItem.productId || '').startsWith('custom-print:')) {
+                await removeItem(cartItem);
                 setLoading(false);
                 return;
             }
-            const res = await fetch("/api/user/cart", {
+            const res = await storeFetch("/api/user/cart", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -433,7 +484,7 @@ function Cart() {
             const requestId = item.customPrintRequestId || item.requestId || (item.productId || '').split(':')[1];
             if (!requestId) return;
             try {
-                const res = await fetch(`/api/custom-print?requestId=${requestId}`);
+                const res = await storeFetch(`/api/custom-print?requestId=${requestId}`);
                 if (res.ok) {
                     const data = await res.json();
                     if (data?.request?.requestId) {
@@ -486,15 +537,38 @@ function Cart() {
         return isCustomPrintPending(cartItem, customPrintRequest);
     });
 
+    // Checkout needs an address only when something in the cart ships, and
+    // every line must hold a delivery option its product/request still offers.
+    const addressBlocked = Boolean(user) && needsDeliveryAddress && addressMissing;
+    const mismatchReason = deliveryMismatchReason(cartBreakdown);
+    const checkoutBlockedReason = cart.length === 0
+        ? null
+        : hasPendingCustomPrint
+            ? 'Finish your custom print request to check out.'
+            : mismatchReason
+                ? mismatchReason
+                : addressBlocked
+                    ? ADD_ADDRESS_TO_CHECKOUT
+                    : null;
+    const checkoutDisabled = loading || checkoutBusy || offline || Boolean(error) || cart.length === 0 || Boolean(checkoutBlockedReason);
+
     return (
         <div className='flex w-full flex-col min-h-[92vh] py-12 border-b border-borderColor px-8'>
             <Link href={redirectUrl} className='flex w-full items-center text-sm font-normal gap-2 toggleXbutton'>
                 <GoChevronLeft /> Go Back
             </Link>
+            <ConnectionNotice offline={offline} />
+            <StoreError message={error} onRetry={fetchCartData} busy={loading} />
             <h2 className='flex items-center gap-2 ml-5 mb-2 mt-4 font-semibold text-3xl'>
                 <IoCartOutline />
                 Your Cart
             </h2>
+            {!user && <p className="text-sm mt-2">Guest cart. Enter contact and delivery details at checkout. Shipping estimates use Singapore until then.</p>}
+            {addRequestError && (
+                <p role='alert' className='mx-5 mt-2 rounded-md bg-amber-50 p-3 text-sm text-amber-800'>
+                    {addRequestError} <Link href='/account/prints' className='underline'>View your print requests</Link>
+                </p>
+            )}
             <div className='flex flex-col w-full py-4'>
                 <div className='flex flex-col border-t border-b w-full my-6 divide-y divide-borderColor border-borderColor'>
                     {loading ? (
@@ -508,7 +582,10 @@ function Cart() {
                                 const isCustomPrint = String(cartItem.productId || '').startsWith('custom-print:');
                                 const productKey = isCustomPrint ? 'custom-print' : cartItem.productId;
                                 const product = products[productKey];
-                                if (!product) return null;
+                                if (!product) return <div className="p-4" key={cartItem._id || index}>
+                                    <p>This item could not be loaded. Try again or remove it from your cart.</p>
+                                    <button className="underline" onClick={() => handleRemove(cartItem)} disabled={loading}>Remove unavailable item</button>
+                                </div>;
 
                                 // Find the corresponding breakdown item for pricing
                                 const breakdownItem = cartBreakdown.find(item => {
@@ -773,7 +850,7 @@ function Cart() {
                                                     <div className='flex flex-row rounded border border-borderColor py-1'>
                                                         <button
                                                             onClick={() => handleChangeQuantity(cartItem, 1)}
-                                                            disabled={loading || cartItem.chosenDeliveryType === "digital" || cartItem.chosenDeliveryType === "printDelivery"}
+                                                            disabled={loading || isCustomPrint || cartItem.chosenDeliveryType === "digital" || cartItem.chosenDeliveryType === "printDelivery"}
                                                             className="px-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                                             aria-label="Increase quantity"
                                                         >
@@ -979,7 +1056,7 @@ function Cart() {
                             })
                         ) : (
                             <div className='flex w-full items-center justify-center p-6 text-lightColor text-xs uppercase font-normal'>
-                                No items in cart.
+                                {error ? 'Your cart could not be loaded.' : 'No items in cart.'}
                             </div>
                         )
                     }
@@ -1016,31 +1093,30 @@ function Cart() {
                                 </div>
                             );
                         })()}
+                        {/* Mounted independent of `loading` so typing survives a
+                            summary refresh (e.g. a delivery option change). */}
+                        {addressBlocked && (
+                            <div className="mb-4">
+                                <DeliveryAddressPrompt
+                                    initialAddress={savedAddress}
+                                    onAddressSaved={(saved) => {
+                                        setSavedAddress(saved);
+                                        setAddressMissing(false);
+                                        refreshCartBreakdown();
+                                    }}
+                                />
+                            </div>
+                        )}
                         {loading ? (
                             <CartSummarySkeleton />
-                        ) : showAddressPrompt ? (
-                            <div className="mb-4 rounded-lg border border-borderColor bg-baseColor p-6 space-y-4">
-                                <div className="space-y-2">
-                                    <h3 className="text-sm font-semibold text-textColor">Delivery Address Required</h3>
-                                    <p className="text-xs text-lightColor leading-relaxed">
-                                        Please add your delivery address to see accurate shipping costs and proceed with checkout.
-                                    </p>
-                                </div>
-                                <Link
-                                    href="/account?tab=billing"
-                                    className="block w-full px-4 py-3 bg-textColor text-background rounded-md text-sm font-medium hover:bg-textColor/90 transition-all duration-200 text-center"
-                                >
-                                    Add Delivery Address
-                                </Link>
-                            </div>
                         ) : cartBreakdown.length === 0 ? (
-                            <div className="text-lightColor text-xs mb-4">No items in cart.</div>
+                            <div className="text-lightColor text-xs mb-4">{error ? 'Cart totals are unavailable. Please try again.' : 'No items in cart.'}</div>
                         ) : (
                             (() => {
                                 // Subtotal: sum of all final prices (base + variants - discount) × quantity
                                 const subtotal = cartBreakdown.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
                                 // Delivery fees: sum of all deliveryFee * quantity (per item)
-                                const totalDeliveryFee = cartBreakdown.reduce((sum, item) => sum + ((item.deliveryFee || 0) * (item.quantity || 1)), 0);
+                                const totalDeliveryFee = cartBreakdown.reduce((sum, item) => sum + (item.deliveryFee || 0), 0);
                                 // Grand total: subtotal + totalDeliveryFee
                                 const grandTotal = subtotal + totalDeliveryFee;
                                 const currency = cartBreakdown[0]?.currency || 'SGD';
@@ -1070,9 +1146,12 @@ function Cart() {
                                                             {item.quantity > 1 ? ` x${item.quantity}` : ""}
                                                         </span>
                                                         <span className='font-medium text-textColor text-right'>
-                                                            {`${currency} ${(item.deliveryFee ? item.deliveryFee * (item.quantity || 1) : 0).toFixed(2)}`}
+                                                            {`${currency} ${(item.deliveryFee || 0).toFixed(2)}`}
                                                         </span>
                                                     </div>
+                                                    {item.warning && (
+                                                        <span className="text-[11px] text-yellow-700">{item.warning}</span>
+                                                    )}
                                                     {deliveryMeta && (
                                                         <div className="flex flex-col text-[11px] text-lightColor ml-1 mt-0.5">
                                                             <span><b>Type:</b> {deliveryMeta.displayName} ({deliveryMeta.name})</span>
@@ -1097,21 +1176,35 @@ function Cart() {
                         <Link
                             href="/checkout"
                             onClick={async (e) => {
-                                if (hasPendingCustomPrint) {
+                                e.preventDefault();
+                                if (checkoutBusy || mutationLock.current || offline || error) return;
+                                if (checkoutDisabled) {
                                     e.preventDefault();
-                                    showToast('Please complete your custom print request before checking out.', 'error');
+                                    if (checkoutBlockedReason) showToast(checkoutBlockedReason, 'error');
                                     return;
                                 }
-                                posthog.capture('checkout_started', { item_count: cart.length });
-                                await submitOrderNotes();
-                                window.location.href = "/checkout";
+                                mutationLock.current = true;
+                                setCheckoutBusy(true);
+                                try {
+                                    await submitOrderNotes();
+                                    const latest = await (await storeFetch('/api/user/cart')).json();
+                                    rememberCheckoutAttempt(latest.checkoutAttemptId || attemptId);
+                                    try { posthog.capture('checkout_started', { item_count: cart.length }); } catch {}
+                                    window.location.href = '/checkout';
+                                } catch (err) { setError(err.message); }
+                                finally { mutationLock.current = false; setCheckoutBusy(false); }
                             }}
-                            className={`formBlackButton mt-4${cart.length === 0 || hasPendingCustomPrint ? " opacity-60 pointer-events-none cursor-not-allowed" : ""}`}
-                            tabIndex={cart.length === 0 || hasPendingCustomPrint ? -1 : 0}
-                            aria-disabled={cart.length === 0 || hasPendingCustomPrint}
+                            className={`formBlackButton mt-4${checkoutDisabled ? " opacity-60 pointer-events-none cursor-not-allowed" : ""}`}
+                            tabIndex={checkoutDisabled ? -1 : 0}
+                            aria-disabled={checkoutDisabled}
                         >
-                            Proceed to Checkout
+                            {checkoutBusy ? 'Saving cart...' : 'Proceed to Checkout'}
                         </Link>
+                        {!loading && checkoutBlockedReason && (
+                            <p data-testid="checkout-blocked-reason" className="text-xs text-lightColor mt-2">
+                                {checkoutBlockedReason}
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

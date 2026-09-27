@@ -34,6 +34,17 @@ afterEach(() => {
 })
 
 describe('server-rendered shop cards', () => {
+    it('lets a guest select a filament colour and add from the listing', async () => {
+        session.user = null; session.isSignedIn = false
+        render(<ProductCard product={{ ...publicProduct, productType: 'shop', listing: 'fit', infiniteStock: true,
+            variantTypes: [{ name: 'Colour', options: [{ name: 'White' }, { name: 'Black' }] }],
+            delivery: { deliveryTypes: [{ type: 'shipping' }] } }} />)
+        fireEvent.change(screen.getByLabelText('Lanbo PLA Colour'), { target: { value: 'Black' } })
+        fireEvent.click(screen.getByRole('button', { name: 'Add to Cart' }))
+        expect(await screen.findByRole('status')).toHaveTextContent('Added to cart')
+        const call = global.fetch.mock.calls.find(([url, options]) => url === '/api/user/cart' && options.method === 'POST')
+        expect(JSON.parse(call[1].body).cartItem).toMatchObject({ selectedVariants: { Colour: 'Black' }, quantity: 1 })
+    })
     it('keeps links and sold counts in initial HTML while withholding unresolved user controls', () => {
         const html = renderToStaticMarkup(<ProductCard product={publicProduct} />)
         expect(html).toContain('href="/products/lanbo-pla"')

@@ -37,7 +37,7 @@ if (!MONGODB_URI) {
 }
 
 async function main() {
-  await mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+  await mongoose.connect(MONGODB_URI, { maxPoolSize: 5, minPoolSize: 0, maxIdleTimeMS: 60000 });
 
   await AppSettings.findOneAndUpdate(
     { _id: 'app-settings' },
@@ -46,10 +46,9 @@ async function main() {
   );
   console.log('Production AppSettings updated with hardcoded PROD_PRICE_IDS:', PROD_PRICE_IDS);
 
-  await mongoose.disconnect();
 }
 
-main().catch(e => {
+main().finally(() => mongoose.disconnect()).catch(e => {
   console.error(e);
-  process.exit(1);
+  process.exitCode = 1;
 });

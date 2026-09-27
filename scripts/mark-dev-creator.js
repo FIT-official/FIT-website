@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 dotenv.config({ path: '.env.local' });
 
 async function markDevCreator() {
@@ -11,7 +12,8 @@ async function markDevCreator() {
 
     if (!process.env.MONGODB_URI) {
         console.error('MONGODB_URI is not set');
-        process.exit(1);
+        process.exitCode = 1;
+        return;
     }
 
     await connectToDatabase();
@@ -35,10 +37,9 @@ async function markDevCreator() {
         creatorProductsCount: Array.isArray(updated.creatorProducts) ? updated.creatorProducts.length : 0,
     });
 
-    process.exit(0);
 }
 
-markDevCreator().catch((err) => {
+markDevCreator().finally(() => mongoose.disconnect()).catch((err) => {
     console.error('Error marking dev creator:', err);
-    process.exit(1);
+    process.exitCode = 1;
 });

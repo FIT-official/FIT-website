@@ -5,6 +5,17 @@ import { fileURLToPath } from 'node:url'
 const root = dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
+  plugins: [{
+    name: 'script-hashbang',
+    enforce: 'pre',
+    // Vite hoists imports ahead of CLI hashbangs, which is invalid JavaScript.
+    // Keep the scripts executable directly while testing them as modules.
+    transform(code, id) {
+      if (id.replaceAll('\\', '/').includes('/scripts/') && code.startsWith('#!')) {
+        return { code: code.replace(/^#![^\r\n]*/, ''), map: null }
+      }
+    },
+  }],
   esbuild: {
     jsx: 'automatic',
   },

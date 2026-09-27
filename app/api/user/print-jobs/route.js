@@ -24,6 +24,10 @@ const JOB_PROJECTION = {
     basePrice: 1,
     printFee: 1,
     currency: 1,
+    // The print farm's saved estimate prefills the creator's quote.
+    estimate: 1,
+    estimatedAt: 1,
+    pricedWith: 1,
     statusHistory: 1,
     createdAt: 1,
     updatedAt: 1,

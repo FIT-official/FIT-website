@@ -45,7 +45,7 @@ const tierNameMap = {
 };
 
 async function main() {
-  await mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+  await mongoose.connect(MONGODB_URI, { maxPoolSize: 5, minPoolSize: 0, maxIdleTimeMS: 60000 });
 
   // Fetch all products
   const products = await stripe.products.list({ limit: 100, active: true });
@@ -66,8 +66,7 @@ async function main() {
   }
 
   if (Object.keys(priceIdMap).length === 0) {
-    console.error('No Stripe price IDs found for any tier. Aborting.');
-    process.exit(1);
+    throw new Error('No Stripe price IDs found for any tier. Aborting.');
   }
 
   // Update AppSettings in MongoDB
@@ -79,10 +78,9 @@ async function main() {
   );
   console.log('AppSettings updated with Stripe price IDs:', priceIdMap);
 
-  await mongoose.disconnect();
 }
 
-main().catch(e => {
+main().finally(() => mongoose.disconnect()).catch(e => {
   console.error(e);
-  process.exit(1);
+  process.exitCode = 1;
 });

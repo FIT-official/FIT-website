@@ -49,11 +49,11 @@ function question(query) {
 // Connect to MongoDB
 async function connectToDatabase() {
     try {
-        await mongoose.connect(MONGODB_URI);
+        await mongoose.connect(MONGODB_URI, { maxPoolSize: 5, minPoolSize: 0, maxIdleTimeMS: 60000 });
         console.log('✅ Connected to MongoDB');
     } catch (error) {
         console.error('❌ MongoDB connection error:', error);
-        process.exit(1);
+        throw error;
     }
 }
 
@@ -203,7 +203,7 @@ async function main() {
 
     } catch (error) {
         console.error('\n❌ Error:', error);
-        process.exit(1);
+        process.exitCode = 1;
     } finally {
         rl.close();
         await mongoose.disconnect();
@@ -212,4 +212,7 @@ async function main() {
 }
 
 // Run the script
-main();
+main().catch(error => {
+    console.error('MongoDB cleanup failed:', error);
+    process.exitCode = 1;
+});

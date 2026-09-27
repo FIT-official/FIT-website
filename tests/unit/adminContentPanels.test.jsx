@@ -59,6 +59,8 @@ describe('ContentManagement — spatial page map picker', () => {
         // Homepage blocks in page order, plus fixed context blocks.
         expect(screen.getByRole('button', { name: 'Announcement bar' })).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Hero banner' })).toBeInTheDocument()
+        // The print request strip (home/print-cta) sits between the hero and featured products.
+        expect(screen.getByRole('button', { name: 'Print request strip' })).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Testimonials' })).toBeInTheDocument()
         expect(screen.getByText('Footer')).toBeInTheDocument()
 

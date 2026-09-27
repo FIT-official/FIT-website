@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import dotenv from 'dotenv'
+import mongoose from 'mongoose'
 dotenv.config({ path: '.env.local' })
 
 async function checkCategories() {
@@ -43,10 +44,9 @@ async function checkCategories() {
         }
     })
 
-    process.exit(0)
 }
 
-checkCategories().catch(err => {
+checkCategories().finally(() => mongoose.disconnect()).catch(err => {
     console.error('Error:', err)
-    process.exit(1)
+    process.exitCode = 1
 })

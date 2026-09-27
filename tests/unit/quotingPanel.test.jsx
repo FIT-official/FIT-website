@@ -42,6 +42,11 @@ afterEach(() => {
 })
 
 describe('QuotingPricingManagement — sub-view tabs', () => {
+    it('is presented as the recommended pricing creator print farms start from', async () => {
+        render(<QuotingPricingManagement />)
+        expect(await screen.findByRole('heading', { name: 'Recommended pricing' })).toBeInTheDocument()
+        expect(screen.getByText('Creator print farms start from these values and override what differs.')).toBeInTheDocument()
+    })
     it('shows Rates by default and switches groups through the tabs', async () => {
         render(<QuotingPricingManagement />)
         expect(await screen.findByLabelText('Material rate')).toHaveValue(0.02)

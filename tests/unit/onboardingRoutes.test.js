@@ -19,6 +19,14 @@ beforeEach(() => {
 })
 
 describe('Free onboarding routing', () => {
+    it.each(['/shop', '/products/1kg-pla-3d-printing-filament-lanbo', '/cart', '/checkout', '/checkout/return'])('keeps %s public without depending on Clerk account lookup', async path => {
+        const auth = vi.fn().mockRejectedValue(new Error('Clerk unavailable'))
+        auth.protect = vi.fn()
+        const response = await middleware(auth, new Request(`https://fit.example${path}`))
+        expect(response.status).toBe(200)
+        expect(auth).not.toHaveBeenCalled()
+        expect(auth.protect).not.toHaveBeenCalled()
+    })
     it.each(['/sign-up/sso-callback', '/sign-in/sso-callback'])('allows Clerk to complete %s without redirecting', async (path) => {
         const auth = vi.fn()
         const response = await middleware(auth, new Request(`https://fit.example${path}`))

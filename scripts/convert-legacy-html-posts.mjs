@@ -26,52 +26,55 @@ function mongoUri() {
     throw new Error('MONGODB_URI not set and .env not readable')
 }
 
-const conn = await mongoose.connect(mongoUri())
-const col = conn.connection.db.collection('blogposts')
+async function main() {
+    const conn = await mongoose.connect(mongoUri(), { maxPoolSize: 5, minPoolSize: 0, maxIdleTimeMS: 60000 })
+    const col = conn.connection.db.collection('blogposts')
 
-// Targets: anything still legacy-formatted, plus earlier conversions that
-// became ONE giant htmlBlock (pre-segmentation) — those re-normalize from the
-// preserved `content` backup into the segmented doc.
-const isSingleHtmlBlock = (doc) =>
-    Array.isArray(doc?.content) && doc.content.length === 1 && doc.content[0]?.type === 'htmlBlock'
+    // Targets: anything still legacy-formatted, plus earlier conversions that
+    // became ONE giant htmlBlock (pre-segmentation) — those re-normalize from the
+    // preserved `content` backup into the segmented doc.
+    const isSingleHtmlBlock = (doc) =>
+        Array.isArray(doc?.content) && doc.content.length === 1 && doc.content[0]?.type === 'htmlBlock'
 
-const all = await col
-    .find(
-        {
-            $or: [
-                { contentFormat: { $ne: 'tiptap' } },
-                { contentFormat: 'tiptap', 'contentJson.content.0.type': 'htmlBlock', content: { $regex: /^\s*</ } },
-            ],
-        },
-        { projection: { title: 1, slug: 1, content: 1, contentFormat: 1, contentJson: 1 } },
-    )
-    .toArray()
-const candidates = all.filter(
-    (p) => p.contentFormat !== 'tiptap' || isSingleHtmlBlock(p.contentJson),
-)
-
-console.log(`${candidates.length} post(s) to normalize${apply ? '' : ' (dry run, pass --apply to write)'}`)
-
-let converted = 0
-for (const post of candidates) {
-    const size = Buffer.byteLength(post.content || '', 'utf8')
-    const kind = String(post.content || '').trimStart().startsWith('<') ? 'html' : 'markdown'
-    console.log(`- ${post.slug} | ${kind} | ${String(post.title).slice(0, 60)} | ${(size / 1024).toFixed(0)}KB`)
-    if (!apply) continue
-    // Force re-normalization from the raw source, not the existing doc.
-    const normalized = normalizeToTiptap({ contentFormat: 'legacy', content: post.content })
-    await col.updateOne(
-        { _id: post._id },
-        {
-            $set: {
-                contentFormat: 'tiptap',
-                contentJson: normalized.contentJson,
-                // `content` intentionally untouched: reversible backup.
+    const all = await col
+        .find(
+            {
+                $or: [
+                    { contentFormat: { $ne: 'tiptap' } },
+                    { contentFormat: 'tiptap', 'contentJson.content.0.type': 'htmlBlock', content: { $regex: /^\s*</ } },
+                ],
             },
-        },
+            { projection: { title: 1, slug: 1, content: 1, contentFormat: 1, contentJson: 1 } },
+        )
+        .toArray()
+    const candidates = all.filter(
+        (p) => p.contentFormat !== 'tiptap' || isSingleHtmlBlock(p.contentJson),
     )
-    converted += 1
+
+    console.log(`${candidates.length} post(s) to normalize${apply ? '' : ' (dry run, pass --apply to write)'}`)
+
+    let converted = 0
+    for (const post of candidates) {
+        const size = Buffer.byteLength(post.content || '', 'utf8')
+        const kind = String(post.content || '').trimStart().startsWith('<') ? 'html' : 'markdown'
+        console.log(`- ${post.slug} | ${kind} | ${String(post.title).slice(0, 60)} | ${(size / 1024).toFixed(0)}KB`)
+        if (!apply) continue
+        // Force re-normalization from the raw source, not the existing doc.
+        const normalized = normalizeToTiptap({ contentFormat: 'legacy', content: post.content })
+        await col.updateOne(
+            { _id: post._id },
+            {
+                $set: {
+                    contentFormat: 'tiptap',
+                    contentJson: normalized.contentJson,
+                    // `content` intentionally untouched: reversible backup.
+                },
+            },
+        )
+        converted += 1
+    }
+
+    console.log(apply ? `Converted ${converted} post(s).` : 'No changes written.')
 }
 
-console.log(apply ? `Converted ${converted} post(s).` : 'No changes written.')
-await mongoose.disconnect()
+await main().finally(() => mongoose.disconnect())

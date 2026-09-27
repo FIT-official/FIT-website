@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import dotenv from 'dotenv'
+import mongoose from 'mongoose'
 dotenv.config({ path: '.env.local' })
 
 async function activateAllCategories() {
@@ -49,10 +50,9 @@ async function activateAllCategories() {
         console.log('\n✅ All categories and subcategories were already active!')
     }
 
-    process.exit(0)
 }
 
-activateAllCategories().catch(err => {
+activateAllCategories().finally(() => mongoose.disconnect()).catch(err => {
     console.error('Error:', err)
-    process.exit(1)
+    process.exitCode = 1
 })

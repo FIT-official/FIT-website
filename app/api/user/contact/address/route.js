@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import Stripe from "stripe";
+import { isAddressComplete, pickAddressFields } from "@/lib/checkoutAddressGate";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -23,16 +24,10 @@ export async function POST(req) {
     try {
         const { userId } = await auth();
         if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        const { address } = await req.json();
-        if (
-            !address ||
-            !address.street ||
-            !address.unitNumber ||
-            !address.city ||
-            !address.state ||
-            !address.postalCode ||
-            !address.country
-        ) {
+        const { address: rawAddress } = await req.json();
+        // Unit number and state are optional; only the known keys are stored.
+        const address = pickAddressFields(rawAddress);
+        if (!rawAddress || !isAddressComplete(address)) {
             return NextResponse.json({ error: "Missing address fields" }, { status: 400 });
         }
         await connectToDatabase();
@@ -51,7 +46,7 @@ export async function POST(req) {
                 address: {
                     line1: address.street + (address.unitNumber ? `, ${address.unitNumber}` : ""),
                     city: address.city,
-                    state: address.state,
+                    ...(address.state ? { state: address.state } : {}),
                     postal_code: address.postalCode,
                     country: address.country,
                 }
