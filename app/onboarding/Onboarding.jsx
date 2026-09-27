@@ -47,7 +47,7 @@ function Onboarding({ priceId }) {
             />
             <h1>Welcome{isLoaded && user?.firstName ? ", " + user.firstName : ""}.</h1>
             <p className='w-1/2 md:w-1/3 text-center text-pretty inline'>
-                <span className='font-medium inline'>FixItTodaySG</span> is a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration. We&apos;re excited to have you on board!
+                Please finish setting up your <span className='font-medium inline'>Fix It Today</span> account to continue.
             </p>
             {/* {onboardingStage === 'complete' && (
                 

@@ -28,7 +28,7 @@ const GEO_JSON_LD = {
       "name": "Fix It Today®",
       "url": "https://www.fixitoday.com",
       "logo": "https://www.fixitoday.com/fitogimage.png",
-      "description": "We are a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration. We offer a comprehensive suite of services including 3D printing, printer maintenance, filament supply, and electronics sourcing.",
+      "description": "Fix It Today provides 3D printing, school STEM programmes, company workshops, printer repair, filament and electronics in Singapore.",
       "areaServed": "SG"
     },
     {
@@ -51,11 +51,11 @@ const GEO_JSON_LD = {
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: "3D Printer Repair & Filament Singapore | Fix It Today",
-  description: "We are a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration. We offer a comprehensive suite of services including 3D printing, printer maintenance, filament supply, and electronics sourcing.",
+  description: "Fix It Today provides 3D printing, school STEM programmes, company workshops, printer repair, filament and electronics in Singapore.",
   openGraph: {
     title: "Fix It Today® | Home",
     description:
-      "We are a Singapore-based technology solutions provider specializing in additive manufacturing and hardware integration.",
+      "Fix It Today provides 3D printing, school STEM programmes, company workshops, printer repair, filament and electronics in Singapore.",
     url: "https://www.fixitoday.com",
     siteName: "Fix It Today®",
     images: [
