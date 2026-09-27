@@ -56,6 +56,7 @@ describe('public sitemap URLs', () => {
             'https://www.fixitoday.com/shop', 'https://www.fixitoday.com/prints',
             'https://www.fixitoday.com/creators', 'https://www.fixitoday.com/creators/join',
             'https://www.fixitoday.com/blog',
+            'https://www.fixitoday.com/school-programmes', 'https://www.fixitoday.com/company-workshops',
             'https://www.fixitoday.com/privacy', 'https://www.fixitoday.com/terms',
         ])
         expect(entries.every(entry => !('lastModified' in entry))).toBe(true)

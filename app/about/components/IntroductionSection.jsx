@@ -1,15 +1,13 @@
 'use client'
-import Link from "next/link"
-import { GoChevronRight } from "react-icons/go"
 import { useContent } from '@/utils/useContent'
 import MarkdownRenderer from '@/components/General/MarkdownRenderer'
 import CTALink from "@/components/General/CTALink"
 
 function IntroductionSection() {
     const { content } = useContent('about/introduction', {
-        heading: 'Turning Ideas into Reality, One Print at a Time.',
+        heading: '3D Printing, Workshops and Printer Support',
         subheading: 'Join us as a creator',
-        description: 'We are one of Singapore\'s most reliable 3D printing & tech repair hub. We aim to empower creators through accessible 3D printing solutions'
+        description: 'Fix It Today provides 3D printing, school STEM programmes, company workshops and printer repair in Singapore. We help you design parts, build prototypes and learn to use 3D printers and electronics.'
     })
 
     return (

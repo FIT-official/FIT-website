@@ -336,6 +336,8 @@ function MobileMenu({ open, onClose, triggerRef, shopCategories = [], printCateg
                                 onNavigate={onClose}
                                 reduceMotion={reduceMotion}
                             />
+                            <SheetRow href="/school-programmes" icon={IoPeopleOutline} label="School programmes" active={pathname?.startsWith('/school-programmes')} onNavigate={onClose} />
+                            <SheetRow href="/company-workshops" icon={IoPeopleOutline} label="Company workshops" active={pathname?.startsWith('/company-workshops')} onNavigate={onClose} />
                             <SheetRow href="/creators" icon={IoPeopleOutline} label="Creators" active={pathname?.startsWith('/creators')} onNavigate={onClose} />
                             <SheetRow href="/about" icon={IoInformationCircleOutline} label="About" active={pathname?.startsWith('/about')} onNavigate={onClose} />
 

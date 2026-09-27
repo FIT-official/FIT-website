@@ -65,14 +65,15 @@ export default function BlogPageClient({ post, contentHtml, related = [], previe
                 </div>
 
             </div>
-            <div className="flex w-[90%] md:w-3/5 flex-col gap-8 text-justify">
+            <div className="flex w-[90%] md:w-3/5 flex-col gap-8 text-left">
                 {post.heroImage ? (
                     <Image
                         src={imageSrc(post.heroImage)}
                         width={800}
                         height={400}
                         alt={post.title}
-                        className="rounded-md border border-borderColor aspect-video"
+                        sizes="(max-width: 768px) 90vw, 60vw"
+                        className="w-full h-auto max-h-[36rem] object-contain rounded-md border border-borderColor"
                     />
                 ) : null}
                 <div className="prose max-w-none">

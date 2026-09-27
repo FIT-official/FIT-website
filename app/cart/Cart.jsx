@@ -563,7 +563,7 @@ function Cart() {
                 <IoCartOutline />
                 Your Cart
             </h2>
-            {!user && <p className="text-sm mt-2">Guest cart. Enter contact and delivery details at checkout. Shipping estimates use Singapore until then.</p>}
+            {!user && <p className="text-sm mt-2">This is your guest cart. Please enter your contact and delivery details at checkout. Shipping estimates are based on addresses in Singapore.</p>}
             {addRequestError && (
                 <p role='alert' className='mx-5 mt-2 rounded-md bg-amber-50 p-3 text-sm text-amber-800'>
                     {addRequestError} <Link href='/account/prints' className='underline'>View your print requests</Link>
@@ -710,7 +710,7 @@ function Cart() {
                                                             <span className="relative group">
                                                                 <HiExclamationCircle className="text-yellow-500 text-base cursor-pointer" />
                                                                 <span className="absolute right-0 font-normal mt-2 w-64 text-xs rounded p-4 items-center justify-center text-center opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity duration-200 whitespace-normal bg-background border border-borderColor shadow-lg">
-                                                                    This may not be the final price and will be affected by the final quote.<br />For help, please contact <a href="mailto:fixitoday.contact@gmail.com" className="underline">fixitoday.contact@gmail.com</a>
+                                                                    The final price will be shown in your quote.<br />For help, email <a href="mailto:fixittoday.contact@gmail.com" className="underline">fixittoday.contact@gmail.com</a>
                                                                 </span>
                                                             </span>
                                                         </span>

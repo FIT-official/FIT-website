@@ -522,7 +522,7 @@ export default function PrintRequestFlow() {
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Get a 3D print made</h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-lightColor">{isCreatorFlow
               ? `${service.headline} · About ${leadTimeDays} days. Payment is arranged directly with the creator.`
-              : 'Upload a model, choose material and colour, and see the price as you go. Nothing is charged until you check out.'}</p>
+              : 'Upload your 3D model, choose a material and colour, then review your quote. You’ll pay at checkout.'}</p>
           </div>
           {!signedIn && <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-blue-800">No account needed to get a price</span>}
         </div>

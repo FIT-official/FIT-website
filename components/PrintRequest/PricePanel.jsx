@@ -25,7 +25,7 @@ export function priceLines({ quote, delivery, filament }) {
 }
 
 export default function PricePanel({ quote, quoteState, quoteError, delivery, filament, checklist, ready, printedBy, estimateOnly,
-  submitting, progress, error, cta, hint, hasModel, children, totalNote = 'Nothing is charged until you check out.',
+  submitting, progress, error, cta, hint, hasModel, children, totalNote = 'You’ll pay at checkout.',
   checklistLabel = 'Before you add to cart' }) {
   const lines = priceLines({ quote, delivery, filament })
   const total = quote ? (Number(quote.total) || 0) + (Number(delivery?.price) || 0) : null

@@ -19,7 +19,13 @@ function Footer() {
                 </div>
 
                 {/* links section */}
-                <div className='flex flex-col md:flex-row gap-6 md:gap-28 mx-2'>
+                <div className='flex flex-col md:flex-row flex-wrap gap-8 lg:gap-20 mx-2'>
+                    <div className='flex flex-col gap-3'>
+                        <div className='uppercase tracking-wide font-semibold'>Learn and make</div>
+                        <Link href='/school-programmes' className='footerLink'>School programmes</Link>
+                        <Link href='/company-workshops' className='footerLink'>Company workshops</Link>
+                        <Link href='/blog' className='footerLink'>3D printing and electronics guides</Link>
+                    </div>
                     <div className='flex flex-col gap-6'>
                         <div className='flex flex-col gap-3'>
                             <div className='uppercase tracking-wide font-semibold'>Legal</div>

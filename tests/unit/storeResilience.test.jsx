@@ -78,7 +78,7 @@ describe('Store network recovery', () => {
         render(<Cart />);
         expect(await screen.findByText('Lanbo PLA')).toBeInTheDocument();
         await waitFor(() => expect(screen.getByText('Proceed to Checkout')).toHaveAttribute('aria-disabled', 'false'));
-        expect(screen.getByText(/Guest cart/)).toBeInTheDocument();
+        expect(screen.getByText(/This is your guest cart/)).toBeInTheDocument();
     });
     it('shows an API error and retries the saved cart on reconnect without resubmitting mutations', async () => {
         global.fetch.mockRejectedValue(new TypeError('offline'));
@@ -166,9 +166,9 @@ describe('Payment submission and return recovery', () => {
         else m.elementReady = false;
         render(<CheckOut />);
         await act(async () => { await vi.advanceTimersByTimeAsync(0); });
-        expect(screen.getByText('Loading secure payment controls...')).toBeInTheDocument();
+        expect(screen.getByText('Loading the payment form…')).toBeInTheDocument();
         await act(async () => { await vi.advanceTimersByTimeAsync(15001); });
-        expect(screen.getByRole('alert')).toHaveTextContent('Payment controls could not load');
+        expect(screen.getByRole('alert')).toHaveTextContent('We couldn’t load the payment form');
         expect(screen.queryByRole('button', { name: 'Pay Now' })).toBeNull();
         m.elementReady = true;
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Try again' })); });
@@ -180,7 +180,7 @@ describe('Payment submission and return recovery', () => {
     it('recovers an element load error without automatically submitting payment', async () => {
         m.elementError = true;
         render(<CheckOut />);
-        expect(await screen.findByRole('alert')).toHaveTextContent('Payment controls could not load');
+        expect(await screen.findByRole('alert')).toHaveTextContent('We couldn’t load the payment form');
         expect(screen.queryByRole('button', { name: 'Pay Now' })).toBeNull();
         m.elementError = false;
         fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
@@ -191,7 +191,7 @@ describe('Payment submission and return recovery', () => {
         if (failure === 'rejection') m.initCheckout.mockRejectedValueOnce(new Error('Network interrupted'));
         else m.initCheckout.mockImplementationOnce(() => { throw new Error('Network interrupted'); });
         render(<CheckOut />);
-        expect(await screen.findByRole('alert')).toHaveTextContent('Payment controls could not load');
+        expect(await screen.findByRole('alert')).toHaveTextContent('We couldn’t load the payment form');
         expect(screen.queryByRole('button', { name: 'Pay Now' })).toBeNull();
         fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
         await waitFor(() => expect(screen.getByRole('button', { name: 'Pay Now' })).toBeEnabled());
