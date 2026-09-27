@@ -10,7 +10,7 @@ function ServicesSection() {
     const { content } = useContent('about/services', {
         heading: 'What We Offer',
         subheading: 'Our Services',
-        description: 'Explore our comprehensive range of 3D printing and related services designed to bring your ideas to life.'
+        description: '3D printing, printer repair and practical workshops for schools and companies.'
     })
 
     useEffect(() => {
@@ -28,9 +28,9 @@ function ServicesSection() {
             <div className='flex flex-col gap-8 w-full lg:w-[40%] mt-4'>
                 <div className='flex flex-col gap-2'>
                     <h3>{content.subheading}</h3>
-                    <h1>
+                    <h2>
                         {content.heading}
-                    </h1>
+                    </h2>
                 </div>
                 <p className='w-full text-pretty flex text-sm'>
                     {content.description}

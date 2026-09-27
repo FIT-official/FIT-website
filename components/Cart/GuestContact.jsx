@@ -22,7 +22,7 @@ export default function GuestContact({ onContinue, initialContact = {} }) {
     }
     return <form onSubmit={submit} className="flex flex-col gap-4 border rounded p-6 max-w-xl mx-auto">
         <h1 className="text-2xl font-semibold">Guest checkout</h1>
-        <p>Enter your receipt email and delivery address to continue to payment.</p>
+        <p>Please enter your name, email address and delivery details. We&apos;ll send your receipt to this email address.</p>
         {[
             ['name', 'Full name', 'text', ''], ['email', 'Email', 'email', ''],
             ['street', 'Street address', 'text', ''], ['unitNumber', 'Unit number (optional)', 'text', ''],

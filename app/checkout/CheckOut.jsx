@@ -65,7 +65,7 @@ export const CheckoutForm = ({ sessionId, onCheckStatus, onReady, onLoadError })
     </form>;
 };
 
-const paymentLoadError = 'Payment controls could not load. Check your connection and try again.';
+const paymentLoadError = 'We couldn’t load the payment form. Please check your connection and try again.';
 
 function PaymentControls({ stripe, data, onCheckStatus }) {
     const [ready, setReady] = useState(false);
@@ -96,7 +96,7 @@ function PaymentControls({ stripe, data, onCheckStatus }) {
         },
     }), [stripe]);
     return <div>
-        {!ready && !error && <p role="status">Loading secure payment controls...</p>}
+        {!ready && !error && <p role="status">Loading the payment form…</p>}
         <StoreError message={error} onRetry={onCheckStatus} />
         {!error && <CheckoutProvider stripe={guardedStripe} options={{ fetchClientSecret: async () => data.clientSecret }}>
             <CheckoutForm sessionId={data.sessionId} onCheckStatus={onCheckStatus}
@@ -235,9 +235,9 @@ const CheckOut = () => {
                 let timer;
                 try {
                     const loaded = await Promise.race([loadStripe(stripeKey), new Promise((_, reject) => {
-                        timer = setTimeout(() => reject(new Error('Payment controls could not load. Check your connection and try again.')), 15000);
+                        timer = setTimeout(() => reject(new Error(paymentLoadError)), 15000);
                     })]);
-                    if (!loaded) throw new Error('Payment controls could not load. Please try again.');
+                    if (!loaded) throw new Error(paymentLoadError);
                     setStripe(loaded);
                 } finally { clearTimeout(timer); }
             }

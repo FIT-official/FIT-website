@@ -30,6 +30,7 @@ import { useContent } from '@/utils/useContent'
 const PRIMARY = [
     { key: 'shop', label: 'Shop' },
     { key: 'prints', label: 'Prints' },
+    { key: 'school-programmes', label: 'Programmes', href: '/school-programmes' },
     { key: 'creators', label: 'Creators', href: '/creators' },
     { key: 'about', label: 'About', href: '/about' },
 ]

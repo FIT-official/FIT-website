@@ -6,7 +6,7 @@ import { useContent } from '@/utils/useContent'
 export const PRINT_CTA_DEFAULTS = Object.freeze({
     eyebrow: '3D printing',
     title: 'Get a 3D print made',
-    text: 'Upload a model, choose material and colour, and see the price as you go. Nothing is charged until you check out.',
+    text: 'Upload your 3D model, choose a material and colour, then review your quote. You’ll pay at checkout.',
     buttonText: 'Start a print request',
 })
 
