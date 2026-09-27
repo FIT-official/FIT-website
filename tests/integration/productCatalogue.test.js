@@ -64,7 +64,13 @@ describe('GET public product catalogue', () => {
         ])
     })
 
-    it.each([{}, { productType: 'print' }, { productType: 'other' }])('keeps the guard for an unfiltered non-shop request %j', async params => {
+    it('returns the public print catalogue without requiring a category (the /prints landing page)', async () => {
+        const response = await get({ productType: 'print' })
+        expect(response.status).toBe(200)
+        expect(Product.find).toHaveBeenCalledWith(expect.objectContaining({ productType: 'print', hidden: false }))
+    })
+
+    it.each([{}, { productType: 'other' }])('keeps the guard for an unfiltered non-catalogue request %j', async params => {
         const response = await get(params)
         expect(response.status).toBe(400)
         expect(Product.find).not.toHaveBeenCalled()

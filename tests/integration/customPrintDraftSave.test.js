@@ -55,3 +55,26 @@ describe('initial request save concurrency', () => {
     expect(update).not.toHaveBeenCalled()
   })
 })
+
+describe('stale print-farm estimates', () => {
+  const withEstimate = () => {
+    saved.set({ creatorUserId: 'creator-1', estimate: { total: 17.4, currency: 'sgd' }, estimatedAt: new Date(),
+      pricedWith: { profile: 'farm', creatorUserId: 'creator-1', version: 2 } })
+    saved.$__reset?.()
+  }
+  it.each([
+    ['the model', { printConfiguration: undefined }],
+    ['the print configuration', { modelFile: undefined, printConfiguration: { generic: { strength: 'Strong', quality: 'Medium', material: 'PLA', colour: 'Black' } } }],
+  ])('unsets estimate, estimatedAt and pricedWith when %s changes', async (_label, overrides) => {
+    withEstimate()
+    expect((await put(overrides)).status).toBe(200)
+    const [, mutation] = update.mock.calls[0]
+    expect(mutation.$unset).toMatchObject({ estimate: 1, estimatedAt: 1, pricedWith: 1 })
+  })
+  it('keeps the estimate when only the note changes', async () => {
+    withEstimate()
+    expect((await put({ modelFile: undefined, printConfiguration: undefined, customerNote: 'By Friday' })).status).toBe(200)
+    const [, mutation] = update.mock.calls[0]
+    expect(mutation.$unset || {}).not.toHaveProperty('estimate')
+  })
+})

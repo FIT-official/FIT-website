@@ -4,7 +4,7 @@ import { clerkClient } from '@clerk/nextjs/server';
 import { connectToDatabase } from '@/lib/db';
 import { cartIdentity, cartOwner } from '@/lib/cartOwner';
 import Product from '@/models/Product';
-import { checkoutIntent, findAttempt, resumeAttempt, createAttempt, adoptLegacyAttempt, CheckoutAttemptError } from '@/lib/checkoutAttempt';
+import { checkoutIntent, findAttempt, resumeAttempt, createAttempt, adoptLegacyAttempt, cancelAttempt, CheckoutAttemptError } from '@/lib/checkoutAttempt';
 import CustomPrintRequest from '@/models/CustomPrintRequest';
 import { calculateCartItemBreakdown } from '../calculateBreakdown';
 import { customPrintChargeBreakdown } from '@/lib/customPrintDisplayPrice';
@@ -14,6 +14,11 @@ import { checkAdminPrivileges } from '@/lib/checkPrivileges';
 import { verifyCheckoutTransactions, CheckoutTransactionUnavailableError } from '@/lib/checkoutTransactionReadiness';
 import { getFilamentAvailability, rushAvailability } from '@/lib/filamentInventory';
 import { storeDeadline } from '@/lib/storeDeadline';
+import { isAddressComplete, lineNeedsDeliveryAddress, pickDeliveryOptionMessage } from '@/lib/checkoutAddressGate';
+
+// calculateCartItemBreakdown and customPrintChargeBreakdown throw this when
+// the cart's chosenDeliveryType is not one the product/request offers.
+const isDeliveryTypeMismatch = (error) => /Unknown delivery type/.test(error?.message || '');
 
 
 
@@ -51,7 +56,8 @@ export async function POST(req) {
         if (!user?.cart?.length) return NextResponse.json({ error: 'Your cart is empty' }, { status: 400 });
         if (user.cart.length > 50) return NextResponse.json({ error: 'Too many cart items' }, { status: 400 });
         const address = identity.guest ? user.guestContact?.address : user.contact?.address;
-        if (!address?.country) return NextResponse.json({ error: 'Missing delivery address' }, { status: 400 });
+        const needsAddress = user.cart.some(item => lineNeedsDeliveryAddress(item.chosenDeliveryType));
+        if (needsAddress && !isAddressComplete(address)) return NextResponse.json({ error: 'Add a complete delivery address to pay.', code: 'checkout_address_required' }, { status: 400 });
         const customer = identity.guest ? null : await storeDeadline((async () => (await clerkClient()).users.getUser(userId))());
         const email = identity.guest ? user.guestContact?.email : customer.emailAddresses?.[0]?.emailAddress;
         const name = identity.guest ? user.guestContact?.name : [customer.firstName, customer.lastName].filter(Boolean).join(' ') || email;
@@ -102,7 +108,13 @@ export async function POST(req) {
                 }
                 product = await Product.findOne({ slug: 'custom-print-request' }).lean();
                 if (!product) return NextResponse.json({ error: 'Custom printing is not configured' }, { status: 409 });
-                const charge = customPrintChargeBreakdown(customRequest, item.chosenDeliveryType);
+                let charge;
+                try {
+                    charge = customPrintChargeBreakdown(customRequest, item.chosenDeliveryType);
+                } catch (error) {
+                    if (isDeliveryTypeMismatch(error)) return NextResponse.json({ error: pickDeliveryOptionMessage(product.name) }, { status: 409 });
+                    throw error;
+                }
                 breakdown = {
                     quantity: 1, price: charge.amount, priceBeforeDiscount: charge.amount,
                     basePrice: Number(customRequest.basePrice || 0), variantInfo: [],
@@ -140,7 +152,12 @@ export async function POST(req) {
                         return NextResponse.json({ error: 'The selected option is not in stock' }, { status: 409 });
                     }
                 }
-                breakdown = await calculateCartItemBreakdown({ item, product, address });
+                try {
+                    breakdown = await calculateCartItemBreakdown({ item, product, address });
+                } catch (error) {
+                    if (isDeliveryTypeMismatch(error)) return NextResponse.json({ error: pickDeliveryOptionMessage(product.name) }, { status: 409 });
+                    throw error;
+                }
                 if (item.chosenDeliveryType === 'printDelivery' && product.productType === 'print') {
                     productPrintInput = buildProductPrintRequestInput({ product,
                         chosenColour: colourNameFromVariants(item.selectedVariants),
@@ -180,7 +197,7 @@ export async function POST(req) {
         };
         const snapshot = { userId, snapshotVersion: 1,
             items, totalAmount, currency: 'sgd', salesData, digitalProductData,
-            shippingAddress: checkoutPlain(address), customerEmail: email, customerName: name };
+            shippingAddress: address ? checkoutPlain(address) : null, customerEmail: email, customerName: name };
         return NextResponse.json(await createAttempt(stripe, { attemptId, userId, snapshot, stripeParams }));
     } catch (error) {
         if (error instanceof CheckoutAttemptError || error instanceof CheckoutTransactionUnavailableError) {
@@ -188,5 +205,20 @@ export async function POST(req) {
         }
         console.error('Checkout creation failed:', error);
         return NextResponse.json({ error: 'Unable to create checkout. Please review your cart and try again.' }, { status: 503 });
+    }
+}
+
+export async function DELETE(req) {
+    try {
+        const identity = await cartIdentity(req);
+        if (!identity.userId) return NextResponse.json({ error: 'Open your cart before continuing.' }, { status: 401 });
+        const attemptId = req.headers.get('X-Checkout-Attempt');
+        if (!/^[a-f0-9-]{36}$/.test(attemptId || '')) return NextResponse.json({ error: 'Invalid checkout attempt.' }, { status: 400 });
+        await connectToDatabase();
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil', timeout: 10000, maxNetworkRetries: 1 });
+        return NextResponse.json(await cancelAttempt(stripe, identity.userId, attemptId));
+    } catch (error) {
+        if (error instanceof CheckoutAttemptError) return NextResponse.json({ error: error.message, code: error.code }, { status: error.status });
+        return NextResponse.json({ error: 'Could not confirm that payment was cancelled. Check payment status before editing.' }, { status: 503 });
     }
 }

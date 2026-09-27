@@ -862,8 +862,10 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                 <div className='flex w-full'>
                                     <div className='flex flex-col items-center justify-center p-4 md:p-8 gap-4'>
                                         <div className='font-medium flex text-6xl items-end'>
-                                            {Number(product.reviews?.reduce((acc, review) => acc + (review.rating || 0), 0) / product.reviews?.length || 5).toFixed(1)}
-                                            <span className='flex text-extraLight text-lg ml-1 font-normal'>/5</span>
+                                            {product.reviews?.length ? <>
+                                                {(product.reviews.reduce((acc, review) => acc + (review.rating || 0), 0) / product.reviews.length).toFixed(1)}
+                                                <span className='flex text-extraLight text-lg ml-1 font-normal'>/5</span>
+                                            </> : <span className="text-lg">No reviews yet</span>}
                                         </div>
 
                                         <div className="flex text-lightColor text-sm font-normal">

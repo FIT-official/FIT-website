@@ -2,7 +2,7 @@
 import { storeFetch } from '@/lib/storeRequest';
 import { useRef, useState } from 'react';
 
-export default function GuestContact({ onContinue }) {
+export default function GuestContact({ onContinue, initialContact = {} }) {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
     const lock = useRef(false);
@@ -29,8 +29,8 @@ export default function GuestContact({ onContinue }) {
             ['postalCode', 'Postal code', 'text', ''], ['city', 'City', 'text', 'Singapore'],
             ['state', 'State / region', 'text', 'Singapore'], ['country', 'Country code', 'text', 'SG'],
         ].map(([name, label, type, value]) => <label key={name}>{label}
-            <input className="block border rounded p-2 w-full" name={name} type={type} defaultValue={value}
-                required={name !== 'unitNumber'} maxLength={name === 'country' ? 2 : 200} pattern={name === 'country' ? '[A-Z]{2}' : undefined} disabled={busy} />
+            <input className="block border rounded p-2 w-full" name={name} type={type} defaultValue={initialContact[name] ?? initialContact.address?.[name] ?? value}
+                required={!['unitNumber', 'state'].includes(name)} maxLength={name === 'country' ? 2 : 200} pattern={name === 'country' ? '[A-Z]{2}' : undefined} disabled={busy} />
         </label>)}
         {error && <p role="alert">{error}</p>}
         <button className="formBlackButton justify-center" disabled={busy}>{busy ? 'Saving details…' : 'Continue to payment'}</button>

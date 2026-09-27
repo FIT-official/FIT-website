@@ -6,6 +6,8 @@ import { loadStripe } from '@stripe/stripe-js';
 import { useRouter } from 'next/navigation';
 import posthog from 'posthog-js';
 import GuestContact from '@/components/Cart/GuestContact';
+import DeliveryAddressPrompt from '@/components/Cart/DeliveryAddressPrompt';
+import { ADD_ADDRESS_TO_PAY, isAddressComplete, cartNeedsDeliveryAddress } from '@/lib/checkoutAddressGate';
 import { storeJson, savedCheckoutAttempt, rememberCheckoutAttempt } from '@/lib/storeRequest';
 import { ConnectionNotice, StoreError, useStoreConnection } from '@/components/Cart/StoreFeedback';
 
@@ -160,37 +162,12 @@ const CartBreakdown = ({ cartBreakdown }) => {
 
 const BillingInfo = ({ userContact }) => (
     <div className="flex flex-col gap-4 border border-borderColor rounded bg-white p-6">
-        <h3 className="font-semibold text-lg mb-2 text-textColor">Billing Info</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label className="text-xs text-lightColor">Country</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.country || ""} disabled />
-            </div>
-            <div>
-                <label className="text-xs text-lightColor">Postal Code</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.postalCode || ""} disabled />
-            </div>
-            <div>
-                <label className="text-xs text-lightColor">City</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.city || ""} disabled />
-            </div>
-            <div>
-                <label className="text-xs text-lightColor">State</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.state || ""} disabled />
-            </div>
-            <div className="md:col-span-2">
-                <label className="text-xs text-lightColor">Street Address</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.street || ""} disabled />
-            </div>
-            <div className="md:col-span-2">
-                <label className="text-xs text-lightColor">Unit Number</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.unitNumber || ""} disabled />
-            </div>
-            <div>
-                <label className="text-xs text-lightColor">Phone</label>
-                <input className="w-full border border-borderColor rounded px-3 py-2 bg-baseColor text-textColor" value={userContact?.phone || ""} disabled />
-            </div>
-        </div>
+        <h3 className="font-semibold text-lg text-textColor">Delivery address</h3>
+        {userContact ? <address data-testid="saved-address" className="not-italic text-sm leading-relaxed">
+            <div>{[userContact.street, userContact.unitNumber].filter(Boolean).join(', ')}</div>
+            <div>{[userContact.city, userContact.state, userContact.postalCode].filter(Boolean).join(' ')}</div>
+            <div>{userContact.country}</div>
+        </address> : <p>Nothing in this order ships, so an address is optional.</p>}
     </div>
 );
 
@@ -210,7 +187,7 @@ const OrderSummary = ({ cartBreakdown }) => {
             <CartBreakdown cartBreakdown={cartBreakdown} />
             <div className="flex justify-between text-base font-bold mt-4">
                 <span className="text-textColor">Order Total</span>
-                <span className="text-textColor">S${total.toFixed(2)}</span>
+                <span data-testid="order-total" className="text-textColor">S${total.toFixed(2)}</span>
             </div>
         </div>
     );
@@ -222,27 +199,35 @@ const CheckOut = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [needsGuestContact, setNeedsGuestContact] = useState(false);
+    const [guestContact, setGuestContact] = useState({});
+    const [review, setReview] = useState(null);
     const [empty, setEmpty] = useState(false);
     const [paymentRevision, setPaymentRevision] = useState(0);
     const lock = useRef(false);
     const offline = useStoreConnection(() => { if (error) load(); });
-    async function load() {
+    async function load(options = {}) {
         if (lock.current) return;
         lock.current = true; setLoading(true); setError('');
         try {
             const cart = await storeJson('/api/user/cart');
+            setGuestContact(cart.guestContact || {});
             const attemptId = savedCheckoutAttempt() || cart.checkoutAttemptId;
             if (attemptId) rememberCheckoutAttempt(attemptId);
             if (!cart.cart?.length && !attemptId) { setEmpty(true); return; }
             // A new guest intent can already have an ID before contact saving.
-            if (cart.guest && !cart.contactReady && cart.cart?.length) {
-                setNeedsGuestContact(true); return;
+            if (cart.guest && (!cart.contactReady || options.review) && cart.cart?.length) {
+                setData(null); setReview(null); setNeedsGuestContact(true); return;
             }
             setNeedsGuestContact(false);
+            if (options.review) {
+                setData(null);
+                setReview({ ...(await storeJson('/api/checkout/breakdown')), editing: true });
+                return;
+            }
             const result = await storeJson('/api/checkout/session', { method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...(attemptId ? { 'X-Checkout-Attempt': attemptId } : {}) } }, 25000);
             rememberCheckoutAttempt(result.attemptId);
-            setData(result); setEmpty(false); setPaymentRevision(v => v + 1);
+            setData(result); setReview(null); setEmpty(false); setPaymentRevision(v => v + 1);
             if (result.clientSecret && !result.alreadyPaid && !result.pending) {
                 if (!stripeKey) throw new Error('Payment is temporarily unavailable. Please try again later.');
                 let timer;
@@ -254,6 +239,30 @@ const CheckOut = () => {
                     setStripe(loaded);
                 } finally { clearTimeout(timer); }
             }
+        } catch (err) {
+            if (err.code === 'checkout_address_required') {
+                setData(null);
+                try { setReview({ ...(await storeJson('/api/checkout/breakdown')), editing: true }); }
+                catch (readError) { setError(readError.message); }
+            } else {
+                setError(err.message);
+                if (!data) {
+                    try { setReview({ ...(await storeJson('/api/checkout/breakdown')), editing: false }); }
+                    catch { /* Keep the original payment error and its retry action. */ }
+                }
+            }
+        }
+        finally { lock.current = false; setLoading(false); }
+    }
+    async function editOrder() {
+        if (lock.current || !data?.attemptId) return;
+        lock.current = true; setLoading(true); setError('');
+        try {
+            const cancelled = await storeJson('/api/checkout/session', { method: 'DELETE', headers: { 'X-Checkout-Attempt': data.attemptId } });
+            rememberCheckoutAttempt(cancelled.attemptId);
+            setData(null);
+            lock.current = false;
+            await load({ review: true });
         } catch (err) { setError(err.message); }
         finally { lock.current = false; setLoading(false); }
     }
@@ -262,7 +271,17 @@ const CheckOut = () => {
         <ConnectionNotice offline={offline} />
         <StoreError message={error} onRetry={load} busy={loading} />
         {loading && <p role="status">Checking your cart and payment status...</p>}
-        {!loading && needsGuestContact && <GuestContact onContinue={load} />}
+        {!loading && needsGuestContact && <GuestContact initialContact={guestContact} onContinue={() => load()} />}
+        {!loading && review && <div className="max-w-6xl grid md:grid-cols-2 gap-8">
+            {review.editing ? <DeliveryAddressPrompt initialAddress={review.address} title="Delivery address" onAddressSaved={() => load()} /> : <BillingInfo userContact={review.address} />}
+            <div className="flex flex-col gap-4">
+                <OrderSummary cartBreakdown={review.cartBreakdown || []} />
+                {!review.editing || (cartNeedsDeliveryAddress(review.cartBreakdown) && !isAddressComplete(review.address)) ? <>
+                    <button disabled className="formBlackButton">Pay Now</button>
+                    <p data-testid="pay-blocked-reason">{review.editing ? ADD_ADDRESS_TO_PAY : error}</p>
+                </> : <button className="formBlackButton" onClick={() => load()}>Continue to payment</button>}
+            </div>
+        </div>}
         {!loading && empty && <p>Your cart is empty. <a className="underline" href="/shop">Continue shopping</a></p>}
         {!loading && data && !needsGuestContact && <>
             <h1 className="text-3xl font-bold mb-4">Checkout</h1>
@@ -271,7 +290,11 @@ const CheckOut = () => {
                 <p>{data.alreadyPaid ? 'No further payment is needed. Order confirmation may take a moment.' : 'Please wait for confirmation before starting another payment.'}</p>
                 <a className="underline" href={'/checkout/return?session_id=' + encodeURIComponent(data.sessionId)}>View payment status</a>
             </div> : <div className="max-w-6xl grid md:grid-cols-2 gap-8">
-                <BillingInfo userContact={data.userContact} />
+                <div className="flex flex-col gap-4">
+                    <BillingInfo userContact={data.userContact} />
+                    <button className="underline self-start" onClick={editOrder} disabled={loading || offline}>Edit order details</button>
+                    <p className="text-sm">Changing details closes this unpaid payment session before you continue.</p>
+                </div>
                 <div className="flex flex-col gap-6">
                     <OrderSummary cartBreakdown={data.cartBreakdown || []} />
                     <p className="text-sm">Payment covers the order shown here. Return to your cart after this payment to buy any items added later.</p>

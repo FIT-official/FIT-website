@@ -1,5 +1,41 @@
 import mongoose from 'mongoose'
 
+// Instant Quoting Engine breakdown (lib/quoting/quote.js output shape), used
+// for the chargeable `quote` and a creator farm's `estimate`.
+const quoteShape = () => ({
+    currency: { type: String },
+    lines: [{
+        key: { type: String },
+        label: { type: String },
+        amount: { type: Number },
+        _id: false,
+    }],
+    subtotal: { type: Number },
+    expedite: {
+        applied: { type: Boolean, default: false },
+        mode: { type: String },
+        amount: { type: Number, default: 0 },
+    },
+    total: { type: Number },
+    confidence: { type: String, enum: ['high', 'low'] },
+    inputs: {
+        options: {
+            postProcessing: { type: Boolean, default: false },
+            specialRequest: { type: Boolean, default: false },
+            priority: { type: Boolean, default: false },
+            expedite: { type: Boolean, default: false },
+        },
+        volumeCm3: { type: Number },
+        weightGrams: { type: Number },
+        printHours: { type: Number },
+        // Shape-aware layer-stack estimate, recorded for print-farm
+        // validation only — NOT priced (see add-lightweight-print-time-estimator).
+        printHoursShapeAware: { type: Number },
+        // A print farm's per-material price multiplier (absent = 1).
+        materialMultiplier: { type: Number },
+    },
+})
+
 const CustomPrintRequestSchema = new mongoose.Schema({
     // Request identification
     requestId: { type: String, required: true, unique: true },
@@ -102,38 +138,21 @@ const CustomPrintRequestSchema = new mongoose.Schema({
 
     // Instant Quoting Engine result (server-authoritative breakdown). Set when
     // the request is auto-quoted; mirrors lib/quoting/quote.js output shape.
-    quote: {
-        currency: { type: String },
-        lines: [{
-            key: { type: String },
-            label: { type: String },
-            amount: { type: Number },
-            _id: false,
-        }],
-        subtotal: { type: Number },
-        expedite: {
-            applied: { type: Boolean, default: false },
-            mode: { type: String },
-            amount: { type: Number, default: 0 },
-        },
-        total: { type: Number },
-        confidence: { type: String, enum: ['high', 'low'] },
-        inputs: {
-            options: {
-                postProcessing: { type: Boolean, default: false },
-                specialRequest: { type: Boolean, default: false },
-                priority: { type: Boolean, default: false },
-                expedite: { type: Boolean, default: false },
-            },
-            volumeCm3: { type: Number },
-            weightGrams: { type: Number },
-            printHours: { type: Number },
-            // Shape-aware layer-stack estimate, recorded for print-farm
-            // validation only — NOT priced (see add-lightweight-print-time-estimator).
-            printHoursShapeAware: { type: Number },
-        },
-    },
+    quote: quoteShape(),
     quotedAt: { type: Date },
+
+    // Creator print farm estimate (same shape as `quote`, plus the farm's flat
+    // delivery choice). Shown to the creator to prefill their quote; never
+    // payable through Fix It Today (creator jobs are paid off-platform).
+    estimate: { ...quoteShape(), delivery: { type: { type: String }, label: { type: String }, price: { type: Number } } },
+    estimatedAt: { type: Date },
+    // Which pricing profile produced the quote/estimate, so a later change to
+    // the recommendation or the farm's profile is traceable.
+    pricedWith: {
+        profile: { type: String, enum: ['recommended', 'farm'] },
+        creatorUserId: { type: String },
+        version: { type: Number },
+    },
 
     // How this request was quoted:
     //   - 'instant' — server-authoritative price from the Instant Quoting Engine.

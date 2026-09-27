@@ -3,7 +3,7 @@
 // request (StatusPill vocabulary), the quote breakdown as dotted-leader rows
 // when quoted, and a progress Timeline from statusHistory. The customer-facing
 // mirror of the admin job queue. Endpoints and action links are unchanged
-// (/api/account/custom-print, /editor?requestId=, /cart?addCustomRequest=).
+// (/api/account/custom-print, /prints/request?requestId=, /cart?addCustomRequest=).
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
@@ -12,6 +12,8 @@ import AccountShell from '@/components/Account/AccountShell'
 import { printRequestTone, printStatusLabel, money } from '@/components/Account/accountUi'
 import { useToast } from '@/components/General/ToastProvider'
 import { DashCard, DottedRow, EmptyState, StatusPill, Tag, Timeline, SkeletonTile } from '@/components/dashboard-ui'
+import { customPrintDisplayPrice } from '@/lib/customPrintDisplayPrice'
+import { estimateLines, hasEstimate } from '@/lib/customPrint/estimateLines'
 
 export default function AccountPrintRequestsPage() {
     const { user, isLoaded } = useUser()
@@ -103,15 +105,24 @@ export default function AccountPrintRequestsPage() {
                     {requests.map((r) => {
                         const base = Number(r.basePrice || 0)
                         const fee = Number(r.printFee || 0)
-                        const quoted = base + fee
+                        // Same selector the cart and checkout use: instant quotes
+                        // store quote.total, manual quotes basePrice + printFee.
+                        const priced = customPrintDisplayPrice(r)
+                        const quoted = priced.amount
                         const currency = (r.currency || 'SGD').toUpperCase()
                         const creatorJob = Boolean(r.creatorUserId)
                         // TODO(phase5-connect): creator jobs become payable in-cart once
                         // Stripe Connect lands; until then payment is arranged off-platform.
                         const canAddToCart =
                             !creatorJob && (r.status === 'quoted' || r.status === 'payment_pending') && quoted > 0
-                        const quoteLines = r.quote?.lines || []
+                        // Instant-quote lines only; a manual quote's price is
+                        // basePrice + printFee even if an old quote object lingers.
+                        const quoteLines = priced.source === 'instant' ? (r.quote?.lines || []) : []
                         const history = r.statusHistory || []
+                        // A print farm's estimate (saved when the request was sent);
+                        // the creator's own quote, when sent, is shown below it.
+                        const estimate = creatorJob && hasEstimate(r) ? r.estimate : null
+                        const farmName = r.creatorDisplayName || 'the creator'
 
                         return (
                             <DashCard key={r.requestId}>
@@ -133,10 +144,33 @@ export default function AccountPrintRequestsPage() {
                                     {/* Request ids are admin-facing only; the model name identifies
                                         the job for the customer. */}
 
+                                    {estimate && (
+                                        <section className="max-w-md" aria-label={`Estimate from ${farmName}`}>
+                                            <h4 className="dash-label mb-1">Estimate from {farmName}</h4>
+                                            {estimateLines(estimate).map((line) => (
+                                                <DottedRow key={line.key} label={line.label}>
+                                                    {currency} {money(line.amount)}
+                                                </DottedRow>
+                                            ))}
+                                            <div className="mt-1 pt-1 border-t border-[var(--dash-line)]">
+                                                <DottedRow label="Estimate total">
+                                                    <span className="font-medium">
+                                                        {(estimate.currency || r.currency || 'SGD').toUpperCase()} {money(estimate.total)}
+                                                    </span>
+                                                </DottedRow>
+                                            </div>
+                                            <p className="dash-data dash-soft mt-1.5">
+                                                {farmName} confirms the final price. Payment is arranged directly with the creator.
+                                            </p>
+                                        </section>
+                                    )}
+
                                     {/* Quote breakdown, when a quote exists. */}
-                                    {(r.status === 'quoted' || r.status === 'payment_pending') && quoted > 0 && (
+                                    {/* A creator's quote stays visible after they accept the job. */}
+                                    {quoted > 0 && (r.status === 'quoted' || r.status === 'payment_pending'
+                                        || (creatorJob && fee > 0 && r.status !== 'cancelled')) && (
                                         <section className="max-w-md">
-                                            <h4 className="dash-label mb-1">Quote</h4>
+                                            <h4 className="dash-label mb-1">{creatorJob ? `Quote from ${farmName}` : 'Quote'}</h4>
                                             {quoteLines.length > 0 ? (
                                                 <>
                                                     {quoteLines.map((line) => (
@@ -150,6 +184,8 @@ export default function AccountPrintRequestsPage() {
                                                         </DottedRow>
                                                     )}
                                                 </>
+                                            ) : creatorJob ? (
+                                                r.adminNote ? <p className="dash-data dash-soft mb-1">{r.adminNote}</p> : null
                                             ) : (
                                                 <>
                                                     <DottedRow label="Base price">
@@ -163,7 +199,7 @@ export default function AccountPrintRequestsPage() {
                                             <div className="mt-1 pt-1 border-t border-[var(--dash-line)]">
                                                 <DottedRow label="Total">
                                                     <span className="font-medium">
-                                                        {currency} {money(r.quote?.total ?? quoted)}
+                                                        {currency} {money(quoted)}
                                                     </span>
                                                 </DottedRow>
                                             </div>
@@ -192,10 +228,10 @@ export default function AccountPrintRequestsPage() {
 
                                     <div className="flex flex-wrap items-center gap-2 pt-1">
                                         <Link
-                                            href={`/editor?requestId=${encodeURIComponent(r.requestId)}`}
+                                            href={`/prints/request?requestId=${encodeURIComponent(r.requestId)}`}
                                             className="dash-hoverable inline-flex items-center rounded-full border border-[var(--dash-line)] bg-[var(--dash-card)] px-3.5 py-1.5 text-[12px] font-medium dash-soft hover:text-[var(--dash-ink)] hover:bg-[var(--dash-canvas)]"
                                         >
-                                            Open in editor
+                                            Open request
                                         </Link>
                                         {canAddToCart && (
                                             <Link

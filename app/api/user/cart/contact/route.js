@@ -6,7 +6,7 @@ import { cartIdentity, cartOwner } from '@/lib/cartOwner';
 const text = z.string().trim().min(1).max(200);
 const contactSchema = z.object({
     name: text.max(100), email: z.string().trim().email().max(254),
-    address: z.object({ street: text, city: text, state: text, postalCode: text.max(20),
+    address: z.object({ street: text, city: text, state: z.string().trim().max(200).default(''), postalCode: text.max(20),
         country: z.string().regex(/^[A-Z]{2}$/), unitNumber: z.string().trim().max(100).default('') }),
 });
 

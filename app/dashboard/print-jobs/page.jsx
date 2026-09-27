@@ -24,6 +24,7 @@ import {
     FreshnessStamp,
 } from '@/components/dashboard-ui'
 import { availableCreatorActions } from '@/lib/creatorPrintService/jobTransitions'
+import { estimateLines, hasEstimate } from '@/lib/customPrint/estimateLines'
 
 // Creator-facing labels over the shared status vocabulary.
 export const JOB_STATUS_LABELS = {
@@ -119,7 +120,8 @@ function PrintJobs() {
 
     const openPeek = (j) => {
         setPeekId(j.requestId)
-        setQuoteAmount(j.printFee ? String(j.printFee) : '')
+        // Prefill with the farm's saved estimate; the creator's number wins.
+        setQuoteAmount(j.printFee ? String(j.printFee) : hasEstimate(j) ? String(j.estimate.total) : '')
         setQuoteNote(j.adminNote || '')
         setRejectReason('')
     }
@@ -215,9 +217,13 @@ function PrintJobs() {
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
-                                        {Number(j.printFee) > 0 && (
+                                        {Number(j.printFee) > 0 ? (
                                             <span className="dash-data dash-soft whitespace-nowrap">
                                                 {(j.currency || 'SGD').toUpperCase()} {money(Number(j.basePrice || 0) + Number(j.printFee || 0))}
+                                            </span>
+                                        ) : hasEstimate(j) && (
+                                            <span className="dash-data dash-soft whitespace-nowrap">
+                                                Est. {(j.estimate.currency || j.currency || 'SGD').toUpperCase()} {money(j.estimate.total)}
                                             </span>
                                         )}
                                         <StatusPill tone={printRequestTone(j.status)}>{JOB_STATUS_LABELS[j.status] || j.status}</StatusPill>
@@ -264,6 +270,20 @@ function PrintJobs() {
                                 {job.designSource.attribution ? ` · ${job.designSource.attribution}` : ''}
                             </p>}
                         </section>
+
+                        {hasEstimate(job) && (
+                            <section aria-label="Estimate">
+                                <h4 className="dash-label mb-1">Estimate</h4>
+                                {estimateLines(job.estimate).map((line) => (
+                                    <DottedRow key={line.key} label={line.label}>{currency} {money(line.amount)}</DottedRow>
+                                ))}
+                                <DottedRow label="Estimate total"><span className="font-medium">{currency} {money(job.estimate.total)}</span></DottedRow>
+                                <p className="dash-data dash-soft mt-1">
+                                    What the customer saw, priced with your print farm pricing{job.pricedWith?.version ? ` (version ${job.pricedWith.version})` : ''}.
+                                    {' '}It prefills your quote; the price you send is the one that counts.
+                                </p>
+                            </section>
+                        )}
 
                         {quoted > 0 && (
                             <section>

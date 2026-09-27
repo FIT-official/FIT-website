@@ -1,193 +1,41 @@
 'use client'
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { GoStar } from "react-icons/go";
+import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import { AnimatePresence, MotionConfig, motion } from "framer-motion";
-import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { HiCube, HiUpload } from "react-icons/hi";
-import LinkToolTip from "./LinkToolTip";
+import { GoChevronRight } from "react-icons/go";
 
-function CustomPrintCard({ product }) {
-    const { user, isSignedIn, isLoaded } = useUser();
-    const [liked, setLiked] = useState(user?.id ? product.likes?.includes?.(user.id) ?? false : false);
-    const router = useRouter();
-
-    const [tooltip, setTooltip] = useState(null);
-    const [hoveringLink, setHoveringLink] = useState(false);
-
-    const handleLike = async (e) => {
-        e.stopPropagation();
-        if (!isLoaded || !user) {
-            return;
-        }
-        if (!isSignedIn) {
-            router.push("/sign-in?redirect=/prints");
-            return;
-        }
-        setLiked(true);
-
-        try {
-            const res = await fetch(`/api/like/${product._id}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: user.id, action: "like" }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setLiked(data.liked);
-            } else {
-                setLiked(false);
-            }
-        } catch (err) {
-            setLiked(false);
-        }
-    }
-
-    const handleUnlike = async (e) => {
-        e.stopPropagation();
-        if (!isLoaded || !user) {
-            return;
-        }
-        if (!isSignedIn) {
-            router.push("/sign-in?redirect=/prints");
-            return;
-        }
-        setLiked(false);
-
-        try {
-            const res = await fetch(`/api/like/${product._id}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: user.id, action: "unlike" }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setLiked(data.liked);
-            } else {
-                setLiked(true);
-            }
-        } catch (err) {
-            setLiked(true);
-        }
-    };
-
-    const handleCardClick = (e) => {
-        if (!hoveringLink) {
-            window.open(`/products/custom-print-request`, '_blank');
-        }
-    };
-
+// Entry tile for the print request page. It stands on its own (no price, no
+// account, no custom-print product needed); a product image is optional.
+function CustomPrintCard({ product = null }) {
+    const image = product?.images?.[0];
     return (
-        <div
-            className="relative flex flex-col gap-3 p-4 border border-dashed border-borderColor hover:border-textColor/20 rounded-lg bg-linear-to-br from-baseColor to-background transition-all duration-300 hover:shadow-lg cursor-pointer group"
-            onMouseMove={e => {
-                if (!hoveringLink) {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setTooltip({
-                        x: e.clientX - rect.left,
-                        y: e.clientY - rect.top,
-                    });
-                }
-            }}
-            onMouseLeave={() => setTooltip(null)}
-            onClick={handleCardClick}
-            role="button"
+        <Link
+            href="/prints/request"
+            className="group relative flex flex-col gap-3 rounded-lg border border-dashed border-borderColor bg-linear-to-br from-baseColor to-background p-4 transition-all duration-300 hover:border-textColor/20 hover:shadow-lg"
         >
-            {!hoveringLink && <LinkToolTip tooltip={tooltip} title={"View Custom 3D Printing"} />}
-
-            {/* Show product image if available, otherwise show icon */}
-            {product?.images?.length > 0 ? (
+            {image ? (
                 <Image
-                    src={`/api/proxy?key=${encodeURIComponent(product.images[0])}`}
-                    alt="Custom 3D Printing"
+                    src={`/api/proxy?key=${encodeURIComponent(image)}`}
+                    alt="Custom 3D printing"
                     width={400}
                     height={400}
-                    className="flex w-full object-cover bg-borderColor/30 aspect-square mb-2 rounded-lg group-hover:bg-borderColor/50 transition-colors"
+                    className="mb-2 flex aspect-square w-full rounded-lg bg-borderColor/30 object-cover transition-colors group-hover:bg-borderColor/50"
                 />
             ) : (
-                <div className="w-full aspect-square bg-borderColor/30 rounded-lg flex flex-col items-center justify-center gap-4 group-hover:bg-borderColor/50 transition-colors mb-2">
+                <div className="mb-2 flex aspect-square w-full flex-col items-center justify-center gap-4 rounded-lg bg-borderColor/30 transition-colors group-hover:bg-borderColor/50">
                     <div className="relative">
-                        <HiCube className="text-lightColor text-6xl group-hover:text-textColor transition-colors" />
-                        <HiUpload className="absolute -bottom-2 -right-2 text-textColor text-2xl bg-background rounded-full p-1 border-2 border-borderColor" />
+                        <HiCube className="text-6xl text-lightColor transition-colors group-hover:text-textColor" aria-hidden="true" />
+                        <HiUpload className="absolute -bottom-2 -right-2 rounded-full border-2 border-borderColor bg-background p-1 text-2xl text-textColor" aria-hidden="true" />
                     </div>
-                    <div className="text-center">
-                        <p className="text-sm font-medium text-textColor">Upload Your Model</p>
-                        <p className="text-xs text-lightColor mt-1">Custom 3D Printing</p>
-                    </div>
+                    <p className="text-xs text-lightColor">STL, OBJ or 3MF · price as you go</p>
                 </div>
             )}
-
-            <div className="flex flex-col w-full items-center justify-center relative">
-                <p className="text-xs uppercase font-normal flex">
-                    {product?.name || 'Custom 3D Print'}
-                </p>
-
-                <p className="text-base font-bold flex items-end">
-                    {(() => {
-                        const basePrice = Number(product?.basePrice?.presentmentAmount || 0);
-                        const currency = product?.basePrice?.presentmentCurrency || 'SGD';
-
-                        if (basePrice > 0) {
-                            return `From ${currency} ${basePrice.toFixed(2)}`;
-                        }
-                        return 'Price on request';
-                    })()}
-                </p>
-
-                {product?.reviews?.length > 0 && (
-                    <span className='flex items-center gap-2 text-lightColor text-sm'>
-                        <GoStar className='inline' />
-                        {(product.reviews.reduce((acc, review) => acc + review.rating, 0) / product.reviews.length).toFixed(1)}
-                    </span>
-                )}
-
-                {product?.sales?.length > 0 && (
-                    <span className='flex text-xs text-lightColor'>{product.sales.length} completed</span>
-                )}
-
-                <button
-                    onClick={liked ? handleUnlike : handleLike}
-                    className="absolute top-1 right-1 z-5 cursor-pointer"
-                    aria-label={liked ? "Unlike" : "Like"}
-                    onMouseEnter={() => {
-                        setHoveringLink(true);
-                        setTooltip(null);
-                    }}
-                    onMouseLeave={() => setHoveringLink(false)}
-                >
-                    <MotionConfig transition={{ duration: 0.15, ease: "easeInOut" }}>
-                        <AnimatePresence mode="wait" initial={false}>
-                            {liked ? (
-                                <motion.span
-                                    key="liked"
-                                    initial={{ scale: 0.7, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    exit={{ scale: 0.7, opacity: 0 }}
-                                >
-                                    <IoIosHeart size={16} className="text-textColor" />
-                                </motion.span>
-                            ) : (
-                                <motion.span
-                                    key="unliked"
-                                    initial={{ scale: 0.7, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    exit={{ scale: 0.7, opacity: 0 }}
-                                >
-                                    <IoIosHeartEmpty size={16} className="text-textColor" />
-                                </motion.span>
-                            )}
-                        </AnimatePresence>
-                    </MotionConfig>
-                </button>
+            <div className="flex w-full flex-col items-center text-center">
+                <p className="text-sm font-semibold">Get a 3D print made</p>
+                <p className="mt-1 text-xs text-lightColor">Upload a model, pick material and colour, see the price.</p>
+                <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold underline underline-offset-4">Start a request <GoChevronRight aria-hidden="true" /></span>
             </div>
-
-            {/* "New" badge */}
-            <div className="absolute top-3 right-3 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full border border-green-200">
-                New
-            </div>
-        </div>
+        </Link>
     )
 }
 

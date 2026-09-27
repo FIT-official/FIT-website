@@ -11,8 +11,11 @@ vi.mock('@/components/General/MarkdownRenderer', () => ({
 
 const creator = { id: 'user_creator', displayName: 'Ada Prints', shop: { accentColor: '#3b82f6' } }
 
-const service = {
-    enabled: true,
+// A legacy service (saved before per-farm pricing), wrapped exactly as
+// GET /api/creators/[id]/print-service returns it. The block used to read
+// these fields from the top of the response, so live pages showed no
+// materials; the mocks now use the real { enabled, creator, service } shape.
+const legacyService = {
     headline: 'Prints from my Bambu',
     description: 'PLA and PETG, **fast**.',
     materials: [
@@ -23,6 +26,7 @@ const service = {
     leadTimeDays: 3,
     turnaroundNote: 'Pickup at Tampines.',
 }
+const service = { enabled: true, creator: { userId: 'user_creator', displayName: 'Ada Prints' }, service: legacyService }
 
 afterEach(() => { cleanup(); vi.restoreAllMocks() })
 
@@ -69,5 +73,59 @@ describe('PrintServiceBlock', () => {
         render(<PrintServiceBlock settings={{ heading: 'Print with me' }} creator={creator} />)
         expect(await screen.findByRole('heading', { level: 2, name: 'Print with me' })).toBeInTheDocument()
         expect(screen.getByRole('heading', { level: 3, name: 'Prints from my Bambu' })).toBeInTheDocument()
+    })
+})
+
+// Exactly what the public route returns for a farm with per-farm pricing:
+// publicPrintService(doc) + publicFarmProfile(resolveFarmPricing(...)).
+const routeResponse = {
+    enabled: true,
+    creator: { userId: 'user_creator', displayName: 'Ada Prints' },
+    service: {
+        headline: 'Prints from my Bambu', description: '', materials: [], minimumCharge: 0, leadTimeDays: 7,
+        maxBuildMm: { x: 250, y: 250, z: 250 }, acceptedFormats: ['stl', '3mf'], turnaroundNote: '',
+    },
+    profile: {
+        materials: [
+            { filament: 'pla', label: 'PLA', ratePerGram: 0.125, note: 'Most colours in stock', colours: [
+                { filament: 'pla', name: 'Jade White', code: '10100', hex: '#ffffff' },
+                { filament: 'pla', name: 'Black', code: '10101', hex: '#000000' },
+            ] },
+            { filament: 'petg', label: 'PETG', ratePerGram: 0.18, note: '', colours: [{ filament: 'petg', name: 'White', code: '30106', hex: '#f7f7f4' }] },
+        ],
+        reviewMaterials: [{ key: 'review-1', label: 'Nylon', note: 'Dried first', colours: [{ name: 'Black', hex: null }] }],
+        minimumPrice: 8,
+        deliveryOptions: [
+            { type: 'pickup', displayName: 'Collect in Tampines', description: '', price: 0, needsAddress: false },
+            { type: 'courier', displayName: 'Courier', description: '', price: 8, needsAddress: true },
+        ],
+        leadTimeDays: 4,
+        machineLimits: { maxLengthCm: 25.6, maxWidthCm: 25.6, maxHeightCm: 25.6, maxWeightKg: null },
+        offers: { postProcessing: true, specialRequest: true, priority: false, expedite: false },
+    },
+}
+
+describe('PrintServiceBlock with a per-farm pricing profile', () => {
+    it('renders the offered materials, colours, S$/g, lead time, size limit and delivery from the public route shape', async () => {
+        global.fetch = vi.fn(async () => ({ ok: true, json: async () => routeResponse }))
+        render(<PrintServiceBlock settings={{}} creator={creator} />)
+        expect(await screen.findByText('PETG')).toBeInTheDocument()
+        const rows = screen.getAllByRole('row').slice(1)
+        expect(rows).toHaveLength(3)
+        expect(rows[0]).toHaveTextContent('Most colours in stock')
+        expect(rows[2]).toHaveTextContent('Nylon')
+        expect(rows[2]).toHaveTextContent('Dried first')
+        expect(rows[2]).toHaveTextContent('On review')
+        expect(rows[0]).toHaveTextContent('PLA')
+        expect(rows[0]).toHaveTextContent('Jade White')
+        expect(rows[0]).toHaveTextContent('Black')
+        expect(rows[0]).toHaveTextContent('0.125')
+        expect(rows[1]).toHaveTextContent('0.18')
+        // Lead time comes from the profile, not the legacy service default.
+        expect(screen.getByText('4 days')).toBeInTheDocument()
+        expect(screen.getByText('256 × 256 × 256 mm')).toBeInTheDocument()
+        expect(screen.getByText('Collect in Tampines (free), Courier (S$8.00)')).toBeInTheDocument()
+        expect(screen.getByText('Minimum order').closest('span')).toHaveTextContent('Minimum order S$8.00')
+        expect(screen.getByRole('link', { name: 'Upload your model' })).toHaveAttribute('href', '/prints/request?creator=user_creator')
     })
 })

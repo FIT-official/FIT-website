@@ -25,7 +25,7 @@ vi.mock('@/models/CheckoutAttempt', () => ({ default: {
     },
     updateOne: async ({ _id }, update) => { Object.assign(m.attempts.get(_id), update.$set); },
 } }));
-import { POST } from '@/app/api/checkout/session/route';
+import { POST, DELETE } from '@/app/api/checkout/session/route';
 import { CheckoutTransactionUnavailableError } from '@/lib/checkoutTransactionReadiness';
 
 let user, product;
@@ -42,7 +42,7 @@ beforeEach(() => {
     });
     m.updateOwner.mockResolvedValue({ matchedCount: 1 });
     m.customer.mockResolvedValue({ emailAddresses: [{ emailAddress: 'buyer@example.test' }], firstName: 'Buyer', publicMetadata: {} });
-    user = { userId: 'buyer', checkoutIntent: '00000000-0000-4000-8000-000000000001', contact: { address: { country: 'SG', street: 'Original street' } },
+    user = { userId: 'buyer', checkoutIntent: '00000000-0000-4000-8000-000000000001', contact: { address: { country: 'SG', street: 'Original street', city: 'Singapore', postalCode: '123456' } },
         cart: [{ _id: 'cart1', productId: 'p1', quantity: 2, chosenDeliveryType: 'shipping', selectedVariants: {}, price: .01 }], save: vi.fn() };
     product = { _id: 'p1', name: 'Product', slug: 'product', creatorUserId: 'creator', listing: 'fit',
         basePrice: { presentmentAmount: 10, presentmentCurrency: 'SGD' }, variantTypes: [],
@@ -55,6 +55,64 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('Checkout session purchase contract', () => {
+    it('expires an unpaid session before rotating its intent for edits', async () => {
+        await POST();
+        const originalIntent = user.checkoutIntent;
+        m.expire.mockResolvedValue({ id: 'cs_created', status: 'expired', payment_status: 'unpaid' });
+        m.updateOwner.mockImplementation(async (filter, update) => {
+            if (filter.checkoutIntent === user.checkoutIntent) Object.assign(user, update.$set);
+            return { matchedCount: 1 };
+        });
+        const response = await DELETE(new Request('https://x/api/checkout/session', { method: 'DELETE', headers: { 'X-Checkout-Attempt': originalIntent } }));
+        expect(response.status).toBe(200);
+        expect(m.expire).toHaveBeenCalledWith('cs_created');
+        expect((await response.json()).attemptId).not.toBe(originalIntent);
+        expect(m.expire.mock.invocationCallOrder[0]).toBeLessThan(m.updateOwner.mock.invocationCallOrder[0]);
+        expect(m.createSession).toHaveBeenCalledTimes(1);
+    });
+    it.each([
+        { status: 'complete', payment_status: 'paid' },
+        { status: 'complete', payment_status: 'unpaid' },
+    ])('refuses edits when a payment is already processing: %j', async status => {
+        await POST();
+        m.retrieve.mockResolvedValue({ id: 'cs_created', ...status });
+        const response = await DELETE(new Request('https://x/api/checkout/session', { method: 'DELETE', headers: { 'X-Checkout-Attempt': user.checkoutIntent } }));
+        expect(response.status).toBe(409);
+        expect(m.expire).not.toHaveBeenCalled();
+        expect(m.updateOwner).not.toHaveBeenCalled();
+    });
+    it('blocks edits after an uncertain expiry and reuses the original contract', async () => {
+        await POST();
+        m.expire.mockRejectedValue(new Error('Lost expiry response'));
+        const response = await DELETE(new Request('https://x/api/checkout/session', { method: 'DELETE', headers: { 'X-Checkout-Attempt': user.checkoutIntent } }));
+        expect(response.status).toBe(409);
+        expect(m.updateOwner).not.toHaveBeenCalled();
+        await POST();
+        expect(m.createSession).toHaveBeenCalledTimes(1);
+    });
+    it('recovers a lost expiry response only after the provider confirms expiry', async () => {
+        await POST();
+        m.expire.mockRejectedValueOnce(new Error('Lost response'));
+        m.retrieve.mockResolvedValueOnce({ id: 'cs_created', status: 'open', payment_status: 'unpaid' })
+            .mockResolvedValueOnce({ id: 'cs_created', status: 'expired', payment_status: 'unpaid' });
+        const response = await DELETE(new Request('https://x/api/checkout/session', { method: 'DELETE', headers: { 'X-Checkout-Attempt': user.checkoutIntent } }));
+        expect(response.status).toBe(200);
+        expect(m.updateOwner).toHaveBeenCalledOnce();
+    });
+    it('cannot expire another customer checkout', async () => {
+        await POST();
+        m.auth.mockResolvedValue({ userId: 'other_buyer' });
+        const response = await DELETE(new Request('https://x/api/checkout/session', { method: 'DELETE', headers: { 'X-Checkout-Attempt': user.checkoutIntent } }));
+        expect(response.status).toBe(403);
+        expect(m.expire).not.toHaveBeenCalled();
+        expect(m.updateOwner).not.toHaveBeenCalled();
+    });
+    it.each(['street', 'city', 'postalCode', 'country'])('never creates payment when a shipping address lacks %s', async field => {
+        delete user.contact.address[field];
+        const response = await POST();
+        expect(response.status).toBe(400);
+        expect(m.createSession).not.toHaveBeenCalled();
+    });
     it('allocates one durable intent for concurrent calls from an older account cart', async () => {
         delete user.checkoutIntent;
         const results = await Promise.all(Array.from({ length: 5 }, () => POST()));
@@ -177,7 +235,7 @@ describe('Checkout session purchase contract', () => {
     });
     it('creates a Stripe session for a guest with a Mongo cart and contact details', async () => {
         m.auth.mockResolvedValue({ userId: null });
-        user.guestContact = { name: 'Guest', email: 'guest@example.test', address: { country: 'SG', street: 'Guest street' } };
+        user.guestContact = { name: 'Guest', email: 'guest@example.test', address: { country: 'SG', street: 'Guest street', city: 'Singapore', postalCode: '123456' } };
         product.productType = 'shop';
         const response = await POST(new Request('https://fit.example/api/checkout/session', { method: 'POST',
             headers: { cookie: `fit_guest_cart=${'a'.repeat(64)}` } }));
@@ -234,6 +292,32 @@ describe('Checkout session purchase contract', () => {
         m.saveSnapshot.mockRejectedValueOnce(new Error('Database unavailable'));
         expect((await POST()).status).toBe(503); expect(m.expire).not.toHaveBeenCalled();
         expect((await POST()).status).toBe(200); expect(m.createSession).toHaveBeenCalledTimes(1);
+    });
+    it('refuses a shipping cart without a complete delivery address', async () => {
+        user.contact = {};
+        const response = await POST();
+        expect(response.status).toBe(400); expect(await response.json()).toMatchObject({ code: 'checkout_address_required' });
+        expect(m.createSession).not.toHaveBeenCalled();
+    });
+    it('does not require an address when nothing in the cart ships', async () => {
+        user.contact = {};
+        user.cart[0].chosenDeliveryType = 'digital';
+        user.cart[0].quantity = 1;
+        product.delivery = { deliveryTypes: [{ type: 'digital', price: 0 }] };
+        const response = await POST();
+        expect(response.status).toBe(200);
+        expect(m.saveSnapshot).toHaveBeenCalledWith(expect.objectContaining({ shippingAddress: null, totalAmount: 1000 }));
+    });
+    it('accepts an address with no unit number and no state', async () => {
+        user.contact.address = { street: '1 Test St', city: 'Singapore', postalCode: '123456', country: 'SG' };
+        expect((await POST()).status).toBe(200);
+    });
+    it('answers 409 with a cart hint when a line holds a delivery option the product no longer offers', async () => {
+        user.cart[0].chosenDeliveryType = 'drone';
+        const response = await POST();
+        expect(response.status).toBe(409);
+        expect(await response.json()).toEqual({ error: 'Pick a delivery option for Product in the cart.' });
+        expect(m.createSession).not.toHaveBeenCalled();
     });
     it('rejects an empty cart before creating a Stripe session', async () => {
         user.cart = []; expect((await POST()).status).toBe(400); expect(m.createSession).not.toHaveBeenCalled();

@@ -5,6 +5,7 @@ import { HiOutlineMail } from 'react-icons/hi'
 import Link from 'next/link'
 
 function Footer() {
+    const whatsappNumber = (process.env.NEXT_PUBLIC_FIT_WHATSAPP_NUMBER || '').replace(/\D/g, '');
     return (
         <footer className='flex flex-col w-full min-h-[40vh] px-12 py-12'>
             {/* top section */}
@@ -37,9 +38,9 @@ function Footer() {
                             {/* <Link href='https://instagram.com' target="_blank" rel="noopener noreferrer" className='footerLink'>
                                 <FaInstagram size={16} className='flex' /> Instagram
                             </Link> */}
-                            <Link href='https://whatsapp.com' target="_blank" rel="noopener noreferrer" className='footerLink'>
-                                <FaWhatsapp size={16} className='flex' /> Whatsapp
-                            </Link>
+                            {whatsappNumber && <Link href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" className='footerLink'>
+                                <FaWhatsapp size={16} className='flex' /> WhatsApp
+                            </Link>}
                             {/* <Link href='https://telegram.org' target="_blank" rel="noopener noreferrer" className='footerLink'>
                                 <FaTelegram size={16} className='flex' /> Telegram
                             </Link>
@@ -60,7 +61,7 @@ function Footer() {
                     <span className='opacity-60'>Website created by</span> <a href="https://www.linkedin.com/in/sabaxazad/" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity ease-in-out duration-300 ml-1">Saba Azad</a>
                 </div>
                 <div className='flex text-sm tracking-tight opacity-60'>
-                    © 2025 Fix It Today. All rights reserved.
+                    © {new Date().getFullYear()} Fix It Today. All rights reserved.
                 </div>
             </div>
         </footer>

@@ -13,6 +13,11 @@ export async function POST(req) {
         if (!cartItem || !cartItem.productId || !cartItem.chosenDeliveryType) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
+        // Print requests reach the cart only through /api/cart/custom-print,
+        // which checks ownership, the quote and that it is not a creator job.
+        if (String(cartItem.productId).startsWith("custom-print:")) {
+            return NextResponse.json({ error: "Use Add to cart on the print request page." }, { status: 409 });
+        }
 
         const user = await cartOwner(identity, { create: true });
         if (!user) return NextResponse.json({ error: "Your account cart is unavailable. Please sign in again." }, { status: 401 });
@@ -94,6 +99,7 @@ export async function GET(req) {
         if (!user) return NextResponse.json({ error: "Your account cart is unavailable. Please sign in again." }, { status: 401 });
         const intent = user.cart.length ? await checkoutIntent(user) : user.checkoutIntent;
         return withCartCookie(NextResponse.json({ cart: user.cart, guest: identity.guest,
+            ...(identity.guest ? { guestContact: user.guestContact || null } : {}),
             checkoutAttemptId: intent, contactReady: !identity.guest || !!(user.guestContact?.email && user.guestContact?.address?.country) }), identity);
     } catch (err) {
         console.error(err);
@@ -132,8 +138,9 @@ export async function DELETE(req) {
         if (!user) return NextResponse.json({ error: "Your cart has expired. Please return to the shop." }, { status: 401 });
         user.cart = user.cart.filter(
             item => {
-                // Special handling for custom print items - match by productId only
-                if (productId === 'custom-print-request' || item.productId === 'custom-print-request') {
+                // Custom print lines (custom-print:<requestId>) carry no
+                // variants, so they match by productId alone.
+                if (String(productId).startsWith('custom-print:') || String(item.productId || '').startsWith('custom-print:')) {
                     return item.productId !== productId;
                 }
 
