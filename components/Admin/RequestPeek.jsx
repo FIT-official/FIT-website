@@ -4,6 +4,7 @@ import { IoDownloadOutline, IoPrintOutline } from 'react-icons/io5'
 import ShippingFields from '@/components/DashboardComponents/ProductFormFields/ShippingFields'
 import { useToast } from '@/components/General/ToastProvider'
 import { PeekPanel, DottedRow, Timeline, StatusPill, ComingSoon } from '@/components/dashboard-ui'
+import { customPrintDisplayPrice } from '@/lib/customPrintDisplayPrice'
 
 // Status vocabulary shared by the queue list and the peek (§5.8).
 export const STATUS_LABELS = {
@@ -56,9 +57,8 @@ function describeStatus(r) {
         case 'pending_config': return 'Model uploaded, awaiting print config'
         case 'configured': return 'Model & config done, awaiting quote'
         case 'quoted': {
-            const base = typeof r.basePrice === 'number' ? r.basePrice : 0
-            const fee = typeof r.printFee === 'number' ? r.printFee : 0
-            return `Quote: ${(base + fee).toFixed(2)} ${r.currency?.toUpperCase() || 'SGD'}`
+            const { amount } = customPrintDisplayPrice(r)
+            return `Quote: ${amount.toFixed(2)} ${r.currency?.toUpperCase() || 'SGD'}`
         }
         case 'payment_pending': return 'Quote sent, awaiting payment'
         case 'paid': return 'Paid, in queue for printing'
@@ -326,7 +326,7 @@ export default function RequestPeek({
                     {r.quote?.total != null && (
                         <>
                             <DottedRow label="Quote total" className="font-medium">
-                                {`${String(r.quote.currency || 'sgd').toUpperCase()} ${Number(r.quote.total).toFixed(2)}`}
+                                {`${String(r.currency || 'sgd').toUpperCase()} ${customPrintDisplayPrice(r).amount.toFixed(2)}`}
                             </DottedRow>
                             {/* Honest stub (openspec add-quote-review-state): quotes have no
                                 validity window yet — the value stays a dash, never a fake date. */}

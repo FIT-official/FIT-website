@@ -17,6 +17,7 @@ import { useParams, useSearchParams } from 'next/navigation'
 import { DottedRow, StatusPill } from '@/components/dashboard-ui'
 import { STATUS_LABELS, statusTone, normalizeMeshColors, configEntries } from '@/components/Admin/RequestPeek'
 import { encodeQr, qrSvgPath } from '@/lib/qr'
+import { customPrintDisplayPrice } from '@/lib/customPrintDisplayPrice'
 
 const PRINT_CSS = `
 @page { size: A5 portrait; margin: 10mm; }
@@ -109,12 +110,9 @@ function JobSheet() {
     const r = request
     const settings = r.printConfiguration?.printSettings
     const swatches = Object.entries(normalizeMeshColors(r.printConfiguration?.meshColors))
-    const quoteTotal =
-        r.quote?.total != null
-            ? `${String(r.quote.currency || 'sgd').toUpperCase()} ${Number(r.quote.total).toFixed(2)}`
-            : typeof r.printFee === 'number' && r.printFee > 0
-              ? `${String(r.currency || 'sgd').toUpperCase()} ${(Number(r.basePrice || 0) + Number(r.printFee)).toFixed(2)}`
-              : '–'
+    const quoteTotal = r.quote?.total != null || (typeof r.printFee === 'number' && r.printFee > 0)
+        ? `${String(r.currency || 'sgd').toUpperCase()} ${customPrintDisplayPrice(r).amount.toFixed(2)}`
+        : '–'
 
     return (
         <div className="dash min-h-[92vh] py-8 px-4">

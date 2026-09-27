@@ -77,6 +77,21 @@ afterEach(() => {
 })
 
 describe('CustomPrintRequests — job queue', () => {
+    it.each([
+        ['instant', 5],
+        ['manual', 22],
+    ])('shows the same %s quote in the status and detail row as checkout', async (quoteMode, amount) => {
+        global.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ requests: [{
+            ...requestsFixture[1], quoteMode, basePrice: 17, printFee: 5, quote: { total: 5 },
+        }] }) }))
+        render(<CustomPrintRequests />)
+        fireEvent.click(await screen.findByText('vase.stl'))
+        const dialog = await screen.findByRole('dialog')
+        expect(within(dialog).getByText(`Quote: ${amount.toFixed(2)} SGD`)).toBeInTheDocument()
+        expect(within(dialog).getByText(`SGD ${amount.toFixed(2)}`)).toBeInTheDocument()
+        expect(within(dialog).queryByText(`SGD ${(amount === 5 ? 22 : 5).toFixed(2)}`)).toBeNull()
+    })
+
     it('renders a job-card row with model, customer, id and status pill', async () => {
         render(<CustomPrintRequests />)
         expect(await screen.findByText('benchy.stl')).toBeInTheDocument()
