@@ -90,6 +90,23 @@ function setup() {
 beforeEach(setup);
 
 describe('Stripe paid checkout snapshots', () => {
+    it('creates only one paid guest order across repeated completion and asynchronous events', async () => {
+        const guestId = 'guest_opaque_owner';
+        f.state.user.userId = guestId;
+        f.state.user.checkoutIntent = 'intent_one';
+        f.state.checkout.userId = guestId;
+        f.state.checkout.attemptId = 'intent_one';
+        f.event.data.object.metadata.userId = guestId;
+        for (const type of ['checkout.session.completed', 'checkout.session.completed', 'checkout.session.async_payment_succeeded']) {
+            f.event.type = type;
+            expect((await POST(req())).status).toBe(200);
+        }
+        expect(f.state.orders).toHaveLength(1);
+        expect(f.state.orders[0]).toMatchObject({ stripeSessionId: 'cs_paid', stripePaymentIntentId: 'pi_paid' });
+        expect(f.state.user.orderHistory).toHaveLength(1);
+        expect(f.state.products.product1.stock).toBe(8);
+        expect(f.state.user.checkoutIntent).not.toBe('intent_one');
+    });
     it('fulfils original prices, files and quantity when the cart and catalogue change', async () => {
         f.state.user.cart = [{ _id: 'new', productId: 'expensive-unpaid', quantity: 5, chosenDeliveryType: 'digital' }];
         expect((await POST(req())).status).toBe(200);

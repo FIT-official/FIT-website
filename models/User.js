@@ -140,6 +140,14 @@ const UserSchema = new mongoose.Schema({
     userId: { type: String, required: true, unique: true },
     orderHistory: { type: [OrderSchema], default: [] },
     cart: { type: [CartItemSchema], default: [] },
+    // Rotated only after fulfilment or a Stripe-confirmed expired session.
+    // Cart edits never create another concurrently payable intent.
+    checkoutIntent: { type: String, default: undefined },
+    guestContact: { type: new mongoose.Schema({
+        email: { type: String, maxlength: 254 },
+        name: { type: String, maxlength: 100 },
+        address: { type: mongoose.Schema.Types.Mixed },
+    }, { _id: false }), default: undefined },
     contact: { type: ContactSchema, required: false, default: undefined },
     usedPromoCodes: { type: [String], default: [] },
     metadata: {

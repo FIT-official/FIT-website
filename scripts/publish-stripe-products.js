@@ -33,7 +33,7 @@ if (!STRIPE_API_KEY) {
 }
 if (!MONGODB_URI) {
   console.error('Missing MONGODB_URI or MONGO_URL in environment.');
-  process.exit(1);s
+  process.exit(1);
 }
 
 const stripe = new Stripe(STRIPE_API_KEY, { apiVersion: '2023-10-16' });
@@ -67,7 +67,7 @@ const products = [
 
 async function main() {
   // Connect to MongoDB
-  await mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+  await mongoose.connect(MONGODB_URI, { maxPoolSize: 5, minPoolSize: 0, maxIdleTimeMS: 60000 });
 
   const created = [];
   for (const prod of products) {
@@ -116,10 +116,9 @@ async function main() {
   );
   console.log('AppSettings updated with Stripe price IDs:', priceIdMap);
 
-  await mongoose.disconnect();
 }
 
-main().catch(e => {
+main().finally(() => mongoose.disconnect()).catch(e => {
   console.error(e);
-  process.exit(1);
+  process.exitCode = 1;
 });

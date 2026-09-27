@@ -19,6 +19,7 @@ const CheckoutSessionSchema = new mongoose.Schema(
     {
         sessionId: { type: String, required: true, unique: true },
         userId: { type: String, required: true },
+        attemptId: { type: String, immutable: true },
         snapshotVersion: { type: Number, immutable: true },
         // Server-priced purchase contract. Legacy rows intentionally have no
         // snapshot and must be reconciled, never rebuilt from a current cart.

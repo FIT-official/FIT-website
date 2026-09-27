@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import User from "@/models/User";
+import { cartIdentity, cartOwner } from "@/lib/cartOwner";
 import Product from "@/models/Product";
 import CustomPrintRequest from "@/models/CustomPrintRequest";
 import { sanitizeString } from "@/utils/validate";
-import { auth } from "@clerk/nextjs/server";
 import { resolveDeliveryFee } from "@/lib/quoting/deliveryTypeResolver";
 
 export async function PUT(req) {
     try {
-        const { userId } = await auth();
+        const identity = await cartIdentity(req);
+        const { userId } = identity;
         if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -25,7 +25,7 @@ export async function PUT(req) {
         }
 
         await connectToDatabase();
-        const user = await User.findOne({ userId });
+        const user = await cartOwner(identity);
         if (!user) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }

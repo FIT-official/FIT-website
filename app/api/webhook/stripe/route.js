@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
+import { randomUUID } from 'node:crypto';
 import Stripe from 'stripe';
 import { connectToDatabase } from '@/lib/db';
 import User from '@/models/User';
 import Product from '@/models/Product';
 import CheckoutSession from '@/models/CheckoutSession';
+import CheckoutAttempt from '@/models/CheckoutAttempt';
 import Order from '@/models/Order';
 import CustomPrintRequest from '@/models/CustomPrintRequest';
 import DigitalProductTransaction from '@/models/DigitalProductTransaction';
@@ -176,6 +178,9 @@ export async function POST(req) {
             // Concurrent user edits conflict with this transaction and cause a
             // fresh read/retry, rather than being overwritten by a stale cart.
             user.cart = removePurchasedCartItems(user.cart, snapshots);
+            const attemptId = claimed.attemptId || (user.checkoutIntent
+                ? (await CheckoutAttempt.findOne({ sessionId: payment.id, userId: claimed.userId }).session(dbSession))?._id : null);
+            if (attemptId && user.checkoutIntent === attemptId) user.checkoutIntent = randomUUID();
             await user.save({ session: dbSession });
         });
         if (duplicate) return NextResponse.json({ received: true, duplicate: true });

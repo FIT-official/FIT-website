@@ -16,6 +16,7 @@
  */
 
 import dotenv from 'dotenv'
+import mongoose from 'mongoose'
 dotenv.config({ path: '.env.local' })
 dotenv.config({ path: '.env' })
 
@@ -42,7 +43,7 @@ async function seedPrintColours() {
             `✅ printColours already has ${existing.length} colour(s); leaving it untouched. ` +
                 `Re-run with --force to overwrite with the defaults.`,
         )
-        process.exit(0)
+        return
     }
 
     // Strip the Object.freeze wrapper into plain objects for Mongoose.
@@ -59,10 +60,9 @@ async function seedPrintColours() {
         `✅ Seeded ${settings.printColours.length} print colours into AppSettings "${id}"` +
             (force && existing.length > 0 ? ` (overwrote ${existing.length} existing).` : '.'),
     )
-    process.exit(0)
 }
 
-seedPrintColours().catch((err) => {
+seedPrintColours().finally(() => mongoose.disconnect()).catch((err) => {
     console.error('Error seeding print colours:', err)
-    process.exit(1)
+    process.exitCode = 1
 })

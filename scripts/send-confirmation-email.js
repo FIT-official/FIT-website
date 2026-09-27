@@ -115,20 +115,18 @@ function renderOrderDetails(session, user) {
 }
 
 async function main() {
-  await mongoose.connect(process.env.MONGODB_URI);
+  await mongoose.connect(process.env.MONGODB_URI, { maxPoolSize: 5, minPoolSize: 0, maxIdleTimeMS: 60000 });
 
   // Fetch session from DB
   const session = await CheckoutSession.findOne({ sessionId });
   if (!session) {
-    console.error('Session not found');
-    process.exit(1);
+    throw new Error('Session not found');
   }
 
   // Fetch user from DB using userId from session
   const user = await User.findOne({ userId: session.userId });
   if (!user) {
-    console.error('User not found for userId:', session.userId);
-    process.exit(1);
+    throw new Error(`User not found for userId: ${session.userId}`);
   }
 
   // Build salesData and digitalProductData
@@ -207,7 +205,6 @@ async function main() {
     html,
   });
   console.log('Confirmation email sent to', userEmail);
-  process.exit(0);
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+main().finally(() => mongoose.disconnect()).catch(e => { console.error(e); process.exitCode = 1; });

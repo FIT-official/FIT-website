@@ -2,7 +2,8 @@
 // the purchase buttons. Mirrors the live catalogue shape (shop product,
 // standard-shipping, no viewable model) reported missing buttons on 2026-07-04.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
+import { useUser } from '@clerk/nextjs'
 
 vi.mock('@clerk/nextjs', () => ({
     useUser: vi.fn(() => ({
@@ -55,6 +56,7 @@ function mockFetchByUrl() {
 
 describe('ProductPage purchase buttons', () => {
     beforeEach(() => {
+        useUser.mockReturnValue({ user: { id: 'user_customer_saba' }, isLoaded: true, isSignedIn: true })
         mockFetchByUrl()
     })
     afterEach(() => {
@@ -65,6 +67,15 @@ describe('ProductPage purchase buttons', () => {
     it('shows Add to Cart to a signed-in customer on a shop product', async () => {
         render(<ProductPage />)
         expect(await screen.findByText('Add to Cart')).toBeInTheDocument()
+    })
+
+    it('lets a guest add a seeded shop product without private creator data', async () => {
+        useUser.mockReturnValue({ user: null, isLoaded: true, isSignedIn: false })
+        const product = { ...shopProduct, creatorUserId: undefined, slug: '1kg-pla-3d-printing-filament-lanbo' }
+        render(<ProductPage initialProduct={product} />)
+        fireEvent.click(screen.getByRole('button', { name: 'Add to Cart' }))
+        await waitFor(() => expect(global.fetch).toHaveBeenCalledWith('/api/user/cart', expect.objectContaining({ method: 'POST' })))
+        expect(await screen.findByText('Added to cart')).toBeInTheDocument()
     })
 
     it('shows Order Print only when the product has a viewable model', async () => {

@@ -1,29 +1,25 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import User from "@/models/User";
+import { cartIdentity, cartOwner } from "@/lib/cartOwner";
 import Event from "@/models/Event";
+import Product from "@/models/Product";
 import CustomPrintRequest from "@/models/CustomPrintRequest";
 import { calculateCartItemBreakdown } from "../calculateBreakdown";
 import { customPrintChargeBreakdown } from "@/lib/customPrintDisplayPrice";
-import { authenticate, UnauthorizedError, unauthorizedResponse } from "@/lib/authenticate";
 
 async function fetchProduct(productId) {
-    try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/product?productId=${productId}`);
-        const data = await res.json();
-        return data.product;
-    } catch (err) {
-        console.error(`Error fetching product ${productId}:`, err);
-        return null;
-    }
+    return Product.findById(productId).lean();
 }
 
 export async function GET(req) {
     try {
-        const { userId } = await authenticate(req);
+        const identity = await cartIdentity(req);
+        const { userId } = identity;
+        if (!userId) return NextResponse.json({ error: 'Open your cart before continuing.' }, { status: 401 });
         await connectToDatabase();
-        const user = await User.findOne({ userId });
-        const address = user.contact?.address;
+        const user = await cartOwner(identity);
+        if (!user?.cart?.length) return NextResponse.json({ cartBreakdown: [] });
+        const address = identity.guest ? user.guestContact?.address || { country: 'SG' } : user.contact?.address;
         if (!address || !address.country) {
             console.error("Missing delivery address for user");
             return NextResponse.json({ error: "Missing delivery address" }, { status: 400 });
@@ -69,7 +65,7 @@ export async function GET(req) {
                 product = await fetchProduct(item.productId);
             }
 
-            if (!product) continue;
+            if (!product) return NextResponse.json({ error: "An item is no longer available. Remove it from your cart to continue." }, { status: 409 });
 
             try {
                 let breakdown;
@@ -144,12 +140,12 @@ export async function GET(req) {
                 cartBreakdown.push(breakdown);
             } catch (err) {
                 console.error("Error in cart breakdown:", err);
+                return NextResponse.json({ error: "Unable to calculate this cart. Check delivery options and try again." }, { status: 503 });
             }
         }
 
         return NextResponse.json({ cartBreakdown }, { status: 200 });
     } catch (err) {
-        if (err instanceof UnauthorizedError) return unauthorizedResponse();
         console.error("Server error in /api/checkout/breakdown:", err);
         return NextResponse.json({ error: "Server error" }, { status: 500 });
     }

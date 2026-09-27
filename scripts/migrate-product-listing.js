@@ -15,6 +15,7 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,7 +56,7 @@ async function run() {
 
     if (dryRun) {
         console.log("Dry run: nothing written.");
-        process.exit(0);
+        return;
     }
 
     if (adminIds.length) {
@@ -66,10 +67,9 @@ async function run() {
     console.log(`Set listing='creator' on ${res2.modifiedCount} products.`);
 
     console.log("Done.");
-    process.exit(0);
 }
 
-run().catch((err) => {
+run().finally(() => mongoose.disconnect()).catch((err) => {
     console.error("Migration failed:", err);
-    process.exit(1);
+    process.exitCode = 1;
 });

@@ -65,13 +65,12 @@ async function fetchStripePriceTiers() {
 }
 
 async function main() {
-  await mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+  await mongoose.connect(MONGODB_URI, { maxPoolSize: 5, minPoolSize: 0, maxIdleTimeMS: 60000 });
 
   // Load the current app-settings doc for base fields
   const prodDoc = await AppSettings.findOne({ _id: 'app-settings' }).lean(); // Always fetch prod doc for base
   if (!prodDoc) {
-    console.error('No base app-settings document found. Please create one manually first.');
-    process.exit(1);
+    throw new Error('No base app-settings document found. Please create one manually first.');
   }
 
   // 1. Update production version (env: 'production')
@@ -97,10 +96,9 @@ async function main() {
   );
   console.log('Development AppSettings updated (env: development, dev price ids set).');
 
-  await mongoose.disconnect();
 }
 
-main().catch(e => {
+main().finally(() => mongoose.disconnect()).catch(e => {
   console.error(e);
-  process.exit(1);
+  process.exitCode = 1;
 });

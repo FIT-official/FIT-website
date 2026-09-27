@@ -2,6 +2,7 @@
 // Loads .env/.env.tunnel and uses connectToDatabase from lib/db.js
 
 require('dotenv').config({ path: require('path').resolve(__dirname, '.env.tunnel') });
+const mongoose = require('mongoose');
 const { connectToDatabase } = require('../lib/db.js');
 
 async function main() {
@@ -23,10 +24,9 @@ async function main() {
   );
 
   console.log(`Updated ${result.modifiedCount} documents.`);
-  await conn.disconnect();
 }
 
-main().catch(err => {
+main().finally(() => mongoose.disconnect()).catch(err => {
   console.error(err);
-  process.exit(1);
+  process.exitCode = 1;
 });

@@ -12,6 +12,8 @@ import dynamic from 'next/dynamic';
 import { IoMdCheckmark } from 'react-icons/io';
 import { getDiscountedPrice, getEffectivePercentageForRule } from '@/utils/discount';
 import ReviewSection from '@/components/ProductPage/ReviewSection';
+import { storeFetch, addShopItem } from '@/lib/storeRequest';
+import { ConnectionNotice, StoreError, useStoreConnection } from '@/components/Cart/StoreFeedback';
 import { getDefaultVariantSelections } from '@/lib/seo/product';
 
 const ModelViewer = dynamic(() => import("@/components/3D/ModelViewer"), { ssr: false });
@@ -27,6 +29,11 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
     const [product, setProduct] = useState(initialProduct);
     const [selectedVariantOptions, setSelectedVariantOptions] = useState(() => getDefaultVariantSelections(initialProduct));
     const [isAdding, setIsAdding] = useState(false);
+    const [cartError, setCartError] = useState('');
+    const addLock = useRef(false);
+    const [productError, setProductError] = useState('');
+    const [reloadProduct, setReloadProduct] = useState(0);
+    const offline = useStoreConnection(() => setReloadProduct(v => v + 1));
     const [showAdded, setShowAdded] = useState(false);
     const [isOwnProduct, setIsOwnProduct] = useState(false);
     const [ownsDigitalProduct, setOwnsDigitalProduct] = useState(false);
@@ -70,8 +77,9 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
             // Keep the server-rendered catalogue visible while user-specific
             // details (creator, likes and purchase controls) are refreshed.
             if (!initialProduct) setLoading(true);
+            setProductError('');
             try {
-                const res = await fetch(`/api/product?slug=${encodeURIComponent(slug)}`);
+                const res = await storeFetch(`/api/product?slug=${encodeURIComponent(slug)}`);
                 if (!res.ok) return;
                 const data = await res.json();
                 if (!cancelled) setProduct(data.product);
@@ -79,9 +87,9 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                 if (!cancelled) setLoading(false);
             }
         }
-        fetchProduct().catch(() => {});
+        fetchProduct().catch(error => { if (!cancelled) setProductError(error.message); });
         return () => { cancelled = true; };
-    }, [slug, initialProduct]);
+    }, [slug, initialProduct, reloadProduct]);
 
     // Fetch active global events so we can reflect their effect in the
     // displayed discount percentage on the product page.
@@ -157,7 +165,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
     };
 
     useEffect(() => {
-        setIsOwnProduct(product?.creatorUserId === user?.id);
+        setIsOwnProduct(!!user?.id && product?.creatorUserId === user.id);
         setLiked(!!(product?.likes?.includes?.(user?.id)));
 
         if (product?.viewableModel) {
@@ -195,11 +203,13 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
     }, [product, user, isLoaded])
 
     const handleAddToCart = async (product) => {
+        if (addLock.current) return;
+        setCartError('');
         if (isOwnProduct) {
             return;
         }
 
-        if (!isLoaded || !user) {
+        if ((!isLoaded || !user) && product.productType !== 'shop') {
             router.push("/sign-in");
             return;
         }
@@ -212,6 +222,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
             return;
         }
 
+        addLock.current = true;
         setIsAdding(true);
         try {
             if (isCustomPrint) {
@@ -261,18 +272,14 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                 isCustomPrint: isCustomPrint, // Flag for cart to show upload interface
             };
 
-            const res = await fetch("/api/user/cart", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ cartItem }),
-            });
-
-            posthog.capture('product_added_to_cart', {
+            await addShopItem(cartItem);
+            try { posthog.capture('product_added_to_cart', {
                 product_id: product._id,
                 product_type: product.productType,
                 price: product.basePrice?.presentmentAmount || 0,
                 source: 'product_page',
-            });
+            }); } catch {}
+
             setIsAdding(false);
             setShowAdded(true);
             setTimeout(() => setShowAdded(false), 3000);
@@ -282,8 +289,9 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                 setTimeout(() => router.push('/cart'), 1000);
             }
         } catch (error) {
-            alert(error || "Failed to add to cart.");
+            setCartError(error.message || 'Unable to add this item. Please try again.');
         } finally {
+            addLock.current = false;
             setIsAdding(false);
         }
     };
@@ -497,6 +505,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
 
     return (
         <div className='flex w-full flex-col py-20 border-b border-borderColor px-8 md:px-20'>
+            <StoreError message={productError} onRetry={() => setReloadProduct(v => v + 1)} />
             <div className='flex lg:flex-row flex-col w-full gap-16'>
                 <div className='flex flex-col lg:flex-2/5 gap-4 max-w-[600px]'>
                     <div className='flex w-full overflow-hidden aspect-square' ref={containerRef}>
@@ -698,6 +707,8 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                 </div>
                             )}
 
+                            <ConnectionNotice offline={offline} />
+                            <StoreError message={cartError} />
                             {!loading && product?.listing === 'creator' && product?.creatorUserId && (
                                 <div className="flex flex-col gap-3 mt-4 border border-borderColor rounded-xl p-4">
                                     <p className="text-sm text-lightColor">Contact this creator to agree a quote, payment and delivery. Creator purchases are arranged directly with the seller.</p>
@@ -705,7 +716,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                     {ownsDigitalProduct && <button className="underline text-sm" onClick={handleViewInDownloads}>View purchased downloads</button>}
                                 </div>
                             )}
-                            {!loading && product?.listing !== 'creator' && product?.creatorUserId && user && product.creatorUserId !== user.id && (
+                            {!loading && product?.listing !== 'creator' && product && (user ? product.creatorUserId !== user.id : product.productType === 'shop') && (
                                 <div className="flex flex-col gap-2 mt-2">
                                     {ownsDigitalProduct ? (
                                         <button
@@ -732,7 +743,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                         <button
                                             className='formBlackButton gap-2'
                                             onClick={() => handleAddToCart(product)}
-                                            disabled={isAdding || showAdded || checkingOwnership || !areAllVariantsSelected() || isOutOfStock()}
+                                            disabled={offline || isAdding || showAdded || checkingOwnership || !areAllVariantsSelected() || isOutOfStock()}
                                         >
                                             {checkingOwnership ? (
                                                 <>

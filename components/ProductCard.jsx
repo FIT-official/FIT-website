@@ -8,6 +8,7 @@ import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import LinkToolTip from "./LinkToolTip";
 import { getDiscountedPrice } from "@/utils/discount";
+import ShopAddToCart from './Cart/ShopAddToCart';
 
 function ProductCard({ product }) {
     const { user, isSignedIn, isLoaded } = useUser();
@@ -217,6 +218,7 @@ function ProductCard({ product }) {
                 )}
 
                 <span className='flex text-xs text-lightColor'>{salesCount} sold</span>
+                {product.productType === 'shop' && product.listing !== 'creator' && !isItMyProduct(creatorUserId) && <ShopAddToCart product={product} />}
                 {relationshipReady && !isItMyProduct(creatorUserId) && (
                     <button
                         onClick={liked ? handleUnlike : handleLike}

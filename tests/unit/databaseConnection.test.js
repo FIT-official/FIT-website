@@ -99,12 +99,13 @@ describe('shared database connection', () => {
         expect(mongoose.disconnect).not.toHaveBeenCalled()
     })
 
-    it('caps per-client pool growth and expires idle sockets without changing operation timeouts', async () => {
+    it('caps per-client pool growth and bounds connection and socket waits', async () => {
         mongoose.connect.mockResolvedValue(mongoose)
         const { connectToDatabase } = await load()
         await connectToDatabase()
         expect(mongoose.connect).toHaveBeenCalledWith(uri, {
-            bufferCommands: false, maxPoolSize: 10, minPoolSize: 0, maxIdleTimeMS: 60000,
+            bufferCommands: false, maxPoolSize: 5, minPoolSize: 0, maxIdleTimeMS: 60000,
+            serverSelectionTimeoutMS: 8000, connectTimeoutMS: 8000, socketTimeoutMS: 15000,
         })
         expect(mongoose.disconnect).not.toHaveBeenCalled()
     })
