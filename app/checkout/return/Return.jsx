@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { storeJson } from '@/lib/storeRequest';
+import { captureCheckoutEvent } from '@/lib/checkoutAnalytics';
 import { ConnectionNotice, StoreError, useStoreConnection } from '@/components/Cart/StoreFeedback';
 
 export default function Return() {
@@ -20,6 +21,7 @@ export default function Return() {
             const data = await storeJson('/api/checkout/session/' + encodeURIComponent(sessionId));
             if (!data.session?.status) throw new Error('Payment status is unavailable. Please check again.');
             setSession(data.session);
+            if (data.session.payment_status === 'paid') captureCheckoutEvent('checkout_completed', data.session.id || sessionId);
         } catch (err) { setError(err.message); }
         finally { lock.current = false; setLoading(false); }
     }

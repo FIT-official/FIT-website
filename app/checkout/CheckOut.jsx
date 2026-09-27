@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckoutProvider, PaymentElement, useCheckout } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useRouter } from 'next/navigation';
-import posthog from 'posthog-js';
+import { captureCheckoutEvent } from '@/lib/checkoutAnalytics';
 import GuestContact from '@/components/Cart/GuestContact';
 import DeliveryAddressPrompt from '@/components/Cart/DeliveryAddressPrompt';
 import { ADD_ADDRESS_TO_PAY, isAddressComplete, cartNeedsDeliveryAddress } from '@/lib/checkoutAddressGate';
@@ -44,7 +44,7 @@ export const CheckoutForm = ({ sessionId, onCheckStatus, onReady, onLoadError })
                 setUncertain(true); setMessage(result.error?.message || 'Payment could not be confirmed. Check payment status.');
             } else if (result.type === 'success') {
                 setUncertain(true);
-                try { posthog.capture('checkout_payment_submitted', { session_id: sessionId }); } catch {}
+                captureCheckoutEvent('checkout_payment_submitted', sessionId);
                 router.push('/checkout/return?session_id=' + encodeURIComponent(result.sessionId || sessionId));
             } else { setUncertain(true); setMessage('Check payment status before trying again.'); }
         } catch (error) {
@@ -228,6 +228,8 @@ const CheckOut = () => {
                 headers: { 'Content-Type': 'application/json', ...(attemptId ? { 'X-Checkout-Attempt': attemptId } : {}) } }, 25000);
             rememberCheckoutAttempt(result.attemptId);
             setData(result); setReview(null); setEmpty(false); setPaymentRevision(v => v + 1);
+            if (result.alreadyPaid) captureCheckoutEvent('checkout_completed', result.sessionId);
+            else if (result.clientSecret) captureCheckoutEvent('checkout_started', result.sessionId);
             if (result.clientSecret && !result.alreadyPaid && !result.pending) {
                 if (!stripeKey) throw new Error('Payment is temporarily unavailable. Please try again later.');
                 let timer;
