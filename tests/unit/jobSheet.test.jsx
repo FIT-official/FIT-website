@@ -41,6 +41,7 @@ const fixture = {
         meshColors: { hull: '#ff0000' },
     },
     dimensions: { length: 10, width: 8, height: 4, weight: 0.5 },
+    quoteMode: 'instant',
     quote: { total: 25.5, currency: 'sgd', inputs: { printHours: 3.2 } },
 }
 
@@ -56,6 +57,18 @@ afterEach(() => {
 })
 
 describe('Job sheet route', () => {
+    it.each([
+        ['instant', 5],
+        ['manual', 22],
+    ])('uses the checkout price for a %s quote with conflicting legacy fields', async (quoteMode, amount) => {
+        sessionStorage.setItem('dashJobSheet.REQ-001', JSON.stringify({
+            ...fixture, quoteMode, basePrice: 17, printFee: 5, quote: { total: 5 },
+        }))
+        render(<JobSheetPage />)
+        expect(await screen.findByText(`SGD ${amount.toFixed(2)}`)).toBeInTheDocument()
+        expect(screen.queryByText(`SGD ${(amount === 5 ? 22 : 5).toFixed(2)}`)).toBeNull()
+    })
+
     it('renders the sheet from the sessionStorage handoff', async () => {
         sessionStorage.setItem('dashJobSheet.REQ-001', JSON.stringify(fixture))
         render(<JobSheetPage />)
