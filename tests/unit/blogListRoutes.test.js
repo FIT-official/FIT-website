@@ -17,6 +17,7 @@ const state = vi.hoisted(() => ({
     total: 0,
     finds: [],
     findOneFilter: null,
+    saved: null,
 }))
 
 vi.mock('@/models/BlogPost', () => {
@@ -45,6 +46,8 @@ vi.mock('@/models/BlogPost', () => {
                 return { lean: async () => state.single }
             },
             countDocuments: async () => state.total,
+            findById: () => ({ lean: async () => state.single }),
+            findByIdAndUpdate: async (id, data) => { state.saved = data; return { _id: id, ...data } },
         },
     }
 })
@@ -58,6 +61,7 @@ beforeEach(() => {
     state.total = 0
     state.finds = []
     state.findOneFilter = null
+    state.saved = null
     vi.clearAllMocks()
 })
 
@@ -166,5 +170,40 @@ describe('GET /api/blog (public lean list)', () => {
         expect(lf.rec.select).toMatch(/\bcreatedAt\b/) // FeaturedArticles sort fallback
         expect(lf.rec.hint).toEqual({ publishDate: -1, createdAt: -1 })
         expect(body).toEqual({ ok: true, posts: state.listDocs })
+    })
+})
+
+describe('GET /api/blog/[slug]', () => {
+    it('does not expose removed legacy text alongside the edited public body', async () => {
+        const contentJson = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Current article' }] }] }
+        state.single = { slug: 'workshop', published: true, contentFormat: 'tiptap', contentJson, content: 'Removed private schedule' }
+        const { GET } = await import('@/app/api/blog/[slug]/route')
+        const response = await GET(new Request('http://t/api/blog/workshop'), { params: Promise.resolve({ slug: 'workshop' }) })
+        const body = await response.json()
+        expect(body.post.contentJson).toEqual(contentJson)
+        expect(JSON.stringify(body)).not.toContain('Removed private schedule')
+    })
+
+    it('preserves the body of posts that have not been converted yet', async () => {
+        state.single = { slug: 'legacy', published: true, contentFormat: 'markdown', content: 'Published legacy article' }
+        const { GET } = await import('@/app/api/blog/[slug]/route')
+        const response = await GET(new Request('http://t/api/blog/legacy'), { params: Promise.resolve({ slug: 'legacy' }) })
+        expect((await response.json()).post.content).toBe('Published legacy article')
+    })
+})
+
+describe('POST /api/admin/blog', () => {
+    it('clears the old source when an edited article is published', async () => {
+        const contentJson = { type: 'doc', content: [{ type: 'htmlBlock', attrs: { html: '<p>Current workshop guide</p>' } }] }
+        state.single = { _id: 'a', publishDate: '2026-01-01T00:00:00.000Z' }
+        const { POST } = await import('@/app/api/admin/blog/route')
+        const response = await POST(new Request('http://t/api/admin/blog', { method: 'POST', body: JSON.stringify({
+            _id: 'a', title: 'Workshop', slug: 'workshop', status: 'published', contentFormat: 'tiptap', contentJson,
+            content: 'Removed private schedule',
+        }) }))
+        expect(response.status).toBe(200)
+        expect(state.saved.content).toBe('')
+        expect(state.saved.contentJson).toEqual(contentJson)
+        expect(state.saved.readingTimeMinutes).toBe(1)
     })
 })

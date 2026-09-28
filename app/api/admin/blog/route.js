@@ -15,11 +15,7 @@ export const dynamic = 'force-dynamic';
 
 function computeReadingTime(body) {
     if (body.contentFormat === 'tiptap') {
-        const text = extractTextFromTiptap(body.contentJson);
-        if (text.trim()) return readingTimeMinutes(text);
-        // htmlBlock-converted legacy posts extract no plain text: fall back to
-        // the preserved raw content, tags stripped.
-        return readingTimeMinutes(String(body.content || '').replace(/<[^>]*>/g, ' '));
+        return readingTimeMinutes(extractTextFromTiptap(body.contentJson));
     }
     return readingTimeMinutes(body.content || '');
 }
@@ -42,13 +38,14 @@ export async function POST(req) {
 
     // The legacy 'markdown' format is retired: whatever shape arrives (tiptap
     // JSON, raw HTML, or markdown, e.g. from the import pipeline), it is
-    // normalized to TipTap on write. The raw source stays in `content`.
+    // normalized to TipTap on write. Keep one canonical body so an edit cannot
+    // leave removed text in a stale legacy copy.
     const normalized = normalizeToTiptap(body);
 
     const data = {
         title: body.title,
         excerpt: body.excerpt || '',
-        content: body.content || '',
+        content: '',
         contentJson: normalized.contentJson,
         contentFormat: 'tiptap',
         heroImage: body.heroImage || '',
