@@ -83,6 +83,9 @@ export default async function BlogPage({ params }) {
     const related = pickRelated(post, pool, 3)
 
     const safePost = JSON.parse(JSON.stringify(post))
+    // The client receives the edited rich-text body only. Imported legacy
+    // source can contain text that was subsequently removed by an editor.
+    if (safePost.contentFormat === 'tiptap' && safePost.contentJson) safePost.content = ''
     safePost.publishDateFormatted = post.publishDate ? new Date(post.publishDate).toLocaleDateString('en-GB') : null
     const safeRelated = JSON.parse(JSON.stringify(related))
 
