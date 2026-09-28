@@ -15,6 +15,7 @@ vi.mock('@/models/BlogPost', () => ({
         findOne: () => ({ lean: async () => ({
             slug: 'guide', title: 'Guide', status: 'published', published: true,
             contentFormat: 'tiptap', contentJson: {}, categories: [],
+            content: 'Removed private schedule',
         }) }),
         find: () => {
             if (!state.ready) throw new Error('Query started before index was ready')
@@ -37,6 +38,13 @@ beforeEach(() => {
 })
 
 describe('public blog sort consumers', () => {
+    it('keeps removed legacy text out of the page props sent to the browser', async () => {
+        const { default: BlogPage } = await import('@/app/blog/[blogSlug]/page')
+        const page = await BlogPage({ params: Promise.resolve({ blogSlug: 'guide' }) })
+        expect(JSON.stringify(page)).not.toContain('Removed private schedule')
+        expect(JSON.stringify(page)).toContain('<p>Guide</p>')
+    })
+
     it('renders an article only after its related-post query can use the date index', async () => {
         const { default: BlogPage } = await import('@/app/blog/[blogSlug]/page')
         expect(await BlogPage({ params: Promise.resolve({ blogSlug: 'guide' }) })).toBeTruthy()
