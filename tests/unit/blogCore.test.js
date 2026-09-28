@@ -22,6 +22,11 @@ describe('extractTextFromTiptap', () => {
     expect(extractTextFromTiptap(null)).toBe('')
     expect(extractTextFromTiptap({})).toBe('')
   })
+  it('counts the current HTML body without stylesheet or script text', () => {
+    expect(extractTextFromTiptap({ type: 'doc', content: [
+      { type: 'htmlBlock', attrs: { html: '<style>p{color:red}</style><h2>Workshop</h2><p>Build a circuit.</p><script>ignored()</script>' } },
+    ] })).toBe('Workshop Build a circuit.')
+  })
 })
 
 describe('readingTimeMinutes', () => {

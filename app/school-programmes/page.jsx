@@ -44,17 +44,25 @@ export default function SchoolProgrammes() {
                     </div>
                 </div>
             </section>
-            <section className={`${sectionClass} grid items-center gap-8 md:grid-cols-2`}>
+            <section className={sectionClass}>
                 <div>
-                    <h2>Build on real workshop work</h2>
-                    <p className={paragraphClass}>Our school work includes 3D printed parts, Arduino circuits and interactive project boards. These projects give students something concrete to test and explain.</p>
-                    <p className={paragraphClass}>See examples from our collaboration work, including the school programme at Nanyang Girls’ High School and a separate MIC project.</p>
+                    <h2>Inside a school workshop</h2>
+                    <p className={paragraphClass}>At Nanyang Girls’ High School, the escape room project brings together model making, 3D printed mechanisms and interactive elements. Students turn a plan into physical parts, check dimensions and work out how the pieces fit together.</p>
+                    <p className={paragraphClass}>These photos show measuring, building room layouts and examining printed mechanism parts. The collaboration article also includes a separate MIC electronics project.</p>
                     <Link href="/blog/school-stem-collaborations" className={`mt-5 inline-block text-sm ${textLinkClass}`}>See our school and MIC projects</Link>
                 </div>
-                <figure className="rounded-xl border border-borderColor bg-baseColor p-5">
-                    <Image src="/images/collaborations/printed-project-parts.jpg" width={601} height={759} sizes="(max-width: 768px) 90vw, 40vw" alt="3D printed parts and game pieces arranged on a table" className="mx-auto h-auto max-h-80 w-auto max-w-full object-contain rounded-md" />
-                    <figcaption className="mt-4 text-center text-xs leading-6 text-lightColor">Printed parts and game pieces from our workshop development.</figcaption>
-                </figure>
+                <div className="mt-8 grid items-start gap-6 md:grid-cols-3">
+                    {[
+                        { image: 'nygh-model-measuring.jpg', alt: 'NYGH students measuring a sheet for a room model, photographed from behind', caption: 'Measuring the model panels before cutting and assembly.' },
+                        { image: 'nygh-room-models.jpg', alt: 'Small room layouts built from white panels at the NYGH workshop', caption: 'Room models give each team a physical layout to develop.' },
+                        { image: 'nygh-printed-mechanism.jpg', alt: 'Blue 3D printed mechanism parts with circular openings and gear teeth', caption: 'Printed mechanism parts connect 3D design with fit and movement.' },
+                    ].map(({ image, alt, caption }) => (
+                        <figure key={image} className="rounded-xl border border-borderColor bg-baseColor p-4">
+                            <Image src={`/images/collaborations/${image}`} width={1080} height={1440} sizes="(max-width: 768px) 90vw, 28vw" alt={alt} className="h-auto w-full rounded-md" />
+                            <figcaption className="mt-4 text-sm leading-6 text-lightColor">{caption}</figcaption>
+                        </figure>
+                    ))}
+                </div>
             </section>
             <section className={sectionClass}>
                 <h2>Choose a format that fits your school</h2>
