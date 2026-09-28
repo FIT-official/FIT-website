@@ -21,39 +21,23 @@ export default function SchoolProgrammes() {
                 <p className={paragraphClass}>Choose a starting point below. We can adjust the design task, coding support and build complexity to suit your class.</p>
                 <div className="mt-7 grid gap-5 md:grid-cols-2">
                     <div className={cardClass}>
-                        <figure className="mb-5">
-                            <Image src="/images/programmes/3d-design-concept.webp" width={1448} height={1086} sizes="(max-width: 768px) 90vw, 40vw" alt="Illustration of a 3D printed keychain, phone stand and small box" className="h-auto w-full rounded-lg" />
-                            <figcaption className="mt-2 text-xs text-lightColor">Concept illustration</figcaption>
-                        </figure>
                         <h3 className="text-lg font-semibold normal-case">3D design and printing</h3>
                         <p className={paragraphClass}>Students model a keychain, phone stand or small storage box in Tinkercad. They use dimensions, shapes and clearances to make a design that can be printed and used.</p>
                         <p className={paragraphClass}>The printing lesson connects the digital model to layers, supports and print orientation. Students compare the design with the finished part and decide what to improve.</p>
                         <Link href="/blog/tinkercad-keychain-tutorial" className={`mt-4 inline-block text-sm ${textLinkClass}`}>Try the Tinkercad keychain guide</Link>
                     </div>
                     <div className={cardClass}>
-                        <figure className="mb-5">
-                            <Image src="/images/programmes/electronics-concept.webp" width={1448} height={1086} sizes="(max-width: 768px) 90vw, 40vw" alt="Illustration of a controller, button, sensor and small display" className="h-auto w-full rounded-lg" />
-                            <figcaption className="mt-2 text-xs text-lightColor">Concept illustration</figcaption>
-                        </figure>
                         <h3 className="text-lg font-semibold normal-case">Arduino and interactive exhibits</h3>
                         <p className={paragraphClass}>Build a temperature display, reaction game or interactive board. Students connect a sensor or button, write a short program and use lights or a display to show the result.</p>
                         <p className={paragraphClass}>The core idea is input, process and output: a sensor measures something, the code makes a decision, and the circuit responds.</p>
                         <Link href="/blog/arduino-nano-dht11-workshop-guide" className={`mt-4 inline-block text-sm ${textLinkClass}`}>Read the Arduino sensor guide</Link>
                     </div>
                     <div className={cardClass}>
-                        <figure className="mb-5">
-                            <Image src="/images/programmes/robotics-concept.webp" width={1448} height={1086} sizes="(max-width: 768px) 90vw, 40vw" alt="Illustration of a two-wheel robot approaching an obstacle" className="h-auto w-full rounded-lg" />
-                            <figcaption className="mt-2 text-xs text-lightColor">Concept illustration</figcaption>
-                        </figure>
                         <h3 className="text-lg font-semibold normal-case">Introduction to robotics</h3>
                         <p className={paragraphClass}>Use sensors, code and motors to explore how a moving device responds to its surroundings. Project options can include an obstacle alert or a simple motorised mechanism.</p>
                         <p className={paragraphClass}>Students learn how sensing and movement work together, then test one change at a time. The robot or mechanism is chosen to match the available equipment and lesson time.</p>
                     </div>
                     <div className={cardClass}>
-                        <figure className="mb-5">
-                            <Image src="/images/programmes/prototyping-concept.webp" width={1448} height={1086} sizes="(max-width: 768px) 90vw, 40vw" alt="Illustration of a cardboard storage prototype, sketch, ruler and 3D printed part" className="h-auto w-full rounded-lg" />
-                            <figcaption className="mt-2 text-xs text-lightColor">Concept illustration</figcaption>
-                        </figure>
                         <h3 className="text-lg font-semibold normal-case">Design thinking and prototypes</h3>
                         <p className={paragraphClass}>Start with a problem students can observe, such as storing classroom items or making a display easier to use. Students research the need, sketch possible solutions and build a prototype.</p>
                         <p className={paragraphClass}>Testing gives them evidence for the next version. A longer programme can combine a printed enclosure, electronics and a short presentation explaining the design choices.</p>
@@ -62,19 +46,20 @@ export default function SchoolProgrammes() {
             </section>
             <section className={sectionClass}>
                 <div>
-                    <h2>Inside a school workshop</h2>
+                    <h2>Projects from our workshops</h2>
                     <p className={paragraphClass}>At Nanyang Girls’ High School, the escape room project brings together model making, 3D printed mechanisms and interactive elements. Students turn a plan into physical parts, check dimensions and work out how the pieces fit together.</p>
-                    <p className={paragraphClass}>These photos show measuring, building room layouts and examining printed mechanism parts. The collaboration article also includes a separate MIC electronics project.</p>
+                    <p className={paragraphClass}>The photos show students measuring panels, building room models and examining printed parts. The interactive exhibit is from a separate MIC project.</p>
                     <Link href="/blog/school-stem-collaborations" className={`mt-5 inline-block text-sm ${textLinkClass}`}>See our school and MIC projects</Link>
                 </div>
-                <div className="mt-8 grid items-start gap-6 md:grid-cols-3">
+                <div className="mt-8 grid items-start gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     {[
-                        { image: 'nygh-model-measuring.jpg', alt: 'NYGH students measuring a sheet for a room model, photographed from behind', caption: 'Measuring the model panels before cutting and assembly.' },
-                        { image: 'nygh-room-models.jpg', alt: 'Small room layouts built from white panels at the NYGH workshop', caption: 'Room models give each team a physical layout to develop.' },
-                        { image: 'nygh-printed-mechanism.jpg', alt: 'Blue 3D printed mechanism parts with circular openings and gear teeth', caption: 'Printed mechanism parts connect 3D design with fit and movement.' },
-                    ].map(({ image, alt, caption }) => (
+                        { image: 'nygh-model-measuring.jpg', width: 1080, height: 1440, alt: 'NYGH students measuring a sheet for a room model, photographed from behind', caption: 'NYGH: measuring panels for a room model.' },
+                        { image: 'nygh-room-models.jpg', width: 1080, height: 1440, alt: 'Small room layouts built from white panels at the NYGH workshop', caption: 'NYGH: room models under construction.' },
+                        { image: 'nygh-printed-mechanism.jpg', width: 1080, height: 1440, alt: 'Blue 3D printed mechanism parts with circular openings and gear teeth', caption: 'NYGH: printed parts for a mechanism.' },
+                        { image: 'interactive-stem-board.jpg', width: 720, height: 1280, alt: 'Interactive MIC exhibit with a distance sensor and display', caption: 'MIC: an interactive electronics exhibit.' },
+                    ].map(({ image, width, height, alt, caption }) => (
                         <figure key={image} className="rounded-xl border border-borderColor bg-baseColor p-4">
-                            <Image src={`/images/collaborations/${image}`} width={1080} height={1440} sizes="(max-width: 768px) 90vw, 28vw" alt={alt} className="h-auto w-full rounded-md" />
+                            <Image src={`/images/collaborations/${image}`} width={width} height={height} sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 22vw" alt={alt} className="h-auto w-full rounded-md" />
                             <figcaption className="mt-4 text-sm leading-6 text-lightColor">{caption}</figcaption>
                         </figure>
                     ))}
