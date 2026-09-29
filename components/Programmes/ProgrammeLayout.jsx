@@ -84,7 +84,7 @@ export default function ProgrammeLayout({ title, titleLead, titleAccent, intro, 
                 <p className={styles.heroIntro}>{intro}</p>
                 <div className={styles.heroActions}>
                     <a href="#enquire" className={styles.button}>Enquire about a workshop <span aria-hidden="true">↗</span></a>
-                    <a href="#gallery" className={styles.quietLink}>Photographs <span aria-hidden="true">↓</span></a>
+                    <a href="#gallery" className={styles.quietLink}>View gallery <span aria-hidden="true">↓</span></a>
                 </div>
             </div>
         </header>

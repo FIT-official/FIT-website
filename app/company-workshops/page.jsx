@@ -51,8 +51,8 @@ export default function CompanyWorkshops() {
                 <div><h3>The workshop</h3><p>Participants work through a design or circuit with guidance, then test the result and discuss any changes.</p></div>
             </div>
         </section>
-        <ProjectGallery photos={companyGalleryPhotos} title="From our workshops"
-            intro="Photographs from our school teaching at NYGH and miniature escape room project." />
+        <ProjectGallery photos={companyGalleryPhotos} title="Our workshops"
+            intro="School programmes at NYGH and our miniature escape room project." />
         <Questions items={[
             { question: 'Can beginners take part?', answer: 'Yes. A guided design or circuit is a useful starting point. For mixed experience levels, we can discuss a common task with optional extensions.' },
             { question: 'Can you run the workshop at our office?', answer: 'Share the location, room layout and available equipment. We’ll confirm whether the proposed project can be delivered there and what needs to be arranged.' },

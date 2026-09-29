@@ -67,7 +67,7 @@ export default function SchoolProgrammes() {
                 <div><h3>Facilitator support</h3><p>Training and project guidance for the people running a programme, exhibition or competition activity.</p></div>
             </div>
         </section>
-        <ProjectGallery photos={schoolGalleryPhotos} title="Workshop photographs"
+        <ProjectGallery photos={schoolGalleryPhotos} title="Our programmes"
             intro="Classroom sessions at NYGH and our miniature escape room build." />
         <Questions items={[
             { question: 'Do students need prior experience?', answer: 'Beginner sessions can start with guided modelling or simple circuits. Tell us the students’ level and any coding or design experience so we can choose a suitable task.' },
