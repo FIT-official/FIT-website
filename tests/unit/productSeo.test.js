@@ -20,6 +20,16 @@ const product = {
 afterEach(() => vi.useRealTimers())
 
 describe('product metadata', () => {
+    it('preserves dimension separators and part identifiers in search previews', () => {
+        const item = { ...product, name: 'Copper Stripboard 6.5*14.5CM DEV_A', description: '**Board** 6.5*14.5 cm, 2.54 mm pitch.' }
+        const metadata = productMetadata(item)
+        expect(metadata.title).toBe('Copper Stripboard 6.5*14.5CM DEV_A | Fix It Today®')
+        expect(metadata.description).toBe('Board 6.5 × 14.5 cm, 2.54 mm pitch.')
+        expect(metadata.openGraph.title).toBe(metadata.title)
+        expect(metadata.twitter.title).toBe(metadata.title)
+        expect(productJsonLd(item).description).toBe(metadata.description)
+    })
+
     it('uses readable descriptions and the actual absolute product photo', () => {
         const metadata = productMetadata(product)
         expect(metadata.description).toBe('PLA filament for everyday 3D printing.')
