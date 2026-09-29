@@ -1,99 +1,72 @@
-import Link from 'next/link'
-import ProgrammeLayout, { programmeMetadata, sectionClass, cardClass, paragraphClass, textLinkClass } from '@/components/Programmes/ProgrammeLayout'
+import ProgrammeLayout, { programmeMetadata, Photo, SectionHeading, TextLink, WorkshopList, Questions, ReadingList, styles } from '@/components/Programmes/ProgrammeLayout'
 
 const description = 'Plan a company 3D printing, CAD or introductory robotics workshop in Singapore. Learn through a practical team project, or request a prototype print.'
-export const metadata = programmeMetadata({ title: 'Company 3D Printing Workshops Singapore | Fix It Today', description, path: '/company-workshops' })
+const hero = {
+    src: '/images/collaborations/nygh-printed-mechanism.jpg',
+    alt: 'Blue 3D printed mechanism parts showing gear teeth, openings and visible print layers',
+    caption: 'A closer look at making · Printed mechanism parts from our NYGH school project.',
+}
+export const metadata = programmeMetadata({ title: 'Company 3D Printing Workshops Singapore | Fix It Today', description, path: '/company-workshops', image: hero.src, imageAlt: hero.alt })
 
 export default function CompanyWorkshops() {
-    return (
-        <ProgrammeLayout
-            title="3D Printing Workshops for Companies"
-            intro="Learn how to turn a digital design into a physical part. Plan a practical workshop for your team in Singapore, from a first 3D print to CAD, prototypes and introductory electronics or robotics."
-            path="/company-workshops"
-            serviceType="Company 3D printing, CAD and introductory robotics workshops"
-            enquirySubject="Company workshop enquiry"
-            enquiryDetails={'Company:\nNumber of participants:\nExperience with CAD, printing or coding:\nLearning goal or project idea:\nPreferred dates and session length:\nVenue and available equipment:\nBudget:\n'}
-        >
-            <section id="projects" className={`${sectionClass} scroll-mt-20`}>
-                <h2>Choose what your team wants to learn</h2>
-                <div className="mt-7 grid gap-5 md:grid-cols-2">
-                    <div className={cardClass}>
-                        <h3 className="text-lg font-semibold normal-case">A first 3D printing project</h3>
-                        <p className={paragraphClass}>For teams new to 3D printing, start with a small desk accessory or personalised part. Work through a simple model, prepare it in a slicer and see how a printer builds it layer by layer.</p>
-                        <p className={paragraphClass}>Participants learn why orientation, supports and material choice affect the print, and what to check before starting a job.</p>
-                    </div>
-                    <div className={cardClass}>
-                        <h3 className="text-lg font-semibold normal-case">CAD and practical prototypes</h3>
-                        <p className={paragraphClass}>Use a bracket, enclosure or organiser as a design exercise. Explore dimensions, fit and tolerances, then use a prototype to check the design before making another version.</p>
-                        <p className={paragraphClass}>Share an example from your team’s work when planning the session. We’ll check whether it suits the workshop tools, materials and available time.</p>
-                    </div>
-                    <div className={cardClass}>
-                        <h3 className="text-lg font-semibold normal-case">Electronics and robotics basics</h3>
-                        <p className={paragraphClass}>Build a small sensor project or motorised mechanism to understand how hardware and code work together. Start with reading an input, making a decision in code and controlling an output.</p>
-                        <p className={paragraphClass}>This can suit a team learning activity or an introduction to interactive prototypes. The equipment and coding level are agreed before the workshop.</p>
-                    </div>
-                    <div className={cardClass}>
-                        <h3 className="text-lg font-semibold normal-case">Using your workplace 3D printer</h3>
-                        <p className={paragraphClass}>Discuss a session around your printer model and typical parts. Topics can include preparing files, selecting filament, first layer checks and recognising common print problems.</p>
-                        <p className={paragraphClass}>Send the printer model and your current setup with the enquiry so we can confirm the support available.</p>
-                    </div>
-                </div>
-            </section>
-            <section className={sectionClass}>
-                <h2>Useful team challenges</h2>
-                <p className={paragraphClass}>These are example briefs to help choose a workshop. We can adapt the task to the team’s experience, equipment and time.</p>
-                <div className="mt-7 grid items-start gap-5 md:grid-cols-2">
-                    <details open className={cardClass}>
-                        <summary className="cursor-pointer font-semibold">Make a cable guide that fits</summary>
-                        <p className={paragraphClass}>Measure a desk edge and cable, model a small guide, then check whether the prototype fits and lets the cable move freely. Adjust one dimension and compare the next version.</p>
-                        <p className={paragraphClass}>The exercise connects CAD dimensions, clearance and the direction of printed layers to how a part works in use.</p>
-                    </details>
-                    <details className={cardClass}>
-                        <summary className="cursor-pointer font-semibold">Improve a troublesome print</summary>
-                        <p className={paragraphClass}>Bring a model or example of a failed print. Check the first layer, orientation and support settings, then change one setting and compare the result where equipment and time allow.</p>
-                        <p className={paragraphClass}>The team learns to form a testable explanation for a print problem instead of changing several settings at once.</p>
-                    </details>
-                </div>
-                <a href="#enquire" className={`mt-6 inline-block text-sm ${textLinkClass}`}>Discuss a project for your team</a>
-            </section>
-            <section className={sectionClass}>
-                <h2>Plan around a useful outcome</h2>
-                <ol className="mt-6 grid gap-6 md:grid-cols-3">
-                    <li className={cardClass}><p className="text-xs text-lightColor">01</p><h3 className="mt-3 text-base font-semibold normal-case">Choose the task</h3><p className={paragraphClass}>Decide whether the aim is a team activity, a first introduction or a practical design skill. Share the group’s experience and a project idea.</p></li>
-                    <li className={cardClass}><p className="text-xs text-lightColor">02</p><h3 className="mt-3 text-base font-semibold normal-case">Agree on the setup</h3><p className={paragraphClass}>Confirm the venue, laptops, software, printers and materials. Print time is planned separately from design time so the session is realistic.</p></li>
-                    <li className={cardClass}><p className="text-xs text-lightColor">03</p><h3 className="mt-3 text-base font-semibold normal-case">Build and review</h3><p className={paragraphClass}>Participants make a design or circuit, test it and discuss what worked. The next step might be another prototype or a skill to practise at work.</p></li>
-                </ol>
-            </section>
-            <section className={`${sectionClass} grid gap-8 md:grid-cols-2`}>
-                <div>
-                    <h2>Need a part printed?</h2>
-                    <p className={paragraphClass}>If you already have a 3D model, upload it to get a printing quote. Check the dimensions, material and intended use before ordering. If the model needs design work, include that in your enquiry.</p>
-                    <Link href="/prints/request" className={`mt-5 inline-block text-sm ${textLinkClass}`}>Request a 3D print</Link>
-                </div>
-                <div>
-                    <h2>Maintaining a company printer?</h2>
-                    <p className={paragraphClass}>For a printer fault or maintenance enquiry, share the make, model, symptoms and photos. We’ll assess the issue and explain the proposed work.</p>
-                    <Link href="/blog/3d-printer-repair" className={`mt-5 inline-block text-sm ${textLinkClass}`}>Printer repair and maintenance in Singapore</Link>
-                </div>
-            </section>
-            <section className={sectionClass}>
-                <h2>Common planning questions</h2>
-                <div className="mt-6 grid gap-6 md:grid-cols-2">
-                    <div><h3 className="text-base font-semibold normal-case">Can beginners take part?</h3><p className={paragraphClass}>Yes. A guided design or circuit is a useful starting point. For a group with mixed experience, we can discuss a common task with optional extensions.</p></div>
-                    <div><h3 className="text-base font-semibold normal-case">Can the workshop take place at our office?</h3><p className={paragraphClass}>Share the location, room layout and available equipment. We’ll confirm whether the proposed project can be delivered there and what needs to be arranged.</p></div>
-                    <div><h3 className="text-base font-semibold normal-case">Will participants take home a print?</h3><p className={paragraphClass}>That depends on the chosen project, class size and printing time. We’ll agree on any included parts and their collection or delivery in the quote.</p></div>
-                    <div><h3 className="text-base font-semibold normal-case">How much does a company workshop cost?</h3><p className={paragraphClass}>Pricing depends on participant numbers, duration, preparation, materials and equipment. Share your budget and learning goal so the quote covers the work your team needs.</p></div>
-                </div>
-            </section>
-            <section className={sectionClass}>
-                <h2>Guides for your first project</h2>
-                <ul className="mt-5 space-y-4 text-sm">
-                    <li><Link href="/blog/3d-printing" className={textLinkClass}>How 3D printing works</Link></li>
-                    <li><Link href="/blog/fusion-360-cup-holder-workshop-guide" className={textLinkClass}>A Fusion 360 modelling project</Link></li>
-                    <li><Link href="/blog/3d-printing-filament-types-guide" className={textLinkClass}>Choosing a 3D printing filament</Link></li>
-                    <li><Link href="/blog/arduino-nano-dht11-workshop-guide" className={textLinkClass}>An Arduino temperature and humidity project</Link></li>
-                </ul>
-            </section>
-        </ProgrammeLayout>
-    )
+    return <ProgrammeLayout
+        title="Build something together." titleLead="Build something" titleAccent="together." eyebrow="Company workshops"
+        intro="Step away from the slides and work on a physical idea. Bring your team together for 3D printing, practical design or electronics, with a project that gives everyone something to try."
+        hero={hero} topics={['Team workshops', 'CAD & prototyping', 'Electronics & robotics', 'Workplace printer training']}
+        path="/company-workshops" serviceType="Company 3D printing, CAD and introductory robotics workshops"
+        enquirySubject="Company workshop enquiry"
+        enquiryDetails={'Company:\nNumber of participants:\nExperience with CAD, printing or coding:\nLearning goal or project idea:\nPreferred dates and session length:\nVenue and available equipment:\nBudget:\n'}
+    >
+        <section id="projects" className={`${styles.section} ${styles.programmeGrid}`}>
+            <div className={styles.programmeAside}>
+                <SectionHeading eyebrow="A shared project" title="Make the session useful.">A first taste of making, a skill for the workplace or a prototype to improve. Choose what your team would like to get out of the day.</SectionHeading>
+                <Photo src="/images/collaborations/interactive-stem-board.jpg" width={720} height={1280}
+                    alt="A physical electronics board combining a distance sensor, display and illuminated components"
+                    caption="Project detail · A sensor, a display and code working together." />
+            </div>
+            <WorkshopList items={[
+                { title: 'Your first 3D print', description: 'Design a small desk accessory or personalised part. Prepare the model in a slicer and see how a printer turns it into layers.', concepts: 'Explore orientation, supports and material choice.' },
+                { title: 'CAD with a purpose', description: 'Use a bracket, enclosure or organiser to practise dimensions and fit. Bring an idea from your team’s work; we’ll check its suitability before the session.', concepts: 'Learn how clearance and tolerances affect a working prototype.', href: '/blog/fusion-360-cup-holder-workshop-guide', link: 'See a practical CAD exercise' },
+                { title: 'Electronics & robotics', description: 'Build a small sensor project or motorised mechanism. Read an input, make a decision in code and control an output.', concepts: 'Equipment and coding level are matched to the group.' },
+                { title: 'Know your workplace printer', description: 'Work through file preparation, filament selection, first layer checks and common printing problems. Send us your printer model and typical parts when enquiring.', concepts: 'Training scope is agreed around your actual setup.' },
+            ]} />
+        </section>
+
+        <section className={`${styles.section} ${styles.challenge}`}>
+            <div>
+                <SectionHeading eyebrow="An example workshop brief" title="A better home for that cable.">A cable guide is a simple starting point for a real design conversation. Does it fit the desk? Does the cable move freely? What would make it better?</SectionHeading>
+                <TextLink href="#enquire">Plan a challenge for your team</TextLink>
+            </div>
+            <ol className={styles.challengeSteps}>
+                <li className={styles.challengeStep}><span className={styles.rowNumber}>01</span><div><h3>Measure the need</h3><p>Check the desk edge and cable diameter. Turn the observations into dimensions for a small guide.</p></div></li>
+                <li className={styles.challengeStep}><span className={styles.rowNumber}>02</span><div><h3>Make a first version</h3><p>Model the part and consider its print direction. The orientation of the layers affects how a loaded part can fail.</p></div></li>
+                <li className={styles.challengeStep}><span className={styles.rowNumber}>03</span><div><h3>Test the fit</h3><p>Check the clearance, adjust one dimension and compare versions. Use the prototype to explain the next design decision.</p></div></li>
+            </ol>
+        </section>
+
+        <section className={styles.section}>
+            <SectionHeading eyebrow="Built around your team" title="A little planning. A better workshop." />
+            <div className={styles.formats}>
+                <div><span className={styles.eyebrow}>01 / The goal</span><h3>Choose the outcome</h3><p>A team activity, an introduction to making or a practical design skill. We start with your group’s experience and what you want to learn.</p></div>
+                <div><span className={styles.eyebrow}>02 / The setup</span><h3>Agree on the details</h3><p>Venue, laptops, software, printers and materials. We plan printing time separately from design time so the session is realistic.</p></div>
+                <div><span className={styles.eyebrow}>03 / The session</span><h3>Build, test, discuss</h3><p>Make a design or circuit, see what works and review it together. Leave with a clearer understanding of the next step.</p></div>
+            </div>
+        </section>
+        <Questions items={[
+            { question: 'Can beginners take part?', answer: 'Yes. A guided design or circuit is a useful starting point. For mixed experience levels, we can discuss a common task with optional extensions.' },
+            { question: 'Can you run the workshop at our office?', answer: 'Share the location, room layout and available equipment. We’ll confirm whether the proposed project can be delivered there and what needs to be arranged.' },
+            { question: 'Will participants take home a print?', answer: 'That depends on the chosen project, group size and printing time. We’ll agree on any included parts and their collection or delivery in the quote.' },
+            { question: 'How much does a company workshop cost?', answer: 'Pricing depends on participant numbers, duration, preparation, materials and equipment. Share your budget and learning goal so the quote covers the work your team needs.' },
+        ]} />
+        <section className={`${styles.section} ${styles.services}`}>
+            <div><h2>Already have a model?</h2><p>Upload it for a printing quote. Check the dimensions, material and intended use before ordering.</p><TextLink href="/prints/request">Request a 3D print</TextLink></div>
+            <div><h2>A printer that needs attention?</h2><p>Share the make, model, symptoms and photos. We’ll assess the issue and explain the proposed work.</p><TextLink href="/blog/3d-printer-repair">Printer repair & maintenance</TextLink></div>
+        </section>
+        <ReadingList items={[
+            { href: '/blog/3d-printing', topic: 'The basics', title: 'From a digital model to a print' },
+            { href: '/blog/fusion-360-cup-holder-workshop-guide', topic: 'CAD', title: 'Design a part you can use' },
+            { href: '/blog/3d-printing-filament-types-guide', topic: 'Materials', title: 'Choose the right filament' },
+            { href: '/blog/arduino-nano-dht11-workshop-guide', topic: 'Electronics', title: 'Build a temperature monitor' },
+        ]} />
+    </ProgrammeLayout>
 }
