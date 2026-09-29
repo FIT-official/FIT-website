@@ -38,7 +38,7 @@ export default function ProjectGallery({ photos, title, intro }) {
 
     return <section className={styles.gallery} aria-labelledby={`${id}-title`} id="gallery">
         <div className={styles.heading}>
-            <div><p className={styles.eyebrow}>In pictures</p><h2 id={`${id}-title`}>{title}</h2></div>
+            <div><h2 id={`${id}-title`}>{title}</h2></div>
             <p>{intro}</p>
         </div>
         <div className={styles.toolbar}>
@@ -46,7 +46,7 @@ export default function ProjectGallery({ photos, title, intro }) {
                 {['All photos', ...new Set(photos.map(item => item.album))].map(name => <button type="button" key={name}
                     aria-pressed={album === name} onClick={() => { setAlbum(name); setExpanded(false) }}>{name}</button>)}
             </div>
-            <p className={styles.count} aria-live="polite">{filtered.length} photos · Select to enlarge</p>
+            <p className={styles.count} aria-live="polite">{filtered.length} photographs</p>
         </div>
         <div className={styles.grid} id={`${id}-photos`}>
             {visible.map((item, index) => <figure className={styles.card} key={item.src}>
@@ -54,7 +54,7 @@ export default function ProjectGallery({ photos, title, intro }) {
                     event.preventDefault(); opener.current = event.currentTarget; setActive(index)
                 }}>
                     <Image src={item.src} alt={item.alt} width={item.width} height={item.height}
-                        sizes={index < 2 ? '(max-width: 767px) 90vw, 45vw' : '(max-width: 767px) 45vw, 30vw'} />
+                        sizes={index % 2 === 0 ? '(max-width: 767px) 90vw, (max-width: 1440px) 50vw, 720px' : '(max-width: 767px) 80vw, (max-width: 1440px) 35vw, 480px'} />
                     <span className={styles.enlarge} aria-hidden="true">↗</span>
                 </a>
                 <figcaption><span>{item.album}</span>{item.caption}</figcaption>

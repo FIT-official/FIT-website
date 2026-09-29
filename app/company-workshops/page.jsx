@@ -5,42 +5,35 @@ import { companyGalleryPhotos, teachingPhotos } from '@/components/Programmes/wo
 const description = 'Plan a company 3D printing, CAD or introductory robotics workshop in Singapore. Learn through a practical team project, or request a prototype print.'
 const hero = {
     ...teachingPhotos[2],
-    caption: 'Our teaching in practice · A FIT session at Nanyang Girls’ High School.',
-    landscape: true,
+    caption: 'FIT teaching at Nanyang Girls’ High School',
 }
 export const metadata = programmeMetadata({ title: 'Company 3D Printing Workshops Singapore | Fix It Today', description, path: '/company-workshops', image: hero.src, imageAlt: hero.alt })
 
 export default function CompanyWorkshops() {
     return <ProgrammeLayout
-        title="Practical skills. Stronger teams." titleLead="Practical skills." titleAccent="Stronger teams." eyebrow="Company workshops"
-        intro="Bring 3D design, printing and electronics into your team’s skill set. Plan an instructor-led workshop around a clear learning goal, with demonstrations, guided practice and a practical challenge."
-        hero={hero} topics={['Team workshops', 'CAD & prototyping', 'Electronics & robotics', 'Workplace printer training']}
+        title="Company workshops" titleLead="Company" titleAccent="workshops"
+        intro="Learn to model a part, prepare a print or build a working circuit. We plan practical sessions for teams, from a first introduction to training on the printer in your workplace."
+        hero={hero}
         path="/company-workshops" serviceType="Company 3D printing, CAD and introductory robotics workshops"
         enquirySubject="Company workshop enquiry"
         enquiryDetails={'Company:\nNumber of participants:\nExperience with CAD, printing or coding:\nLearning goal or project idea:\nPreferred dates and session length:\nVenue and available equipment:\nBudget:\n'}
     >
-        <section className={styles.overview} aria-label="Workshop approach">
-            <div><p className={styles.eyebrow}>Team development</p><h2>Learn through a shared task</h2><p>Work through a design brief together, compare decisions and test a physical result.</p></div>
-            <div><p className={styles.eyebrow}>Technical skills</p><h2>Build practical confidence</h2><p>Explore CAD, print preparation or electronics through guided exercises matched to the group’s experience.</p></div>
-            <div><p className={styles.eyebrow}>Workplace application</p><h2>Bring a useful problem</h2><p>Discuss a prototype or your workplace printer setup so we can agree on a relevant training scope.</p></div>
-        </section>
-
         <section id="projects" className={`${styles.section} ${styles.programmeGrid}`}>
             <div className={styles.programmeAside}>
-                <SectionHeading eyebrow="Workshop pathways" title="Training with a clear outcome.">A first introduction, a skill for the workplace or a prototype to improve. Choose what your team would like to learn.</SectionHeading>
+                <SectionHeading title="At the workbench">Choose a topic, or bring a part you would like to develop. We’ll agree on an exercise that fits the group and the time available.</SectionHeading>
                 <Photo {...teachingPhotos[1]} caption="Small-group guidance during our NYGH school programme." />
             </div>
             <WorkshopList items={[
                 { title: 'Your first 3D print', description: 'Design a small desk accessory or personalised part. Prepare the model in a slicer and see how a printer turns it into layers.', concepts: 'Explore orientation, supports and material choice.' },
-                { title: 'CAD with a purpose', description: 'Use a bracket, enclosure or organiser to practise dimensions and fit. Bring an idea from your team’s work; we’ll check its suitability before the session.', concepts: 'Learn how clearance and tolerances affect a working prototype.', href: '/blog/fusion-360-cup-holder-workshop-guide', link: 'See a practical CAD exercise' },
+                { title: 'CAD & prototyping', description: 'Use a bracket, enclosure or organiser to practise dimensions and fit. Bring an idea from your team’s work; we’ll check its suitability before the session.', concepts: 'Learn how clearance and tolerances affect a working prototype.', href: '/blog/fusion-360-cup-holder-workshop-guide', link: 'A practical CAD exercise' },
                 { title: 'Electronics & robotics', description: 'Build a small sensor project or motorised mechanism. Read an input, make a decision in code and control an output.', concepts: 'Equipment and coding level are matched to the group.' },
-                { title: 'Know your workplace printer', description: 'Work through file preparation, filament selection, first layer checks and common printing problems. Send us your printer model and typical parts when enquiring.', concepts: 'Training scope is agreed around your actual setup.' },
+                { title: 'Printer training', description: 'Work through file preparation, filament selection, first layer checks and common printing problems. Send us your printer model and typical parts when enquiring.', concepts: 'Training scope is agreed around your actual setup.' },
             ]} />
         </section>
 
         <section className={`${styles.section} ${styles.challenge}`}>
             <div>
-                <SectionHeading eyebrow="An example workshop brief" title="A better home for that cable.">A cable guide is a simple starting point for a real design conversation. Does it fit the desk? Does the cable move freely? What would make it better?</SectionHeading>
+                <SectionHeading eyebrow="An example brief" title="The cable guide">Measure a desk edge and a cable, then design a guide to hold it. Test the printed part for fit, movement and strength.</SectionHeading>
                 <TextLink href="#enquire">Plan a challenge for your team</TextLink>
             </div>
             <ol className={styles.challengeSteps}>
@@ -51,15 +44,15 @@ export default function CompanyWorkshops() {
         </section>
 
         <section className={styles.section}>
-            <SectionHeading eyebrow="Built around your team" title="A little planning. A better workshop." />
+            <SectionHeading title="Planning the session" />
             <div className={styles.formats}>
-                <div><span className={styles.eyebrow}>01 / The goal</span><h3>Choose the outcome</h3><p>A team activity, an introduction to making or a practical design skill. We start with your group’s experience and what you want to learn.</p></div>
-                <div><span className={styles.eyebrow}>02 / The setup</span><h3>Agree on the details</h3><p>Venue, laptops, software, printers and materials. We plan printing time separately from design time so the session is realistic.</p></div>
-                <div><span className={styles.eyebrow}>03 / The session</span><h3>Build, test, discuss</h3><p>Make a design or circuit, see what works and review it together. Leave with a clearer understanding of the next step.</p></div>
+                <div><h3>The brief</h3><p>Tell us about your group’s experience and what you want to learn. We’ll suggest a suitable exercise and scope.</p></div>
+                <div><h3>The equipment</h3><p>We agree on the venue, laptops, software and materials. Printing time is planned separately from design time.</p></div>
+                <div><h3>The workshop</h3><p>Participants work through a design or circuit with guidance, then test the result and discuss any changes.</p></div>
             </div>
         </section>
-        <ProjectGallery photos={companyGalleryPhotos} title="Teaching, making and testing."
-            intro="Our teaching approach in action at NYGH, alongside our miniature escape room build. These photographs show school teaching and project work; company sessions are planned around your team’s brief." />
+        <ProjectGallery photos={companyGalleryPhotos} title="From our workshops"
+            intro="Photographs from our school teaching at NYGH and miniature escape room project." />
         <Questions items={[
             { question: 'Can beginners take part?', answer: 'Yes. A guided design or circuit is a useful starting point. For mixed experience levels, we can discuss a common task with optional extensions.' },
             { question: 'Can you run the workshop at our office?', answer: 'Share the location, room layout and available equipment. We’ll confirm whether the proposed project can be delivered there and what needs to be arranged.' },
