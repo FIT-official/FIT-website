@@ -1,30 +1,12 @@
-import Creators from "./Creators";
+import Creators from './Creators'
+import { buildPageMetadata } from '@/lib/seo/metadata'
 
-export const metadata = {
-    title: "Become a creator | Fix It Today®",
-    description: "Browse creator subscription packages at Fix It Today®",
-    openGraph: {
-        title: "Become a creator | Fix It Today®",
-        description: "Browse creator subscription packages at Fix It Today®",
-        url: "https://fixitoday.com/creators/join",
-        siteName: "Fix It Today®",
-        images: [
-            {
-                url: "/fitogimage.png",
-                width: 800,
-                height: 800,
-                alt: "Fix It Today® Photo",
-            },
-        ],
-        locale: "en_SG",
-        type: "website",
-    },
-};
+export const metadata = buildPageMetadata({
+    title: 'Creator Storefront & Print Job Software Plans | Fix It Today',
+    description: 'Create a storefront, list products and manage quotes and print requests with FIT creator plans. Compare Free, Student, Standard and Pro options in SGD.',
+    path: '/creators/join',
+})
 
-function CreatorsPage() {
-    return (
-        <Creators/>
-    )
+export default function CreatorsPage() {
+    return <Creators />
 }
-
-export default CreatorsPage

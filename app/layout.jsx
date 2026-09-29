@@ -12,7 +12,7 @@ import { Suspense } from "react";
 import { CurrencyProvider } from "@/components/General/CurrencyContext";
 import ClientProviders from "@/components/General/ClientProviders";
 import PostHogProvider from "@/components/General/PostHogProvider";
-import { SITE_URL } from '@/lib/seo/site';
+import { SITE_URL, absoluteUrl } from '@/lib/seo/site';
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,8 +28,10 @@ const GEO_JSON_LD = {
       "name": "Fix It Today®",
       "url": "https://www.fixitoday.com",
       "logo": "https://www.fixitoday.com/fitogimage.png",
-      "description": "Fix It Today provides 3D printing, school STEM programmes, company workshops, printer repair, filament and electronics in Singapore.",
-      "areaServed": "SG"
+      "description": "3D printing, custom metal parts, CAD design, electronics, printer repair and STEM workshops in Singapore.",
+      "email": "fixittoday.contact@gmail.com",
+      "sameAs": ["https://www.linkedin.com/company/fix-it-today-sg"],
+      "areaServed": { "@type": "Country", "name": "Singapore" }
     },
     {
       "@type": "WebSite",
@@ -50,25 +52,11 @@ const GEO_JSON_LD = {
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "3D Printer Repair & Filament Singapore | Fix It Today",
-  description: "Fix It Today provides 3D printing, school STEM programmes, company workshops, printer repair, filament and electronics in Singapore.",
-  openGraph: {
-    title: "Fix It Today® | Home",
-    description:
-      "Fix It Today provides 3D printing, school STEM programmes, company workshops, printer repair, filament and electronics in Singapore.",
-    url: "https://www.fixitoday.com",
-    siteName: "Fix It Today®",
-    images: [
-      {
-        url: "/fitogimage.png",
-        width: 800,
-        height: 800,
-        alt: "Fix It Today® Photo",
-      },
-    ],
-    locale: "en_SG",
-    type: "website",
-  },
+  title: 'Fix It Today | 3D Printing & Custom Parts Singapore',
+  description: '3D printing, custom metal parts, CAD design, electronics, printer repair and STEM workshops in Singapore.',
+  openGraph: { siteName: 'Fix It Today', locale: 'en_SG', type: 'website', images: [absoluteUrl('/fitogimage.png')] },
+  twitter: { card: 'summary_large_image', images: [absoluteUrl('/fitogimage.png')] },
+  robots: { index: true, follow: true, googleBot: { 'max-image-preview': 'large' } },
 };
 
 export default function RootLayout({ children }) {

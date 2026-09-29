@@ -30,7 +30,7 @@ export const BLOCK_COMPONENTS = {
 
 export const resolveBlocks = (blocks) => (Array.isArray(blocks) && blocks.length > 0 ? blocks : DEFAULT_BLOCKS)
 
-export default function BlockRenderer({ blocks, creator, products = [], preview = false, className = '' }) {
+export default function BlockRenderer({ blocks, creator, products = [], textHtml = {}, preview = false, className = '' }) {
     const list = resolveBlocks(blocks)
     return (
         <div className={`flex flex-col gap-8 ${className}`}>
@@ -39,7 +39,7 @@ export default function BlockRenderer({ blocks, creator, products = [], preview 
                 if (!Component) return null
                 return (
                     <section key={block.id || `${block.type}-${i}`} data-block-type={block.type} data-block-id={block.id}>
-                        <Component settings={block.settings || {}} creator={creator} products={products} preview={preview} />
+                        <Component settings={block.settings || {}} creator={creator} products={products} preview={preview} contentHtml={textHtml[block.id]} />
                     </section>
                 )
             })}

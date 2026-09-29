@@ -7,12 +7,12 @@ const hero = {
     ...teachingPhotos[0],
     caption: 'A classroom session at Nanyang Girls’ High School',
 }
-export const metadata = programmeMetadata({ title: 'School STEM, 3D Printing & Robotics | Fix It Today', description, path: '/school-programmes', image: hero.src, imageAlt: hero.alt })
+export const metadata = programmeMetadata({ title: 'School STEM & Robotics Workshops Singapore | Fix It Today', description, path: '/school-programmes', image: hero.src, imageAlt: hero.alt })
 
 export default function SchoolProgrammes() {
     return <ProgrammeLayout
         title="School programmes" titleLead="School" titleAccent="programmes"
-        intro="We teach 3D design, printing and electronics through practical work. Sessions range from a first introduction to a term-long project, with time for students to build and test their ideas."
+        intro="We run school STEM workshops in Singapore, teaching 3D design, printing, electronics and introductory robotics through practical work. Sessions range from a first introduction to a term-long project, with time for students to build and test their ideas."
         hero={hero}
         path="/school-programmes" serviceType="School STEM programmes and 3D printing workshops"
         enquirySubject="School programme enquiry"

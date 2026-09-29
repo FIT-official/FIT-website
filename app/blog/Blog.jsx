@@ -218,12 +218,13 @@ function BlogList({ posts }) {
     )
 }
 
-function Blog() {
-    const [featured, setFeatured] = useState([])
-    const [allPosts, setAllPosts] = useState([])
-    const [loading, setLoading] = useState(true)
+function Blog({ initialPosts = null, pagination = null }) {
+    const [featured, setFeatured] = useState(() => (initialPosts || []).filter(post => post.featured))
+    const [allPosts, setAllPosts] = useState(initialPosts || [])
+    const [loading, setLoading] = useState(initialPosts === null)
 
     useEffect(() => {
+        if (initialPosts !== null) return
         const load = async () => {
             try {
                 const res = await fetch('/api/blog')
@@ -250,7 +251,7 @@ function Blog() {
         }
 
         load()
-    }, [])
+    }, [initialPosts])
 
     return (
         <div className="min-h-[92vh] flex flex-col items-center pt-12 pb-24 border-b border-borderColor bg-borderColor/40">
@@ -268,6 +269,7 @@ function Blog() {
                 <>
                     <FeaturedCarousel posts={featured.length > 0 ? featured : allPosts.slice(0, 3)} />
                     <BlogList posts={allPosts} />
+                    {pagination}
 
                     <section className="w-full max-w-5xl mt-16 px-6 md:px-0 flex flex-col items-center text-center gap-3">
                         <h2 className="text-sm font-medium text-textColor uppercase tracking-wide">Stay in the loop</h2>

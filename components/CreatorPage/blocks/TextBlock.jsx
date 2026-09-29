@@ -3,7 +3,7 @@
 import MarkdownRenderer from '@/components/General/MarkdownRenderer'
 import { SectionHeading } from '../shared'
 
-export default function TextBlock({ settings = {} }) {
+export default function TextBlock({ settings = {}, contentHtml }) {
     const heading = settings.heading || ''
     const body = settings.body || ''
     if (!heading && !body) return null
@@ -11,7 +11,9 @@ export default function TextBlock({ settings = {} }) {
         <div className="flex flex-col gap-3">
             <SectionHeading>{heading}</SectionHeading>
             {body && (
-                <MarkdownRenderer source={body} className="w-full text-sm text-lightColor text-pretty" />
+                typeof contentHtml === 'string'
+                    ? <div className="w-full text-sm text-lightColor text-pretty markdown-content" data-color-mode="light" dangerouslySetInnerHTML={{ __html: contentHtml }} />
+                    : <MarkdownRenderer source={body} className="w-full text-sm text-lightColor text-pretty" />
             )}
         </div>
     )

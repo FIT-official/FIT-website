@@ -1,30 +1,12 @@
-import TermsPage from "./TermsPage";
+import TermsPage from './TermsPage'
+import { buildPageMetadata } from '@/lib/seo/metadata'
 
-export const metadata = {
-    title: "Terms of Service | Fix It Today®",
-    description: "Review our terms of service and user agreements.",
-    openGraph: {
-        title: "Terms of Service | Fix It Today®",
-        description: "Review our terms of service and user agreements.",
-        url: "https://fixitoday.com/terms",
-        siteName: "Fix It Today®",
-        images: [
-            {
-                url: "/fitogimage.png",
-                width: 800,
-                height: 800,
-                alt: "Fix It Today® Photo",
-            },
-        ],
-        locale: "en_SG",
-        type: "website",
-    },
-};
+export const metadata = buildPageMetadata({
+    title: 'Terms of Service | Fix It Today',
+    description: 'Terms of service for purchases, custom work and use of the Fix It Today website.',
+    path: '/terms',
+})
 
-function TermsLayout() {
-    return (
-        <TermsPage />
-    )
+export default function Page() {
+    return <TermsPage />
 }
-
-export default TermsLayout

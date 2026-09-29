@@ -6,8 +6,8 @@ import Link from 'next/link'
 import { programmeMetadata } from '@/components/Programmes/ProgrammeLayout'
 
 export const metadata = programmeMetadata({
-    title: 'About Fix It Today | 3D Printing & STEM Workshops Singapore',
-    description: '3D printing, school STEM programmes, company workshops and printer support in Singapore. Learn about Fix It Today and plan your next project.',
+    title: 'About FIT | 3D Printing, Fabrication & Workshops Singapore',
+    description: 'Fix It Today provides 3D printing, custom metal parts, electronics, printer repair and practical STEM workshops for schools and businesses in Singapore.',
     path: '/about',
 })
 

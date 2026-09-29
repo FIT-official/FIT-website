@@ -77,7 +77,7 @@ export default function BlogPageClient({ post, contentHtml, related = [], previe
                     />
                 ) : null}
                 <div className="prose max-w-none">
-                    {contentHtml ? (
+                    {typeof contentHtml === 'string' ? (
                         <div dangerouslySetInnerHTML={{ __html: contentHtml }} />
                     ) : (
                         <MarkdownRenderer source={post.content} />

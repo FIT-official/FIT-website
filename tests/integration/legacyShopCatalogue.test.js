@@ -22,6 +22,7 @@ function matches(product, filter) {
         if (expected && typeof expected === 'object') {
             if ('$exists' in expected) return Object.hasOwn(product, field) === expected.$exists
             if ('$ne' in expected) return product[field] !== expected.$ne
+            if ('$nin' in expected) return !expected.$nin.includes(product[field])
             if ('$regex' in expected) return new RegExp(expected.$regex, expected.$options).test(product[field] ?? '')
         }
         return product[field] === expected
@@ -44,7 +45,8 @@ describe('legacy FIT shop catalogue', () => {
     it('still excludes hidden, moderated and print rows and does not treat invalid listing values as legacy', async () => {
         products.push(row('hidden', { hidden: true }), row('moderated', { flaggedForModeration: true }),
             row('print', { productType: 'print' }), row('null', { listing: null }),
-            row('blank', { listing: '' }), row('unknown', { listing: 'other' }))
+            row('blank', { listing: '' }), row('unknown', { listing: 'other' }),
+            row('admin-product-normal'), row('custom-print-request'))
         expect((await getShopProducts()).map(product => product.slug)).toEqual(['legacy', 'fit'])
     })
 

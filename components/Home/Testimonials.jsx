@@ -74,7 +74,7 @@ function Testimonials() {
             <Grid />
             <div className="flex flex-col items-center gap-3 z-10">
                 <h3>Testimonials</h3>
-                <h1>What Customers Say</h1>
+                <h2 className="font-semibold text-3xl md:text-4xl tracking-tight">What Customers Say</h2>
                 <div className='border-t w-6 h-0 border-1 z-10' />
             </div>
             <div className="flex flex-row items-center justify-center gap-2 md:gap-8">

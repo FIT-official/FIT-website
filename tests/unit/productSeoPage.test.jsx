@@ -63,6 +63,15 @@ describe('product server rendering', () => {
         fetchSpy.mockRestore()
     })
 
+    it('redacts raw descriptions at render time without changing the visible sale price', () => {
+        const description = 'Circuit board. Escendo Quotation 2512031 (3 Dec 2025) unit price SGD 7.40. 30 pins.'
+        const html = renderToStaticMarkup(<ProductPage initialProduct={{ ...product, description }} />)
+        expect(html).toContain('Circuit board. 30 pins.')
+        expect(html).not.toContain('Escendo')
+        expect(html).not.toContain('2512031')
+        expect(html).toContain('SGD 25.00')
+    })
+
     it('returns a true not-found page for an absent product', async () => {
         Product.findOne.mockReturnValue({ select: vi.fn(() => ({ lean: vi.fn().mockResolvedValue(null) })) })
         expect((await generateMetadata({ params })).robots.index).toBe(false)

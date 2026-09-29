@@ -2,19 +2,14 @@ import Link from 'next/link'
 import { GoChevronRight } from 'react-icons/go'
 import ButtonLink from '@/components/Buttons/ButtonLink'
 import { absoluteUrl } from '@/lib/seo/site'
+import { buildPageMetadata } from '@/lib/seo/metadata'
 import { serviceLinks } from '@/lib/content/researchServices'
 import styles from './ServicePage.module.css'
 
 const email = 'fixittoday.contact@gmail.com'
 
 export function serviceMetadata(page) {
-    return {
-        title: page.title,
-        description: page.description,
-        alternates: { canonical: absoluteUrl(page.path) },
-        openGraph: { title: page.title, description: page.description, url: absoluteUrl(page.path), siteName: 'Fix It Today', locale: 'en_SG', type: 'website', images: [absoluteUrl('/fitogimage.png')] },
-        twitter: { card: 'summary_large_image', title: page.title, description: page.description, images: [absoluteUrl('/fitogimage.png')] },
-    }
+    return buildPageMetadata(page)
 }
 
 export default function ServicePage({ page }) {
