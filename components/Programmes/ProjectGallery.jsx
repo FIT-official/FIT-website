@@ -75,7 +75,7 @@ export default function ProjectGallery({ photos, title, intro }) {
             }}>
             {photo && <div className={styles.viewer}>
                 <div className={styles.viewerHeader}><span>{photo.album}</span><button type="button" onClick={() => setActive(null)} aria-label="Close photo viewer">Close <span aria-hidden="true">×</span></button></div>
-                <div className={styles.fullPhoto}><Image key={photo.src} src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} sizes="(max-width: 767px) 100vw, 90vw" /></div>
+                <div className={styles.fullPhoto}><Image key={photo.src} src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} unoptimized loading="eager" /></div>
                 <div className={styles.viewerFooter}>
                     <p id={`${id}-caption`} aria-live="polite">{photo.caption}</p>
                     <div className={styles.controls}><button type="button" aria-label="Previous photo" onClick={() => move(-1)}>←</button><span aria-live="polite">{active + 1} / {filtered.length}</span><button type="button" aria-label="Next photo" onClick={() => move(1)}>→</button></div>
