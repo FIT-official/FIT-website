@@ -1,4 +1,6 @@
 import ProgrammeLayout, { programmeMetadata, Photo, SectionHeading, TextLink, WorkshopList, Questions, ReadingList, styles } from '@/components/Programmes/ProgrammeLayout'
+import ProjectGallery from '@/components/Programmes/ProjectGallery'
+import { schoolGalleryPhotos } from '@/components/Programmes/workshopPhotos'
 
 const description = '3D printing, Arduino electronics and robotics workshops for schools in Singapore. Explore practical project ideas and plan a programme for your students.'
 const hero = {
@@ -41,6 +43,9 @@ export default function SchoolProgrammes() {
                 <p>We also supported the Materials Innovation Challenge (MIC) through workshops and training for its facilitators.</p>
             </div>
         </section>
+
+        <ProjectGallery photos={schoolGalleryPhotos} title="Small details. Big moments."
+            intro="Explore the NYGH classroom sessions, the making of a miniature escape room and the puzzles inside an immersive room. Open a photo for a closer look." />
 
         <section id="projects" className={`${styles.section} ${styles.programmeGrid}`}>
             <div className={styles.programmeAside}>

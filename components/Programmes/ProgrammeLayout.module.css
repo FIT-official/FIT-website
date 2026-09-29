@@ -148,6 +148,8 @@
     .enquiryDetails p { font-size: 13px; }
     .services { grid-template-columns: 1fr; gap: 32px; }
 }
+.heroLandscape .photoFrame { aspect-ratio: 4 / 3; }
+.heroLandscape img { object-fit: contain; }
 @media (prefers-reduced-motion: reduce) {
     .page *, .page *::before, .page *::after { transition: none; }
 }
