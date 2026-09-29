@@ -17,7 +17,7 @@
 .hero { display: grid; grid-template-columns: minmax(0, .28fr) minmax(0, .72fr); gap: 36px 6%; padding: 32px 5% 100px; }
 .edition { grid-column: 1 / -1; display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; line-height: 1.5; }
 .hero h1 { grid-column: 1 / -1; margin: 4px 0 30px; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(64px, 8.5vw, 132px); font-weight: 400; line-height: .98; letter-spacing: -.065em; }
-.hero h1 em { font-weight: 400; }
+.hero h1 em { margin-left: .16em; font-weight: 400; }
 .heroCopy { grid-column: 1; grid-row: 3; align-self: end; padding-bottom: 32px; }
 .heroIntro { max-width: 290px; color: var(--ink); font-size: 15px; line-height: 1.85; }
 .heroActions { display: flex; flex-direction: column; align-items: flex-start; gap: 17px; margin-top: 32px; }
@@ -109,7 +109,7 @@
     .hero { display: flex; flex-direction: column; padding: 24px 6% 50px; gap: 0; }
     .edition { font-size: 10px; margin-bottom: 24px; }
     .hero h1 { font-size: clamp(54px, 12.6vw, 92px); margin: 0 0 32px; line-height: .98; letter-spacing: -.06em; }
-    .hero h1 em { display: block; }
+    .hero h1 em { display: block; margin-left: 0; }
     .heroPhoto { width: 100%; }
     .heroPhoto figcaption { text-align: left; font-size: 10px; }
     .heroCopy { padding: 26px 0 0; align-self: start; }
