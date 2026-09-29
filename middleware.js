@@ -5,6 +5,7 @@ import { subscriptionIntentTarget, subscriptionPriceId, withSubscriptionIntent }
 const isPrivateRoute = createRouteMatcher(['/dashboard(.*)', '/account(.*)', '/onboarding'])
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
 const isStoreRoute = createRouteMatcher(['/shop(.*)', '/products(.*)', '/cart(.*)', '/checkout(.*)'])
+const isServicePage = createRouteMatcher(['/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping'])
 const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)'])
 const isSsoCallback = createRouteMatcher(['/sign-up/sso-callback(.*)', '/sign-in/sso-callback(.*)'])
 
@@ -17,6 +18,8 @@ export default clerkMiddleware(async (auth, req) => {
     if (isSsoCallback(req)) return NextResponse.next()
     // Shopping and payment recovery do not depend on account onboarding.
     if (isStoreRoute(req)) return NextResponse.next()
+    // Reading service information and starting an email enquiry needs no account setup.
+    if (isServicePage(req)) return NextResponse.next()
     const { userId, sessionClaims } = await auth()
     const priceId = subscriptionPriceId(new URL(req.url).searchParams.get('priceId'))
     const homeUrl = new URL(subscriptionIntentTarget(priceId, '/'), req.url)

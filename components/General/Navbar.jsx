@@ -30,6 +30,7 @@ import { useContent } from '@/utils/useContent'
 const PRIMARY = [
     { key: 'shop', label: 'Shop' },
     { key: 'prints', label: 'Prints' },
+    { key: 'services', label: 'Services', href: '/research-fabrication', paths: ['/metal-fabrication', '/3d-design-printing', '/electronics-prototyping'] },
     { key: 'school-programmes', label: 'Programmes', href: '/school-programmes' },
     { key: 'creators', label: 'Creators', href: '/creators' },
     { key: 'about', label: 'About', href: '/about' },
@@ -185,7 +186,9 @@ function Navbar() {
     }
 
     const routeKey = PRIMARY.find(
-        (item) => pathname === (item.href ?? `/${item.key}`) || pathname?.startsWith(`${item.href ?? `/${item.key}`}/`),
+        (item) => [item.href ?? `/${item.key}`, ...(item.paths || [])].some(
+            (path) => pathname === path || pathname?.startsWith(`${path}/`),
+        ),
     )?.key
     const activeKey = openPanel || routeKey
     const openItem = PRIMARY.find((item) => item.key === openPanel)
