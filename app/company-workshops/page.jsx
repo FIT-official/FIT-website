@@ -1,10 +1,12 @@
 import ProgrammeLayout, { programmeMetadata, Photo, SectionHeading, TextLink, WorkshopList, Questions, ReadingList, styles } from '@/components/Programmes/ProgrammeLayout'
+import ProjectGallery from '@/components/Programmes/ProjectGallery'
+import { escapeRoomPhotos } from '@/components/Programmes/workshopPhotos'
 
 const description = 'Plan a company 3D printing, CAD or introductory robotics workshop in Singapore. Learn through a practical team project, or request a prototype print.'
 const hero = {
-    src: '/images/collaborations/nygh-printed-mechanism.jpg',
-    alt: 'Blue 3D printed mechanism parts showing gear teeth, openings and visible print layers',
-    caption: 'A closer look at making · Printed mechanism parts from our NYGH school project.',
+    ...escapeRoomPhotos[0],
+    caption: 'The escape room project · Together with the completed miniature build.',
+    landscape: true,
 }
 export const metadata = programmeMetadata({ title: 'Company 3D Printing Workshops Singapore | Fix It Today', description, path: '/company-workshops', image: hero.src, imageAlt: hero.alt })
 
@@ -17,6 +19,9 @@ export default function CompanyWorkshops() {
         enquirySubject="Company workshop enquiry"
         enquiryDetails={'Company:\nNumber of participants:\nExperience with CAD, printing or coding:\nLearning goal or project idea:\nPreferred dates and session length:\nVenue and available equipment:\nBudget:\n'}
     >
+        <ProjectGallery photos={escapeRoomPhotos} title="From the workbench to the final reveal."
+            intro="A look inside our escape room projects: making the parts, connecting the electronics and bringing people together to try the puzzles." />
+
         <section id="projects" className={`${styles.section} ${styles.programmeGrid}`}>
             <div className={styles.programmeAside}>
                 <SectionHeading eyebrow="A shared project" title="Make the session useful.">A first taste of making, a skill for the workplace or a prototype to improve. Choose what your team would like to get out of the day.</SectionHeading>

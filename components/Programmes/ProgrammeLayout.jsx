@@ -84,11 +84,11 @@ export default function ProgrammeLayout({ title, titleLead, titleAccent, eyebrow
                 <p className={styles.heroIntro}>{intro}</p>
                 <div className={styles.heroActions}>
                     <a href="#enquire" className={styles.button}>Plan a workshop <span aria-hidden="true">↗</span></a>
-                    <a href="#projects" className={styles.quietLink}>Explore the programmes <span aria-hidden="true">↓</span></a>
+                    <a href="#gallery" className={styles.quietLink}>See the projects <span aria-hidden="true">↓</span></a>
                 </div>
                 <p className={styles.heroNote}>3D printing, electronics &amp; the joy of making.</p>
             </div>
-            <Photo {...hero} priority className={styles.heroPhoto} />
+            <Photo {...hero} priority className={`${styles.heroPhoto} ${hero.landscape ? styles.heroLandscape : ''}`} />
         </header>
         <ul className={styles.topicStrip} aria-label="Workshop topics">{topics.map(topic => <li key={topic}>{topic}</li>)}</ul>
         <div className={styles.content}>{children}</div>
