@@ -75,15 +75,14 @@ export default function SchoolProgrammes() {
                 <div>
                     <h2>Projects from our workshops</h2>
                     <p className={paragraphClass}>At Nanyang Girls’ High School, the escape room project brings together model making, 3D printed mechanisms and interactive elements. Students turn a plan into physical parts, check dimensions and work out how the pieces fit together.</p>
-                    <p className={paragraphClass}>The photos show students measuring panels, building room models and examining printed parts. The interactive exhibit is from a separate MIC project.</p>
-                    <Link href="/blog/school-stem-collaborations" className={`mt-5 inline-block text-sm ${textLinkClass}`}>See our school and MIC projects</Link>
+                    <p className={paragraphClass}>The photos show students measuring panels, building room models and examining printed parts. The final photo shows a separate interactive electronics board.</p>
                 </div>
                 <div className="mt-8 grid items-start gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     {[
                         { image: 'nygh-model-measuring.jpg', width: 1080, height: 1440, alt: 'NYGH students measuring a sheet for a room model, photographed from behind', caption: 'NYGH: measuring panels for a room model.' },
                         { image: 'nygh-room-models.jpg', width: 1080, height: 1440, alt: 'Small room layouts built from white panels at the NYGH workshop', caption: 'NYGH: room models under construction.' },
                         { image: 'nygh-printed-mechanism.jpg', width: 1080, height: 1440, alt: 'Blue 3D printed mechanism parts with circular openings and gear teeth', caption: 'NYGH: printed parts for a mechanism.' },
-                        { image: 'interactive-stem-board.jpg', width: 720, height: 1280, alt: 'Interactive MIC exhibit with a distance sensor and display', caption: 'MIC: an interactive electronics exhibit.' },
+                        { image: 'interactive-stem-board.jpg', width: 720, height: 1280, alt: 'Interactive electronics board with a distance sensor and display', caption: 'Interactive electronics board with a display and sensor.' },
                     ].map(({ image, width, height, alt, caption }) => (
                         <figure key={image} className="rounded-xl border border-borderColor bg-baseColor p-4">
                             <Image src={`/images/collaborations/${image}`} width={width} height={height} sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 22vw" alt={alt} className="h-auto w-full rounded-md" />
@@ -91,6 +90,8 @@ export default function SchoolProgrammes() {
                         </figure>
                     ))}
                 </div>
+                <p className={paragraphClass}>We also supported the Materials Innovation Challenge (MIC) through workshops and facilitator training.</p>
+                <Link href="/blog/school-stem-collaborations" className={`mt-5 inline-block text-sm ${textLinkClass}`}>See our workshops and MIC support</Link>
             </section>
             <section className={sectionClass}>
                 <h2>Choose a format that fits your school</h2>

@@ -25,7 +25,7 @@ function About() {
                 <div className="mt-6 flex flex-wrap gap-6 text-sm underline underline-offset-4">
                     <Link href="/school-programmes">School programmes</Link>
                     <Link href="/company-workshops">Company workshops</Link>
-                    <Link href="/blog/school-stem-collaborations">School and MIC projects</Link>
+                    <Link href="/blog/school-stem-collaborations">School workshops and MIC support</Link>
                 </div>
             </section>
         </div>

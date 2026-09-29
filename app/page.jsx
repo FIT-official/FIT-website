@@ -33,7 +33,7 @@ export default async function Home() {
             <div className="flex flex-wrap gap-5 text-sm underline underline-offset-4">
                 <Link href="/school-programmes">School STEM programmes</Link>
                 <Link href="/company-workshops">Company 3D printing workshops</Link>
-                <Link href="/blog/school-stem-collaborations">School and MIC projects</Link>
+                <Link href="/blog/school-stem-collaborations">School workshops and MIC support</Link>
             </div>
         </section>
     </HomeClient>
