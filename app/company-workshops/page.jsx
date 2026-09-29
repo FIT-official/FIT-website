@@ -40,6 +40,23 @@ export default function CompanyWorkshops() {
                 </div>
             </section>
             <section className={sectionClass}>
+                <h2>Useful team challenges</h2>
+                <p className={paragraphClass}>These are example briefs to help choose a workshop. We can adapt the task to the team’s experience, equipment and time.</p>
+                <div className="mt-7 grid items-start gap-5 md:grid-cols-2">
+                    <details open className={cardClass}>
+                        <summary className="cursor-pointer font-semibold">Make a cable guide that fits</summary>
+                        <p className={paragraphClass}>Measure a desk edge and cable, model a small guide, then check whether the prototype fits and lets the cable move freely. Adjust one dimension and compare the next version.</p>
+                        <p className={paragraphClass}>The exercise connects CAD dimensions, clearance and the direction of printed layers to how a part works in use.</p>
+                    </details>
+                    <details className={cardClass}>
+                        <summary className="cursor-pointer font-semibold">Improve a troublesome print</summary>
+                        <p className={paragraphClass}>Bring a model or example of a failed print. Check the first layer, orientation and support settings, then change one setting and compare the result where equipment and time allow.</p>
+                        <p className={paragraphClass}>The team learns to form a testable explanation for a print problem instead of changing several settings at once.</p>
+                    </details>
+                </div>
+                <a href="#enquire" className={`mt-6 inline-block text-sm ${textLinkClass}`}>Discuss a project for your team</a>
+            </section>
+            <section className={sectionClass}>
                 <h2>Plan around a useful outcome</h2>
                 <ol className="mt-6 grid gap-6 md:grid-cols-3">
                     <li className={cardClass}><p className="text-xs text-lightColor">01</p><h3 className="mt-3 text-base font-semibold normal-case">Choose the task</h3><p className={paragraphClass}>Decide whether the aim is a team activity, a first introduction or a practical design skill. Share the group’s experience and a project idea.</p></li>

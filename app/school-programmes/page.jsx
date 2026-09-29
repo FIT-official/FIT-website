@@ -45,6 +45,33 @@ export default function SchoolProgrammes() {
                 </div>
             </section>
             <section className={sectionClass}>
+                <h2>Build, test, improve</h2>
+                <p className={paragraphClass}>A small question gives students something concrete to test. These are starting ideas; the parts and coding level depend on the class and equipment.</p>
+                <div className="mt-7 grid items-start gap-5 md:grid-cols-2">
+                    <details open className={cardClass}>
+                        <summary className="cursor-pointer font-semibold">Will the lid fit?</summary>
+                        <p className={paragraphClass}>Model a box and two lids with slightly different clearances. Print and try both. Students measure the fit and see why a digital dimension does not always produce a perfect physical fit.</p>
+                        <p className={paragraphClass}>The lesson introduces dimensional tolerance, print orientation and one-change-at-a-time testing.</p>
+                    </details>
+                    <details className={cardClass}>
+                        <summary className="cursor-pointer font-semibold">How fast can you react?</summary>
+                        <p className={paragraphClass}>Use a button and light to make a reaction game. Record several attempts, then check whether the code starts and stops the timer at the intended moments.</p>
+                        <p className={paragraphClass}>Students connect input, processing and output, and learn why repeated measurements can differ.</p>
+                    </details>
+                    <details className={cardClass}>
+                        <summary className="cursor-pointer font-semibold">When should a robot stop?</summary>
+                        <p className={paragraphClass}>Use a distance sensor to trigger a light or stop a small motorised build before it reaches an obstacle. Test the response at several distances and adjust the threshold.</p>
+                        <p className={paragraphClass}>This explores sensor readings, decisions in code and how to check whether a response is reliable.</p>
+                    </details>
+                    <details className={cardClass}>
+                        <summary className="cursor-pointer font-semibold">Can a mechanism fit the model?</summary>
+                        <p className={paragraphClass}>Make a small room model, then add one moving or printed part. Students check the space it needs, try the movement and revise the design where parts catch.</p>
+                        <p className={paragraphClass}>The lesson brings scale, clearance and prototyping into the same build.</p>
+                    </details>
+                </div>
+                <a href="#enquire" className={`mt-6 inline-block text-sm ${textLinkClass}`}>Discuss a challenge for your class</a>
+            </section>
+            <section className={sectionClass}>
                 <div>
                     <h2>Projects from our workshops</h2>
                     <p className={paragraphClass}>At Nanyang Girls’ High School, the escape room project brings together model making, 3D printed mechanisms and interactive elements. Students turn a plan into physical parts, check dimensions and work out how the pieces fit together.</p>
