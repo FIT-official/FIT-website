@@ -28,23 +28,23 @@ export default async function Home() {
             </div>
         </section>
         <section className="w-full px-8 md:px-20 py-12 border-b border-borderColor">
-            <h2 className="text-2xl md:text-3xl mb-4">Fabrication and Prototypes for Research and Business</h2>
-            <p className="text-sm leading-7 max-w-3xl mb-6">Develop a part, build a prototype or discuss electronics for an experiment or automation project. Send your drawings, CAD files or a description of what you need to make.</p>
+            <h2 className="text-2xl md:text-3xl mb-4">Custom parts and prototypes</h2>
+            <p className="text-sm leading-7 max-w-3xl mb-6">We help with metal fabrication, 3D design, printing and electronics for research and commercial projects. Send us your drawings or let us know what you need.</p>
             <div className="grid gap-5 md:grid-cols-3">
                 <Link href="/metal-fabrication" className="rounded-xl border border-borderColor p-5 transition-colors hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
                     <h3 className="text-lg mb-3">Metal fabrication</h3>
-                    <p className="text-sm leading-6">Metal parts made from 3D CAD files or technical drawings. Typical lead time is 2–6 weeks, confirmed with your quotation.</p>
+                    <p className="text-sm leading-6">Metal parts made from your CAD files or drawings using conventional metalworking. Usually 2–6 weeks, depending on the job.</p>
                 </Link>
                 <Link href="/3d-design-printing" className="rounded-xl border border-borderColor p-5 transition-colors hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
                     <h3 className="text-lg mb-3">3D design and printing</h3>
-                    <p className="text-sm leading-6">Develop a printable design or work from an existing file to make a prototype, enclosure or custom part.</p>
+                    <p className="text-sm leading-6">Design a part from your sketch or print an existing model. Suitable for prototypes, enclosures and fixtures.</p>
                 </Link>
                 <Link href="/electronics-prototyping" className="rounded-xl border border-borderColor p-5 transition-colors hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
                     <h3 className="text-lg mb-3">Custom electronics</h3>
-                    <p className="text-sm leading-6">Discuss sensors, data collection and control electronics for research and automation prototypes.</p>
+                    <p className="text-sm leading-6">Connect sensors, collect data or add controls to a research setup or automation project.</p>
                 </Link>
             </div>
-            <Link href="/research-fabrication" className="mt-6 inline-block text-sm underline underline-offset-4">Explore fabrication and prototyping services</Link>
+            <Link href="/research-fabrication" className="mt-6 inline-block text-sm underline underline-offset-4">View all services</Link>
         </section>
         <section className="w-full px-8 md:px-20 py-12 border-b border-borderColor">
             <h2 className="text-2xl md:text-3xl mb-4">3D Printing and Robotics Workshops</h2>
