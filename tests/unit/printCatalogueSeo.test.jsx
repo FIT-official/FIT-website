@@ -87,7 +87,7 @@ describe('print catalogue before browser effects', () => {
         const html = renderToStaticMarkup(await PrintLayout())
         expect(html).toContain('Get a 3D print made')
         expect(html).toContain('href="/prints/request"')
-        expect(html).toContain('No matching designs found.')
+        expect(html).toContain('Use the print request above to start with your own model.')
     })
 })
 

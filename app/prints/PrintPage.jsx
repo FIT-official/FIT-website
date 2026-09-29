@@ -209,7 +209,7 @@ function PrintPage({ initialProducts = [] }) {
                     ))
                 ) : (
                     <div className="col-span-full text-center py-8">
-                        <p>No matching designs found.</p>
+                        <p>{products.length ? 'No matching designs found.' : 'Use the print request above to start with your own model.'}</p>
                     </div>
                 )}
             </div>
