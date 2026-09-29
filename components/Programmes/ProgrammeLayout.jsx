@@ -1,18 +1,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { absoluteUrl } from '@/lib/seo/site'
+import { buildPageMetadata } from '@/lib/seo/metadata'
 import styles from './ProgrammeLayout.module.css'
 
 export { styles }
 
 export function programmeMetadata({ title, description, path, image, imageAlt }) {
-    const images = image ? [{ url: absoluteUrl(image), alt: imageAlt }] : [absoluteUrl('/fitogimage.png')]
-    return {
-        title, description,
-        alternates: { canonical: absoluteUrl(path) },
-        openGraph: { title, description, url: absoluteUrl(path), siteName: 'Fix It Today', locale: 'en_SG', type: 'website', images },
-        twitter: { card: 'summary_large_image', title, description, images },
-    }
+    return buildPageMetadata({ title, description, path, image, imageAlt })
 }
 
 export function Photo({ src, alt, caption, width = 1080, height = 1440, priority = false, className = '', sizes = '(max-width: 767px) 100vw, (max-width: 1200px) 45vw, 600px' }) {

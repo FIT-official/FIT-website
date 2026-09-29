@@ -6,6 +6,9 @@
 // entitlements), so the shell renders for any signed-in state and the gated
 // pages swap their own content for Fallback inside the rail.
 import CreatorShell from "@/components/DashboardComponents/CreatorShell";
+import { PRIVATE_PAGE_ROBOTS } from '@/lib/seo/metadata';
+
+export const metadata = { robots: PRIVATE_PAGE_ROBOTS };
 
 export default function DashboardLayout({ children }) {
     return <CreatorShell>{children}</CreatorShell>;

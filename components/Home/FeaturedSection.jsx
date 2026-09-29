@@ -116,9 +116,9 @@ function FeaturedSection() {
         <div className='flex flex-col gap-8 w-full h-full lg:w-[40%] mt-4'>
           <div className='flex flex-col gap-2'>
             <h3>Featured</h3>
-            <h1>
+            <h2 className="font-semibold text-3xl md:text-4xl tracking-tight">
               {sectionContent.title}
-            </h1>
+            </h2>
           </div>
           <MarkdownRenderer
             source={sectionContent.content}

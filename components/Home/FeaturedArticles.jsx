@@ -64,7 +64,7 @@ function FeaturedArticles() {
         <div className='flex flex-col md:flex-row md:items-end md:justify-between gap-6'>
           <div className='flex flex-col gap-2'>
             <h3>From the Blog</h3>
-            <h1>Featured Articles</h1>
+            <h2 className="font-semibold text-3xl md:text-4xl tracking-tight">Featured Articles</h2>
           </div>
           <ButtonLink lnk={'/blog'} text={'Browse All Articles'} />
         </div>

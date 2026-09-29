@@ -1,27 +1,26 @@
 'use client'
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { GoChevronDown } from "react-icons/go";
 import { AnimatePresence, motion } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
 import CustomPrintCard from "@/components/CustomPrintCard";
-import { useToast } from "@/components/General/ToastProvider";
-import { HiUpload, HiCube } from "react-icons/hi";
 import { useContent } from "@/utils/useContent";
+import { cataloguePrice } from '@/lib/productCatalogue';
 
-function PrintPage() {
-    const [products, setProducts] = useState([]);
-    const [customPrintProduct, setCustomPrintProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
+function PrintPage({ initialProducts = [] }) {
+    const products = initialProducts;
     const searchParams = useSearchParams();
-    const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [priceRange, setPriceRange] = useState(100);
+    const [priceRange, setPriceRange] = useState(null);
+    const priceCeiling = Math.max(100, ...products.map(p => Math.ceil(cataloguePrice(p))));
+    const effectivePriceRange = Math.min(priceRange ?? priceCeiling, priceCeiling);
     const [sort, setSort] = useState("topRated");
-    const [search, setSearch] = useState("");
-    const { showToast } = useToast();
+    const [search, setSearch] = useState(searchParams.get('search') || "");
+    const urlSearch = searchParams.get('search') || '';
+    useEffect(() => { setSearch(urlSearch); }, [urlSearch]);
 
     const { content: bannerContent } = useContent('prints/banner', {
         bannerImage: '/placeholder.jpg'
@@ -46,49 +45,12 @@ function PrintPage() {
         }
     }, [bannerContent?.bannerImage]);
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            setLoading(true);
-            const categoryName = searchParams.get('productCategory');
-            const subcategoryName = searchParams.get('productSubCategory');
-
-            try {
-                // Fetch custom print product
-                const customPrintRes = await fetch('/api/product/custom-print-config');
-                if (customPrintRes.ok) {
-                    const customPrintData = await customPrintRes.json();
-                    setCustomPrintProduct(customPrintData.product);
-                }
-            } catch (error) {
-                console.error('Error fetching custom print product:', error);
-            }
-            const params = new URLSearchParams();
-            params.set('productType', 'print');
-            params.set('listing', 'fit');
-            if (categoryName) params.set('productCategory', categoryName);
-            if (subcategoryName) params.set('productSubCategory', subcategoryName);
-            params.set('fields', 'sales,name,variants,discount,images,reviews,slug,likes,creatorUserId,basePrice,variantTypes');
-
-            const res = await fetch(`/api/product?${params.toString()}`);
-            const data = await res.json();
-            if (!res.ok) {
-                showToast('Failed to fetch products', 'error');
-            } else {
-                setProducts(data.products);
-            }
-            setLoading(false);
-        };
-
-        fetchProducts();
-    }, [searchParams, showToast]);
-
     const filteredProducts = useMemo(() => {
         let filtered = products
             .filter(p => p.slug !== 'custom-print-request') // Exclude custom print product as it's shown separately
             .filter(
                 (p) =>
-                    (!p.price?.presentmentAmount ||
-                        Number(p.price.presentmentAmount) <= priceRange) &&
+                    cataloguePrice(p) <= effectivePriceRange &&
                     (
                         !search ||
                         p.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -109,22 +71,22 @@ function PrintPage() {
                 });
                 break;
             case "sales":
-                filtered = filtered.slice().sort((a, b) => (b.sales?.length || 0) - (a.sales?.length || 0));
+                filtered = filtered.slice().sort((a, b) => (b.salesCount ?? b.sales?.length ?? 0) - (a.salesCount ?? a.sales?.length ?? 0));
                 break;
             case "newest":
                 filtered = filtered.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 break;
             case "priceHigh":
-                filtered = filtered.slice().sort((a, b) => (b.price?.presentmentAmount || 0) - (a.price?.presentmentAmount || 0));
+                filtered = filtered.slice().sort((a, b) => cataloguePrice(b) - cataloguePrice(a));
                 break;
             case "priceLow":
-                filtered = filtered.slice().sort((a, b) => (a.price?.presentmentAmount || 0) - (b.price?.presentmentAmount || 0));
+                filtered = filtered.slice().sort((a, b) => cataloguePrice(a) - cataloguePrice(b));
                 break;
             default:
                 break;
         }
         return filtered;
-    }, [products, sort, priceRange, search]);
+    }, [products, sort, effectivePriceRange, search]);
 
     const toggleDropdown = () => {
         setIsDropdownOpen((prev) => !prev);
@@ -156,7 +118,8 @@ function PrintPage() {
                 <input
                     className='flex w-full px-2 focus:outline-none font-normal'
                     type='text'
-                    placeholder='Search products...'
+                    placeholder='Search designs...'
+                    aria-label='Search print designs'
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                 />
@@ -224,13 +187,13 @@ function PrintPage() {
                                     <input
                                         type="range"
                                         min={0}
-                                        max={100}
+                                        max={priceCeiling}
                                         step={1}
-                                        value={priceRange}
+                                        value={effectivePriceRange}
                                         onChange={e => setPriceRange(Number(e.target.value))}
                                         className="w-full accent-textColor"
                                     />
-                                    <span className="text-xs mt-1">Up to ${priceRange}</span>
+                                    <span className="text-xs mt-1">Up to ${effectivePriceRange}</span>
                                 </div>
                             </motion.div>
                         )}
@@ -239,32 +202,16 @@ function PrintPage() {
             </div>
 
             <div className="grid w-full lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6 mb-8">
-                {!loading && (
-                    <CustomPrintCard product={customPrintProduct} />
-                )}
-
-                {loading ? (
-                    Array.from({ length: 4 }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="relative flex flex-col gap-3 p-4 animate-pulse"
-                        >
-                            <div className="w-full aspect-square bg-borderColor mb-2" />
-                            <div className="flex flex-col w-full items-center justify-center relative gap-2">
-                                <div className="h-4 w-1/2 bg-borderColor  mb-1" />
-                                <div className="h-6 w-1/3 bg-borderColor  mb-2" />
-                            </div>
-                        </div>
-                    ))
-                ) : filteredProducts.length > 0 ? (
+                <CustomPrintCard />
+                {filteredProducts.length > 0 ? (
                     filteredProducts.map((product) => (
                         <ProductCard key={product._id || product.id} product={product} />
                     ))
-                ) : !loading ? (
-                    <div className="col-span-4 text-center py-8">
-                        <p>No products found.</p>
+                ) : (
+                    <div className="col-span-full text-center py-8">
+                        <p>{products.length ? 'No matching designs found.' : 'Use the print request above to start with your own model.'}</p>
                     </div>
-                ) : null}
+                )}
             </div>
         </div>
     )

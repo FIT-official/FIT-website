@@ -4,6 +4,7 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { statusQuery } from '@/lib/blog/status'
 import { getHomeHeroContent } from '@/lib/homeHero'
+import { NON_PUBLIC_PRODUCT_SLUGS } from '@/lib/productPublicContent'
 
 const state = vi.hoisted(() => ({
     products: [], post: null, filters: [], productFields: '', postFilter: null,
@@ -93,7 +94,7 @@ describe('public landing pages before browser effects', () => {
         expect(page.props.initialHeroContent).toEqual({
             text: 'Current creator services', heroImage: 'admin/uploads/home/current.jpg', darkOverlay: 20,
         })
-        expect(html).toContain('3D Printer Repair and Filament in Singapore')
+        expect(html).toContain('3D printing and custom parts in Singapore')
         expect(html).toContain('href="/blog/3d-printer-repair"')
         expect(html).toContain('href="/shop"')
         expect(metadata.alternates.canonical).toBe('https://www.fixitoday.com/')
@@ -105,7 +106,7 @@ describe('public landing pages before browser effects', () => {
         state.products = [product('PLA Filament', 'pla'), product('Filament Bundle', 'bundle', 140)]
         const { default: Shop, metadata } = await import('@/app/shop/page')
         const html = renderToStaticMarkup(await Shop({ searchParams: Promise.resolve({}) }))
-        expect(html).toContain('3D Printing Filament in Singapore')
+        expect(html).toContain('3D Printing Filament and Electronics in Singapore')
         expect(html).toContain('href="/products/pla"')
         expect(html).toContain('href="/products/bundle"')
         expect(html).toContain('SGD 22.00')
@@ -136,6 +137,7 @@ describe('server shop catalogue', () => {
         await getShopProducts({ productCategory: ' Filament ', productSubCategory: 'PLA+' })
         expect(state.filters[0]).toEqual({
             productType: 'shop', hidden: false, flaggedForModeration: { $ne: true },
+            slug: { $nin: [...NON_PUBLIC_PRODUCT_SLUGS, 'custom-print-request'] },
             $or: [{ listing: 'fit' }, { listing: { $exists: false } }],
             categoryId: { $regex: '^Filament$', $options: 'i' },
             subcategoryId: { $regex: '^PLA\\+$', $options: 'i' },

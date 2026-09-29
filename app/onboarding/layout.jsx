@@ -1,5 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import { PRIVATE_PAGE_ROBOTS } from '@/lib/seo/metadata'
+
+export const metadata = { robots: PRIVATE_PAGE_ROBOTS }
 
 export default async function RootLayout({ children }) {
     const { userId } = await auth()

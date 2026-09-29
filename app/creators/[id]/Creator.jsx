@@ -11,7 +11,7 @@ import CreatorPageFrame from "@/components/CreatorPage/CreatorPageFrame";
 import BlockRenderer from "@/components/CreatorPage/BlockRenderer";
 import { sanitizeDisplayName } from "@/components/CreatorPage/shared";
 
-function Creator({ creator, products, canEdit = false }) {
+function Creator({ creator, products, textHtml = {}, canEdit = false }) {
     const { user, isLoaded } = useUser();
     const viewerUserId = isLoaded ? (user?.id ? String(user.id) : null) : null;
     const creatorUserId = creator?.id ? String(creator.id) : null;
@@ -54,6 +54,7 @@ function Creator({ creator, products, canEdit = false }) {
                     blocks={shop.blocks}
                     creator={{ ...creator, displayName }}
                     products={safeProducts}
+                    textHtml={textHtml}
                 />
             </div>
         </CreatorPageFrame>

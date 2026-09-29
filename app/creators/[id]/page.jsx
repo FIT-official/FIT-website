@@ -1,4 +1,9 @@
 import Creator from "./Creator";
+import { notFound } from 'next/navigation';
+import { jsonLdString } from '@/lib/jsonLd';
+import { creatorMetadata } from '@/lib/seo/creators';
+import { renderPublicMarkdown } from '@/lib/seo/publicContent';
+import { NON_PUBLIC_PRODUCT_SLUGS, isPublicCatalogueProduct, publicProductDescription } from '@/lib/productPublicContent';
 import { productForViewer } from "@/lib/productAccess";
 import { connectToDatabase } from "@/lib/db";
 import Product from "@/models/Product";
@@ -7,10 +12,12 @@ import { checkAdminPrivileges } from "@/lib/checkPrivileges";
 import { resolveCreatorByIdOrName } from "@/lib/creatorPage/resolveCreator";
 import { validateBlocks, normalizeTheme } from "@/lib/creatorPage/blocks";
 
-export const metadata = {
-	title: "Creator | Fix It Today®",
-	description: "Browse this creator's products at Fix It Today®",
-};
+export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }) {
+	const { id } = await params;
+	return creatorMetadata(await resolveCreatorByIdOrName(id));
+}
 
 function serializeForClient(value) {
 	if (value == null) return value;
@@ -46,20 +53,12 @@ function serializeForClient(value) {
 	return value;
 }
 
-function Notice({ children }) {
-	return (
-		<div className="flex min-h-[92vh] w-full items-center justify-center border-b border-borderColor">
-			<div className="text-sm text-lightColor">{children}</div>
-		</div>
-	);
-}
-
 export default async function CreatorPage(props) {
 	const params = await props.params;
 	const creatorSlug = params?.id;
 
 	if (!creatorSlug) {
-		return <Notice>Creator not found.</Notice>;
+		notFound();
 	}
 
 	await connectToDatabase();
@@ -69,7 +68,7 @@ export default async function CreatorPage(props) {
 	// projection only).
 	const resolved = await resolveCreatorByIdOrName(creatorSlug);
 	if (!resolved) {
-		return <Notice>Creator not found.</Notice>;
+		notFound();
 	}
 	const resolvedUserId = resolved.userId;
 
@@ -109,10 +108,10 @@ export default async function CreatorPage(props) {
 	const isOwner = !!viewerUserId && viewerUserId === resolvedUserId;
 	const isAdmin = !!viewerUserId && !isOwner ? await checkAdminPrivileges(viewerUserId) : false;
 	if (!shop.published && !isOwner && !isAdmin) {
-		return <Notice>This creator page is not published yet.</Notice>;
+		notFound();
 	}
 
-	const products = await Product.find({ creatorUserId: resolvedUserId, hidden: { $ne: true }, flaggedForModeration: { $ne: true } }).sort({ createdAt: -1 }).lean();
+	const products = await Product.find({ creatorUserId: resolvedUserId, hidden: { $ne: true }, flaggedForModeration: { $ne: true }, slug: { $nin: NON_PUBLIC_PRODUCT_SLUGS } }).sort({ createdAt: -1 }).lean();
 
 	let profile = null;
 	try {
@@ -138,6 +137,19 @@ export default async function CreatorPage(props) {
 		shop,
 	};
 
-	const safeProducts = serializeForClient((products || []).map(product => productForViewer(product, viewerUserId, isAdmin)).filter(Boolean));
-	return <Creator creator={creator} products={safeProducts} canEdit={isAdmin} />;
+	const safeProducts = serializeForClient((products || []).filter(isPublicCatalogueProduct)
+		.map(product => productForViewer(product, viewerUserId, isAdmin)).filter(Boolean)
+		.map(product => ({ ...product, description: publicProductDescription(product.description) })));
+	const textHtml = Object.fromEntries(shop.blocks.filter(block => block.type === 'text')
+		.map(block => [block.id, renderPublicMarkdown(block.settings?.body)]));
+	const metadata = creatorMetadata(resolved);
+	const schema = metadata.robots?.index === false ? null : {
+		'@context': 'https://schema.org', '@type': 'ProfilePage',
+		name: resolved.displayName, description: metadata.description, url: metadata.alternates.canonical,
+		mainEntity: { '@type': 'Thing', name: resolved.displayName, url: metadata.alternates.canonical },
+	};
+	return <>
+		{schema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(schema) }} />}
+		<Creator creator={creator} products={safeProducts} textHtml={textHtml} canEdit={isAdmin} />
+	</>;
 }

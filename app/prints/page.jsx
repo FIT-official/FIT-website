@@ -1,49 +1,47 @@
 import { jsonLdString } from '@/lib/jsonLd'
 import PrintPage from "./PrintPage";
+import Link from 'next/link';
+import { SITE_URL, absoluteUrl } from '@/lib/seo/site';
+import { buildPageMetadata } from '@/lib/seo/metadata';
+import { getPrintProducts } from '@/lib/seo/shop';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://fixitoday.com";
+export const dynamic = 'force-dynamic';
 
-export const metadata = {
-    title: "Print | Fix It Today®",
-    description: "Browse and purchase print products from Fix It Today®",
-    openGraph: {
-        title: "Print | Fix It Today®",
-        description: "Browse and purchase print products from Fix It Today®",
-        url: "https://fixitoday.com/prints",
-        siteName: "Fix It Today®",
-        images: [
-            {
-                url: "/fitogimage.png",
-                width: 800,
-                height: 800,
-                alt: "Fix It Today® Photo",
-            },
-        ],
-        locale: "en_SG",
-        type: "website",
-    },
-};
+const title = '3D Printing Singapore | Models & Custom Prints | Fix It Today';
+const description = 'Upload your STL, OBJ or 3MF model for custom 3D printing in Singapore. Choose material and colour, or get help designing a part.';
+
+export const metadata = buildPageMetadata({ title, description, path: '/prints', imageAlt: 'Fix It Today' });
 
 const PRINTS_JSON_LD = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Print | Fix It Today®",
-    description: "Browse and purchase print products from Fix It Today®",
-    url: `${BASE_URL}/prints`,
+    name: title,
+    description,
+    url: absoluteUrl('/prints'),
     isPartOf: {
         "@type": "WebSite",
-        url: BASE_URL,
+        url: SITE_URL,
     },
 };
 
-function PrintLayout() {
+async function PrintLayout({ searchParams } = {}) {
+    const products = await getPrintProducts(await searchParams || {});
     return (
         <>
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: jsonLdString(PRINTS_JSON_LD) }}
             />
-            <PrintPage />
+            <section className="px-8 pt-12 pb-6">
+                <h1 className="text-2xl md:text-3xl mb-4">3D Printing in Singapore</h1>
+                <p className="text-sm max-w-3xl mb-4">Upload your own model for a custom print.{products.length > 0 ? ' You can also choose from the designs below.' : ''} If you need a part drawn first, we can help with the 3D design.</p>
+                <div className="flex flex-wrap gap-4 text-sm underline">
+                    <Link href="/prints/request">Upload a model for printing</Link>
+                    <Link href="/3d-design-printing">3D design and printing services</Link>
+                    <Link href="/research-fabrication">Parts for research and business</Link>
+                </div>
+            </section>
+            <PrintPage initialProducts={products} />
         </>
     )
 }

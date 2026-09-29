@@ -15,6 +15,7 @@ import ReviewSection from '@/components/ProductPage/ReviewSection';
 import { storeFetch, addShopItem } from '@/lib/storeRequest';
 import { ConnectionNotice, StoreError, useStoreConnection } from '@/components/Cart/StoreFeedback';
 import { getDefaultVariantSelections } from '@/lib/seo/product';
+import { publicProductDescription } from '@/lib/productPublicContent';
 
 const ModelViewer = dynamic(() => import("@/components/3D/ModelViewer"), { ssr: false });
 
@@ -665,7 +666,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                     className={`w-full text-pretty text-sm mt-2 mb-3 overflow-hidden transition-all duration-500 ease-in-out ${isDescriptionExpanded ? "" : "line-clamp-3"
                                         }`}
                                 >
-                                    {product.description || "No description available for this product."}
+                                    {publicProductDescription(product.description) || "No description available for this product."}
                                 </div>
 
                                 {product.description && (

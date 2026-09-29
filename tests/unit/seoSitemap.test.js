@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { statusQuery } from '@/lib/blog/status'
 import { buildPublicSitemap } from '@/lib/seo/sitemap'
+import { NON_PUBLIC_PRODUCT_SLUGS } from '@/lib/productPublicContent'
 import robots from '@/app/robots'
 import { GET as legacySitemap } from '@/app/sitemap-0.xml/route'
 
@@ -52,7 +53,7 @@ describe('public sitemap URLs', () => {
     it('lists only public landing pages under the canonical www origin', () => {
         const entries = buildPublicSitemap()
         expect(entries.map(entry => entry.url)).toEqual([
-            'https://www.fixitoday.com', 'https://www.fixitoday.com/about',
+            'https://www.fixitoday.com/', 'https://www.fixitoday.com/about',
             'https://www.fixitoday.com/shop', 'https://www.fixitoday.com/prints',
             'https://www.fixitoday.com/creators', 'https://www.fixitoday.com/creators/join',
             'https://www.fixitoday.com/blog',
@@ -85,6 +86,8 @@ describe('public sitemap URLs', () => {
             { slug: 'hidden-filament', hidden: true },
             { slug: 'moderated', hidden: false, flaggedForModeration: true },
             { slug: 'visibility-unknown' },
+            ...NON_PUBLIC_PRODUCT_SLUGS.map(slug => ({ slug, hidden: false })),
+            { slug: 'custom-print-request', hidden: false },
         ] })
         expect(entries.filter(entry => entry.url.includes('/products/'))).toEqual([
             { url: 'https://www.fixitoday.com/products/pla' },
@@ -141,7 +144,7 @@ describe('sitemap database route', () => {
         const entries = await sitemap()
         expect(dynamic).toBe('force-dynamic')
         expect(db.connect).toHaveBeenCalledOnce()
-        expect(db.productFilter).toEqual({ hidden: false, flaggedForModeration: { $ne: true } })
+        expect(db.productFilter).toEqual({ hidden: false, flaggedForModeration: { $ne: true }, slug: { $nin: [...NON_PUBLIC_PRODUCT_SLUGS, 'custom-print-request'] } })
         expect(db.postFilter).toEqual(statusQuery('published'))
         expect(db.creatorFilter).toEqual({
             shop: { $exists: true, $ne: null },

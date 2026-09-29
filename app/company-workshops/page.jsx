@@ -12,7 +12,7 @@ export const metadata = programmeMetadata({ title: 'Company 3D Printing Workshop
 export default function CompanyWorkshops() {
     return <ProgrammeLayout
         title="Company workshops" titleLead="Company" titleAccent="workshops"
-        intro="Learn to model a part, prepare a print or build a working circuit. We plan practical sessions for teams, from a first introduction to training on the printer in your workplace."
+        intro="Our company workshops in Singapore cover 3D design, printing and electronics. Learn to model a part, prepare a print or build a working circuit, with sessions for beginners and training on the printer in your workplace."
         hero={hero}
         path="/company-workshops" serviceType="Company 3D printing, CAD and introductory robotics workshops"
         enquirySubject="Company workshop enquiry"

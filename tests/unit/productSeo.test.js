@@ -50,6 +50,19 @@ describe('product metadata', () => {
         expect(productImageUrl('https://cdn.example.com/filament.webp')).toBe('https://cdn.example.com/filament.webp')
         expect(productImageUrl(null)).toBeNull()
     })
+
+    it('creates individual metadata for both catalogue types with a safe social fallback', () => {
+        for (const productType of ['shop', 'print']) {
+            const item = { ...product, productType, slug: `${productType}-model`, images: [], description: '' }
+            const metadata = productMetadata(item)
+            expect(metadata.title).toContain(product.name)
+            expect(metadata.description).toContain(product.name)
+            expect(metadata.alternates.canonical).toBe(`https://www.fixitoday.com/products/${productType}-model`)
+            expect(metadata.openGraph.url).toBe(metadata.alternates.canonical)
+            expect(metadata.twitter.images).toEqual(['https://www.fixitoday.com/fitogimage.png'])
+        }
+        expect(productDescription('Maker&#39;s holder &#x2014; 20 mm')).toBe('Maker\'s holder — 20 mm')
+    })
 })
 
 describe('product offer accuracy', () => {
@@ -87,6 +100,14 @@ describe('product offer accuracy', () => {
         expect(productJsonLd({ ...product, productType: 'print' })).not.toHaveProperty('offers')
         expect(productJsonLd({ ...product, basePrice: {} })).not.toHaveProperty('offers')
         expect(productJsonLd(product, [], false)).not.toHaveProperty('offers')
+    })
+
+    it('omits availability when there is no stock evidence instead of assuming stock', () => {
+        const unknownStock = { ...product, variantTypes: [], stock: undefined, infiniteStock: false }
+        expect(productJsonLd(unknownStock).offers).toMatchObject({ price: '20.00', priceCurrency: 'SGD' })
+        expect(productJsonLd(unknownStock).offers).not.toHaveProperty('availability')
+        expect(productJsonLd({ ...unknownStock, stock: NaN }).offers).not.toHaveProperty('availability')
+        expect(productJsonLd({ ...unknownStock, infiniteStock: true }).offers.availability).toMatch(/InStock$/)
     })
 
     it('uses only actual valid ratings', () => {

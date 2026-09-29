@@ -50,16 +50,14 @@ describe('creators directory', () => {
         expect(calls.at(-1)).toBe('/api/creators?page=1&q=zed')
     })
 
-    it('shows the no-pages empty state and pages forward', async () => {
+    it('shows a crawlable next-page link and the no-pages empty state', async () => {
         stubFetch((url) => {
             if (url.includes('page=2')) return { ok: true, json: async () => ({ creators: [creators[1]], total: 21, hasMore: false }) }
             return { ok: true, json: async () => ({ creators: [creators[0]], total: 21, hasMore: true }) }
         })
         render(<CreatorsDirectory />)
         await screen.findByText('Ada Prints')
-        fireEvent.click(screen.getByRole('button', { name: 'Next' }))
-        expect(await screen.findByText('Bob Builds')).toBeInTheDocument()
-        expect(screen.getByText('Page 2')).toBeInTheDocument()
+        expect(screen.getByRole('link', { name: 'Next' })).toHaveAttribute('href', '/creators?page=2')
 
         stubFetch(() => ({ ok: true, json: async () => ({ creators: [], total: 0, hasMore: false }) }))
         cleanup()

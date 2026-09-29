@@ -55,25 +55,34 @@ function CreatorCard({ creator }) {
     )
 }
 
-export default function CreatorsDirectory() {
-    const [query, setQuery] = useState('')
-    const [debounced, setDebounced] = useState('')
-    const [page, setPage] = useState(1)
-    const [creators, setCreators] = useState([])
-    const [total, setTotal] = useState(0)
-    const [hasMore, setHasMore] = useState(false)
-    const [loading, setLoading] = useState(true)
+export default function CreatorsDirectory({ initialData = null }) {
+    const [query, setQuery] = useState(initialData?.q || '')
+    const [debounced, setDebounced] = useState(initialData?.q || '')
+    const [page, setPage] = useState(initialData?.page || 1)
+    const [creators, setCreators] = useState(initialData?.creators || [])
+    const [total, setTotal] = useState(initialData?.total || 0)
+    const [hasMore, setHasMore] = useState(initialData?.hasMore || false)
+    const [loading, setLoading] = useState(initialData === null)
     const [error, setError] = useState('')
 
     useEffect(() => {
+        if (query.trim() === debounced) return
         const t = setTimeout(() => {
             setDebounced(query.trim())
             setPage(1)
         }, 250)
         return () => clearTimeout(t)
-    }, [query])
+    }, [query, debounced])
 
     useEffect(() => {
+        if (initialData && page === initialData.page && debounced === initialData.q) {
+            setCreators(initialData.creators)
+            setTotal(initialData.total)
+            setHasMore(initialData.hasMore)
+            setLoading(false)
+            setError('')
+            return
+        }
         let cancelled = false
         ;(async () => {
             setLoading(true)
@@ -96,7 +105,13 @@ export default function CreatorsDirectory() {
             }
         })()
         return () => { cancelled = true }
-    }, [debounced, page])
+    }, [debounced, page, initialData])
+
+    const pageHref = nextPage => {
+        const params = new URLSearchParams({ page: String(nextPage) })
+        if (debounced) params.set('q', debounced)
+        return `/creators?${params.toString()}`
+    }
 
     return (
         <div className="flex flex-col min-h-[92vh] w-full items-center justify-start border-b border-borderColor py-16 px-4 md:px-8">
@@ -160,23 +175,15 @@ export default function CreatorsDirectory() {
                             <div className="flex items-center justify-between text-xs text-lightColor">
                                 <span>{total} {total === 1 ? 'creator' : 'creators'}</span>
                                 <div className="flex items-center gap-2">
-                                    <button
-                                        type="button"
-                                        disabled={page <= 1}
-                                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                        className="rounded-full border border-borderColor px-3 py-1.5 font-medium text-textColor disabled:opacity-40 hover:bg-baseColor transition-colors duration-300 cursor-pointer disabled:cursor-default"
-                                    >
-                                        Previous
-                                    </button>
+                                    {page > 1 ? <Link
+                                        href={pageHref(page - 1)}
+                                        className="rounded-full border border-borderColor px-3 py-1.5 font-medium text-textColor hover:bg-baseColor transition-colors duration-300"
+                                    >Previous</Link> : <span aria-disabled="true" className="rounded-full border border-borderColor px-3 py-1.5 font-medium text-textColor opacity-40">Previous</span>}
                                     <span>Page {page}</span>
-                                    <button
-                                        type="button"
-                                        disabled={!hasMore}
-                                        onClick={() => setPage((p) => p + 1)}
-                                        className="rounded-full border border-borderColor px-3 py-1.5 font-medium text-textColor disabled:opacity-40 hover:bg-baseColor transition-colors duration-300 cursor-pointer disabled:cursor-default"
-                                    >
-                                        Next
-                                    </button>
+                                    {hasMore ? <Link
+                                        href={pageHref(page + 1)}
+                                        className="rounded-full border border-borderColor px-3 py-1.5 font-medium text-textColor hover:bg-baseColor transition-colors duration-300"
+                                    >Next</Link> : <span aria-disabled="true" className="rounded-full border border-borderColor px-3 py-1.5 font-medium text-textColor opacity-40">Next</span>}
                                 </div>
                             </div>
                         )}
