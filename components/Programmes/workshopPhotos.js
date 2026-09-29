@@ -9,14 +9,6 @@ export const escapeRoomPhotos = [
     "album": "Escape room build"
   },
   {
-    "src": "/images/collaborations/escape-room-workshop-group.jpg",
-    "alt": "Escape room project group gathered around a workshop table",
-    "caption": "A moment together around the workbench.",
-    "width": 1024,
-    "height": 768,
-    "album": "Escape room build"
-  },
-  {
     "src": "/images/collaborations/escape-room-model-build.jpg",
     "alt": "Three participants measuring a large white panel at a workbench",
     "caption": "Measuring and preparing the model base.",
@@ -66,7 +58,35 @@ export const escapeRoomPhotos = [
   }
 ]
 
+export const teachingPhotos = [
+  {
+    src: '/images/collaborations/nygh-classroom-workshop.jpg',
+    alt: 'FIT instructor leading a classroom workshop with NYGH students seated around tables',
+    caption: 'Classroom teaching at Nanyang Girls’ High School.',
+    width: 1280,
+    height: 960,
+    album: 'School workshops / NYGH',
+  },
+  {
+    src: '/images/collaborations/nygh-group-guidance.jpg',
+    alt: 'FIT instructor supporting a small group of NYGH students working together around a laptop',
+    caption: 'Working through a design with a small group of students.',
+    width: 1280,
+    height: 960,
+    album: 'School workshops / NYGH',
+  },
+  {
+    src: '/images/collaborations/nygh-workshop-instructor.jpg',
+    alt: 'FIT instructor explaining a workshop task to NYGH students in front of a projected lesson',
+    caption: 'Explaining the task before students put it into practice.',
+    width: 1280,
+    height: 960,
+    album: 'School workshops / NYGH',
+  },
+]
+
 export const schoolWorkshopPhotos = [
+  ...teachingPhotos,
   {
     "src": "/images/collaborations/nygh-3d-design-workshop.jpg",
     "alt": "An instructor introducing 3D printing examples to a class at NYGH",
@@ -109,4 +129,5 @@ export const schoolWorkshopPhotos = [
   }
 ]
 
-export const schoolGalleryPhotos = [escapeRoomPhotos[0], ...schoolWorkshopPhotos, ...escapeRoomPhotos.slice(1)]
+export const schoolGalleryPhotos = [...schoolWorkshopPhotos, ...escapeRoomPhotos]
+export const companyGalleryPhotos = [teachingPhotos[2], teachingPhotos[1], teachingPhotos[0], ...escapeRoomPhotos]
