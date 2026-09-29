@@ -1,33 +1,34 @@
 import ProgrammeLayout, { programmeMetadata, Photo, SectionHeading, TextLink, WorkshopList, Questions, ReadingList, styles } from '@/components/Programmes/ProgrammeLayout'
 import ProjectGallery from '@/components/Programmes/ProjectGallery'
-import { escapeRoomPhotos } from '@/components/Programmes/workshopPhotos'
+import { companyGalleryPhotos, teachingPhotos } from '@/components/Programmes/workshopPhotos'
 
 const description = 'Plan a company 3D printing, CAD or introductory robotics workshop in Singapore. Learn through a practical team project, or request a prototype print.'
 const hero = {
-    ...escapeRoomPhotos[0],
-    caption: 'The escape room project · Together with the completed miniature build.',
+    ...teachingPhotos[2],
+    caption: 'Our teaching in practice · A FIT session at Nanyang Girls’ High School.',
     landscape: true,
 }
 export const metadata = programmeMetadata({ title: 'Company 3D Printing Workshops Singapore | Fix It Today', description, path: '/company-workshops', image: hero.src, imageAlt: hero.alt })
 
 export default function CompanyWorkshops() {
     return <ProgrammeLayout
-        title="Build something together." titleLead="Build something" titleAccent="together." eyebrow="Company workshops"
-        intro="Step away from the slides and work on a physical idea. Bring your team together for 3D printing, practical design or electronics, with a project that gives everyone something to try."
+        title="Practical skills. Stronger teams." titleLead="Practical skills." titleAccent="Stronger teams." eyebrow="Company workshops"
+        intro="Bring 3D design, printing and electronics into your team’s skill set. Plan an instructor-led workshop around a clear learning goal, with demonstrations, guided practice and a practical challenge."
         hero={hero} topics={['Team workshops', 'CAD & prototyping', 'Electronics & robotics', 'Workplace printer training']}
         path="/company-workshops" serviceType="Company 3D printing, CAD and introductory robotics workshops"
         enquirySubject="Company workshop enquiry"
         enquiryDetails={'Company:\nNumber of participants:\nExperience with CAD, printing or coding:\nLearning goal or project idea:\nPreferred dates and session length:\nVenue and available equipment:\nBudget:\n'}
     >
-        <ProjectGallery photos={escapeRoomPhotos} title="From the workbench to the final reveal."
-            intro="The making of our miniature escape room: preparing the model, connecting the electronics and bringing the finished build together." />
+        <section className={styles.overview} aria-label="Workshop approach">
+            <div><p className={styles.eyebrow}>Team development</p><h2>Learn through a shared task</h2><p>Work through a design brief together, compare decisions and test a physical result.</p></div>
+            <div><p className={styles.eyebrow}>Technical skills</p><h2>Build practical confidence</h2><p>Explore CAD, print preparation or electronics through guided exercises matched to the group’s experience.</p></div>
+            <div><p className={styles.eyebrow}>Workplace application</p><h2>Bring a useful problem</h2><p>Discuss a prototype or your workplace printer setup so we can agree on a relevant training scope.</p></div>
+        </section>
 
         <section id="projects" className={`${styles.section} ${styles.programmeGrid}`}>
             <div className={styles.programmeAside}>
-                <SectionHeading eyebrow="A shared project" title="Make the session useful.">A first taste of making, a skill for the workplace or a prototype to improve. Choose what your team would like to get out of the day.</SectionHeading>
-                <Photo src="/images/collaborations/interactive-stem-board.jpg" width={720} height={1280}
-                    alt="A physical electronics board combining a distance sensor, display and illuminated components"
-                    caption="Project detail · A sensor, a display and code working together." />
+                <SectionHeading eyebrow="Workshop pathways" title="Training with a clear outcome.">A first introduction, a skill for the workplace or a prototype to improve. Choose what your team would like to learn.</SectionHeading>
+                <Photo {...teachingPhotos[1]} caption="Small-group guidance during our NYGH school programme." />
             </div>
             <WorkshopList items={[
                 { title: 'Your first 3D print', description: 'Design a small desk accessory or personalised part. Prepare the model in a slicer and see how a printer turns it into layers.', concepts: 'Explore orientation, supports and material choice.' },
@@ -57,6 +58,8 @@ export default function CompanyWorkshops() {
                 <div><span className={styles.eyebrow}>03 / The session</span><h3>Build, test, discuss</h3><p>Make a design or circuit, see what works and review it together. Leave with a clearer understanding of the next step.</p></div>
             </div>
         </section>
+        <ProjectGallery photos={companyGalleryPhotos} title="Teaching, making and testing."
+            intro="Our teaching approach in action at NYGH, alongside our miniature escape room build. These photographs show school teaching and project work; company sessions are planned around your team’s brief." />
         <Questions items={[
             { question: 'Can beginners take part?', answer: 'Yes. A guided design or circuit is a useful starting point. For mixed experience levels, we can discuss a common task with optional extensions.' },
             { question: 'Can you run the workshop at our office?', answer: 'Share the location, room layout and available equipment. We’ll confirm whether the proposed project can be delivered there and what needs to be arranged.' },

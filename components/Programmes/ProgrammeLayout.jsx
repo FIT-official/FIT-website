@@ -84,9 +84,9 @@ export default function ProgrammeLayout({ title, titleLead, titleAccent, eyebrow
                 <p className={styles.heroIntro}>{intro}</p>
                 <div className={styles.heroActions}>
                     <a href="#enquire" className={styles.button}>Plan a workshop <span aria-hidden="true">↗</span></a>
-                    <a href="#gallery" className={styles.quietLink}>See the projects <span aria-hidden="true">↓</span></a>
+                    <a href="#gallery" className={styles.quietLink}>View the gallery <span aria-hidden="true">↓</span></a>
                 </div>
-                <p className={styles.heroNote}>3D printing, electronics &amp; the joy of making.</p>
+                <p className={styles.heroNote}>Instructor-led workshops · Practical skills · Project support</p>
             </div>
             <Photo {...hero} priority className={`${styles.heroPhoto} ${hero.landscape ? styles.heroLandscape : ''}`} />
         </header>
