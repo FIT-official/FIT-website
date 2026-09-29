@@ -20,7 +20,7 @@ export default function CompanyWorkshops() {
         enquiryDetails={'Company:\nNumber of participants:\nExperience with CAD, printing or coding:\nLearning goal or project idea:\nPreferred dates and session length:\nVenue and available equipment:\nBudget:\n'}
     >
         <ProjectGallery photos={escapeRoomPhotos} title="From the workbench to the final reveal."
-            intro="A look inside our escape room projects: making the parts, connecting the electronics and bringing people together to try the puzzles." />
+            intro="The making of our miniature escape room: preparing the model, connecting the electronics and bringing the finished build together." />
 
         <section id="projects" className={`${styles.section} ${styles.programmeGrid}`}>
             <div className={styles.programmeAside}>

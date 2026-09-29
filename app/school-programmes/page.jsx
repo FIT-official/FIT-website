@@ -45,7 +45,7 @@ export default function SchoolProgrammes() {
         </section>
 
         <ProjectGallery photos={schoolGalleryPhotos} title="Small details. Big moments."
-            intro="Explore the NYGH classroom sessions, the making of a miniature escape room and the puzzles inside an immersive room. Open a photo for a closer look." />
+            intro="Explore the NYGH classroom sessions and the making of a miniature escape room, from model panels to working electronics. Open a photo for a closer look." />
 
         <section id="projects" className={`${styles.section} ${styles.programmeGrid}`}>
             <div className={styles.programmeAside}>

@@ -1,4 +1,4 @@
-// Original FIT photographs. Source references: docs/workshop-photo-sources.json
+// FIT miniature escape room build and NYGH workshop photographs. Source references: docs/workshop-photo-sources.json
 export const escapeRoomPhotos = [
   {
     "src": "/images/collaborations/escape-room-team.jpg",
@@ -7,14 +7,6 @@ export const escapeRoomPhotos = [
     "width": 1024,
     "height": 768,
     "album": "Escape room build"
-  },
-  {
-    "src": "/images/collaborations/escape-room-light-puzzle.jpg",
-    "alt": "Hands around an escape room puzzle with a blue illuminated centre",
-    "caption": "A tabletop puzzle opens to reveal its illuminated centre.",
-    "width": 1024,
-    "height": 768,
-    "album": "Inside the escape room"
   },
   {
     "src": "/images/collaborations/escape-room-workshop-group.jpg",
@@ -65,84 +57,12 @@ export const escapeRoomPhotos = [
     "album": "Escape room build"
   },
   {
-    "src": "/images/collaborations/escape-room-team-puzzle.jpg",
-    "alt": "Five participants discussing a puzzle around a white table",
-    "caption": "Working through the clues together.",
-    "width": 1024,
-    "height": 768,
-    "album": "Inside the escape room"
-  },
-  {
-    "src": "/images/collaborations/escape-room-hidden-screen.jpg",
-    "alt": "Participants looking at a screen revealed behind an opened picture frame",
-    "caption": "A screen hidden behind a framed picture.",
-    "width": 1024,
-    "height": 768,
-    "album": "Inside the escape room"
-  },
-  {
-    "src": "/images/collaborations/escape-room-wall-puzzle.jpg",
-    "alt": "Participants examining a wall puzzle beside greenery",
-    "caption": "Looking for the next clue in the room.",
-    "width": 1024,
-    "height": 768,
-    "album": "Inside the escape room"
-  },
-  {
-    "src": "/images/collaborations/escape-room-light-clue.jpg",
-    "alt": "Coloured markings and light on a clear puzzle panel",
-    "caption": "A closer look at a light-based clue.",
-    "width": 1024,
-    "height": 768,
-    "album": "Inside the escape room"
-  },
-  {
-    "src": "/images/collaborations/escape-room-glowing-wall.jpg",
-    "alt": "Large numbers and glowing circular elements on a dark blue puzzle wall",
-    "caption": "The room takes on a different character under coloured light.",
-    "width": 1024,
-    "height": 768,
-    "album": "Inside the escape room"
-  },
-  {
-    "src": "/images/collaborations/escape-room-projection.jpg",
-    "alt": "Participants watching a projected waveform in a purple-lit escape room",
-    "caption": "Following a screen prompt in the darkened room.",
-    "width": 1024,
-    "height": 768,
-    "album": "Inside the escape room"
-  },
-  {
-    "src": "/images/collaborations/escape-room-table-challenge.jpg",
-    "alt": "Participants leaning over puzzle pieces on a white table",
-    "caption": "Comparing pieces and testing an idea.",
-    "width": 1024,
-    "height": 768,
-    "album": "Inside the escape room"
-  },
-  {
-    "src": "/images/collaborations/escape-room-puzzle-box.jpg",
-    "alt": "Hands opening a small wooden box beside a treasure chest",
-    "caption": "Exploring the compartments of a puzzle box.",
-    "width": 768,
-    "height": 1024,
-    "album": "Inside the escape room"
-  },
-  {
     "src": "/images/collaborations/escape-room-circuit-work.jpg",
     "alt": "Participants working on electronics beside laptops",
     "caption": "Building and checking a circuit at the workbench.",
     "width": 1024,
     "height": 768,
     "album": "Escape room build"
-  },
-  {
-    "src": "/images/collaborations/escape-room-garden-clue.jpg",
-    "alt": "Participants examining a coloured puzzle beside garden scenery",
-    "caption": "Finding a clue among the scenery.",
-    "width": 1024,
-    "height": 768,
-    "album": "Inside the escape room"
   }
 ]
 
@@ -189,4 +109,4 @@ export const schoolWorkshopPhotos = [
   }
 ]
 
-export const schoolGalleryPhotos = [escapeRoomPhotos[0], schoolWorkshopPhotos[0], escapeRoomPhotos[1], schoolWorkshopPhotos[1], escapeRoomPhotos[5], escapeRoomPhotos[3], schoolWorkshopPhotos[2], escapeRoomPhotos[2], ...schoolWorkshopPhotos.slice(3), ...escapeRoomPhotos.filter((_, index) => ![0, 1, 2, 3, 5].includes(index))]
+export const schoolGalleryPhotos = [escapeRoomPhotos[0], ...schoolWorkshopPhotos, ...escapeRoomPhotos.slice(1)]
