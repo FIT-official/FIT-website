@@ -20,10 +20,10 @@ function About() {
             <Header title="OUR SERVICES" />
             <ServicesSection />
             <section className="border-t border-borderColor px-8 py-12 md:px-20">
-                <h2>Fabrication for research and business</h2>
-                <p className="mt-4 max-w-3xl text-sm leading-7">Bring a CAD model, technical drawing or project brief. Discuss metal fabrication, 3D design and printing, or custom electronics for a research or automation prototype.</p>
+                <h2>Custom parts and prototypes</h2>
+                <p className="mt-4 max-w-3xl text-sm leading-7">We help with metal fabrication, 3D design, printing and electronics for research and commercial projects. Send us your drawings or let us know what you need.</p>
                 <div className="mt-6 flex flex-wrap gap-6 text-sm underline underline-offset-4">
-                    <Link href="/research-fabrication">Explore our services</Link>
+                    <Link href="/research-fabrication">View all services</Link>
                     <Link href="/metal-fabrication">Metal fabrication</Link>
                     <Link href="/3d-design-printing">3D design and printing</Link>
                     <Link href="/electronics-prototyping">Custom electronics</Link>
