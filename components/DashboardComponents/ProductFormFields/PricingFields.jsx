@@ -76,8 +76,12 @@ export default function PricingFields({ form, setForm, allCurrencies, missingFie
                         name="priceCredits"
                         type="number"
                         min={0}
+                        step="0.01"
                         value={form.priceCredits ?? ''}
-                        onChange={(e) => setForm(f => ({ ...f, priceCredits: e.target.value === '' ? '' : parseInt(e.target.value) }))}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            setForm(f => ({ ...f, priceCredits: value === '' ? '' : parseFloat(value) }));
+                        }}
                         className={`${inputCls(priceCreditsMissing)} dash-data`}
                         placeholder="0"
                     />
