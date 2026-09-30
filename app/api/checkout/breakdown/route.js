@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { cartIdentity, cartOwner } from "@/lib/cartOwner";
-import Event from "@/models/Event";
+import { checkoutDiscountRules } from '@/lib/checkoutDiscounts';
+import { applyShopShipping } from '@/lib/shopShipping';
 import Product from "@/models/Product";
 import CustomPrintRequest from "@/models/CustomPrintRequest";
 import { calculateCartItemBreakdown } from "../calculateBreakdown";
@@ -19,7 +20,7 @@ const FIXED_PRICE_STATUSES = [
 ];
 
 async function fetchProduct(productId) {
-    return Product.findById(productId).lean();
+    return Product.findById(productId).select('+shippingCosts').lean();
 }
 
 export async function GET(req) {
@@ -33,20 +34,7 @@ export async function GET(req) {
         const addressMissing = !isAddressComplete(address);
 
         // Load active global events once for this checkout breakdown
-        const now = new Date();
-        const globalEvents = await Event.find({
-            isActive: true,
-            isGlobal: true,
-            startDate: { $lte: now },
-            endDate: { $gte: now },
-        }).lean();
-
-        const extraDiscountRules = (globalEvents || []).map(ev => ({
-            percentage: ev.percentage,
-            minimumAmount: ev.minimumPrice,
-            startDate: ev.startDate,
-            endDate: ev.endDate,
-        }));
+        const extraDiscountRules = await checkoutDiscountRules();
 
         // The custom-print base product is read straight from the database.
         // The previous server-to-server fetch of /api/product/custom-print-config
@@ -61,6 +49,7 @@ export async function GET(req) {
         };
 
         const cartBreakdown = [];
+        const shippingLines = [];
         for (const item of user?.cart || []) {
             let product = null;
             let customPrintRequest = null;
@@ -154,12 +143,14 @@ export async function GET(req) {
                 breakdown.orderNote = item.orderNote || "";
                 breakdown.needsDeliveryAddress = lineNeedsDeliveryAddress(breakdown.chosenDeliveryType);
                 cartBreakdown.push(breakdown);
+                shippingLines.push({ product, breakdown, customRequest: isCustomPrintItem });
             } catch (err) {
                 console.error("Error in cart breakdown:", err);
                 return NextResponse.json({ error: "Unable to calculate this cart. Check delivery options and try again." }, { status: 503 });
             }
         }
 
+        applyShopShipping(shippingLines, address);
         const needsDeliveryAddress = cartBreakdown.some(line => line.needsDeliveryAddress);
 
         // The raw (possibly partial) address is returned so the inline form

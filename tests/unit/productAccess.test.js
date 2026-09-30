@@ -20,4 +20,13 @@ describe('catalogue ownership and public data', () => {
     expect(productForViewer({ ...product, hidden: true }, 'owner').sales).toEqual(product.sales)
     expect(productForViewer(product, 'admin', true).paidAssets).toEqual(['private.stl'])
   })
+  it('keeps costs private and does not advertise legacy unconditional free shipping', () => {
+    const item = { ...product, productType: 'shop', listing: 'fit', shippingCosts: { unitCost: 3 },
+      delivery: { deliveryTypes: [{ type: 'standard-shipping', customPrice: 0 }, { type: 'pick-up', price: 0 }] } }
+    const result = productForViewer(item, null)
+    expect(result).not.toHaveProperty('shippingCosts')
+    expect(result.delivery.deliveryTypes.map(type => type.price)).toEqual([6.2, 0])
+    expect(editableProduct(item)).not.toHaveProperty('shippingCosts')
+    expect(productForViewer(item, 'admin', true).shippingCosts.unitCost).toBe(3)
+  })
 })

@@ -1146,7 +1146,7 @@ function Cart() {
                                                             {item.quantity > 1 ? ` x${item.quantity}` : ""}
                                                         </span>
                                                         <span className='font-medium text-textColor text-right'>
-                                                            {`${currency} ${(item.deliveryFee || 0).toFixed(2)}`}
+                                                            {item.freeDeliveryApplied ? 'Free' : `${currency} ${(item.deliveryFee || 0).toFixed(2)}`}
                                                         </span>
                                                     </div>
                                                     {item.warning && (
@@ -1156,15 +1156,13 @@ function Cart() {
                                                         <div className="flex flex-col text-[11px] text-lightColor ml-1 mt-0.5">
                                                             <span><b>Type:</b> {deliveryMeta.displayName} ({deliveryMeta.name})</span>
                                                             {deliveryMeta.description && <span><b>About:</b> {deliveryMeta.description}</span>}
-                                                            {deliveryMeta.hasDefaultPrice && deliveryMeta.basePricing?.basePrice != null && (
-                                                                <span><b>Default Price:</b> SGD {Number(deliveryMeta.basePricing.basePrice).toFixed(2)}</span>
-                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
                                             );
                                         })}
                                         {/* Grand Total */}
+                                        <p className="py-2 text-lightColor">Free standard delivery is available on eligible Singapore orders over S$20 after discounts. Your delivery charge is shown above.</p>
                                         <div className='py-2 flex justify-between font-bold mt-2 w-full whitespace-nowrap'>
                                             <span>Grand Total</span>
                                             <span className='text-right'>{`${currency} ${grandTotal.toFixed(2)}`}</span>

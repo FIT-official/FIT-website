@@ -79,11 +79,12 @@ beforeEach(() => {
 describe('POST /api/product listing', () => {
     it('binds ownership to the signed-in creator and ignores forged sales and moderation fields', async () => {
         const { POST } = await import('@/app/api/product/route')
-        const res = await POST(json('http://t/api/product', 'POST', productBody({ creatorUserId: 'user_victim', sales: [{ price: 500 }], flaggedForModeration: false })))
+        const res = await POST(json('http://t/api/product', 'POST', productBody({ creatorUserId: 'user_victim', sales: [{ price: 500 }], flaggedForModeration: false, shippingCosts: { unitCost: 0, confirmed: true } })))
         expect(res.status).toBe(201)
         expect(state.created.creatorUserId).toBe('user_creator')
         expect(state.created).not.toHaveProperty('sales')
         expect(state.created).not.toHaveProperty('flaggedForModeration')
+        expect(state.created).not.toHaveProperty('shippingCosts')
     })
 
     it('rejects another account model asset before creating a listing', async () => {
@@ -106,6 +107,16 @@ describe('POST /api/product listing', () => {
         const res = await POST(json('http://t/api/product', 'POST', productBody({ productType: 'shop' })))
         expect(res.status).toBe(201)
         expect(state.created.listing).toBe('fit')
+    })
+    it('saves complete admin costs and rejects incomplete confirmation', async () => {
+        state.role = 'admin'
+        const { POST } = await import('@/app/api/product/route')
+        const costs = { unitCost: 3, packingCost: 1, deliveryCost: 6.2, confirmed: true }
+        expect((await POST(json('http://t/api/product', 'POST', productBody({ productType: 'shop', shippingCosts: costs })))).status).toBe(201)
+        expect(state.created.shippingCosts).toEqual(costs)
+        state.created = null
+        expect((await POST(json('http://t/api/product', 'POST', productBody({ productType: 'shop', shippingCosts: { confirmed: true } })))).status).toBe(400)
+        expect(state.created).toBeNull()
     })
 })
 

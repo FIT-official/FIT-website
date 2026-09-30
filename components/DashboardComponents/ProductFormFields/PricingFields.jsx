@@ -67,6 +67,28 @@ export default function PricingFields({ form, setForm, allCurrencies, missingFie
             </div>
 
             <div className="space-y-3 pt-4 border-t border-[var(--dash-line)]">
+                {form.productType === 'shop' && <fieldset className="space-y-3 pb-4">
+                    <legend className={labelCls}>Delivery eligibility</legend>
+                    <p className="text-sm text-lightColor">Private costs in SGD per unit. Use the highest cost across all variants. Leave unknown costs blank; delivery stays chargeable.</p>
+                    {[
+                        ['unitCost', 'Landed product cost', 'Include purchase cost, inbound freight and non-recoverable taxes.'],
+                        ['packingCost', 'Packing and handling cost', 'Include packaging, labour and any other direct order costs.'],
+                        ['deliveryCost', 'Delivery cost', 'Allow enough to send one unit to a Singapore customer.'],
+                    ].map(([key, label, help]) => <div key={key} className="space-y-1">
+                        <label className={labelCls} htmlFor={`shipping-${key}`}>{label}</label>
+                        <input id={`shipping-${key}`} type="number" min="0" max="1000000" step="0.01"
+                            value={form.shippingCosts?.[key] ?? ''} className={inputCls(false)}
+                            onChange={e => setForm(f => ({ ...f, shippingCosts: { ...f.shippingCosts,
+                                [key]: e.target.value === '' ? null : Number(e.target.value), confirmed: false } }))} />
+                        <p className="text-xs text-lightColor">{help}</p>
+                    </div>)}
+                    <label className="flex items-start gap-3 text-sm">
+                        <input type="checkbox" checked={form.shippingCosts?.confirmed === true}
+                            onChange={e => setForm(f => ({ ...f, shippingCosts: { ...f.shippingCosts, confirmed: e.target.checked } }))} />
+                        <span>These costs cover every variant of this product.</span>
+                    </label>
+                    <InfoStrip tone="info">Free standard delivery requires a Singapore basket over S$20 after discounts and at least S$6 remaining after these costs and a payment-fee allowance of 7% + S$0.60. Every item in the basket must qualify for standard delivery and have confirmed costs.</InfoStrip>
+                </fieldset>}
                 <span className={labelCls}>Platform Credits</span>
 
                 <div className="flex flex-col gap-1.5">

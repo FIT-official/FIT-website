@@ -7,6 +7,8 @@ import Product from '@/models/Product';
 import { checkoutIntent, findAttempt, resumeAttempt, createAttempt, adoptLegacyAttempt, cancelAttempt, CheckoutAttemptError } from '@/lib/checkoutAttempt';
 import CustomPrintRequest from '@/models/CustomPrintRequest';
 import { calculateCartItemBreakdown } from '../calculateBreakdown';
+import { checkoutDiscountRules } from '@/lib/checkoutDiscounts';
+import { applyShopShipping } from '@/lib/shopShipping';
 import { customPrintChargeBreakdown } from '@/lib/customPrintDisplayPrice';
 import { buildProductPrintRequestInput, colourNameFromVariants } from '@/lib/customPrint/productRequest';
 import { buildCheckoutItem, checkoutPlain } from '@/lib/checkoutSnapshot';
@@ -69,6 +71,8 @@ export async function POST(req) {
         const requestIds = new Set();
         const sellerChecks = new Map();
         const stockTotals = new Map();
+        const pendingItems = [];
+        const extraDiscountRules = await checkoutDiscountRules();
 
         function reserveStock(key, quantity, available) {
             if (available == null) return true;
@@ -123,7 +127,7 @@ export async function POST(req) {
                 };
             } else {
                 // Use private server data; public product responses omit paid files.
-                product = await Product.findById(item.productId).lean();
+                product = await Product.findById(item.productId).select('+shippingCosts').lean();
                 if (product?.quoteOnly) {
                     return NextResponse.json({ error: 'Please contact us to confirm the price and availability of this item before ordering.' }, { status: 409 });
                 }
@@ -156,7 +160,7 @@ export async function POST(req) {
                     }
                 }
                 try {
-                    breakdown = await calculateCartItemBreakdown({ item, product, address });
+                    breakdown = await calculateCartItemBreakdown({ item, product, address, extraDiscountRules });
                 } catch (error) {
                     if (isDeliveryTypeMismatch(error)) return NextResponse.json({ error: pickDeliveryOptionMessage(product.name) }, { status: 409 });
                     throw error;
@@ -168,7 +172,11 @@ export async function POST(req) {
                     delete productPrintInput.quoteSettings;
                 }
             }
-            const snapshot = buildCheckoutItem({ item, product, breakdown, customRequest, productPrintInput });
+            pendingItems.push({ item, product, breakdown, customRequest, productPrintInput });
+        }
+        applyShopShipping(pendingItems, address);
+        for (const pending of pendingItems) {
+            const snapshot = buildCheckoutItem(pending);
             items.push(snapshot);
             line_items.push({ price_data: { currency: 'sgd', unit_amount: snapshot.unitAmount,
                 product_data: { name: snapshot.productName } }, quantity: snapshot.quantity });

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
     assign: vi.fn(), updateOwner: vi.fn(), auth: vi.fn(), customer: vi.fn(), user: vi.fn(), product: vi.fn(), request: vi.fn(),
-    legacy: [], fulfilled: vi.fn(), attempts: new Map(), retrieve: vi.fn(), createSession: vi.fn(), expire: vi.fn(), saveSnapshot: vi.fn(), isAdmin: vi.fn(), preflight: vi.fn(),
+    legacy: [], events: [], fulfilled: vi.fn(), attempts: new Map(), retrieve: vi.fn(), createSession: vi.fn(), expire: vi.fn(), saveSnapshot: vi.fn(), isAdmin: vi.fn(), preflight: vi.fn(),
 }));
 vi.mock('stripe', () => ({ default: class { checkout = { sessions: { create: m.createSession, retrieve: m.retrieve, expire: m.expire } }; } }));
 vi.mock('@clerk/nextjs/server', () => ({ auth: m.auth, clerkClient: async () => ({ users: { getUser: m.customer } }) }));
@@ -11,7 +11,8 @@ vi.mock('@/lib/checkoutTransactionReadiness', async importOriginal => ({
 }));
 vi.mock('@/lib/checkPrivileges', () => ({ checkAdminPrivileges: m.isAdmin }));
 vi.mock('@/models/User', () => ({ default: { findOne: m.user, findOneAndUpdate: m.assign, updateOne: m.updateOwner } }));
-vi.mock('@/models/Product', () => ({ default: { findById: (...args) => ({ lean: () => m.product(...args) }), findOne: (...args) => ({ lean: () => m.product(...args) }) } }));
+vi.mock('@/models/Product', () => ({ default: { findById: (...args) => ({ select: () => ({ lean: () => m.product(...args) }) }), findOne: (...args) => ({ lean: () => m.product(...args) }) } }));
+vi.mock('@/models/Event', () => ({ default: { find: () => ({ lean: async () => m.events }) } }));
 vi.mock('@/models/CustomPrintRequest', () => ({ default: { findOne: (...args) => ({ lean: () => m.request(...args) }) } }));
 vi.mock('@/models/CheckoutSession', () => ({ default: {
     find: () => ({ limit: async () => m.legacy }), findOne: m.fulfilled,
@@ -26,12 +27,13 @@ vi.mock('@/models/CheckoutAttempt', () => ({ default: {
     updateOne: async ({ _id }, update) => { Object.assign(m.attempts.get(_id), update.$set); },
 } }));
 import { POST, DELETE } from '@/app/api/checkout/session/route';
+import { GET as getBreakdown } from '@/app/api/checkout/breakdown/route';
 import { CheckoutTransactionUnavailableError } from '@/lib/checkoutTransactionReadiness';
 
 let user, product;
 beforeEach(() => {
     vi.clearAllMocks();
-    m.attempts.clear(); m.legacy = []; m.fulfilled.mockResolvedValue(null);
+    m.attempts.clear(); m.legacy = []; m.events = []; m.fulfilled.mockResolvedValue(null);
     vi.stubEnv('STRIPE_SESSION_COMPLETE_SIGNING_SECRET', 'whsec_test');
     m.auth.mockResolvedValue({ userId: 'buyer' });
     m.isAdmin.mockResolvedValue(false);
@@ -55,6 +57,40 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('Checkout session purchase contract', () => {
+    it.each([true, false])('uses the same profit decision in the cart and Stripe (known costs: %s)', async known => {
+        product.productType = 'shop';
+        product.basePrice.presentmentAmount = 30;
+        product.delivery.deliveryTypes = [{ type: 'standard-shipping', price: 0 }];
+        if (known) product.shippingCosts = { unitCost: 2, packingCost: 1, deliveryCost: 6.2, confirmed: true };
+        user.cart[0].quantity = 1;
+        user.cart[0].chosenDeliveryType = 'standard-shipping';
+        user.cart[0].deliveryFee = 0; // Untrusted browser value cannot waive the charge.
+        const cartResponse = await getBreakdown();
+        expect(cartResponse.status).toBe(200);
+        const { cartBreakdown } = await cartResponse.json();
+        expect(cartBreakdown[0].deliveryFee).toBe(known ? 0 : 6.2);
+        expect(JSON.stringify(cartBreakdown)).not.toContain('unitCost');
+        const response = await POST();
+        expect(response.status).toBe(200);
+        const checkout = m.saveSnapshot.mock.calls[0][0];
+        expect(checkout.items[0].deliveryAmount).toBe(known ? 0 : 620);
+        expect(checkout.totalAmount).toBe(Math.round(cartBreakdown[0].total * 100));
+        const stripeTotal = m.createSession.mock.calls[0][0].line_items.reduce((sum, item) => sum + item.price_data.unit_amount * item.quantity, 0);
+        expect(stripeTotal).toBe(checkout.totalAmount);
+    });
+    it('applies active global discounts before checking the threshold at both endpoints', async () => {
+        product.productType = 'shop';
+        product.basePrice.presentmentAmount = 25;
+        product.shippingCosts = { unitCost: 1, packingCost: 0, deliveryCost: 2, confirmed: true };
+        product.delivery.deliveryTypes = [{ type: 'standard-shipping', price: 0 }];
+        user.cart[0].quantity = 1;
+        user.cart[0].chosenDeliveryType = 'standard-shipping';
+        m.events = [{ percentage: 20 }];
+        const { cartBreakdown } = await (await getBreakdown()).json();
+        expect(cartBreakdown[0]).toMatchObject({ price: 20, deliveryFee: 6.2, freeDeliveryApplied: false });
+        expect((await POST()).status).toBe(200);
+        expect(m.saveSnapshot.mock.calls[0][0].totalAmount).toBe(2620);
+    });
     it('does not start a payment for an item that now requires a quote', async () => {
         product.quoteOnly = true;
         const response = await POST();

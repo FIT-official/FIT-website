@@ -3,7 +3,8 @@ const m = vi.hoisted(() => ({ auth: vi.fn(), find: vi.fn(), upsert: vi.fn(), pro
 vi.mock('@clerk/nextjs/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/db', () => ({ connectToDatabase: m.db }));
 vi.mock('@/models/User', () => ({ default: { findOne: m.find, findOneAndUpdate: m.upsert } }));
-vi.mock('@/models/Product', () => ({ default: { findById: () => ({ lean: m.product }) } }));
+vi.mock('@/models/Product', () => ({ default: { findById: () => ({ lean: m.product, select: () => ({ lean: m.product }) }) } }));
+vi.mock('@/models/Event', () => ({ default: { find: () => ({ lean: async () => [] }) } }));
 vi.mock('stripe', () => ({ default: class { checkout = { sessions: { create: m.create, retrieve: m.retrieve } }; } }));
 vi.mock('@/lib/checkPrivileges', () => ({ checkAdminPrivileges: async () => false }));
 vi.mock('@/lib/checkoutTransactionReadiness', () => ({ verifyCheckoutTransactions: async () => {}, CheckoutTransactionUnavailableError: class extends Error {} }));
