@@ -1156,9 +1156,6 @@ function Cart() {
                                                         <div className="flex flex-col text-[11px] text-lightColor ml-1 mt-0.5">
                                                             <span><b>Type:</b> {deliveryMeta.displayName} ({deliveryMeta.name})</span>
                                                             {deliveryMeta.description && <span><b>About:</b> {deliveryMeta.description}</span>}
-                                                            {deliveryMeta.hasDefaultPrice && deliveryMeta.basePricing?.basePrice != null && (
-                                                                <span><b>Default Price:</b> SGD {Number(deliveryMeta.basePricing.basePrice).toFixed(2)}</span>
-                                                            )}
                                                         </div>
                                                     )}
                                                 </div>

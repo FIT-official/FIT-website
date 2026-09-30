@@ -413,6 +413,9 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
                                                                     ? 'You can override the automatically calculated price (tier-based)'
                                                                     : 'Set your delivery price for this option'}
                                                         </p>
+                                                        {form.productType === 'shop' && deliveryType.name === 'standard-shipping' && (
+                                                            <p className="text-[13px] text-[var(--dash-ink-soft)] leading-relaxed">A zero rate uses S$6.20 unless the order qualifies for free delivery. Confirm product costs in Pricing to enable the eligibility check.</p>
+                                                        )}
                                                     </div>
                                                 )}
 
