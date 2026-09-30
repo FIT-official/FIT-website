@@ -1,0 +1,13 @@
+import styles from './ProgrammeEvidence.module.css'
+export default function PenProgramme({ school = false }) {
+    return <section id="pen-programmes" className={styles.section} aria-labelledby="pen-programme-title">
+        <div className={styles.penIntro}><div><p className={styles.eyebrow}>3D PEN / MAKE BY HAND</p><h2 id="pen-programme-title">Make ideas<br /><em>take shape.</em></h2><p className={styles.intro}>Turn a flat template into a small three-dimensional model. A 3D pen programme gives participants a direct way to explore shapes, connections and structure, with guidance through each step.</p></div><div className={styles.penDiagram} aria-label="Example making sequence: trace a panel, join panels, test a model"><div><span className={styles.flatShape} aria-hidden="true" /><p>Trace a panel</p></div><span aria-hidden="true">→</span><div><span className={styles.builtShape} aria-hidden="true" /><p>Join &amp; test</p></div></div></div>
+        <div className={styles.cards}>
+            <article className={styles.outcome}><span className={styles.tag}>SCHOOLS</span><h3>From shapes to structures</h3><p>Start with guided lines and simple templates, then join flat pieces into a small model. Discuss which connections hold and what needs another support.</p><div className={styles.evidence}><span>PROGRAMME GOAL</span>Explain how a two-dimensional plan becomes a three-dimensional object.</div></article>
+            <article className={styles.outcome}><span className={styles.tag}>COMPANY TEAMS</span><h3>Build something together</h3><p>Share a small making brief, divide the pieces and agree how they will connect. A team model gives everyone something concrete to contribute and review.</p><div className={styles.evidence}><span>PROGRAMME GOAL</span>Communicate an idea, coordinate a build and test the joined result.</div></article>
+            <article className={styles.outcome}><span className={styles.tag}>COMMUNITY GROUPS</span><h3>A shared making project</h3><p>Plan a themed model or collaborative display. We discuss the age range, confidence with tools and support needed before choosing the activity.</p><div className={styles.evidence}><span>PROGRAMME GOAL</span>Contribute a piece, connect it to the shared work and explain the design.</div></article>
+        </div>
+        <p className={styles.intro}>Project size, pen settings, materials and supervision are agreed for the group. These are example programme formats; included equipment, finished pieces and session length are confirmed in the quotation.</p>
+        <a href="#enquire" className={styles.penLink}>{school ? 'Plan a 3D pen session for your school' : 'Plan a 3D pen programme for your group'} ↗</a>
+    </section>
+}

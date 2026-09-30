@@ -1,0 +1,13 @@
+import Image from 'next/image'
+import Link from 'next/link'
+import styles from './ProgrammeEvidence.module.css'
+export default function SchoolCollaborations() {
+    return <section id="school-collaborations" className={styles.section} aria-labelledby="school-collaborations-title">
+        <p className={styles.eyebrow}>DIFFERENT SCHOOLS. DIFFERENT BRIEFS.</p><h2 id="school-collaborations-title">Room for every<br /><em>school’s ideas.</em></h2><p className={styles.intro}>Our school collaborations include Bartley Secondary School, Boon Lay Garden Primary School and Nanyang Girls’ High School. The age group, project and teaching approach shape each programme.</p>
+        <div className={styles.cards}>
+            <article className={styles.bartley}><span className={styles.tag}>SECONDARY / PROJECT BRIEF</span><h3>Bartley Secondary School</h3><h4>A school story, made interactive.</h4><p>The Bartley miniature escape-room plan turns familiar school spaces into connected puzzle stations. Its brief brings together model making, 3D printed parts and electronics.</p><div className={styles.flow} aria-label="Project connections"><span>School story</span><span aria-hidden="true">↓</span><span>Puzzle logic</span><span aria-hidden="true">↓</span><span>Physical interaction</span></div><p className={styles.note}>Project planning example: connecting narrative, puzzle logic and a physical response.</p></article>
+            <article className={styles.boon}><span className={styles.tag}>PRIMARY / SCHOOL COLLABORATION</span><h3>Boon Lay Garden Primary School</h3><h4>Another classroom. Its own starting point.</h4><p>Boon Lay Garden Primary is part of our school programme work. For primary groups, we discuss the students’ experience, the level of guidance and a manageable build before choosing the activity.</p><div className={styles.primaryGraphic} aria-hidden="true"><span>Explore</span><span>Make</span><span>Explain</span></div><a href="#enquire">Discuss a primary programme ↗</a></article>
+            <article className={styles.nygh}><span className={styles.tag}>SECONDARY / PROJECT EXAMPLE</span><h3>Nanyang Girls’ High School</h3><div className={styles.image}><Image src="/images/collaborations/nygh-room-models.jpg" width={1080} height={1440} sizes="(max-width:767px) 90vw, 30vw" alt="White panel room models under construction at NYGH; no students pictured" /></div><h4>Make the plan fit the parts.</h4><p>Students developed room models, printed mechanisms and interactive elements. Measuring panels and checking the fit connect the design on screen to a physical build.</p><Link href="/blog/school-stem-collaborations">Explore the project ↗</Link></article>
+        </div>
+    </section>
+}

@@ -1,29 +1,35 @@
 import ProgrammeLayout, { programmeMetadata, Photo, SectionHeading, TextLink, WorkshopList, Questions, ReadingList, styles } from '@/components/Programmes/ProgrammeLayout'
 import ProjectGallery from '@/components/Programmes/ProjectGallery'
-import { companyGalleryPhotos, teachingPhotos } from '@/components/Programmes/workshopPhotos'
+import { escapeRoomPhotos } from '@/components/Programmes/workshopPhotos'
+import LearningOutcomes from '@/components/Programmes/LearningOutcomes'
+import PenProgramme from '@/components/Programmes/PenProgramme'
 
-const description = 'Plan a company 3D printing, CAD or introductory robotics workshop in Singapore. Learn through a practical team project, or request a prototype print.'
+const description = '3D pen, 3D printing, CAD and electronics programmes for company teams and community groups in Singapore. Plan a practical making project with FIT.'
 const hero = {
-    ...teachingPhotos[2],
-    caption: 'FIT teaching at Nanyang Girls’ High School',
+    src: '/images/collaborations/escape-room-electronics.jpg', width: 1024, height: 768,
+    alt: 'Arduino controller, servo and breadboard on the FIT project workbench',
+    caption: 'A FIT project workbench: the controller, circuit and mechanism behind an interactive build.',
 }
 export const metadata = programmeMetadata({ title: 'Company 3D Printing Workshops Singapore | Fix It Today', description, path: '/company-workshops', image: hero.src, imageAlt: hero.alt })
 
 export default function CompanyWorkshops() {
     return <ProgrammeLayout
         title="Company workshops" titleLead="Company" titleAccent="workshops"
-        intro="Our company workshops in Singapore cover 3D design, printing and electronics. Learn to model a part, prepare a print or build a working circuit, with sessions for beginners and training on the printer in your workplace."
+        intro="Our workshops for company teams and community groups in Singapore cover 3D pen making, 3D design, printing and electronics. Make a shared model, prepare a print or build a working circuit, with the project and guidance matched to your group."
         hero={hero}
         path="/company-workshops" serviceType="Company 3D printing, CAD and introductory robotics workshops"
-        enquirySubject="Company workshop enquiry"
-        enquiryDetails={'Company:\nNumber of participants:\nExperience with CAD, printing or coding:\nLearning goal or project idea:\nPreferred dates and session length:\nVenue and available equipment:\nBudget:\n'}
+        enquirySubject="Team or community programme enquiry"
+        enquiryDetails={'Company or community group:\nAge range and number of participants:\nExperience with making, CAD, printing or coding:\nLearning goal or project idea:\nPreferred dates and session length:\nVenue and available equipment:\nBudget:\n'}
     >
+        <LearningOutcomes company />
+        <PenProgramme />
         <section id="projects" className={`${styles.section} ${styles.programmeGrid}`}>
             <div className={styles.programmeAside}>
                 <SectionHeading title="At the workbench">Choose a topic, or bring a part you would like to develop. We’ll agree on an exercise that fits the group and the time available.</SectionHeading>
-                <Photo {...teachingPhotos[1]} caption="Small-group guidance during our NYGH school programme." />
+                <Photo src="/images/collaborations/escape-room-electronics.jpg" width={1024} height={768} alt="Controller, servo and breadboards from a FIT miniature escape-room project" caption="The hardware behind a FIT interactive project." />
             </div>
             <WorkshopList items={[
+                { title: '3D pen team & community projects', description: 'Make a small model or collaborative display from guided templates. Participants plan the pieces, build by hand and work out how to join them.', concepts: 'A shared making brief for teams, schools or community groups.', href: '#pen-programmes', link: 'Explore 3D pen programmes' },
                 { title: 'Your first 3D print', description: 'Design a small desk accessory or personalised part. Prepare the model in a slicer and see how a printer turns it into layers.', concepts: 'Explore orientation, supports and material choice.' },
                 { title: 'CAD & prototyping', description: 'Use a bracket, enclosure or organiser to practise dimensions and fit. Bring an idea from your team’s work; we’ll check its suitability before the session.', concepts: 'Learn how clearance and tolerances affect a working prototype.', href: '/blog/fusion-360-cup-holder-workshop-guide', link: 'A practical CAD exercise' },
                 { title: 'Electronics & robotics', description: 'Build a small sensor project or motorised mechanism. Read an input, make a decision in code and control an output.', concepts: 'Equipment and coding level are matched to the group.' },
@@ -51,8 +57,8 @@ export default function CompanyWorkshops() {
                 <div><h3>The workshop</h3><p>Participants work through a design or circuit with guidance, then test the result and discuss any changes.</p></div>
             </div>
         </section>
-        <ProjectGallery photos={companyGalleryPhotos} title="Our workshops"
-            intro="School programmes at NYGH and our miniature escape room project." />
+        <ProjectGallery photos={escapeRoomPhotos.filter(photo => /sensor-wiring|button-lights|electronics/.test(photo.src))} title="The work behind the workshop"
+            intro="Circuits and controls from the FIT miniature escape-room project: practical examples of connecting sensing, code and movement." />
         <Questions items={[
             { question: 'Can beginners take part?', answer: 'Yes. A guided design or circuit is a useful starting point. For mixed experience levels, we can discuss a common task with optional extensions.' },
             { question: 'Can you run the workshop at our office?', answer: 'Share the location, room layout and available equipment. We’ll confirm whether the proposed project can be delivered there and what needs to be arranged.' },

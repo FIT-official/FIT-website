@@ -14,7 +14,7 @@ vi.mock('next/image', () => ({ default: ({ src, alt }) =>
 describe('public programme pages', () => {
     it.each([
         ['/school-programmes', SchoolProgrammes, schoolMetadata, 'School programme enquiry'],
-        ['/company-workshops', CompanyWorkshops, companyMetadata, 'Company workshop enquiry'],
+        ['/company-workshops', CompanyWorkshops, companyMetadata, 'Team or community programme enquiry'],
     ])('renders %s with crawlable content, a working enquiry and consistent search metadata', (path, Page, metadata, subject) => {
         const html = renderToStaticMarkup(<Page />)
         const document = new DOMParser().parseFromString(html, 'text/html')
