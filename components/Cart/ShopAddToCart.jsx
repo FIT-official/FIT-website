@@ -4,6 +4,7 @@ import { ConnectionNotice, useStoreConnection } from './StoreFeedback';
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { getDefaultVariantSelections } from '@/lib/seo/product';
+import { productVariantLabel } from '@/lib/productVariantLabel';
 
 export default function ShopAddToCart({ product }) {
     const [variants, setVariants] = useState(() => getDefaultVariantSelections(product));
@@ -27,8 +28,8 @@ export default function ShopAddToCart({ product }) {
     }
     return <div className="flex flex-col gap-2 mt-3 w-full" onClick={e => e.stopPropagation()}>
         <ConnectionNotice offline={offline} />
-        {(product.variantTypes || []).map(v => <label key={v.name} className="text-sm">{v.name}
-            <select aria-label={`${product.name} ${v.name}`} value={variants[v.name] || ''} disabled={busy}
+        {(product.variantTypes || []).map(v => <label key={v.name} className="text-sm">{productVariantLabel(product, v)}
+            <select aria-label={`${product.name} ${productVariantLabel(product, v)}`} value={variants[v.name] || ''} disabled={busy}
                 className="border rounded p-2 w-full" onChange={e => { setVariants({ ...variants, [v.name]: e.target.value }); setAdded(false); }}>
                 {v.options.map(o => <option key={o.name} value={o.name}>{o.name}{o.additionalFee > 0 ? ` (+S$${o.additionalFee.toFixed(2)})` : ''}</option>)}
             </select>
