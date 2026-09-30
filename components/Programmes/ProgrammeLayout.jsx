@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { absoluteUrl } from '@/lib/seo/site'
 import { buildPageMetadata } from '@/lib/seo/metadata'
+import { photoImageStyle } from './finishedProjectPhotos'
 import styles from './ProgrammeLayout.module.css'
 
 export { styles }
@@ -10,11 +11,11 @@ export function programmeMetadata({ title, description, path, image, imageAlt })
     return buildPageMetadata({ title, description, path, image, imageAlt })
 }
 
-export function Photo({ src, alt, caption, width = 1080, height = 1440, priority = false, className = '', sizes = '(max-width: 767px) 100vw, (max-width: 1200px) 45vw, 600px' }) {
+export function Photo({ src, alt, caption, width = 1080, height = 1440, priority = false, className = '', displayZoom, displayFocus, displayPosition, displayRatio, sizes = '(max-width: 767px) 100vw, (max-width: 1200px) 45vw, 600px' }) {
     return <figure className={`${styles.photo} ${className}`}>
-        <div className={styles.photoFrame} style={{ aspectRatio: `${width} / ${height}` }}>
+        <div className={styles.photoFrame} style={{ aspectRatio: displayRatio || `${width} / ${height}` }}>
             <Image src={src} width={width} height={height} alt={alt} priority={priority}
-                sizes={sizes} />
+                sizes={sizes} style={photoImageStyle({ displayZoom, displayFocus, displayPosition })} />
         </div>
         <figcaption>{caption}</figcaption>
     </figure>
@@ -53,7 +54,7 @@ export function ReadingList({ items }) {
     return <section className={`${styles.section} ${styles.reading}`}>
         <SectionHeading title="Further reading" />
         <div className={styles.readingList}>{items.map(({ href, topic, title, photo }) => <Link key={href} href={href} className={styles.readingLink}>
-            {photo && <span className={styles.readingPhoto}><Image src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} sizes="(max-width: 1023px) 43vw, 21vw" /></span>}
+            {photo && <span className={styles.readingPhoto}><Image src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} sizes="(max-width: 1023px) 43vw, 21vw" style={photoImageStyle(photo)} /></span>}
             <span className={styles.eyebrow}>{topic}</span><span className={styles.readingTitle}>{title}</span>
             <span aria-hidden="true" className={styles.readingArrow}>↗</span>
         </Link>)}</div>

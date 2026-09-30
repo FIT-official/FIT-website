@@ -4,16 +4,13 @@ import { schoolWorkshopPhotos, escapeRoomPhotos } from '@/components/Programmes/
 import LearningOutcomes from '@/components/Programmes/LearningOutcomes'
 import SchoolCollaborations from '@/components/Programmes/SchoolCollaborations'
 import PenProgramme from '@/components/Programmes/PenProgramme'
-import { threeDPenPhotos, miniatureEscapeRoomPhoto } from '@/components/Programmes/finishedProjectPhotos'
+import { threeDPenPhotos, miniatureEscapeRoomPhoto, nyghMiniatureRoomPhoto } from '@/components/Programmes/finishedProjectPhotos'
 
 const description = '3D pen, 3D printing, Arduino electronics and robotics workshops for schools in Singapore. Explore practical projects and plan a programme for your students.'
-const hero = miniatureEscapeRoomPhoto
+const hero = { ...threeDPenPhotos[0], displayZoom: 2, displayFocus: '82% 62%' }
 // Existing approved project photographs. School-specific photos keep their
 // actual attribution; these do not represent Bartley or Boon Lay sessions.
-const mechanismPhoto = schoolWorkshopPhotos.find(photo => photo.src.endsWith('/nygh-printed-mechanism.jpg'))
-const roomPhoto = schoolWorkshopPhotos.find(photo => photo.src.endsWith('/nygh-room-models.jpg'))
-const sensorPhoto = escapeRoomPhotos.find(photo => photo.src.endsWith('/escape-room-sensor-wiring.jpg'))
-const circuitPhoto = escapeRoomPhotos.find(photo => photo.src.endsWith('/escape-room-electronics.jpg'))
+const buttonPhoto = escapeRoomPhotos.find(photo => photo.src.endsWith('/escape-room-button-lights.jpg'))
 export const metadata = programmeMetadata({ title: 'School STEM & Robotics Workshops Singapore | Fix It Today', description, path: '/school-programmes', image: hero.src, imageAlt: hero.alt })
 
 export default function SchoolProgrammes() {
@@ -38,16 +35,14 @@ export default function SchoolProgrammes() {
         <section id="projects" className={`${styles.section} ${styles.programmeGrid}`}>
             <div className={styles.programmeAside}>
                 <SectionHeading title="What we teach">The starting point depends on the students’ age, experience and the equipment available.</SectionHeading>
-                <Photo src="/images/collaborations/nygh-printed-mechanism.jpg" width={1080} height={1440}
-                    alt="Blue 3D printed gear and mechanism components from the NYGH project"
-                    caption="Printed mechanism parts from the NYGH project." />
+                <Photo {...threeDPenPhotos[1]} />
             </div>
             <WorkshopList items={[
                 { title: '3D pen making', description: 'Trace a few shapes and join them into a model. Start with a guided first piece, then add details or make a shared class display.', concepts: 'See how flat pieces connect and what helps a model stand up.', href: '#pen-programmes', link: 'Explore 3D pen programmes', photo: threeDPenPhotos[1] },
-                { title: '3D design & printing', description: 'Model a keychain, phone stand or small box in Tinkercad, then compare the design with a printed part.', concepts: 'Explore dimensions, clearance, layers and print orientation.', href: '/blog/tinkercad-keychain-tutorial', link: 'Try a first modelling project', photo: { ...mechanismPhoto, caption: 'Printed mechanism parts from the NYGH project.' } },
-                { title: 'Electronics', description: 'Connect a sensor or button to a light or display. Build a temperature monitor, reaction game or interactive exhibit.', concepts: 'Press a button or read a sensor, then see the circuit respond.', href: '/blog/arduino-nano-dht11-workshop-guide', link: 'An Arduino sensor project', photo: { ...circuitPhoto, caption: 'Circuits on the FIT project workbench.' } },
-                { title: 'Robotics', description: 'Use a sensor and motor to make a device respond to its surroundings. Test when it should move, stop or signal an obstacle.', concepts: 'Connect sensing, thresholds and movement through repeated tests.', photo: { ...sensorPhoto, caption: 'Connecting a sensor and servo in the FIT build.' } },
-                { title: 'Project mentoring', description: 'Develop a prototype over several sessions. Projects can combine a printed enclosure, electronics and a presentation of the work.', concepts: 'Keep the first attempt, make a change and compare the results.', photo: { ...roomPhoto, caption: 'Room models taking shape in the NYGH project.' } },
+                { title: '3D design & printing', description: 'Model a keychain, phone stand or small box in Tinkercad, then compare the design with a printed part.', concepts: 'Explore dimensions, clearance, layers and print orientation.', href: '/blog/tinkercad-keychain-tutorial', link: 'Try a first modelling project', photo: nyghMiniatureRoomPhoto },
+                { title: 'Electronics', description: 'Connect a sensor or button to a light or display. Build a temperature monitor, reaction game or interactive exhibit.', concepts: 'Press a button or read a sensor, then see the circuit respond.', href: '/blog/arduino-nano-dht11-workshop-guide', link: 'An Arduino sensor project', photo: buttonPhoto },
+                { title: 'Robotics', description: 'Use a sensor and motor to make a device respond to its surroundings. Test when it should move, stop or signal an obstacle.', concepts: 'Connect sensing, thresholds and movement through repeated tests.' },
+                { title: 'Project mentoring', description: 'Develop a prototype over several sessions. Projects can combine a printed enclosure, electronics and a presentation of the work.', concepts: 'Keep the first attempt, make a change and compare the results.', photo: nyghMiniatureRoomPhoto },
             ]} />
         </section>
 
@@ -68,7 +63,7 @@ export default function SchoolProgrammes() {
                 <div><h3>Facilitator support</h3><p>Training and project guidance for the people running a programme, exhibition or competition activity.</p></div>
             </div>
         </section>
-        <ProjectGallery photos={[miniatureEscapeRoomPhoto, ...threeDPenPhotos, ...schoolWorkshopPhotos.filter(photo => /room-models|printed-mechanism/.test(photo.src)), ...escapeRoomPhotos.filter(photo => /sensor-wiring|button-lights|electronics/.test(photo.src))]} title="Models, mechanisms and circuits"
+        <ProjectGallery photos={[...threeDPenPhotos, ...schoolWorkshopPhotos.filter(photo => /room-models|printed-mechanism/.test(photo.src)), miniatureEscapeRoomPhoto, ...escapeRoomPhotos.filter(photo => /button-lights|sensor-wiring|electronics/.test(photo.src))]} title="Things we have made"
             intro="A FIT miniature escape-room build, 3D pen models from the EEEAA 30th Anniversary workshop, and room models and mechanisms from NYGH. Each photograph names its project." />
         <Questions items={[
             { question: 'Do students need prior experience?', answer: 'Beginner sessions can start with guided modelling or simple circuits. Tell us the students’ level and any coding or design experience so we can choose a suitable task.' },
@@ -77,10 +72,10 @@ export default function SchoolProgrammes() {
             { question: 'How is the programme priced?', answer: 'The quote depends on the group size, number of sessions, materials, equipment and project support. Share your budget early so we can plan a suitable scope.' },
         ]} />
         <ReadingList items={[
-            { href: '/blog/3d-printing', topic: 'Start here', title: 'How 3D printing works', photo: mechanismPhoto },
-            { href: '/blog/tinkercad-toolbox-guide', topic: 'Design', title: 'Your first Tinkercad tools', photo: roomPhoto },
-            { href: '/blog/3d-printing-theory-and-material-properties', topic: 'Materials', title: 'From plastic to a useful part', photo: mechanismPhoto },
-            { href: '/blog/arduino-nano-io-expansion-shield-wiring', topic: 'Electronics', title: 'Connect an Arduino project', photo: sensorPhoto },
+            { href: '/blog/3d-printing', topic: 'Start here', title: 'How 3D printing works', photo: nyghMiniatureRoomPhoto },
+            { href: '/blog/tinkercad-toolbox-guide', topic: 'Design', title: 'Your first Tinkercad tools', photo: nyghMiniatureRoomPhoto },
+            { href: '/blog/3d-printing-theory-and-material-properties', topic: 'Materials', title: 'From plastic to a useful part', photo: nyghMiniatureRoomPhoto },
+            { href: '/blog/arduino-nano-io-expansion-shield-wiring', topic: 'Electronics', title: 'Connect an Arduino project', photo: buttonPhoto },
         ]} />
     </ProgrammeLayout>
 }

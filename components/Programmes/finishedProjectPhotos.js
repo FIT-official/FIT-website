@@ -28,3 +28,25 @@ export const miniatureEscapeRoomPhoto = {
     album: 'FIT miniature escape-room build',
     preserveFrame: true,
 }
+
+export const nyghMiniatureRoomPhoto = {
+    src: '/images/programmes/nygh-miniature-room-finished.jpg',
+    width: 1280,
+    height: 720,
+    alt: 'A finished miniature room with a blue door and clock from the NYGH project',
+    caption: 'A finished miniature room from the NYGH project.',
+    album: 'School workshops / NYGH',
+    displayZoom: 1.15,
+    displayFocus: '0% 0%',
+    displayPosition: 'left center',
+    displayRatio: '4 / 3',
+}
+
+// Presentation crops keep the source photograph unchanged.
+export function photoImageStyle({ displayZoom = 1, displayFocus = '50% 50%', displayPosition } = {}) {
+    if (displayZoom <= 1 && !displayPosition) return undefined
+    return {
+        ...(displayZoom > 1 ? { transform: `scale(${displayZoom})`, transformOrigin: displayFocus } : {}),
+        ...(displayPosition ? { height: '100%', objectFit: 'cover', objectPosition: displayPosition } : {}),
+    }
+}
