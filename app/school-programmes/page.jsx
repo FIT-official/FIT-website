@@ -11,6 +11,12 @@ const hero = {
     alt: 'Arduino controller, servo and breadboard on the FIT project workbench',
     caption: 'Inside a working idea: controller, circuit and mechanism on the FIT project workbench.',
 }
+// Existing approved project photographs. School-specific photos keep their
+// actual attribution; these do not represent Bartley or Boon Lay sessions.
+const mechanismPhoto = schoolWorkshopPhotos.find(photo => photo.src.endsWith('/nygh-printed-mechanism.jpg'))
+const roomPhoto = schoolWorkshopPhotos.find(photo => photo.src.endsWith('/nygh-room-models.jpg'))
+const sensorPhoto = escapeRoomPhotos.find(photo => photo.src.endsWith('/escape-room-sensor-wiring.jpg'))
+const circuitPhoto = escapeRoomPhotos.find(photo => photo.src.endsWith('/escape-room-electronics.jpg'))
 export const metadata = programmeMetadata({ title: 'School STEM & Robotics Workshops Singapore | Fix It Today', description, path: '/school-programmes', image: hero.src, imageAlt: hero.alt })
 
 export default function SchoolProgrammes() {
@@ -41,10 +47,10 @@ export default function SchoolProgrammes() {
             </div>
             <WorkshopList items={[
                 { title: '3D pen making', description: 'Trace a template, join the pieces and test a small model. Plan a guided first build or a shared class project.', concepts: 'Connect flat shapes, spatial thinking and structural support.', href: '#pen-programmes', link: 'Explore 3D pen programmes' },
-                { title: '3D design & printing', description: 'Model a keychain, phone stand or small box in Tinkercad, then compare the design with a printed part.', concepts: 'Explore dimensions, clearance, layers and print orientation.', href: '/blog/tinkercad-keychain-tutorial', link: 'Try a first modelling project' },
-                { title: 'Electronics', description: 'Connect a sensor or button to a light or display. Build a temperature monitor, reaction game or interactive exhibit.', concepts: 'Learn how code uses an input to control an output.', href: '/blog/arduino-nano-dht11-workshop-guide', link: 'An Arduino sensor project' },
-                { title: 'Robotics', description: 'Use a sensor and motor to make a device respond to its surroundings. Test when it should move, stop or signal an obstacle.', concepts: 'Connect sensing, thresholds and movement through repeated tests.' },
-                { title: 'Project mentoring', description: 'Develop a prototype over several sessions. Projects can combine a printed enclosure, electronics and a presentation of the work.', concepts: 'Use observations and measurements to decide what to change.' },
+                { title: '3D design & printing', description: 'Model a keychain, phone stand or small box in Tinkercad, then compare the design with a printed part.', concepts: 'Explore dimensions, clearance, layers and print orientation.', href: '/blog/tinkercad-keychain-tutorial', link: 'Try a first modelling project', photo: { ...mechanismPhoto, caption: 'Printed mechanism parts from the NYGH project.' } },
+                { title: 'Electronics', description: 'Connect a sensor or button to a light or display. Build a temperature monitor, reaction game or interactive exhibit.', concepts: 'Learn how code uses an input to control an output.', href: '/blog/arduino-nano-dht11-workshop-guide', link: 'An Arduino sensor project', photo: { ...circuitPhoto, caption: 'Circuits on the FIT project workbench.' } },
+                { title: 'Robotics', description: 'Use a sensor and motor to make a device respond to its surroundings. Test when it should move, stop or signal an obstacle.', concepts: 'Connect sensing, thresholds and movement through repeated tests.', photo: { ...sensorPhoto, caption: 'Connecting a sensor and servo in the FIT build.' } },
+                { title: 'Project mentoring', description: 'Develop a prototype over several sessions. Projects can combine a printed enclosure, electronics and a presentation of the work.', concepts: 'Use observations and measurements to decide what to change.', photo: { ...roomPhoto, caption: 'Room models taking shape in the NYGH project.' } },
             ]} />
         </section>
 
@@ -74,10 +80,10 @@ export default function SchoolProgrammes() {
             { question: 'How is the programme priced?', answer: 'The quote depends on the group size, number of sessions, materials, equipment and project support. Share your budget early so we can plan a suitable scope.' },
         ]} />
         <ReadingList items={[
-            { href: '/blog/3d-printing', topic: 'Start here', title: 'How 3D printing works' },
-            { href: '/blog/tinkercad-toolbox-guide', topic: 'Design', title: 'Your first Tinkercad tools' },
-            { href: '/blog/3d-printing-theory-and-material-properties', topic: 'Materials', title: 'From plastic to a useful part' },
-            { href: '/blog/arduino-nano-io-expansion-shield-wiring', topic: 'Electronics', title: 'Connect an Arduino project' },
+            { href: '/blog/3d-printing', topic: 'Start here', title: 'How 3D printing works', photo: mechanismPhoto },
+            { href: '/blog/tinkercad-toolbox-guide', topic: 'Design', title: 'Your first Tinkercad tools', photo: roomPhoto },
+            { href: '/blog/3d-printing-theory-and-material-properties', topic: 'Materials', title: 'From plastic to a useful part', photo: mechanismPhoto },
+            { href: '/blog/arduino-nano-io-expansion-shield-wiring', topic: 'Electronics', title: 'Connect an Arduino project', photo: sensorPhoto },
         ]} />
     </ProgrammeLayout>
 }

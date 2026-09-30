@@ -59,6 +59,11 @@
 .workshopRow p { margin-top: 12px; color: var(--muted); font-size: 13px; line-height: 1.85; }
 .workshopRow p.concepts { font-size: 12px; }
 .workshopRow .textLink { margin-top: 13px; font-size: 11px; }
+.workshopWithPhoto { display: grid; grid-template-columns: minmax(0, 1fr) 160px; gap: 24px; align-items: start; }
+.workshopPhoto { margin: 0; }
+.workshopPhoto .photoFrame { aspect-ratio: 4 / 3; }
+.workshopPhoto img { height: 100%; object-fit: contain; }
+.workshopPhoto figcaption { padding-top: 9px; font-size: 10px; }
 .challenge { display: grid; grid-template-columns: .9fr 1.1fr; gap: 12%; }
 .challenge .description { max-width: 370px; }
 .challengeSteps { display: grid; gap: 24px; }
@@ -82,6 +87,8 @@
 .readingTitle { margin: 15px 0 24px; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; line-height: 1.3; letter-spacing: -.025em; }
 .readingArrow { margin-top: auto; color: var(--accent); }
 .readingLink:hover .readingTitle { text-decoration: underline; text-underline-offset: 4px; }
+.readingPhoto { display: block; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; background: #e7e4dc; margin-bottom: 18px; }
+.readingPhoto img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .enquiry { display: grid; grid-template-columns: 1.1fr .9fr; gap: 12%; margin: 0 5%; padding: 80px 0 100px; border-top: 1px solid var(--ink); scroll-margin-top: 90px; }
 .enquiry h2 { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(58px, 7vw, 100px); line-height: .95; color: var(--ink); font-weight: 400; letter-spacing: -.06em; }
 .enquiry h2 em { font-weight: 400; }
@@ -129,6 +136,7 @@
     .programmeAside img { max-height: 350px; }
     .workshopRow h3 { font-size: 20px; }
     .workshopRow { padding: 23px 0; }
+    .workshopWithPhoto { grid-template-columns: minmax(0, 1fr) 120px; gap: 18px; }
     .formats { grid-template-columns: 1fr; gap: 24px; margin-top: 28px; }
     .formats > div { padding-top: 20px; }
     .readingList { gap: 28px 20px; margin-top: 30px; }

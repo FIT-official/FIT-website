@@ -32,10 +32,11 @@ export function TextLink({ href, children }) {
 }
 
 export function WorkshopList({ items }) {
-    return <div className={styles.workshopList}>{items.map(({ title, description, concepts, href, link }) => <div className={styles.workshopRow} key={title}>
+    return <div className={styles.workshopList}>{items.map(({ title, description, concepts, href, link, photo }) => <div className={`${styles.workshopRow} ${photo ? styles.workshopWithPhoto : ''}`} key={title}>
         <div><h3>{title}</h3><p>{description}</p><p className={styles.concepts}>{concepts}</p>
             {href && <TextLink href={href}>{link}</TextLink>}
         </div>
+        {photo && <Photo {...photo} className={styles.workshopPhoto} sizes="(max-width: 767px) 120px, 160px" />}
     </div>)}</div>
 }
 
@@ -51,7 +52,8 @@ export function Questions({ items }) {
 export function ReadingList({ items }) {
     return <section className={`${styles.section} ${styles.reading}`}>
         <SectionHeading title="Further reading" />
-        <div className={styles.readingList}>{items.map(({ href, topic, title }) => <Link key={href} href={href} className={styles.readingLink}>
+        <div className={styles.readingList}>{items.map(({ href, topic, title, photo }) => <Link key={href} href={href} className={styles.readingLink}>
+            {photo && <span className={styles.readingPhoto}><Image src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} sizes="(max-width: 1023px) 43vw, 21vw" /></span>}
             <span className={styles.eyebrow}>{topic}</span><span className={styles.readingTitle}>{title}</span>
             <span aria-hidden="true" className={styles.readingArrow}>↗</span>
         </Link>)}</div>

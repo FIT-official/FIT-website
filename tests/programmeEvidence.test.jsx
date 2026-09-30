@@ -1,4 +1,5 @@
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, within } from '@testing-library/react'
+import { existsSync } from 'node:fs'
 import { afterEach, expect, it, vi } from 'vitest'
 // Plain DOM image isolates content assertions from Next image optimisation.
 // eslint-disable-next-line @next/next/no-img-element
@@ -6,6 +7,7 @@ vi.mock('next/image', () => ({ default: props => <img {...props} alt={props.alt}
 import SchoolCollaborations from '../components/Programmes/SchoolCollaborations'
 import LearningOutcomes from '../components/Programmes/LearningOutcomes'
 import PenProgramme from '../components/Programmes/PenProgramme'
+import SchoolProgrammes from '../app/school-programmes/page'
 afterEach(cleanup)
 it('represents all three schools, distinguishes the Bartley brief and avoids student images', () => {
   render(<SchoolCollaborations />)
@@ -27,4 +29,18 @@ it('labels learning outcomes as programme goals with reviewable evidence', () =>
   expect(screen.getByText(/These are programme goals/)).toBeInTheDocument()
   expect(screen.getByText('A test record and a reasoned revision')).toBeInTheDocument()
   expect(screen.getByRole('link')).toHaveAttribute('href', '#enquire')
+})
+it('adds existing non-identifying photographs to reading cards while preserving their destinations', () => {
+  render(<SchoolProgrammes />)
+  const reading=screen.getByRole('heading',{name:'Further reading'}).closest('section')
+  const links=within(reading).getAllByRole('link')
+  expect(links.map(link=>link.getAttribute('href'))).toEqual(['/blog/3d-printing','/blog/tinkercad-toolbox-guide','/blog/3d-printing-theory-and-material-properties','/blog/arduino-nano-io-expansion-shield-wiring'])
+  for(const link of links){
+    const image=within(link).getByRole('img')
+    expect(image.getAttribute('src')).toMatch(/(?:nygh-printed-mechanism|nygh-room-models|escape-room-sensor-wiring)\.jpg$/)
+    expect(existsSync('public'+image.getAttribute('src'))).toBe(true)
+    expect(image.getAttribute('alt')).toBeTruthy()
+  }
+  expect(screen.getByText('Circuits on the FIT project workbench.')).toBeInTheDocument()
+  expect(screen.getByText('Room models taking shape in the NYGH project.')).toBeInTheDocument()
 })
