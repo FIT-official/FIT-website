@@ -122,6 +122,7 @@ export function buildProductPayload(form, user, uploadedImages, uploadedModels, 
         priceCredits: Number(form.priceCredits) || 0,
         stock: form.stock !== undefined && form.stock !== '' ? Number(form.stock) : 1,
         infiniteStock: !!form.infiniteStock,
+        quoteOnly: !!form.quoteOnly,
         variantTypes: (form.variantTypes || []).map(vt => ({
             ...vt,
             options: (vt.options || []).map(opt => ({

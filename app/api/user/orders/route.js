@@ -5,6 +5,7 @@ import Product from "@/models/Product";
 import CheckoutSession from "@/models/CheckoutSession";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { checkAdminPrivileges } from "@/lib/checkPrivileges";
+import { orderProductSummary } from "@/lib/orderProductSummary";
 
 export async function POST(req) {
     try {
@@ -105,7 +106,16 @@ export async function GET(req) {
                 currency: review.reconciliation.currency, recordedAt: review.reconciliation.recordedAt },
         }));
         if (!user && !paymentReviews.length) return NextResponse.json({ error: "User not found" }, { status: 404 });
-        const orders = user?.orderHistory ?? [];
+        const originalOrders = user?.orderHistory ?? [];
+        const productIds = [...new Set(originalOrders.map(order => String(order.cartItem?.productId || '')))]
+            .filter(id => /^[a-f0-9]{24}$/i.test(id));
+        const summaries = productIds.length ? await Product.find({ _id: { $in: productIds } })
+            .select('_id name images slug creatorUserId hidden flaggedForModeration').lean() : [];
+        const productMap = new Map(summaries.map(product => [String(product._id), orderProductSummary(product)]));
+        const orders = originalOrders.map(order => ({
+            ...(order.toObject ? order.toObject() : order),
+            productSummary: productMap.get(String(order.cartItem?.productId)) || null,
+        }));
         return NextResponse.json({ orders, paymentReviews }, { status: 200 });
     } catch (error) {
         console.error("Error fetching user orders:", error);

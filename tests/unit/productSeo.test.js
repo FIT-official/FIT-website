@@ -20,6 +20,12 @@ const product = {
 afterEach(() => vi.useRealTimers())
 
 describe('product metadata', () => {
+    it('keeps an enquiry product searchable without advertising an unconfirmed offer', () => {
+        const item = { ...product, quoteOnly: true };
+        expect(productMetadata(item).alternates.canonical).toContain(product.slug);
+        expect(productJsonLd(item).offers).toBeUndefined();
+        expect(publicProductSeed(item).quoteOnly).toBe(true);
+    });
     it('preserves dimension separators and part identifiers in search previews', () => {
         const item = { ...product, name: 'Copper Stripboard 6.5*14.5CM DEV_A', description: '**Board** 6.5*14.5 cm, 2.54 mm pitch.' }
         const metadata = productMetadata(item)

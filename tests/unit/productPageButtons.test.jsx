@@ -55,6 +55,15 @@ function mockFetchByUrl() {
 }
 
 describe('ProductPage purchase buttons', () => {
+    it('offers an enquiry instead of checkout for a quote-only item', async () => {
+        useUser.mockReturnValue({ user: null, isLoaded: true, isSignedIn: false });
+        const item = { ...shopProduct, quoteOnly: true };
+        global.fetch = vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ product: item }) }));
+        render(<ProductPage initialProduct={item} />);
+        expect(await screen.findByRole('link', { name: 'Ask for a quote' })).toHaveAttribute('href', expect.stringContaining('mailto:fixittoday.contact@gmail.com'));
+        expect(screen.getByText('Price on request')).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Add to Cart' })).not.toBeInTheDocument();
+    });
     beforeEach(() => {
         useUser.mockReturnValue({ user: { id: 'user_customer_saba' }, isLoaded: true, isSignedIn: true })
         mockFetchByUrl()

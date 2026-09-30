@@ -55,6 +55,14 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('Checkout session purchase contract', () => {
+    it('does not start a payment for an item that now requires a quote', async () => {
+        product.quoteOnly = true;
+        const response = await POST();
+        expect(response.status).toBe(409);
+        expect((await response.json()).error).toMatch(/confirm the price/);
+        expect(m.createSession).not.toHaveBeenCalled();
+        expect(m.saveSnapshot).not.toHaveBeenCalled();
+    });
     it('expires an unpaid session before rotating its intent for edits', async () => {
         await POST();
         const originalIntent = user.checkoutIntent;

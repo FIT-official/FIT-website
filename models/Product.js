@@ -112,6 +112,7 @@ const ProductSchema = new mongoose.Schema(
         priceCredits: { type: Number, required: true },
         stock: { type: Number, required: false, min: 0 },
         infiniteStock: { type: Boolean, default: false },
+        quoteOnly: { type: Boolean, default: false },
         productType: { type: String, enum: ["print", "shop"], required: true, default: "shop" },
 
         // Print-delivery products (productType: "print"): the vendor's FIXED

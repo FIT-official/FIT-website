@@ -616,6 +616,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                             )}
                             <div className='font-medium text-lg mb-6'>
                                 {(() => {
+                                    if (product.quoteOnly) return 'Price on request';
                                     const priceInfo = calculateTotalPrice();
 
                                     if (priceInfo.discountedTotal !== null) {
@@ -710,6 +711,12 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
 
                             <ConnectionNotice offline={offline} />
                             <StoreError message={cartError} />
+                            {product.quoteOnly && (
+                                <div className="flex flex-col gap-3 mt-4">
+                                    <p className="text-sm text-lightColor">Tell us the quantity you need and when you need it. We will confirm the price, availability and delivery before you order.</p>
+                                    <a className="formBlackButton justify-center" href={`mailto:fixittoday.contact@gmail.com?subject=${encodeURIComponent(`Enquiry: ${product.name}`)}&body=${encodeURIComponent(`Item: ${product.name}\nQuantity: \nRequired by: \nDelivery postcode: \n\nhttps://www.fixitoday.com/products/${product.slug}`)}`}>Ask for a quote</a>
+                                </div>
+                            )}
                             {!loading && product?.listing === 'creator' && product?.creatorUserId && (
                                 <div className="flex flex-col gap-3 mt-4 border border-borderColor rounded-xl p-4">
                                     <p className="text-sm text-lightColor">Contact this creator to agree a quote, payment and delivery. Creator purchases are arranged directly with the seller.</p>
@@ -717,7 +724,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                     {ownsDigitalProduct && <button className="underline text-sm" onClick={handleViewInDownloads}>View purchased downloads</button>}
                                 </div>
                             )}
-                            {!loading && product?.listing !== 'creator' && product && (user ? product.creatorUserId !== user.id : product.productType === 'shop') && (
+                            {!loading && !product?.quoteOnly && product?.listing !== 'creator' && product && (user ? product.creatorUserId !== user.id : product.productType === 'shop') && (
                                 <div className="flex flex-col gap-2 mt-2">
                                     {ownsDigitalProduct ? (
                                         <button

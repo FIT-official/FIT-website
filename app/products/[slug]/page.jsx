@@ -14,7 +14,7 @@ const getProduct = cache(async (slug) => {
     await connectToDatabase()
     return Product.findOne({ slug }).select([
         '_id', 'slug', 'name', 'description', 'images', 'basePrice', 'productType',
-        'stock', 'infiniteStock', 'viewableModel', 'variantTypes', 'discount', 'discounts',
+        'stock', 'infiniteStock', 'quoteOnly', 'viewableModel', 'variantTypes', 'discount', 'discounts',
         'delivery.deliveryTypes.type', 'hidden', 'flaggedForModeration',
         'reviews._id', 'reviews.username', 'reviews.userImageUrl', 'reviews.rating',
         'reviews.comment', 'reviews.mediaUrls', 'reviews.verifiedPurchase', 'reviews.createdAt',
