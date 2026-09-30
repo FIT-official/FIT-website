@@ -89,7 +89,7 @@ export default function ProgrammeLayout({ title, titleLead, titleAccent, intro, 
         <section id="enquire" className={styles.enquiry}>
             <div><h2>Plan a<br /><em>workshop</em></h2></div>
             <div className={styles.enquiryDetails}>
-                <p>Send us your group size, preferred dates and a topic you have in mind. We’ll discuss the equipment, materials and cost.</p>
+                <p>Have a project in mind, or need a few ideas? Send us your group size, preferred dates and budget. We will suggest a starting point and explain the materials, equipment and cost.</p>
                 <a href={enquiryUrl} className={styles.button}>Get in touch <span aria-hidden="true">↗</span></a>
                 <span className={styles.email}>fixittoday.contact@gmail.com</span>
             </div>

@@ -22,7 +22,7 @@ export const metadata = programmeMetadata({ title: 'School STEM & Robotics Works
 export default function SchoolProgrammes() {
     return <ProgrammeLayout
         title="School programmes" titleLead="School" titleAccent="programmes"
-        intro="We run school STEM workshops in Singapore, teaching 3D pen making, 3D design, printing, electronics and introductory robotics through practical work. Sessions range from a first introduction to a term-long project, with time for students to build and test their ideas."
+        intro="What would your students like to make? Try a 3D pen model, design a first print or build a circuit that lights up. We guide the class through the tricky steps, with time to try things and show what they made. Plan a single workshop or work on a project over several sessions."
         hero={hero}
         path="/school-programmes" serviceType="School STEM programmes and 3D printing workshops"
         enquirySubject="School programme enquiry"
@@ -43,14 +43,14 @@ export default function SchoolProgrammes() {
                 <SectionHeading title="What we teach">The starting point depends on the students’ age, experience and the equipment available.</SectionHeading>
                 <Photo src="/images/collaborations/nygh-printed-mechanism.jpg" width={1080} height={1440}
                     alt="Blue 3D printed gear and mechanism components from the NYGH project"
-                    caption="A design becomes a part: printed mechanism components from NYGH." />
+                    caption="Printed mechanism parts from the NYGH project." />
             </div>
             <WorkshopList items={[
-                { title: '3D pen making', description: 'Trace a template, join the pieces and test a small model. Plan a guided first build or a shared class project.', concepts: 'Connect flat shapes, spatial thinking and structural support.', href: '#pen-programmes', link: 'Explore 3D pen programmes' },
+                { title: '3D pen making', description: 'Trace a few shapes and join them into a model. Start with a guided first piece, then add details or make a shared class display.', concepts: 'See how flat pieces connect and what helps a model stand up.', href: '#pen-programmes', link: 'Explore 3D pen programmes' },
                 { title: '3D design & printing', description: 'Model a keychain, phone stand or small box in Tinkercad, then compare the design with a printed part.', concepts: 'Explore dimensions, clearance, layers and print orientation.', href: '/blog/tinkercad-keychain-tutorial', link: 'Try a first modelling project', photo: { ...mechanismPhoto, caption: 'Printed mechanism parts from the NYGH project.' } },
-                { title: 'Electronics', description: 'Connect a sensor or button to a light or display. Build a temperature monitor, reaction game or interactive exhibit.', concepts: 'Learn how code uses an input to control an output.', href: '/blog/arduino-nano-dht11-workshop-guide', link: 'An Arduino sensor project', photo: { ...circuitPhoto, caption: 'Circuits on the FIT project workbench.' } },
+                { title: 'Electronics', description: 'Connect a sensor or button to a light or display. Build a temperature monitor, reaction game or interactive exhibit.', concepts: 'Press a button or read a sensor, then see the circuit respond.', href: '/blog/arduino-nano-dht11-workshop-guide', link: 'An Arduino sensor project', photo: { ...circuitPhoto, caption: 'Circuits on the FIT project workbench.' } },
                 { title: 'Robotics', description: 'Use a sensor and motor to make a device respond to its surroundings. Test when it should move, stop or signal an obstacle.', concepts: 'Connect sensing, thresholds and movement through repeated tests.', photo: { ...sensorPhoto, caption: 'Connecting a sensor and servo in the FIT build.' } },
-                { title: 'Project mentoring', description: 'Develop a prototype over several sessions. Projects can combine a printed enclosure, electronics and a presentation of the work.', concepts: 'Use observations and measurements to decide what to change.', photo: { ...roomPhoto, caption: 'Room models taking shape in the NYGH project.' } },
+                { title: 'Project mentoring', description: 'Develop a prototype over several sessions. Projects can combine a printed enclosure, electronics and a presentation of the work.', concepts: 'Keep the first attempt, make a change and compare the results.', photo: { ...roomPhoto, caption: 'Room models taking shape in the NYGH project.' } },
             ]} />
         </section>
 
@@ -71,7 +71,7 @@ export default function SchoolProgrammes() {
                 <div><h3>Facilitator support</h3><p>Training and project guidance for the people running a programme, exhibition or competition activity.</p></div>
             </div>
         </section>
-        <ProjectGallery photos={[...schoolWorkshopPhotos.filter(photo => /room-models|printed-mechanism/.test(photo.src)), ...escapeRoomPhotos.filter(photo => /sensor-wiring|button-lights|electronics/.test(photo.src))]} title="Look inside the build"
+        <ProjectGallery photos={[...schoolWorkshopPhotos.filter(photo => /room-models|printed-mechanism/.test(photo.src)), ...escapeRoomPhotos.filter(photo => /sensor-wiring|button-lights|electronics/.test(photo.src))]} title="Models, mechanisms and circuits"
             intro="Project details from NYGH and the FIT miniature escape-room build. These photos show the models, mechanisms and circuits; they are not photos of the Bartley or Boon Lay programmes." />
         <Questions items={[
             { question: 'Do students need prior experience?', answer: 'Beginner sessions can start with guided modelling or simple circuits. Tell us the students’ level and any coding or design experience so we can choose a suitable task.' },

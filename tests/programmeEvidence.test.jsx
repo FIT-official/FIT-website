@@ -27,7 +27,7 @@ it('offers 3D pen programmes to schools, teams and community groups with an enqu
 it('labels learning outcomes as programme goals with reviewable evidence', () => {
   render(<LearningOutcomes />)
   expect(screen.getByText(/These are programme goals/)).toBeInTheDocument()
-  expect(screen.getByText('A test record and a reasoned revision')).toBeInTheDocument()
+  expect(screen.getByText('A short explanation of what changed')).toBeInTheDocument()
   expect(screen.getByRole('link')).toHaveAttribute('href', '#enquire')
 })
 it('adds existing non-identifying photographs to reading cards while preserving their destinations', () => {

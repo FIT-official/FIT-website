@@ -15,7 +15,7 @@ export const metadata = programmeMetadata({ title: 'Company 3D Printing Workshop
 export default function CompanyWorkshops() {
     return <ProgrammeLayout
         title="Company workshops" titleLead="Company" titleAccent="workshops"
-        intro="Our workshops for company teams and community groups in Singapore cover 3D pen making, 3D design, printing and electronics. Make a shared model, prepare a print or build a working circuit, with the project and guidance matched to your group."
+        intro="Bring your team or community group together to make something. Try a 3D pen model, design a small part for your desk or connect a circuit that responds. Beginners are welcome. Tell us what your group enjoys and we will help you choose a project."
         hero={hero}
         path="/company-workshops" serviceType="Company 3D printing, CAD and introductory robotics workshops"
         enquirySubject="Team or community programme enquiry"
@@ -25,11 +25,11 @@ export default function CompanyWorkshops() {
         <PenProgramme />
         <section id="projects" className={`${styles.section} ${styles.programmeGrid}`}>
             <div className={styles.programmeAside}>
-                <SectionHeading title="At the workbench">Choose a topic, or bring a part you would like to develop. We’ll agree on an exercise that fits the group and the time available.</SectionHeading>
+                <SectionHeading title="What would your group enjoy making?">Choose a first project below, or bring an idea of your own. We will work out what fits your group, venue and time.</SectionHeading>
                 <Photo src="/images/collaborations/escape-room-electronics.jpg" width={1024} height={768} alt="Controller, servo and breadboards from a FIT miniature escape-room project" caption="The hardware behind a FIT interactive project." />
             </div>
             <WorkshopList items={[
-                { title: '3D pen team & community projects', description: 'Make a small model or collaborative display from guided templates. Participants plan the pieces, build by hand and work out how to join them.', concepts: 'A shared making brief for teams, schools or community groups.', href: '#pen-programmes', link: 'Explore 3D pen programmes' },
+                { title: '3D pen team & community projects', description: 'Use templates to make the first pieces, then join them into a small model or a display everyone contributes to.', concepts: 'A shared making brief for teams, schools or community groups.', href: '#pen-programmes', link: 'Explore 3D pen programmes' },
                 { title: 'Your first 3D print', description: 'Design a small desk accessory or personalised part. Prepare the model in a slicer and see how a printer turns it into layers.', concepts: 'Explore orientation, supports and material choice.' },
                 { title: 'CAD & prototyping', description: 'Use a bracket, enclosure or organiser to practise dimensions and fit. Bring an idea from your team’s work; we’ll check its suitability before the session.', concepts: 'Learn how clearance and tolerances affect a working prototype.', href: '/blog/fusion-360-cup-holder-workshop-guide', link: 'A practical CAD exercise' },
                 { title: 'Electronics & robotics', description: 'Build a small sensor project or motorised mechanism. Read an input, make a decision in code and control an output.', concepts: 'Equipment and coding level are matched to the group.' },
@@ -57,7 +57,7 @@ export default function CompanyWorkshops() {
                 <div><h3>The workshop</h3><p>Participants work through a design or circuit with guidance, then test the result and discuss any changes.</p></div>
             </div>
         </section>
-        <ProjectGallery photos={escapeRoomPhotos.filter(photo => /sensor-wiring|button-lights|electronics/.test(photo.src))} title="The work behind the workshop"
+        <ProjectGallery photos={escapeRoomPhotos.filter(photo => /sensor-wiring|button-lights|electronics/.test(photo.src))} title="A closer look at the projects"
             intro="Circuits and controls from the FIT miniature escape-room project: practical examples of connecting sensing, code and movement." />
         <Questions items={[
             { question: 'Can beginners take part?', answer: 'Yes. A guided design or circuit is a useful starting point. For mixed experience levels, we can discuss a common task with optional extensions.' },
