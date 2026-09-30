@@ -113,6 +113,18 @@ const ProductSchema = new mongoose.Schema(
         stock: { type: Number, required: false, min: 0 },
         infiniteStock: { type: Boolean, default: false },
         quoteOnly: { type: Boolean, default: false },
+        // Never selected for public catalogue responses. Only the admin
+        // editor and authoritative shipping calculations opt into this data.
+        shippingCosts: {
+            type: new mongoose.Schema({
+                unitCost: { type: Number, min: 0, max: 1000000, default: null },
+                packingCost: { type: Number, min: 0, max: 1000000, default: null },
+                deliveryCost: { type: Number, min: 0, max: 1000000, default: null },
+                confirmed: { type: Boolean, default: false },
+            }, { _id: false }),
+            select: false,
+            default: undefined,
+        },
         productType: { type: String, enum: ["print", "shop"], required: true, default: "shop" },
 
         // Print-delivery products (productType: "print"): the vendor's FIXED

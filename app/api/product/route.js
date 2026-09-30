@@ -11,6 +11,7 @@ import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3 } from "@/lib/s3";
 import { reserveCreatorQuota, releaseProductQuota, CreatorQuotaError } from "@/lib/creatorQuota";
 import { editableProduct, productForViewer } from "@/lib/productAccess";
+import { shippingCostsInput } from '@/lib/shopShipping';
 
 const BUCKET_NAME = process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
 
@@ -126,11 +127,14 @@ export async function POST(req) {
             return NextResponse.json({ error: "Model assets must belong to your account" }, { status: 400 });
         }
         const slug = await generateUniqueSlug(name);
-        reservation = await reserveCreatorQuota(userId, "products");
-
         // Listing is server-authoritative: admin posts land in the FIT
         // catalogue, creator posts stay on the creator's page.
         const listing = userRole === "admin" ? "fit" : "creator";
+        if (userRole === 'admin' && Object.hasOwn(input, 'shippingCosts')) {
+            try { body.shippingCosts = shippingCostsInput(input.shippingCosts); }
+            catch (error) { return NextResponse.json({ error: error.message }, { status: 400 }); }
+        }
+        reservation = await reserveCreatorQuota(userId, "products");
 
         try {
             const product = await Product.create({
@@ -209,6 +213,10 @@ export async function PUT(req) {
         // the storefront listing.
         body.creatorUserId = prevProduct.creatorUserId;
         body.listing = prevProduct.listing;
+        if (userRole === 'admin' && Object.hasOwn(input, 'shippingCosts')) {
+            try { body.shippingCosts = shippingCostsInput(input.shippingCosts); }
+            catch (error) { return NextResponse.json({ error: error.message }, { status: 400 }); }
+        }
 
         // Compare images
         const prevImages = prevProduct.images || [];
@@ -346,7 +354,7 @@ export async function GET(req) {
         if (listing === "fit" || listing === "creator") filter.listing = listing;
 
         if (slug) {
-            const projection = undefined;
+            const projection = isAdmin ? '+shippingCosts' : undefined;
             const product = await Product.findOne({ slug }).select(projection).lean();
             if (!productForViewer(product, userId, isAdmin)) {
                 return NextResponse.json({ product: null }, { status: 200 });
@@ -490,7 +498,7 @@ export async function GET(req) {
             filter.flaggedForModeration = { $ne: true };
         }
 
-        const projection = undefined;
+        const projection = isAdmin ? '+shippingCosts' : undefined;
 
         let query = Product.find(filter).select(projection);
 

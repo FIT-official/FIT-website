@@ -46,7 +46,15 @@ describe('Merchant Center catalogue', () => {
         ] } }).shipping.price).toBe('2.00 SGD')
         expect(merchantProduct({ ...product, delivery: { deliveryTypes: [
             { type: 'standard-shipping', price: 0 },
-        ] } }).shipping.price).toBe('0.00 SGD')
+        ] } }).shipping.price).toBe('6.20 SGD')
+    })
+
+    it('advertises free shipping only when the single-item order passes the private cost check', () => {
+        const stocked = { ...product, shippingCosts: { unitCost: 1, packingCost: 1, deliveryCost: 6.2, confirmed: true } }
+        expect(merchantProduct(stocked).shipping.price).toBe('0.00 SGD')
+        // A discount reduces the order to the excluded S$20 boundary.
+        expect(merchantProduct(stocked, [{ percentage: 20 }]).shipping.price).toBe('6.20 SGD')
+        expect(buildMerchantFeed([stocked])).not.toMatch(/shippingCosts|unitCost|packingCost|confirmed/)
     })
 
     it('produces valid escaped XML with only public product attributes', () => {

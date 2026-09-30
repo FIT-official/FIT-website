@@ -1,5 +1,6 @@
 import { getDiscountedPrice } from '@/utils/discount';
 import { resolveDeliveryFee } from '@/lib/quoting/deliveryTypeResolver';
+import { paidShopDeliveryFee } from '@/lib/shopShipping';
 
 export async function calculateCartItemBreakdown({ item, product, address, extraDiscountRules = [] }) {
     const quantity = item.quantity || 1;
@@ -71,7 +72,7 @@ export async function calculateCartItemBreakdown({ item, product, address, extra
     if (!deliveryResolution.ok) {
         throw new Error(`Unknown delivery type "${item.chosenDeliveryType}" for product ${product._id}`);
     }
-    const deliveryFee = deliveryResolution.fee;
+    const deliveryFee = paidShopDeliveryFee(product, item.chosenDeliveryType, deliveryResolution.fee);
 
     const total = (finalPrice * quantity) + deliveryFee;
 

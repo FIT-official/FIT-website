@@ -123,6 +123,7 @@ export function buildProductPayload(form, user, uploadedImages, uploadedModels, 
         stock: form.stock !== undefined && form.stock !== '' ? Number(form.stock) : 1,
         infiniteStock: !!form.infiniteStock,
         quoteOnly: !!form.quoteOnly,
+        ...(form.shippingCosts ? { shippingCosts: form.shippingCosts } : {}),
         variantTypes: (form.variantTypes || []).map(vt => ({
             ...vt,
             options: (vt.options || []).map(opt => ({

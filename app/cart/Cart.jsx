@@ -1146,7 +1146,7 @@ function Cart() {
                                                             {item.quantity > 1 ? ` x${item.quantity}` : ""}
                                                         </span>
                                                         <span className='font-medium text-textColor text-right'>
-                                                            {`${currency} ${(item.deliveryFee || 0).toFixed(2)}`}
+                                                            {item.freeDeliveryApplied ? 'Free' : `${currency} ${(item.deliveryFee || 0).toFixed(2)}`}
                                                         </span>
                                                     </div>
                                                     {item.warning && (
@@ -1165,6 +1165,7 @@ function Cart() {
                                             );
                                         })}
                                         {/* Grand Total */}
+                                        <p className="py-2 text-lightColor">Free standard delivery is available on eligible Singapore orders over S$20 after discounts. Your delivery charge is shown above.</p>
                                         <div className='py-2 flex justify-between font-bold mt-2 w-full whitespace-nowrap'>
                                             <span>Grand Total</span>
                                             <span className='text-right'>{`${currency} ${grandTotal.toFixed(2)}`}</span>
