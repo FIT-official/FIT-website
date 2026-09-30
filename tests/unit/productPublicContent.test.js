@@ -35,6 +35,7 @@ describe('public product content', () => {
     ])('removes numbered reference variants: %s', reference => {
         expect(publicProductDescription(reference)).toBe('')
         expect(publicProductDescription(`Sensor. ${reference} 2.54 mm pitch.`)).toBe('Sensor. 2.54 mm pitch.')
+        expect(publicProductDescription(`Sensor.\n${reference}\n2.54 mm pitch.`)).toBe('Sensor.\n\n2.54 mm pitch.')
     })
 
     it('cleans product saves and delivery notes without changing commercial or licensing fields', () => {
