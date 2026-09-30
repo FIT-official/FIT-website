@@ -3,7 +3,7 @@ import { buildPageMetadata } from '@/lib/seo/metadata'
 
 export const metadata = buildPageMetadata({
     title: 'Creator Storefront & Print Job Software Plans | Fix It Today',
-    description: 'Create a storefront, list products and manage quotes and print requests with FIT creator plans. Compare Free, Student, Standard and Pro options in SGD.',
+    description: 'Start your own 3D printing storefront with FIT. Add products, manage print requests and agree jobs with your customers. Start free and compare the existing software plans.',
     path: '/creators/join',
 })
 
