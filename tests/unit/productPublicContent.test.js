@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { NON_PUBLIC_PRODUCT_SLUGS, isPublicCatalogueProduct, publicProductDescription } from '@/lib/productPublicContent'
-import { productForViewer } from '@/lib/productAccess'
+import { NON_PUBLIC_PRODUCT_SLUGS, isPublicCatalogueProduct, publicProductDescription, cleanProductCopy } from '@/lib/productPublicContent'
+import { editableProduct, productForViewer } from '@/lib/productAccess'
 import { productMetadata, productJsonLd, publicProductSeed } from '@/lib/seo/product'
 
 const description = 'ESP32-Wroom/DevKit, 30pin. Escendo Quotation 2512031 (3 Dec 2025) unit price SGD 7.40. Sold by Fix It Today Singapore.'
@@ -25,8 +25,39 @@ describe('public product content', () => {
     it('leaves other quotation text, unit prices, dimensions and formatting alone', () => {
         const text = 'Unit price SGD 12.90. Quotation available on request.\n\n6.5 × 14.5 cm, 2.54 mm pitch.  Pack of 10.'
         expect(publicProductDescription(text)).toBe(text)
-        const differentReference = 'Quotation 1234 dated 3 Dec 2025. Unit price SGD 7.40.'
-        expect(publicProductDescription(differentReference)).toBe(differentReference)
+    })
+
+    it.each([
+        'Escendo Quotation 2512031 (3 Dec 2025)',
+        'Escendo Quotation 2512031 (3 Dec 2025).',
+        'Quotation 1234 dated 3 Dec 2025. Unit price SGD 7.40.',
+        'ESCENDO QUOTATION No. 2512031 (3 December 2025) unit price S$7.40.',
+    ])('removes numbered reference variants: %s', reference => {
+        expect(publicProductDescription(reference)).toBe('')
+        expect(publicProductDescription(`Sensor. ${reference} 2.54 mm pitch.`)).toBe('Sensor. 2.54 mm pitch.')
+        expect(publicProductDescription(`Sensor.\n${reference}\n2.54 mm pitch.`)).toBe('Sensor.\n\n2.54 mm pitch.')
+    })
+
+    it('cleans product saves and delivery notes without changing commercial or licensing fields', () => {
+        const original = { ...product, description: `${description} Photo: Example, CC BY 4.0.`,
+            delivery: { deliveryTypes: [{ type: 'express-courier', customPrice: 30,
+                customDescription: 'Premium tracked courier; tests higher bounds. 1–2 business days, fully tracked.' },
+                { type: 'pick-up', customPrice: 0, customDescription: null }] } }
+        const clean = cleanProductCopy(original)
+        expect(clean.description).toBe(`${publicDescription} Photo: Example, CC BY 4.0.`)
+        expect(clean.delivery.deliveryTypes[0]).toEqual({ ...original.delivery.deliveryTypes[0], customDescription: 'Premium tracked courier. 1–2 business days, fully tracked.' })
+        expect(clean.delivery.deliveryTypes[1]).toEqual(original.delivery.deliveryTypes[1])
+        expect(clean.basePrice).toEqual(original.basePrice)
+        expect(clean.stock).toBe(original.stock)
+        expect(original.delivery.deliveryTypes[0].customDescription).toContain('tests higher bounds')
+        expect(editableProduct(original).description).toBe(clean.description)
+        expect(productForViewer(original, null).delivery).toEqual(clean.delivery)
+        expect(cleanProductCopy(clean)).toEqual(clean)
+    })
+
+    it('retains a usable product name when the description contained only a reference', () => {
+        expect(cleanProductCopy({ name: 'Foam Board', description: 'Escendo Quotation 2512031 (3 Dec 2025)' }).description).toBe('Foam Board.')
+        expect(editableProduct({ name: 'Foam Board', description: '' }).description).toBe('')
     })
 
     it('keeps provenance out of metadata, structured data and server seeds', () => {
