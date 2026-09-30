@@ -55,11 +55,19 @@ export default function ServicePage({ page }) {
                     <div className={styles.sectionHeading}><h2>What to include</h2><p>These details help us prepare your quote. If something is missing, we’ll ask.</p></div>
                     <ul className={styles.checklist}>{page.checklist.map(item => <li key={item}>{item}</li>)}</ul>
                 </section>
+                {page.process && <section className={styles.section} aria-labelledby="design-request-steps">
+                    <div className={styles.sectionHeading}><h2 id="design-request-steps">From your idea to a quote</h2><p>A sketch is enough to start the conversation. Design work and printing can be quoted separately.</p></div>
+                    <ol className={styles.examples}>{page.process.map((step, index) => <li key={step.title}><h3>{index + 1}. {step.title}</h3><p>{step.text}</p></li>)}</ol>
+                </section>}
                 <section className={`${styles.section} ${styles.split}`}>
                     <div className={styles.sectionHeading}><h2>FAQs</h2></div>
                     <div>{page.faqs.map(faq => <details className={styles.question} key={faq.question}><summary>{faq.question}<span aria-hidden="true">+</span></summary><p>{faq.answer}</p></details>)}</div>
                 </section>
                 {!page.services && <section className={styles.section}><div className={styles.sectionHeading}><h2>Related services</h2></div><div className={styles.related}>{related.map(item => <Link key={item.href} href={item.href}><h3>{item.title}<GoChevronRight aria-hidden="true" /></h3><p>{item.text}</p></Link>)}</div></section>}
+                <section className={`${styles.section} ${styles.split}`} aria-labelledby="organisation-enquiry">
+                    <div className={styles.sectionHeading}><h2 id="organisation-enquiry">Buying for a school or organisation?</h2><p>Include the purchasing requirements with your enquiry so we can check them before quoting.</p></div>
+                    <p className={styles.organisationDetails}>Tell us if you need a written quotation, purchase-order reference, named delivery contact or specific documents. Include your organisation name and required date. We will confirm the scope and paperwork we can provide; supplier registration and special payment terms need separate confirmation.</p>
+                </section>
             </div>
             <section className={styles.enquiry} id="enquire">
                 <div><h2>Request a quote</h2><p>Email your drawings and a short description of what you need, including the quantity and required date.</p><a className={styles.email} href={`mailto:${email}`}>{email}</a></div>

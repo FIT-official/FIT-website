@@ -17,7 +17,7 @@ afterEach(() => { cleanup(); vi.restoreAllMocks() })
 describe('Creator plans', () => {
     it('shows Free, Student, Standard and Pro with clear eligibility and limits', async () => {
         render(<Creators />)
-        expect(screen.getAllByRole('heading', { level: 2 }).map(n => n.textContent)).toEqual(['Free','Student','Standard','Pro'])
+        for (const name of ['Free', 'Student', 'Standard', 'Pro']) expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument()
         expect(screen.getByText('S$39')).toBeInTheDocument()
         expect(screen.getByText('S$99')).toBeInTheDocument()
         expect(screen.getByText('10 print requests each month')).toBeInTheDocument()
@@ -25,6 +25,14 @@ describe('Creator plans', () => {
         expect(screen.getByText(/arrange payment directly/)).toBeInTheDocument()
         expect((await screen.findByRole('link', { name: 'Choose Standard' })).getAttribute('href')).toBe('/sign-up?priceId=p_standard')
         expect(screen.queryByText('Current plan')).not.toBeInTheDocument()
+    })
+    it('gives a free store entry point and explains who fulfils creator jobs', async () => {
+        render(<Creators />)
+        expect(screen.getByRole('heading', { level: 1, name: 'Open your 3D printing storefront' })).toBeInTheDocument()
+        expect(screen.getByRole('link', { name: 'Create a Free storefront' })).toHaveAttribute('href', '/sign-up')
+        expect(screen.getByText(/You arrange production, quality checks, delivery and direct payment/)).toBeInTheDocument()
+        expect(screen.getByText(/automatic FIT fulfilment/)).toBeInTheDocument()
+        await screen.findByRole('link', { name: 'Choose Standard' })
     })
     it('links a signed-in creator only to a verified available price', async () => {
         state.signedIn = true

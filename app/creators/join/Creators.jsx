@@ -28,9 +28,20 @@ export default function Creators() {
     return <main className="mx-auto max-w-6xl px-6 py-16">
         <div className="text-center max-w-2xl mx-auto mb-10">
             <p className="text-sm text-lightColor mb-3">Creator plans</p>
-            <h1>Build your making business</h1>
-            <p className="text-sm text-lightColor mt-4">Create your page, showcase your work and manage print requests from your own customers. Start free, then expand as your business grows.</p>
+            <h1>Open your 3D printing storefront</h1>
+            <p className="text-sm text-lightColor mt-4">Show what you make and manage requests from your own customers. Start with a Free storefront and choose the software you need as your shop grows.</p>
         </div>
+        <section className="mb-12 rounded-2xl border border-borderColor bg-white p-6 md:p-8" aria-labelledby="start-print-store">
+            <h2 id="start-print-store" className="text-2xl font-semibold">Want to open your own 3D printing store?</h2>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-lightColor">Start with a Free storefront. Add your products or print service, set the details customers need and publish when you are ready. You can look at paid software plans later.</p>
+            <ol className="mt-6 grid gap-6 md:grid-cols-3 text-sm leading-7">
+                <li><h3 className="font-semibold">1. Set up your shop</h3><p>Choose a name, describe what you make and add clear photos. Sign up or open your existing storefront to start.</p></li>
+                <li><h3 className="font-semibold">2. Agree each job</h3><p>Use print requests and messages to discuss the file, material, price and deadline with your customer.</p></li>
+                <li><h3 className="font-semibold">3. Make and deliver it</h3><p>You arrange production, quality checks, delivery and direct payment for creator print jobs. FIT provides the storefront and job-management software.</p></li>
+            </ol>
+            <Link className="inline-flex mt-6 min-h-11 items-center underline underline-offset-4" href={isSignedIn ? '/dashboard/shop' : '/sign-up'}>{isSignedIn ? 'Set up your storefront' : 'Create a Free storefront'}</Link>
+            <p className="mt-4 text-xs leading-6 text-lightColor">A storefront does not include a printer, automatic FIT fulfilment, automatic payouts or guaranteed sales. Discuss any FIT production support separately before promising it to a customer.</p>
+        </section>
         <fieldset className="mb-8 flex flex-wrap justify-center gap-3">
             <legend className="sr-only">Billing period</legend>
             {[['month', 'Pay monthly'], ['year', 'Pay yearly · 2 months free']].map(([value, label]) => <label key={value} className={`cursor-pointer rounded-full border px-5 py-3 text-sm focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-textColor ${interval === value ? 'border-textColor bg-textColor text-white' : 'border-borderColor bg-white text-textColor'}`}>
