@@ -59,11 +59,19 @@ describe('private repair request API with fixture persistence', () => {
     expect(body.request).not.toHaveProperty('price'); expect(body.request).not.toHaveProperty('appointment')
     expect(response.headers.get('cache-control')).toBe('no-store'); expect(state.rows[0].customerUserId).toBe('customer')
   })
+  it('persists normalised selections and original Other brand, rejecting cross-brand issue injections', async () => {
+    const custom = { ...repairFixture, brief: { ...repairFixture.brief, brandChoice: 'other', brandOther: '  Customer printer  ', brand: 'arbitrary label', modelChoice: 'other', model: ' Model X ' } }
+    const { request } = await (await POST(req(custom))).json()
+    expect(request.brief).toMatchObject({ brand: 'Customer printer', brandOther: '  Customer printer  ', model: 'Model X' })
+    expect((await POST(req(custom))).status).toBe(200)
+    for (const patch of [{ brandChoice: 'constructor' }, { feeder: 'mmu' }, { issue: 'mmu' }, { issue: 'ams', feeder: 'none' }]) expect((await POST(req({ ...repairFixture, brief: { ...repairFixture.brief, ...patch } }))).status).toBe(400)
+    expect(state.rows).toHaveLength(1)
+  })
   it('creates one request for concurrent duplicate attempts and exact retries', async () => {
     const responses = await Promise.all([POST(req(repairFixture)), POST(req(repairFixture))])
     expect(responses.map(response => response.status).sort()).toEqual([200, 201]); expect(state.rows).toHaveLength(1)
     expect((await POST(req(repairFixture))).status).toBe(200)
-    expect((await POST(req({ ...repairFixture, brief: { ...repairFixture.brief, model: 'X1' } }))).status).toBe(409)
+    expect((await POST(req({ ...repairFixture, brief: { ...repairFixture.brief, modelChoice: 'x1', model: 'X1' } }))).status).toBe(409)
   })
   it('recovers a committed write whose database response was lost', async () => {
     const create = mocks.create.getMockImplementation()

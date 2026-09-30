@@ -12,7 +12,7 @@ describe('repair assessment validation', () => {
     const brief = JSON.parse(JSON.stringify(repairFixture.brief)); Object.defineProperty(brief, field, { value: 'injected', enumerable: true })
     expect(validateRepairSubmission({ ...repairFixture, brief }).ok).toBe(false)
   })
-  it.each([{ brand: '' }, { model: '' }, { issue: 'confirmed_repair' }, { details: 'short' }, { details: '<script>test</script>' }, { details: 'x'.repeat(2001) }, { email: 'not-an-email' }, { phone: 'abc123' }, { preferredDate: '2099-02-30' }, { preferredDate: 'tomorrow' }, { handover: 'guaranteed_pickup' }, { audience: 'unlisted' }])('rejects invalid brief %j', patch => expect(validateRepairBrief({ ...repairFixture.brief, ...patch }).ok).toBe(false))
+  it.each([{ brandChoice: '' }, { modelChoice: 'other', model: '' }, { issue: 'confirmed_repair' }, { details: 'short' }, { details: '<script>test</script>' }, { details: 'x'.repeat(2001) }, { email: 'not-an-email' }, { phone: 'abc123' }, { preferredDate: '2099-02-30' }, { preferredDate: 'tomorrow' }, { handover: 'guaranteed_pickup' }, { audience: 'unlisted' }])('rejects invalid brief %j', patch => expect(validateRepairBrief({ ...repairFixture.brief, ...patch }).ok).toBe(false))
   it('validates each step without demanding later contact fields', () => {
     expect(validateRepairBrief({ ...repairFixture.brief, email: '' }, { step: 0 }).ok).toBe(true)
     expect(validateRepairBrief({ ...repairFixture.brief, email: '' }, { step: 2 }).errors.email).toBeTruthy()
