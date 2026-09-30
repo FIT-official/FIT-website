@@ -73,6 +73,7 @@ export const DEFAULT_MENU_PAGES = [
     { icon: 'sparkles', label: 'Become a creator', description: 'Plans for selling on Fix It Today.', href: '/creators/join' },
     { icon: 'info', label: 'About', description: 'Who we are and how we work.', href: '/about' },
     { icon: 'print', label: 'Custom 3D print', description: 'Upload a model for an instant quote.', href: '/prints/request' },
+    { icon: 'help', label: 'Printer repair', description: 'Request a repair or maintenance assessment.', href: '/printer-repair' },
     { icon: 'cube', label: 'Print requests', description: 'Track your custom print orders.', href: '/account/prints' },
 ]
 
