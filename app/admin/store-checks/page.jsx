@@ -101,5 +101,6 @@ export default async function StoreChecksPage() {
                 </CheckCard>
             </div>
         </div>
+        <Link href="/admin/catalogue-copy" className="inline-block text-sm underline">Check catalogue descriptions</Link>
     </main>;
 }
