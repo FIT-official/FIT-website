@@ -50,3 +50,10 @@ export function photoImageStyle({ displayZoom = 1, displayFocus = '50% 50%', dis
         ...(displayPosition ? { height: '100%', objectFit: 'cover', objectPosition: displayPosition } : {}),
     }
 }
+
+export function photoImageSizes(sizes, displayZoom = 1) {
+    if (displayZoom <= 1) return sizes
+    // Scale image widths while preserving the viewport breakpoints.
+    return sizes.replace(/(\d+(?:\.\d+)?)(vw|px)(?=\s*(?:,|$))/g,
+        (_match, value, unit) => `${Math.ceil(Number(value) * displayZoom)}${unit}`)
+}

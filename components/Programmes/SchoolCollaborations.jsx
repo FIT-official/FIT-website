@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import styles from './ProgrammeEvidence.module.css'
-import { nyghMiniatureRoomPhoto, photoImageStyle } from './finishedProjectPhotos'
+import { nyghMiniatureRoomPhoto, photoImageStyle, photoImageSizes } from './finishedProjectPhotos'
 export default function SchoolCollaborations() {
     return <section id="school-collaborations" className={styles.section} aria-labelledby="school-collaborations-title">
         <p className={styles.eyebrow}>PROJECTS WITH SINGAPORE SCHOOLS</p><h2 id="school-collaborations-title">Ideas from<br /><em>our schools.</em></h2><p className={styles.intro}>We have worked with Bartley Secondary School, Boon Lay Garden Primary School and Nanyang Girls’ High School. Each school brings a different idea. Here are a few starting points for yours.</p>
@@ -14,7 +14,7 @@ export default function SchoolCollaborations() {
                 <figure>
                     <div className={styles.image} style={{ height: 'auto', aspectRatio: nyghMiniatureRoomPhoto.displayRatio }}>
                         <Image src={nyghMiniatureRoomPhoto.src} width={nyghMiniatureRoomPhoto.width} height={nyghMiniatureRoomPhoto.height}
-                            sizes="(max-width:767px) 90vw, 30vw" alt={nyghMiniatureRoomPhoto.alt} style={photoImageStyle(nyghMiniatureRoomPhoto)} />
+                            sizes={photoImageSizes('(max-width:767px) 90vw, 30vw', nyghMiniatureRoomPhoto.displayZoom)} alt={nyghMiniatureRoomPhoto.alt} style={photoImageStyle(nyghMiniatureRoomPhoto)} />
                     </div>
                     <figcaption style={{ fontSize: '10px', lineHeight: 1.65, marginTop: '10px' }}>{nyghMiniatureRoomPhoto.caption}</figcaption>
                 </figure>

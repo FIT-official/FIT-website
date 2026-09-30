@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { absoluteUrl } from '@/lib/seo/site'
 import { buildPageMetadata } from '@/lib/seo/metadata'
-import { photoImageStyle } from './finishedProjectPhotos'
+import { photoImageStyle, photoImageSizes } from './finishedProjectPhotos'
 import styles from './ProgrammeLayout.module.css'
 
 export { styles }
@@ -15,7 +15,7 @@ export function Photo({ src, alt, caption, width = 1080, height = 1440, priority
     return <figure className={`${styles.photo} ${className}`}>
         <div className={styles.photoFrame} style={{ aspectRatio: displayRatio || `${width} / ${height}` }}>
             <Image src={src} width={width} height={height} alt={alt} priority={priority}
-                sizes={sizes} style={photoImageStyle({ displayZoom, displayFocus, displayPosition })} />
+                sizes={photoImageSizes(sizes, displayZoom)} style={photoImageStyle({ displayZoom, displayFocus, displayPosition })} />
         </div>
         <figcaption>{caption}</figcaption>
     </figure>
@@ -54,7 +54,7 @@ export function ReadingList({ items }) {
     return <section className={`${styles.section} ${styles.reading}`}>
         <SectionHeading title="Further reading" />
         <div className={styles.readingList}>{items.map(({ href, topic, title, photo }) => <Link key={href} href={href} className={styles.readingLink}>
-            {photo && <span className={styles.readingPhoto}><Image src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} sizes="(max-width: 1023px) 43vw, 21vw" style={photoImageStyle(photo)} /></span>}
+            {photo && <span className={styles.readingPhoto}><Image src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} sizes={photoImageSizes('(max-width: 1023px) 43vw, 21vw', photo.displayZoom)} style={photoImageStyle(photo)} /></span>}
             <span className={styles.eyebrow}>{topic}</span><span className={styles.readingTitle}>{title}</span>
             <span aria-hidden="true" className={styles.readingArrow}>↗</span>
         </Link>)}</div>
