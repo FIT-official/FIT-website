@@ -144,9 +144,8 @@ export default async function CreatorPage(props) {
 		.map(block => [block.id, renderPublicMarkdown(block.settings?.body)]));
 	const metadata = creatorMetadata(resolved);
 	const schema = metadata.robots?.index === false ? null : {
-		'@context': 'https://schema.org', '@type': 'ProfilePage',
+		'@context': 'https://schema.org', '@type': 'CollectionPage',
 		name: resolved.displayName, description: metadata.description, url: metadata.alternates.canonical,
-		mainEntity: { '@type': 'Thing', name: resolved.displayName, url: metadata.alternates.canonical },
 	};
 	return <>
 		{schema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(schema) }} />}

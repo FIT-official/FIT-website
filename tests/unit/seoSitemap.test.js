@@ -167,16 +167,25 @@ describe('sitemap database route', () => {
 })
 
 describe('crawler routes', () => {
-    it('excludes private flows while leaving public pages and product images crawlable', () => {
+    it('excludes internal routes while leaving public pages and product images crawlable', () => {
         const result = robots()
         expect(result.sitemap).toBe('https://www.fixitoday.com/sitemap.xml')
         expect(result.rules.allow).toContain('/api/proxy')
-        for (const path of ['/admin', '/account', '/dashboard', '/editor', '/checkout', '/cart', '/api/']) {
+        for (const path of ['/admin', '/account', '/dashboard', '/editor', '/onboarding', '/api/']) {
             expect(result.rules.disallow).toContain(path)
         }
         expect(result.rules.disallow).not.toContain('/shop')
         expect(result.rules.disallow).not.toContain('/products')
         expect(result.rules.disallow).not.toContain('/blog')
+    })
+
+    it.each(['cart', 'checkout', 'sign-in', 'sign-up'])('lets crawlers read the noindex instruction on /%s', async route => {
+        const { metadata } = await import(`../../app/${route}/layout.jsx`)
+        const { disallow } = robots().rules
+        expect(disallow.some(path => `/${route}`.startsWith(path))).toBe(false)
+        expect(metadata.robots.index).toBe(false)
+        expect(metadata.robots.googleBot.index).toBe(false)
+        expect(buildPublicSitemap().some(entry => entry.url.endsWith(`/${route}`))).toBe(false)
     })
 
     it('permanently redirects the old generated child sitemap to the dynamic sitemap', () => {

@@ -5,9 +5,10 @@ export default function robots() {
         rules: {
             userAgent: '*',
             allow: ['/', '/api/proxy'],
+            // Google must crawl sign-in, cart and checkout to read their noindex tags.
             disallow: [
-                '/account', '/admin', '/api/', '/cart', '/checkout',
-                '/dashboard', '/editor', '/onboarding', '/sign-in', '/sign-up',
+                '/account', '/admin', '/api/',
+                '/dashboard', '/editor', '/onboarding',
             ],
         },
         sitemap: `${SITE_URL}/sitemap.xml`,
