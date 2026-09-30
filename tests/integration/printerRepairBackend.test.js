@@ -109,6 +109,9 @@ describe('private repair request API with fixture persistence', () => {
     expect(result.triage.quoteDraft).toMatchObject({ status: 'needs_assessment', price: null, appointment: null, customerApproval: 'required_before_work' })
     expect(result.triage.photos[0].imageUrl).toContain('signed.example.invalid')
     expect(JSON.stringify(result)).not.toContain('private-test-key'); expect(state.rows).toHaveLength(1)
+    await withdraw(req({ action: 'withdraw' }, { method: 'PATCH' }), params(request.requestId))
+    const closed = await (await triage(req(null, { method: 'GET' }), params(request.requestId))).json()
+    expect(closed.triage.quoteDraft.status).toBe('closed')
   })
   it('exposes only a storage availability boolean, never bucket names or secrets', async () => {
     vi.stubEnv('FABRICATION_S3_BUCKET_NAME', 'secret-private-bucket')
