@@ -142,6 +142,15 @@ describe('public creator search content', () => {
         expect(creatorMetadata(null).robots.index).toBe(false)
     })
 
+    it('uses a clear FIT shop title in search and social previews without repeating the brand', () => {
+        const metadata = creatorMetadata({ displayName: 'Fix It Today', shop: { published: true } })
+        expect(metadata.title).toBe('Fix It Today Shop')
+        expect(metadata.openGraph.title).toBe('Fix It Today Shop')
+        expect(metadata.twitter.title).toBe('Fix It Today Shop')
+        expect(metadata.alternates.canonical).toBe('https://www.fixitoday.com/creators/Fix%20It%20Today')
+        expect(creatorMetadata({ displayName: 'Fix It Today', shop: { published: false } }).robots.index).toBe(false)
+    })
+
     it('keeps the empty directory valid but rejects unavailable pagination', async () => {
         const { default: CreatorsPage, generateMetadata } = await import('@/app/creators/page')
         expect(renderToStaticMarkup(await CreatorsPage({ searchParams: Promise.resolve({ page: 'bad' }) }))).toContain('No creator pages yet.')
@@ -151,13 +160,15 @@ describe('public creator search content', () => {
         }
     })
 
-    it('returns not-found for missing and unpublished public profiles while allowing a private owner preview', async () => {
+    it('returns not-found for missing and unpublished shops while keeping owner and admin previews without public schema', async () => {
         const { default: CreatorPage, generateMetadata } = await import('@/app/creators/[id]/page')
         await expect(CreatorPage({ params: Promise.resolve({ id: 'missing' }) })).rejects.toThrow('NEXT_NOT_FOUND')
         state.creator = { userId: 'user_ada', displayName: 'Ada Prints', shop: { published: false } }
         await expect(CreatorPage({ params: Promise.resolve({ id: 'Ada Prints' }) })).rejects.toThrow('NEXT_NOT_FOUND')
         expect((await generateMetadata({ params: Promise.resolve({ id: 'Ada Prints' }) })).robots.index).toBe(false)
         state.viewer = 'user_ada'
+        expect(renderToStaticMarkup(await CreatorPage({ params: Promise.resolve({ id: 'Ada Prints' }) }))).not.toContain('application/ld+json')
+        state.viewer = 'admin'; state.admin = true
         expect(renderToStaticMarkup(await CreatorPage({ params: Promise.resolve({ id: 'Ada Prints' }) }))).not.toContain('application/ld+json')
     })
 
@@ -167,6 +178,11 @@ describe('public creator search content', () => {
         const html = renderToStaticMarkup(await CreatorPage({ params: Promise.resolve({ id: 'Ada Prints' }) }))
         expect(html).toContain('<strong>enclosures</strong>')
         expect(html).toContain('href="/prints"')
-        expect(html).toContain('application/ld+json')
+        const schema = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)[1])
+        expect(schema).toEqual({
+            '@context': 'https://schema.org', '@type': 'CollectionPage',
+            name: 'Ada Prints', description: "Browse Ada Prints's products and creator page on Fix It Today.",
+            url: 'https://www.fixitoday.com/creators/Ada%20Prints',
+        })
     })
 })
