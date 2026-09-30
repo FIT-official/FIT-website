@@ -7,7 +7,7 @@ const product = {
     images: ['images/filament.jpg', 'images/detail.jpg'],
     basePrice: { presentmentAmount: 20, presentmentCurrency: 'SGD' },
     variantTypes: [{ name: 'Colour', options: [{ name: 'Blue', additionalFee: 5, stock: 2 }, { name: 'Red', stock: 0 }] }],
-    delivery: { deliveryTypes: [{ type: 'normal' }] },
+    delivery: { deliveryTypes: [{ type: 'standard-shipping', price: 6.2 }] },
 }
 
 describe('Merchant Center catalogue', () => {
@@ -27,11 +27,26 @@ describe('Merchant Center catalogue', () => {
             { slug: 'admin-product-normal' }, { images: [] }, { description: '' },
             { basePrice: { presentmentAmount: 0, presentmentCurrency: 'SGD' }, variantTypes: [] },
             { basePrice: { presentmentAmount: 20, presentmentCurrency: 'USD' } },
-            { delivery: { deliveryTypes: [{ type: 'digital' }, { type: 'normal' }] } },
+            { delivery: { deliveryTypes: [{ type: 'digital' }, { type: 'standard-shipping', price: 6.2 }] } },
+            { delivery: { deliveryTypes: [{ type: 'pick-up', price: 0 }] } },
+            { delivery: { deliveryTypes: [{ type: 'standard-shipping' }] } },
             { delivery: {} }, { stock: undefined, variantTypes: [] },
         ]
         for (const override of overrides) expect(merchantProduct({ ...product, ...override })).toBeNull()
         expect(merchantProduct({ ...product, listing: undefined })).not.toBeNull()
+    })
+
+    it('keeps item-specific shipping overrides and the five-working-day estimate', () => {
+        expect(merchantProduct(product).shipping).toEqual({
+            country: 'SG', service: 'Standard delivery', price: '6.20 SGD',
+            min_handling_time: 2, max_handling_time: 2, min_transit_time: 3, max_transit_time: 3,
+        })
+        expect(merchantProduct({ ...product, delivery: { deliveryTypes: [
+            { type: 'standard-shipping', price: 6.2, customPrice: 2 },
+        ] } }).shipping.price).toBe('2.00 SGD')
+        expect(merchantProduct({ ...product, delivery: { deliveryTypes: [
+            { type: 'standard-shipping', price: 0 },
+        ] } }).shipping.price).toBe('0.00 SGD')
     })
 
     it('produces valid escaped XML with only public product attributes', () => {
