@@ -16,6 +16,7 @@ import { storeFetch, addShopItem } from '@/lib/storeRequest';
 import { ConnectionNotice, StoreError, useStoreConnection } from '@/components/Cart/StoreFeedback';
 import { getDefaultVariantSelections } from '@/lib/seo/product';
 import { publicProductDescription } from '@/lib/productPublicContent';
+import { productVariantLabel } from '@/lib/productVariantLabel';
 
 const ModelViewer = dynamic(() => import("@/components/3D/ModelViewer"), { ssr: false });
 
@@ -686,9 +687,10 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                     {product.variantTypes.map((variantType) => (
                                         <div key={variantType._id} className="flex flex-col gap-2">
                                             <div className="flex uppercase font-semibold text-sm">
-                                                {variantType.name}
+                                                {productVariantLabel(product, variantType)}
                                             </div>
                                             <select
+                                                aria-label={productVariantLabel(product, variantType)}
                                                 className="w-full p-3 border border-borderColor rounded-md bg-background text-textColor focus:outline-none focus:border-gray-400"
                                                 value={selectedVariantOptions[variantType.name] || (variantType.options[0]?.name || '')}
                                                 onChange={(e) => {
