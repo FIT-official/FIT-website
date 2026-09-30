@@ -124,6 +124,9 @@ export async function POST(req) {
             } else {
                 // Use private server data; public product responses omit paid files.
                 product = await Product.findById(item.productId).lean();
+                if (product?.quoteOnly) {
+                    return NextResponse.json({ error: 'Please contact us to confirm the price and availability of this item before ordering.' }, { status: 409 });
+                }
                 if (!product || product.hidden || product.flaggedForModeration || (identity.guest && product.productType !== 'shop')) {
                     return NextResponse.json({ error: 'A product is no longer available' }, { status: 409 });
                 }

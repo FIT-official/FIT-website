@@ -8,6 +8,13 @@ export default function PricingFields({ form, setForm, allCurrencies, missingFie
 
     return (
         <div className="w-full space-y-4">
+            {form.productType === 'shop' && <label className="flex items-start gap-3 text-sm">
+                <input type="checkbox" checked={!!form.quoteOnly}
+                    onChange={e => setForm(f => ({ ...f, quoteOnly: e.target.checked }))} />
+                <span>Confirm price and availability before purchase
+                    <span className="block mt-1 text-lightColor">Customers can ask for a quote. Online checkout stays off until you confirm the cost and stock. The base price below is not displayed as an offer.</span>
+                </span>
+            </label>}
             {(basePriceMissing || priceCreditsMissing) && (
                 <FieldErrorBanner
                     title="Pricing information required"

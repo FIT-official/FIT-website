@@ -213,7 +213,7 @@ function OrderSection() {
         const isCustomPrint =
             Boolean(cartItem.requestId) || String(cartItem.productId || '').startsWith('custom-print:')
         const product =
-            products[cartItem.productId] || (isCustomPrint ? products['custom-print'] : null) || {}
+            products[cartItem.productId] || order.productSummary || (isCustomPrint ? products['custom-print'] : null) || {}
         const displayTitle = isCustomPrint
             ? 'Custom 3D Print' // request ids are admin-facing only
             : product.name || cartItem.productId

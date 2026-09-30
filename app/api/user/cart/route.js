@@ -24,9 +24,12 @@ export async function POST(req) {
         if (!Number.isSafeInteger(cartItem.quantity ?? 1) || cartItem.quantity === 0 || Math.abs(cartItem.quantity ?? 1) > 100) {
             return NextResponse.json({ error: "Invalid quantity" }, { status: 400 });
         }
+        if (identity.guest && !/^[a-f0-9]{24}$/i.test(cartItem.productId)) return NextResponse.json({ error: "Invalid product" }, { status: 400 });
+        const product = await Product.findById(cartItem.productId).lean();
+        if (product?.quoteOnly) {
+            return NextResponse.json({ error: "Please contact us to confirm the price and availability of this item before ordering." }, { status: 409 });
+        }
         if (identity.guest) {
-            if (!/^[a-f0-9]{24}$/i.test(cartItem.productId)) return NextResponse.json({ error: "Invalid product" }, { status: 400 });
-            const product = await Product.findById(cartItem.productId).lean();
             if (!product || product.hidden || product.flaggedForModeration || product.productType !== 'shop' || product.listing === 'creator' ||
                 ['digital', 'printDelivery'].includes(cartItem.chosenDeliveryType)) {
                 return NextResponse.json({ error: "This item is not available for guest checkout." }, { status: 409 });

@@ -43,6 +43,15 @@ beforeEach(() => {
     m.product.mockResolvedValue({ productType: 'shop', listing: 'fit', delivery: { deliveryTypes: [{ type: 'shipping' }] } });
 });
 describe('Mongo guest cart', () => {
+    it.each([null, 'account_buyer'])('rejects a quote-only item for buyer %s before saving the cart', async (userId) => {
+        m.auth.mockResolvedValue({ userId });
+        if (userId) users.set(userId, { userId, cart: [], save: vi.fn() });
+        m.product.mockResolvedValue({ productType: 'shop', listing: 'fit', quoteOnly: true });
+        const response = await POST(request('POST', { cartItem: { productId, quantity: 1, chosenDeliveryType: 'shipping' } }));
+        expect(response.status).toBe(409);
+        expect((await response.json()).error).toMatch(/confirm the price/);
+        for (const owner of users.values()) expect(owner.save).not.toHaveBeenCalled();
+    });
     it('runs guest add, schema-valid contact save, cart reload and Stripe session recovery end to end', async () => {
         const first = await GET(request());
         const cookie = first.headers.get('set-cookie').split(';')[0];

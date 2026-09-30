@@ -161,6 +161,7 @@ function ProductCard({ product }) {
 
                 <p className="text-base font-bold flex items-end">
                     {(() => {
+                        if (product.quoteOnly) return 'Price on request';
                         const basePrice = Number(product.basePrice?.presentmentAmount || 0);
                         const currency = product.basePrice?.presentmentCurrency || 'SGD';
 
@@ -218,7 +219,7 @@ function ProductCard({ product }) {
                 )}
 
                 <span className='flex text-xs text-lightColor'>{salesCount} sold</span>
-                {product.productType === 'shop' && product.listing !== 'creator' && !isItMyProduct(creatorUserId) && <ShopAddToCart product={product} />}
+                {!product.quoteOnly && product.productType === 'shop' && product.listing !== 'creator' && !isItMyProduct(creatorUserId) && <ShopAddToCart product={product} />}
                 {relationshipReady && !isItMyProduct(creatorUserId) && (
                     <button
                         onClick={liked ? handleUnlike : handleLike}
