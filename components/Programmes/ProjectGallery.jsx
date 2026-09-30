@@ -49,7 +49,7 @@ export default function ProjectGallery({ photos, title, intro }) {
             <p className={styles.count} aria-live="polite">{filtered.length} photographs</p>
         </div>
         <div className={styles.grid} id={`${id}-photos`}>
-            {visible.map((item, index) => <figure className={styles.card} key={item.src}>
+            {visible.map((item, index) => <figure className={`${styles.card} ${item.preserveFrame ? styles.fullFrame : ''}`} key={item.src}>
                 <a href={item.src} aria-label={`Enlarge: ${item.caption}`} aria-haspopup="dialog" onClick={event => {
                     event.preventDefault(); opener.current = event.currentTarget; setActive(index)
                 }}>

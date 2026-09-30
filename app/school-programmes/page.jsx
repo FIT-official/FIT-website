@@ -4,13 +4,10 @@ import { schoolWorkshopPhotos, escapeRoomPhotos } from '@/components/Programmes/
 import LearningOutcomes from '@/components/Programmes/LearningOutcomes'
 import SchoolCollaborations from '@/components/Programmes/SchoolCollaborations'
 import PenProgramme from '@/components/Programmes/PenProgramme'
+import { threeDPenPhotos, miniatureEscapeRoomPhoto } from '@/components/Programmes/finishedProjectPhotos'
 
 const description = '3D pen, 3D printing, Arduino electronics and robotics workshops for schools in Singapore. Explore practical projects and plan a programme for your students.'
-const hero = {
-    src: '/images/collaborations/escape-room-electronics.jpg', width: 1024, height: 768,
-    alt: 'Arduino controller, servo and breadboard on the FIT project workbench',
-    caption: 'Inside a working idea: controller, circuit and mechanism on the FIT project workbench.',
-}
+const hero = miniatureEscapeRoomPhoto
 // Existing approved project photographs. School-specific photos keep their
 // actual attribution; these do not represent Bartley or Boon Lay sessions.
 const mechanismPhoto = schoolWorkshopPhotos.find(photo => photo.src.endsWith('/nygh-printed-mechanism.jpg'))
@@ -46,7 +43,7 @@ export default function SchoolProgrammes() {
                     caption="Printed mechanism parts from the NYGH project." />
             </div>
             <WorkshopList items={[
-                { title: '3D pen making', description: 'Trace a few shapes and join them into a model. Start with a guided first piece, then add details or make a shared class display.', concepts: 'See how flat pieces connect and what helps a model stand up.', href: '#pen-programmes', link: 'Explore 3D pen programmes' },
+                { title: '3D pen making', description: 'Trace a few shapes and join them into a model. Start with a guided first piece, then add details or make a shared class display.', concepts: 'See how flat pieces connect and what helps a model stand up.', href: '#pen-programmes', link: 'Explore 3D pen programmes', photo: threeDPenPhotos[1] },
                 { title: '3D design & printing', description: 'Model a keychain, phone stand or small box in Tinkercad, then compare the design with a printed part.', concepts: 'Explore dimensions, clearance, layers and print orientation.', href: '/blog/tinkercad-keychain-tutorial', link: 'Try a first modelling project', photo: { ...mechanismPhoto, caption: 'Printed mechanism parts from the NYGH project.' } },
                 { title: 'Electronics', description: 'Connect a sensor or button to a light or display. Build a temperature monitor, reaction game or interactive exhibit.', concepts: 'Press a button or read a sensor, then see the circuit respond.', href: '/blog/arduino-nano-dht11-workshop-guide', link: 'An Arduino sensor project', photo: { ...circuitPhoto, caption: 'Circuits on the FIT project workbench.' } },
                 { title: 'Robotics', description: 'Use a sensor and motor to make a device respond to its surroundings. Test when it should move, stop or signal an obstacle.', concepts: 'Connect sensing, thresholds and movement through repeated tests.', photo: { ...sensorPhoto, caption: 'Connecting a sensor and servo in the FIT build.' } },
@@ -71,8 +68,8 @@ export default function SchoolProgrammes() {
                 <div><h3>Facilitator support</h3><p>Training and project guidance for the people running a programme, exhibition or competition activity.</p></div>
             </div>
         </section>
-        <ProjectGallery photos={[...schoolWorkshopPhotos.filter(photo => /room-models|printed-mechanism/.test(photo.src)), ...escapeRoomPhotos.filter(photo => /sensor-wiring|button-lights|electronics/.test(photo.src))]} title="Models, mechanisms and circuits"
-            intro="Project details from NYGH and the FIT miniature escape-room build. These photos show the models, mechanisms and circuits; they are not photos of the Bartley or Boon Lay programmes." />
+        <ProjectGallery photos={[miniatureEscapeRoomPhoto, ...threeDPenPhotos, ...schoolWorkshopPhotos.filter(photo => /room-models|printed-mechanism/.test(photo.src)), ...escapeRoomPhotos.filter(photo => /sensor-wiring|button-lights|electronics/.test(photo.src))]} title="Models, mechanisms and circuits"
+            intro="A FIT miniature escape-room build, 3D pen models from the EEEAA 30th Anniversary workshop, and room models and mechanisms from NYGH. Each photograph names its project." />
         <Questions items={[
             { question: 'Do students need prior experience?', answer: 'Beginner sessions can start with guided modelling or simple circuits. Tell us the students’ level and any coding or design experience so we can choose a suitable task.' },
             { question: 'Does the school need its own equipment?', answer: 'Let us know which laptops, printers and electronics kits are available. We’ll agree on equipment, materials and any printing needed before or after the session.' },

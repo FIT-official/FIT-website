@@ -14,6 +14,8 @@
 .card a { display: block; position: relative; overflow: hidden; background: #e7e4dc; aspect-ratio: 4 / 3; }
 .card img { display: block; height: 100%; width: 100%; object-fit: cover; transition: transform .25s; }
 .card a:hover img { transform: scale(1.025); }
+.fullFrame img { object-fit: contain; }
+.fullFrame a:hover img { transform: none; }
 .enlarge { position: absolute; bottom: 12px; right: 12px; display: grid; place-items: center; width: 30px; height: 30px; background: #f7f5ef; color: var(--ink); font-size: 19px; }
 .card figcaption { margin-top: 11px; font-size: 11px; line-height: 1.65; color: var(--muted); }
 .card figcaption > span { display: block; margin-bottom: 4px; color: var(--ink); font-size: 10px; }

@@ -8,6 +8,7 @@ import SchoolCollaborations from '../components/Programmes/SchoolCollaborations'
 import LearningOutcomes from '../components/Programmes/LearningOutcomes'
 import PenProgramme from '../components/Programmes/PenProgramme'
 import SchoolProgrammes from '../app/school-programmes/page'
+import CompanyWorkshops from '../app/company-workshops/page'
 afterEach(cleanup)
 it('represents all three schools, distinguishes the Bartley brief and avoids student images', () => {
   render(<SchoolCollaborations />)
@@ -23,6 +24,19 @@ it('offers 3D pen programmes to schools, teams and community groups with an enqu
   expect(screen.getByText('COMPANY TEAMS')).toBeInTheDocument()
   expect(screen.getByText('COMMUNITY GROUPS')).toBeInTheDocument()
   expect(screen.getByRole('link', {name:/Plan a 3D pen programme/})).toHaveAttribute('href','#enquire')
+})
+it('keeps the approved finished-project photographs attributed to EEEAA on both programme pages', () => {
+  for (const Page of [SchoolProgrammes, CompanyWorkshops]) {
+    const view=render(<Page />)
+    const section=screen.getByRole('heading',{name:/Draw the pieces/}).closest('section')
+    const image=within(section).getByRole('img')
+    expect(image.getAttribute('src')).toMatch(/^\/images\/programmes\/eeeaa-2026-3d-pen-(?:balloon|phone-stand)\.jpg$/)
+    expect(existsSync('public'+image.getAttribute('src'))).toBe(true)
+    expect(within(section).getByText(/EEEAA 30th Anniversary workshop, 26 September 2026/)).toBeInTheDocument()
+    expect(section.textContent).not.toMatch(/Bartley|Boon Lay|NYGH/)
+    expect(screen.getAllByText(/EEEAA 30th Anniversary workshop, 26 September 2026/).length).toBeGreaterThanOrEqual(3)
+    view.unmount()
+  }
 })
 it('labels learning outcomes as programme goals with reviewable evidence', () => {
   render(<LearningOutcomes />)

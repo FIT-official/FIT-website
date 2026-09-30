@@ -12,7 +12,7 @@ export function programmeMetadata({ title, description, path, image, imageAlt })
 
 export function Photo({ src, alt, caption, width = 1080, height = 1440, priority = false, className = '', sizes = '(max-width: 767px) 100vw, (max-width: 1200px) 45vw, 600px' }) {
     return <figure className={`${styles.photo} ${className}`}>
-        <div className={styles.photoFrame}>
+        <div className={styles.photoFrame} style={{ aspectRatio: `${width} / ${height}` }}>
             <Image src={src} width={width} height={height} alt={alt} priority={priority}
                 sizes={sizes} />
         </div>
