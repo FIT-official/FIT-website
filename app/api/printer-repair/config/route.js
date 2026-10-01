@@ -1,6 +1,7 @@
 import { json } from '@/lib/fabrication/serverHttp'
 import { privateFabricationBucket } from '@/lib/fabrication/serverAssets'
 import { reportPhotoReadiness } from '@/lib/printerRepair/diagnostics'
+import { fabricationRateSource } from '@/lib/fabrication/rateLimitConfig'
 export const dynamic = 'force-dynamic'
 export async function GET() {
   let uploadsAvailable = false
@@ -9,7 +10,7 @@ export async function GET() {
   } else reportPhotoReadiness()
   const requestsAvailable = process.env.NODE_ENV !== 'production' || Boolean(
     process.env.MONGODB_URI && process.env.CLERK_SECRET_KEY &&
-    process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    fabricationRateSource()
   )
   return json({ uploadsAvailable, requestsAvailable })
 }

@@ -38,6 +38,17 @@ describe('repair readiness and staff queue', () => {
     expect(await (await config()).json()).toEqual({ uploadsAvailable: false, requestsAvailable: false })
     expect(mocks.bucket).not.toHaveBeenCalled()
   })
+  it('recognizes existing Vercel KV configuration without advertising an incomplete or mixed pair', async () => {
+    vi.stubEnv('NODE_ENV', 'production'); vi.stubEnv('FABRICATION_S3_BUCKET_NAME', '')
+    vi.stubEnv('MONGODB_URI', 'fixture-database'); vi.stubEnv('CLERK_SECRET_KEY', 'fixture-auth')
+    vi.stubEnv('UPSTASH_REDIS_REST_URL', ''); vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', '')
+    vi.stubEnv('KV_REST_API_URL', 'https://fixture-kv.upstash.io'); vi.stubEnv('KV_REST_API_TOKEN', 'fixture-secret')
+    expect(await (await config()).json()).toEqual({ uploadsAvailable: false, requestsAvailable: true })
+    vi.stubEnv('UPSTASH_REDIS_REST_URL', 'partial-fixture')
+    expect((await (await config()).json()).requestsAvailable).toBe(false)
+    vi.stubEnv('UPSTASH_REDIS_REST_URL', ''); vi.stubEnv('KV_REST_API_TOKEN', '')
+    expect((await (await config()).json()).requestsAvailable).toBe(false)
+  })
   it.each([null, 'shop-provider', 'customer'])('denies nonadmins before any database or private list read: %s', async actor => {
     mocks.auth.mockResolvedValue({ userId: actor }); mocks.admin.mockResolvedValue(false)
     expect((await queue(new Request('https://fit.invalid/api/admin/printer-repair'))).status).toBe(actor ? 403 : 401)
