@@ -1,3 +1,5 @@
+import { AnalyticsCookieChoices } from '@/components/General/AnalyticsConsentProvider';
+
 function PrivacyPage() {
     return (
         <div className="min-h-[92vh] flex flex-col items-center py-10 px-6 md:p-12 border-b border-borderColor justify-center">
@@ -59,6 +61,14 @@ function PrivacyPage() {
                     <h4 className="font-semibold mt-2">Legal Requirements</h4>
                     <p>We may disclose your information to comply with legal obligations, respond to legal processes, enforce agreements, protect rights/property/safety, or investigate fraud/illegal activities.</p>
 
+                    <h4 className="font-semibold mt-2" id="google-purchase-measurement">Google purchase measurement</h4>
+                    <p>If you accept analytics cookies, our Google tag measures paid shop purchases for FIT&apos;s Google Merchant Center. We send the order ID, purchase value, currency, shipping charge, product identifiers, item prices and quantities. We do not include your email, name, address, payment details, order notes or uploaded files in these purchase events. Google may also receive browser information, IP address, cookies and a Google shopping click identifier. The tag stays blocked until you accept analytics cookies.</p>
+                    <p><AnalyticsCookieChoices />. Declining analytics does not prevent shopping or payment.</p>
+
+                    <h4 className="font-semibold mt-2" id="google-customer-reviews">Google Customer Reviews</h4>
+                    <p>On paid-order confirmations with verified delivery details, Google&apos;s Customer Reviews module offers a choice to receive a review survey. The module sends Google your email, order ID, delivery country and estimated delivery date when it opens, even if you then decline the survey. Google sends a survey email only if you opt in. Your answer does not affect your order. For shipped Singapore orders, our delivery estimate is 5 working days for verified in-stock items or 14 working days for verified preorders, counted after paid order confirmation and excluding weekends and Singapore public holidays. Mixed stock/preorder shipments use 14 working days. We do not infer a date for missing stock status or unsupported delivery arrangements.</p>
+                    <p>These Google services may process information outside Singapore. Read <a href="https://policies.google.com/privacy" className="underline" target="_blank" rel="noopener noreferrer">Google&apos;s Privacy Policy</a> for Google&apos;s data practices.</p>
+
                     <h3 className="text-textColor text-sm">Data Retention</h3>
                     <p>We retain your personal information only as long as necessary for the purposes outlined or as required by law. If you close your account or request deletion, we retain data only as required for compliance, dispute resolution, and record-keeping.</p>
 
@@ -88,7 +98,7 @@ function PrivacyPage() {
                         <li>Performance and Analytics Cookies: Track visitor interaction and improve performance.</li>
                         <li>Targeting and Advertising Cookies: Provide targeted ads based on browsing behaviour.</li>
                     </ul>
-                    <p>You can manage cookie preferences via your browser. Disabling some cookies may impact website features.</p>
+                    <p><AnalyticsCookieChoices />. You can also manage cookies in your browser. Necessary checkout and account cookies remain separate from optional analytics.</p>
 
                     <h3 className="text-textColor text-sm">International Transfers</h3>
                     <p>We may transfer/store your data outside Singapore. By using the website, you consent to such transfers, subject to this Privacy Policy.</p>

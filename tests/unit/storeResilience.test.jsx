@@ -300,11 +300,11 @@ describe('Payment submission and return recovery', () => {
         global.fetch.mockRejectedValue(new Error('network'));
         render(<Return />);
         expect(await screen.findByRole('alert')).toHaveTextContent('Unable to connect');
-        global.fetch.mockResolvedValue(response({ session: { status: 'complete', payment_status: 'unpaid' } }));
+        global.fetch.mockResolvedValue(response({ session: { id: 'cs_one', status: 'complete', payment_status: 'unpaid' } }));
         fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
         expect(await screen.findByText('Payment is processing')).toBeInTheDocument();
         expect(screen.queryByText('Thank you for your order')).toBeNull();
-        global.fetch.mockResolvedValue(response({ session: { status: 'complete', payment_status: 'paid' } }));
+        global.fetch.mockResolvedValue(response({ session: { id: 'cs_one', status: 'complete', payment_status: 'paid' } }));
         fireEvent.click(screen.getByRole('button', { name: 'Check payment status' }));
         expect(await screen.findByText('Thank you for your order')).toBeInTheDocument();
         expect(global.fetch.mock.calls.every(([, options]) => !options.method)).toBe(true);
@@ -313,5 +313,13 @@ describe('Payment submission and return recovery', () => {
         render(<Return />);
         expect(await screen.findByRole('alert')).toHaveTextContent('payment link is incomplete');
         expect(global.fetch).not.toHaveBeenCalled();
+    });
+    it('never treats a paid response for another session as this order confirmation', async () => {
+        m.params = new URLSearchParams('session_id=cs_one');
+        global.fetch.mockResolvedValue(response({ session: { id: 'cs_other', status: 'complete', payment_status: 'paid' } }));
+        render(<Return />);
+        expect(await screen.findByText('Payment is processing')).toBeInTheDocument();
+        expect(screen.queryByText('Thank you for your order')).toBeNull();
+        expect(global.fetch.mock.calls.some(([url]) => String(url).endsWith('/measurement'))).toBe(false);
     });
 });

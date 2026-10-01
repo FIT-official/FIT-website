@@ -12,6 +12,8 @@ import { Suspense } from "react";
 import { CurrencyProvider } from "@/components/General/CurrencyContext";
 import ClientProviders from "@/components/General/ClientProviders";
 import PostHogProvider from "@/components/General/PostHogProvider";
+import AnalyticsConsentProvider from "@/components/General/AnalyticsConsentProvider";
+import GoogleMeasurementProvider from "@/components/General/GoogleMeasurementProvider";
 import { SITE_URL, absoluteUrl } from '@/lib/seo/site';
 
 const inter = Inter({
@@ -74,7 +76,7 @@ export default function RootLayout({ children }) {
           <CurrencyProvider>
             <Smooth>
                 <ToastProvider>
-                  <PostHogProvider>
+                  <AnalyticsConsentProvider><GoogleMeasurementProvider><PostHogProvider>
                   <ClientProviders>
                     <div className="flex flex-row items-center justify-center bg-baseColor">
                       <div className="flex flex-col md:w-[90vw] lg:w-[85vw] max-w-[1350px] w-screen border-l border-r border-borderColor transition-all duration-300 ease-in-out overflow-hidden bg-background">
@@ -86,7 +88,7 @@ export default function RootLayout({ children }) {
                       <Suspense><ChatLauncher /></Suspense>
                     </div>
                   </ClientProviders>
-                  </PostHogProvider>
+                  </PostHogProvider></GoogleMeasurementProvider></AnalyticsConsentProvider>
                 </ToastProvider>
             </Smooth>
           </CurrencyProvider>

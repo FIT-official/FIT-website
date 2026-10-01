@@ -113,6 +113,17 @@ const ProductSchema = new mongoose.Schema(
         stock: { type: Number, required: false, min: 0 },
         infiniteStock: { type: Boolean, default: false },
         quoteOnly: { type: Boolean, default: false },
+        // Private verified classification for review delivery estimates where
+        // numeric stock is not tracked. No default or automatic preorder inference.
+        googleReviewAvailability: {
+            type: new mongoose.Schema({
+                state: { type: String, enum: ['in_stock', 'preorder'], required: true },
+                source: { type: String, required: true, maxlength: 200 },
+                verifiedAt: { type: Date, required: true },
+            }, { _id: false, strict: 'throw' }),
+            select: false,
+            default: undefined,
+        },
         // Never selected for public catalogue responses. Only the admin
         // editor and authoritative shipping calculations opt into this data.
         shippingCosts: {

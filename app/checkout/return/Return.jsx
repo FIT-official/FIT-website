@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { storeJson } from '@/lib/storeRequest';
 import { captureCheckoutEvent } from '@/lib/checkoutAnalytics';
 import { ConnectionNotice, StoreError, useStoreConnection } from '@/components/Cart/StoreFeedback';
+import PaidOrderMeasurement from '@/components/Checkout/PaidOrderMeasurement';
 
 export default function Return() {
     const sessionId = useSearchParams().get('session_id');
@@ -28,7 +29,7 @@ export default function Return() {
     // The session ID is the read identity; reconnect and retry call the latest check.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => { check(); }, [sessionId]);
-    const paid = session?.payment_status === 'paid';
+    const paid = session?.payment_status === 'paid' && session?.id === sessionId;
     const pending = session?.status === 'complete' && !paid;
     return <div className="min-h-[92vh] flex flex-col items-center justify-center p-8 border-b border-borderColor">
         <ConnectionNotice offline={offline} />
@@ -43,6 +44,7 @@ export default function Return() {
             {session.status === 'open' && !paid && <Link className="underline" href={session.attemptId ? '/checkout?attempt=' + encodeURIComponent(session.attemptId) : '/checkout'}>Return to checkout</Link>}
             {session.status === 'expired' && <Link className="underline" href="/cart">Back to cart</Link>}
             <Link className="underline" href="/shop">Continue shopping</Link>
+            {paid && <PaidOrderMeasurement sessionId={session.id || sessionId} />}
         </div>}
     </div>;
 }

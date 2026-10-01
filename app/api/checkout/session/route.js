@@ -127,7 +127,7 @@ export async function POST(req) {
                 };
             } else {
                 // Use private server data; public product responses omit paid files.
-                product = await Product.findById(item.productId).select('+shippingCosts').lean();
+                product = await Product.findById(item.productId).select('+shippingCosts +googleReviewAvailability').lean();
                 if (product?.quoteOnly) {
                     return NextResponse.json({ error: 'Please contact us to confirm the price and availability of this item before ordering.' }, { status: 409 });
                 }

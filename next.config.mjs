@@ -92,7 +92,7 @@ const nextConfig = {
                 headers: [
                     {
                         key: "Content-Security-Policy",
-                        value: "frame-ancestors 'self' https://pay.google.com; frame-src 'self' https://pay.google.com https://js.stripe.com https://challenges.cloudflare.com; ",
+                        value: "frame-ancestors 'self' https://pay.google.com; frame-src 'self' https://pay.google.com https://js.stripe.com https://challenges.cloudflare.com https://www.google.com/shopping/customerreviews/optin; ",
                     },
                 ],
             },

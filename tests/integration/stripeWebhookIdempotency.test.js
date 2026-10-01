@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { REVIEW_DELIVERY_POLICY } from '@/lib/googleReviewDelivery';
 const f = vi.hoisted(() => ({ state: null, draft: null, event: null, failOrder: false,
     failTransaction: false, sendEmail: vi.fn(), notify: vi.fn(), options: [], transactions: 0 }));
 vi.mock('stripe', () => ({ default: class {
@@ -70,6 +71,7 @@ vi.mock('@clerk/nextjs/server', () => ({ clerkClient: async () => ({ users: { ge
 import { POST } from '@/app/api/webhook/stripe/route';
 
 const req = () => ({ text: async () => '{}', headers: { get: () => 'valid-signature' } });
+afterEach(() => vi.useRealTimers());
 const originalCart = () => ({ _id: 'cart1', productId: 'product1', quantity: 2, selectedVariants: {}, chosenDeliveryType: 'shipping', orderNote: '' });
 function setup() {
     f.event = { type: 'checkout.session.completed', data: { object: { id: 'cs_paid', mode: 'payment', payment_status: 'paid',
@@ -88,6 +90,34 @@ function setup() {
     f.sendEmail.mockReset(); f.notify.mockReset();
 }
 beforeEach(setup);
+
+describe('Google review estimate saved with the paid order', () => {
+    it('uses the checkout status and confirmation time, ignoring later product classification and revisits', async () => {
+        vi.useFakeTimers(); vi.setSystemTime(new Date('2026-09-30T16:30:00Z'));
+        f.state.checkout.shippingAddress = { country: 'SG' };
+        f.state.checkout.items[0].googleReviewAvailability = { state: 'in_stock', policy: REVIEW_DELIVERY_POLICY, source: 'checkout-stock' };
+        f.state.products.product1.googleReviewAvailability = { state: 'preorder' };
+        expect((await POST(req())).status).toBe(200);
+        expect(f.state.orders[0].googleReviewDeliveryEstimate.date).toBe('2026-10-08');
+        expect(f.state.orders[0].paidConfirmedAt.toISOString()).toBe('2026-09-30T16:30:00.000Z');
+        vi.setSystemTime(new Date('2026-10-05T00:00:00Z'));
+        await POST(req());
+        expect(f.state.orders).toHaveLength(1);
+        expect(f.state.orders[0].googleReviewDeliveryEstimate.date).toBe('2026-10-08');
+    });
+    it('leaves the review date absent when old snapshots have no verified status', async () => {
+        f.state.checkout.shippingAddress = { country: 'SG' };
+        expect((await POST(req())).status).toBe(200);
+        expect(f.state.orders[0].googleReviewDeliveryEstimate).toBeUndefined();
+    });
+    it('applies the approved preorder duration including an observed holiday', async () => {
+        vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-06T02:00:00Z'));
+        f.state.checkout.shippingAddress = { country: 'SG' };
+        f.state.checkout.items[0].googleReviewAvailability = { state: 'preorder', policy: REVIEW_DELIVERY_POLICY, source: 'verified-fulfilment-record' };
+        expect((await POST(req())).status).toBe(200);
+        expect(f.state.orders[0].googleReviewDeliveryEstimate.date).toBe('2026-11-27');
+    });
+});
 
 describe('Stripe paid checkout snapshots', () => {
     it('creates only one paid guest order across repeated completion and asynchronous events', async () => {

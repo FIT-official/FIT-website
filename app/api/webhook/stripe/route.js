@@ -11,6 +11,7 @@ import CustomPrintRequest from '@/models/CustomPrintRequest';
 import DigitalProductTransaction from '@/models/DigitalProductTransaction';
 import { checkoutPlain, checkoutOrderItem, validateCheckoutPayment, removePurchasedCartItems } from '@/lib/checkoutSnapshot';
 import { isLegacyCheckout, recordLegacyCheckoutPayment } from '@/lib/legacyCheckoutReconciliation';
+import { estimateGoogleReviewDelivery } from '@/lib/googleReviewDelivery';
 import { sendEmail } from '@/lib/email';
 import { buildNewSaleEmail, buildOrderConfirmationEmail } from '@/lib/email/templates/transactional';
 import { notifyCustomPrintEvent } from '@/lib/notifications/customPrint';
@@ -154,11 +155,16 @@ export async function POST(req) {
                 }
             }
             const address = claimed.shippingAddress || {};
+            // Anchor on verified paid order confirmation, not session creation,
+            // mutable later inventory or the customer's return-page visit.
+            const paidConfirmedAt = new Date();
+            const googleReviewDeliveryEstimate = estimateGoogleReviewDelivery({ checkout: claimed, confirmedAt: paidConfirmedAt });
             const newOrder = new Order({
                 orderId: `ORD_${payment.id}`, userId: claimed.userId, stripeSessionId: payment.id,
                 stripePaymentIntentId: payment.payment_intent || null, paymentMethod,
                 customerEmail: claimed.customerEmail || payment.customer_details?.email,
                 customerName: claimed.customerName || '',
+                paidConfirmedAt, ...(googleReviewDeliveryEstimate ? { googleReviewDeliveryEstimate } : {}),
                 shippingAddress: { line1: address.street || '', line2: address.unitNumber || '', city: address.city || '',
                     state: address.state || '', postalCode: address.postalCode || '', country: address.country || '' },
                 items: orderItems,

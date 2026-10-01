@@ -102,6 +102,19 @@ const OrderSchema = new mongoose.Schema({
     // Tracking
     trackingNumber: { type: String, default: null },
     trackingUrl: { type: String, default: null },
+    paidConfirmedAt: { type: Date, default: null },
+
+    // Optional verified, order-specific fulfilment input for Google Reviews.
+    // The paid webhook applies the owner-approved policy to immutable checkout
+    // availability, or leaves this absent when status/date cannot be verified.
+    googleReviewDeliveryEstimate: {
+        type: new mongoose.Schema({
+            date: { type: String, required: true, match: /^\d{4}-\d{2}-\d{2}$/ },
+            source: { type: String, required: true, maxlength: 200 },
+            verifiedAt: { type: Date, required: true },
+        }, { _id: false, strict: 'throw' }),
+        default: undefined,
+    },
 
     // Notes
     customerNote: { type: String, default: "" },
