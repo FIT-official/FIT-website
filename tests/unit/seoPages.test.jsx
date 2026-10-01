@@ -63,7 +63,7 @@ vi.mock('@/lib/blog/sortIndex', () => ({
     ensureBlogSortIndex: vi.fn(async () => {}),
 }))
 vi.mock('@/lib/blog/renderTiptap', () => ({ renderTiptapHtml: () => '<p>Repair guide.</p>' }))
-vi.mock('@/app/blog/[blogSlug]/BlogPageClient', () => ({ default: ({ post }) => <article>{post.title}</article> }))
+vi.mock('@/app/blog/[blogSlug]/BlogPageClient', () => ({ default: ({ post }) => <article>{post.title}{post.cta && <a href={post.cta.url}>{post.cta.text}</a>}</article> }))
 
 const product = (name, slug, amount = 22) => ({
     _id: slug, name, slug, description: `${name} filament`, images: [],
@@ -95,7 +95,7 @@ describe('public landing pages before browser effects', () => {
             text: 'Current creator services', heroImage: 'admin/uploads/home/current.jpg', darkOverlay: 20,
         })
         expect(html).toContain('3D printing and custom parts in Singapore')
-        expect(html).toContain('href="/blog/3d-printer-repair"')
+        expect(html).toContain('href="/printer-repair"')
         expect(html).toContain('href="/shop"')
         expect(metadata.alternates.canonical).toBe('https://www.fixitoday.com/')
         expect(metadata.openGraph.url).toBe(metadata.alternates.canonical)
@@ -109,6 +109,7 @@ describe('public landing pages before browser effects', () => {
         expect(html).toContain('3D Printing Filament and Electronics in Singapore')
         expect(html).toContain('href="/products/pla"')
         expect(html).toContain('href="/products/bundle"')
+        expect(html).toContain('href="/printer-repair"')
         expect(html).toContain('SGD 22.00')
         expect(html).toContain('SGD 140.00')
         expect(html).not.toContain('No products found.')
@@ -165,6 +166,28 @@ describe('server shop catalogue', () => {
 })
 
 describe('blog search metadata', () => {
+    it('routes the repair article CTA to assessment instead of its legacy email CTA', async () => {
+        state.post = { slug: '3d-printer-repair', title: 'Printer Repair', status: 'published',
+            contentFormat: 'tiptap', contentJson: {}, categories: [],
+            cta: { tag: 'Repairs', text: 'Email about a repair', url: 'mailto:fixittoday.contact@gmail.com' } }
+        const { default: BlogPage } = await import('@/app/blog/[blogSlug]/page')
+        const html = renderToStaticMarkup(await BlogPage({ params: Promise.resolve({ blogSlug: state.post.slug }) }))
+        expect(html).toContain('href="/printer-repair"')
+        expect(html).toContain('Request a printer assessment')
+        expect(html).not.toContain('mailto:')
+        expect(state.post.cta.url).toBe('mailto:fixittoday.contact@gmail.com')
+    })
+
+    it('preserves the stored CTA for other articles', async () => {
+        state.post = { slug: '3d-printing', title: 'Printing', status: 'published',
+            contentFormat: 'tiptap', contentJson: {}, categories: [],
+            cta: { tag: 'Printing', text: 'Request a print', url: '/prints/request' } }
+        const { default: BlogPage } = await import('@/app/blog/[blogSlug]/page')
+        const html = renderToStaticMarkup(await BlogPage({ params: Promise.resolve({ blogSlug: state.post.slug }) }))
+        expect(html).toContain('href="/prints/request"')
+        expect(html).not.toContain('href="/printer-repair"')
+    })
+
     it('uses the published-status filter and a www canonical with an absolute social image', async () => {
         state.post = { slug: '3d-printer-repair', title: 'Printer Repair', status: 'published', heroImage: 'guides/repair.jpg' }
         const { generateMetadata } = await import('@/app/blog/[blogSlug]/page')
