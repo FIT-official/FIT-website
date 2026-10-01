@@ -9,6 +9,7 @@ vi.mock('@/lib/fabrication/serverAssets', () => ({ privateFabricationBucket: moc
 vi.mock('@/models/PrinterRepairRequest', () => ({ default: { find: mocks.find } }))
 import { GET as config } from '@/app/api/printer-repair/config/route'
 import { GET as queue } from '@/app/api/admin/printer-repair/route'
+import { GET as detail } from '@/app/api/admin/printer-repair/[requestId]/route'
 import { repairFixture } from '../fixtures/printerRepair'
 beforeEach(() => {
   vi.clearAllMocks(); mocks.rows.length = 0
@@ -33,6 +34,12 @@ describe('repair readiness and staff queue', () => {
     mocks.auth.mockResolvedValue({ userId: actor }); mocks.admin.mockResolvedValue(false)
     expect((await queue(new Request('https://fit.invalid/api/admin/printer-repair'))).status).toBe(actor ? 403 : 401)
     expect(mocks.db).not.toHaveBeenCalled(); expect(mocks.find).not.toHaveBeenCalled()
+  })
+  it.each([null, 'shop-provider', 'customer'])('denies nonadmins on private request details before database or rate service access: %s', async actor => {
+    mocks.auth.mockResolvedValue({ userId: actor }); mocks.admin.mockResolvedValue(false)
+    const response = await detail(new Request('https://fit.invalid/api/admin/printer-repair/private'), { params: Promise.resolve({ requestId: 'private' }) })
+    expect(response.status).toBe(actor ? 403 : 401)
+    expect(mocks.db).not.toHaveBeenCalled(); expect(mocks.rate).not.toHaveBeenCalled()
   })
   it('bounds the admin queue and removes internal identities from each result', async () => {
     for (let index = 0; index < 21; index++) mocks.rows.push({ requestId: '56e1fe9c-33e5-4ae3-8e70-dbc6b0c97b34', status: 'assessment_requested', customerUserId: 'private-identity', submissionFingerprint: 'private-hash', brief: repairFixture.brief, photoAssetIds: [], createdAt: new Date('2026-10-01T00:00:00.000Z'), updatedAt: new Date('2026-10-01T00:00:00.000Z') })
