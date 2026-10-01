@@ -3,7 +3,8 @@ import { connectToDatabase } from '@/lib/db'
 import { checkAdminPrivileges } from '@/lib/checkPrivileges'
 import PrinterRepairRequest from '@/models/PrinterRepairRequest'
 import { enforceFabricationRate } from '@/lib/fabrication/serverRateLimit'
-import { fail, failure, json } from '@/lib/fabrication/serverHttp'
+import { fail, json } from '@/lib/fabrication/serverHttp'
+import { repairFailure } from '@/lib/printerRepair/diagnostics'
 import { shapeRepairRequest } from '@/lib/printerRepair/server'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -27,5 +28,5 @@ export async function GET(request) {
     const rows = await PrinterRepairRequest.find(query).sort({ createdAt: -1, requestId: -1 }).limit(21).lean()
     const page = rows.slice(0, 20), last = page.at(-1)
     return json({ requests: page.map(shapeRepairRequest), nextCursor: rows.length > 20 ? `${new Date(last.createdAt).toISOString()}|${last.requestId}` : null })
-  } catch (error) { return failure(error) }
+  } catch (error) { return repairFailure(error, 'staff_queue') }
 }

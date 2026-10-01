@@ -3,7 +3,10 @@ import { useCallback, useEffect, useState } from 'react'
 import styles from '@/components/Services/PrinterRepairFlow.module.css'
 async function read(url, signal) {
   const response = await fetch(url, { signal, cache: 'no-store' }), body = await response.json()
-  if (!response.ok) throw new Error(body.error || 'Assessment requests could not be loaded.')
+  if (!response.ok) {
+    const reference = ['rate_limit_unavailable', 'service_unavailable', 'storage_unavailable'].includes(body.code) ? ` Reference: ${body.code}.` : ''
+    throw new Error(`${body.error || 'Assessment requests could not be loaded.'}${reference}`)
+  }
   return body
 }
 const date = value => new Intl.DateTimeFormat('en-SG', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Singapore' }).format(new Date(value))

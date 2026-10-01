@@ -11,6 +11,7 @@ import { GET as config } from '@/app/api/printer-repair/config/route'
 import { GET as queue } from '@/app/api/admin/printer-repair/route'
 import { GET as detail } from '@/app/api/admin/printer-repair/[requestId]/route'
 import { repairFixture } from '../fixtures/printerRepair'
+import { fail } from '@/lib/fabrication/serverHttp'
 beforeEach(() => {
   vi.clearAllMocks(); mocks.rows.length = 0
   mocks.bucket.mockResolvedValue('fixture-private'); mocks.auth.mockResolvedValue({ userId: 'fixture-admin' }); mocks.admin.mockResolvedValue(true)
@@ -18,6 +19,13 @@ beforeEach(() => {
 })
 afterEach(() => vi.unstubAllEnvs())
 describe('repair readiness and staff queue', () => {
+  it('reports a limiter outage distinctly and reads no queue data', async () => {
+    mocks.rate.mockImplementationOnce(async () => fail('This service is temporarily unavailable.', 503, 'rate_limit_unavailable'))
+    const response = await queue(new Request('https://fit.invalid/api/admin/printer-repair'))
+    expect(response.status).toBe(503)
+    expect((await response.json()).code).toBe('rate_limit_unavailable')
+    expect(mocks.db).not.toHaveBeenCalled(); expect(mocks.find).not.toHaveBeenCalled()
+  })
   it('offers uploads only after existing private storage passes its read-only verification', async () => {
     vi.stubEnv('FABRICATION_S3_BUCKET_NAME', 'fixture-private')
     expect((await (await config()).json()).uploadsAvailable).toBe(true)

@@ -1,7 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { connectToDatabase } from '@/lib/db'
 import { enforceFabricationRate } from '@/lib/fabrication/serverRateLimit'
-import { fail, failure, json, readJson } from '@/lib/fabrication/serverHttp'
+import { fail, json, readJson } from '@/lib/fabrication/serverHttp'
+import { repairFailure } from '@/lib/printerRepair/diagnostics'
 import { createRepairRequest, recoverRepairRequest, requireRepairOrigin } from '@/lib/printerRepair/server'
 
 export const runtime = 'nodejs'
@@ -16,7 +17,7 @@ export async function POST(request) {
     await connectToDatabase()
     const result = await createRepairRequest(body, userId)
     return json({ request: result.request }, result.created ? 201 : 200)
-  } catch (error) { return failure(error) }
+  } catch (error) { return repairFailure(error, 'submit') }
 }
 export async function GET(request) {
   try {
@@ -25,5 +26,5 @@ export async function GET(request) {
     await enforceFabricationRate(request, 'public', userId)
     await connectToDatabase()
     return json({ request: await recoverRepairRequest(new URL(request.url).searchParams.get('clientRequestId'), userId) })
-  } catch (error) { return failure(error) }
+  } catch (error) { return repairFailure(error, 'recover') }
 }

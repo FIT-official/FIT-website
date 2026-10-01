@@ -27,10 +27,12 @@ async function advance(user = userEvent.setup()) {
   await user.type(screen.getByLabelText('What happens when you use the printer?'), repairFixture.brief.details)
   await user.click(screen.getByRole('button', { name: 'Continue' }))
   await screen.findByLabelText(/Photos Optional/, { selector: 'input' })
+  await waitFor(() => expect(screen.getByRole('heading', { name: 'Photos & checks' })).toHaveFocus())
   return user
 }
 async function contact(user, audience = 'individual') {
   await user.click(screen.getByRole('button', { name: 'Continue' }))
+  await waitFor(() => expect(screen.getByRole('heading', { name: 'Contact & review' })).toHaveFocus())
   await user.type(screen.getByLabelText('Your name'), 'Demo Customer')
   await user.type(screen.getByLabelText('Email'), 'customer@example.invalid')
   await user.selectOptions(screen.getByLabelText('Who is the printer for?'), audience)
