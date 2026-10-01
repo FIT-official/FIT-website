@@ -11,6 +11,7 @@ import DeliveryTypeManagement from '@/components/Admin/DeliveryTypeManagement'
 import OrderStatusManagement from '@/components/Admin/OrderStatusManagement'
 import CustomPrintProductManagement from '@/components/Admin/CustomPrintProductManagement'
 import CustomPrintRequests from '@/components/Admin/CustomPrintRequests'
+import PrinterRepairManagement from '@/components/Admin/PrinterRepairManagement'
 import QuotingPricingManagement from '@/components/Admin/QuotingPricingManagement'
 import PrintTimeCalibration from '@/components/Admin/PrintTimeCalibration'
 import ReviewManagement from '@/components/Admin/ReviewManagement'
@@ -82,6 +83,7 @@ const NAV_GROUPS = [
                 icon: IoCubeOutline,
                 description: 'Quote, track and manage custom print jobs.',
             },
+            { key: 'printerRepair', label: 'Printer Assessments', icon: IoPrintOutline, description: 'Review repair requests, private photos and next steps.' },
             {
                 key: 'orders',
                 label: 'Orders & Statuses',
@@ -196,6 +198,7 @@ const PANELS = {
     newsletter: NewsletterManagement,
     customPrint: CustomPrintProductManagement,
     customPrintRequests: CustomPrintRequests,
+    printerRepair: PrinterRepairManagement,
     quoting: QuotingPricingManagement,
     printTiming: PrintTimeCalibration,
     reviews: ReviewManagement,

@@ -6,7 +6,7 @@ vi.mock('@clerk/nextjs/server', () => ({ auth: mocks.auth }))
 vi.mock('@/lib/db', () => ({ connectToDatabase: mocks.connect }))
 vi.mock('@/lib/checkPrivileges', () => ({ checkAdminPrivileges: mocks.admin }))
 vi.mock('@/lib/fabrication/serverRateLimit', () => ({ enforceFabricationRate: mocks.rate }))
-vi.mock('@/lib/fabrication/serverAssets', () => ({ findOwnedAsset: mocks.ownedAsset, shapeFabricationAsset: mocks.shapeAsset }))
+vi.mock('@/lib/fabrication/serverAssets', () => ({ findOwnedAsset: mocks.ownedAsset, shapeFabricationAsset: mocks.shapeAsset, privateFabricationBucket: vi.fn(async () => 'private-test') }))
 vi.mock('@/models/PrinterRepairRequest', () => ({ default: { createIndexes: vi.fn(async () => {}), findOne: mocks.find, create: mocks.create, findOneAndUpdate: mocks.update } }))
 import { POST, GET } from '@/app/api/printer-repair/route'
 import { GET as detail, PATCH as withdraw } from '@/app/api/printer-repair/[requestId]/route'
@@ -123,6 +123,6 @@ describe('private repair request API with fixture persistence', () => {
   })
   it('exposes only a storage availability boolean, never bucket names or secrets', async () => {
     vi.stubEnv('FABRICATION_S3_BUCKET_NAME', 'secret-private-bucket')
-    expect(await (await config()).json()).toEqual({ uploadsAvailable: true }); vi.unstubAllEnvs()
+    expect(await (await config()).json()).toEqual({ uploadsAvailable: true, requestsAvailable: true }); vi.unstubAllEnvs()
   })
 })

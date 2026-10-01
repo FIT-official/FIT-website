@@ -37,6 +37,7 @@ export default function PrinterRepairFlow() {
   const [step, setStep] = useState(0), [errors, setErrors] = useState({})
   const [photos, setPhotos] = useState([]), [photoError, setPhotoError] = useState('')
   const [uploadsAvailable, setUploadsAvailable] = useState(null)
+  const [requestsAvailable, setRequestsAvailable] = useState(null)
   const [photoBusy, setPhotoBusy] = useState(false), [uploadProgress, setUploadProgress] = useState('')
   const [selectionNotice, setSelectionNotice] = useState('')
   const photoGeneration = useRef(0)
@@ -54,7 +55,9 @@ export default function PrinterRepairFlow() {
   useEffect(() => {
     setSavedReference(new URL(window.location.href).searchParams.has('request'))
     const controller = new AbortController(), lifecycle = photoGeneration
-    boundedFetch('/api/printer-repair/config', { signal: controller.signal }).then(body => setUploadsAvailable(body.uploadsAvailable === true)).catch(() => { if (!controller.signal.aborted) setUploadsAvailable(false) })
+    boundedFetch('/api/printer-repair/config', { signal: controller.signal }).then(body => {
+      setUploadsAvailable(body.uploadsAvailable === true); setRequestsAvailable(body.requestsAvailable !== false)
+    }).catch(() => { if (!controller.signal.aborted) { setUploadsAvailable(false); setRequestsAvailable(false) } })
     return () => { controller.abort(); lifecycle.current++ }
   }, [])
   useEffect(() => { files.current = photos }, [photos])
@@ -151,7 +154,7 @@ export default function PrinterRepairFlow() {
   }
   async function submit(event) {
     event.preventDefault()
-    if (sending.current || !isLoaded || !isSignedIn || !user?.id) return
+    if (sending.current || !isLoaded || !isSignedIn || !user?.id || requestsAvailable !== true) return
     const checked = validateRepairBrief(brief, { today: pending ? undefined : singaporeToday() })
     if (!pending && !checked.ok) return showErrors(checked.errors)
     sending.current = true; setMessage(''); setErrors({})
@@ -271,10 +274,11 @@ export default function PrinterRepairFlow() {
         </div>}
         {message && <p role="alert" className={styles.error}>{message}</p>}
         {pending && <p className={styles.note}>This send needs confirmation. Check its status first, or retry exactly the same details.</p>}
+        {requestsAvailable === false && <p role="status" className={styles.note}>Online assessment requests are temporarily unavailable. Your draft is still here. <a href="mailto:fixittoday.contact@gmail.com">Email FIT about your printer</a> instead.</p>}
         {busy && <p role="status" aria-live="polite">{busy === 'uploading' ? uploadProgress || 'Uploading your photos privately.' : busy === 'checking' ? 'Checking the saved request.' : 'Sending your assessment request.'}</p>}
         <div className={styles.actions}>
           {step > 0 && <button type="button" className={styles.secondary} disabled={locked} onClick={() => { setStep(current => current - 1); setErrors({}); requestAnimationFrame(() => heading.current?.focus()) }}>Back</button>}
-          {step < 2 ? <button key="continue" type="button" className={styles.primary} disabled={locked || photoBusy} onClick={nextStep}>Continue</button> : <button key="send" type="submit" className={styles.primary} disabled={Boolean(busy) || !isLoaded || !isSignedIn}>{busy === 'uploading' ? 'Uploading…' : busy ? 'Please wait…' : pending ? 'Retry same request' : 'Send assessment request'}</button>}
+          {step < 2 ? <button key="continue" type="button" className={styles.primary} disabled={locked || photoBusy} onClick={nextStep}>Continue</button> : <button key="send" type="submit" className={styles.primary} disabled={Boolean(busy) || !isLoaded || !isSignedIn || requestsAvailable !== true}>{busy === 'uploading' ? 'Uploading…' : busy ? 'Please wait…' : pending ? 'Retry same request' : 'Send assessment request'}</button>}
           {pending && <button type="button" className={styles.secondary} onClick={checkStatus} disabled={Boolean(busy) || !isSignedIn}>Check request status</button>}
           {busy === 'uploading' && <button type="button" className={styles.secondary} onClick={() => active.current?.abort()}>Stop upload</button>}
         </div>

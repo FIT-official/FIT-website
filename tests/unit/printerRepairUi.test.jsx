@@ -36,6 +36,14 @@ async function contact(user, audience = 'individual') {
   await user.selectOptions(screen.getByLabelText('Who is the printer for?'), audience)
 }
 describe('repair request customer interaction', () => {
+  it('keeps the draft and offers email when the existing production submission configuration is unavailable', async () => {
+    globalThis.fetch.mockImplementation(async () => new Response(JSON.stringify({ uploadsAvailable: true, requestsAvailable: false })))
+    render(<PrinterRepairFlow />); const user = await advance(); await contact(user)
+    expect(await screen.findByRole('link', { name: 'Email FIT about your printer' })).toHaveAttribute('href', 'mailto:fixittoday.contact@gmail.com')
+    expect(screen.getByRole('button', { name: 'Send assessment request' })).toBeDisabled()
+    expect(screen.getByLabelText('Your name')).toHaveValue('Demo Customer')
+    expect(calls.some(call => call.options.method === 'POST')).toBe(false)
+  })
   it('shows an optional observation in review and clears it when the issue changes', async () => {
     render(<PrinterRepairFlow />); const user = await advance()
     await user.click(screen.getByRole('button', { name: 'Back' }))
