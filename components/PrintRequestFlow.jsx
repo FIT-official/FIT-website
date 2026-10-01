@@ -154,7 +154,8 @@ export default function PrintRequestFlow() {
   const farmReady = creatorState === 'ready' && Boolean(farmProfile)
   const deliveryOptions = farmReady ? farmProfile.deliveryOptions : config.deliveryTypes
   useEffect(() => {
-    if (!deliveryOptions.some((option) => option.type === deliveryType)) setDeliveryType(deliveryOptions[0]?.type || '')
+    // A pending default update must preserve a valid choice made since render.
+    setDeliveryType((current) => deliveryOptions.some((option) => option.type === current) ? current : deliveryOptions[0]?.type || '')
   }, [deliveryOptions, deliveryType])
 
   // Saved address for courier delivery. An address typed while signed out is

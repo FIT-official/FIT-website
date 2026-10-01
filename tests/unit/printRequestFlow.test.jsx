@@ -208,7 +208,10 @@ describe('creator print farm mode', () => {
     expect(within(delivery).getByText(/Courier · /)).toBeInTheDocument()
     expect(screen.getByLabelText('Priority')).toBeInTheDocument()
     expect(screen.queryByLabelText('Rush, sooner')).toBeNull()
-    fireEvent.click(within(delivery).getByRole('radio', { name: /Courier/ }))
+    const courier = within(delivery).getByRole('radio', { name: /Courier/ })
+    expect(courier).toBeEnabled()
+    fireEvent.click(courier)
+    await waitFor(() => expect(courier).toBeChecked())
     // No address form: the creator arranges delivery directly.
     expect(screen.queryByRole('textbox', { name: /Street address/ })).toBeNull()
     expect(screen.getByText('Print Studio arranges collection or courier with you directly once they confirm the price.')).toBeInTheDocument()
