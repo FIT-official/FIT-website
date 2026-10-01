@@ -70,6 +70,9 @@ function PrivacyPage() {
                     <p>These Google services may process information outside Singapore. Read <a href="https://policies.google.com/privacy" className="underline" target="_blank" rel="noopener noreferrer">Google&apos;s Privacy Policy</a> for Google&apos;s data practices.</p>
 
                     <h3 className="text-textColor text-sm">Data Retention</h3>
+                    <h4 className="font-semibold mt-2" id="community-comments-reviews">Blog comments and hosted-shop reviews</h4>
+                    <p>If you post a comment, service review or shop response, your chosen display name, text, rating where applicable and posting date are public. We privately link the post to your account. Service reviews also link to your completed request so we can check eligibility and prevent duplicate or self reviews; order references, contact details and payment information are not included in the public review. Unconfirmed post attempts may be kept in your browser session for up to one hour so you can retry without duplicating a post.</p>
+                    <p>FIT platform admins can view abuse reports and moderation records, hide or restore content with a recorded reason, and review substantiated abuse before restricting community posting. Shop owners cannot remove customer reviews. Reports and moderation audit records are private to FIT admins. Automatic checks may miss content or flag it incorrectly; negative feedback alone is not an abuse finding. Contact FIT to request a moderation or privacy review.</p>
                     <p>We retain your personal information only as long as necessary for the purposes outlined or as required by law. If you close your account or request deletion, we retain data only as required for compliance, dispute resolution, and record-keeping.</p>
 
                     <h3 className="text-textColor text-sm">Security of Your Information</h3>

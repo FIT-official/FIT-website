@@ -12,6 +12,7 @@ import OrderStatusManagement from '@/components/Admin/OrderStatusManagement'
 import CustomPrintProductManagement from '@/components/Admin/CustomPrintProductManagement'
 import CustomPrintRequests from '@/components/Admin/CustomPrintRequests'
 import PrinterRepairManagement from '@/components/Admin/PrinterRepairManagement'
+import CommunityModerationPanel from '@/components/Community/CommunityModerationPanel'
 import QuotingPricingManagement from '@/components/Admin/QuotingPricingManagement'
 import PrintTimeCalibration from '@/components/Admin/PrintTimeCalibration'
 import ReviewManagement from '@/components/Admin/ReviewManagement'
@@ -108,6 +109,7 @@ const NAV_GROUPS = [
                 icon: IoPeopleOutline,
                 description: 'Customer list with orders, value and requests. Coming soon.',
             },
+            { key: 'community', label: 'Comments & Shop Reviews', icon: IoStarOutline, description: 'FIT moderation of article comments and hosted service reviews.' },
             {
                 key: 'creatorSubscriptions',
                 label: 'Creator Plans',
@@ -202,6 +204,7 @@ const PANELS = {
     quoting: QuotingPricingManagement,
     printTiming: PrintTimeCalibration,
     reviews: ReviewManagement,
+    community: CommunityModerationPanel,
     customers: CustomersPanel,
     creatorSubscriptions: CreatorSubscriptions,
 }

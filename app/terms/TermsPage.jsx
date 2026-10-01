@@ -22,6 +22,10 @@ function TermsPage() {
                         <li><b>Account:</b> The user profile created upon registration, required to access certain features.</li>
                     </ul>
 
+                    <h3 className="text-textColor text-sm mt-4" id="community-posting">Comments and hosted-service reviews</h3>
+                    <p>Comments and eligible service reviews appear immediately. Keep posts relevant and do not include private contact details, threats, harassment, impersonation or spam. Honest criticism and low ratings are welcome; they are flagged for FIT attention without being treated as abuse. A completed-request label means the review is linked to a completed request in FIT records. It is not an independent quality assessment or confirmation of a payment made directly to a provider.</p>
+                    <p>Each completed request can have one service review. Providers cannot review their own shop or remove customer reviews. They can report concerns and give a shop response. FIT platform admins may hide any comment, review or response for security or moderation, with a recorded reason and reversible restoration. The original content and audit history are retained privately under our retention policy.</p>
+                    <p>Substantiated abuse may lead to an explicit temporary community-posting restriction or a FIT-admin-reviewed posting suspension. No automatic punishment threshold is enabled. These restrictions affect posting comments, reviews and shop responses. You can still report a concern, shop and pay. Contact fixittoday.contact@gmail.com to request a review of a moderation decision.</p>
                     <h3 className="text-textColor text-sm mt-4">Creator Rights and Responsibilities</h3>
                     <h4 className="font-semibold mt-2">Eligibility</h4>
                     <p>By creating an Account (Creator Account), you confirm you have legal capacity to form a binding contract. If using on behalf of an entity, you warrant you have authority to bind that entity.</p>

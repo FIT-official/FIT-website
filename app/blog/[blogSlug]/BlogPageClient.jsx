@@ -1,4 +1,5 @@
 "use client"
+import CommunityThread from '@/components/Community/CommunityThread'
 import { useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -85,6 +86,7 @@ export default function BlogPageClient({ post, contentHtml, related = [], previe
                 </div>
             </div>
 
+            {!preview && <div className="w-[90%] md:w-3/5"><CommunityThread kind="blog_comment" subject={post.slug} /></div>}
             {related.length > 0 && (
                 <div className="flex w-[90%] md:w-3/5 flex-col mt-16">
                     <h2 className="text-sm font-medium text-textColor uppercase tracking-wide mb-3">Related articles</h2>

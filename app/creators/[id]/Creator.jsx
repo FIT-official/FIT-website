@@ -9,6 +9,7 @@ import { useUser } from '@clerk/nextjs';
 import { GoPencil, GoEyeClosed } from "react-icons/go";
 import CreatorPageFrame from "@/components/CreatorPage/CreatorPageFrame";
 import BlockRenderer from "@/components/CreatorPage/BlockRenderer";
+import CommunityThread from '@/components/Community/CommunityThread';
 import { sanitizeDisplayName } from "@/components/CreatorPage/shared";
 
 function Creator({ creator, products, textHtml = {}, canEdit = false }) {
@@ -56,6 +57,7 @@ function Creator({ creator, products, textHtml = {}, canEdit = false }) {
                     products={safeProducts}
                     textHtml={textHtml}
                 />
+                {!unpublished && <CommunityThread kind="shop_review" subject={creatorUserId} hideIfUnavailable />}
             </div>
         </CreatorPageFrame>
     )
