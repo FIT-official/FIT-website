@@ -24,7 +24,7 @@ export default async function Home() {
             <h2 className="mb-4">3D printer repair and filament</h2>
             <p className="text-sm max-w-3xl mb-6">Get help with Bambu Lab, Prusa and other FDM printer faults, arrange maintenance, or choose filament for your next print. Repair enquiries can include your printer model, error message, photos and a short video.</p>
             <div className="flex flex-wrap gap-5 text-sm underline">
-                <Link href="/blog/3d-printer-repair">Printer repair and maintenance</Link>
+                <Link href="/printer-repair">Printer repair and maintenance</Link>
                 <Link href="/shop">Shop 3D printing filament</Link>
                 <Link href="/blog/3d-printing-filament-types-guide">Compare filament materials</Link>
             </div>
