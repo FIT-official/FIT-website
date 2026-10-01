@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { absoluteUrl } from '@/lib/seo/site'
 import { buildPageMetadata } from '@/lib/seo/metadata'
 import { photoImageStyle, photoImageSizes } from './finishedProjectPhotos'
+import { readingPhotoFor } from './readingPhotos'
 import styles from './ProgrammeLayout.module.css'
 
 export { styles }
@@ -53,7 +54,7 @@ export function Questions({ items }) {
 export function ReadingList({ items }) {
     return <section className={`${styles.section} ${styles.reading}`}>
         <SectionHeading title="Further reading" />
-        <div className={styles.readingList}>{items.map(({ href, topic, title, photo }) => <Link key={href} href={href} className={styles.readingLink}>
+        <div className={styles.readingList}>{items.map(({ href, topic, title, photo = readingPhotoFor(href) }) => <Link key={href} href={href} className={styles.readingLink}>
             {photo && <span className={styles.readingPhoto}><Image src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} sizes={photoImageSizes('(max-width: 1023px) 43vw, 21vw', photo.displayZoom)} style={photoImageStyle(photo)} /></span>}
             <span className={styles.eyebrow}>{topic}</span><span className={styles.readingTitle}>{title}</span>
             <span aria-hidden="true" className={styles.readingArrow}>↗</span>

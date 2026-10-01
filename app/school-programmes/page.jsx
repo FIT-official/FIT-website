@@ -72,10 +72,10 @@ export default function SchoolProgrammes() {
             { question: 'How is the programme priced?', answer: 'The quote depends on the group size, number of sessions, materials, equipment and project support. Share your budget early so we can plan a suitable scope.' },
         ]} />
         <ReadingList items={[
-            { href: '/blog/3d-printing', topic: 'Start here', title: 'How 3D printing works', photo: nyghMiniatureRoomPhoto },
-            { href: '/blog/tinkercad-toolbox-guide', topic: 'Design', title: 'Your first Tinkercad tools', photo: nyghMiniatureRoomPhoto },
-            { href: '/blog/3d-printing-theory-and-material-properties', topic: 'Materials', title: 'From plastic to a useful part', photo: nyghMiniatureRoomPhoto },
-            { href: '/blog/arduino-nano-io-expansion-shield-wiring', topic: 'Electronics', title: 'Connect an Arduino project', photo: buttonPhoto },
+            { href: '/blog/3d-printing', topic: 'Start here', title: 'How 3D printing works' },
+            { href: '/blog/tinkercad-toolbox-guide', topic: 'Design', title: 'Your first Tinkercad tools' },
+            { href: '/blog/3d-printing-theory-and-material-properties', topic: 'Materials', title: 'From plastic to a useful part' },
+            { href: '/blog/arduino-nano-io-expansion-shield-wiring', topic: 'Electronics', title: 'Connect an Arduino project' },
         ]} />
     </ProgrammeLayout>
 }

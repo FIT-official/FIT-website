@@ -1,5 +1,5 @@
 import { build } from 'esbuild'
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises'
 import { resolve } from 'node:path'
 const output = resolve('output/programme-review')
 await mkdir(output, { recursive: true })
@@ -7,6 +7,13 @@ await mkdir(resolve('output/playwright'), { recursive: true })
 const names = ['escape-room-electronics', 'escape-room-sensor-wiring', 'escape-room-button-lights', 'nygh-room-models', 'nygh-printed-mechanism']
 const images = {}
 for (const name of names) images[`/images/collaborations/${name}.jpg`] = 'data:image/jpeg;base64,' + (await readFile(`public/images/collaborations/${name}.jpg`)).toString('base64')
+for (const folder of ['images/collaborations', 'images/programmes']) {
+  for (const file of await readdir(`public/${folder}`)) {
+    if (!file.endsWith('.jpg')) continue
+    images[`/${folder}/${file}`] = 'data:image/jpeg;base64,' + (await readFile(`public/${folder}/${file}`)).toString('base64')
+  }
+}
+for (const file of ['printer.png', 'filament.png']) images[`/${file}`] = 'data:image/png;base64,' + (await readFile(`public/${file}`)).toString('base64')
 for (const [name, source] of [['school', 'school-programmes'], ['company', 'company-workshops']]) {
   const result = await build({ stdin: { contents: `import React from 'react'; import {createRoot} from 'react-dom/client'; import Page from './app/${source}/page.jsx'; createRoot(document.getElementById('root')).render(<Page />);`, resolveDir: process.cwd(), loader: 'jsx' }, bundle: true, write: false, outfile: resolve(output, `${name}.js`), jsx: 'automatic', alias: { '@': process.cwd() }, minify: true, plugins: [{ name: 'local-next-view', setup(builder) {
     builder.onResolve({ filter: /^next\/(image|link)$/ }, args => ({ path: args.path, namespace: 'review' }))

@@ -9,6 +9,7 @@ import LearningOutcomes from '../components/Programmes/LearningOutcomes'
 import PenProgramme from '../components/Programmes/PenProgramme'
 import SchoolProgrammes from '../app/school-programmes/page'
 import CompanyWorkshops from '../app/company-workshops/page'
+import { ReadingList } from '../components/Programmes/ProgrammeLayout'
 afterEach(cleanup)
 it('represents all three schools, distinguishes the Bartley brief and avoids student images', () => {
   render(<SchoolCollaborations />)
@@ -45,19 +46,28 @@ it('labels learning outcomes as programme goals with reviewable evidence', () =>
   expect(screen.getByText('A short explanation of what changed')).toBeInTheDocument()
   expect(screen.getByRole('link')).toHaveAttribute('href', '#enquire')
 })
-it('adds existing non-identifying photographs to reading cards while preserving their destinations', () => {
-  render(<SchoolProgrammes />)
-  const reading=screen.getByRole('heading',{name:'Further reading'}).closest('section')
-  const links=within(reading).getAllByRole('link')
-  expect(links.map(link=>link.getAttribute('href'))).toEqual(['/blog/3d-printing','/blog/tinkercad-toolbox-guide','/blog/3d-printing-theory-and-material-properties','/blog/arduino-nano-io-expansion-shield-wiring'])
-  for(const link of links){
-    const image=within(link).getByRole('img')
-    expect(image.getAttribute('src')).toMatch(/(?:nygh-miniature-room-finished|escape-room-button-lights)\.jpg$/)
-    expect(existsSync('public'+image.getAttribute('src'))).toBe(true)
-    expect(image.getAttribute('alt')).toBeTruthy()
+it('maps reading topics to distinct existing catalogue and finished-project images on both pages', () => {
+  for (const Page of [SchoolProgrammes, CompanyWorkshops]) {
+    const view = render(<Page />)
+    const reading = screen.getByRole('heading', {name:'Further reading'}).closest('section')
+    const links = within(reading).getAllByRole('link')
+    const images = links.map(link => within(link).getByRole('img'))
+    expect(images.map(image => image.getAttribute('src'))).toEqual(['/printer.png', '/images/programmes/miniature-escape-room-finished.jpg', '/filament.png', '/images/collaborations/escape-room-button-lights.jpg'])
+    expect(new Set(images.map(image => image.getAttribute('src'))).size).toBe(4)
+    for (const image of images) {
+      expect(existsSync('public'+image.getAttribute('src'))).toBe(true)
+      expect(image.getAttribute('alt')).toBeTruthy()
+    }
+    expect(images[1].style.transform).toBe('scale(5)')
+    expect(images[1].style.transformOrigin).toBe('50% 77%')
+    expect(links.map(link=>link.getAttribute('href'))).toEqual(Page === SchoolProgrammes ? ['/blog/3d-printing','/blog/tinkercad-toolbox-guide','/blog/3d-printing-theory-and-material-properties','/blog/arduino-nano-io-expansion-shield-wiring'] : ['/blog/3d-printing','/blog/fusion-360-cup-holder-workshop-guide','/blog/3d-printing-filament-types-guide','/blog/arduino-nano-dht11-workshop-guide'])
+    view.unmount()
   }
-  expect(screen.getAllByText('A button panel that responds with light.').length).toBeGreaterThan(0)
-  expect(screen.getAllByText('A finished miniature room from the NYGH project.').length).toBeGreaterThan(0)
+})
+it('keeps an unknown reading topic text-only without an unrelated image fallback', () => {
+  render(<ReadingList items={[{href:'/blog/new-topic', topic:'Guide', title:'A new guide'}]} />)
+  expect(screen.getByRole('link')).toHaveAttribute('href','/blog/new-topic')
+  expect(screen.queryByRole('img')).not.toBeInTheDocument()
 })
 it('leads with a finished creation and keeps wiring and component closeups in the lower gallery', () => {
   render(<SchoolProgrammes />)
@@ -65,7 +75,7 @@ it('leads with a finished creation and keeps wiring and component closeups in th
   expect(within(hero).getByRole('img')).toHaveAttribute('src','/images/programmes/eeeaa-2026-3d-pen-balloon.jpg')
   expect(within(hero).getByText(/EEEAA 30th Anniversary workshop/)).toBeInTheDocument()
   expect(within(hero).queryByText(/NYGH|Bartley|Boon Lay/)).not.toBeInTheDocument()
-  const technicalImages = screen.getAllByRole('img').filter(image => /sensor-wiring|escape-room-electronics|nygh-printed-mechanism|miniature-escape-room-finished/.test(image.getAttribute('src')))
+  const technicalImages = screen.getAllByRole('img').filter(image => !image.closest('[class*=reading]') && /sensor-wiring|escape-room-electronics|nygh-printed-mechanism|miniature-escape-room-finished/.test(image.getAttribute('src')))
   expect(technicalImages.length).toBeGreaterThan(0)
   for(const image of technicalImages) expect(image.closest('#gallery')).not.toBeNull()
   expect(within(document.querySelector('#gallery')).getAllByRole('img')[0]).toHaveAttribute('src','/images/programmes/eeeaa-2026-3d-pen-balloon.jpg')
