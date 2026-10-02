@@ -2,6 +2,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { absoluteUrl } from '@/lib/seo/site'
 import { buildPageMetadata } from '@/lib/seo/metadata'
+import { ORGANIZATION_ID } from '@/lib/seo/organization'
+import { faqJsonLd } from '@/lib/seo/faq'
+import { jsonLdString } from '@/lib/jsonLd'
+import ProcurementNote from '@/components/Procurement/ProcurementNote'
 import { photoImageStyle, photoImageSizes } from './finishedProjectPhotos'
 import styles from './ProgrammeLayout.module.css'
 
@@ -43,6 +47,7 @@ export function WorkshopList({ items }) {
 
 export function Questions({ items }) {
     return <section className={`${styles.section} ${styles.questions}`}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(faqJsonLd(items)) }} />
         <SectionHeading title="Before booking" />
         <div>{items.map(({ question, answer }) => <details className={styles.question} key={question}>
             <summary>{question}<span aria-hidden="true" className={styles.plus}>+</span></summary><p>{answer}</p>
@@ -65,11 +70,11 @@ export default function ProgrammeLayout({ title, titleLead, titleAccent, intro, 
     const schema = {
         '@context': 'https://schema.org', '@type': 'Service', name: title, description: intro, serviceType, url: absoluteUrl(path),
         areaServed: { '@type': 'Country', name: 'Singapore' },
-        provider: { '@type': 'Organization', name: 'Fix It Today', url: absoluteUrl('/') }, image: absoluteUrl(hero.src),
+        provider: { '@type': 'Organization', '@id': ORGANIZATION_ID, name: 'Fix It Today', url: absoluteUrl('/') }, image: absoluteUrl(hero.src),
     }
     const enquiryUrl = `mailto:fixittoday.contact@gmail.com?subject=${encodeURIComponent(enquirySubject)}&body=${encodeURIComponent(enquiryDetails)}`
     return <article className={styles.page}>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(schema) }} />
         <nav aria-label="Workshop pages" className={styles.pageNav}>
             <Link href="/school-programmes" aria-current={path === '/school-programmes' ? 'page' : undefined}>School programmes</Link>
             <Link href="/company-workshops" aria-current={path === '/company-workshops' ? 'page' : undefined}>Company workshops</Link>
@@ -86,7 +91,7 @@ export default function ProgrammeLayout({ title, titleLead, titleAccent, intro, 
                 </div>
             </div>
         </header>
-        <div className={styles.content}>{children}</div>
+        <div className={styles.content}>{children}<ProcurementNote className={styles.section} /></div>
         <section id="enquire" className={styles.enquiry}>
             <div><h2>Plan a<br /><em>workshop</em></h2></div>
             <div className={styles.enquiryDetails}>

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import HomeClient from './HomeClient'
 import { absoluteUrl } from '@/lib/seo/site'
 import { getHomeHeroContent } from '@/lib/homeHero'
+import ProcurementNote from '@/components/Procurement/ProcurementNote'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,7 +12,7 @@ const description = '3D printing, metal fabrication from CAD drawings, electroni
 export const metadata = {
     title, description,
     alternates: { canonical: absoluteUrl('/') },
-    openGraph: { title, description, url: absoluteUrl('/'), siteName: 'Fix It Today®', locale: 'en_SG', type: 'website', images: [absoluteUrl('/fitogimage.png')] },
+    openGraph: { title, description, url: absoluteUrl('/'), siteName: 'Fix It Today', locale: 'en_SG', type: 'website', images: [absoluteUrl('/fitogimage.png')] },
     twitter: { card: 'summary_large_image', title, description, images: [absoluteUrl('/fitogimage.png')] },
 }
 
@@ -22,7 +23,7 @@ export default async function Home() {
             <h1 className="text-2xl md:text-3xl mb-4">3D printing and custom parts in Singapore</h1>
             <p className="text-sm max-w-3xl mb-6">Fix It Today provides 3D printing, CAD design, custom metal fabrication and electronics for research and commercial projects. We also run school programmes and company workshops.</p>
             <h2 className="mb-4">3D printer repair and filament</h2>
-            <p className="text-sm max-w-3xl mb-6">Get help with Bambu Lab, Prusa and other FDM printer faults, arrange maintenance, or choose filament for your next print. Repair enquiries can include your printer model, error message, photos and a short video.</p>
+            <p className="text-sm max-w-3xl mb-6">Request an assessment for an FDM printer fault or maintenance. Share your printer brand, model, symptoms and checks already tried. FIT will discuss any proposed work before it starts.</p>
             <div className="flex flex-wrap gap-5 text-sm underline">
                 <Link href="/printer-repair">Printer repair and maintenance</Link>
                 <Link href="/shop">Shop 3D printing filament</Link>
@@ -48,6 +49,7 @@ export default async function Home() {
             </div>
             <Link href="/research-fabrication" className="mt-6 inline-block text-sm underline underline-offset-4">View all services</Link>
         </section>
+        <ProcurementNote className="w-full px-8 md:px-20 py-12 border-b border-borderColor" />
         <section className="w-full px-8 md:px-20 py-12 border-b border-borderColor">
             <h2 className="text-2xl md:text-3xl mb-4">3D Printing and Robotics Workshops</h2>
             <p className="text-sm leading-7 max-w-3xl mb-6">Plan a school STEM programme or a company workshop in Singapore. Explore 3D design, Arduino electronics and introductory robotics through a project your group can build and test.</p>

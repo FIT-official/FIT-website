@@ -4,6 +4,7 @@ import BenefitsSection from "./components/BenefitsSection"
 import IntroductionSection from "./components/IntroductionSection"
 import Link from 'next/link'
 import { programmeMetadata } from '@/components/Programmes/ProgrammeLayout'
+import ProcurementNote from '@/components/Procurement/ProcurementNote'
 
 export const metadata = programmeMetadata({
     title: 'About FIT | 3D Printing, Fabrication & Workshops Singapore',
@@ -19,6 +20,7 @@ function About() {
             <BenefitsSection />
             <Header title="OUR SERVICES" />
             <ServicesSection />
+            <ProcurementNote className="border-t border-borderColor px-8 py-12 md:px-20" />
             <section className="border-t border-borderColor px-8 py-12 md:px-20">
                 <h2>Custom parts and prototypes</h2>
                 <p className="mt-4 max-w-3xl text-sm leading-7">We help with metal fabrication, 3D design, printing and electronics for research and commercial projects. Send us your drawings or let us know what you need.</p>

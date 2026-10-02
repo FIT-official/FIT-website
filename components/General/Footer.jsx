@@ -26,6 +26,7 @@ function Footer() {
                         <Link href='/metal-fabrication' className='footerLink'>Metal fabrication</Link>
                         <Link href='/3d-design-printing' className='footerLink'>3D design and printing</Link>
                         <Link href='/electronics-prototyping' className='footerLink'>Custom electronics</Link>
+                        <Link href='/procurement' className='footerLink'>School and university procurement</Link>
                     </div>
                     <div className='flex flex-col gap-3'>
                         <div className='uppercase tracking-wide font-semibold'>Learn and make</div>

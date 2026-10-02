@@ -53,7 +53,7 @@ describe('public sitemap URLs', () => {
     it('lists only public landing pages under the canonical www origin', () => {
         const entries = buildPublicSitemap()
         expect(entries.map(entry => entry.url)).toEqual([
-            'https://www.fixitoday.com/', 'https://www.fixitoday.com/about',
+            'https://www.fixitoday.com/', 'https://www.fixitoday.com/about', 'https://www.fixitoday.com/procurement',
             'https://www.fixitoday.com/shop', 'https://www.fixitoday.com/prints',
             'https://www.fixitoday.com/creators', 'https://www.fixitoday.com/creators/join',
             'https://www.fixitoday.com/blog',
@@ -169,6 +169,7 @@ describe('sitemap database route', () => {
 describe('crawler routes', () => {
     it('excludes internal routes while leaving public pages and product images crawlable', () => {
         const result = robots()
+        expect(result.rules.userAgent).toEqual(['*', 'OAI-SearchBot'])
         expect(result.sitemap).toBe('https://www.fixitoday.com/sitemap.xml')
         expect(result.rules.allow).toContain('/api/proxy')
         for (const path of ['/admin', '/account', '/dashboard', '/editor', '/onboarding', '/api/']) {

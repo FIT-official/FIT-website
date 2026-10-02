@@ -15,42 +15,12 @@ import PostHogProvider from "@/components/General/PostHogProvider";
 import AnalyticsConsentProvider from "@/components/General/AnalyticsConsentProvider";
 import GoogleMeasurementProvider from "@/components/General/GoogleMeasurementProvider";
 import { SITE_URL, absoluteUrl } from '@/lib/seo/site';
+import { siteJsonLd } from '@/lib/seo/organization';
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
 });
-
-const GEO_JSON_LD = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": "https://www.fixitoday.com/#organization",
-      "name": "Fix It Today®",
-      "url": "https://www.fixitoday.com",
-      "logo": "https://www.fixitoday.com/fitogimage.png",
-      "description": "3D printing, custom metal parts, CAD design, electronics, printer repair and STEM workshops in Singapore.",
-      "email": "fixittoday.contact@gmail.com",
-      "sameAs": ["https://www.linkedin.com/company/fix-it-today-sg"],
-      "areaServed": { "@type": "Country", "name": "Singapore" }
-    },
-    {
-      "@type": "WebSite",
-      "@id": "https://www.fixitoday.com/#website",
-      "url": "https://www.fixitoday.com",
-      "name": "Fix It Today®",
-      "publisher": {
-        "@id": "https://www.fixitoday.com/#organization"
-      },
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://www.fixitoday.com/shop?search={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
-    }
-  ]
-};
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
@@ -69,7 +39,7 @@ export default function RootLayout({ children }) {
           <script
             type="application/ld+json"
             suppressHydrationWarning
-            dangerouslySetInnerHTML={{ __html: jsonLdString(GEO_JSON_LD) }}
+            dangerouslySetInnerHTML={{ __html: jsonLdString(siteJsonLd) }}
           />
         </head>
         <body className={`${inter.variable} antialiased`}>
