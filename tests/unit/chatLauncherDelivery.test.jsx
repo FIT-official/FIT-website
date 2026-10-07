@@ -1,12 +1,13 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-const m = vi.hoisted(() => ({ send: vi.fn(), channel: null }));
-vi.mock('@clerk/nextjs', () => ({ useUser: () => ({ user: { id: 'buyer' }, isLoaded: true }) }));
+const m = vi.hoisted(() => ({ send: vi.fn(), channel: null, user: { id: 'buyer' }, loaded: true }));
+vi.mock('@clerk/nextjs', () => ({ useUser: () => ({ user: m.user, isLoaded: m.loaded }) }));
 vi.mock('stream-chat', () => ({ StreamChat: { getInstance: () => ({
     connectUser: async () => {}, disconnectUser: async () => {}, channel: () => m.channel,
 }) } }));
 import ChatLauncher from '@/components/Chat/ChatLauncher';
 beforeEach(() => {
+    m.user = { id: 'buyer' }; m.loaded = true;
     m.send.mockReset().mockResolvedValue({});
     m.channel = { watch: async () => {}, state: { messages: [] }, off: vi.fn(), on: vi.fn(), sendMessage: m.send };
     vi.stubGlobal('fetch', vi.fn(async url => ({ ok: true, json: async () =>
@@ -15,6 +16,19 @@ beforeEach(() => {
     })));
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+it('gives signed-out visitors a working sign-in action', () => {
+    m.user = null;
+    render(<ChatLauncher />);
+    fireEvent.click(screen.getByRole('button', { name: 'Chat with us' }));
+    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/sign-in');
+});
+it('shows account loading before deciding whether sign-in is required', () => {
+    m.user = null; m.loaded = false;
+    render(<ChatLauncher />);
+    fireEvent.click(screen.getByRole('button', { name: 'Chat with us' }));
+    expect(screen.getByText('Loading your account…')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Sign in' })).toBeNull();
+});
 it('connects a new buyer to a real support destination before enabling Send', async () => {
     render(<ChatLauncher />);
     fireEvent.click(screen.getByRole('button', { name: 'Chat with us' }));

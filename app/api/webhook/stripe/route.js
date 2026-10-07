@@ -13,6 +13,7 @@ import { checkoutPlain, checkoutOrderItem, validateCheckoutPayment, removePurcha
 import { isLegacyCheckout, recordLegacyCheckoutPayment } from '@/lib/legacyCheckoutReconciliation';
 import { estimateGoogleReviewDelivery } from '@/lib/googleReviewDelivery';
 import { sendEmail } from '@/lib/email';
+import { enqueueOrderEmail, drainOrderEmails } from '@/lib/orderEmailQueue';
 import { buildNewSaleEmail, buildOrderConfirmationEmail } from '@/lib/email/templates/transactional';
 import { notifyCustomPrintEvent } from '@/lib/notifications/customPrint';
 import { clerkClient } from '@clerk/nextjs/server';
@@ -75,6 +76,7 @@ export async function POST(req) {
         const checkout = await CheckoutSession.findOne({ sessionId: payment.id });
         if (!checkout) return NextResponse.json({ error: 'Checkout session not found' }, { status: 404 });
         if (checkout.status === 'completed') {
+            await drainOrderEmails({ sessionId: payment.id }).catch(() => {});
             return NextResponse.json({ received: true, duplicate: true });
         }
         if (isLegacyCheckout(checkout)) {
@@ -176,6 +178,12 @@ export async function POST(req) {
                 customerNote: orderItems.map(item => item.orderNote).filter(Boolean).join('; '),
             });
             await newOrder.save({ session: dbSession });
+            await enqueueOrderEmail(payment.id, {
+                to: claimed.customerEmail || payment.customer_details?.email,
+                ...buildOrderConfirmationEmail({ customerName: claimed.customerName || '',
+                    orderRef: `ORD_${payment.id}`, total: claimed.totalAmount / 100, currency: claimed.currency,
+                    items: claimed.items.map(checkoutOrderItem) }),
+            }, dbSession);
             user.orderHistory.push(...orderItems.map(item => ({ cartItem: {
                 // Legacy readers multiply this all-in unit price by quantity.
                 ...item, price: item.totalPrice / item.quantity,
@@ -200,10 +208,7 @@ export async function POST(req) {
             } catch (error) { console.error('Paid print notification failed:', error); }
         }
         try {
-            const to = checkout.customerEmail || payment.customer_details?.email;
-            if (to) await sendEmail({ to, ...buildOrderConfirmationEmail({ customerName: checkout.customerName || '',
-                orderRef: `ORD_${payment.id}`, total: checkout.totalAmount / 100, currency: checkout.currency,
-                items: checkout.items.map(checkoutOrderItem) }) });
+            await drainOrderEmails({ sessionId: payment.id });
         } catch (error) { console.error('Order confirmation failed:', error); }
         const creatorSales = {};
         for (const item of checkout.items) {

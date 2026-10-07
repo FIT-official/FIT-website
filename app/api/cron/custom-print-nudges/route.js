@@ -8,6 +8,7 @@ import {
   NUDGE_ELIGIBLE_STATUSES,
 } from '@/lib/notifications/idleRequests'
 import { verifyCronSecret } from '@/lib/verifyCronSecret'
+import { drainOrderEmails } from '@/lib/orderEmailQueue'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -39,6 +40,10 @@ export async function GET(req) {
   }
 
   await connectToDatabase()
+  // Reuse the existing authenticated daily scheduler and database. No new
+  // provider, account or timer is required; webhook replay also drains a job.
+  try { await drainOrderEmails() }
+  catch { console.error('[cron:order-email] Queue drain failed; persisted jobs remain available for retry') }
 
   const now = Date.now()
   const idleBefore = new Date(now - IDLE_DAYS * 24 * 60 * 60 * 1000)

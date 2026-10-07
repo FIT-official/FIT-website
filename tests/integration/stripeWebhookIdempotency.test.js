@@ -15,6 +15,15 @@ const dbSession = vi.hoisted(() => ({
     }, endSession: vi.fn(),
 }));
 vi.mock('@/lib/db', () => ({ connectToDatabase: async () => ({ startSession: async () => dbSession }) }));
+vi.mock('@/lib/orderEmailQueue', () => ({
+    enqueueOrderEmail: async (_id, email, session) => {
+        f.options.push({ session }); f.draft.emailJob = email;
+    },
+    drainOrderEmails: async () => {
+        if (!f.state.emailJob || f.state.emailSent) return;
+        await f.sendEmail(f.state.emailJob); f.state.emailSent = true;
+    },
+}));
 vi.mock('@/models/CheckoutSession', () => ({ default: {
     findOne: async () => structuredClone(f.state.checkout),
     findOneAndUpdate: async (_filter, _update, options) => {

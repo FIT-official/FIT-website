@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { IoChatbubblesOutline, IoClose } from 'react-icons/io5';
 import { StreamChat } from 'stream-chat';
+import Link from 'next/link';
 
 export default function ChatLauncher() {
     const { user, isLoaded } = useUser();
@@ -517,11 +518,12 @@ export default function ChatLauncher() {
                                         <div className="text-center max-w-sm">
                                             <IoChatbubblesOutline size={48} className="mx-auto mb-4 text-gray-300 dark:text-borderColor" />
                                             <p className="text-sm text-gray-700 dark:text-textColor font-medium mb-2">
-                                                Sign in to start chatting
+                                                {isLoaded ? 'Sign in to start chatting' : 'Loading your account…'}
                                             </p>
                                             <p className="text-xs text-gray-500 dark:text-lightColor">
                                                 Connect with our support team or message creators directly.
                                             </p>
+                                            {isLoaded && <Link href="/sign-in" className="inline-flex mt-4 px-4 py-2 rounded-md bg-black text-white text-sm">Sign in</Link>}
                                         </div>
                                     </div>
                                 )}
