@@ -6,6 +6,7 @@ const { addShopItem } = vi.hoisted(() => ({ addShopItem: vi.fn() }));
 vi.mock('@/lib/storeRequest', () => ({ addShopItem }));
 vi.mock('@/components/Cart/StoreFeedback', () => ({ ConnectionNotice: () => null, useStoreConnection: () => false }));
 vi.mock('next/link', () => ({ default: ({ children, ...props }) => <a {...props}>{children}</a> }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 function fixture() {
   return {
