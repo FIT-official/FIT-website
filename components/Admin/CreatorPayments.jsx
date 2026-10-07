@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
+import { checkoutItemLabels } from '@/lib/checkoutItemLabels'
 import { useToast } from '@/components/General/ToastProvider'
 import { IoDownloadOutline, IoCardOutline } from 'react-icons/io5'
 import * as XLSX from 'xlsx'
@@ -134,12 +135,10 @@ export default function CreatorPayments() {
                 // Add product data for each item
                 saleData.items.forEach(item => {
                     const productData = productLookup[item.productId]
-                    const variant = productData?.variants?.find(v => v._id === item.variantId)
 
                     enrichedSession.enrichedData[creatorId].items.push({
                         ...item,
-                        productName: productData?.name || 'Unknown Product',
-                        variantName: variant?.name || 'Unknown Variant'
+                        ...checkoutItemLabels(item, session.items, productData)
                     })
                 })
             })

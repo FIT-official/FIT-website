@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { REVIEW_DELIVERY_POLICY } from '@/lib/googleReviewDelivery';
 const f = vi.hoisted(() => ({ state: null, draft: null, event: null, failOrder: false,
-    failTransaction: false, sendEmail: vi.fn(), notify: vi.fn(), options: [], transactions: 0 }));
+    failTransaction: false, invalidSignature: false, sendEmail: vi.fn(), notify: vi.fn(), options: [], transactions: 0 }));
 vi.mock('stripe', () => ({ default: class {
-    webhooks = { constructEvent: () => f.event };
+    webhooks = { constructEvent: () => { if (f.invalidSignature) throw new Error('Invalid signature'); return f.event; } };
     paymentIntents = { retrieve: async () => ({}) };
 } }));
 const dbSession = vi.hoisted(() => ({
@@ -86,7 +86,7 @@ function setup() {
         products: { product1: { _id: 'product1', name: 'Changed after checkout', basePrice: { presentmentAmount: 999 },
             paidAssets: ['private/replacement.stl'], stock: 10, infiniteStock: false, variantTypes: [], sales: [] } },
         requests: {}, orders: [], assets: [] };
-    f.failOrder = false; f.failTransaction = false; f.options = []; f.transactions = 0;
+    f.failOrder = false; f.failTransaction = false; f.invalidSignature = false; f.options = []; f.transactions = 0;
     f.sendEmail.mockReset(); f.notify.mockReset();
 }
 beforeEach(setup);
@@ -120,6 +120,22 @@ describe('Google review estimate saved with the paid order', () => {
 });
 
 describe('Stripe paid checkout snapshots', () => {
+    it('rejects an unverified webhook before order, stock or notification effects', async () => {
+        f.invalidSignature = true;
+        expect((await POST(req())).status).toBe(400);
+        expect(f.transactions).toBe(0);
+        expect(f.state.orders).toHaveLength(0);
+        expect(f.sendEmail).not.toHaveBeenCalled();
+    });
+    it('sends the saved product, option and paid total in the confirmation', async () => {
+        f.state.checkout.items[0].selectedVariants = { Colour: 'Black' };
+        f.state.products.product1.infiniteStock = true;
+        expect((await POST(req())).status).toBe(200);
+        const html = f.sendEmail.mock.calls[0][0].html;
+        expect(html).toContain('Colour: Black');
+        expect(html).toContain('Paid original');
+        expect(html).toContain('SGD 25.00');
+    });
     it('creates only one paid guest order across repeated completion and asynchronous events', async () => {
         const guestId = 'guest_opaque_owner';
         f.state.user.userId = guestId;

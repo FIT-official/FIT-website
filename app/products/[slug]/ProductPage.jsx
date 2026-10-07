@@ -16,6 +16,7 @@ import { storeFetch, addShopItem } from '@/lib/storeRequest';
 import { ConnectionNotice, StoreError, useStoreConnection } from '@/components/Cart/StoreFeedback';
 import { getDefaultVariantSelections } from '@/lib/seo/product';
 import { publicProductDescription } from '@/lib/productPublicContent';
+import { canShowPurchaseControls, isFirstPartyListing } from '@/lib/purchaseControls';
 import { productVariantLabel } from '@/lib/productVariantLabel';
 
 const ModelViewer = dynamic(() => import("@/components/3D/ModelViewer"), { ssr: false });
@@ -204,10 +205,10 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
         checkDigitalOwnership();
     }, [product, user, isLoaded])
 
-    const handleAddToCart = async (product) => {
+    const handleAddToCart = async (product, buyNow = false) => {
         if (addLock.current) return;
         setCartError('');
-        if (isOwnProduct) {
+        if (isOwnProduct && !isFirstPartyListing(product)) {
             return;
         }
 
@@ -285,6 +286,8 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
             setIsAdding(false);
             setShowAdded(true);
             setTimeout(() => setShowAdded(false), 3000);
+
+            if (buyNow && product.productType === 'shop') router.push('/checkout');
 
             // Redirect to cart if custom print so user can upload model
             if (isCustomPrint) {
@@ -726,7 +729,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                     {ownsDigitalProduct && <button className="underline text-sm" onClick={handleViewInDownloads}>View purchased downloads</button>}
                                 </div>
                             )}
-                            {!loading && !product?.quoteOnly && product?.listing !== 'creator' && product && (user ? product.creatorUserId !== user.id : product.productType === 'shop') && (
+                            {!loading && canShowPurchaseControls(product, { userId: user?.id ?? null, requireShopTypeForGuests: true }) && (
                                 <div className="flex flex-col gap-2 mt-2">
                                     {ownsDigitalProduct ? (
                                         <button
@@ -793,7 +796,12 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                                 </>
                                             )}
                                         </button>
-                                    ) : null}                                    {/* Print Button - only show if product has a 3D model */}
+                                    ) : null}
+                                    {product.productType === 'shop' && !ownsDigitalProduct && (
+                                        <button className="formWhiteButton justify-center" disabled={isAdding || isOutOfStock() || !areAllVariantsSelected()}
+                                            onClick={() => handleAddToCart(product, true)}>Buy Now</button>
+                                    )}
+                                    {/* Print Button - only show if product has a 3D model */}
                                     {/* Only show print order button if NOT digital-only product */}
                                     {product.viewableModel && !(
                                         Array.isArray(product.delivery?.deliveryTypes) &&

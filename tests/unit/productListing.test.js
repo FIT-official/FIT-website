@@ -9,6 +9,7 @@ const state = vi.hoisted(() => ({
     prevProduct: null,
     updated: null,
     findFilter: null,
+    projection: null,
 }))
 
 vi.mock('@/lib/creatorQuota', () => ({
@@ -34,7 +35,7 @@ vi.mock('@/models/User', () => ({
 vi.mock('@/models/Product', () => {
     const query = (result) => {
         const q = {
-            select: () => q,
+            select: (fields) => { state.projection = fields; return q },
             limit: () => q,
             lean: async () => result,
         }
@@ -146,6 +147,14 @@ describe('PUT /api/product listing', () => {
 })
 
 describe('GET /api/product listing filter', () => {
+    it('projects only relationship and visibility fields for card enrichment', async () => {
+        const { GET } = await import('@/app/api/product/route')
+        const res = await GET(new Request('http://t/api/product?ids=000000000000000000000001&fields=likes,creatorUserId'))
+        expect(res.status).toBe(200)
+        expect(state.projection).toBe('likes creatorUserId hidden flaggedForModeration slug')
+        await GET(new Request('http://t/api/product?productType=shop&fields=paidAssets'))
+        expect(state.projection).toBeUndefined()
+    })
     it('applies listing=fit to the catalogue filter and ignores unknown values', async () => {
         const { GET } = await import('@/app/api/product/route')
         await GET(new Request('http://t/api/product?productType=shop&listing=fit'))

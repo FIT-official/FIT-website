@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
-const session = vi.hoisted(() => ({ user: { id: 'user_customer' }, isLoaded: true, isSignedIn: true }))
+const session = vi.hoisted(() => ({ user: { id: 'user_customer' }, isLoaded: true, isSignedIn: true, push: vi.fn() }))
 vi.mock('@clerk/nextjs', () => ({ useUser: () => session }))
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }))
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: session.push }) }))
 vi.mock('@/lib/db', () => ({ connectToDatabase: vi.fn() }))
 vi.mock('@/models/Product', () => ({ default: { find: vi.fn() } }))
 
@@ -24,7 +24,7 @@ beforeEach(() => {
     session.isSignedIn = true
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({ product: { creatorUserId: 'user_seller', likes: ['user_customer', 'user_other'] } }),
+        json: async () => ({ products: [{ _id: publicProduct._id, creatorUserId: 'user_seller', likes: ['user_customer'], likeCount: 2 }] }),
     }))
 })
 afterEach(() => {
@@ -34,6 +34,14 @@ afterEach(() => {
 })
 
 describe('server-rendered shop cards', () => {
+    it('offers Buy Now to the FIT owner and opens checkout only after the item was saved', async () => {
+        session.user = { id: 'user_seller' }
+        render(<ProductCard product={{ ...publicProduct, productType: 'shop', listing: 'fit', creatorUserId: 'user_seller', likes: [], infiniteStock: true }} />)
+        fireEvent.click(screen.getByRole('button', { name: 'Buy Now' }))
+        await act(async () => {})
+        expect(global.fetch.mock.calls.some(([url, opts]) => url === '/api/user/cart' && opts?.method === 'POST')).toBe(true)
+        expect(session.push).toHaveBeenCalledWith('/checkout')
+    })
     it('lets a guest select a filament colour and add from the listing', async () => {
         session.user = null; session.isSignedIn = false
         render(<ProductCard product={{ ...publicProduct, productType: 'shop', listing: 'fit', infiniteStock: true,
@@ -59,7 +67,7 @@ describe('server-rendered shop cards', () => {
         const button = await screen.findByRole('button', { name: 'Unlike' })
         expect(button).toHaveAttribute('title', '2 likes')
         const url = new URL(global.fetch.mock.calls[0][0], 'https://www.fixitoday.com')
-        expect(url.searchParams.get('productId')).toBe(publicProduct._id)
+        expect(url.searchParams.get('ids')).toBe(publicProduct._id)
         expect(url.searchParams.get('fields')).toBe('likes,creatorUserId')
     })
 

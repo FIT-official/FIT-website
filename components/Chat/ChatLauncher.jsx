@@ -14,6 +14,7 @@ export default function ChatLauncher() {
     const [chatInfo, setChatInfo] = useState(null);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
+    const [sending, setSending] = useState(false);
     const [client, setClient] = useState(null);
     const [channel, setChannel] = useState(null);
     const [conversations, setConversations] = useState([]);
@@ -232,6 +233,20 @@ export default function ChatLauncher() {
                     if (inboxRes.ok) {
                         const inboxData = await inboxRes.json();
                         const list = inboxData.channels || [];
+                        // The launcher promises support, including to first-time buyers.
+                        // A token alone does not create a message destination.
+                        if (list.length === 0) {
+                            const supportRes = await fetch('/api/chat/channel', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ kind: 'support' }),
+                            });
+                            if (!supportRes.ok) throw new Error('Unable to start support chat');
+                            const support = await supportRes.json();
+                            if (!support.channelId) throw new Error('Support chat is unavailable');
+                            list.push({ channelId: support.channelId, kind: 'support',
+                                participants: [{ name: 'FIT Support' }], unreadCount: 0 });
+                        }
                         setConversations(list);
                         const total = list.reduce((sum, ch) => sum + (ch.unreadCount || 0), 0);
                         setUnreadTotal(total);
@@ -303,6 +318,7 @@ export default function ChatLauncher() {
                     }
                 } catch (e) {
                     console.error('Failed to load existing conversations', e);
+                    throw e;
                 }
 
                 setInitialised(true);
@@ -319,9 +335,13 @@ export default function ChatLauncher() {
 
     const handleSend = async (e) => {
         e.preventDefault();
-        if (!input.trim()) return;
+        if (!input.trim() || sending) return;
         const text = input.trim();
-        setInput('');
+        if (!channel) {
+            setError('No conversation is connected. Your message has not been sent.');
+            return;
+        }
+        setSending(true);
 
         const activeConversation = conversations.find((c) => c.channelId === activeChannelId) || null;
         const isFirstMessageInChannel = messages.length === 0;
@@ -333,6 +353,7 @@ export default function ChatLauncher() {
         if (channel) {
             try {
                 await channel.sendMessage({ text });
+                setInput(current => current === text ? '' : current);
 
                 if (shouldTriggerAutoReply && activeConversation) {
                     try {
@@ -347,13 +368,10 @@ export default function ChatLauncher() {
                 }
             } catch (err) {
                 console.error('Failed to send chat message', err);
+                setError('Your message could not be confirmed as sent. It is kept here; check the conversation before retrying.');
+            } finally {
+                setSending(false);
             }
-        } else {
-            // Fallback: local echo if channel is unavailable
-            setMessages(prev => ([
-                ...prev,
-                { id: Date.now(), from: 'user', text },
-            ]));
         }
     };
 
@@ -466,7 +484,7 @@ export default function ChatLauncher() {
                             <span className="text-base font-semibold text-gray-900 dark:text-textColor">Messages</span>
                             <span className="text-xs text-gray-600 dark:text-lightColor flex items-center gap-1.5">
                                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                Online now
+                                {channel ? 'Conversation connected' : 'Support messages'}
                             </span>
                         </div>
                         <button
@@ -708,11 +726,11 @@ export default function ChatLauncher() {
                                         onChange={e => setInput(e.target.value)}
                                         placeholder="Type your message…"
                                         className="flex-1 text-sm px-4 py-2.5 border border-gray-300 dark:border-borderColor rounded-xl bg-white dark:bg-background text-gray-900 dark:text-textColor placeholder-gray-500 dark:placeholder-lightColor/60 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white/20 focus:border-transparent transition-shadow resize-none"
-                                        disabled={connecting}
+                                        disabled={connecting || sending || !channel}
                                     />
                                     <button
                                         type="submit"
-                                        disabled={connecting || !input.trim()}
+                                        disabled={connecting || sending || !channel || !input.trim()}
                                         className="px-5 py-2.5 rounded-xl bg-black text-white font-medium text-sm hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 active:scale-95"
                                     >
                                         Send

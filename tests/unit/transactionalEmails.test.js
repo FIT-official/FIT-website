@@ -6,6 +6,13 @@ import {
 } from '@/lib/email/templates/transactional'
 
 describe('transactional email builders (restyled)', () => {
+  it('includes the paid purchase snapshot and escaped selected options', () => {
+    const items = [{ productName: 'PETG', quantity: 1, selectedVariants: { Colour: 'Black <test>' }, totalPrice: 13.90 }]
+    const buyer = buildOrderConfirmationEmail({ orderRef: 'ORD_cs_test', total: 13.90, items }).html
+    expect(buyer).toContain('ORD_cs_test')
+    expect(buyer).toContain('SGD 13.90')
+    expect(buyer).toContain('Colour: Black &lt;test&gt;')
+  })
   it('order confirmation greets by name and links to orders', () => {
     const { subject, html } = buildOrderConfirmationEmail({ customerName: 'Ada' })
     expect(subject).toMatch(/confirmation/i)

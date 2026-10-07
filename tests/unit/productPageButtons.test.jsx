@@ -55,6 +55,14 @@ function mockFetchByUrl() {
 }
 
 describe('ProductPage purchase buttons', () => {
+    it('allows the signed-in FIT owner to add their first-party stock', async () => {
+        useUser.mockReturnValue({ user: { id: shopProduct.creatorUserId }, isLoaded: true, isSignedIn: true })
+        const item = { ...shopProduct, listing: 'fit' }
+        global.fetch = vi.fn(url => Promise.resolve({ ok: true, json: async () => String(url).startsWith('/api/product?slug=') ? { product: item } : {} }))
+        render(<ProductPage initialProduct={item} />)
+        fireEvent.click(await screen.findByRole('button', { name: 'Add to Cart' }))
+        await waitFor(() => expect(global.fetch).toHaveBeenCalledWith('/api/user/cart', expect.objectContaining({ method: 'POST' })))
+    })
     it('offers an enquiry instead of checkout for a quote-only item', async () => {
         useUser.mockReturnValue({ user: null, isLoaded: true, isSignedIn: false });
         const item = { ...shopProduct, quoteOnly: true };

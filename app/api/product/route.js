@@ -498,7 +498,11 @@ export async function GET(req) {
             filter.flaggedForModeration = { $ne: true };
         }
 
-        const projection = isAdmin ? '+shippingCosts' : undefined;
+        // Relationship enrichment does not need descriptions, assets or sales.
+        // Include visibility fields so the same existing access rules still run.
+        const projection = fields === 'likes,creatorUserId' && (ids || productId)
+            ? 'likes creatorUserId hidden flaggedForModeration slug'
+            : isAdmin ? '+shippingCosts' : undefined;
 
         let query = Product.find(filter).select(projection);
 

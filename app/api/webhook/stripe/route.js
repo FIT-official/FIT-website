@@ -201,13 +201,16 @@ export async function POST(req) {
         }
         try {
             const to = checkout.customerEmail || payment.customer_details?.email;
-            if (to) await sendEmail({ to, ...buildOrderConfirmationEmail({ customerName: checkout.customerName || '' }) });
+            if (to) await sendEmail({ to, ...buildOrderConfirmationEmail({ customerName: checkout.customerName || '',
+                orderRef: `ORD_${payment.id}`, total: checkout.totalAmount / 100, currency: checkout.currency,
+                items: checkout.items.map(checkoutOrderItem) }) });
         } catch (error) { console.error('Order confirmation failed:', error); }
         const creatorSales = {};
         for (const item of checkout.items) {
             if (!item.creatorUserId) continue;
             creatorSales[item.creatorUserId] ||= { items: [], total: 0 };
-            creatorSales[item.creatorUserId].items.push({ name: item.productName, quantity: item.quantity,
+            const options = Object.entries(item.selectedVariants || {}).map(([key, value]) => `${key}: ${value}`).join(', ');
+            creatorSales[item.creatorUserId].items.push({ name: `${item.productName}${options ? ` (${options})` : ''}`, quantity: item.quantity,
                 price: item.unitAmount / 100, currency: item.currency.toUpperCase() });
             creatorSales[item.creatorUserId].total += item.totalAmount / 100;
         }

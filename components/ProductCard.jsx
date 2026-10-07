@@ -9,6 +9,8 @@ import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import LinkToolTip from "./LinkToolTip";
 import { getDiscountedPrice } from "@/utils/discount";
 import ShopAddToCart from './Cart/ShopAddToCart';
+import { loadProductRelationship } from '@/lib/productRelationships';
+import { canShowPurchaseControls } from '@/lib/purchaseControls';
 
 function ProductCard({ product }) {
     const { user, isSignedIn, isLoaded } = useUser();
@@ -36,15 +38,12 @@ function ProductCard({ product }) {
         setLikeCount(product.likeCount);
         if (!isLoaded || !isSignedIn || !viewerId) return;
         let cancelled = false;
-        const params = new URLSearchParams({ productId: product._id, fields: 'likes,creatorUserId' });
-        fetch(`/api/product?${params}`)
-            .then(response => response.ok ? response.json() : null)
-            .then(data => {
-                const details = data?.product;
+        loadProductRelationship(product._id)
+            .then(details => {
                 if (cancelled || !details || typeof details.creatorUserId !== 'string' || !Array.isArray(details.likes)) return;
                 setRelationship({ viewerId, productId: product._id, creatorUserId: details.creatorUserId });
                 setLiked(details.likes.includes(viewerId));
-                setLikeCount(details.likes.length);
+                setLikeCount(details.likeCount ?? details.likes.length);
             })
             .catch(() => {});
         return () => { cancelled = true; };
@@ -219,7 +218,7 @@ function ProductCard({ product }) {
                 )}
 
                 <span className='flex text-xs text-lightColor'>{salesCount} sold</span>
-                {!product.quoteOnly && product.productType === 'shop' && product.listing !== 'creator' && !isItMyProduct(creatorUserId) && <ShopAddToCart product={product} />}
+                {product.productType === 'shop' && canShowPurchaseControls(product, { userId: isLoaded && user ? user.id : null }) && <ShopAddToCart product={product} />}
                 {relationshipReady && !isItMyProduct(creatorUserId) && (
                     <button
                         onClick={liked ? handleUnlike : handleLike}
