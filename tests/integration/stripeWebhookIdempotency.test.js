@@ -38,7 +38,13 @@ vi.mock('@/models/User', () => ({ default: {
     findOne: ({ userId }) => ({ session: async () => {
         if (!f.draft.user || f.draft.user.userId !== userId) return null;
         const user = structuredClone(f.draft.user);
-        user.save = async options => { f.options.push(options); const { save, ...data } = user; f.draft.user = structuredClone(data); };
+        user.save = async options => {
+            f.options.push(options);
+            if (user.contact?.phone && (!user.contact.phone.number || !user.contact.phone.countryCode) && !options.validateModifiedOnly) {
+                throw new Error('User validation failed: contact.phone.number: Path phone.number is required., contact.phone.countryCode: Path phone.countryCode is required.');
+            }
+            const { save, ...data } = user; f.draft.user = structuredClone(data);
+        };
         return user;
     } }),
 } }));
@@ -99,6 +105,19 @@ function setup() {
     f.sendEmail.mockReset(); f.notify.mockReset();
 }
 beforeEach(setup);
+it('fulfils a paid checkout once despite unchanged missing legacy phone fields', async () => {
+    f.state.user.contact = { phone: {}, address: { street: 'Synthetic street', city: 'Singapore', postalCode: '000000', country: 'SG' } };
+    const contact = structuredClone(f.state.user.contact);
+    expect((await POST(req())).status).toBe(200);
+    expect(f.state.orders).toHaveLength(1);
+    expect(f.state.user.contact).toEqual(contact);
+    expect(f.state.products.product1.stock).toBe(8);
+    expect(f.state.emailJob).toBeDefined();
+    expect((await POST(req())).status).toBe(200);
+    expect(f.state.orders).toHaveLength(1);
+    expect(f.state.products.product1.stock).toBe(8);
+    expect(f.sendEmail).toHaveBeenCalledTimes(1);
+});
 
 describe('Google review estimate saved with the paid order', () => {
     it('uses the checkout status and confirmation time, ignoring later product classification and revisits', async () => {

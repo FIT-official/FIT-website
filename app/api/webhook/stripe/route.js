@@ -195,7 +195,10 @@ export async function POST(req) {
             const attemptId = claimed.attemptId || (user.checkoutIntent
                 ? (await CheckoutAttempt.findOne({ sessionId: payment.id, userId: claimed.userId }).session(dbSession))?._id : null);
             if (attemptId && user.checkoutIntent === attemptId) user.checkoutIntent = randomUUID();
-            await user.save({ session: dbSession });
+            // Legacy contacts can lack phone fields. This transaction changes
+            // history/cart/intent, not contact: validate its changed paths
+            // without making an unrelated profile repair a paid-order gate.
+            await user.save({ session: dbSession, validateModifiedOnly: true });
         });
         if (duplicate) return NextResponse.json({ received: true, duplicate: true });
 
