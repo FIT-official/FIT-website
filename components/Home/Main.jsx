@@ -76,7 +76,8 @@ function Main({ adbanner, initialHeroContent }) {
             <div className="relative z-10 flex flex-col items-center w-full text-background text-center px-4">
                 <motion.div
                     variants={containerVariants}
-                    initial="hidden"
+                    // The first viewport must remain readable before hydration.
+                    initial={false}
                     animate="visible"
                     aria-label={text}
                 >
@@ -96,7 +97,7 @@ function Main({ adbanner, initialHeroContent }) {
                         </motion.div>
                         <motion.div
                             className="font-semibold uppercase text-xs md:text-lg"
-                            initial={{ opacity: 0 }}
+                            initial={false}
                             animate={{ opacity: 1, transition: { duration: 0.5 } }}>
                             {content.text}
                         </motion.div>
