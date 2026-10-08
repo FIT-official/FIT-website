@@ -2,5 +2,19 @@
   "buildCommand": "yarn build",
   "installCommand": "yarn install --ignore-engines",
   "framework": "nextjs",
-  "regions": ["iad1"]
+  "regions": [
+    "iad1"
+  ],
+  "functions": {
+    "app/api/workshop/**/route.js": {
+      "regions": [
+        "sin1"
+      ]
+    },
+    "app/api/admin/workshop/**/route.js": {
+      "regions": [
+        "sin1"
+      ]
+    }
+  }
 }
