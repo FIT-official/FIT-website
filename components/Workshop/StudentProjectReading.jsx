@@ -2,7 +2,7 @@ import Image from 'next/image'
 export default function StudentProjectReading({ group }) {
     const reading = group.reading
     return <article className="px-5 py-8 max-w-6xl mx-auto" aria-label={'Group ' + group.number + ' complete project reading'}>
-        <h2 className="text-3xl">Group {group.number}: two project ideas</h2><p className="mt-3">Read the original intention and the proposed changes separately. Choose one idea for your three feedback answers.</p><p className="border rounded-lg p-3 mt-4">Reading draft for review. Mechanisms and illustrations still need drawing checks and physical tests; descriptions are not proof that the equipment works.</p>
+        <h2 className="text-3xl">Group {group.number}: two project ideas</h2><p className="mt-3">Read the original idea and the suggested changes. Choose one idea for your three feedback answers.</p><p className="border rounded-lg p-3 mt-4">These drawings explain ideas to discuss. The designs still need to be built and tested.</p>
         <div className="grid lg:grid-cols-2 gap-6 mt-6">{reading.ideas.map((idea, index) => <section key={idea.reviewedImageKey} className="border rounded-xl p-5" aria-labelledby={'reading-' + group.id + '-' + index}>
             <h3 id={'reading-' + group.id + '-' + index} className="text-2xl">Idea {index + 1}: {idea.title}</h3>
             <h4 className="font-semibold mt-4">The problem and who it helps</h4><p className="mt-2 leading-relaxed">{idea.problemContext}</p>

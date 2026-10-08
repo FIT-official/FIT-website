@@ -132,6 +132,18 @@
   @apply flex px-3 py-2 items-center justify-center rounded-md font-medium text-sm text-background bg-textColor cursor-pointer
 }
 
+.formWhiteButton {
+  @apply inline-flex px-4 py-2 items-center justify-center rounded-md border-2 border-textColor bg-background text-textColor font-medium text-sm cursor-pointer hover:bg-baseColor focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-textColor disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.formWhiteButton[aria-pressed="true"] {
+  @apply bg-textColor text-background;
+}
+
+.formBlackButton:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
 .formBlackButton2 {
   @apply flex px-3 py-2 items-center justify-between gap-2 rounded-md font-medium text-sm text-background bg-textColor cursor-pointer
 }

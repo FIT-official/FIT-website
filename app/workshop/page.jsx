@@ -7,8 +7,8 @@ export default function WorkshopHub() {
     return <main className="px-5 md:px-10 py-12 max-w-6xl mx-auto">
         <p className="text-sm">Friday 9 October 2026 · 30 minutes</p><h1 className="text-3xl md:text-4xl mt-3">Choose your group</h1>
         <p className="mt-4 max-w-3xl">Each group has two ideas, clearer problem statements, reviewed model examples and three short activities. Open your group, compare the ideas and write your answers.</p>
-        <p className="mt-3 text-sm">Illustrations are pending review. Read both ideas below. Preparation answers save on this browser; sign in to the classroom to submit feedback and refinements to your teacher.</p>
-        <Link className="inline-block underline mt-4" href="/workshop/classroom">Sign in to the classroom</Link>
+        <p className="mt-3 text-sm">Read both ideas and their discussion drawings. The proposed designs still need testing. Preparation answers save on this browser. Enter the classroom to send feedback and revised ideas to your teacher.</p>
+        <Link className="formBlackButton inline-flex mt-4" href="/workshop/classroom">Enter the workshop classroom</Link>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">{workshopGroups.map(item => {const group=workshopGroupPage(item.id);return <Link key={group.id} href={'/workshop/'+group.id+'/classroom'} className="border border-borderColor rounded-xl overflow-hidden hover:bg-baseColor">
             <div className="grid grid-cols-2 gap-2 p-3 items-start">{group.models.map((image, index) => <figure key={index} className="min-w-0">
                 {image ? <Image src={image.src} width={image.width} height={image.height} alt={image.alt} sizes="(max-width:639px) 43vw, (max-width:1023px) 21vw, 14vw" className="w-full h-auto" /> : <p className="text-sm">Illustration pending review</p>}

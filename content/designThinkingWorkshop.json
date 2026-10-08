@@ -68,7 +68,7 @@
           "Which is difficult now: carrying, using or storing it?",
           "Would a plain tray already solve that difficulty?"
         ],
-        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+        "successCheck": "Name who needs help, what is difficult and what you still need to test."
       },
       {
         "title": "Make the idea work",
@@ -175,7 +175,7 @@
           "What does a motion nightlight already do?",
           "Which single change would make this placement easier to use?"
         ],
-        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+        "successCheck": "Name who needs help, what is difficult and what you still need to test."
       },
       {
         "title": "Make the idea work",
@@ -281,7 +281,7 @@
           "Do they want a recording, a hello signal or a real conversation?",
           "What can the class actually demonstrate?"
         ],
-        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+        "successCheck": "Name who needs help, what is difficult and what you still need to test."
       },
       {
         "title": "Make the idea work",
@@ -387,7 +387,7 @@
           "What does an ordinary wick pot already solve?",
           "Is seeing or reaching the wick a real remaining difficulty?"
         ],
-        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+        "successCheck": "Name who needs help, what is difficult and what you still need to test."
       },
       {
         "title": "Make the idea work",
@@ -457,7 +457,7 @@
         "originalProblem": "A person approaching a crossing may need a clear reminder of the steps to follow.",
         "originalSolution": "Crossing the road was another recorded topic, with a small unlabelled cuff-like drawing.",
         "improvedProblem": "A person approaching a crossing may need a clear reminder of the steps to follow.",
-        "reason": "The cuff makes the reminder reachable without inventing a sensor that judges traffic.",
+        "reason": "The cuff keeps the reminder easy to find. The wearer still needs to check the road.",
         "changes": [
           {
             "change": "Recommended refinement (proposal)",
@@ -494,7 +494,7 @@
           "Where must the alert be noticed?",
           "What should happen if a parcel stays on the plate?"
         ],
-        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+        "successCheck": "Name who needs help, what is difficult and what you still need to test."
       },
       {
         "title": "Make the idea work",
@@ -564,7 +564,7 @@
         "originalProblem": "A response team needs an alert that identifies the affected place.",
         "originalSolution": "A scanner detects a fire, alerts drones and proposes guidance for people nearby.",
         "improvedProblem": "A response team needs an alert that identifies the affected place.",
-        "reason": "A named place and acknowledgement make the message actionable without pretending that heat alone gives an exact location.",
+        "reason": "The alert should name the area and let someone confirm they’ve received it.",
         "changes": [
           {
             "change": "Recommended refinement (proposal)",
@@ -600,7 +600,7 @@
           "What information is missing?",
           "Who controls the drone?"
         ],
-        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+        "successCheck": "Name who needs help, what is difficult and what you still need to test."
       },
       {
         "title": "Make the idea work",
@@ -706,7 +706,7 @@
           "What condition changes the decision?",
           "What reason should the learner explain?"
         ],
-        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+        "successCheck": "Name who needs help, what is difficult and what you still need to test."
       },
       {
         "title": "Make the idea work",
@@ -812,7 +812,7 @@
           "How will ON and OFF feel different without relying on colour?",
           "What size and force suit the actual person?"
         ],
-        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+        "successCheck": "Name who needs help, what is difficult and what you still need to test."
       },
       {
         "title": "Make the idea work",
@@ -918,7 +918,7 @@
           "Would an ordinary parking place already help?",
           "What must remain easy to do when the person needs the phone?"
         ],
-        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+        "successCheck": "Name who needs help, what is difficult and what you still need to test."
       },
       {
         "title": "Make the idea work",
@@ -1024,7 +1024,7 @@
           "What does an ordinary caption app already do?",
           "Which printed change would help the actual reader?"
         ],
-        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+        "successCheck": "Name who needs help, what is difficult and what you still need to test."
       },
       {
         "title": "Make the idea work",
