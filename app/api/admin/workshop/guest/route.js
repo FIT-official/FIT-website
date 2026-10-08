@@ -1,6 +1,7 @@
 import { requireGuestTeacher } from '@/lib/workshopGuestAccess'
 import { classroomView, readLesson, moderateClassroom, setGuestEntry } from '@/lib/workshopGuestClassroomStore'
 import { guestDb, classJson, classFailure, sameOrigin, jsonBody } from '@/lib/workshopGuestHttp'
+import { WORKSHOP_SESSION } from '@/lib/workshopFeedback'
 export const runtime = 'nodejs'
-export async function GET(request) { try { const access = await requireGuestTeacher(request), db = await guestDb(), state = await readLesson(db.collection('workshopGuestLessons')); return classJson({ ...classroomView(state, access), entryOpen: Boolean(state.entryOpen) }) } catch (error) { return classFailure(error) } }
+export async function GET(request) { try { const access = await requireGuestTeacher(request), db = await guestDb(), state = await readLesson(db.collection('workshopGuestLessons')); const joined = await db.collection('workshopGuestSessions').aggregate([{ $match: { session: WORKSHOP_SESSION, enabled: true, expiresAt: { $gt: new Date() } } }, { $group: { _id: '$group', count: { $sum: 1 } } }]).toArray(); const view = classroomView(state, access); return classJson({ ...view, progress: view.progress.map(row => ({ ...row, joinedSessions: joined.find(item => item._id === row.group)?.count || 0 })), entryOpen: Boolean(state.entryOpen) }) } catch (error) { return classFailure(error) } }
 export async function PATCH(request) { try { sameOrigin(request); const access = await requireGuestTeacher(request), input = await jsonBody(request), db = await guestDb(), store = db.collection('workshopGuestLessons'); return classJson(input.action === 'entry' ? await setGuestEntry(store, access, input) : await moderateClassroom(store, access, input)) } catch (error) { return classFailure(error) } }

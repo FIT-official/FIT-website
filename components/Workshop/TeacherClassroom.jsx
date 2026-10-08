@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { classroomRequest } from './Classroom'
+import WorkshopAudit from './WorkshopAudit'
 import TeacherResponses from './TeacherResponses'
 import TeacherDraftRecovery from './TeacherDraftRecovery'
 import { useClassPolling } from './useClassPolling'
@@ -42,6 +43,6 @@ export default function TeacherClassroom() {
             {privateRoster && <><div aria-label="Selected group login cards" className="grid sm:grid-cols-2 gap-3 mt-4">{privateRoster.filter(row => row.group === rosterGroup).map(row => { const account = lesson.accounts.find(a => a._id === row.seat), active = account?.enabled && Date.parse(account.expiresAt) > Date.now(); return <article key={row.seat} className="border rounded p-4"><h3>{row.seat}</h3><p>Website: /workshop/classroom</p>{active ? <p>Temporary password: <code className="break-all">{row.password}</code></p> : <p>Seat revoked or expired; do not distribute this login.</p>}<p>Tinkercad is separate. Each student sees only their own assigned instructions after signing in.</p></article> })}</div><button type="button" className="formWhiteButton mt-4" onClick={() => { setPrivateRoster(null); setRosterMessage('Private passwords cleared from this tab.') }}>Clear private roster</button></>}
             <p role="status" className="mt-3">{rosterMessage}</p>
         </section>
-        </details><details className="mt-8"><summary>Teacher audit history ({lesson.audit.length})</summary>{lesson.audit.map((event, i) => <article key={i} className="border p-3 mt-2"><p>{event.at} • {event.actor} • {event.action} • {event.id}</p><pre className="whitespace-pre-wrap break-all">{JSON.stringify({ before: event.before, after: event.after }, null, 2)}</pre></article>)}</details>
+        </details><details className="mt-8"><summary>Teacher audit history ({lesson.audit.length})</summary><WorkshopAudit events={lesson.audit} /></details>
     </main>
 }

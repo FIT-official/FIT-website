@@ -1,0 +1,4 @@
+.columns { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 24px; align-items: start; }
+.idea, .form { min-width: 0; scroll-margin-top: 24px; }
+.jumps { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+@media (min-width: 1100px) { .columns { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px; } .form { position: sticky; top: 20px; } .jumps { display: none; } }

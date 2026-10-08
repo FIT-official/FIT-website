@@ -14,6 +14,7 @@ import ClientProviders from "@/components/General/ClientProviders";
 import PostHogProvider from "@/components/General/PostHogProvider";
 import AnalyticsConsentProvider from "@/components/General/AnalyticsConsentProvider";
 import GoogleMeasurementProvider from "@/components/General/GoogleMeasurementProvider";
+import PresentationBoundary from '@/components/Workshop/PresentationBoundary';
 import { SITE_URL, absoluteUrl } from '@/lib/seo/site';
 
 const inter = Inter({
@@ -73,6 +74,7 @@ export default function RootLayout({ children }) {
           />
         </head>
         <body className={`${inter.variable} antialiased`}>
+          <PresentationBoundary presentation={children}>
           <CurrencyProvider>
             <Smooth>
                 <ToastProvider>
@@ -92,6 +94,7 @@ export default function RootLayout({ children }) {
                 </ToastProvider>
             </Smooth>
           </CurrencyProvider>
+          </PresentationBoundary>
         </body>
       </html>
     </ClerkProvider>

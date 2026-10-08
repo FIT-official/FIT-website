@@ -1,0 +1,528 @@
+{
+  "title": "FIT design workshop",
+  "workshopUrl": "https://www.fixitoday.com/workshop",
+  "canvas": {
+    "width": 1280,
+    "height": 720
+  },
+  "theme": {
+    "fontFamily": "Arial, sans-serif",
+    "background": "#FAF9F5",
+    "text": "#202D35",
+    "accent": "#265B74"
+  },
+  "slides": [
+    {
+      "id": 1,
+      "title": "Our design workshop",
+      "blocks": [
+        {
+          "text": "Our design workshop",
+          "x": 72,
+          "y": 48,
+          "width": 1136,
+          "height": 90,
+          "fontSizePx": 57,
+          "bold": true,
+          "color": "#202D35"
+        },
+        {
+          "text": "fixitoday.com/workshop",
+          "x": 72,
+          "y": 177,
+          "width": 1136,
+          "height": 82,
+          "fontSizePx": 53,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "1   Select “Enter workshop”",
+          "x": 72,
+          "y": 305,
+          "width": 1136,
+          "height": 63,
+          "fontSizePx": 40,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "2   Type your name and choose your group",
+          "x": 72,
+          "y": 386,
+          "width": 1136,
+          "height": 63,
+          "fontSizePx": 40,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "3   Select “Enter workshop” to join",
+          "x": 72,
+          "y": 467,
+          "width": 1136,
+          "height": 63,
+          "fontSizePx": 40,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "Use your own page. Keep this browser open.",
+          "x": 72,
+          "y": 598,
+          "width": 1136,
+          "height": 55,
+          "fontSizePx": 30,
+          "bold": false,
+          "color": "#202D35"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Explore the ideas",
+      "blocks": [
+        {
+          "text": "Explore the ideas",
+          "x": 72,
+          "y": 48,
+          "width": 1136,
+          "height": 90,
+          "fontSizePx": 57,
+          "bold": true,
+          "color": "#202D35"
+        },
+        {
+          "text": "Explore     Feedback     Refine",
+          "x": 72,
+          "y": 170,
+          "width": 1136,
+          "height": 68,
+          "fontSizePx": 42,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Read both ideas from your own group.",
+          "x": 72,
+          "y": 300,
+          "width": 1136,
+          "height": 72,
+          "fontSizePx": 40,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "Then read your assigned group’s ideas.",
+          "x": 72,
+          "y": 400,
+          "width": 1136,
+          "height": 72,
+          "fontSizePx": 40,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "What does each idea do? Who could it help?",
+          "x": 72,
+          "y": 550,
+          "width": 1136,
+          "height": 80,
+          "fontSizePx": 34,
+          "bold": false,
+          "color": "#202D35"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Your first feedback group",
+      "blocks": [
+        {
+          "text": "Your first feedback group",
+          "x": 72,
+          "y": 48,
+          "width": 1136,
+          "height": 90,
+          "fontSizePx": 57,
+          "bold": true,
+          "color": "#202D35"
+        },
+        {
+          "text": "Your group reviews the next group.",
+          "x": 72,
+          "y": 159,
+          "width": 1136,
+          "height": 65,
+          "fontSizePx": 39,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "Group 1  →  Group 2",
+          "x": 72,
+          "y": 255,
+          "width": 540,
+          "height": 59,
+          "fontSizePx": 37,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Group 6  →  Group 7",
+          "x": 690,
+          "y": 255,
+          "width": 530,
+          "height": 59,
+          "fontSizePx": 37,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Group 2  →  Group 3",
+          "x": 72,
+          "y": 320,
+          "width": 540,
+          "height": 59,
+          "fontSizePx": 37,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Group 7  →  Group 8",
+          "x": 690,
+          "y": 320,
+          "width": 530,
+          "height": 59,
+          "fontSizePx": 37,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Group 3  →  Group 4",
+          "x": 72,
+          "y": 385,
+          "width": 540,
+          "height": 59,
+          "fontSizePx": 37,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Group 8  →  Group 9",
+          "x": 690,
+          "y": 385,
+          "width": 530,
+          "height": 59,
+          "fontSizePx": 37,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Group 4  →  Group 5",
+          "x": 72,
+          "y": 450,
+          "width": 540,
+          "height": 59,
+          "fontSizePx": 37,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Group 9  →  Group 10",
+          "x": 690,
+          "y": 450,
+          "width": 530,
+          "height": 59,
+          "fontSizePx": 37,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Group 5  →  Group 6",
+          "x": 72,
+          "y": 515,
+          "width": 540,
+          "height": 59,
+          "fontSizePx": 37,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Group 10  →  Group 1",
+          "x": 690,
+          "y": 515,
+          "width": 530,
+          "height": 59,
+          "fontSizePx": 37,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Choose that group in the dropdown on your own page.",
+          "x": 72,
+          "y": 621,
+          "width": 1140,
+          "height": 56,
+          "fontSizePx": 30,
+          "bold": false,
+          "color": "#202D35"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Helpful feedback",
+      "blocks": [
+        {
+          "text": "Helpful feedback",
+          "x": 72,
+          "y": 48,
+          "width": 1136,
+          "height": 90,
+          "fontSizePx": 57,
+          "bold": true,
+          "color": "#202D35"
+        },
+        {
+          "text": "What works well, and why?",
+          "x": 72,
+          "y": 169,
+          "width": 1136,
+          "height": 62,
+          "fontSizePx": 42,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "“I like … because …”",
+          "x": 72,
+          "y": 232,
+          "width": 1136,
+          "height": 62,
+          "fontSizePx": 36,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "What question would you ask the presenters?",
+          "x": 72,
+          "y": 329,
+          "width": 1136,
+          "height": 62,
+          "fontSizePx": 42,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "“How would …?”",
+          "x": 72,
+          "y": 392,
+          "width": 1136,
+          "height": 62,
+          "fontSizePx": 36,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "What specific improvement do you suggest?",
+          "x": 72,
+          "y": 489,
+          "width": 1136,
+          "height": 62,
+          "fontSizePx": 42,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "“You could …”",
+          "x": 72,
+          "y": 552,
+          "width": 1136,
+          "height": 62,
+          "fontSizePx": 36,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "Both ideas first. Other groups only if you finish.",
+          "x": 72,
+          "y": 640,
+          "width": 1136,
+          "height": 44,
+          "fontSizePx": 27,
+          "bold": false,
+          "color": "#202D35"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Feedback on your ideas",
+      "blocks": [
+        {
+          "text": "Feedback on your ideas",
+          "x": 72,
+          "y": 48,
+          "width": 1136,
+          "height": 90,
+          "fontSizePx": 57,
+          "bold": true,
+          "color": "#202D35"
+        },
+        {
+          "text": "Go back to your own group.",
+          "x": 72,
+          "y": 176,
+          "width": 1136,
+          "height": 71,
+          "fontSizePx": 43,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Read the comments on your ideas.",
+          "x": 72,
+          "y": 283,
+          "width": 1136,
+          "height": 71,
+          "fontSizePx": 40,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "Choose one useful suggestion.",
+          "x": 72,
+          "y": 390,
+          "width": 1136,
+          "height": 71,
+          "fontSizePx": 40,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "Which change could help the most?",
+          "x": 72,
+          "y": 550,
+          "width": 1136,
+          "height": 76,
+          "fontSizePx": 37,
+          "bold": false,
+          "color": "#202D35"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Refine your idea",
+      "blocks": [
+        {
+          "text": "Refine your idea",
+          "x": 72,
+          "y": 48,
+          "width": 1136,
+          "height": 90,
+          "fontSizePx": 57,
+          "bold": true,
+          "color": "#202D35"
+        },
+        {
+          "text": "What would you change to improve this idea?",
+          "x": 72,
+          "y": 165,
+          "width": 1136,
+          "height": 111,
+          "fontSizePx": 42,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "Why would this improve the idea?",
+          "x": 72,
+          "y": 326,
+          "width": 1136,
+          "height": 104,
+          "fontSizePx": 42,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "How would you test the change?",
+          "x": 72,
+          "y": 487,
+          "width": 1136,
+          "height": 104,
+          "fontSizePx": 42,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "One short sentence for each answer.",
+          "x": 72,
+          "y": 636,
+          "width": 1136,
+          "height": 45,
+          "fontSizePx": 29,
+          "bold": false,
+          "color": "#202D35"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Final check",
+      "blocks": [
+        {
+          "text": "Final check",
+          "x": 72,
+          "y": 48,
+          "width": 1136,
+          "height": 90,
+          "fontSizePx": 57,
+          "bold": true,
+          "color": "#202D35"
+        },
+        {
+          "text": "My name and group are correct.",
+          "x": 72,
+          "y": 166,
+          "width": 1136,
+          "height": 73,
+          "fontSizePx": 41,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "I reviewed my assigned group’s ideas.",
+          "x": 72,
+          "y": 273,
+          "width": 1136,
+          "height": 73,
+          "fontSizePx": 41,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "I wrote my change, reason and test.",
+          "x": 72,
+          "y": 380,
+          "width": 1136,
+          "height": 73,
+          "fontSizePx": 41,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "My work is saved on my page.",
+          "x": 72,
+          "y": 487,
+          "width": 1136,
+          "height": 73,
+          "fontSizePx": 41,
+          "bold": true,
+          "color": "#265B74"
+        }
+      ]
+    }
+  ]
+}

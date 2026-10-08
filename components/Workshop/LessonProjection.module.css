@@ -1,0 +1,8 @@
+.root { position: fixed; inset: 0; display: flex; flex-direction: column; background: #faf9f5; color: #202d35; overflow: hidden; z-index: 100; }
+.viewport { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0; overflow: hidden; }
+.canvas { position: relative; transform-origin: top left; overflow: hidden; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px; align-items: center; justify-content: center; background: #fff; font: 16px Arial, sans-serif; border-top: 1px solid #d9dddf; }
+.controls button { padding: 8px 12px; border: 1px solid #b9c4ca; border-radius: 6px; cursor: pointer; }
+.controls button:disabled { opacity: .4; cursor: default; }
+.controls button:focus-visible { outline: 3px solid #265b74; outline-offset: 2px; }
+.message { padding: 4px 12px; text-align: center; }
