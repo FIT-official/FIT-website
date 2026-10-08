@@ -1,142 +1,242 @@
 {
   "g1_folding_tray": {
-    "src": "/workshop/models/g1_folding_tray.png",
-    "alt": "Idea: Foldable tray design proposal",
-    "caption": "Idea — Foldable tray. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g01-idea1-pdf-derived.jpeg",
+    "alt": "Foldable tray: Open-flat tabletop tray overview with three circular recesses on one half, plain second half and continuous central hinge. Folded-empty storage view of the same two halves. Partially folded empty side view with no separate latch.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Source core: foldable tray. This drawing shows a proposed table-supported embodiment; carrying use/support remains unconfirmed. Alternative not adopted; test hinge clearance and repeated folding.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "0c8dafbbfe0f56f16fc0094090b4749880fb2e36ac5fb7f114c5ed429449338d",
+    "registryVersion": 1
   },
   "g1_rolling_bin": {
-    "src": "/workshop/models/g1_rolling_bin.png",
-    "alt": "Idea: Rolling bin design proposal",
-    "caption": "Idea — Rolling bin. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g01-idea2-pdf-derived.jpeg",
+    "alt": "Mobile bin and companion: Large lidded manually pushed bin with supported casters and visible brakes. Small open manually pushed collection bin with lift-out liner and supported casters. Lift-out liner detail retaining original profile and handholds with removal arrow; unvalidated 5cm annotation removed.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Source core: four-wheel peaked-lid bin with smaller wheeled companion. Manual collection arrangement shown is a proposed refinement. Alternative not adopted; test handling, casters, stability, liner fit and removal.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "3b61d5d4523febd1a4b022fa097d6af88665585c1db152ac0e49089512e49507",
+    "registryVersion": 1
   },
   "g2_motion_lamp": {
-    "src": "/workshop/models/g2_motion_lamp.png",
-    "alt": "Idea: Mushroom lamp design proposal",
-    "caption": "Idea — Mushroom lamp. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g02-idea1-pdf-derived.jpeg",
+    "alt": "Mushroom nightlight: Exterior view with motion sensor, OFF/AUTO control and low-voltage adapter. Sectional view with fixed LED ring outside the stem, explicit clearance, downward diffusers and continuous cable route. Operation flow and proposal/testing qualifications.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Test detection, glare, thermal design and stability. The fixed LED ring and OFF/AUTO switch are proposed; performance is not established.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "7e82c11377ff325488fb69a21b1fbd8b8fcef7340e515f106d168c1ae51d8973",
+    "registryVersion": 1
   },
   "g2_sorting_bin": {
-    "src": "/workshop/models/g2_sorting_bin.png",
-    "alt": "Idea: Sorting robot bin design proposal",
-    "caption": "Idea — Sorting robot bin. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g02-idea2-pdf-derived.jpeg",
+    "alt": "Robot sorting bin: Robot sorting-bin overview with open hopper, one solid pivoting chute, dashed alternate position, two destination bins and Choose/Wait for READY/Load one item sequence. Enlarged supported drive detail showing servo, coupling and continuous chute shaft supported at front and rear.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Category selection remains manual. The inset proposes a shaft and coupling. Test clearances, loads and jam behaviour before adopting the mechanism.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "bb3c92fed1135a620f87d97496dbaa706b0dae480245389a5deac14fa72c0521",
+    "registryVersion": 1
   },
   "g3_sound_companion": {
-    "src": "/workshop/models/g3_sound_companion.png",
-    "alt": "Idea: Sound companion design proposal",
-    "caption": "Idea — Sound companion. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g03-idea1-pdf-derived.jpeg",
+    "alt": "Sound and hello companion: Front cat-plush overview showing hold-to-send HELLO paw control, separate sound button and heart power control. Open rear access flap and removable electronics cradle with retained paw-cable disconnect, seated speaker, controller and strapped battery. Side section of retained wide-flange heart cap, fixed bezel and switch-actuating plunger. Nearby receiver exterior and opened enclosure with test button, secured speaker/controller and strapped battery; wireless HELLO and device-received directions shown.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Control assignments shown are proposed and need confirmation; heart power and separate sound control follow this drawing. Test operating range, reliability, retained connections and nearby acknowledgement.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "3a34936d8e8faa1bd10dcd591eec12b86f53644bda39a0b1c4fffa0b4d28dcd4",
+    "registryVersion": 1
   },
   "g3_parcel_box": {
-    "src": "/workshop/models/g3_parcel_box.png",
-    "alt": "Idea: Parcel box design proposal",
-    "caption": "Idea — Parcel box. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g03-idea2-pdf-derived.jpeg",
+    "alt": "Private parcel box: Open-ready side cutaway with vertical lid continuing above view, two-link folding stay, captive stop, side-pocket mount and inward-fold/manual-lowering directions. Matched keyed self-latching lock closed-detail inset with lid-mounted lock and engaged tongue in a keeper fixed to the box.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. The stay holds the lid open; it does not slow closing. Test folded linkage clearance and the proposed purchased latch and keeper.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "1f1dfd10a2427cf0a02c97609f876fafac053965f83ec8b1ff1526ca5579d456",
+    "registryVersion": 1
   },
   "g4_wick_pot": {
-    "src": "/workshop/models/g4_wick_pot.png",
-    "alt": "Idea: Plant care design proposal",
-    "caption": "Idea — Plant care. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g04-idea1-pdf-derived.jpeg",
+    "alt": "Water storing plant pot: Functional cutaway showing inner soil pot, bottom drainage, immersed continuous wick into soil, reservoir water below maximum level, air gap, vent above maximum, overflow at maximum and hinged refill cap. Small overall exterior view of the same pot with matching refill-cap, vent and overflow locations and same plant.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Prototype the water level, overflow dimensions, drainage and air gap. The upward wick and retained cap are proposed; water delivery is not yet validated.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "828288d04b8bebc82f2e5a010a6149a5bec94b65e04831423bab54d96b20e62c",
+    "registryVersion": 1
   },
   "g4_doorbell_band": {
-    "src": "/workshop/models/g4_doorbell_band.png",
-    "alt": "Idea: Doorbell wristband design proposal",
-    "caption": "Idea — Doorbell wristband. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g04-idea2-pdf-derived.jpeg",
+    "alt": "Doorbell wristband: Battery-powered doorbell transmitter and dashed wireless event path. Assembled wristband with visual/vibration cue, test/ack control, power/link indicators and hook-and-loop closure. Opened housing showing secured motor against base, secured battery, receiver/controller and connected LED/motor wiring.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Test wrist fit, wireless range, cue strength and power. The strap closure and retained wired components are proposed; alert reliability remains untested.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "9871fd09472fd3c256edd8b085d866a669972abf3e9ffef74f1fc680a69bcab3",
+    "registryVersion": 1
   },
   "g5_parcel_alert": {
-    "src": "/workshop/models/g5_parcel_alert.png",
-    "alt": "Idea: Parcel notice design proposal",
-    "caption": "Idea — Parcel notice. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g05-idea1-pdf-derived.jpeg",
+    "alt": "Parcel arrival notice: Parcel-loaded platform, transmitter and separate indoor parcel notice receiver overview. Loaded mechanism section with captured guides, hard stops carrying load, return springs and lever switch sensing travel.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Hard stops and captured guides are proposed. Physically test stop clearance, spring rate, switch travel and parcel loads.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "d7ea7b1ed480ccf1ed9b2c145dd49170289e3beb616c7e2f521d1064162a3102",
+    "registryVersion": 1
   },
   "g5_crossing_cuff": {
-    "src": "/workshop/models/g5_crossing_cuff.png",
-    "alt": "Idea: Crossing the road design proposal",
-    "caption": "Idea — Crossing the road. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g05-idea2-pdf-derived.jpeg",
+    "alt": "Crossing reminder cuff: Crossing reminder cuff overview with STOP LOOK LISTEN panel and hook-and-loop overlap. Rear attachment view showing strap threading through two closed strap slots.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Wearable usefulness and adoption remain unresolved; non-wearable replacements have not been adopted. The closed strap slots retain the existing cuff idea. Road-crossing benefit is not established.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "0695898697c8b4f8c07b27097ca782263544111956c4cdebce672348d0c9641d",
+    "registryVersion": 1
   },
   "g6_drone": {
-    "src": "/workshop/models/g6_drone.png",
-    "alt": "Idea: Drone response design proposal",
-    "caption": "Idea — Drone response. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g06-idea1-pdf-derived.jpeg",
+    "alt": "Fire inspection drone: Four-ring inspection drone overview with thermal and RGB camera pair, forward search light and landing legs. Single-rotor side section showing radial blade-tip clearance and structural supports below the blades. Operator/controller view with separate RGB, thermal and uncertain map information; operator confirms location.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Ring support and propeller clearance remain proposed. Flight capability and localisation are unvalidated; this drawing is not evidence of safe operation.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "195a9ebf1ad8a3c1d868bcfaa170f2abaa8b018a7967468b6750990e0bfaf937",
+    "registryVersion": 1
   },
   "g6_detect_alert": {
-    "src": "/workshop/models/g6_detect_alert.png",
-    "alt": "Idea: Detect and alert design proposal",
-    "caption": "Idea — Detect and alert. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g06-idea2-pdf-derived.jpeg",
+    "alt": "Fire detection and alert: Ceiling smoke/heat detector sends alarm event and room ID. Room display and compatible receiver/controller show separate Acknowledge and Dispatch controls; acknowledgement records receipt. Four-rotor inspection drone receives operator dispatch and returns video/status through a separate return path.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. The drone here is a schematic, distinct from the inspection-drone hardware on the previous page. Receipt acknowledgement does not mean dispatch. A compatible receiver and commissioned detector interface are required. Detection and alert performance remain unvalidated.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "b96c006c1863d0f62aadfb9cb8816865bd8486b08e405b1cca068a3f88698f38",
+    "registryVersion": 1
   },
   "g7_condition_quiz": {
-    "src": "/workshop/models/g7_condition_quiz.png",
-    "alt": "Idea: Recycling reasons quiz design proposal",
-    "caption": "Idea — Recycling reasons quiz. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g07-idea1-pdf-derived.jpeg",
+    "alt": "Which bin quiz: Choose state: independently hand-moved EMPTY/FOOD INSIDE pointer with answer concealed; actual right-hand parking area remains free. Reveal state: same cover slides within captive tracks into parking area to expose the answer, retained by an end stop.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. The condition pointer and reason card must be matched manually. Source group association remains uncertain; check slide travel and parking in a prototype.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "afb513eec48f29e17f5cf69304913a2ed8fc07a0ed8c0f446a66381b04871096",
+    "registryVersion": 1
   },
   "g7_feedback_bin": {
-    "src": "/workshop/models/g7_feedback_bin.png",
-    "alt": "Idea: Bin feedback design proposal",
-    "caption": "Idea — Bin feedback. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g07-idea2-pdf-derived.jpeg",
+    "alt": "Camera assisted bin feedback: Front section: camera/light inspection area, supported closed holding flap, fixed collection funnel and separate pivoting chute to recycling/general-waste bins. Side section: rear hinge support, closed flap and dashed open-swing position with clearance above the fixed funnel. Three-step operating sequence: inspect, keep closed and return if unsure, confirm/set chute/release.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Original idea: a single bin with red/green feedback. These panels show a proposed camera-assisted refinement; the original guard is not depicted. Test torque, power-loss behaviour, guarding and jams; rear bearing attachment remains schematic.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "4df356ffed0854e098c451c5a258d477aad0a804a5b04bb230488f2c03c457a9",
+    "registryVersion": 1
   },
   "g8_pendant": {
-    "src": "/workshop/models/g8_pendant.png",
-    "alt": "Idea: Reachable light control design proposal",
-    "caption": "Idea — Reachable light control. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g08-idea1-pdf-derived.jpeg",
+    "alt": "Reachable light control: Whole-pendant view: differentiated ON and OFF button faces. Housing section: retained button caps, axial plungers over separate supported switches, wiring and secured battery. Wireless receiver and lamp connection: low-voltage supply into matched receiver and cable to lamp.",
     "width": 1639,
-    "height": 960
+    "height": 960,
+    "caption": "Discussion illustration: proposed and untested. Test button stroke, cap retention and switch force. The secured battery and compatible powered receiver are proposed; electrical and mechanical performance remain unvalidated.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "9d21d7771cc5eef9e3f67aaacc51f4b760b598b23c637eef081c4a4bfe2941de",
+    "registryVersion": 1
   },
   "g8_cooking_screen": {
-    "src": "/workshop/models/g8_cooking_screen.png",
-    "alt": "Idea: Firestructor cooking screen design proposal",
-    "caption": "Idea — Firestructor cooking screen. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g08-idea2-pdf-derived.jpeg",
+    "alt": "Firestructor cooking guide: Three-quarter overview: Firestructor step interface, current cook timer, navigation controls and stable retaining stand. Side detail: real inserted side-port plug, continuous cable slack loop and stand-mounted clip.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Check and Finish details remain to be developed; the interface is illustrative, not a complete recipe. No automatic equipment shutoff is shown. Test the proposed cable port and stand retention.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "66b5d7785c3966c88cdb20c5a85ee7c3d054faae52b138bc997929aeee9c950b",
+    "registryVersion": 1
   },
   "g9_phone_bed": {
-    "src": "/workshop/models/g9_phone_bed.png",
-    "alt": "Idea: Phone sleep holder design proposal",
-    "caption": "Idea — Phone sleep holder. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g09-idea1-pdf-derived.jpeg",
+    "alt": "Phone sleep bed: Top/overall phone-bed view with pull grip, continuous guides, end stops, transverse foot roller and proposed manual thumbwheel. Axial roller section showing winding space, retained slats and the Roller turns annotation. Proposal and testing notes for manual take-up and slat/roller fit.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Manual thumbwheel take-up is a proposed implementation that has not been adopted. Test winding space, slat fit and the supported roller before use.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "11098dbe03330581def4f3688d7202ec0b259da64fda3c61337d51877d23a241",
+    "registryVersion": 1
   },
   "g9_recycling_mascot": {
-    "src": "/workshop/models/g9_recycling_mascot.png",
-    "alt": "Idea: Recycling mascot design proposal",
-    "caption": "Idea — Recycling mascot. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g09-idea2-pdf-derived.jpeg",
+    "alt": "Recycling reward mascot: Two mascot response states, wired correct/wrong confirmation controls and keychain form. Sticker dispenser section: continuous sticker-plus-backing path from roll through pinch rollers, mark sensor and exit/tear edge. Signal sequence: mark sensor to controller to motor. Lower-roller direct-drive close-up: coaxial roller shaft, two-sided bearing support, coupling and motor; outcome captions define next-mark indexing and no-feed on wrong.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. TRY AGAIN leaves the feed inactive. Reward-strip material remains unconfirmed. The sticker-plus-backing feed is a proposed example; no separate peel route is established. Test roller/reel support, mark sensing and one-label stopping.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "0898537c243e8641d878e387fb9e20066fc4491c7ace44cd24ba081f32154a5d",
+    "registryVersion": 1
   },
   "g10_caption_display": {
-    "src": "/workshop/models/g10_caption_display.png",
-    "alt": "Idea: Living-room caption display design proposal",
-    "caption": "Idea — Living-room caption display. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g10-idea1-pdf-derived.jpeg",
+    "alt": "Living room caption TV: Caption-display overview: outward microphone, readable text, separate mute/font-size/power controls, pivot supports and protected slack cable route. Side tilt view: two extreme screen angles, pivot stops and free cable slack. Signal/power diagram: microphone to speech-to-text processor to display, power pack supplying processor. Summary sequence: speech to software to captions, with testing note.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Signal path, controls and slack tilt cable are proposed. Software and battery targets require implementation and measurement; caption performance remains unvalidated.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "c66227211e9c7284376c88cfa5ac494d440bab215ee3816ee5cf811cc011dc9e",
+    "registryVersion": 1
   },
   "g10_fire_car": {
-    "src": "/workshop/models/g10_fire_car.png",
-    "alt": "Idea: Fire response car design proposal",
-    "caption": "Idea — Fire response car. A design proposal; physical construction and performance have not been validated.",
+    "src": "/workshop/models/g10-idea2-pdf-derived.jpeg",
+    "alt": "Articulated fire response car: Vehicle overview: front chassis camera, strapped low cylinder, exactly two arm joints, fixed nozzle, continuous hose with shoulder/elbow slack loops and stop tabs. Separate operator-control panel: camera view, DRIVE, AIM J1/J2, DISCHARGE and STOP controls.",
     "width": 1536,
-    "height": 1024
+    "height": 1024,
+    "caption": "Discussion illustration: proposed and untested. Two joints, nozzle mounting, hose loops and drive/aim controls remain proposed. Validate component orientation and ratings, stability and hose sweep before any operational use.",
+    "approved": true,
+    "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+    "sourcePdfSha256": "7dbcbe30c8a691819bd88faca915824a3694b6043b38e740ce8967ead19f848c",
+    "sha256": "593b35b18cb921acbc3f61457a90cf8d044dd96d9ee4462796920d76438ba9b4",
+    "registryVersion": 1
   }
 }
