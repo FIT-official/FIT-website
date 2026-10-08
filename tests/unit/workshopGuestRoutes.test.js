@@ -1,10 +1,10 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import { randomUUID } from 'node:crypto'
-const h = vi.hoisted(() => ({ rows: new Map(), touched: [], admin: false, signedIn: false }))
+const h = vi.hoisted(() => ({ rows: new Map(), touched: [], reads: [], admin: false, signedIn: false }))
 vi.mock('@/lib/workshopDatabase', () => ({ workshopDatabase: async () => ({ collection(name) {
     if (!['workshopGuestSessions', 'workshopGuestLessons', 'workshopGuestRateLimits', 'workshopGuestDrafts'].includes(name)) throw Error('Guest attempted a legacy collection: ' + name)
     h.touched.push(name); if (!h.rows.has(name)) h.rows.set(name, new Map()); const rows = h.rows.get(name)
-    return { findOne: async q => rows.has(q._id) ? structuredClone(rows.get(q._id)) : null, insertOne: async row => { if (rows.has(row._id)) throw Object.assign(Error(), { code: 11000 }); rows.set(row._id, structuredClone(row)) }, deleteOne: async q => ({ deletedCount: rows.delete(q._id) ? 1 : 0 }), updateOne: async (q, update) => { if (name === 'workshopGuestRateLimits') return { modifiedCount: 1 }; const row = rows.get(q._id); if (!row) return { modifiedCount: 0 }; Object.assign(row, update.$set); return { modifiedCount: 1 } }, replaceOne: async (q, row) => { if (rows.get(q._id)?.version !== q.version) return { modifiedCount: 0 }; rows.set(q._id, structuredClone(row)); return { modifiedCount: 1 } }, find: q => ({ limit: () => ({ toArray: async () => [...rows.values()].filter(row => q._id.$in.includes(row._id)).map(row => structuredClone(row)) }) }) }
+    return { findOne: async (q, options) => { h.reads.push({ name, q, options }); return rows.has(q._id) ? structuredClone(rows.get(q._id)) : null }, insertOne: async row => { if (rows.has(row._id)) throw Object.assign(Error(), { code: 11000 }); rows.set(row._id, structuredClone(row)) }, deleteOne: async q => ({ deletedCount: rows.delete(q._id) ? 1 : 0 }), updateOne: async (q, update) => { if (name === 'workshopGuestRateLimits') return { modifiedCount: 1 }; const row = rows.get(q._id); if (!row) return { modifiedCount: 0 }; Object.assign(row, update.$set); return { modifiedCount: 1 } }, replaceOne: async (q, row) => { if (rows.get(q._id)?.version !== q.version) return { modifiedCount: 0 }; rows.set(q._id, structuredClone(row)); return { modifiedCount: 1 } }, find: q => ({ limit: () => ({ toArray: async () => [...rows.values()].filter(row => q._id.$in.includes(row._id)).map(row => structuredClone(row)) }) }) }
 } }) }))
 vi.mock('@/lib/authenticate', () => { class UnauthorizedError extends Error { constructor() { super('Teacher sign-in required.'); this.status = 401 } } return { UnauthorizedError, authenticate: async () => { if (!h.signedIn) throw new UnauthorizedError(); return { userId: 'synthetic-teacher' } } } })
 vi.mock('@/lib/checkPrivileges', () => ({ checkAdminPrivileges: async () => h.admin }))
@@ -18,9 +18,28 @@ const base = 'https://www.fixitoday.com'
 function req(path, method = 'GET', body, cookie = '', origin = base) { return new Request(base + path, { method, headers: { origin, cookie, ...(body ? { 'content-type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) }) }
 function lesson() { return h.rows.get('workshopGuestLessons').get('2026-10-09') }
 async function join(name = 'Alex', group = 'g2') { const r = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name, group })); expect(r.status).toBe(200); return { cookie: r.headers.get('set-cookie').split(';')[0], identity: await r.json() } }
-beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-09T02:00:00Z')); h.rows.clear(); h.touched = []; h.admin = false; h.signedIn = false; h.rows.set('workshopGuestLessons', new Map([['2026-10-09', { ...emptyLesson(), entryOpen: true, version: 1 }]])) })
+beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-09T02:00:00Z')); h.rows.clear(); h.touched = []; h.reads = []; h.admin = false; h.signedIn = false; h.rows.set('workshopGuestLessons', new Map([['2026-10-09', { ...emptyLesson(), entryOpen: true, version: 1 }]])) })
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs() })
 describe('guest routes never reveal legacy class data', () => {
+    it('uses one projected lesson read for changed/unchanged polls and rechecks revoked access', async () => {
+        const a = await join()
+        h.reads = []
+        const changed = await classroomGET(req('/api/workshop/guest/classroom?since=0&seat=' + a.identity.seat, 'GET', undefined, a.cookie))
+        expect(changed.status).toBe(200)
+        const reads = h.reads.filter(row => row.name === 'workshopGuestLessons')
+        expect(reads).toHaveLength(1)
+        expect(reads[0].options.projection.feedback.$cond[0]).toEqual({ $eq: ['$version', 0] })
+        expect(changed.headers.get('server-timing')).toMatch(/session;dur=\d+/)
+        h.reads = []
+        const unchanged = await classroomGET(req('/api/workshop/guest/classroom?since=1&seat=' + a.identity.seat, 'GET', undefined, a.cookie))
+        expect(unchanged.status).toBe(304); expect(await unchanged.text()).toBe(''); expect(unchanged.headers.get('cache-control')).toBe('private, no-store'); expect(h.reads.filter(row => row.name === 'workshopGuestLessons')).toHaveLength(1)
+        const wrongHint = await classroomGET(req('/api/workshop/guest/classroom?since=1&seat=someone-else', 'GET', undefined, a.cookie))
+        expect(wrongHint.status).toBe(200); expect((await wrongHint.json()).seat).toBe(a.identity.seat)
+        for (const row of h.rows.get('workshopGuestSessions').values()) row.enabled = false
+        h.reads = []
+        expect((await classroomGET(req('/api/workshop/guest/classroom?since=1&seat=' + a.identity.seat, 'GET', undefined, a.cookie))).status).toBe(401)
+        expect(h.reads.filter(row => row.name === 'workshopGuestLessons')).toHaveLength(0)
+    })
     it('requires the teacher entry gate and rejects cross-origin entry', async () => { lesson().entryOpen = false; expect((await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'Alex', group: 'g2' }))).status).toBe(403); expect((await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'Alex', group: 'g2' }, '', 'https://other.test'))).status).toBe(403); expect((await sessionGET(req('/api/workshop/guest/session'))).status).toBe(200); expect(await sessionGET(req('/api/workshop/guest/session')).then(r => r.json())).toEqual({ entryOpen: false }) })
     it('uses separate browser cookies and keeps refresh identity without numbered accounts', async () => { const a = await join(), b = await join(); expect(a.identity.seat).not.toBe(b.identity.seat); const status = await sessionGET(req('/api/workshop/guest/session', 'GET', undefined, a.cookie)); expect(await status.json()).toMatchObject({ name: 'Alex', group: 'g2', seat: a.identity.seat }); const retry = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'Alex', group: 'g2' }, a.cookie)); expect((await retry.json()).seat).toBe(a.identity.seat); expect((await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'Other', group: 'g3' }, a.cookie))).status).toBe(409) })
     it('returns only own-session guest data and rejects another home and legacy routes', async () => { const a = await join(); const r = await classroomGET(req('/api/workshop/guest/classroom?homeGroup=g2', 'GET', undefined, a.cookie)); expect(r.status).toBe(200); const body = await r.json(); expect(body).toMatchObject({ seat: a.identity.seat, studentName: 'Alex', guest: true, selfReported: true }); for (const key of ['ownClassDetails', 'accounts', 'audit', 'password', 'loginDetails', 'classLink']) expect(body).not.toHaveProperty(key); expect(r.headers.get('cache-control')).toBe('private, no-store'); expect((await classroomGET(req('/api/workshop/guest/classroom?homeGroup=g3', 'GET', undefined, a.cookie))).status).toBe(403); expect((await legacyGET(req('/api/workshop/classroom', 'GET', undefined, a.cookie))).status).toBe(401); expect((await classroomGET(req('/api/workshop/guest/classroom?since=1&seat=' + a.identity.seat, 'GET', undefined, a.cookie))).status).toBe(304) })
