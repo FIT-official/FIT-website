@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { workshopGroups, workshopGroupPage } from '@/lib/workshopPages'
+import { workshopGroups, workshopGroupPage, assertWorkshopImagesReady } from '@/lib/workshopPages'
 export const metadata = { title: 'Design-thinking workshop | Fix It Today', robots: { index: false, follow: false } }
 export default function WorkshopHub() {
+    assertWorkshopImagesReady()
     return <main className="px-5 md:px-10 py-12 max-w-6xl mx-auto">
         <p className="text-sm">Friday 9 October 2026 · 30 minutes</p><h1 className="text-3xl md:text-4xl mt-3">Choose your group</h1>
         <p className="mt-4 max-w-3xl">Each group has two ideas, clearer problem statements, reviewed model examples and three short activities. Open your group, compare the ideas and write your answers.</p>
