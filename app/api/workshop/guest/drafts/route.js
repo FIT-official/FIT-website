@@ -1,0 +1,6 @@
+import { requireGuestAccess, verifyGuestHome } from '@/lib/workshopGuestAccess'
+import { guestDb, classJson, classFailure, sameOrigin, jsonBody, limitGuestOperation } from '@/lib/workshopGuestHttp'
+import { draftId, draftTopics, draftView, saveWorkshopDraft, DraftError } from '@/lib/workshopGuestDraftStore'
+export const runtime = 'nodejs'
+export async function GET(request) { try { const access = await requireGuestAccess(request); verifyGuestHome(request, access); const db = await guestDb(), rows = await db.collection('workshopGuestDrafts').find({ _id: { $in: draftTopics(access.group).map(topic => draftId(access.seat, topic)) } }).limit(20).toArray(); return classJson({ seat: access.seat, drafts: rows.map(draftView) }) } catch (error) { return classFailure(error) } }
+export async function POST(request) { try { sameOrigin(request); const access = await requireGuestAccess(request); verifyGuestHome(request, access); const input = await jsonBody(request); if (input.seat !== access.seat) throw new DraftError('Use your own workshop session.', 403); const db = await guestDb(); await limitGuestOperation(db, 'draft-' + access.seat, 30); return classJson(await saveWorkshopDraft(db.collection('workshopGuestDrafts'), access, input)) } catch (error) { return classFailure(error) } }
