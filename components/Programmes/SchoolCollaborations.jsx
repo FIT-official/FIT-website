@@ -4,13 +4,13 @@ import styles from './ProgrammeEvidence.module.css'
 import { nyghMiniatureRoomPhoto, photoImageStyle, photoImageSizes } from './finishedProjectPhotos'
 export default function SchoolCollaborations() {
     return <section id="school-collaborations" className={styles.section} aria-labelledby="school-collaborations-title">
-        <p className={styles.eyebrow}>PROJECTS WITH SINGAPORE SCHOOLS</p><h2 id="school-collaborations-title">Programmes for<br /><em>young makers.</em></h2><p className={styles.intro}>We have worked with Bartley Secondary School, Boon Lay Garden Primary School and Nanyang Girls’ High School. Each school brings a different idea. Here are a few starting points for yours.</p>
+        <p className={styles.eyebrow}>PROJECTS WITH SINGAPORE SCHOOLS</p><h2 id="school-collaborations-title">Programmes for<br /><em>young makers.</em></h2><p className={styles.intro}>Explore miniature escape rooms, beginner making and interactive room models. These programme examples bring design, model making and electronics together.</p>
         <div className={styles.cards}>
             <article className={styles.bartley}><span className={styles.tag}>SECONDARY / PROJECT BRIEF</span><h3>Miniature escape-room design</h3><h4>An escape room about the school.</h4><p>The escape-room project brief uses familiar school spaces as puzzle stations in a miniature escape room. It brings together model making, 3D printed parts and electronics.</p><div className={styles.flow} aria-label="Project connections"><span>School story</span><span aria-hidden="true">↓</span><span>Puzzle logic</span><span aria-hidden="true">↓</span><span>Physical interaction</span></div><p className={styles.note}>Project planning example: connecting narrative, puzzle logic and a physical response.</p></article>
             <article className={styles.boon}><span className={styles.tag}>PRIMARY / SCHOOL COLLABORATION</span><h3>Beginner design and making</h3><h4>A first project for younger makers.</h4><p>Planning a programme for younger makers? Tell us the students’ ages and experience. We can start with simple shapes, a small model or a guided circuit.</p><div className={styles.primaryGraphic} aria-hidden="true"><span>Explore</span><span>Make</span><span>Explain</span></div><a href="#enquire">Discuss a primary programme ↗</a></article>
             <article className={styles.nygh}>
                 <span className={styles.tag}>SECONDARY / PROJECT EXAMPLE</span>
-                <h3>Nanyang Girls’ High School</h3>
+                <h3>3D design and interactive room models</h3>
                 <figure>
                     <div className={styles.image} style={{ height: 'auto', aspectRatio: nyghMiniatureRoomPhoto.displayRatio }}>
                         <Image src={nyghMiniatureRoomPhoto.src} width={nyghMiniatureRoomPhoto.width} height={nyghMiniatureRoomPhoto.height}
