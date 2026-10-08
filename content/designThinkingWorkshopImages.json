@@ -1,1 +1,142 @@
-{}
+{
+  "g1_folding_tray": {
+    "src": "/workshop/models/g1_folding_tray.png",
+    "alt": "Idea: Foldable tray design proposal",
+    "caption": "Idea — Foldable tray. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g1_rolling_bin": {
+    "src": "/workshop/models/g1_rolling_bin.png",
+    "alt": "Idea: Rolling bin design proposal",
+    "caption": "Idea — Rolling bin. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g2_motion_lamp": {
+    "src": "/workshop/models/g2_motion_lamp.png",
+    "alt": "Idea: Mushroom lamp design proposal",
+    "caption": "Idea — Mushroom lamp. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g2_sorting_bin": {
+    "src": "/workshop/models/g2_sorting_bin.png",
+    "alt": "Idea: Sorting robot bin design proposal",
+    "caption": "Idea — Sorting robot bin. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g3_sound_companion": {
+    "src": "/workshop/models/g3_sound_companion.png",
+    "alt": "Idea: Sound companion design proposal",
+    "caption": "Idea — Sound companion. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g3_parcel_box": {
+    "src": "/workshop/models/g3_parcel_box.png",
+    "alt": "Idea: Parcel box design proposal",
+    "caption": "Idea — Parcel box. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g4_wick_pot": {
+    "src": "/workshop/models/g4_wick_pot.png",
+    "alt": "Idea: Plant care design proposal",
+    "caption": "Idea — Plant care. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g4_doorbell_band": {
+    "src": "/workshop/models/g4_doorbell_band.png",
+    "alt": "Idea: Doorbell wristband design proposal",
+    "caption": "Idea — Doorbell wristband. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g5_parcel_alert": {
+    "src": "/workshop/models/g5_parcel_alert.png",
+    "alt": "Idea: Parcel notice design proposal",
+    "caption": "Idea — Parcel notice. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g5_crossing_cuff": {
+    "src": "/workshop/models/g5_crossing_cuff.png",
+    "alt": "Idea: Crossing the road design proposal",
+    "caption": "Idea — Crossing the road. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g6_drone": {
+    "src": "/workshop/models/g6_drone.png",
+    "alt": "Idea: Drone response design proposal",
+    "caption": "Idea — Drone response. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g6_detect_alert": {
+    "src": "/workshop/models/g6_detect_alert.png",
+    "alt": "Idea: Detect and alert design proposal",
+    "caption": "Idea — Detect and alert. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g7_condition_quiz": {
+    "src": "/workshop/models/g7_condition_quiz.png",
+    "alt": "Idea: Recycling reasons quiz design proposal",
+    "caption": "Idea — Recycling reasons quiz. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g7_feedback_bin": {
+    "src": "/workshop/models/g7_feedback_bin.png",
+    "alt": "Idea: Bin feedback design proposal",
+    "caption": "Idea — Bin feedback. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g8_pendant": {
+    "src": "/workshop/models/g8_pendant.png",
+    "alt": "Idea: Reachable light control design proposal",
+    "caption": "Idea — Reachable light control. A design proposal; physical construction and performance have not been validated.",
+    "width": 1639,
+    "height": 960
+  },
+  "g8_cooking_screen": {
+    "src": "/workshop/models/g8_cooking_screen.png",
+    "alt": "Idea: Firestructor cooking screen design proposal",
+    "caption": "Idea — Firestructor cooking screen. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g9_phone_bed": {
+    "src": "/workshop/models/g9_phone_bed.png",
+    "alt": "Idea: Phone sleep holder design proposal",
+    "caption": "Idea — Phone sleep holder. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g9_recycling_mascot": {
+    "src": "/workshop/models/g9_recycling_mascot.png",
+    "alt": "Idea: Recycling mascot design proposal",
+    "caption": "Idea — Recycling mascot. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g10_caption_display": {
+    "src": "/workshop/models/g10_caption_display.png",
+    "alt": "Idea: Living-room caption display design proposal",
+    "caption": "Idea — Living-room caption display. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  },
+  "g10_fire_car": {
+    "src": "/workshop/models/g10_fire_car.png",
+    "alt": "Idea: Fire response car design proposal",
+    "caption": "Idea — Fire response car. A design proposal; physical construction and performance have not been validated.",
+    "width": 1536,
+    "height": 1024
+  }
+}
