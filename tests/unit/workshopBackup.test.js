@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createHash } from 'node:crypto'
 import { Readable } from 'node:stream'
 import ExcelJS from 'exceljs'
@@ -112,11 +112,13 @@ describe('complete private Excel workshop backup', () => {
         const backup = createBackupArchive({ metadata: metadata({ feedback: 1000 }), records: (async function* () { for (let i = 0; i < 1000; i++) { produced++; yield { ...normal(), reference: String(i) } } })() }, { maxRowsPerPart: 20 })
         backup.stream.on('error', () => {})
         try {
-            await new Promise(resolve => setTimeout(resolve, 250))
-            const stoppedAt = produced
-            await new Promise(resolve => setTimeout(resolve, 100))
-            expect(produced).toBeLessThan(1000)
-            expect(produced).toBe(stoppedAt)
+            let previous = -1
+            await vi.waitFor(() => {
+                const unchanged = produced === previous; previous = produced
+                expect(backup.stream.writableNeedDrain).toBe(true)
+                expect(produced).toBeLessThan(1000)
+                expect(unchanged).toBe(true)
+            }, { interval: 100, timeout: 3000 })
         } finally { backup.cancel(); await backup.done.catch(() => {}) }
-    }, 3000)
+    }, 5000)
 })
