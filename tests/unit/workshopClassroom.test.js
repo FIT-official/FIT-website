@@ -7,7 +7,7 @@ function store(initial = null) {
     let row = initial ? structuredClone(initial) : null
     return { findOne: async () => row ? structuredClone(row) : null, insertOne: async value => { if (row) throw Object.assign(Error(), { code: 11000 }); row = structuredClone(value) }, replaceOne: async (query, value) => { if (!row || row.version !== query.version) return { modifiedCount: 0 }; row = structuredClone(value); return { modifiedCount: 1 } } }
 }
-const feedback = () => ({ kind: 'feedback', submissionId: id, session: '2026-10-09', phaseVersion: 0, presentingGroup: 'g1', visitingGroup: 'g2', idea: '1', whatWorks: 'The base is wide.', question: 'How is the axle held?', improvement: 'Add an axle retainer.' })
+const feedback = () => ({ kind: 'feedback', submissionId: id, session: '2026-10-09', phaseVersion: 0, presentingGroup: 'g3', visitingGroup: 'g2', idea: '1', whatWorks: 'The base is wide.', question: 'How is the axle held?', improvement: 'Add an axle retainer.' })
 const open = phase => ({ ...emptyLesson(), phase, feedbackOpen: phase === 'FEEDBACK', refinementOpen: phase === 'REFINE', showFeedback: true })
 const refinement = () => ({ kind: 'refinement', submissionId: id, phaseVersion: 0, expectedVersion: 0, ideas: [0, 1].map(() => ({ feedbackUsed: 'Visitors asked about attachment.', change: 'Add a removable retainer.', reason: 'The axle stays located.', test: 'Roll it five times and inspect.' })) })
 describe('server-authoritative classroom', () => {
@@ -34,21 +34,23 @@ describe('server-authoritative classroom', () => {
         await expect(submitClassroom(store(open('FEEDBACK')), { ...student, group: 'g1' }, feedback(), now)).rejects.toMatchObject({ status: 403 })
         await expect(submitClassroom(store(open('FEEDBACK')), student, { ...feedback(), presentingGroup: 'g2' }, now)).rejects.toMatchObject({ status: 400 })
     })
-    it('prevents stale cross-device group refinements and keeps both idea responses', async () => {
+    it('preserves classmates contributions and rejects only the same authors stale device', async () => {
         const db = store(open('REFINE'))
         expect((await submitClassroom(db, student, refinement(), now)).version).toBe(1)
-        await expect(submitClassroom(db, { ...student, seat: 'group2student2' }, { ...refinement(), submissionId: '3460d8e9-6b20-4381-bda0-39c7b286544e' }, now)).rejects.toMatchObject({ status: 409 })
+        await submitClassroom(db, { ...student, seat: 'group2student2' }, { ...refinement(), submissionId: '3460d8e9-6b20-4381-bda0-39c7b286544e' }, now)
+        expect((await readLesson(db)).refinements).toHaveLength(2)
+        await expect(submitClassroom(db, student, { ...refinement(), submissionId: '3460d8e9-6b20-4381-bda0-39c7b286544f' }, now)).rejects.toMatchObject({ status: 409 })
         expect((await readLesson(db)).refinements[0].ideas).toHaveLength(2)
-        expect(classroomView(await readLesson(db), { ...student, group: 'g3' }).refinements).toHaveLength(0)
+        expect(classroomView(await readLesson(db), { ...student, group: 'g4' }).refinements).toHaveLength(0)
     })
     it('excludes hidden/blocked feedback, preserves attributed before/after moderation history and restores entries', async () => {
         const db = store(open('FEEDBACK')); await submitClassroom(db, student, feedback(), now)
         let state = await readLesson(db)
         await moderateClassroom(db, teacher, { action: 'feedback', expectedEntryVersion: state.feedback.find(row => row.id === id).version, id, visibility: 'hidden', edit: { whatWorks: 'Teacher clarified the base.', question: 'How is the axle held?', improvement: 'Add a retainer.' } }, now)
-        state = await readLesson(db); expect(classroomView(state, student).feedback).toHaveLength(0); expect(classroomView(state, teacher).feedback).toHaveLength(1)
+        state = await readLesson(db); expect(classroomView(state, { ...student, seat: 'group3student1', group: 'g3' }).feedback).toHaveLength(0); expect(classroomView(state, teacher).feedback).toHaveLength(1)
         expect(state.audit[0].actor).toBe('synthetic-admin'); expect(state.audit[0].before.whatWorks).toBe('The base is wide.')
         await moderateClassroom(db, teacher, { action: 'feedback', expectedEntryVersion: state.feedback.find(row => row.id === id).version, id, visibility: 'visible' }, now)
-        expect(classroomView(await readLesson(db), student).feedback[0].whatWorks).toBe('Teacher clarified the base.')
+        expect(classroomView(await readLesson(db), { ...student, seat: 'group3student1', group: 'g3' }).feedback[0].whatWorks).toBe('Teacher clarified the base.')
         expect(await submitClassroom(db, student, feedback(), now)).toMatchObject({ receipt: id })
     })
     it('denies student moderation and stale teacher edits', async () => {
@@ -57,7 +59,7 @@ describe('server-authoritative classroom', () => {
     })
     it('never returns private audit/hash information to students and can hide all class feedback', async () => {
         const db = store(open('FEEDBACK')); await submitClassroom(db, student, feedback(), now)
-        const state = await readLesson(db), view = classroomView(state, student)
+        const state = await readLesson(db), view = classroomView(state, { ...student, seat: 'group3student1', group: 'g3' })
         expect(view.audit).toBeUndefined(); expect(view.feedback[0].payloadHash).toBeUndefined(); expect(view.feedback[0].seat).toBeUndefined()
         expect(classroomView({ ...state, showFeedback: false }, student).feedback).toHaveLength(0)
     })
@@ -75,7 +77,7 @@ describe('server-authoritative classroom', () => {
         const originalVersion = (await readLesson(db)).feedback[0].version
         for (let i = 0; i < 40; i++) {
             const group = Math.floor(i / 4) + 1, seat = 'group' + group + 'student' + (i % 4 + 1)
-            await submitClassroom(db, { role: 'student', group: 'g' + group, seat }, { ...feedback(), submissionId: id.slice(0, -2) + i.toString(16).padStart(2, '0'), visitingGroup: 'g' + group, presentingGroup: group === 1 ? 'g2' : 'g1' }, now)
+            await submitClassroom(db, { role: 'student', group: 'g' + group, seat }, { ...feedback(), submissionId: id.slice(0, -2) + i.toString(16).padStart(2, '0'), visitingGroup: 'g' + group, presentingGroup: 'g' + (group % 10 + 1) }, now)
         }
         await moderateClassroom(db, teacher, { action: 'feedback', expectedEntryVersion: originalVersion, id, visibility: 'visible', edit: { whatWorks: 'Teacher typed buffer survives student activity.', question: 'How is the axle retained?', improvement: 'Add an axle retainer.' } }, now)
         const state = await readLesson(db)

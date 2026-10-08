@@ -10,13 +10,14 @@ import PenProgramme from '../components/Programmes/PenProgramme'
 import SchoolProgrammes from '../app/school-programmes/page'
 import CompanyWorkshops from '../app/company-workshops/page'
 afterEach(cleanup)
-it('represents all three schools, distinguishes the Bartley brief and avoids student images', () => {
+it('describes the three programme examples without school-name attribution', () => {
   render(<SchoolCollaborations />)
-  expect(screen.getByRole('heading', {name:'Bartley Secondary School'})).toBeInTheDocument()
-  expect(screen.getByRole('heading', {name:'Boon Lay Garden Primary School'})).toBeInTheDocument()
+  expect(screen.getByRole('heading', {name:'Miniature escape-room design'})).toBeInTheDocument()
+  expect(screen.getByRole('heading', {name:'Beginner design and making'})).toBeInTheDocument()
+  expect(document.body.textContent).not.toMatch(/Bartley|Boon Lay|NYGH|Nanyang/)
   expect(screen.getByText(/Project planning example/)).toBeInTheDocument()
   expect(screen.getByRole('img').getAttribute('src')).toBe('/images/programmes/nygh-miniature-room-finished.jpg')
-  expect(screen.getByText('A finished miniature room from the NYGH project.')).toBeInTheDocument()
+  expect(screen.getByText('A finished miniature room from a 3D design and electronics project.')).toBeInTheDocument()
   expect(screen.getByRole('link', {name:/Discuss a primary/})).toHaveAttribute('href', '#enquire')
 })
 it('offers 3D pen programmes to schools, teams and community groups with an enquiry path', () => {
@@ -26,16 +27,17 @@ it('offers 3D pen programmes to schools, teams and community groups with an enqu
   expect(screen.getByText('COMMUNITY GROUPS')).toBeInTheDocument()
   expect(screen.getByRole('link', {name:/Plan a 3D pen programme/})).toHaveAttribute('href','#enquire')
 })
-it('keeps the approved finished-project photographs attributed to EEEAA on both programme pages', () => {
+it('keeps the approved photographs with descriptive programme captions', () => {
   for (const Page of [SchoolProgrammes, CompanyWorkshops]) {
     const view=render(<Page />)
     const section=screen.getByRole('heading',{name:/Draw the pieces/}).closest('section')
     const image=within(section).getByRole('img')
     expect(image.getAttribute('src')).toMatch(/^\/images\/programmes\/eeeaa-2026-3d-pen-(?:balloon|phone-stand)\.jpg$/)
     expect(existsSync('public'+image.getAttribute('src'))).toBe(true)
-    expect(within(section).getByText(/EEEAA 30th Anniversary workshop, 26 September 2026/)).toBeInTheDocument()
+    expect(within(section).getByText('A blue 3D-pen phone-stand model.')).toBeInTheDocument()
     expect(section.textContent).not.toMatch(/Bartley|Boon Lay|NYGH/)
-    expect(screen.getAllByText(/EEEAA 30th Anniversary workshop, 26 September 2026/).length).toBeGreaterThanOrEqual(3)
+    expect(section.textContent).not.toMatch(/EEEAA 30th Anniversary workshop/)
+    expect(screen.getAllByText('A colourful 3D-pen hot-air-balloon model.').length).toBeGreaterThanOrEqual(1)
     view.unmount()
   }
 })
@@ -57,13 +59,13 @@ it('adds existing non-identifying photographs to reading cards while preserving 
     expect(image.getAttribute('alt')).toBeTruthy()
   }
   expect(screen.getAllByText('A button panel that responds with light.').length).toBeGreaterThan(0)
-  expect(screen.getAllByText('A finished miniature room from the NYGH project.').length).toBeGreaterThan(0)
+  expect(screen.getAllByText('A finished miniature room from a 3D design and electronics project.').length).toBeGreaterThan(0)
 })
 it('leads with a finished creation and keeps wiring and component closeups in the lower gallery', () => {
   render(<SchoolProgrammes />)
   const hero = document.querySelector('article > header')
   expect(within(hero).getByRole('img')).toHaveAttribute('src','/images/programmes/eeeaa-2026-3d-pen-balloon.jpg')
-  expect(within(hero).getByText(/EEEAA 30th Anniversary workshop/)).toBeInTheDocument()
+  expect(within(hero).getByText('A colourful 3D-pen hot-air-balloon model.')).toBeInTheDocument()
   expect(within(hero).queryByText(/NYGH|Bartley|Boon Lay/)).not.toBeInTheDocument()
   const technicalImages = screen.getAllByRole('img').filter(image => /sensor-wiring|escape-room-electronics|nygh-printed-mechanism|miniature-escape-room-finished/.test(image.getAttribute('src')))
   expect(technicalImages.length).toBeGreaterThan(0)

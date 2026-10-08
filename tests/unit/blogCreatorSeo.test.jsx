@@ -117,7 +117,10 @@ describe('public blog search content', () => {
 
     it('normalizes malformed pages and rejects huge or out-of-range pages instead of returning empty indexed archives', async () => {
         const { default: Blog, generateMetadata } = await import('@/app/blog/page')
-        expect(renderToStaticMarkup(await Blog({ searchParams: Promise.resolve({ page: 'bad' }) }))).toContain('No blog posts yet.')
+        // The approved static workshop article remains listed even when Mongo has no posts.
+        const html = renderToStaticMarkup(await Blog({ searchParams: Promise.resolve({ page: 'bad' }) }))
+        expect(html).toContain('href="/blog/design-thinking-workshop"')
+        expect(html).not.toContain('No blog posts yet.')
         expect((await generateMetadata({ searchParams: Promise.resolve({ page: 'Infinity' }) })).alternates.canonical).toBe('https://www.fixitoday.com/blog')
         for (const page of ['2', '999', String(Number.MAX_SAFE_INTEGER)]) {
             await expect(Blog({ searchParams: Promise.resolve({ page }) })).rejects.toThrow('NEXT_NOT_FOUND')

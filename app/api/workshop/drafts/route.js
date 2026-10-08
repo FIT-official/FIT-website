@@ -1,0 +1,7 @@
+import { requireWorkshopAccess } from '@/lib/workshopAccess'
+import { classDb, classJson, classFailure, sameOrigin, jsonBody, limitClassOperation } from '@/lib/workshopHttp'
+import { draftId, draftTopics, draftView, saveWorkshopDraft, DraftError } from '@/lib/workshopDraftStore'
+import { readLesson } from '@/lib/workshopClassroomStore'
+export const runtime = 'nodejs'
+export async function GET(request) { try { const access = await requireWorkshopAccess(request); if (access.role !== 'student') throw new DraftError('Student draft access required.', 403); const db = await classDb(); const rows = await db.collection('workshopDrafts').find({ _id: { $in: draftTopics(access.seat).map(topic => draftId(access.seat, topic)) } }).limit(20).toArray(); return classJson({ seat: access.seat, drafts: rows.map(draftView) }) } catch (error) { return classFailure(error) } }
+export async function POST(request) { try { sameOrigin(request); const access = await requireWorkshopAccess(request), input = await jsonBody(request); if (access.role !== 'student' || input.seat !== access.seat) throw new DraftError('Use your current student seat. Your draft is kept.', 403); const db = await classDb(); await limitClassOperation(db, 'draft-' + access.seat, 30); const lesson = await readLesson(db.collection('workshopLessons')); return classJson(await saveWorkshopDraft(db.collection('workshopDrafts'), access, input, new Date(), lesson.reviewRound || 1)) } catch (error) { return classFailure(error) } }

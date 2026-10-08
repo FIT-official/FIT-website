@@ -1,0 +1,927 @@
+{
+  "status": "CONTENT DRAFT ONLY — not canonical or published",
+  "groups": [
+    {
+      "groupNumber": 1,
+      "ideas": [
+        {
+          "reviewedImageKey": "g1_folding_tray",
+          "title": "Foldable tray",
+          "originalIntent": "A folding oval tray with three compartments on one half.",
+          "recommendedRefinement": "Use a hinge and a positive open lock, then release the lock to fold the empty tray.",
+          "parts": [
+            "Two tray halves",
+            "Hinge pin",
+            "Captive sliding bridge and guides"
+          ],
+          "nextTest": "Check hinge clearance, lock engagement, load deflection and whether storage space improves.",
+          "designSafeguards": "Guard the hinge gap; keep the bridge captive; define a rated load after testing.",
+          "problemContext": "The original drawing shows an oval tray that folds, but does not explain who uses it or what it carries. Finding that out is the first design task. A tray for storing craft materials might need different compartments, strength and cleaning from a tray for carrying food. These are possible research directions, not confirmed original uses.",
+          "studentExplanation": "The original idea has two folding halves and three compartments on one half. The proposed refinement adds a hinge and a sliding support under the middle. A hinge allows turning; it does not, by itself, stop the tray folding under a load. The sliding bridge is intended to support the joint when the tray is fully open. It must stay attached to the tray, slide far enough into its guides and be easy to check. This is a proposed mechanism, so its strength and fit still need testing. Fold the tray only after it is empty. Compare its folded size with the storage space the chosen user actually has.",
+          "mechanismSteps": [
+            "Open the empty tray until both halves are level.",
+            "Slide the captive bridge under the joint into its open-lock position.",
+            "Check the lock before placing a tested load on the tray.",
+            "Remove the contents, retract the bridge and fold the halves together."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "OPEN: both tray halves lie level; the centre hinge is labelled.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "LOCK: the sliding bridge moves beneath the joint; arrows show engagement in its guides.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "FOLD: the empty tray closes only after the bridge has been pulled back.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 207
+        },
+        {
+          "reviewedImageKey": "g1_rolling_bin",
+          "title": "Mobile bin and companion",
+          "originalIntent": "A four-wheel bin with a peaked lid and a smaller wheeled companion.",
+          "recommendedRefinement": "Link the pair for moving; add hands-free opening and deposit feedback. Use the companion for recycling.",
+          "parts": [
+            "Four-wheel main body with peaked hinged lid",
+            "Smaller self-supported wheeled companion",
+            "Removable coupling and parking brakes",
+            "Proximity sensor, lid actuator, deposit sensor and display"
+          ],
+          "nextTest": "Compare the pair with two ordinary bins: turning space, parking, separation mistakes, hand contact, false lid openings and whether users notice the deposit feedback.",
+          "designSafeguards": "Keep each box supported by its own wheels; lock it for use; guard the lid drive and hitch; stop closing if obstructed; provide manual opening and transport mode.",
+          "problemContext": "A fixed bin may be far from the place where people are using it. This idea explores a disposal station that a person can move and park. The group still needs to choose a real setting and find out whether moving the station is more helpful than leaving two ordinary bins nearby.",
+          "studentExplanation": "The recorded original has a four-wheel bin with a peaked lid and a smaller wheeled box. In the proposed version, a removable link joins the two for transport. Each box stays supported by its own wheels. The smaller box is proposed as a recycling companion, with clear labels to help people choose. A nearby hand can trigger the main lid to open; a separate sensor inside looks for an actual deposit and starts a THANKS message. Opening the lid alone should not count as a deposit. These sensors and the recycling role are additions, not features confirmed in the original drawing. The station is pushed by a person; it does not follow people by itself.",
+          "mechanismSteps": [
+            "Link the two wheeled boxes and push them to the chosen place.",
+            "Apply the parking brakes and make the disposal labels easy to see.",
+            "A proximity sensor signals the lid drive to open; the user deposits an item.",
+            "An internal deposit signal triggers feedback; the lid closes only when the opening is clear."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "MOVE: a person pushes the coupled pair, with both bodies supported on wheels.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "PARK: brakes engage and the two disposal labels face the user.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "DEPOSIT: separate arrows show hand detection, lid opening and item detection before THANKS.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 220
+        }
+      ],
+      "feedbackQuestions": [
+        "What useful task could the folding tray or mobile bin help with, and why would that user choose it?",
+        "Which part is unclear: locking and folding the tray, or moving, parking and opening the bin? Explain what a drawing should show.",
+        "What one change would make either idea easier or safer to use, and how would you test it?"
+      ]
+    },
+    {
+      "groupNumber": 2,
+      "ideas": [
+        {
+          "reviewedImageKey": "g2_motion_lamp",
+          "title": "Mushroom nightlight",
+          "originalIntent": "A mushroom lamp that turns on when the person sits up, with accessible charging.",
+          "recommendedRefinement": "Aim the light at the floor and keep the motion sensor clear of the shade.",
+          "parts": [
+            "PIR sensor",
+            "Controller and LED driver",
+            "Diffuser and stable shell",
+            "Matched low-voltage adapter"
+          ],
+          "nextTest": "Check detection from the actual bed, useful floor visibility, glare, timeout and OFF behavior.",
+          "designSafeguards": "Provide cable strain relief, ventilation and a stable base; use a compatible power supply.",
+          "problemContext": "An older person getting out of bed may have difficulty seeing the floor before reaching a room switch. The useful question is whether a small light reveals the first part of their route without shining into their eyes. The design should be tested from the actual bed position.",
+          "studentExplanation": "The original mushroom-shaped lamp is intended to switch on when a person sits up and includes accessible charging. The proposed refinement puts the motion sensor where the shade will not block it and directs light down towards the floor. A passive infrared, or PIR, sensor detects changes in the infrared pattern in its view. It sends a signal to a controller, which switches on an LED and controls the timeout. It does not understand that someone is getting out of bed, so ordinary movements may also activate it. An OFF/AUTO control disables the lamp or enables motion operation; a separate always-on mode would need its own setting. Magnetic charging remains an original option; a compatible low-voltage adapter is a different implementation, not the same feature.",
+          "mechanismSteps": [
+            "Place the stable lamp so its sensor can see the intended movement.",
+            "Movement produces a sensor signal that reaches the controller.",
+            "The controller powers the downward-facing LED for a chosen period.",
+            "The light times out; selecting OFF disables motion operation and selecting AUTO enables it."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "WAITING: show the sensor view reaching the bed rather than being hidden by the shade.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "DETECT: sitting-up movement sends a signal through controller to LED.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "LIGHT: a downward pool of light reveals the floor; mark the manual control and cable route.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 218
+        },
+        {
+          "reviewedImageKey": "g2_sorting_bin",
+          "title": "Robot sorting bin",
+          "originalIntent": "A robot guides rubbish into several labelled compartments.",
+          "recommendedRefinement": "Use a supported pivoting chute and select its position before loading one item.",
+          "parts": [
+            "Single-item hopper",
+            "Servo and supported front-to-back shaft",
+            "Pivoting chute and separate liners",
+            "Position sensing or ready indication"
+          ],
+          "nextTest": "Trace both routes, measure clearances and test jams with representative clean items.",
+          "designSafeguards": "Enclose moving parts; stop on obstruction; use an accessible service release and rated actuator supply.",
+          "problemContext": "People sometimes put waste in the wrong compartment. A guide can make a chosen route clearer, but it cannot correct a category that the person chose incorrectly. This version explores a simple sequence that separates choosing the destination from inserting the item.",
+          "studentExplanation": "The original robot idea guides rubbish into several labelled compartments. The proposed demonstration simplifies this to two routes. It has a hopper, a tilting chute and a shaft supported by the bin structure. A small motor called a servo changes the chute angle. The supports, rather than the servo alone, should carry the item load. The person first chooses a category and waits for a ready indication. Only then do they put one item into the hopper. The item travels along the settled chute into the selected liner. Two routes are a mechanism demonstration, not a complete statement of local disposal rules. A gate that prevents loading while the chute moves would be a further refinement; it is not assumed to be built into this version. A visible coupling or short linkage must connect the servo to the supported shaft; the current drawing does not establish that connection.",
+          "mechanismSteps": [
+            "Choose the labelled destination before putting an item in.",
+            "The servo turns the supported chute towards the selected route.",
+            "Wait for the chute to settle and the ready indication.",
+            "Load one item; it slides into the matching removable liner."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "CHOOSE: the hopper is empty while a person selects a category.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "POSITION: arrows show the chute tilting around its supported front-to-back shaft.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "LOAD: one clean demonstration item follows the settled chute into its liner; no automatic inlet gate is assumed.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 229
+        }
+      ],
+      "feedbackQuestions": [
+        "Which feature would most help the nightlight user or the person sorting an item, and why?",
+        "What is still unclear about the lamp’s detection area or the chute’s choose-then-load sequence?",
+        "What one change could reduce unwanted lamp activations or sorting mistakes, and what comparison would test it?"
+      ]
+    },
+    {
+      "groupNumber": 3,
+      "ideas": [
+        {
+          "reviewedImageKey": "g3_sound_companion",
+          "title": "Sound and hello companion",
+          "originalIntent": "Switch the heart on, pat the plush to sing, and hold the paw to send Hello.",
+          "recommendedRefinement": "Keep a soft body around a removable control module, with separate sound and greeting controls.",
+          "parts": [
+            "Soft cover",
+            "Removable control cradle",
+            "Sound output and switches",
+            "Paired communication modules"
+          ],
+          "nextTest": "Compare the original pat control with the clear button and measure missed or accidental activations.",
+          "designSafeguards": "Secure the battery and paw wiring, bound the volume, remove electronics for washing and use a communication link that reaches the actual recipient.",
+          "problemContext": "A person living alone may enjoy a comforting object and a simple way to greet someone they know. This idea brings those two activities together. It should be designed with the intended user and recipient, because a useful tune, comfortable controls and a meaningful greeting can differ from person to person.",
+          "studentExplanation": "The original plush companion turns on at the heart, sings when patted and sends Hello when its paw is held. The proposed refinement keeps the soft body but places the electronics in a removable cradle. It separates the sound control from the greeting control so users can predict what will happen. A clear sound button is an alternative to the original pat input, not a confirmed original feature. When the greeting is sent, the receiving device returns an acknowledgement. That can show that the device received the signal; it must not imply that a person read it unless that is separately confirmed. The communication method must reach the actual recipient. A short-range radio connection alone cannot reach family far away.",
+          "mechanismSteps": [
+            "Switch on the companion and choose the sound or greeting action.",
+            "Use the sound control to start or stop a selected tune.",
+            "Hold or press the paw control to send Hello to the paired receiver.",
+            "Show receipt confirmation or a clear failure state so the user knows what happened."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "CHOOSE: identify heart power, sound input and paw greeting as separate controls.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "SEND: show Hello travelling from the companion to its paired receiver.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "CONFIRM: distinguish received acknowledgement from no connection; show the removable electronics cradle.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 220
+        },
+        {
+          "reviewedImageKey": "g3_parcel_box",
+          "title": "Private parcel box",
+          "originalIntent": "A parcel box with an angled transparent cover, string, pole and lock.",
+          "recommendedRefinement": "Use a complete opaque rectangular enclosure with a conventional hinged lid and a real latch.",
+          "parts": [
+            "Opaque enclosure",
+            "Hinge, lid stay and seal",
+            "Latch and owner lock",
+            "Ground or wall fixing points"
+          ],
+          "nextTest": "Check parcel fit, closing force, latch engagement, owner access, water entry and second-delivery handling.",
+          "designSafeguards": "Use controlled lid closing, guarded hinge gaps, anchoring and drainage; privacy is not proof of theft resistance.",
+          "problemContext": "A parcel left outside a door can be visible and within reach of passers-by. This idea aims to hide the contents and control access after delivery. It needs to suit the resident, the courier, the size of likely parcels and the space available without blocking anyone’s route.",
+          "studentExplanation": "The original concept uses an angled transparent cover, a string, a pole and a lock. The proposed refinement changes it to a complete opaque box with a conventional rear hinge, a folding two-link lid stay and a defined latch. Opaque walls conceal what is inside; they do not prove the box resists theft. The resident prepares the box for a delivery. The courier opens it, puts the parcel inside and closes the lid. For closing to secure it automatically, a matching latch tongue and keeper must actually engage; a simple clasp does not establish that. The owner unlocks the box, retrieves the parcel and resets it. This simple cycle raises an important question: what happens if a second courier arrives before the owner empties it? A solution for repeat deliveries must be designed rather than assumed.",
+          "mechanismSteps": [
+            "The owner prepares the empty box in its delivery-ready state.",
+            "The courier lifts the lid; the hinge and folding stay guide its movement.",
+            "Place the parcel inside and close the lid; a designed latch tongue and keeper must engage for the proposed automatic locking cycle.",
+            "The owner unlocks, retrieves and resets the box for a later delivery."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "READY: an opaque enclosure has a delivery-ready lid and unobstructed access.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "DELIVER: a side view shows the rear hinge and two-link stay with the lid open.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "SECURE/RESET: show the actual latch tongue entering its keeper, then owner unlocking; add a question beside a second parcel.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 240,
+          "auditUnresolved": "The proposed close-to-lock cycle needs an actual self-latching tongue/keeper; the drawn clasp alone does not prove it."
+        }
+      ],
+      "feedbackQuestions": [
+        "Which feature best supports comfort, greeting someone or parcel privacy, and why?",
+        "What is unclear about confirming a greeting or preparing the box for a second delivery?",
+        "What one change would make the companion or parcel box more useful in a real home, and how would you check it?"
+      ]
+    },
+    {
+      "groupNumber": 4,
+      "ideas": [
+        {
+          "reviewedImageKey": "g4_wick_pot",
+          "title": "Water storing plant pot",
+          "originalIntent": "A pot stores rain or wasted water and waters a plant when the soil is dry.",
+          "recommendedRefinement": "Use a covered reservoir and a wick that reaches both the water and the soil.",
+          "parts": [
+            "Inner pot",
+            "Covered reservoir",
+            "Wick and refill cap",
+            "Screened vent and overflow"
+          ],
+          "nextTest": "Measure water delivery and soil condition with the actual plant, wick and reservoir height.",
+          "designSafeguards": "Keep overflow below soil level; preserve drainage; use suitable water and cleanable parts.",
+          "problemContext": "Busy people can forget to water a plant. A stored supply could help between visits, but different plants and growing conditions need different amounts of water. The project needs to show how water reaches the roots without keeping the soil too wet.",
+          "studentExplanation": "The original intention is to collect rain or wasted water and water a plant when its soil becomes dry. The original sketch box was empty, so the proposed wick system is a new implementation of that intention. A wick is an absorbent strip connecting the covered reservoir to the inner pot. Water travels through the material into the soil. This is a passive process, not an electronic sensor deciding that the soil is dry. The wick’s material, size and position affect delivery, as does the height difference between water and soil. A refill opening makes the reservoir accessible, while a screened vent and overflow manage air and excess water. The pot still needs drainage and cleaning. Any reused water must be suitable for the plant and its setting.",
+          "mechanismSteps": [
+            "Fill the covered reservoir through the refill opening.",
+            "Keep one end of the wick in the water and the other in contact with the soil.",
+            "Water moves along the absorbent wick towards the inner pot.",
+            "Check soil condition and reservoir level; refill and clean as needed."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "FILL: a cutaway shows the reservoir, inner pot and refill cap as separate parts.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "TRANSFER: arrows follow the wick continuously from stored water to soil.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "CHECK: compare a full and low reservoir; label the screened vent, overflow and drainage.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 216
+        },
+        {
+          "reviewedImageKey": "g4_doorbell_band",
+          "title": "Doorbell wristband",
+          "originalIntent": "A wristband flashes and vibrates when the bell rings.",
+          "recommendedRefinement": "Pair a doorbell transmitter with a wearable receiver and clear test or acknowledgement control.",
+          "parts": [
+            "Doorbell transmitter",
+            "Receiver and controller",
+            "Light and vibration motor",
+            "Battery, adjustable strap and enclosure"
+          ],
+          "nextTest": "Measure missed alerts, range, cue strength, battery life and comfort in the intended home.",
+          "designSafeguards": "Provide low-battery and link-status indication, secure battery housing and a defined ingress-protection target.",
+          "problemContext": "A person with hearing difficulties may miss a visitor if the doorbell gives only a sound. A wristband could provide an alert that the person can feel and see. It must be comfortable enough to wear and reliable in the rooms where they spend time.",
+          "studentExplanation": "The original idea is a wristband that flashes and vibrates when the bell rings. In the proposed system, a transmitter at the door sends an event to a paired wearable receiver. The receiver’s controller starts a light and vibration motor. These two cues may suit different situations, and their strength needs testing with the wearer. A status indication is also important: no alert should not be confused with a flat battery or a lost connection. A test or acknowledgement control can help the wearer check operation and stop a noticed alert. The original waterproofing goal is not verified performance. The enclosure, charging arrangement and strap would need appropriate design and testing before any water-resistance claim.",
+          "mechanismSteps": [
+            "Press the doorbell to make the transmitter send an event.",
+            "The paired wristband receives the event and starts its alert pattern.",
+            "The wearer notices the flashing light, vibration or both and acknowledges it.",
+            "Use a test and status indication to check battery power and connection."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "RING: connect the pressed doorbell to a labelled wireless event arrow.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "ALERT: the worn band flashes and vibrates; distinguish both outputs.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "CHECK: show the acknowledgement control and separate battery/link status.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 205
+        }
+      ],
+      "feedbackQuestions": [
+        "What works well about the wick water path or the wristband’s two alert cues, and why?",
+        "What is unclear about how much water reaches the soil or how the wearer knows the band is connected?",
+        "What one change could make either idea more reliable for its intended user, and what would you measure?"
+      ]
+    },
+    {
+      "groupNumber": 5,
+      "ideas": [
+        {
+          "reviewedImageKey": "g5_parcel_alert",
+          "title": "Parcel arrival notice",
+          "originalIntent": "Parcels at the door was one of the group’s recorded topics.",
+          "recommendedRefinement": "Use a load plate with guided travel, a protected switch and a clear received message.",
+          "parts": [
+            "Load plate and guides",
+            "Return springs",
+            "Switch and travel stops",
+            "Transmitter and receiver"
+          ],
+          "nextTest": "Test light and heavy parcels, off-centre loads, repeated arrivals and acknowledgement.",
+          "designSafeguards": "Add mechanical overload stops, protected wiring and suitable outdoor sealing; keep the walking route clear.",
+          "problemContext": "A resident may not realise a parcel has been left at the door. An arrival notice could help them collect it sooner. The available original record names parcels at the door as a topic but does not contain a complete labelled mechanism. The following design is facilitator-supported development, not a recovered original design.",
+          "studentExplanation": "The proposed version places a guided load plate where the parcel is meant to be left. The parcel pushes the plate down against return springs until it operates a protected switch. Mechanical travel stops should take excess load so a heavy parcel does not keep crushing the switch. A controller filters rapid on-off contact changes, called switch bounce, and sends a notice to a receiver. Removing the parcel lets the springs raise the plate and prepare it for another arrival. The notice only says the plate was activated; it does not by itself prove what was delivered or who delivered it. Off-centre parcels, very light envelopes, several parcels and accidental footsteps are useful test cases. The plate must not create an obstacle in the walking route.",
+          "mechanismSteps": [
+            "An empty guided plate waits above the switch on return springs.",
+            "A parcel lowers the plate until the protected switch changes state.",
+            "The controller checks the signal and sends a clear arrival notice.",
+            "Parcel removal releases the switch, raises the plate and re-arms the system."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "EMPTY: show the raised plate, spring supports and switch clearance.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "LOADED: the plate moves down; stops, not the switch, take excess travel load.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "RESET: parcel removal lifts the plate and changes the receiver from arrival to ready.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 224
+        },
+        {
+          "reviewedImageKey": "g5_crossing_cuff",
+          "title": "Crossing reminder cuff",
+          "originalIntent": "Crossing the road was another recorded topic, with a small unlabelled cuff-like drawing.",
+          "recommendedRefinement": "Put a readable reminder on a comfortable adjustable cuff.",
+          "parts": [
+            "Flexible strap",
+            "Hook-and-loop closure",
+            "Readable reminder panel",
+            "Optional reflective material"
+          ],
+          "nextTest": "Compare reading speed, comfort and recall with an ordinary reminder card.",
+          "designSafeguards": "Use a snag-conscious closure and rounded edges; any visibility claim depends on material and wear testing.",
+          "problemContext": "The original notes include crossing the road and a small unlabelled cuff-like drawing. They do not confirm who wears it or how it works. The proposed development is a wearable reminder that someone can read before crossing, with the intended user and wording still to be chosen.",
+          "studentExplanation": "The cuff uses a flexible strap, a readable reminder panel and an adjustable closure. Its purpose is to make an agreed reminder easy to find without searching for a card. The wearer looks at it before crossing, then attends to the road and follows suitable crossing guidance. It does not detect vehicles, judge their speed, control traffic or tell someone that it is safe to cross. The reminder must therefore avoid a misleading safe-to-go signal. Any reflective material would be an optional feature with its own visibility testing. Rounded edges, comfort and a closure that does not create an unnecessary snag risk matter. A simple comparison with a reminder card can help establish whether wearing the information actually improves recall.",
+          "mechanismSteps": [
+            "Fit the strap so the reminder can be seen without turning it awkwardly.",
+            "Before crossing, the wearer reads and recalls the agreed reminder.",
+            "The wearer looks at the road and follows the crossing guidance.",
+            "Remove or adjust the cuff using its accessible closure."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "FIT: the reminder faces the wearer and the adjustable fastening is visible.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "READ BEFORE CROSSING: a close-up shows large words or symbols on the panel.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "LOOK UP: show attention returning to the road; label the cuff as a reminder, not a traffic detector.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 210
+        }
+      ],
+      "feedbackQuestions": [
+        "Which proposed development addresses a clearer need: the parcel notice or crossing reminder, and why?",
+        "What is still unclear about the plate’s load protection or what the cuff can and cannot tell the wearer?",
+        "What would you change after speaking to the intended user, and why would that be your first test?"
+      ]
+    },
+    {
+      "groupNumber": 6,
+      "ideas": [
+        {
+          "reviewedImageKey": "g6_drone",
+          "title": "Fire inspection drone",
+          "originalIntent": "A drone responds to a fire alert, helps with the fire and searches with a light.",
+          "recommendedRefinement": "Add paired thermal and visible cameras, location support and an operator-confirmed report.",
+          "parts": [
+            "Guarded drone",
+            "Thermal and RGB cameras",
+            "Depth or range sensor",
+            "Indoor localisation, communications and operator display"
+          ],
+          "nextTest": "Check image alignment, location error, link loss, battery reserve and representative hot-object false alarms.",
+          "designSafeguards": "Thermal cannot see through walls or ordinary glass; show uncertainty, use human confirmation and tested aircraft fail-safes.",
+          "problemContext": "A response team may need to inspect a place that is difficult or dangerous to approach. The design challenge is not just collecting an image: the team also needs to understand what the image shows, where it came from and how certain that location is.",
+          "studentExplanation": "The original drone responds to a fire alert, helps with the fire and searches using a light. The proposed inspection version adds a thermal camera, a visible-light camera and location support. The thermal view shows surface-temperature patterns; the ordinary camera provides visible context. Matching the two views can help an operator investigate an observation. A camera direction, range estimate and mapped position help relate that observation to a place. If the position is unreliable, the display should say so rather than place a confident but incorrect pin. A hot object is not automatically a fire. Thermal imaging cannot see through walls or ordinary glass. Fire suppression would require a separate engineered payload; the described inspection drone does not include an unspecified extinguisher.",
+          "mechanismSteps": [
+            "An operator selects an inspection task and checks the aircraft is ready.",
+            "Thermal and visible cameras collect corresponding views of the scene.",
+            "Position, direction and range information suggest where the observation lies.",
+            "The operator checks the evidence and confirms the map pin or marks it uncertain."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "INSPECT: a drone with ring guards carries separate visible and thermal cameras; the guards leave the top and bottom open.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "COMPARE: paired views show a warm feature with its surrounding visible context.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "LOCATE: a map pin includes an uncertainty label and waits for operator confirmation.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 213
+        },
+        {
+          "reviewedImageKey": "g6_detect_alert",
+          "title": "Fire detection and alert",
+          "originalIntent": "A scanner detects a fire, alerts drones and proposes guidance for people nearby.",
+          "recommendedRefinement": "Combine a commissioned detector with a configured room identity and an acknowledged alert.",
+          "parts": [
+            "Appropriate smoke or heat detector",
+            "Configured room/zone record",
+            "Message controller and link",
+            "Operator acknowledgement display"
+          ],
+          "nextTest": "Check room labels, timestamps, missed messages, false alerts and the response to uncertain location.",
+          "designSafeguards": "Keep commissioned detection and building alarm functions independent. Operator acknowledgement records receipt; it does not silently disable the alarm.",
+          "problemContext": "A response team needs more than a general message saying there may be a fire. An alert should identify the affected room or zone, show when the event happened and make it clear whether someone received it. Missing or mistaken location information could send attention to the wrong place.",
+          "studentExplanation": "The original scanner idea detects fire, alerts drones and proposes guidance for people nearby. The proposed refinement starts with a suitable detector that has been installed and checked for its intended setting. Its system record contains a configured room or zone identity. When an event occurs, the alert combines that identity with the time and any available camera evidence. An operator acknowledges receipt and decides whether to dispatch or redirect an inspection drone. Receipt acknowledgement is not permission to silence or disable a building alarm. The required detection and alarm functions must remain independent of this classroom concept. Projected floor guidance appears in the original idea, but its operation remains unresolved; it does not arise automatically from a thermal image.",
+          "mechanismSteps": [
+            "Configure and verify the detector’s room or zone identity.",
+            "A detection event generates a message containing the identity and time.",
+            "Available supporting evidence appears with any missing or uncertain information clearly marked.",
+            "An operator acknowledges receipt and chooses the next response."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "IDENTIFY: a detector is linked to one verified room or zone label.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "ALERT: the message shows location, time and evidence rather than just FIRE.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "ACKNOWLEDGE: operator receipt is shown separately from the continuing building alarm.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 210
+        }
+      ],
+      "feedbackQuestions": [
+        "Which part of the drone view or detector message gives a responder useful information, and why?",
+        "What is unclear about the observation’s location, uncertainty or operator acknowledgement?",
+        "What one change would help the operator avoid a mistaken conclusion, and how could you test it safely?"
+      ]
+    },
+    {
+      "groupNumber": 7,
+      "ideas": [
+        {
+          "reviewedImageKey": "g7_condition_quiz",
+          "title": "Which bin quiz",
+          "originalIntent": "A quiz asks which bin an item goes into.",
+          "recommendedRefinement": "Include the item’s condition and explain the reason after the learner chooses.",
+          "parts": [
+            "Item and condition cards",
+            "Choice selector",
+            "Reveal shutter or display",
+            "Locally checked rule set"
+          ],
+          "nextTest": "Ask learners to explain unfamiliar examples and compare the quality of their reasons before and after using the quiz.",
+          "designSafeguards": "Keep rules current and include uncertain or special-disposal cases; words and symbols accompany colour.",
+          "problemContext": "Knowing an item’s material is not always enough to decide how to dispose of it. Its condition and local collection rules also matter. This quiz helps learners explain a choice, rather than only memorising the colour of a bin. Its source grouping has a conflict, so it remains in the existing Group 7 gallery pending confirmation.",
+          "studentExplanation": "The original idea asks which bin an item belongs in. The proposed manual quiz adds condition cards and explanations. A learner looks at an item, sets the condition pointer and chooses a bin aloud. They slide a reveal cover to read the reason for that condition, then compare a different case. The pointer and cover are manually operated. There is no confirmed mechanism that automatically lines up the correct answer when the pointer moves, so the matching explanation must be checked. A useful example contrasts the same container in different conditions without assuming every dirty item must immediately become general waste. Local guidance may require emptying or rinsing an accepted item. Unknown items and special collection routes need their own explanations.",
+          "mechanismSteps": [
+            "Read the item card and set the pointer to its stated condition.",
+            "Choose a disposal route aloud and explain the reason.",
+            "Slide the cover to reveal the explanation matching that condition.",
+            "Change the item or condition and compare how the reason changes."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "QUESTION: one item card and a clear condition pointer are visible.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "CHOOSE/REVEAL: a hand slides the shutter into a receiving pocket or clear parking space; captive end stops keep it attached. The learner then checks the matching explanation.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "COMPARE: two conditions of the same item lead to separately checked explanations.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [
+            {
+              "text": "In a 24 February 2026 reply, Singapore’s Ministry of Sustainability and the Environment said the aggregate contamination rate for National Recycling Programme bins and chutes remained about 40%.",
+              "sourceTitle": "MSE: Contamination of recyclables in blue bins",
+              "url": "https://www.mse.gov.sg/latest-news/written-reply-to-parliamentary-question-on-contamination-of-recyclables-in-blue-bins/",
+              "scope": "National programme context, not a measurement at this school or an expected improvement from this design.",
+              "checkedDate": "2026-10-08"
+            }
+          ],
+          "readingWordCount": 219,
+          "auditUnresolved": "The existing cover arrow runs into an end wall; receiving space and retained travel must be drawn."
+        },
+        {
+          "reviewedImageKey": "g7_feedback_bin",
+          "title": "Camera assisted bin feedback",
+          "originalIntent": "The original guard checks items going into one recycling bin and gives red or green feedback.",
+          "recommendedRefinement": "Add a camera inspection chamber and a second general-waste outlet, with a return path for uncertain items.",
+          "parts": [
+            "Lit inspection chamber and camera",
+            "Small computer and trained model",
+            "Guarded gates and diverter",
+            "Separate removable liners and screen"
+          ],
+          "nextTest": "Test known, unknown, dirty, obscured and multiple items; report confusion cases, jams and rejected items.",
+          "designSafeguards": "Confidence thresholds need calibration; hold the item in the chamber when uncertain; add jam detection, manual release and accessible stop.",
+          "problemContext": "Wrong items and food or liquid residues can spoil a recycling collection. Feedback at the bin could help someone correct a choice before the item disappears inside. The important challenge is deciding what the system genuinely knows and what it still needs to ask the user.",
+          "studentExplanation": "The original recycling-bin guard gives red or green feedback for items going into one bin. The proposed refinement adds a lit inspection chamber, a camera, a small computer, two disposal outlets and a way to take an item back. The camera provides an image; trained software proposes an item category. A locally checked rule set helps decide its disposal route. Appearance alone may not reveal food residue or whether a special collection route is required, so the system asks for missing information. An uncertain item stays accessible in the chamber. After a supported decision is confirmed, the diverter moves to the selected route and the gate releases one item. The two outlets and automatic recognition are proposed additions that require separate testing.",
+          "mechanismSteps": [
+            "Place one item on the closed, supported flap in the lit chamber.",
+            "The software proposes a class and asks about missing condition information.",
+            "Confirm a supported route, or return an uncertain or special-disposal item.",
+            "Move the diverter to its checked position before releasing the item."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "INSPECT: one item rests on a closed, structurally supported flap in the lit chamber.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "UNCERTAIN: the support flap stays closed while the user takes back the accessible item.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "ROUTE: the diverter reaches its checked position before the supported flap opens and releases the item.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [
+            {
+              "text": "In a 24 February 2026 reply, Singapore’s Ministry of Sustainability and the Environment said the aggregate contamination rate for National Recycling Programme bins and chutes remained about 40%.",
+              "sourceTitle": "MSE: Contamination of recyclables in blue bins",
+              "url": "https://www.mse.gov.sg/latest-news/written-reply-to-parliamentary-question-on-contamination-of-recyclables-in-blue-bins/",
+              "scope": "National programme context, not a measurement at this school or an expected improvement from this design.",
+              "checkedDate": "2026-10-08"
+            }
+          ],
+          "readingWordCount": 213,
+          "auditUnresolved": "The current drawing does not adequately show item support; the flap and its load path require correction."
+        }
+      ],
+      "feedbackQuestions": [
+        "Which feature helps a person understand a disposal rule rather than guess, and why?",
+        "What is unclear about matching the quiz explanation or returning an uncertain item from the camera bin?",
+        "What one change would improve learning or reduce wrong routing, and which unfamiliar item would you use to test it?"
+      ]
+    },
+    {
+      "groupNumber": 8,
+      "ideas": [
+        {
+          "reviewedImageKey": "g8_pendant",
+          "title": "Reachable light control",
+          "originalIntent": "A round pendant with side-by-side ON and OFF controls, possible Braille and colour labels.",
+          "recommendedRefinement": "Use distinguishable controls linked to a compatible light receiver.",
+          "parts": [
+            "Round enclosure and guided caps",
+            "Compatible remote and receiver",
+            "Tactile labels",
+            "Battery and state indication"
+          ],
+          "nextTest": "Measure reach, mistaken presses, signal reliability and whether the user knows the light state.",
+          "designSafeguards": "Avoid a snag-prone neck loop; provide a suitable breakaway or bedside mounting option and secure battery access.",
+          "problemContext": "A person in bed may be unable to reach the room’s light switch comfortably. A reachable control could let them operate the light from their chosen position. It needs to work when the person cannot easily see it and when they want to distinguish ON from OFF by touch.",
+          "studentExplanation": "The original design is a round pendant with side-by-side ON and OFF controls, with possible Braille and colour labels. The proposed refinement connects clear, distinguishable buttons to a compatible light receiver. Each outer button cap must align with its actual switch inside. Pressing it tells the transmitter to send an ON or OFF command. The receiver changes the light and, if supported, reports its state back. Sending a command is different from confirming that the light changed. Button shape, spacing and tactile marks should help the intended user choose reliably without depending on colour alone. Braille must be correctly designed and checked. A bedside mounting option may avoid a neck loop; any wearable version needs attention to snag risk and easy removal.",
+          "mechanismSteps": [
+            "Keep the control within easy reach in the chosen bed position.",
+            "Feel the distinct buttons and press the intended ON or OFF cap.",
+            "The aligned switch triggers a command to the compatible receiver.",
+            "The light changes; use available state feedback to check the result."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "REACH: show a bedside position that can be reached comfortably.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "PRESS: a cutaway aligns each guided button cap with its own switch.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "CONFIRM: distinguish command sent from receiver-confirmed light state.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 215
+        },
+        {
+          "reviewedImageKey": "g8_cooking_screen",
+          "title": "Firestructor cooking guide",
+          "originalIntent": "A screen gives cooking instructions and recipes.",
+          "recommendedRefinement": "Show the current step, recipe navigation, a timer and a clear finish sequence.",
+          "parts": [
+            "Recipe software and display",
+            "Next/Back controls",
+            "Timers and acknowledgement",
+            "Stable cleanable stand and power routing"
+          ],
+          "nextTest": "Compare missed steps, time to resume after interruption and clarity of timer acknowledgement with a paper recipe.",
+          "designSafeguards": "Place the screen outside heat and splash exposure, protect the cable, and define what happens after power or app interruption.",
+          "problemContext": "A cook can lose their place in a recipe after an interruption or forget that a cooking step is still running. The idea aims to keep the current step and timing visible. It should support the cook’s attention without implying that a screen can supervise a stove on its own.",
+          "studentExplanation": "The original Firestructor is a screen giving recipes and cooking instructions. The proposed version shows one current step, Next and Back controls, timers and a clear finishing sequence. The cook selects the recipe, starts the step and moves through the instructions deliberately. A timer prompts a check; it does not prove that food is cooked or that equipment is safe. If the cook is interrupted, the screen should make it easy to see which step was last active. At the end, it reminds the person to check doneness and switch equipment off. An automatic stove shutoff is not included in the described system. Power or app interruption also needs a clear recovery state so a restarted display does not silently lose an active timer.",
+          "mechanismSteps": [
+            "Choose a recipe and open its first step.",
+            "Start any timer for the step and use Next or Back to keep your place.",
+            "A prompt asks the cook to check the food and acknowledge the timer.",
+            "The finish screen asks for the final food and equipment checks."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "START: recipe and current step are prominent, with clear navigation.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "CHECK: an active timer changes to a prompt requiring acknowledgement.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "FINISH: a checklist covers doneness and equipment off; no automatic shutoff is implied.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [
+            {
+              "text": "SCDF recorded 318 residential fires caused by unattended cooking in 2025. It remained the leading cause of residential fires.",
+              "sourceTitle": "SCDF Emergency Medical Services, Fire & Enforcement Statistics 2025, page 5",
+              "url": "https://www.scdf.gov.sg/docs/default-source/media-room-(publications)/annual-statistics/scdf-annual-statistics-on-ems-fire-enforcement-2025.pdf",
+              "scope": "Singapore residential fires in 2025; this does not show that the proposed screen prevents fires.",
+              "checkedDate": "2026-10-08"
+            }
+          ],
+          "readingWordCount": 221
+        }
+      ],
+      "feedbackQuestions": [
+        "Which feature makes the light control or cooking guide easier to use, and why?",
+        "What is unclear about confirming the light state or resuming a recipe after an interruption?",
+        "What one change would reduce mistaken presses or missed steps, and how would you compare the result?"
+      ]
+    },
+    {
+      "groupNumber": 9,
+      "ideas": [
+        {
+          "reviewedImageKey": "g9_phone_bed",
+          "title": "Phone sleep bed",
+          "originalIntent": "A phone-sized bed with blanket, charging pocket, lock and custom headboard.",
+          "recommendedRefinement": "Use a flexible segmented blanket stored in a foot-end housing and guided along both sides.",
+          "parts": [
+            "Phone cradle and headboard",
+            "Segmented flexible cover",
+            "Curved guides and foot-end storage",
+            "Pull bar, stops and manual release"
+          ],
+          "nextTest": "Check bend radius, full travel, jamming, phone retrieval and cable clearance with actual phone sizes.",
+          "designSafeguards": "Keep charging airflow and cable route clear of moving tracks; provide manual opening independent of any timed lock.",
+          "problemContext": "A person who chooses to take a phone break may want a clear place to put the phone away. A miniature bed could make that action noticeable and memorable. The design needs to preserve access when necessary and work with the person’s actual phone size.",
+          "studentExplanation": "The original phone bed has a blanket, a charging pocket, a lock and a custom headboard. It does not define how the blanket moves. The proposed mechanism makes it a flexible cover of linked slats, sometimes called a tambour cover. The slats follow guides along both sides and turn around a transverse roller into a housing at the foot of the bed. Pulling the end bar draws the cover back over the phone. A proposed side thumbwheel could turn a roller supported at both ends to wind the cover in; this addition is not yet adopted. The housing needs room for the whole cover and its bend. Stops keep it in the tracks and manual opening preserves retrieval. A timed lock and an energy-saving effect are not established. Charging would need clear airflow and a cable route away from the moving parts.",
+          "mechanismSteps": [
+            "Proposed addition, awaiting selection: turn a captive side thumbwheel to wind the cover onto a roller supported at both ends.",
+            "Place the phone in its cradle, keeping any cable outside the tracks.",
+            "Pull the end bar to guide the flexible cover over the phone.",
+            "Open it manually when access is needed and retrieve the phone."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "PROPOSED TAKE-UP: show a captive side thumbwheel, a roller supported at both ends and space for the whole wound cover; this addition needs approval and geometry checks.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "CLOSE: pulling the central bar unrolls the flexible slats through both guides; show a continuous path into the foot cassette.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "RETRIEVE: the manual opening path stays accessible and clear of charging cables.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 242,
+          "auditUnresolved": "Current stored coil does not establish a working take-up action. Thumbwheel is a candidate refinement, not an adopted or tested part."
+        },
+        {
+          "reviewedImageKey": "g9_recycling_mascot",
+          "title": "Recycling reward mascot",
+          "originalIntent": "Two box-shaped mascots show wrong/correct feedback, use hands as a cue and give stickers or a keychain reward.",
+          "recommendedRefinement": "Link a confirmed sorting choice to the feedback screen and a controlled one-sticker feed.",
+          "parts": [
+            "Feedback display and controller",
+            "Confirmation input",
+            "Sticker feed and collection slot",
+            "Mascot shell and keychain"
+          ],
+          "nextTest": "Check feedback clarity, one-at-a-time dispensing, stock detection and learning on new items without rewards.",
+          "designSafeguards": "Use rounded fixed decorative hands, a guarded feed path and separate clean reward access.",
+          "problemContext": "People may need feedback to learn what belongs in a recycling bin. A friendly character and small reward might encourage participation, but the project should also test whether people remember the reason when there is no reward. Learning is more important than merely producing a correct-looking response.",
+          "studentExplanation": "The original concept contains two box-shaped mascot variants with wrong/correct feedback, hand cues and sticker or keychain rewards. The proposed version links a confirmed sorting choice to a feedback display and a controlled sticker dispenser. A correct choice would enable supported pinch rollers to feed a continuous sticker-and-backing strip. A defined sensing or indexing method must stop the feed after one label; this is not yet established. A wrong choice leaves the feed off and explains the rule so the person can learn. A confirmation input is needed; the mascot does not automatically recognise an item simply because it has a face or display. Any camera classifier would be a separately designed and tested feature. Both original box-shaped variants should remain visible. Decorative hands should be rounded and fixed, with the reward slot separated from dirty items and moving feed parts.",
+          "mechanismSteps": [
+            "Make a sorting choice using a locally checked example.",
+            "Confirm the choice so the display can show a reasoned response.",
+            "For a correct choice, feed the continuous label strip through supported rollers; a tested index or sensor must stop it after one label.",
+            "Collect the reward safely; for an error, read the explanation and try again."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "CHOOSE: show both original box-shaped variants and a clear confirmation input.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "PROPOSED CORRECT PATH: draw the complete sticker/backing route through supported pinch rollers to collection, including the sensing or indexing point that stops one-label feed.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "WRONG: the feed stays off while an explanation helps the learner reconsider.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [
+            {
+              "text": "In a 24 February 2026 reply, Singapore’s Ministry of Sustainability and the Environment said the aggregate contamination rate for National Recycling Programme bins and chutes remained about 40%.",
+              "sourceTitle": "MSE: Contamination of recyclables in blue bins",
+              "url": "https://www.mse.gov.sg/latest-news/written-reply-to-parliamentary-question-on-contamination-of-recyclables-in-blue-bins/",
+              "scope": "National programme context, not a measurement at this school or an expected improvement from this design.",
+              "checkedDate": "2026-10-08"
+            }
+          ],
+          "readingWordCount": 244,
+          "auditUnresolved": "The current strip is discontinuous and one-label stopping is unresolved. Do not certify single-sticker dispensing."
+        }
+      ],
+      "feedbackQuestions": [
+        "What works well about putting the phone away or giving recycling feedback, and why?",
+        "What is unclear about where the whole phone cover stores or how exactly one sticker reaches the slot?",
+        "What one change would improve either idea, and how would you test its value without relying only on a lock or reward?"
+      ]
+    },
+    {
+      "groupNumber": 10,
+      "ideas": [
+        {
+          "reviewedImageKey": "g10_caption_display",
+          "title": "Living room caption TV",
+          "originalIntent": "A tabletop caption TV with microphone, bright screen, controller, battery and USB-C charging.",
+          "recommendedRefinement": "Fit real speech-to-text hardware/software inside a stable TV-shaped display with accessible controls.",
+          "parts": [
+            "Microphone",
+            "Supplied processor with compatible speech-to-text software",
+            "Screen and enclosure",
+            "Mute, text-size and power controls"
+          ],
+          "nextTest": "Compare transcription accuracy, delay, readability, glare, microphone placement and real battery runtime.",
+          "designSafeguards": "Keep microphone and vents unobstructed, provide a clear mute state, and handle transcription uncertainty visibly.",
+          "problemContext": "A person who cannot hear speech clearly may find it helpful to read captions during a conversation. The display needs to capture the right speaker, produce words with a manageable delay and make the text easy to read. Different rooms and conversation patterns can make those tasks harder.",
+          "studentExplanation": "The original tabletop caption TV includes a microphone, bright screen, controller, battery and USB-C charging. The proposed refinement defines the complete path from speech to readable words. A microphone supplies audio to a suitable processor running compatible speech-to-text software. That software produces text for the screen. A sound-level sensor only measures loudness and cannot do this transcription. The user should be able to change text size, adjust the viewing angle and clearly mute the microphone. Speech recognition can make mistakes, especially with competing voices or unclear sound, so uncertainty should be visible and important words checked. An offline engine on a suitable small computer is one route; an Android transcription app is a different route. The original two-day battery goal needs measurement rather than a promise.",
+          "mechanismSteps": [
+            "Unmute the microphone when the user wants captions.",
+            "Capture speech and pass the audio to the chosen speech-to-text system.",
+            "Display the resulting words in readable lines at a suitable text size.",
+            "Show microphone state and uncertain words; let the user adjust or mute it."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "CAPTURE: speech enters a clearly labelled microphone rather than a loudness-only sensor.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "TRANSCRIBE: arrows connect audio, compatible processor/software and caption text.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "READ/MUTE: show adjustable large text, viewing angle and an unmistakable muted state.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 218
+        },
+        {
+          "reviewedImageKey": "g10_fire_car",
+          "title": "Articulated fire response car",
+          "originalIntent": "A long wheeled vehicle with a two-joint arm carrying an extinguisher.",
+          "recommendedRefinement": "Move the heavy cylinder low on the chassis and put the lighter nozzle on the articulated arm.",
+          "parts": [
+            "Wheeled drive chassis",
+            "Low cylinder cradle",
+            "Two geared arm joints and nozzle",
+            "Protected hose, cameras and operator controls"
+          ],
+          "nextTest": "Check full-reach stability, joint loads, hose clearance, braking, link-loss behavior and environmental limits.",
+          "designSafeguards": "Use joint stops, hose guards, emergency stop and communication-loss stop. Select a professionally rated suppression system approved for its mounting orientation, fire class and remote actuation.",
+          "problemContext": "A responder may need to inspect a dangerous area and aim equipment from a distance. This project explores a wheeled vehicle with an articulated arm. Its shape alone does not show whether it can remain stable, tolerate the environment or operate suitable fire-suppression equipment safely.",
+          "studentExplanation": "The original long vehicle carries an extinguisher on a two-joint arm. The proposed refinement keeps the wheeled outline and two joints but moves the heavy cylinder low on the chassis. The arm carries the lighter nozzle, connected by a flexible hose. This reduces the arm’s payload and its tendency to tip the vehicle, but stability still needs checking at full reach. An operator uses camera views to drive and aim, while geared joints position the nozzle. Discharge requires a separate deliberate command. Hose routing must allow joint movement without pinching, snagging or over-bending. Any real suppression system must be professionally rated for its fire class, mounting orientation and remote actuation. Classroom demonstrations should use a harmless mock payload and simulated discharge, not a live fire.",
+          "mechanismSteps": [
+            "Use camera views to drive the vehicle to a suitable inspection position.",
+            "Stop and check stability before moving the two arm joints.",
+            "Aim the nozzle while the protected hose stays connected to the low cylinder.",
+            "Use a separate deliberate discharge command only on an appropriately engineered system."
+          ],
+          "proposedIllustrations": [
+            {
+              "caption": "TRAVEL: the heavy cylinder sits low within the wheeled chassis.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "AIM: two geared joints move the light nozzle; trace the hose through full movement.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            },
+            {
+              "caption": "CHECK: show full-reach tipping risk, emergency stop and communication-loss stop.",
+              "status": "Storyboard proposal; check against the audited drawing before use."
+            }
+          ],
+          "mechanismStatus": "Proposed explanation based on the supplied public record; drawing audit and physical testing remain outstanding.",
+          "statistics": [],
+          "readingWordCount": 217
+        }
+      ],
+      "feedbackQuestions": [
+        "Which feature helps the caption user or remote vehicle operator understand what is happening, and why?",
+        "What is unclear about transcription mistakes or the vehicle’s stability with its arm extended?",
+        "What one change would most improve the chosen idea, and what harmless test would provide useful evidence?"
+      ]
+    }
+  ],
+  "reviewStatus": {
+    "prose": "Ready for a draft preview.",
+    "intentConfirmation": "Group 1 tray use case and Group 7 quiz assignment need confirmation; Group 5 designs remain proposed developments of sparse original topics.",
+    "mechanisms": "Unverified. Any auditUnresolved field remains an open drawing or mechanism issue, not validated performance.",
+    "statistics": "Direct primary government sources, dates and scope accompany the relevant claims; none establish device effectiveness."
+  }
+}

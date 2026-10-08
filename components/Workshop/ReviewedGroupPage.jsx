@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import LocalWorksheet from './LocalWorksheet'
+import StudentProjectReading from './StudentProjectReading'
 export default function ReviewedGroupPage({ group, classroom = false }) {
+    if (classroom && group.reading) return <StudentProjectReading group={group} />
     const Container = classroom ? 'article' : 'main', Heading = classroom ? 'h2' : 'h1'
     return <Container className="px-5 md:px-10 py-12 max-w-6xl mx-auto">
         <nav aria-label="Workshop navigation" className="flex flex-wrap gap-4 print:hidden"><Link href="/workshop" className="underline">All groups</Link><Link href="/blog/design-thinking-workshop" className="underline">Workshop guide</Link></nav>
