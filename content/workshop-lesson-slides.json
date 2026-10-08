@@ -523,6 +523,72 @@
           "color": "#265B74"
         }
       ]
+    },
+    {
+      "id": 8,
+      "title": "Tinkercad",
+      "blocks": [
+        {
+          "text": "Tinkercad",
+          "x": 72,
+          "y": 48,
+          "width": 1136,
+          "height": 90,
+          "fontSizePx": 57,
+          "bold": true,
+          "color": "#202D35"
+        },
+        {
+          "text": "Class ID: ME4-MFK-MSA",
+          "x": 72,
+          "y": 170,
+          "width": 1136,
+          "height": 90,
+          "fontSizePx": 53,
+          "bold": true,
+          "color": "#265B74"
+        },
+        {
+          "text": "1   Open the “Tinkercad” tab.",
+          "x": 72,
+          "y": 300,
+          "width": 1136,
+          "height": 65,
+          "fontSizePx": 40,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "2   Select “Open Tinkercad”.",
+          "x": 72,
+          "y": 388,
+          "width": 1136,
+          "height": 65,
+          "fontSizePx": 40,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "3   Use the student login shown on your\n     workshop page.",
+          "x": 72,
+          "y": 476,
+          "width": 1136,
+          "height": 110,
+          "fontSizePx": 40,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "tinkercad.com/joinclass/ME4MFKMSA",
+          "x": 72,
+          "y": 636,
+          "width": 1136,
+          "height": 53,
+          "fontSizePx": 33,
+          "bold": false,
+          "color": "#265B74"
+        }
+      ]
     }
   ]
 }

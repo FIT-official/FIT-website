@@ -11,6 +11,7 @@ import GuestFeedbackForm from './GuestFeedbackForm'
 import GuestRefinementForm from './GuestRefinementForm'
 import IncomingFeedback from './GuestIncomingFeedback'
 import GuestIdeaReading from './GuestIdeaReading'
+import GuestTinkercad from './GuestTinkercad'
 import styles from './GuestClassroom.module.css'
 export const classroomRequest = apiRequest
 export default function GuestClassroom({ homeGroup = null }) {
@@ -48,7 +49,8 @@ export default function GuestClassroom({ homeGroup = null }) {
         {offline && <p role="status" className="mt-3">You are offline. Keep writing here, then reconnect to save.</p>}
         {lesson.navigationLocked && <p role="status" className="border rounded-lg p-3 mt-4">Stay on {names[lesson.navigationTarget]} for now. Your teacher will let you know when to move on.</p>}
         {message && <p role="status" aria-live="polite" className="mt-3">{message}</p>}
-        <div className="flex flex-wrap gap-3 mt-4">{['PRESENT', 'FEEDBACK', 'REFINE'].map(phase => <button type="button" key={phase} className="formWhiteButton" disabled={lesson.navigationLocked && phase !== lesson.navigationTarget} aria-pressed={phase === activeView} onClick={() => { if (!lesson.navigationLocked) setViewPhase(phase) }}>{names[phase]}</button>)}<button type="button" className="underline text-sm" disabled={busy} onClick={leave}>Leave workshop</button></div>
+        <div className="flex flex-wrap gap-3 mt-4">{['PRESENT', 'FEEDBACK', 'REFINE', 'TINKERCAD'].map(phase => <button type="button" key={phase} className="formWhiteButton" disabled={lesson.navigationLocked && phase !== lesson.navigationTarget} aria-pressed={phase === activeView} onClick={() => { if (!lesson.navigationLocked) setViewPhase(phase) }}>{phase === 'TINKERCAD' ? 'Tinkercad' : names[phase]}</button>)}<button type="button" className="underline text-sm" disabled={busy} onClick={leave}>Leave workshop</button></div>
+        {activeView === 'TINKERCAD' && <GuestTinkercad key={lesson.seat} seat={lesson.seat} group={lesson.group} />}
         {activeView === 'PRESENT' && <section className="mt-6"><h2 className="text-2xl font-bold">Explore everyone’s ideas</h2><p className="mt-2">Choose a group to read its two ideas.</p><label className="block mt-3">Group to explore<select className="formInput block" aria-label="Group to explore" value={exploreGroup || lesson.group} onChange={event => setExploreGroup(event.target.value)}>{workshopGroups.map(row => <option value={row.id} key={row.id}>Group {row.number}</option>)}</select></label><ReviewedGroupPage group={workshopClassroomGroupPage(exploreGroup || lesson.group)} classroom /></section>}
         {activeView === 'FEEDBACK' && <section className="mt-8"><h2 className="text-3xl font-bold">Feedback for Group {peer.number}</h2><p className="mt-2">Round {lesson.assignment.round}: first send feedback to Group {lesson.assignment.target.slice(1)}. Then you can review other groups.</p>
             <p className="font-semibold mt-3">{lesson.reviewCompletion?.complete ? 'Required feedback submitted. You can review more groups.' : 'Still to do: feedback for Group ' + lesson.assignment.target.slice(1)}</p>{!lesson.reviewCompletion?.complete && targetGroup !== lesson.assignment.target && <button type="button" className="formWhiteButton mt-2" onClick={() => { setTarget(lesson.assignment.target); setTargetRound(lesson.assignment.round); setSelectedIdea('1') }}>Go to Group {lesson.assignment.target.slice(1)}</button>}

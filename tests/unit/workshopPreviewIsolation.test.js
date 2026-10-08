@@ -11,7 +11,7 @@ describe('server-controlled preview collection isolation', () => {
     it('isolates every supported collection consistently for each preview deployment', () => {
         const a = { VERCEL_ENV: 'preview', VERCEL_URL: 'fit-one.vercel.app' }, b = { ...a, VERCEL_URL: 'fit-two.vercel.app' }, collection = vi.fn()
         const prefix = workshopCollectionPrefix(a); expect(prefix).toMatch(/^workshopPreview_[a-f0-9]{16}_$/); expect(workshopCollectionPrefix(b)).not.toBe(prefix)
-        for (const name of ['workshopAccounts', 'workshopSessions', 'workshopLessons', 'workshopRateLimits', 'workshopClassDetails', 'workshopDrafts']) {
+        for (const name of ['workshopAccounts', 'workshopSessions', 'workshopLessons', 'workshopRateLimits', 'workshopClassDetails', 'workshopDrafts', 'workshopTinkercadPools']) {
             scopedWorkshopDatabase({ collection }, a).collection(name); expect(collection).toHaveBeenLastCalledWith(prefix + name, undefined)
         }
         expect(() => scopedWorkshopDatabase({ collection }, a).collection('users')).toThrow('Unknown workshop collection')
