@@ -5,59 +5,52 @@
     "ideas": [
       {
         "title": "Foldable tray",
-        "originalProblem": "Our project is a foldable tray.",
-        "originalSolution": "Our oval tray has three round spaces and a central fold.",
-        "improvedProblem": "If carrying or storing a tray is difficult, the user needs a tray that fits that task. We need to find out which part is awkward.",
-        "reason": "Choose a real task first. This lets us check whether folding helps instead of judging the shape alone.",
+        "originalProblem": "We need to find out which carrying or storage task a folding tray would help.",
+        "originalSolution": "A folding oval tray with three compartments on one half.",
+        "improvedProblem": "We need to find out which carrying or storage task a folding tray would help.",
+        "reason": "A positive lock stops the centre joint folding while the tray is in use.",
         "changes": [
           {
-            "change": "Add a separate hinge pin",
-            "why": "The two halves can turn in a controlled way."
-          },
-          {
-            "change": "Next design step: add an open stop",
-            "why": "Draw where contact faces would meet so the tray cannot open too far."
+            "change": "Recommended refinement (proposal)",
+            "why": "Use a hinge and a positive open lock, then release the lock to fold the empty tray."
           }
         ],
-        "howItWorks": "The central hinge lets the two halves fold. The drawing shows the tray shape and hinge; an open stop and any closure still need to be designed and checked before carrying objects.",
-        "printedParts": [
-          "Two tray leaves",
-          "Hinge knuckles",
-          "Open stop and closure still to design"
-        ],
-        "suppliedParts": [
-          "Measured hinge pin or suitable fastener",
-          "Light practice objects"
-        ],
-        "boundary": "Use an empty model on a flat surface until the stop and closure have been designed and checked by a teacher. Use light dummy objects only. This is not a food-contact test.",
+        "howItWorks": "The hinge guides the two halves. A locking bridge below the joint supports both halves while open. Retract it before folding.",
+        "boundary": "Guard the hinge gap; keep the bridge captive; define a rated load after testing. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use this comparison: An ordinary tray carrying the same light objects.",
-          "Try opening, using and storing both trays five times. Keep the objects, route and storage place the same.",
-          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+          "Check hinge clearance, lock engagement, load deflection and whether storage space improves."
         ],
-        "measure": "Plan how to count spills and accidental closures after a teacher checks the stop. Compare storage space."
+        "proposalParts": [
+          "Two tray halves",
+          "Hinge pin",
+          "Captive sliding bridge and guides"
+        ],
+        "question": "Who needs a folding tray, and what must it hold?"
       },
       {
-        "title": "Rolling bin",
-        "originalProblem": "People keep littering.",
-        "originalSolution": "A bin with a peaked lid rolls on wheels, with a smaller wheeled companion. It brings a place for rubbish closer to the person.",
-        "improvedProblem": "A person far from a bin needs an easy place to put rubbish instead of leaving it behind.",
-        "reason": "This lets us compare convenience with an ordinary nearby bin.",
+        "title": "Mobile bin and companion",
+        "originalProblem": "A fixed disposal point may be inconvenient to reach.",
+        "originalSolution": "A four-wheel bin with a peaked lid and a smaller wheeled companion.",
+        "improvedProblem": "A fixed disposal point may be inconvenient to reach.",
+        "reason": "The companion adds a second stream. Hands-free opening and deposit feedback give the mobile station a useful interaction.",
         "changes": [
           {
-            "change": "Add a handle and wheel stops",
-            "why": "A person can move the bin and park it without it rolling away."
-          },
-          {
-            "change": "Keep a wide opening",
-            "why": "Clean practice scraps can go in without aiming at a small hole."
+            "change": "Recommended refinement (proposal)",
+            "why": "Link the pair for moving; add hands-free opening and deposit feedback. Use the companion for recycling."
           }
         ],
-        "boundary": "Move it by hand on a clear floor. Do not claim it drives itself.",
+        "boundary": "Keep each box supported by its own wheels; lock it for use; guard the lid drive and hitch; stop closing if obstructed; provide manual opening and transport mode. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Compare collecting ten clean paper scraps with a parked rolling bin and an ordinary nearby bin. Count leftovers and the distance walked."
+          "Compare the pair with two ordinary bins: turning space, parking, separation mistakes, hand contact, false lid openings and whether users notice the deposit feedback."
         ],
-        "question": "Does moving the bin help more than placing an ordinary bin nearby?"
+        "question": "When would people choose this over two ordinary bins?",
+        "howItWorks": "Push and park the pair. A proximity sensor opens the lid. A sensor inside detects a deposit and displays THANKS.",
+        "proposalParts": [
+          "Four-wheel main body with peaked hinged lid",
+          "Smaller self-supported wheeled companion",
+          "Removable coupling and parking brakes",
+          "Proximity sensor, lid actuator, deposit sensor and display"
+        ]
       }
     ],
     "activities": [
@@ -116,66 +109,55 @@
     "number": 2,
     "ideas": [
       {
-        "title": "Mushroom lamp",
-        "originalProblem": "Elderly people tend to fall when they get out of bed at night",
-        "originalSolution": "Our mushroom lamp turns on when someone sits up. We drew several shapes and proposed magnetic charging.",
-        "improvedProblem": "An older person getting out of bed at night needs to see the nearby floor before standing up.",
-        "reason": "This names the person and the useful task. We can compare floor visibility and control use without claiming the lamp prevents falls.",
+        "title": "Mushroom nightlight",
+        "originalProblem": "An older person getting out of bed needs to see the nearby floor.",
+        "originalSolution": "A mushroom lamp that turns on when the person sits up, with accessible charging.",
+        "improvedProblem": "An older person getting out of bed needs to see the nearby floor.",
+        "reason": "Good sensor placement and directed light matter more than the mushroom shape alone.",
         "changes": [
           {
-            "change": "Use a wider, low base",
-            "why": "It may rock less in the chosen position."
-          },
-          {
-            "change": "Expose a person-motion sensor and add a simple ON/OFF button",
-            "why": "The input and the way to stop the system are clear."
-          },
-          {
-            "change": "Try a removable cap lip",
-            "why": "It may direct light towards the floor and reduce direct glare."
+            "change": "Recommended refinement (proposal)",
+            "why": "Aim the light at the floor and keep the motion sensor clear of the shade."
           }
         ],
-        "howItWorks": "When ON is enabled, a real person-motion sensor signals a controller to light an LED. OFF disables it. The printed cap, stem and base support the modules; a matched bought adapter supplies low-voltage power.",
-        "printedParts": [
-          "Mushroom cap and removable lip",
-          "Stem and wider base",
-          "Button and sensor openings"
-        ],
-        "suppliedParts": [
-          "Person-motion sensor",
-          "LED and control module",
-          "Simple button",
-          "Matched bought wall adapter and cable"
-        ],
-        "boundary": "An adult selects and connects compatible low-voltage equipment. Pupils do not open an adapter or build mains wiring. A prop-motion IMU is not a stationary person-motion sensor.",
+        "howItWorks": "The motion sensor signals a controller. The controller switches the LED on and times how long it stays lit. The ON/OFF control overrides it.",
+        "boundary": "Provide cable strain relief, ventilation and a stable base; use a compatible power supply. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use this comparison: The same light at the same position without the added cap lip; include an existing nightlight if available.",
-          "Compare the two versions from a safe seated position. Try five movements in front of the stationary lamp and check OFF.",
-          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+          "Check detection from the actual bed, useful floor visibility, glare, timeout and OFF behavior."
         ],
-        "measure": "Record floor-symbol visibility, direct view of the LED, successful activations and rocking."
+        "proposalParts": [
+          "PIR sensor",
+          "Controller and LED driver",
+          "Diffuser and stable shell",
+          "Matched low-voltage adapter"
+        ],
+        "question": "What movement should turn it on, and which floor area should it light?"
       },
       {
-        "title": "Sorting robot bin",
-        "originalProblem": "Everyone is throwing things in the wrong bin.",
-        "originalSolution": "The original robot bin directs items to several compartments. This two-category practice version tests the guiding movement after a person chooses a category.",
-        "improvedProblem": "A person with one confusing item needs to know which local bin it belongs in.",
-        "reason": "We can test an actual sorting decision instead of assuming a sensor knows every material.",
+        "title": "Robot sorting bin",
+        "originalProblem": "People sometimes put items into the wrong compartment.",
+        "originalSolution": "A robot guides rubbish into several labelled compartments.",
+        "improvedProblem": "People sometimes put items into the wrong compartment.",
+        "reason": "The sequence separates choosing, moving the guide and releasing the item, so the motion can be checked.",
         "changes": [
           {
-            "change": "Add clear compartment labels",
-            "why": "People can check where an item will go."
-          },
-          {
-            "change": "Use a person-operated selector first",
-            "why": "The movement can be tested without pretending the model recognises materials."
+            "change": "Recommended refinement (proposal)",
+            "why": "Use a supported pivoting chute and select its position before loading one item."
           }
         ],
-        "boundary": "Use clean, dry practice items. Keep fingers out of moving parts.",
+        "boundary": "Enclose moving parts; stop on obstruction; use an accessible service release and rated actuator supply. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use five clean sample items and teacher-checked bin rules. Choose a compartment, move the guide and count items reaching the intended space."
+          "Trace both routes, measure clearances and test jams with representative clean items."
         ],
-        "question": "What information does the bin need before it can choose the right compartment?"
+        "question": "Which part carries the item load, and which part only turns the diverter?",
+        "howItWorks": "A person chooses a category. The servo tilts the chute left or right about a front-to-back shaft. Wait for the chute to settle, then put one item into the hopper.",
+        "proposalParts": [
+          "Single-item hopper",
+          "Servo and supported front-to-back shaft",
+          "Pivoting chute and separate liners",
+          "Position sensing or ready indication"
+        ],
+        "reviewNotice": "This proposal is under review. No replacement option has been chosen."
       }
     ],
     "activities": [
@@ -234,65 +216,54 @@
     "number": 3,
     "ideas": [
       {
-        "title": "Sound companion",
-        "originalProblem": "A person living alone wants something warm to hold, a sound to hear and an easy way to reach family.",
-        "originalSolution": "Our cat sings when patted and sends Hello through its paw.",
-        "improvedProblem": "A person living alone needs an easy way to hear a chosen sound and send a hello to family.",
-        "reason": "Choose one clear action and one person. A sound or hello can be demonstrated separately from a live conversation.",
+        "title": "Sound and hello companion",
+        "originalProblem": "A person living alone wants comfort and an easy way to send a greeting.",
+        "originalSolution": "Switch the heart on, pat the plush to sing, and hold the paw to send Hello.",
+        "improvedProblem": "A person living alone wants comfort and an easy way to send a greeting.",
+        "reason": "Separate actions make it clearer what each control does and whether the greeting arrived.",
         "changes": [
           {
-            "change": "Try a clear sound button instead of patting",
-            "why": "Compare this change with the original pat-to-sing action and see which is easier."
-          },
-          {
-            "change": "Give the heart and paw different jobs",
-            "why": "The person can learn one control for sound and one for hello."
-          },
-          {
-            "change": "Make start and stop explicit",
-            "why": "The user can choose when sound plays."
+            "change": "Recommended refinement (proposal)",
+            "why": "Keep a soft body around a removable control module, with separate sound and greeting controls."
           }
         ],
-        "howItWorks": "The heart operates a switch that starts or stops a selected tune. A paw switch sends a short radio message to a second nearby board. The receiver can play a brief acknowledgement sound.",
-        "printedParts": [
-          "Removable control cradle",
-          "Guides behind heart and paw controls"
-        ],
-        "suppliedParts": [
-          "Soft sleeve or plush",
-          "Two suitable controllers",
-          "Speaker or board with sound output",
-          "Switches and approved battery supplies"
-        ],
-        "boundary": "Short radio messages do not create a remote voice conversation or AI companion. Use teacher-prepared low-voltage electronics and a willing tester.",
+        "howItWorks": "A sound control starts or stops a chosen tune. The paw control sends a greeting to a paired receiver, which acknowledges it.",
+        "boundary": "Secure the battery and paw wiring, bound the volume, remove electronics for washing and use a communication link that reaches the actual recipient. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use this comparison: A simple sound button with the same tune, and an ordinary hello message.",
-          "Ask a willing person to start and stop the sound without hints. Send five nearby hello messages and count acknowledgements.",
-          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+          "Compare the original pat control with the clear button and measure missed or accidental activations."
         ],
-        "measure": "Count correct first actions, accidental presses and received messages."
+        "proposalParts": [
+          "Soft cover",
+          "Removable control cradle",
+          "Sound output and switches",
+          "Paired communication modules"
+        ],
+        "question": "How does the person know the greeting was received?"
       },
       {
-        "title": "Parcel box",
-        "originalProblem": "Parcels left outside the door can be taken by other people.",
-        "originalSolution": "A box holds a parcel under an angled cover, with a string, pole and lock.",
-        "improvedProblem": "A person receiving a parcel needs a clear way to place it inside and collect it again.",
-        "reason": "We can check access and closing before making a claim about security.",
+        "title": "Private parcel box",
+        "originalProblem": "A parcel left outside a door can be seen and reached by other people.",
+        "originalSolution": "A parcel box with an angled transparent cover, string, pole and lock.",
+        "improvedProblem": "A parcel left outside a door can be seen and reached by other people.",
+        "reason": "Opaque panels conceal the contents. A controlled hinge and defined delivery cycle replace the uncertain cover linkage.",
         "changes": [
           {
-            "change": "Give the cover a clear hinge and stop",
-            "why": "It opens in a controlled way without falling backwards."
-          },
-          {
-            "change": "Keep the lock easy to reach",
-            "why": "The owner can practise opening and closing without reaching inside the hinge."
+            "change": "Recommended refinement (proposal)",
+            "why": "Use a complete opaque rectangular enclosure with a conventional hinged lid and a real latch."
           }
         ],
-        "boundary": "Use a dummy parcel and a teacher-checked model. This test does not prove theft resistance.",
+        "boundary": "Use controlled lid closing, guarded hinge gaps, anchoring and drainage; privacy is not proof of theft resistance. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Compare an ordinary box with this cover using the same dummy parcel. Try placing, closing, unlocking and retrieving it five times."
+          "Check parcel fit, closing force, latch engagement, owner access, water entry and second-delivery handling."
         ],
-        "question": "How does the delivery person put a parcel in, and how does the owner get it out?"
+        "question": "How can the next courier deliver after the first parcel has locked the box?",
+        "howItWorks": "The courier puts a parcel into the prepared box. A rear hinge and folding two-link stay guide the lid. Closing it engages the latch; the owner unlocks the box to retrieve the parcel and reset it.",
+        "proposalParts": [
+          "Opaque enclosure",
+          "Hinge, lid stay and seal",
+          "Latch and owner lock",
+          "Ground or wall fixing points"
+        ]
       }
     ],
     "activities": [
@@ -351,66 +322,54 @@
     "number": 4,
     "ideas": [
       {
-        "title": "Plant care",
-        "originalProblem": "People are busy and forget to water their plants.",
-        "originalSolution": "Our pot stores rain or wasted water and is meant to water a plant when its soil is dry. The class test uses clean water.",
-        "improvedProblem": "A busy plant owner needs a way to keep a plant watered when a watering is missed.",
-        "reason": "Start with the plant, pot and missed interval. Then look for an extra difficulty that an ordinary self-watering pot leaves.",
+        "title": "Water storing plant pot",
+        "originalProblem": "Busy people can forget to water their plants.",
+        "originalSolution": "A pot stores rain or wasted water and waters a plant when the soil is dry.",
+        "improvedProblem": "Busy people can forget to water their plants.",
+        "reason": "The wick provides a real water path; the cover keeps the stored water enclosed.",
         "changes": [
           {
-            "change": "Use a bought clear reservoir",
-            "why": "The stored water and refill level are visible."
-          },
-          {
-            "change": "Guide one continuous wick from water into soil",
-            "why": "The water path can be explained and checked."
-          },
-          {
-            "change": "Add an open side-access wick guide",
-            "why": "The owner may be able to inspect or reseat the exposed wick without moving the plant."
+            "change": "Recommended refinement (proposal)",
+            "why": "Use a covered reservoir and a wick that reaches both the water and the soil."
           }
         ],
-        "howItWorks": "A cotton wick links the water reservoir to the soil. The printed insert supports the plant above the water. The open-sided guide moves away from the wick for inspection while the wick stays in place.",
-        "printedParts": [
-          "Pot insert sized to the reservoir",
-          "Open-sided removable wick guide",
-          "Refill and level features"
-        ],
-        "suppliedParts": [
-          "Leak-tight clear container",
-          "Suitable wick",
-          "Planting medium and practice plant or test pot",
-          "Clean water"
-        ],
-        "boundary": "A wick is not an electronic dry-soil sensor. A short lesson cannot prove long-term plant health. Use clean water; the printed part does not need to be the leak-tight reservoir.",
+        "howItWorks": "Water moves through the wick into the inner pot. The refill cap gives access to the reservoir. A screened vent and overflow manage air and excess water.",
+        "boundary": "Keep overflow below soil level; preserve drainage; use suitable water and cleanable parts. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use this comparison: A plain wick reservoir with the same container, wick and planting medium.",
-          "For class, demonstrate the path and compare access to the wick. Plan a longer water-delivery comparison with equal starting water and conditions.",
-          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+          "Measure water delivery and soil condition with the actual plant, wick and reservoir height."
         ],
-        "measure": "Count steps or disturbance needed to inspect the wick. Later measure water delivered or reservoir change over an agreed interval."
+        "proposalParts": [
+          "Inner pot",
+          "Covered reservoir",
+          "Wick and refill cap",
+          "Screened vent and overflow"
+        ],
+        "question": "How much water reaches this plant over the interval it is usually left alone?"
       },
       {
         "title": "Doorbell wristband",
-        "originalProblem": "People with hearing difficulties may not hear the doorbell at home.",
-        "originalSolution": "A wristband flashes and vibrates when the doorbell rings.",
-        "improvedProblem": "A person who misses a doorbell needs an alert they can notice where they usually sit or move.",
-        "reason": "The useful result is noticing the visitor, so we can compare different cues.",
+        "originalProblem": "A person with hearing difficulties may miss someone ringing the doorbell.",
+        "originalSolution": "A wristband flashes and vibrates when the bell rings.",
+        "improvedProblem": "A person with hearing difficulties may miss someone ringing the doorbell.",
+        "reason": "Two adjustable cues help the wearer notice the event in different situations.",
         "changes": [
           {
-            "change": "Provide separate light and vibration cues",
-            "why": "The person can choose which cue they notice best."
-          },
-          {
-            "change": "Use an adjustable strap and reachable control",
-            "why": "The band can fit comfortably and be easy to check."
+            "change": "Recommended refinement (proposal)",
+            "why": "Pair a doorbell transmitter with a wearable receiver and clear test or acknowledgement control."
           }
         ],
-        "boundary": "An adult checks the separate receiver, battery and vibration parts. Waterproofing has not been tested.",
+        "boundary": "Provide low-battery and link-status indication, secure battery housing and a defined ingress-protection target. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "With a willing person, compare five agreed light or vibration cues in a quiet role-play. Record noticed and missed cues."
+          "Measure missed alerts, range, cue strength, battery life and comfort in the intended home."
         ],
-        "question": "Which cue does the person notice best, and where will they wear or keep it?"
+        "question": "What tells the wearer that the band is charged and connected?",
+        "howItWorks": "The doorbell sends an event to the receiver. The receiver flashes and vibrates. A status signal shows that the band has power and the link is available.",
+        "proposalParts": [
+          "Doorbell transmitter",
+          "Receiver and controller",
+          "Light and vibration motor",
+          "Battery, adjustable strap and enclosure"
+        ]
       }
     ],
     "activities": [
@@ -469,65 +428,55 @@
     "number": 5,
     "ideas": [
       {
-        "title": "Parcel notice",
-        "originalProblem": "Our topic is parcels at the door.",
-        "originalSolution": "Our topic is parcels left at the door. This parcel notice is a starting idea to discuss.",
-        "improvedProblem": "A parcel recipient needs to notice a delivery when the usual knock or message is missed.",
-        "reason": "A real example can show whether notice is the difficulty, rather than storage, collection or security.",
+        "title": "Parcel arrival notice",
+        "originalProblem": "A resident may not notice a parcel has arrived at the door.",
+        "originalSolution": "Parcels at the door was one of the group’s recorded topics.",
+        "improvedProblem": "A resident may not notice a parcel has arrived at the door.",
+        "reason": "A visible movement and separate message make the arrival signal easier to explain and check.",
         "changes": [
           {
-            "change": "Make the input a guided pressure plate",
-            "why": "A dummy parcel can produce a visible, repeatable movement."
-          },
-          {
-            "change": "Use a switch and nearby radio receiver",
-            "why": "The arrival can be signalled at a different place."
-          },
-          {
-            "change": "Keep an icon until acknowledgement",
-            "why": "A short signal can leave a reminder for the recipient to check."
+            "change": "Recommended refinement (proposal)",
+            "why": "Use a load plate with guided travel, a protected switch and a clear received message."
           }
         ],
-        "howItWorks": "The parcel lowers a spring-returned plate onto a microswitch. A controller sends a short message. The receiver shows an icon until its acknowledgement button is pressed.",
-        "printedParts": [
-          "Guided plate and base",
-          "Controller and receiver cases"
-        ],
-        "suppliedParts": [
-          "Suitable return spring and microswitch",
-          "Two radio boards",
-          "Buttons and approved battery supplies",
-          "Dummy parcel"
-        ],
-        "boundary": "This is a tabletop arrival demonstration, not theft prevention or a weatherproof doormat. An adult prepares the electronics and selects the spring.",
+        "howItWorks": "The parcel lowers a guided spring-return plate onto a switch. Hard travel stops carry excess load. The controller filters contact bounce, sends the notice and re-arms after parcel removal.",
+        "boundary": "Add mechanical overload stops, protected wiring and suitable outdoor sealing; keep the walking route clear. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use this comparison: An ordinary knock or message in the same pretend delivery routine.",
-          "Use five dummy deliveries. A tester at the receiver acknowledges each alert. Include a light parcel and a parcel left in place.",
-          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+          "Test light and heavy parcels, off-centre loads, repeated arrivals and acknowledgement."
         ],
-        "measure": "Count deliveries noticed, repeated alerts and plate resets."
+        "proposalParts": [
+          "Load plate and guides",
+          "Return springs",
+          "Switch and travel stops",
+          "Transmitter and receiver"
+        ],
+        "question": "What stops a heavy parcel crushing the switch?"
       },
       {
-        "title": "Crossing the road",
-        "originalProblem": "Our topic is crossing the road.",
-        "originalSolution": "A reminder cuff is one idea to discuss. The group still needs to explain its own drawing.",
-        "improvedProblem": "A person approaching a crossing needs to remember the safe steps taught by an adult.",
-        "reason": "This gives us one small reminder task to discuss without claiming a device makes traffic safe.",
+        "title": "Crossing reminder cuff",
+        "originalProblem": "A person approaching a crossing may need a clear reminder of the steps to follow.",
+        "originalSolution": "Crossing the road was another recorded topic, with a small unlabelled cuff-like drawing.",
+        "improvedProblem": "A person approaching a crossing may need a clear reminder of the steps to follow.",
+        "reason": "The cuff makes the reminder reachable without inventing a sensor that judges traffic.",
         "changes": [
           {
-            "change": "Use a short readable reminder",
-            "why": "The person can explain the message in their own words."
-          },
-          {
-            "change": "Make the message face the wearer",
-            "why": "It can be read without twisting the wrist."
+            "change": "Recommended refinement (proposal)",
+            "why": "Put a readable reminder on a comfortable adjustable cuff."
           }
         ],
-        "boundary": "This is a classroom discussion. Do not test in live traffic or rely on the cuff for road safety.",
+        "boundary": "Use a snag-conscious closure and rounded edges; any visibility claim depends on material and wear testing. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use a paper road scene indoors. Ask a pupil to explain the reminder and choose what to do next. Compare with an ordinary instruction card."
+          "Compare reading speed, comfort and recall with an ordinary reminder card."
         ],
-        "question": "What does your original small drawing show, and who would use your idea?"
+        "question": "Can the wearer read and explain the reminder at a glance?",
+        "howItWorks": "The wearer sees the reminder before crossing. The strap holds it in the chosen position and the closure allows easy removal.",
+        "proposalParts": [
+          "Flexible strap",
+          "Hook-and-loop closure",
+          "Readable reminder panel",
+          "Optional reflective material"
+        ],
+        "reviewNotice": "This proposal is under review. No replacement option has been chosen."
       }
     ],
     "activities": [
@@ -586,58 +535,54 @@
     "number": 6,
     "ideas": [
       {
-        "title": "Drone response",
-        "originalProblem": "There is a fire. A fire scanner alerts drones.",
-        "originalSolution": "Our drone is meant to help put out a fire and search for people with a light. This drawing develops the light and operator link. We still need to explain how it would put out the fire.",
-        "improvedProblem": "A rescue team needs clear information about a place that is difficult to see or reach.",
-        "reason": "This names the information the drone should help gather before choosing its equipment.",
+        "title": "Fire inspection drone",
+        "originalProblem": "A response team needs information about a location that is difficult to inspect.",
+        "originalSolution": "A drone responds to a fire alert, helps with the fire and searches with a light.",
+        "improvedProblem": "A response team needs information about a location that is difficult to inspect.",
+        "reason": "Heat and visible context together are more useful than a spotlight alone, while a map link explains where the observation came from.",
         "changes": [
           {
-            "change": "Show the drone and its search light",
-            "why": "The drawing explains the flying response idea."
-          },
-          {
-            "change": "Show what the operator needs to know",
-            "why": "The group can explain the message and the next action."
+            "change": "Recommended refinement (proposal)",
+            "why": "Add paired thermal and visible cameras, location support and an operator-confirmed report."
           }
         ],
-        "howItWorks": "A detector sends an alert. The group explains how an operator directs the drone, uses its light and receives information. Equipment and mechanism choices remain to be confirmed.",
-        "printedParts": [
-          "Possible housing or light mount, only after checking the selected drone"
-        ],
-        "suppliedParts": [
-          "Suitable drone and controller selected by a qualified adult",
-          "Compatible light and communication equipment if needed"
-        ],
-        "boundary": "This is a design discussion, not a flight or fire test. A qualified adult must check any real drone, equipment and safe operating location.",
+        "howItWorks": "Thermal and RGB cameras send paired views. Mapped position, camera direction and range help locate the observation. The operator confirms the map pin, or marks the location uncertain, before deciding what to do.",
+        "boundary": "Thermal cannot see through walls or ordinary glass; show uncertainty, use human confirmation and tested aircraft fail-safes. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Compare a clear location message with a vague message in an indoor role-play.",
-          "Use pretend messages and a paper plan indoors.",
-          "Record which messages let the receiver identify the right place."
+          "Check image alignment, location error, link loss, battery reserve and representative hot-object false alarms."
         ],
-        "measure": "Count which messages let the listener identify the correct place on a paper plan."
+        "proposalParts": [
+          "Guarded drone",
+          "Thermal and RGB cameras",
+          "Depth or range sensor",
+          "Indoor localisation, communications and operator display"
+        ],
+        "question": "How will the operator tell a hot object from a fire and locate it?"
       },
       {
-        "title": "Detect and alert",
-        "originalProblem": "A fire scanner detects a problem and alerts the drone.",
-        "originalSolution": "The scanner detects a fire, alerts the drone and is meant to show people a way out. This drawing develops the alert and location message. We still need to explain the projected guidance.",
-        "improvedProblem": "A person receiving an alert needs to know what happened and where help is needed.",
-        "reason": "The message can be checked before claiming a reliable detection system.",
+        "title": "Fire detection and alert",
+        "originalProblem": "A response team needs an alert that identifies the affected place.",
+        "originalSolution": "A scanner detects a fire, alerts drones and proposes guidance for people nearby.",
+        "improvedProblem": "A response team needs an alert that identifies the affected place.",
+        "reason": "A named place and acknowledgement make the message actionable without pretending that heat alone gives an exact location.",
         "changes": [
           {
-            "change": "Include a location in the alert",
-            "why": "The receiver knows which place to check."
-          },
-          {
-            "change": "Show the receiver and its next action",
-            "why": "The group can explain the link from detection to drone response."
+            "change": "Recommended refinement (proposal)",
+            "why": "Combine a commissioned detector with a configured room identity and an acknowledged alert."
           }
         ],
-        "boundary": "Do not use fire, heat, smoke or powder. The detector and drone functions still need real equipment and adult checks.",
+        "boundary": "Keep commissioned detection and building alarm functions independent. Operator acknowledgement records receipt; it does not silently disable the alarm. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use five pretend alert cards and a paper plan. Compare messages with and without locations. Record whether the receiver chooses the right place."
+          "Check room labels, timestamps, missed messages, false alerts and the response to uncertain location."
         ],
-        "question": "What detects the problem, who receives the message, and what happens next?"
+        "question": "What information is still useful if the camera view or drone location is uncertain?",
+        "howItWorks": "The detector sends an event and its room or zone ID. The system adds time and available camera evidence. The operator acknowledges the report and dispatches or redirects the drone.",
+        "proposalParts": [
+          "Appropriate smoke or heat detector",
+          "Configured room/zone record",
+          "Message controller and link",
+          "Operator acknowledgement display"
+        ]
       }
     ],
     "activities": [
@@ -696,64 +641,54 @@
     "number": 7,
     "ideas": [
       {
-        "title": "Recycling reasons quiz",
-        "originalProblem": "People not knowing what goes in which bin.",
-        "originalSolution": "Our quiz helps people choose which bin to use.",
-        "improvedProblem": "People using a shared bin need help to check a confusing item before dropping it in.",
-        "reason": "A correct answer and a reason show more understanding than recognising a familiar picture.",
+        "title": "Which bin quiz",
+        "originalProblem": "People may not know whether an item belongs in recycling or general waste.",
+        "originalSolution": "A quiz asks which bin an item goes into.",
+        "improvedProblem": "People may not know whether an item belongs in recycling or general waste.",
+        "reason": "Explaining the rule helps with new items instead of only memorising a colour.",
         "changes": [
           {
-            "change": "Keep one item and change its condition",
-            "why": "The learner can see why the next action may change."
-          },
-          {
-            "change": "Hide the reason behind a sliding cover",
-            "why": "The learner makes a choice before looking."
-          },
-          {
-            "change": "Add guide rails and retaining stops",
-            "why": "The moving parts stay aligned and attached."
+            "change": "Recommended refinement (proposal)",
+            "why": "Include the item’s condition and explain the reason after the learner chooses."
           }
         ],
-        "howItWorks": "A manual slider selects the item condition. A separate cover reveals the matching paper reason row after the learner chooses an answer. Teacher-approved paper cards contain the recycling rules.",
-        "printedParts": [
-          "Base and guide rails",
-          "Condition slider",
-          "Answer cover and retaining features"
-        ],
-        "suppliedParts": [
-          "Printed paper cards",
-          "Checked retaining fasteners if required"
-        ],
-        "boundary": "The model is a manual learning aid. It does not recognise real rubbish. The teacher checks every local rule and example.",
+        "howItWorks": "Move the condition pointer and choose a bin aloud. Slide the cover and read the reason matching that condition. Change the item or condition card to compare another case.",
+        "boundary": "Keep rules current and include uncertain or special-disposal cases; words and symbols accompany colour. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use this comparison: Ordinary recycling rule cards with the same information.",
-          "After trying each method, use five new teacher-approved examples. Ask for the action and the reason, not only a score.",
-          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+          "Ask learners to explain unfamiliar examples and compare the quality of their reasons before and after using the quiz."
         ],
-        "measure": "Count correct actions and explanations on unfamiliar examples; note slider jams."
+        "proposalParts": [
+          "Item and condition cards",
+          "Choice selector",
+          "Reveal shutter or display",
+          "Locally checked rule set"
+        ],
+        "question": "What extra question should the quiz ask about an empty but dirty container?"
       },
       {
-        "title": "Bin feedback",
-        "originalProblem": "People keep throwing things in the wrong bin.",
-        "originalSolution": "A bin gives red or green feedback about a sorting choice.",
-        "improvedProblem": "A person with a confusing item needs to understand why it belongs in a particular bin.",
-        "reason": "An explanation helps the person make the next choice as well.",
+        "title": "Camera assisted bin feedback",
+        "originalProblem": "A wrong item can contaminate the recycling stream.",
+        "originalSolution": "The original guard checks items going into one recycling bin and gives red or green feedback.",
+        "improvedProblem": "A wrong item can contaminate the recycling stream.",
+        "reason": "A second outlet handles confirmed general waste; unknown or special-disposal items stay in the chamber, available for the user to take back.",
         "changes": [
           {
-            "change": "Show a reason with each colour",
-            "why": "The user learns what was right or wrong."
-          },
-          {
-            "change": "Use a teacher-controlled choice first",
-            "why": "The feedback can be tried before adding any unproved item sensor."
+            "change": "Recommended refinement (proposal)",
+            "why": "Add a camera inspection chamber and a second general-waste outlet, with a return path for uncertain items."
           }
         ],
-        "boundary": "A coloured light does not identify a material by itself. Use clean practice items.",
+        "boundary": "Confidence thresholds need calibration; hold the item in the chamber when uncertain; add jam detection, manual release and accessible stop. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use five clean items with teacher-checked rules. Give a word or symbol as well as colour, then ask the person to explain the choice."
+          "Test known, unknown, dirty, obscured and multiple items; report confusion cases, jams and rejected items."
         ],
-        "question": "How will someone understand the feedback if they cannot tell the colours apart?"
+        "question": "What should happen when the system cannot recognise an item or tell whether it is clean?",
+        "howItWorks": "The camera reads one item in the lit chamber. Software checks a trained class against local rules and asks about missing information. After confirmation, the diverter moves and the gate releases the item.",
+        "proposalParts": [
+          "Lit inspection chamber and camera",
+          "Small computer and trained model",
+          "Guarded gates and diverter",
+          "Separate removable liners and screen"
+        ]
       }
     ],
     "activities": [
@@ -813,64 +748,53 @@
     "ideas": [
       {
         "title": "Reachable light control",
-        "originalProblem": "The light switch is too far from the bed, and the room is dark.",
-        "originalSolution": "Our round pendant has side-by-side ON and OFF controls for a light.",
-        "improvedProblem": "An older person in bed needs to control the room light without getting up to reach a distant switch.",
-        "reason": "The reach difficulty is specific. We can compare control use from the same comfortable position.",
+        "originalProblem": "A person in bed may be unable to reach the room light switch.",
+        "originalSolution": "A round pendant with side-by-side ON and OFF controls, possible Braille and colour labels.",
+        "improvedProblem": "A person in bed may be unable to reach the room light switch.",
+        "reason": "Shape, spacing and tactile differences help the person choose the intended control.",
         "changes": [
           {
-            "change": "Keep the round case and side-by-side controls",
-            "why": "The main original form remains recognisable."
-          },
-          {
-            "change": "Add different raised shapes and a separating ridge",
-            "why": "ON and OFF may be easier to distinguish in a single-grey print."
-          },
-          {
-            "change": "Guide caps onto a matched remote module",
-            "why": "Each press has a real path to a switch."
+            "change": "Recommended refinement (proposal)",
+            "why": "Use distinguishable controls linked to a compatible light receiver."
           }
         ],
-        "howItWorks": "A cap presses its aligned switch on a compatible remote module. The matched receiver controls a low-voltage lamp. The printed case guides the caps and supports the module.",
-        "printedParts": [
-          "Round case and back",
-          "Two guided button caps",
-          "Tactile shapes and separating ridge"
-        ],
-        "suppliedParts": [
-          "Compatible remote and receiver",
-          "Low-voltage lamp",
-          "Appropriate fasteners and supply"
-        ],
-        "boundary": "Tactile shapes are not automatically valid Braille. An adult pairs compatible equipment; pupils do not switch or wire mains electricity.",
+        "howItWorks": "Pressing a cap operates its aligned switch. The transmitter sends the command. The receiver changes the light and can report its state.",
+        "boundary": "Avoid a snag-prone neck loop; provide a suitable breakaway or bedside mounting option and secure battery access. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use this comparison: The same compatible remote placed within comfortable reach.",
-          "From a safe seated position, compare finding and pressing ON/OFF with the ordinary remote and the new case.",
-          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+          "Measure reach, mistaken presses, signal reliability and whether the user knows the light state."
         ],
-        "measure": "Count correct first choices, mistaken presses and requests for help."
+        "proposalParts": [
+          "Round enclosure and guided caps",
+          "Compatible remote and receiver",
+          "Tactile labels",
+          "Battery and state indication"
+        ],
+        "question": "How can the person distinguish ON from OFF without relying on colour?"
       },
       {
-        "title": "Firestructor cooking screen",
-        "originalProblem": "Food is left cooking when someone walks away and forgets.",
-        "originalSolution": "Firestructor shows cooking instructions and recipes on a screen.",
-        "improvedProblem": "A person following a recipe needs clear instructions and a way to keep track of the current step.",
-        "reason": "We can compare how clearly the steps are understood in a cold practice activity.",
+        "title": "Firestructor cooking guide",
+        "originalProblem": "A person can lose track of a cooking step or leave food unattended.",
+        "originalSolution": "A screen gives cooking instructions and recipes.",
+        "improvedProblem": "A person can lose track of a cooking step or leave food unattended.",
+        "reason": "Clear progress and acknowledgement help the cook see what still needs attention.",
         "changes": [
           {
-            "change": "Show clear steps with Next and Back controls",
-            "why": "The person can move through the recipe and repeat an instruction."
-          },
-          {
-            "change": "Support the screen and tidy the cable",
-            "why": "The instructions stay readable while the lead stays out of the work area."
+            "change": "Recommended refinement (proposal)",
+            "why": "Show the current step, recipe navigation, a timer and a clear finish sequence."
           }
         ],
-        "boundary": "Do not use a hot stove. A recipe screen does not detect or stop a fire.",
+        "boundary": "Place the screen outside heat and splash exposure, protect the cable, and define what happens after power or app interruption. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use the same cold pretend recipe on paper and on the screen. Count missed steps and requests for help. Ask which instructions were easier to follow."
+          "Compare missed steps, time to resume after interruption and clarity of timer acknowledgement with a paper recipe."
         ],
-        "question": "Which cooking step is forgotten, and what should the reminder ask the person to do?"
+        "question": "How does the display help someone return to the right step after an interruption?",
+        "howItWorks": "The cook chooses a recipe and starts a step. Next and Back keep their place. A timer prompts a check, and the finish screen includes checking doneness and switching equipment off.",
+        "proposalParts": [
+          "Recipe software and display",
+          "Next/Back controls",
+          "Timers and acknowledgement",
+          "Stable cleanable stand and power routing"
+        ]
       }
     ],
     "activities": [
@@ -929,61 +853,54 @@
     "number": 9,
     "ideas": [
       {
-        "title": "Phone sleep holder",
-        "originalProblem": "wasting phone energy and too much screen time",
-        "originalSolution": "Our phone-sized bed holder has a blanket, charging pocket, lock and custom headboard.",
-        "improvedProblem": "Someone choosing a phone break needs help to stop screen use during an agreed rest period.",
-        "reason": "First find the reason for pickups. Screen time and energy are different outcomes, and a holder does not prove either benefit by its shape.",
+        "title": "Phone sleep bed",
+        "originalProblem": "A person choosing a phone break wants a clear place to put the phone away.",
+        "originalSolution": "A phone-sized bed with blanket, charging pocket, lock and custom headboard.",
+        "improvedProblem": "A person choosing a phone break wants a clear place to put the phone away.",
+        "reason": "A visible storage path explains where the blanket goes instead of showing a flat panel with nowhere to travel.",
         "changes": [
           {
-            "change": "Make the blanket a guided slider",
-            "why": "It can cover and uncover the screen in a repeatable way."
-          },
-          {
-            "change": "Next design step: add an end stop",
-            "why": "Decide how to keep the sliding cover attached while still letting the phone come out."
+            "change": "Recommended refinement (proposal)",
+            "why": "Use a flexible segmented blanket stored in a foot-end housing and guided along both sides."
           }
         ],
-        "howItWorks": "A card phone fits in the cradle. The blanket slides along side rails using its pull tab. An end stop and any locking mechanism still need to be designed. A separate channel leads towards the proposed charging pocket.",
-        "printedParts": [
-          "Phone-sized cradle and headboard",
-          "Blanket slider, rails and pull tab",
-          "End stop and any lock still to design",
-          "Separate cable channel"
-        ],
-        "suppliedParts": [
-          "Measured card phone or dummy",
-          "Cable for an unplugged routing check"
-        ],
-        "boundary": "The drawing shows a manual sliding cover, not a timed lock. Use a dummy phone first. Live charging needs separate hardware and ventilation checks. No energy saving is claimed.",
+        "howItWorks": "Linked blanket slats slide in the side guides and wrap around a transverse roller in the foot cassette. The pull bar draws them back over the phone. Stops retain the cover and manual opening keeps access available.",
+        "boundary": "Keep charging airflow and cable route clear of moving tracks; provide manual opening independent of any timed lock. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use this comparison: An ordinary phone parking place during the same voluntary routine.",
-          "Use a dummy first for five open/close cycles. For a voluntary behaviour comparison, count pickups and ask why each happens.",
-          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+          "Check bend radius, full travel, jamming, phone retrieval and cable clearance with actual phone sizes."
         ],
-        "measure": "Record fit, jams, accidental release and pickup reasons."
+        "proposalParts": [
+          "Phone cradle and headboard",
+          "Segmented flexible cover",
+          "Curved guides and foot-end storage",
+          "Pull bar, stops and manual release"
+        ],
+        "question": "Where does the whole cover fit when the phone is uncovered?"
       },
       {
-        "title": "Recycling mascot",
-        "originalProblem": "People put the wrong things in the blue bin.",
-        "originalSolution": "Two mascot designs give feedback. Correct choices earn stickers, with a keychain reward.",
-        "improvedProblem": "A person sorting rubbish needs to understand a confusing item before choosing the blue bin.",
-        "reason": "We can check whether the person learns the rule rather than only collecting a reward.",
+        "title": "Recycling reward mascot",
+        "originalProblem": "People may need clear feedback to learn which items belong in the blue bin.",
+        "originalSolution": "Two box-shaped mascots show wrong/correct feedback, use hands as a cue and give stickers or a keychain reward.",
+        "improvedProblem": "People may need clear feedback to learn which items belong in the blue bin.",
+        "reason": "The feedback can teach the rule while a separate dispenser keeps the reward easy to collect.",
         "changes": [
           {
-            "change": "Put a short reason on the screen",
-            "why": "The mascot explains the choice."
-          },
-          {
-            "change": "Keep rewards separate from the item opening",
-            "why": "Stickers can be collected without reaching near the rubbish."
+            "change": "Recommended refinement (proposal)",
+            "why": "Link a confirmed sorting choice to the feedback screen and a controlled one-sticker feed."
           }
         ],
-        "boundary": "Use clean items and a person to select the feedback. Fake hands must not grab a person.",
+        "boundary": "Use rounded fixed decorative hands, a guarded feed path and separate clean reward access. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Compare explanation-only feedback with explanation plus a sticker. Then ask about new items without rewards."
+          "Check feedback clarity, one-at-a-time dispensing, stock detection and learning on new items without rewards."
         ],
-        "question": "Will the person still choose correctly when no sticker is offered?"
+        "question": "Will people still make a good choice when no sticker is offered?",
+        "howItWorks": "A person confirms the sorting choice and the screen gives feedback. CORRECT enables a matched motor and roller to feed one sticker. WRONG keeps the reward feed off and explains the choice.",
+        "proposalParts": [
+          "Feedback display and controller",
+          "Confirmation input",
+          "Sticker feed and collection slot",
+          "Mascot shell and keychain"
+        ]
       }
     ],
     "activities": [
@@ -1042,66 +959,54 @@
     "number": 10,
     "ideas": [
       {
-        "title": "Living-room caption display",
-        "originalProblem": "Cannot hear clearly",
-        "originalSolution": "Our caption display shows spoken words as text for a person who cannot hear clearly.",
-        "improvedProblem": "A person who cannot hear speech clearly needs to follow the words in an everyday conversation.",
-        "reason": "Name the conversation and person, then check whether the displayed words can be followed.",
+        "title": "Living room caption TV",
+        "originalProblem": "A person who cannot hear clearly needs to read what is being said.",
+        "originalSolution": "A tabletop caption TV with microphone, bright screen, controller, battery and USB-C charging.",
+        "improvedProblem": "A person who cannot hear clearly needs to read what is being said.",
+        "reason": "The complete microphone-to-software-to-screen path separates speech recognition from the enclosure design.",
         "changes": [
           {
-            "change": "Use a compatible device running speech-to-text software",
-            "why": "The proposal has a real route from speech to captions."
-          },
-          {
-            "change": "Support it in a frame with a tilt hinge and stops",
-            "why": "The screen can be positioned for the reader."
-          },
-          {
-            "change": "Try a removable shade and rear cable route",
-            "why": "Glare and cable interference can be compared."
+            "change": "Recommended refinement (proposal)",
+            "why": "Fit real speech-to-text hardware/software inside a stable TV-shaped display with accessible controls."
           }
         ],
-        "howItWorks": "A suitable microphone and speech-to-text app on a supplied phone or tablet produce captions. A printed frame holds the device. A hinge and stop positions change its viewing angle; a removable shade may reduce glare.",
-        "printedParts": [
-          "Screen frame and base",
-          "Tilt hinge and stops",
-          "Removable shade",
-          "Cable guide"
-        ],
-        "suppliedParts": [
-          "Compatible caption-app device",
-          "Compatible microphone if needed",
-          "Suitable fasteners and approved supply"
-        ],
-        "boundary": "A basic micro:bit sound-level sensor measures loudness, not words. A printed frame does not produce captions. The fire-car alternative is a manual demonstration only, without fire or powder.",
+        "howItWorks": "The microphone captures speech. Speech-to-text software produces words. The display shows large captions; the person can adjust text size, viewing angle and microphone state.",
+        "boundary": "Keep microphone and vents unobstructed, provide a clear mute state, and handle transcription uncertainty visibly. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use this comparison: The same caption device in an ordinary position or stand.",
-          "Use the same short phrases, reader position and lighting. Compare readability with two frame positions or with and without the shade.",
-          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+          "Compare transcription accuracy, delay, readability, glare, microphone placement and real battery runtime."
         ],
-        "measure": "Count important missed words and requests to reposition the screen. Separate transcription errors from visibility problems."
+        "proposalParts": [
+          "Microphone",
+          "Supplied processor with compatible speech-to-text software",
+          "Screen and enclosure",
+          "Mute, text-size and power controls"
+        ],
+        "question": "Is a missed word caused by the microphone, the transcription, or the display?"
       },
       {
-        "title": "Fire response car",
-        "originalProblem": "The group wants to help people with cooking or gas-related fire problems.",
-        "originalSolution": "A wheeled car carries a jointed arm and a quick-release extinguisher holder.",
-        "improvedProblem": "A person responding to a fire needs help reaching a dangerous area without entering it.",
-        "reason": "This keeps the real need clear. The class can safely check movement and stability, while emergency functions remain untested.",
+        "title": "Articulated fire response car",
+        "originalProblem": "A responder needs a way to inspect and reach a dangerous area from a distance.",
+        "originalSolution": "A long wheeled vehicle with a two-joint arm carrying an extinguisher.",
+        "improvedProblem": "A responder needs a way to inspect and reach a dangerous area from a distance.",
+        "reason": "A low cylinder reduces the arm’s payload and tipping tendency while preserving the pupil’s articulated-arm idea.",
         "changes": [
           {
-            "change": "Give each joint a clear stop",
-            "why": "The arm has a repeatable range of movement."
-          },
-          {
-            "change": "Keep the body stable while the arm moves",
-            "why": "We can check whether the arm makes the model tip."
+            "change": "Recommended refinement (proposal)",
+            "why": "Move the heavy cylinder low on the chassis and put the lighter nozzle on the articulated arm."
           }
         ],
-        "boundary": "Use no fire, heat, gas, powder or pressure. Do not attach a real extinguisher or claim the model is fireproof.",
+        "boundary": "Use joint stops, hose guards, emergency stop and communication-loss stop. Select a professionally rated suppression system approved for its mounting orientation, fire class and remote actuation. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
         "test": [
-          "Use a hand-moved model with a lightweight dummy payload. Try five arm positions and check stability on a clear floor."
+          "Check full-reach stability, joint loads, hose clearance, braking, link-loss behavior and environmental limits."
         ],
-        "question": "What keeps the car stable when its arm reaches forwards or sideways?"
+        "question": "How will the car stay stable with the arm fully extended?",
+        "howItWorks": "The operator drives and aims using camera views. Geared joints move the nozzle while a flexible hose connects it to the low-mounted cylinder. Discharge requires a separate deliberate command.",
+        "proposalParts": [
+          "Wheeled drive chassis",
+          "Low cylinder cradle",
+          "Two geared arm joints and nozzle",
+          "Protected hose, cameras and operator controls"
+        ]
       }
     ],
     "activities": [

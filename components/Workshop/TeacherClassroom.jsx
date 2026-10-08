@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { classroomRequest } from './Classroom'
+import TeacherRevision from './TeacherRevision'
 const questions = { whatWorks: 'What works', question: 'Question', improvement: 'Specific improvement' }
 export default function TeacherClassroom() {
     const [lesson, setLesson] = useState(null), [message, setMessage] = useState('Loading your protected classroom…'), [busy, setBusy] = useState(false), [edit, setEdit] = useState(null), [group, setGroup] = useState('all')
@@ -9,10 +10,10 @@ export default function TeacherClassroom() {
     async function refresh() { try { setLesson(await classroomRequest('/api/admin/workshop')); setMessage('') } catch (error) { setMessage(error.message); if ([401, 403].includes(error.status)) setLesson(null) } }
     useEffect(() => { refresh(); const timer = setInterval(refresh, 5000); return () => clearInterval(timer) }, [])
     async function action(input) {
-        if (busy) return
+        if (busy) return false
         setBusy(true)
-        try { await classroomRequest('/api/admin/workshop', 'PATCH', input); setEdit(null); await refresh(); setMessage('Saved. Student screens update within five seconds.') }
-        catch (error) { setMessage(error.message); await refresh(); setMessage(error.message + ' Your unsaved edit is kept.') }
+        try { await classroomRequest('/api/admin/workshop', 'PATCH', input); if (input.action === 'feedback' && input.id === edit?.id) setEdit(null); await refresh(); setMessage('Saved. Student screens update within five seconds.'); return true }
+        catch (error) { setMessage(error.message); await refresh(); setMessage(error.message + ' Your unsaved edit is kept.'); return false }
         finally { setBusy(false) }
     }
     async function loadPrivateRoster(event) {
@@ -42,7 +43,7 @@ export default function TeacherClassroom() {
             <div className="flex flex-wrap gap-3 mt-4">{['hidden', 'blocked', 'visible'].map(visibility => <button className="formWhiteButton" key={visibility} disabled={busy || row.visibility === visibility} onClick={() => action({ action: 'feedback', expectedEntryVersion: row.version, id: row.id, visibility })}>{visibility === 'visible' ? 'Restore to class' : visibility === 'hidden' ? 'Hide' : 'Block'}</button>)}<button className="formWhiteButton" onClick={() => setEdit({ id: row.id, expectedEntryVersion: row.version, visibility: row.visibility, ...Object.fromEntries(Object.keys(questions).map(key => [key, row[key]])) })}>Edit entry</button></div>
             {edit?.id === row.id && <form onSubmit={e => { e.preventDefault(); action({ action: 'feedback', expectedEntryVersion: edit.expectedEntryVersion, id: edit.id, visibility: edit.visibility, edit: Object.fromEntries(Object.keys(questions).map(key => [key, edit[key]])) }) }} className="mt-4">{Object.entries(questions).map(([key, label]) => <label className="block mt-3" key={key}>{label}<textarea aria-label={label} required maxLength={600} value={edit[key]} className="formInput block w-full" onChange={e => setEdit({ ...edit, [key]: e.target.value })} /></label>)}<button className="formBlackButton mt-3" disabled={busy}>Save teacher edit</button><button className="formWhiteButton ml-3" type="button" onClick={() => setEdit(null)}>Cancel edit</button>{edit.expectedEntryVersion !== row.version && <div className="border p-4 mt-3"><p>This entry changed. Your typed edit is kept. Compare the latest entry above before continuing.</p><button type="button" className="formWhiteButton mt-3" onClick={() => setEdit({ ...edit, expectedEntryVersion: row.version, visibility: row.visibility })}>Keep my edit and use latest entry version</button></div>}</form>}
         </article>)}
-        <h2 className="text-2xl mt-8">Submitted revisions</h2>{lesson.refinements.map(row => <article className="border rounded-xl p-5 mt-4" key={row.id}><h3>Group {row.group.slice(1)} • Revision {row.version} • {row.seat}</h3>{row.ideas.map(idea => <div key={idea.idea} className="mt-3"><h4>Idea {idea.idea}</h4>{['feedbackUsed', 'change', 'reason', 'test'].map(key => <p key={key} className="whitespace-pre-wrap"><strong>{key}:</strong> {idea[key]}</p>)}</div>)}</article>)}
+        <h2 className="text-2xl mt-8">Submitted revisions</h2>{lesson.refinements.map(row => <TeacherRevision key={row.id} row={row} busy={busy} onAction={action} />)}
         <details className="mt-8"><summary>Teacher audit history ({lesson.audit.length})</summary>{lesson.audit.map((event, i) => <article key={i} className="border p-3 mt-2"><p>{event.at} • {event.actor} • {event.action} • {event.id}</p><pre className="whitespace-pre-wrap break-all">{JSON.stringify({ before: event.before, after: event.after }, null, 2)}</pre></article>)}</details>
     </main>
 }

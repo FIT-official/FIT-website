@@ -10,11 +10,13 @@ export default function ReviewedGroupPage({ group, classroom = false }) {
         <p className="mt-4 max-w-3xl">Choose one difficulty to help with. Compare both ideas, make one useful change and explain a fair test. The model examples show design proposals, not equipment proven to work.</p>
         <div className="grid lg:grid-cols-2 gap-6 mt-8">{group.ideas.map((idea, index) => <section key={idea.title} className="border border-borderColor rounded-xl p-5 md:p-7" aria-labelledby={'idea-' + group.id + '-' + (index + 1)}>
             <h2 id={'idea-' + group.id + '-' + (index + 1)} className="text-2xl">Idea {index + 1}: {idea.title}</h2>
+            {idea.reviewNotice && <p className="mt-3 border rounded p-3">{idea.reviewNotice}</p>}
             {group.models[index] ? <figure className="mt-5"><Image src={group.models[index].src} alt={group.models[index].alt} width={group.models[index].width} height={group.models[index].height} sizes="(max-width:1023px) 90vw, 45vw" className="w-full h-auto rounded-lg" /><figcaption className="text-sm mt-3">{group.models[index].caption}</figcaption></figure> : <p className="mt-5 border rounded p-4">Illustration pending review. Use the original idea and written design proposals below for this activity.</p>}
             <h3 className="font-semibold mt-5">Original problem</h3><p className="mt-2">{idea.originalProblem}</p>
             <h3 className="font-semibold mt-5">Original idea</h3><p className="mt-2">{idea.originalSolution}</p>
             <h3 className="font-semibold mt-5">Clearer problem</h3><p className="mt-2">{idea.improvedProblem}</p><p className="text-sm mt-2">{idea.reason}</p>
-            <h3 className="font-semibold mt-5">A useful change</h3><ul className="list-disc pl-5 space-y-2 mt-2">{idea.changes.map(change => <li key={change.change}><strong>{change.change}.</strong> {change.why}</li>)}</ul>
+            <h3 className="font-semibold mt-5">Changes to investigate</h3><ul className="list-disc pl-5 space-y-2 mt-2">{idea.changes.map(change => <li key={change.change}><strong>{change.change}.</strong> {change.why}</li>)}</ul>
+            {idea.proposalParts && <><h3 className="font-semibold mt-5">Parts to investigate</h3><ul className="list-disc pl-5 mt-2">{idea.proposalParts.map(part => <li key={part}>{part}</li>)}</ul></>}
             <h3 className="font-semibold mt-5">A model you can make</h3><p className="mt-2">{idea.howItWorks || idea.originalSolution}</p>
             {idea.printedParts && <><p className="mt-2"><strong>Printed structure:</strong> {idea.printedParts.join('; ')}.</p><p className="mt-2"><strong>Supplied equipment:</strong> {idea.suppliedParts.join('; ')}.</p></>}
             <p className="text-sm mt-3">Start with a non-working shape model of the reviewed design. Label the parts, show how they connect and explain which equipment is still needed. A printed shape does not prove the proposed functions.</p>
