@@ -13,7 +13,9 @@ function expectTwoIdeas(group) {
     const project = workshopClassroomGroupPage(group), article = screen.getByRole('article', { name: 'Group ' + project.number + ' complete project reading' })
     for (const [i, idea] of project.reading.ideas.entries()) {
         const section = within(article).getByRole('heading', { name: 'Idea ' + (i + 1) + ': ' + idea.title }).closest('section')
-        for (const text of [idea.problemContext, idea.originalIntent, idea.recommendedRefinement, idea.studentExplanation]) expect(section).toHaveTextContent(text)
+        for (const text of [idea.pupilCopy.core_problem, idea.pupilCopy.importance, idea.pupilCopy.solution, idea.pupilCopy.source_caveat, idea.pupilCopy.next_test, ...idea.pupilCopy.how_it_works_steps]) expect(section).toHaveTextContent(text)
+        expect(within(section).getByText(idea.pupilCopy.core_problem, { selector: 'strong' })).toBeInTheDocument()
+        expect(within(section).getByText(idea.pupilCopy.target_user, { selector: 'strong' })).toBeInTheDocument()
     }
     expect(project.reading.feedbackQuestions).toHaveLength(3)
     for (const question of project.reading.feedbackQuestions) expect(article).toHaveTextContent(question)

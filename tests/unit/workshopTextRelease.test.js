@@ -19,8 +19,9 @@ describe('workshop approved discussion illustration release', () => {
             expect(group.models).toHaveLength(2)
             for (const image of group.models) {
                 expect(image.approved).toBe(true)
-                expect(image.src).toMatch(/^\/workshop\/models\/g\d{2}-idea[12]-pdf-derived\.jpeg$/)
-                expect(image.caption).toContain('proposed and untested')
+                expect(image.src).toMatch(/^\/workshop\/models\/g\d{2}-idea[12]-reviewed-v2-pdf-derived\.jpeg$/)
+                expect(image.caption.length).toBeGreaterThan(15)
+                expect(image.sourcePdfSha256).toBe('de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9')
             }
             for (const idea of group.ideas) {
                 expect(idea.originalProblem.length).toBeGreaterThan(5)

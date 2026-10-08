@@ -2,6 +2,24 @@ import { requireGuestAccess, verifyGuestHome } from '@/lib/workshopGuestAccess'
 import { classroomView, readLesson, submitClassroom, ClassroomError } from '@/lib/workshopGuestClassroomStore'
 import { guestDb, classJson, classFailure, sameOrigin, jsonBody, limitGuestOperation } from '@/lib/workshopGuestHttp'
 import { WORKSHOP_SESSION } from '@/lib/workshopFeedback'
+import { workshopTiming } from '@/lib/workshopTiming'
 export const runtime = 'nodejs'
-export async function GET(request) { try { const access = await requireGuestAccess(request); verifyGuestHome(request, access); const db = await guestDb(), store = db.collection('workshopGuestLessons'), query = new URL(request.url).searchParams; if (/^\d+$/.test(query.get('since') || '') && query.get('seat') === access.seat) { const state = await store.findOne({ _id: WORKSHOP_SESSION }, { projection: { version: 1 } }); if (Number(query.get('since')) === (state?.version || 0)) return new Response(null, { status: 304, headers: { 'Cache-Control': 'private, no-store', 'Vary': 'Cookie', 'X-Robots-Tag': 'noindex, nofollow' } }) } const state = await store.findOne({ _id: WORKSHOP_SESSION }, { projection: { version: 1, phaseVersion: 1, navigationLocked: 1, navigationTarget: 1, navigationVersion: 1, reviewRound: 1, projectVersion: 1, phase: 1, feedbackOpen: 1, refinementOpen: 1, showFeedback: 1, feedback: { $filter: { input: '$feedback', as: 'row', cond: { $or: [{ $and: [{ $eq: ['$$row.presentingGroup', access.group] }, { $eq: ['$$row.visibility', 'visible'] }] }, { $eq: ['$$row.seat', access.seat] }] } } }, refinements: { $filter: { input: '$refinements', as: 'row', cond: { $eq: ['$$row.group', access.group] } } } } }); return classJson({ ...classroomView(state || await readLesson(store), access), seat: access.seat, studentName: access.name, selfReported: true, guest: true }) } catch (error) { return classFailure(error) } }
+export async function GET(request) {
+    const timing = workshopTiming()
+    try {
+        const access = await requireGuestAccess(request, timing)
+        verifyGuestHome(request, access)
+        const db = await timing.measure('db', guestDb), store = db.collection('workshopGuestLessons'), query = new URL(request.url).searchParams
+        if (/^\d+$/.test(query.get('since') || '') && query.get('seat') === access.seat) {
+            const state = await timing.measure('version', () => store.findOne({ _id: WORKSHOP_SESSION }, { projection: { version: 1 } }))
+            if (Number(query.get('since')) === (state?.version || 0)) return timing.finish(new Response(null, { status: 304, headers: { 'Cache-Control': 'private, no-store', 'Vary': 'Cookie', 'X-Robots-Tag': 'noindex, nofollow' } }))
+        }
+        const state = await timing.measure('lesson', () => store.findOne({ _id: WORKSHOP_SESSION }, { projection: {
+            version: 1, phaseVersion: 1, navigationLocked: 1, navigationTarget: 1, navigationVersion: 1, reviewRound: 1, projectVersion: 1, phase: 1, feedbackOpen: 1, refinementOpen: 1, showFeedback: 1,
+            feedback: { $filter: { input: '$feedback', as: 'row', cond: { $or: [{ $and: [{ $eq: ['$$row.presentingGroup', access.group] }, { $eq: ['$$row.visibility', 'visible'] }] }, { $eq: ['$$row.seat', access.seat] }] } } },
+            refinements: { $filter: { input: '$refinements', as: 'row', cond: { $eq: ['$$row.group', access.group] } } },
+        } }))
+        return timing.finish(classJson({ ...classroomView(state || await readLesson(store), access), seat: access.seat, studentName: access.name, selfReported: true, guest: true }))
+    } catch (error) { return timing.finish(classFailure(error)) }
+}
 export async function POST(request) { try { sameOrigin(request); const access = await requireGuestAccess(request); verifyGuestHome(request, access); const input = await jsonBody(request), { expectedSeat, ...submission } = input; if (expectedSeat !== access.seat) throw new ClassroomError('Your session changed. Your draft is kept.', 403); const db = await guestDb(); await limitGuestOperation(db, 'submit-' + access.seat, 15); return classJson(await submitClassroom(db.collection('workshopGuestLessons'), access, submission)) } catch (error) { return classFailure(error) } }

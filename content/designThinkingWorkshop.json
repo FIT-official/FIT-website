@@ -5,52 +5,89 @@
     "ideas": [
       {
         "title": "Foldable tray",
-        "originalProblem": "We need to find out which carrying or storage task a folding tray would help.",
-        "originalSolution": "A folding oval tray with three compartments on one half.",
-        "improvedProblem": "We need to find out which carrying or storage task a folding tray would help.",
-        "reason": "A positive lock stops the centre joint folding while the tray is in use.",
+        "originalProblem": "A tray needs the right support for carrying or table use.",
+        "originalSolution": "A tray that rests on a table and folds away when empty.",
+        "improvedProblem": "A tray needs the right support for carrying or table use.",
+        "reason": "Folding could save storage space, if the tray still does its main job well.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Use a hinge and a positive open lock, then release the lock to fold the empty tray."
+            "change": "What to find out",
+            "why": "Will it be carried or stay on a table?"
           }
         ],
-        "howItWorks": "The hinge guides the two halves. A locking bridge below the joint supports both halves while open. Retract it before folding.",
-        "boundary": "Guard the hinge gap; keep the bridge captive; define a rated load after testing. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "howItWorks": "Open the tray flat on a table. Put items in the three round spaces. Empty the tray before folding it.",
+        "boundary": "Check table support, hinge gaps and empty folding.",
         "test": [
-          "Check hinge clearance, lock engagement, load deflection and whether storage space improves."
+          "Check table support, hinge gaps and empty folding."
         ],
-        "proposalParts": [
-          "Two tray halves",
-          "Hinge pin",
-          "Captive sliding bridge and guides"
-        ],
-        "question": "Who needs a folding tray, and what must it hold?"
+        "question": "Will it be carried or stay on a table?",
+        "pupilCopy": {
+          "key": "g1_folding_tray",
+          "group": 1,
+          "idea": 1,
+          "title": "Foldable tray",
+          "problem": "A tray needs the right support for carrying or table use.",
+          "importance": "Folding could save storage space, if the tray still does its main job well.",
+          "solution": "A tray that rests on a table and folds away when empty.",
+          "how_it_works": "1. Open the tray flat on a table.\n2. Put items in the three round spaces.\n3. Empty the tray before folding it.",
+          "source_caveat": "Will it be carried or stay on a table?",
+          "next_test": "Check table support, hinge gaps and empty folding.",
+          "how_it_works_steps": [
+            "Open the tray flat on a table.",
+            "Put items in the three round spaces.",
+            "Empty the tray before folding it."
+          ],
+          "target_user": "People using a tray",
+          "core_problem": "A tray needs the right support for carrying or table use.",
+          "key_points": [
+            "People using a tray",
+            "A tray needs the right support for carrying or table use.",
+            "A tray that rests on a table and folds away when empty."
+          ]
+        }
       },
       {
         "title": "Mobile bin and companion",
-        "originalProblem": "A fixed disposal point may be inconvenient to reach.",
-        "originalSolution": "A four-wheel bin with a peaked lid and a smaller wheeled companion.",
-        "improvedProblem": "A fixed disposal point may be inconvenient to reach.",
-        "reason": "The companion adds a second stream. Hands-free opening and deposit feedback give the mobile station a useful interaction.",
+        "originalProblem": "Moving a full bin and emptying it can be difficult.",
+        "originalSolution": "A large bin with a lid and a smaller open bin, each pushed by hand.",
+        "improvedProblem": "Moving a full bin and emptying it can be difficult.",
+        "reason": "A movable bin should be easy to push, park and empty.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Link the pair for moving; add hands-free opening and deposit feedback. Use the companion for recycling."
+            "change": "What to find out",
+            "why": "Where would the bins help, and how will people empty them?"
           }
         ],
-        "boundary": "Keep each box supported by its own wheels; lock it for use; guard the lid drive and hitch; stop closing if obstructed; provide manual opening and transport mode. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "boundary": "Test pushing, brakes, handle reach and lifting out the container.",
         "test": [
-          "Compare the pair with two ordinary bins: turning space, parking, separation mistakes, hand contact, false lid openings and whether users notice the deposit feedback."
+          "Test pushing, brakes, handle reach and lifting out the container."
         ],
-        "question": "When would people choose this over two ordinary bins?",
-        "howItWorks": "Push and park the pair. A proximity sensor opens the lid. A sensor inside detects a deposit and displays THANKS.",
-        "proposalParts": [
-          "Four-wheel main body with peaked hinged lid",
-          "Smaller self-supported wheeled companion",
-          "Removable coupling and parking brakes",
-          "Proximity sensor, lid actuator, deposit sensor and display"
-        ]
+        "question": "Where would the bins help, and how will people empty them?",
+        "howItWorks": "Push each bin where it is needed. Use the brakes to park the large bin. Lift out the small bin's inner container.",
+        "pupilCopy": {
+          "key": "g1_rolling_bin",
+          "group": 1,
+          "idea": 2,
+          "title": "Mobile bin and companion",
+          "problem": "Moving a full bin and emptying it can be difficult.",
+          "importance": "A movable bin should be easy to push, park and empty.",
+          "solution": "A large bin with a lid and a smaller open bin, each pushed by hand.",
+          "how_it_works": "1. Push each bin where it is needed.\n2. Use the brakes to park the large bin.\n3. Lift out the small bin's inner container.",
+          "source_caveat": "Where would the bins help, and how will people empty them?",
+          "next_test": "Test pushing, brakes, handle reach and lifting out the container.",
+          "how_it_works_steps": [
+            "Push each bin where it is needed.",
+            "Use the brakes to park the large bin.",
+            "Lift out the small bin's inner container."
+          ],
+          "target_user": "People collecting rubbish",
+          "core_problem": "Moving a full bin and emptying it can be difficult.",
+          "key_points": [
+            "People collecting rubbish",
+            "Moving a full bin and emptying it can be difficult.",
+            "A large bin with a lid and a smaller open bin, each pushed by hand."
+          ]
+        }
       }
     ],
     "activities": [
@@ -111,53 +148,88 @@
       {
         "title": "Mushroom nightlight",
         "originalProblem": "An older person getting out of bed needs to see the nearby floor.",
-        "originalSolution": "A mushroom lamp that turns on when the person sits up, with accessible charging.",
+        "originalSolution": "A mushroom-shaped lamp that senses movement and shines down towards the floor.",
         "improvedProblem": "An older person getting out of bed needs to see the nearby floor.",
-        "reason": "Good sensor placement and directed light matter more than the mushroom shape alone.",
+        "reason": "The light should reach the floor and feel comfortable on the eyes.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Aim the light at the floor and keep the motion sensor clear of the shade."
+            "change": "What to find out",
+            "why": "Does the light reach the floor without glare?"
           }
         ],
-        "howItWorks": "The motion sensor signals a controller. The controller switches the LED on and times how long it stays lit. The ON/OFF control overrides it.",
-        "boundary": "Provide cable strain relief, ventilation and a stable base; use a compatible power supply. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "howItWorks": "Set the switch to AUTO. Movement turns on the downward light. The light turns off after a pause.",
+        "boundary": "Check floor light, glare, timeout and stability beside a bed.",
         "test": [
-          "Check detection from the actual bed, useful floor visibility, glare, timeout and OFF behavior."
+          "Check floor light, glare, timeout and stability beside a bed."
         ],
-        "proposalParts": [
-          "PIR sensor",
-          "Controller and LED driver",
-          "Diffuser and stable shell",
-          "Matched low-voltage adapter"
-        ],
-        "question": "What movement should turn it on, and which floor area should it light?"
+        "question": "Does the light reach the floor without glare?",
+        "pupilCopy": {
+          "key": "g2_motion_lamp",
+          "group": 2,
+          "idea": 1,
+          "title": "Mushroom nightlight",
+          "problem": "An older person getting out of bed needs to see the nearby floor.",
+          "importance": "The light should reach the floor and feel comfortable on the eyes.",
+          "solution": "A mushroom-shaped lamp that senses movement and shines down towards the floor.",
+          "how_it_works": "1. Set the switch to AUTO.\n2. Movement turns on the downward light.\n3. The light turns off after a pause.",
+          "source_caveat": "Does the light reach the floor without glare?",
+          "next_test": "Check floor light, glare, timeout and stability beside a bed.",
+          "how_it_works_steps": [
+            "Set the switch to AUTO.",
+            "Movement turns on the downward light.",
+            "The light turns off after a pause."
+          ],
+          "target_user": "An older person getting out of bed",
+          "core_problem": "An older person getting out of bed needs to see the nearby floor.",
+          "key_points": [
+            "An older person getting out of bed",
+            "An older person getting out of bed needs to see the nearby floor.",
+            "A mushroom-shaped lamp that senses movement and shines down towards the floor."
+          ]
+        }
       },
       {
         "title": "Robot sorting bin",
-        "originalProblem": "People sometimes put items into the wrong compartment.",
-        "originalSolution": "A robot guides rubbish into several labelled compartments.",
-        "improvedProblem": "People sometimes put items into the wrong compartment.",
-        "reason": "The sequence separates choosing, moving the guide and releasing the item, so the motion can be checked.",
+        "originalProblem": "People sometimes put rubbish into the wrong compartment.",
+        "originalSolution": "A robot bin that checks an item with a camera and uses a small flap to choose its route.",
+        "improvedProblem": "People sometimes put rubbish into the wrong compartment.",
+        "reason": "The item needs a clear path into the chosen bin.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Use a supported pivoting chute and select its position before loading one item."
+            "change": "What to find out",
+            "why": "Which items can the camera recognise? What happens when it is unsure?"
           }
         ],
-        "boundary": "Enclose moving parts; stop on obstruction; use an accessible service release and rated actuator supply. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "boundary": "Try known and unknown items; check flap movement and jams.",
         "test": [
-          "Trace both routes, measure clearances and test jams with representative clean items."
+          "Try known and unknown items; check flap movement and jams."
         ],
-        "question": "Which part carries the item load, and which part only turns the diverter?",
-        "howItWorks": "A person chooses a category. The servo tilts the chute left or right about a front-to-back shaft. Wait for the chute to settle, then put one item into the hopper.",
-        "proposalParts": [
-          "Single-item hopper",
-          "Servo and supported front-to-back shaft",
-          "Pivoting chute and separate liners",
-          "Position sensing or ready indication"
-        ],
-        "reviewNotice": "This proposal is under review. No replacement option has been chosen."
+        "question": "Which items can the camera recognise? What happens when it is unsure?",
+        "howItWorks": "The camera checks one item. The controller chooses a bin. The flap tilts to that bin.",
+        "pupilCopy": {
+          "key": "g2_sorting_bin",
+          "group": 2,
+          "idea": 2,
+          "title": "Robot sorting bin",
+          "problem": "People sometimes put rubbish into the wrong compartment.",
+          "importance": "The item needs a clear path into the chosen bin.",
+          "solution": "A robot bin that checks an item with a camera and uses a small flap to choose its route.",
+          "how_it_works": "1. The camera checks one item.\n2. The controller chooses a bin.\n3. The flap tilts to that bin.",
+          "source_caveat": "Which items can the camera recognise? What happens when it is unsure?",
+          "next_test": "Try known and unknown items; check flap movement and jams.",
+          "how_it_works_steps": [
+            "The camera checks one item.",
+            "The controller chooses a bin.",
+            "The flap tilts to that bin."
+          ],
+          "target_user": "People sorting rubbish",
+          "core_problem": "People sometimes put rubbish into the wrong compartment.",
+          "key_points": [
+            "People sorting rubbish",
+            "People sometimes put rubbish into the wrong compartment.",
+            "A robot bin that checks an item with a camera and uses a small flap to choose its route."
+          ]
+        }
       }
     ],
     "activities": [
@@ -218,52 +290,89 @@
       {
         "title": "Sound and hello companion",
         "originalProblem": "A person living alone wants comfort and an easy way to send a greeting.",
-        "originalSolution": "Switch the heart on, pat the plush to sing, and hold the paw to send Hello.",
+        "originalSolution": "A singing plush with a heart switch and a paw that sends HELLO to a second micro:bit.",
         "improvedProblem": "A person living alone wants comfort and an easy way to send a greeting.",
-        "reason": "Separate actions make it clearer what each control does and whether the greeting arrived.",
+        "reason": "The song offers comfort, and the paw gives a simple way to send a greeting.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Keep a soft body around a removable control module, with separate sound and greeting controls."
+            "change": "What to find out",
+            "why": "Can the other micro:bit receive HELLO from the needed distance?"
           }
         ],
-        "howItWorks": "A sound control starts or stops a chosen tune. The paw control sends a greeting to a paired receiver, which acknowledges it.",
-        "boundary": "Secure the battery and paw wiring, bound the volume, remove electronics for washing and use a communication link that reaches the actual recipient. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "howItWorks": "Switch the heart on to start the song. Hold the paw to send HELLO. The second micro:bit scrolls HELLO.",
+        "boundary": "Test the heart switch, song, paw press and radio range.",
         "test": [
-          "Compare the original pat control with the clear button and measure missed or accidental activations."
+          "Test the heart switch, song, paw press and radio range."
         ],
-        "proposalParts": [
-          "Soft cover",
-          "Removable control cradle",
-          "Sound output and switches",
-          "Paired communication modules"
-        ],
-        "question": "How does the person know the greeting was received?"
+        "question": "Can the other micro:bit receive HELLO from the needed distance?",
+        "pupilCopy": {
+          "key": "g3_sound_companion",
+          "group": 3,
+          "idea": 1,
+          "title": "Sound and hello companion",
+          "problem": "A person living alone wants comfort and an easy way to send a greeting.",
+          "importance": "The song offers comfort, and the paw gives a simple way to send a greeting.",
+          "solution": "A singing plush with a heart switch and a paw that sends HELLO to a second micro:bit.",
+          "how_it_works": "1. Switch the heart on to start the song.\n2. Hold the paw to send HELLO.\n3. The second micro:bit scrolls HELLO.",
+          "source_caveat": "Can the other micro:bit receive HELLO from the needed distance?",
+          "next_test": "Test the heart switch, song, paw press and radio range.",
+          "how_it_works_steps": [
+            "Switch the heart on to start the song.",
+            "Hold the paw to send HELLO.",
+            "The second micro:bit scrolls HELLO."
+          ],
+          "target_user": "A person living alone",
+          "core_problem": "A person living alone wants comfort and an easy way to send a greeting.",
+          "key_points": [
+            "A person living alone",
+            "A person living alone wants comfort and an easy way to send a greeting.",
+            "A singing plush with a heart switch and a paw that sends HELLO to a second micro:bit."
+          ]
+        }
       },
       {
         "title": "Private parcel box",
         "originalProblem": "A parcel left outside a door can be seen and reached by other people.",
-        "originalSolution": "A parcel box with an angled transparent cover, string, pole and lock.",
+        "originalSolution": "An opaque parcel box with a passcode lock and a bell that sends an alert indoors.",
         "improvedProblem": "A parcel left outside a door can be seen and reached by other people.",
-        "reason": "Opaque panels conceal the contents. A controlled hinge and defined delivery cycle replace the uncertain cover linkage.",
+        "reason": "Keeping parcels out of sight could give the owner more privacy.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Use a complete opaque rectangular enclosure with a conventional hinged lid and a real latch."
+            "change": "What to find out",
+            "why": "How can another parcel arrive after the lid is locked?"
           }
         ],
-        "boundary": "Use controlled lid closing, guarded hinge gaps, anchoring and drainage; privacy is not proof of theft resistance. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "boundary": "Test the code, lid, latch, bell and indoor alert.",
         "test": [
-          "Check parcel fit, closing force, latch engagement, owner access, water entry and second-delivery handling."
+          "Test the code, lid, latch, bell and indoor alert."
         ],
-        "question": "How can the next courier deliver after the first parcel has locked the box?",
-        "howItWorks": "The courier puts a parcel into the prepared box. A rear hinge and folding two-link stay guide the lid. Closing it engages the latch; the owner unlocks the box to retrieve the parcel and reset it.",
-        "proposalParts": [
-          "Opaque enclosure",
-          "Hinge, lid stay and seal",
-          "Latch and owner lock",
-          "Ground or wall fixing points"
-        ]
+        "question": "How can another parcel arrive after the lid is locked?",
+        "howItWorks": "Place the parcel in the open box. Close the lid by hand. Press the bell to alert someone indoors. Enter the passcode to open the latch.",
+        "pupilCopy": {
+          "key": "g3_parcel_box",
+          "group": 3,
+          "idea": 2,
+          "title": "Private parcel box",
+          "problem": "A parcel left outside a door can be seen and reached by other people.",
+          "importance": "Keeping parcels out of sight could give the owner more privacy.",
+          "solution": "An opaque parcel box with a passcode lock and a bell that sends an alert indoors.",
+          "how_it_works": "1. Place the parcel in the open box.\n2. Close the lid by hand.\n3. Press the bell to alert someone indoors.\n4. Enter the passcode to open the latch.",
+          "source_caveat": "How can another parcel arrive after the lid is locked?",
+          "next_test": "Test the code, lid, latch, bell and indoor alert.",
+          "how_it_works_steps": [
+            "Place the parcel in the open box.",
+            "Close the lid by hand.",
+            "Press the bell to alert someone indoors.",
+            "Enter the passcode to open the latch."
+          ],
+          "target_user": "An older resident receiving parcels",
+          "core_problem": "A parcel left outside a door can be seen and reached by other people.",
+          "key_points": [
+            "An older resident receiving parcels",
+            "A parcel left outside a door can be seen and reached by other people.",
+            "An opaque parcel box with a passcode lock and a bell that sends an alert indoors."
+          ]
+        }
       }
     ],
     "activities": [
@@ -322,54 +431,91 @@
     "number": 4,
     "ideas": [
       {
-        "title": "Water storing plant pot",
-        "originalProblem": "Busy people can forget to water their plants.",
-        "originalSolution": "A pot stores rain or wasted water and waters a plant when the soil is dry.",
-        "improvedProblem": "Busy people can forget to water their plants.",
-        "reason": "The wick provides a real water path; the cover keeps the stored water enclosed.",
+        "title": "Rainwater plant pot",
+        "originalProblem": "Plants need water when their soil becomes dry.",
+        "originalSolution": "A pot that collects water and uses a soil probe and pump to water the plant when needed.",
+        "improvedProblem": "Plants need water when their soil becomes dry.",
+        "reason": "Stored rainwater and suitable reused water could reduce waste.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Use a covered reservoir and a wick that reaches both the water and the soil."
+            "change": "What to find out",
+            "why": "Is the water suitable, and is the soil setting right?"
           }
         ],
-        "howItWorks": "Water moves through the wick into the inner pot. The refill cap gives access to the reservoir. A screened vent and overflow manage air and excess water.",
-        "boundary": "Keep overflow below soil level; preserve drainage; use suitable water and cleanable parts. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "howItWorks": "Collect rain and suitable reused water. The probe checks the soil. Dry soil switches the pump on. Moist soil switches it off.",
+        "boundary": "Check water flow, drainage, overflow and an empty tank.",
         "test": [
-          "Measure water delivery and soil condition with the actual plant, wick and reservoir height."
+          "Check water flow, drainage, overflow and an empty tank."
         ],
-        "proposalParts": [
-          "Inner pot",
-          "Covered reservoir",
-          "Wick and refill cap",
-          "Screened vent and overflow"
-        ],
-        "question": "How much water reaches this plant over the interval it is usually left alone?"
+        "question": "Is the water suitable, and is the soil setting right?",
+        "pupilCopy": {
+          "key": "g4_wick_pot",
+          "group": 4,
+          "idea": 1,
+          "title": "Rainwater plant pot",
+          "problem": "Plants need water when their soil becomes dry.",
+          "importance": "Stored rainwater and suitable reused water could reduce waste.",
+          "solution": "A pot that collects water and uses a soil probe and pump to water the plant when needed.",
+          "how_it_works": "1. Collect rain and suitable reused water.\n2. The probe checks the soil.\n3. Dry soil switches the pump on.\n4. Moist soil switches it off.",
+          "source_caveat": "Is the water suitable, and is the soil setting right?",
+          "next_test": "Check water flow, drainage, overflow and an empty tank.",
+          "how_it_works_steps": [
+            "Collect rain and suitable reused water.",
+            "The probe checks the soil.",
+            "Dry soil switches the pump on.",
+            "Moist soil switches it off."
+          ],
+          "target_user": "A busy person caring for plants",
+          "core_problem": "Plants need water when their soil becomes dry.",
+          "key_points": [
+            "A busy person caring for plants",
+            "Plants need water when their soil becomes dry.",
+            "A pot that collects water and uses a soil probe and pump to water the plant when needed."
+          ]
+        }
       },
       {
         "title": "Doorbell wristband",
         "originalProblem": "A person with hearing difficulties may miss someone ringing the doorbell.",
-        "originalSolution": "A wristband flashes and vibrates when the bell rings.",
+        "originalSolution": "A wristband that flashes and vibrates when someone rings the doorbell.",
         "improvedProblem": "A person with hearing difficulties may miss someone ringing the doorbell.",
-        "reason": "Two adjustable cues help the wearer notice the event in different situations.",
+        "reason": "Flashing lights and vibration could help the wearer notice a visitor.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Pair a doorbell transmitter with a wearable receiver and clear test or acknowledgement control."
+            "change": "What to find out",
+            "why": "Can the wearer feel the vibration and see the light?"
           }
         ],
-        "boundary": "Provide low-battery and link-status indication, secure battery housing and a defined ingress-protection target. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "boundary": "Test comfort, range, missed alerts and battery life.",
         "test": [
-          "Measure missed alerts, range, cue strength, battery life and comfort in the intended home."
+          "Test comfort, range, missed alerts and battery life."
         ],
-        "question": "What tells the wearer that the band is charged and connected?",
-        "howItWorks": "The doorbell sends an event to the receiver. The receiver flashes and vibrates. A status signal shows that the band has power and the link is available.",
-        "proposalParts": [
-          "Doorbell transmitter",
-          "Receiver and controller",
-          "Light and vibration motor",
-          "Battery, adjustable strap and enclosure"
-        ]
+        "question": "Can the wearer feel the vibration and see the light?",
+        "howItWorks": "Someone presses the doorbell. The band receives the signal. The band flashes and vibrates.",
+        "pupilCopy": {
+          "key": "g4_doorbell_band",
+          "group": 4,
+          "idea": 2,
+          "title": "Doorbell wristband",
+          "problem": "A person with hearing difficulties may miss someone ringing the doorbell.",
+          "importance": "Flashing lights and vibration could help the wearer notice a visitor.",
+          "solution": "A wristband that flashes and vibrates when someone rings the doorbell.",
+          "how_it_works": "1. Someone presses the doorbell.\n2. The band receives the signal.\n3. The band flashes and vibrates.",
+          "source_caveat": "Can the wearer feel the vibration and see the light?",
+          "next_test": "Test comfort, range, missed alerts and battery life.",
+          "how_it_works_steps": [
+            "Someone presses the doorbell.",
+            "The band receives the signal.",
+            "The band flashes and vibrates."
+          ],
+          "target_user": "Someone who may not hear the doorbell",
+          "core_problem": "A person with hearing difficulties may miss someone ringing the doorbell.",
+          "key_points": [
+            "Someone who may not hear the doorbell",
+            "A person with hearing difficulties may miss someone ringing the doorbell.",
+            "A wristband that flashes and vibrates when someone rings the doorbell."
+          ]
+        }
       }
     ],
     "activities": [
@@ -429,54 +575,89 @@
     "ideas": [
       {
         "title": "Parcel arrival notice",
-        "originalProblem": "A resident may not notice a parcel has arrived at the door.",
-        "originalSolution": "Parcels at the door was one of the group’s recorded topics.",
-        "improvedProblem": "A resident may not notice a parcel has arrived at the door.",
-        "reason": "A visible movement and separate message make the arrival signal easier to explain and check.",
+        "originalProblem": "A resident may not notice that a parcel has arrived at the door.",
+        "originalSolution": "A platform that sends a notice indoors when a parcel is placed on it.",
+        "improvedProblem": "A resident may not notice that a parcel has arrived at the door.",
+        "reason": "An indoor notice could help the resident know when to check for a parcel.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Use a load plate with guided travel, a protected switch and a clear received message."
+            "change": "What to find out",
+            "why": "Does it notice light or off-centre parcels?"
           }
         ],
-        "howItWorks": "The parcel lowers a guided spring-return plate onto a switch. Hard travel stops carry excess load. The controller filters contact bounce, sends the notice and re-arms after parcel removal.",
-        "boundary": "Add mechanical overload stops, protected wiring and suitable outdoor sealing; keep the walking route clear. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "howItWorks": "The parcel pushes the platform down. A switch sends a message indoors. Springs lift the empty platform again.",
+        "boundary": "Try different model loads and repeat deliveries.",
         "test": [
-          "Test light and heavy parcels, off-centre loads, repeated arrivals and acknowledgement."
+          "Try different model loads and repeat deliveries."
         ],
-        "proposalParts": [
-          "Load plate and guides",
-          "Return springs",
-          "Switch and travel stops",
-          "Transmitter and receiver"
-        ],
-        "question": "What stops a heavy parcel crushing the switch?"
+        "question": "Does it notice light or off-centre parcels?",
+        "pupilCopy": {
+          "key": "g5_parcel_alert",
+          "group": 5,
+          "idea": 1,
+          "title": "Parcel arrival notice",
+          "problem": "A resident may not notice that a parcel has arrived at the door.",
+          "importance": "An indoor notice could help the resident know when to check for a parcel.",
+          "solution": "A platform that sends a notice indoors when a parcel is placed on it.",
+          "how_it_works": "1. The parcel pushes the platform down.\n2. A switch sends a message indoors.\n3. Springs lift the empty platform again.",
+          "source_caveat": "Does it notice light or off-centre parcels?",
+          "next_test": "Try different model loads and repeat deliveries.",
+          "how_it_works_steps": [
+            "The parcel pushes the platform down.",
+            "A switch sends a message indoors.",
+            "Springs lift the empty platform again."
+          ],
+          "target_user": "A resident waiting for a delivery",
+          "core_problem": "A resident may not notice that a parcel has arrived at the door.",
+          "key_points": [
+            "A resident waiting for a delivery",
+            "A resident may not notice that a parcel has arrived at the door.",
+            "A platform that sends a notice indoors when a parcel is placed on it."
+          ]
+        }
       },
       {
         "title": "Crossing reminder cuff",
-        "originalProblem": "A person approaching a crossing may need a clear reminder of the steps to follow.",
-        "originalSolution": "Crossing the road was another recorded topic, with a small unlabelled cuff-like drawing.",
-        "improvedProblem": "A person approaching a crossing may need a clear reminder of the steps to follow.",
-        "reason": "The cuff keeps the reminder easy to find. The wearer still needs to check the road.",
+        "originalProblem": "A person approaching a crossing may need a reminder to stop, look and listen.",
+        "originalSolution": "An adjustable wrist cuff with a STOP LOOK LISTEN reminder.",
+        "improvedProblem": "A person approaching a crossing may need a reminder to stop, look and listen.",
+        "reason": "The reminder needs to be easy to read and comfortable enough to wear.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Put a readable reminder on a comfortable adjustable cuff."
+            "change": "What to find out",
+            "why": "Would people wear it and read the reminder?"
           }
         ],
-        "boundary": "Use a snag-conscious closure and rounded edges; any visibility claim depends on material and wear testing. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "boundary": "Compare comfort and reading with a simple reminder card.",
         "test": [
-          "Compare reading speed, comfort and recall with an ordinary reminder card."
+          "Compare comfort and reading with a simple reminder card."
         ],
-        "question": "Can the wearer read and explain the reminder at a glance?",
-        "howItWorks": "The wearer sees the reminder before crossing. The strap holds it in the chosen position and the closure allows easy removal.",
-        "proposalParts": [
-          "Flexible strap",
-          "Hook-and-loop closure",
-          "Readable reminder panel",
-          "Optional reflective material"
-        ],
-        "reviewNotice": "This proposal is under review. No replacement option has been chosen."
+        "question": "Would people wear it and read the reminder?",
+        "howItWorks": "Thread the strap through both slots. Wrap it around the wrist and fasten it. Read STOP LOOK LISTEN before crossing.",
+        "pupilCopy": {
+          "key": "g5_crossing_cuff",
+          "group": 5,
+          "idea": 2,
+          "title": "Crossing reminder cuff",
+          "problem": "A person approaching a crossing may need a reminder to stop, look and listen.",
+          "importance": "The reminder needs to be easy to read and comfortable enough to wear.",
+          "solution": "An adjustable wrist cuff with a STOP LOOK LISTEN reminder.",
+          "how_it_works": "1. Thread the strap through both slots.\n2. Wrap it around the wrist and fasten it.\n3. Read STOP LOOK LISTEN before crossing.",
+          "source_caveat": "Would people wear it and read the reminder?",
+          "next_test": "Compare comfort and reading with a simple reminder card.",
+          "how_it_works_steps": [
+            "Thread the strap through both slots.",
+            "Wrap it around the wrist and fasten it.",
+            "Read STOP LOOK LISTEN before crossing."
+          ],
+          "target_user": "A person approaching a road crossing",
+          "core_problem": "A person approaching a crossing may need a reminder to stop, look and listen.",
+          "key_points": [
+            "A person approaching a road crossing",
+            "A person approaching a crossing may need a reminder to stop, look and listen.",
+            "An adjustable wrist cuff with a STOP LOOK LISTEN reminder."
+          ]
+        }
       }
     ],
     "activities": [
@@ -536,53 +717,89 @@
     "ideas": [
       {
         "title": "Fire inspection drone",
-        "originalProblem": "A response team needs information about a location that is difficult to inspect.",
-        "originalSolution": "A drone responds to a fire alert, helps with the fire and searches with a light.",
-        "improvedProblem": "A response team needs information about a location that is difficult to inspect.",
-        "reason": "Heat and visible context together are more useful than a spotlight alone, while a map link explains where the observation came from.",
+        "originalProblem": "A response team needs to see what is happening in a place that is hard to reach.",
+        "originalSolution": "A drone with normal and thermal cameras that shows a visible fire and highlights its hot region.",
+        "improvedProblem": "A response team needs to see what is happening in a place that is hard to reach.",
+        "reason": "Seeing heat beside a normal picture can help a firefighter find the hot area.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Add paired thermal and visible cameras, location support and an operator-confirmed report."
+            "change": "What to find out",
+            "why": "Do the normal and heat views show the same area?"
           }
         ],
-        "howItWorks": "Thermal and RGB cameras send paired views. Mapped position, camera direction and range help locate the observation. The operator confirms the map pin, or marks the location uncertain, before deciding what to do.",
-        "boundary": "Thermal cannot see through walls or ordinary glass; show uncertainty, use human confirmation and tested aircraft fail-safes. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "howItWorks": "The drone sends normal and heat pictures. Compare both views of the visible fire. The highlight helps the firefighter spot the hot area.",
+        "boundary": "Use safe pictures to compare heat views and camera errors.",
         "test": [
-          "Check image alignment, location error, link loss, battery reserve and representative hot-object false alarms."
+          "Use safe pictures to compare heat views and camera errors."
         ],
-        "proposalParts": [
-          "Guarded drone",
-          "Thermal and RGB cameras",
-          "Depth or range sensor",
-          "Indoor localisation, communications and operator display"
-        ],
-        "question": "How will the operator tell a hot object from a fire and locate it?"
+        "question": "Do the normal and heat views show the same area?",
+        "pupilCopy": {
+          "key": "g6_drone",
+          "group": 6,
+          "idea": 1,
+          "title": "Fire inspection drone",
+          "problem": "A response team needs to see what is happening in a place that is hard to reach.",
+          "importance": "Seeing heat beside a normal picture can help a firefighter find the hot area.",
+          "solution": "A drone with normal and thermal cameras that shows a visible fire and highlights its hot region.",
+          "how_it_works": "1. The drone sends normal and heat pictures.\n2. Compare both views of the visible fire.\n3. The highlight helps the firefighter spot the hot area.",
+          "source_caveat": "Do the normal and heat views show the same area?",
+          "next_test": "Use safe pictures to compare heat views and camera errors.",
+          "how_it_works_steps": [
+            "The drone sends normal and heat pictures.",
+            "Compare both views of the visible fire.",
+            "The highlight helps the firefighter spot the hot area."
+          ],
+          "target_user": "Firefighters",
+          "core_problem": "A response team needs to see what is happening in a place that is hard to reach.",
+          "key_points": [
+            "Firefighters",
+            "A response team needs to see what is happening in a place that is hard to reach.",
+            "A drone with normal and thermal cameras that shows a visible fire and highlights its hot region."
+          ]
+        }
       },
       {
-        "title": "Fire detection and alert",
-        "originalProblem": "A response team needs an alert that identifies the affected place.",
-        "originalSolution": "A scanner detects a fire, alerts drones and proposes guidance for people nearby.",
-        "improvedProblem": "A response team needs an alert that identifies the affected place.",
-        "reason": "The alert should name the area and let someone confirm they’ve received it.",
+        "title": "Stove fire detector and nozzle",
+        "originalProblem": "A cooking fire needs a quick warning and a response aimed at the stove.",
+        "originalSolution": "Smoke and heat sensors linked to an aimed stove nozzle using cooking-oil-rated wet chemical.",
+        "improvedProblem": "A cooking fire needs a quick warning and a response aimed at the stove.",
+        "reason": "The system should treat the cooking area, rather than fill the whole room.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Combine a commissioned detector with a configured room identity and an acknowledged alert."
+            "change": "What to find out",
+            "why": "A real kitchen needs a suitable system fitted by qualified fire-safety specialists."
           }
         ],
-        "boundary": "Keep commissioned detection and building alarm functions independent. Operator acknowledgement records receipt; it does not silently disable the alarm. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "boundary": "Use a dry model. Ask a qualified fire-system specialist.",
         "test": [
-          "Check room labels, timestamps, missed messages, false alerts and the response to uncertain location."
+          "Use a dry model. Ask a qualified fire-system specialist."
         ],
-        "question": "What information is still useful if the camera view or drone location is uncertain?",
-        "howItWorks": "The detector sends an event and its room or zone ID. The system adds time and available camera evidence. The operator acknowledges the report and dispatches or redirects the drone.",
-        "proposalParts": [
-          "Appropriate smoke or heat detector",
-          "Configured room/zone record",
-          "Message controller and link",
-          "Operator acknowledgement display"
-        ]
+        "question": "A real kitchen needs a suitable system fitted by qualified fire-safety specialists.",
+        "howItWorks": "Smoke and heat sensors alert the controller. The nozzle aims at the stove zone. Wet chemical is applied to that cooking area.",
+        "pupilCopy": {
+          "key": "g6_detect_alert",
+          "group": 6,
+          "idea": 2,
+          "title": "Stove fire detector and nozzle",
+          "problem": "A cooking fire needs a quick warning and a response aimed at the stove.",
+          "importance": "The system should treat the cooking area, rather than fill the whole room.",
+          "solution": "Smoke and heat sensors linked to an aimed stove nozzle using cooking-oil-rated wet chemical.",
+          "how_it_works": "1. Smoke and heat sensors alert the controller.\n2. The nozzle aims at the stove zone.\n3. Wet chemical is applied to that cooking area.",
+          "source_caveat": "A real kitchen needs a suitable system fitted by qualified fire-safety specialists.",
+          "next_test": "Use a dry model. Ask a qualified fire-system specialist.",
+          "how_it_works_steps": [
+            "Smoke and heat sensors alert the controller.",
+            "The nozzle aims at the stove zone.",
+            "Wet chemical is applied to that cooking area."
+          ],
+          "target_user": "People cooking on a stove",
+          "core_problem": "A cooking fire needs a quick warning and a response aimed at the stove.",
+          "key_points": [
+            "People cooking on a stove",
+            "A cooking fire needs a quick warning and a response aimed at the stove.",
+            "Smoke and heat sensors linked to an aimed stove nozzle using cooking-oil-rated wet chemical."
+          ]
+        }
       }
     ],
     "activities": [
@@ -642,53 +859,90 @@
     "ideas": [
       {
         "title": "Which bin quiz",
-        "originalProblem": "People may not know whether an item belongs in recycling or general waste.",
-        "originalSolution": "A quiz asks which bin an item goes into.",
-        "improvedProblem": "People may not know whether an item belongs in recycling or general waste.",
-        "reason": "Explaining the rule helps with new items instead of only memorising a colour.",
+        "originalProblem": "People may be unsure whether an item belongs in recycling or general waste.",
+        "originalSolution": "A manual quiz with one question-and-answer card, an A/B pointer and a sliding answer cover.",
+        "improvedProblem": "People may be unsure whether an item belongs in recycling or general waste.",
+        "reason": "Showing the reason helps learners check their answer and use the rule again.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Include the item’s condition and explain the reason after the learner chooses."
+            "change": "What to find out",
+            "why": "Does the card use the correct local recycling rules?"
           }
         ],
-        "howItWorks": "Move the condition pointer and choose a bin aloud. Slide the cover and read the reason matching that condition. Change the item or condition card to compare another case.",
-        "boundary": "Keep rules current and include uncertain or special-disposal cases; words and symbols accompany colour. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "howItWorks": "Insert one card and hide the answer. Read the question. Choose A or B. Slide the cover right. Compare your choice with the printed answer.",
+        "boundary": "Ask someone new to set up, play and reset.",
         "test": [
-          "Ask learners to explain unfamiliar examples and compare the quality of their reasons before and after using the quiz."
+          "Ask someone new to set up, play and reset."
         ],
-        "proposalParts": [
-          "Item and condition cards",
-          "Choice selector",
-          "Reveal shutter or display",
-          "Locally checked rule set"
-        ],
-        "question": "What extra question should the quiz ask about an empty but dirty container?"
+        "question": "Does the card use the correct local recycling rules?",
+        "pupilCopy": {
+          "key": "g7_condition_quiz",
+          "group": 7,
+          "idea": 1,
+          "title": "Which bin quiz",
+          "problem": "People may be unsure whether an item belongs in recycling or general waste.",
+          "importance": "Showing the reason helps learners check their answer and use the rule again.",
+          "solution": "A manual quiz with one question-and-answer card, an A/B pointer and a sliding answer cover.",
+          "how_it_works": "1. Insert one card and hide the answer.\n2. Read the question. Choose A or B.\n3. Slide the cover right.\n4. Compare your choice with the printed answer.",
+          "source_caveat": "Does the card use the correct local recycling rules?",
+          "next_test": "Ask someone new to set up, play and reset.",
+          "how_it_works_steps": [
+            "Insert one card and hide the answer.",
+            "Read the question. Choose A or B.",
+            "Slide the cover right.",
+            "Compare your choice with the printed answer."
+          ],
+          "target_user": "People learning to sort waste",
+          "core_problem": "People may be unsure whether an item belongs in recycling or general waste.",
+          "key_points": [
+            "People learning to sort waste",
+            "People may be unsure whether an item belongs in recycling or general waste.",
+            "A manual quiz with one question-and-answer card, an A/B pointer and a sliding answer cover."
+          ]
+        }
       },
       {
         "title": "Camera assisted bin feedback",
-        "originalProblem": "A wrong item can contaminate the recycling stream.",
-        "originalSolution": "The original guard checks items going into one recycling bin and gives red or green feedback.",
-        "improvedProblem": "A wrong item can contaminate the recycling stream.",
-        "reason": "A second outlet handles confirmed general waste; unknown or special-disposal items stay in the chamber, available for the user to take back.",
+        "originalProblem": "Putting the wrong item in a recycling bin can spoil the recycling.",
+        "originalSolution": "A camera check area with one small flap that tips towards recycling or general waste.",
+        "improvedProblem": "Putting the wrong item in a recycling bin can spoil the recycling.",
+        "reason": "People need a way to take an item back when the system is unsure.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Add a camera inspection chamber and a second general-waste outlet, with a return path for uncertain items."
+            "change": "What to find out",
+            "why": "Can someone take an unclear item back safely?"
           }
         ],
-        "boundary": "Confidence thresholds need calibration; hold the item in the chamber when uncertain; add jam detection, manual release and accessible stop. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "boundary": "Test unknown items, moving gaps and jams with clean samples.",
         "test": [
-          "Test known, unknown, dirty, obscured and multiple items; report confusion cases, jams and rejected items."
+          "Test unknown items, moving gaps and jams with clean samples."
         ],
-        "question": "What should happen when the system cannot recognise an item or tell whether it is clean?",
-        "howItWorks": "The camera reads one item in the lit chamber. Software checks a trained class against local rules and asks about missing information. After confirmation, the diverter moves and the gate releases the item.",
-        "proposalParts": [
-          "Lit inspection chamber and camera",
-          "Small computer and trained model",
-          "Guarded gates and diverter",
-          "Separate removable liners and screen"
-        ]
+        "question": "Can someone take an unclear item back safely?",
+        "howItWorks": "Place one item on the flap. Check the result and confirm the route. The flap tips towards the chosen bin.",
+        "pupilCopy": {
+          "key": "g7_feedback_bin",
+          "group": 7,
+          "idea": 2,
+          "title": "Camera assisted bin feedback",
+          "problem": "Putting the wrong item in a recycling bin can spoil the recycling.",
+          "importance": "People need a way to take an item back when the system is unsure.",
+          "solution": "A camera check area with one small flap that tips towards recycling or general waste.",
+          "how_it_works": "1. Place one item on the flap.\n2. Check the result and confirm the route.\n3. The flap tips towards the chosen bin.",
+          "source_caveat": "Can someone take an unclear item back safely?",
+          "next_test": "Test unknown items, moving gaps and jams with clean samples.",
+          "how_it_works_steps": [
+            "Place one item on the flap.",
+            "Check the result and confirm the route.",
+            "The flap tips towards the chosen bin."
+          ],
+          "target_user": "People using recycling and general-waste bins",
+          "core_problem": "Putting the wrong item in a recycling bin can spoil the recycling.",
+          "key_points": [
+            "People using recycling and general-waste bins",
+            "Putting the wrong item in a recycling bin can spoil the recycling.",
+            "A camera check area with one small flap that tips towards recycling or general waste."
+          ]
+        }
       }
     ],
     "activities": [
@@ -749,52 +1003,88 @@
       {
         "title": "Reachable light control",
         "originalProblem": "A person in bed may be unable to reach the room light switch.",
-        "originalSolution": "A round pendant with side-by-side ON and OFF controls, possible Braille and colour labels.",
+        "originalSolution": "A round remote that tells a battery-powered attachment to press the existing light switch.",
         "improvedProblem": "A person in bed may be unable to reach the room light switch.",
-        "reason": "Shape, spacing and tactile differences help the person choose the intended control.",
+        "reason": "The person should be able to use the room's existing switch from bed.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Use distinguishable controls linked to a compatible light receiver."
+            "change": "What to find out",
+            "why": "Does it fit this switch and allow normal hand use?"
           }
         ],
-        "howItWorks": "Pressing a cap operates its aligned switch. The transmitter sends the command. The receiver changes the light and can report its state.",
-        "boundary": "Avoid a snag-prone neck loop; provide a suitable breakaway or bedside mounting option and secure battery access. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "howItWorks": "Press ON or OFF on the remote. The motor presses the matching rocker end. Swing open the mount to use the switch by hand.",
+        "boundary": "Test a model switch, pressing force, mount and hand access.",
         "test": [
-          "Measure reach, mistaken presses, signal reliability and whether the user knows the light state."
+          "Test a model switch, pressing force, mount and hand access."
         ],
-        "proposalParts": [
-          "Round enclosure and guided caps",
-          "Compatible remote and receiver",
-          "Tactile labels",
-          "Battery and state indication"
-        ],
-        "question": "How can the person distinguish ON from OFF without relying on colour?"
+        "question": "Does it fit this switch and allow normal hand use?",
+        "pupilCopy": {
+          "key": "g8_pendant",
+          "group": 8,
+          "idea": 1,
+          "title": "Reachable light control",
+          "problem": "A person in bed may be unable to reach the room light switch.",
+          "importance": "The person should be able to use the room's existing switch from bed.",
+          "solution": "A round remote that tells a battery-powered attachment to press the existing light switch.",
+          "how_it_works": "1. Press ON or OFF on the remote.\n2. The motor presses the matching rocker end.\n3. Swing open the mount to use the switch by hand.",
+          "source_caveat": "Does it fit this switch and allow normal hand use?",
+          "next_test": "Test a model switch, pressing force, mount and hand access.",
+          "how_it_works_steps": [
+            "Press ON or OFF on the remote.",
+            "The motor presses the matching rocker end.",
+            "Swing open the mount to use the switch by hand."
+          ],
+          "target_user": "A person who cannot reach the light switch",
+          "core_problem": "A person in bed may be unable to reach the room light switch.",
+          "key_points": [
+            "A person who cannot reach the light switch",
+            "A person in bed may be unable to reach the room light switch.",
+            "A round remote that tells a battery-powered attachment to press the existing light switch."
+          ]
+        }
       },
       {
         "title": "Firestructor cooking guide",
-        "originalProblem": "A person can lose track of a cooking step or leave food unattended.",
-        "originalSolution": "A screen gives cooking instructions and recipes.",
-        "improvedProblem": "A person can lose track of a cooking step or leave food unattended.",
-        "reason": "Clear progress and acknowledgement help the cook see what still needs attention.",
+        "originalProblem": "A cook can lose their place in a recipe or leave food unattended.",
+        "originalSolution": "A recipe screen with a timer and buttons to move between steps, held in a stand.",
+        "improvedProblem": "A cook can lose their place in a recipe or leave food unattended.",
+        "reason": "Clear steps and reminders could help the cook return after an interruption.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Show the current step, recipe navigation, a timer and a clear finish sequence."
+            "change": "What to find out",
+            "why": "Are the Check and Finish steps clear after an interruption?"
           }
         ],
-        "boundary": "Place the screen outside heat and splash exposure, protect the cable, and define what happens after power or app interruption. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "boundary": "Try the steps in a model kitchen with no heat.",
         "test": [
-          "Compare missed steps, time to resume after interruption and clarity of timer acknowledgement with a paper recipe."
+          "Try the steps in a model kitchen with no heat."
         ],
-        "question": "How does the display help someone return to the right step after an interruption?",
-        "howItWorks": "The cook chooses a recipe and starts a step. Next and Back keep their place. A timer prompts a check, and the finish screen includes checking doneness and switching equipment off.",
-        "proposalParts": [
-          "Recipe software and display",
-          "Next/Back controls",
-          "Timers and acknowledgement",
-          "Stable cleanable stand and power routing"
-        ]
+        "question": "Are the Check and Finish steps clear after an interruption?",
+        "howItWorks": "Read the recipe step on the screen. Use the timer while you cook. Check the food before moving to the next step.",
+        "pupilCopy": {
+          "key": "g8_cooking_screen",
+          "group": 8,
+          "idea": 2,
+          "title": "Firestructor cooking guide",
+          "problem": "A cook can lose their place in a recipe or leave food unattended.",
+          "importance": "Clear steps and reminders could help the cook return after an interruption.",
+          "solution": "A recipe screen with a timer and buttons to move between steps, held in a stand.",
+          "how_it_works": "1. Read the recipe step on the screen.\n2. Use the timer while you cook.\n3. Check the food before moving to the next step.",
+          "source_caveat": "Are the Check and Finish steps clear after an interruption?",
+          "next_test": "Try the steps in a model kitchen with no heat.",
+          "how_it_works_steps": [
+            "Read the recipe step on the screen.",
+            "Use the timer while you cook.",
+            "Check the food before moving to the next step."
+          ],
+          "target_user": "A cook following a recipe",
+          "core_problem": "A cook can lose their place in a recipe or leave food unattended.",
+          "key_points": [
+            "A cook following a recipe",
+            "A cook can lose their place in a recipe or leave food unattended.",
+            "A recipe screen with a timer and buttons to move between steps, held in a stand."
+          ]
+        }
       }
     ],
     "activities": [
@@ -854,53 +1144,89 @@
     "ideas": [
       {
         "title": "Phone sleep bed",
-        "originalProblem": "A person choosing a phone break wants a clear place to put the phone away.",
-        "originalSolution": "A phone-sized bed with blanket, charging pocket, lock and custom headboard.",
-        "improvedProblem": "A person choosing a phone break wants a clear place to put the phone away.",
-        "reason": "A visible storage path explains where the blanket goes instead of showing a flat panel with nowhere to travel.",
+        "originalProblem": "Someone taking a break from their phone wants a clear place to put it away.",
+        "originalSolution": "A phone bed with a blanket-patterned shutter that slides in side guides and rolls into the foot end.",
+        "improvedProblem": "Someone taking a break from their phone wants a clear place to put it away.",
+        "reason": "The cover should move easily, and the phone should be easy to take out.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Use a flexible segmented blanket stored in a foot-end housing and guided along both sides."
+            "change": "What to find out",
+            "why": "Do the slats roll smoothly and leave space for the cable?"
           }
         ],
-        "howItWorks": "Linked blanket slats slide in the side guides and wrap around a transverse roller in the foot cassette. The pull bar draws them back over the phone. Stops retain the cover and manual opening keeps access available.",
-        "boundary": "Keep charging airflow and cable route clear of moving tracks; provide manual opening independent of any timed lock. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "howItWorks": "Pull the blanket-patterned cover along the guides. The linked slats close over the phone. Turn the roller to open the cover.",
+        "boundary": "Check sliding, winding, jams and taking the phone out.",
         "test": [
-          "Check bend radius, full travel, jamming, phone retrieval and cable clearance with actual phone sizes."
+          "Check sliding, winding, jams and taking the phone out."
         ],
-        "proposalParts": [
-          "Phone cradle and headboard",
-          "Segmented flexible cover",
-          "Curved guides and foot-end storage",
-          "Pull bar, stops and manual release"
-        ],
-        "question": "Where does the whole cover fit when the phone is uncovered?"
+        "question": "Do the slats roll smoothly and leave space for the cable?",
+        "pupilCopy": {
+          "key": "g9_phone_bed",
+          "group": 9,
+          "idea": 1,
+          "title": "Phone sleep bed",
+          "problem": "Someone taking a break from their phone wants a clear place to put it away.",
+          "importance": "The cover should move easily, and the phone should be easy to take out.",
+          "solution": "A phone bed with a blanket-patterned shutter that slides in side guides and rolls into the foot end.",
+          "how_it_works": "1. Pull the blanket-patterned cover along the guides.\n2. The linked slats close over the phone.\n3. Turn the roller to open the cover.",
+          "source_caveat": "Do the slats roll smoothly and leave space for the cable?",
+          "next_test": "Check sliding, winding, jams and taking the phone out.",
+          "how_it_works_steps": [
+            "Pull the blanket-patterned cover along the guides.",
+            "The linked slats close over the phone.",
+            "Turn the roller to open the cover."
+          ],
+          "target_user": "Someone taking a break from their phone",
+          "core_problem": "Someone taking a break from their phone wants a clear place to put it away.",
+          "key_points": [
+            "Someone taking a break from their phone",
+            "Someone taking a break from their phone wants a clear place to put it away.",
+            "A phone bed with a blanket-patterned shutter that slides in side guides and rolls into the foot end."
+          ]
+        }
       },
       {
-        "title": "Recycling reward mascot",
-        "originalProblem": "People may need clear feedback to learn which items belong in the blue bin.",
-        "originalSolution": "Two box-shaped mascots show wrong/correct feedback, use hands as a cue and give stickers or a keychain reward.",
-        "improvedProblem": "People may need clear feedback to learn which items belong in the blue bin.",
-        "reason": "The feedback can teach the rule while a separate dispenser keeps the reward easy to collect.",
+        "title": "Mystery sticker dispenser",
+        "originalProblem": "People may need clear feedback to learn what belongs in the recycling bin.",
+        "originalSolution": "A box-shaped mascot with a slot that gives one mystery sticker after a correct sorting choice.",
+        "improvedProblem": "People may need clear feedback to learn what belongs in the recycling bin.",
+        "reason": "A mystery sticker rewards a correct sorting choice.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Link a confirmed sorting choice to the feedback screen and a controlled one-sticker feed."
+            "change": "What to find out",
+            "why": "Can people collect one sticker easily without seeing the next one?"
           }
         ],
-        "boundary": "Use rounded fixed decorative hands, a guarded feed path and separate clean reward access. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "boundary": "Check sticker collection and the CORRECT and TRY AGAIN states.",
         "test": [
-          "Check feedback clarity, one-at-a-time dispensing, stock detection and learning on new items without rewards."
+          "Check sticker collection and the CORRECT and TRY AGAIN states."
         ],
-        "question": "Will people still make a good choice when no sticker is offered?",
-        "howItWorks": "A person confirms the sorting choice and the screen gives feedback. CORRECT enables a matched motor and roller to feed one sticker. WRONG keeps the reward feed off and explains the choice.",
-        "proposalParts": [
-          "Feedback display and controller",
-          "Confirmation input",
-          "Sticker feed and collection slot",
-          "Mascot shell and keychain"
-        ]
+        "question": "Can people collect one sticker easily without seeing the next one?",
+        "howItWorks": "A person confirms the sorting choice. CORRECT gives one mystery sticker. TRY AGAIN leaves the slot empty.",
+        "pupilCopy": {
+          "key": "g9_recycling_mascot",
+          "group": 9,
+          "idea": 2,
+          "title": "Mystery sticker dispenser",
+          "problem": "People may need clear feedback to learn what belongs in the recycling bin.",
+          "importance": "A mystery sticker rewards a correct sorting choice.",
+          "solution": "A box-shaped mascot with a slot that gives one mystery sticker after a correct sorting choice.",
+          "how_it_works": "1. A person confirms the sorting choice.\n2. CORRECT gives one mystery sticker.\n3. TRY AGAIN leaves the slot empty.",
+          "source_caveat": "Can people collect one sticker easily without seeing the next one?",
+          "next_test": "Check sticker collection and the CORRECT and TRY AGAIN states.",
+          "how_it_works_steps": [
+            "A person confirms the sorting choice.",
+            "CORRECT gives one mystery sticker.",
+            "TRY AGAIN leaves the slot empty."
+          ],
+          "target_user": "People learning what can be recycled",
+          "core_problem": "People may need clear feedback to learn what belongs in the recycling bin.",
+          "key_points": [
+            "People learning what can be recycled",
+            "People may need clear feedback to learn what belongs in the recycling bin.",
+            "A box-shaped mascot with a slot that gives one mystery sticker after a correct sorting choice."
+          ]
+        }
       }
     ],
     "activities": [
@@ -961,52 +1287,88 @@
       {
         "title": "Living room caption TV",
         "originalProblem": "A person who cannot hear clearly needs to read what is being said.",
-        "originalSolution": "A tabletop caption TV with microphone, bright screen, controller, battery and USB-C charging.",
+        "originalSolution": "A tabletop screen that turns speech into captions, with tilt, mute, volume and power controls.",
         "improvedProblem": "A person who cannot hear clearly needs to read what is being said.",
-        "reason": "The complete microphone-to-software-to-screen path separates speech recognition from the enclosure design.",
+        "reason": "The words need to be easy to read and appear soon enough to follow the conversation.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Fit real speech-to-text hardware/software inside a stable TV-shaped display with accessible controls."
+            "change": "What to find out",
+            "why": "Which computer and speech-to-text software work well together?"
           }
         ],
-        "howItWorks": "The microphone captures speech. Speech-to-text software produces words. The display shows large captions; the person can adjust text size, viewing angle and microphone state.",
-        "boundary": "Keep microphone and vents unobstructed, provide a clear mute state, and handle transcription uncertainty visibly. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "howItWorks": "The microphone picks up speech. Speech-to-text software shows words on the screen. Use the minus and plus buttons for volume.",
+        "boundary": "Compare captions with speech; test volume, mute and battery life.",
         "test": [
-          "Compare transcription accuracy, delay, readability, glare, microphone placement and real battery runtime."
+          "Compare captions with speech; test volume, mute and battery life."
         ],
-        "proposalParts": [
-          "Microphone",
-          "Supplied processor with compatible speech-to-text software",
-          "Screen and enclosure",
-          "Mute, text-size and power controls"
-        ],
-        "question": "Is a missed word caused by the microphone, the transcription, or the display?"
+        "question": "Which computer and speech-to-text software work well together?",
+        "pupilCopy": {
+          "key": "g10_caption_display",
+          "group": 10,
+          "idea": 1,
+          "title": "Living room caption TV",
+          "problem": "A person who cannot hear clearly needs to read what is being said.",
+          "importance": "The words need to be easy to read and appear soon enough to follow the conversation.",
+          "solution": "A tabletop screen that turns speech into captions, with tilt, mute, volume and power controls.",
+          "how_it_works": "1. The microphone picks up speech.\n2. Speech-to-text software shows words on the screen.\n3. Use the minus and plus buttons for volume.",
+          "source_caveat": "Which computer and speech-to-text software work well together?",
+          "next_test": "Compare captions with speech; test volume, mute and battery life.",
+          "how_it_works_steps": [
+            "The microphone picks up speech.",
+            "Speech-to-text software shows words on the screen.",
+            "Use the minus and plus buttons for volume."
+          ],
+          "target_user": "Someone who cannot hear speech clearly",
+          "core_problem": "A person who cannot hear clearly needs to read what is being said.",
+          "key_points": [
+            "Someone who cannot hear speech clearly",
+            "A person who cannot hear clearly needs to read what is being said.",
+            "A tabletop screen that turns speech into captions, with tilt, mute, volume and power controls."
+          ]
+        }
       },
       {
-        "title": "Articulated fire response car",
-        "originalProblem": "A responder needs a way to inspect and reach a dangerous area from a distance.",
-        "originalSolution": "A long wheeled vehicle with a two-joint arm carrying an extinguisher.",
-        "improvedProblem": "A responder needs a way to inspect and reach a dangerous area from a distance.",
-        "reason": "A low cylinder reduces the arm’s payload and tipping tendency while preserving the pupil’s articulated-arm idea.",
+        "title": "Fire response car",
+        "originalProblem": "A responder needs to inspect and reach a dangerous area from a distance.",
+        "originalSolution": "A wheeled vehicle with a low cylinder and a two-joint arm holding a nozzle.",
+        "improvedProblem": "A responder needs to inspect and reach a dangerous area from a distance.",
+        "reason": "Keeping the heavy cylinder low could make the arm easier to move.",
         "changes": [
           {
-            "change": "Recommended refinement (proposal)",
-            "why": "Move the heavy cylinder low on the chassis and put the lighter nozzle on the articulated arm."
+            "change": "What to find out",
+            "why": "Can the model reach forward without tipping or pulling the hose?"
           }
         ],
-        "boundary": "Use joint stops, hose guards, emergency stop and communication-loss stop. Select a professionally rated suppression system approved for its mounting orientation, fire class and remote actuation. Ask your teacher before building, powering or testing equipment; performance has not been validated.",
+        "boundary": "Use a non-spraying model to check balance and hose movement.",
         "test": [
-          "Check full-reach stability, joint loads, hose clearance, braking, link-loss behavior and environmental limits."
+          "Use a non-spraying model to check balance and hose movement."
         ],
-        "question": "How will the car stay stable with the arm fully extended?",
-        "howItWorks": "The operator drives and aims using camera views. Geared joints move the nozzle while a flexible hose connects it to the low-mounted cylinder. Discharge requires a separate deliberate command.",
-        "proposalParts": [
-          "Wheeled drive chassis",
-          "Low cylinder cradle",
-          "Two geared arm joints and nozzle",
-          "Protected hose, cameras and operator controls"
-        ]
+        "question": "Can the model reach forward without tipping or pulling the hose?",
+        "howItWorks": "Drive using the camera view. Move the two joints to aim the nozzle. Use separate DISCHARGE and STOP controls.",
+        "pupilCopy": {
+          "key": "g10_fire_car",
+          "group": 10,
+          "idea": 2,
+          "title": "Fire response car",
+          "problem": "A responder needs to inspect and reach a dangerous area from a distance.",
+          "importance": "Keeping the heavy cylinder low could make the arm easier to move.",
+          "solution": "A wheeled vehicle with a low cylinder and a two-joint arm holding a nozzle.",
+          "how_it_works": "1. Drive using the camera view.\n2. Move the two joints to aim the nozzle.\n3. Use separate DISCHARGE and STOP controls.",
+          "source_caveat": "Can the model reach forward without tipping or pulling the hose?",
+          "next_test": "Use a non-spraying model to check balance and hose movement.",
+          "how_it_works_steps": [
+            "Drive using the camera view.",
+            "Move the two joints to aim the nozzle.",
+            "Use separate DISCHARGE and STOP controls."
+          ],
+          "target_user": "Fire responders",
+          "core_problem": "A responder needs to inspect and reach a dangerous area from a distance.",
+          "key_points": [
+            "Fire responders",
+            "A responder needs to inspect and reach a dangerous area from a distance.",
+            "A wheeled vehicle with a low cylinder and a two-joint arm holding a nozzle."
+          ]
+        }
       }
     ],
     "activities": [
