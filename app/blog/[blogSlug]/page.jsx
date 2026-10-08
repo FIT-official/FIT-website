@@ -11,6 +11,7 @@ import { BLOG_SORT_INDEX, ensureBlogSortIndex } from '@/lib/blog/sortIndex'
 import { blogJsonLd, blogMetadata } from '@/lib/seo/blog'
 import { renderPublicMarkdown, validIsoDate } from '@/lib/seo/publicContent'
 import BlogPageClient from './BlogPageClient'
+import { omitRejectedPhoto } from '@/lib/blog/excludedPhoto'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +39,7 @@ export default async function BlogPage({ params }) {
     }
 
     const contentHtml = post.contentFormat === 'tiptap'
-        ? renderTiptapHtml(post.contentJson) : renderPublicMarkdown(post.content)
+        ? renderTiptapHtml(post.contentJson) : omitRejectedPhoto(renderPublicMarkdown(post.content))
 
     await ensureBlogSortIndex()
     const pool = await BlogPost.find(statusQuery('published'))

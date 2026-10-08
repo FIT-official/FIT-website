@@ -112,14 +112,6 @@ export const schoolWorkshopPhotos = [
     "album": "School workshops / NYGH"
   },
   {
-    "src": "/images/collaborations/nygh-printed-mechanism.jpg",
-    "alt": "Blue printed mechanism components with gear teeth and circular openings",
-    "caption": "Printed parts ready to become a moving mechanism.",
-    "width": 1080,
-    "height": 1440,
-    "album": "School workshops / NYGH"
-  },
-  {
     "src": "/images/collaborations/nygh-model-planning.jpg",
     "alt": "Students planning a room model around a white panel at NYGH",
     "caption": "Planning the layout before the build.",
