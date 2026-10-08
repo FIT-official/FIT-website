@@ -104,7 +104,7 @@ describe('shared database connection', () => {
         const { connectToDatabase } = await load()
         await connectToDatabase()
         expect(mongoose.connect).toHaveBeenCalledWith(uri, {
-            bufferCommands: false, maxPoolSize: 5, minPoolSize: 0, maxIdleTimeMS: 60000,
+            bufferCommands: false, maxPoolSize: 5, maxConnecting: 5, minPoolSize: 0, maxIdleTimeMS: 60000,
             serverSelectionTimeoutMS: 8000, connectTimeoutMS: 8000, socketTimeoutMS: 15000,
             monitorCommands: true,
         })
