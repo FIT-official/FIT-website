@@ -1,1 +1,2 @@
-export { POST, runtime } from '../classroom/route'
+export { POST } from '../classroom/route'
+export const runtime = 'nodejs'
