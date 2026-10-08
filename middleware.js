@@ -1,5 +1,6 @@
 import { clerkMiddleware, clerkClient, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import { isUnlistedBlogPath } from '@/lib/blog/unlistedRobots'
 import { subscriptionIntentTarget, subscriptionPriceId, withSubscriptionIntent } from '@/lib/subscriptionIntent'
 
 const isPrivateRoute = createRouteMatcher(['/dashboard(.*)', '/account(.*)', '/onboarding'])
@@ -9,7 +10,7 @@ const isServicePage = createRouteMatcher(['/research-fabrication', '/metal-fabri
 const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)'])
 const isSsoCallback = createRouteMatcher(['/sign-up/sso-callback(.*)', '/sign-in/sso-callback(.*)'])
 
-export default clerkMiddleware(async (auth, req) => {
+async function handleRequest(auth, req) {
     // API handlers enforce their own authentication/signatures. A browser
     // onboarding redirect must never replace JSON or consume a Stripe webhook.
     if (isApiRoute(req)) return NextResponse.next()
@@ -69,8 +70,17 @@ export default clerkMiddleware(async (auth, req) => {
     if (userId && isPrivateRoute(req)) {
         return NextResponse.next()
     }
-})
+}
 
+export default clerkMiddleware(async (auth, req) => {
+    const response = await handleRequest(auth, req)
+    if (await isUnlistedBlogPath(new URL(req.url).pathname)) {
+        const result = response || NextResponse.next()
+        result.headers.set('X-Robots-Tag', 'noindex, nofollow')
+        return result
+    }
+    return response
+})
 
 export const config = {
     matcher: [
@@ -78,5 +88,6 @@ export const config = {
         '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
         // Always run for API routes
         '/(api|trpc)(.*)',
+        '/blog/:path*',
     ],
 }

@@ -4,6 +4,7 @@
 // 700KB of raw HTML each.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { statusQuery } from '@/lib/blog/status'
+import { matchesBlogFilter, visibilityPosts } from '../helpers/blogFilter'
 
 vi.mock('@/lib/db', () => ({ connectToDatabase: vi.fn(async () => { }) }))
 vi.mock('@/lib/authenticate', () => ({ authenticate: vi.fn(async () => ({ userId: 'admin' })) }))
@@ -21,7 +22,7 @@ const state = vi.hoisted(() => ({
 }))
 
 vi.mock('@/models/BlogPost', () => {
-    const makeChain = () => {
+    const makeChain = (filter) => {
         const rec = {}
         const c = {}
         for (const m of ['sort', 'skip', 'limit', 'select', 'hint']) {
@@ -29,7 +30,7 @@ vi.mock('@/models/BlogPost', () => {
         }
         // The counts query selects exactly 'status published'; everything else
         // resolves the list docs.
-        c.lean = async () => (rec.select === 'status published' ? state.statusDocs : state.listDocs)
+        c.lean = async () => (rec.select === 'status published' ? state.statusDocs : state.listDocs.filter(doc => matchesBlogFilter(doc, filter)))
         c.rec = rec
         return c
     }
@@ -37,13 +38,13 @@ vi.mock('@/models/BlogPost', () => {
         default: {
             collection: { createIndex: vi.fn(async () => 'blog_public_date_order') },
             find: (filter) => {
-                const c = makeChain()
+                const c = makeChain(filter)
                 state.finds.push({ filter, rec: c.rec })
                 return c
             },
             findOne: (filter) => {
                 state.findOneFilter = filter
-                return { lean: async () => state.single }
+                return { lean: async () => state.single && matchesBlogFilter(state.single, filter) ? state.single : null }
             },
             countDocuments: async () => state.total,
             findById: () => ({ lean: async () => state.single }),
@@ -93,7 +94,7 @@ describe('GET /api/admin/blog (paginated lean list)', () => {
         expect(lf.rec.select).toMatch(/\breadingTimeMinutes\b/)
 
         expect(body).toMatchObject({ ok: true, page: 1, totalPages: 2, total: 10 })
-        expect(body.counts).toEqual({ all: 4, published: 2, draft: 1, hidden: 1 })
+        expect(body.counts).toEqual({ all: 4, published: 2, draft: 1, hidden: 1, unlisted: 0 })
         // effectiveStatus mapping incl. legacy docs
         expect(body.posts.map((p) => p.status)).toEqual(['published', 'published'])
     })
@@ -125,7 +126,7 @@ describe('GET /api/admin/blog (paginated lean list)', () => {
     it('?all=1 returns every post, still lean, without pagination', async () => {
         state.listDocs = [
             { _id: 'a', title: 'A', status: 'published', published: true },
-            { _id: 'b', title: 'B', status: 'draft', published: false },
+            { _id: 'b', title: 'B', status: 'published', published: true },
         ]
         const { GET } = await import('@/app/api/admin/blog/route')
         const body = await (await GET(new Request('http://t/api/admin/blog?all=1&status=published'))).json()
@@ -149,6 +150,16 @@ describe('GET /api/admin/blog (paginated lean list)', () => {
         expect(body.post.status).toBe('published') // effectiveStatus mapped
     })
 
+    it('newsletter picker uses published-only candidates and counts unlisted separately', async () => {
+        state.listDocs = visibilityPosts
+        state.statusDocs = visibilityPosts
+        const { GET } = await import('@/app/api/admin/blog/route')
+        const picker = await (await GET(new Request('http://t/api/admin/blog?all=1&status=published'))).json()
+        expect(picker.posts.map(post => post.slug)).toEqual(['public-guide', 'legacy-guide'])
+        const list = await (await GET(new Request('http://t/api/admin/blog?status=unlisted'))).json()
+        expect(list.posts.every(post => post.status === 'unlisted')).toBe(true)
+        expect(list.counts.unlisted).toBe(2)
+    })
     it('rejects non-admins', async () => {
         const { checkAdminPrivileges } = await import('@/lib/checkPrivileges')
         checkAdminPrivileges.mockResolvedValueOnce(false)
@@ -159,8 +170,17 @@ describe('GET /api/admin/blog (paginated lean list)', () => {
 })
 
 describe('GET /api/blog (public lean list)', () => {
+    it.each(['', '?search=confidential', '?q=confidential', '?tag=sensor', '?category=electronics', '?page=2', '?limit=999', '?featured=true', '?sort=asc', '?status=unlisted&all=1', '?search=confidential&q=confidential&tag=sensor&category=electronics&page=1&limit=999&featured=true&sort=desc'])('excludes all nonpublic statuses with query %s', async query => {
+        state.listDocs = visibilityPosts
+        const { GET } = await import('@/app/api/blog/route')
+        const body = await (await GET(new Request(`http://t/api/blog${query}`))).json()
+        expect(body.posts.map(post => post.slug)).toEqual(['public-guide', 'legacy-guide'])
+        expect(JSON.stringify(body)).not.toContain('confidential')
+        expect(listFind().filter).toEqual(statusQuery('published'))
+    })
+
     it('filters by effectiveStatus semantics and never selects body content', async () => {
-        state.listDocs = [{ _id: 'a', title: 'A', slug: 'a', featured: true }]
+        state.listDocs = [{ _id: 'a', title: 'A', slug: 'a', featured: true, published: true }]
         const { GET } = await import('@/app/api/blog/route')
         const body = await (await GET()).json()
         const lf = listFind()
@@ -174,6 +194,15 @@ describe('GET /api/blog (public lean list)', () => {
 })
 
 describe('GET /api/blog/[slug]', () => {
+    it.each(visibilityPosts.filter(post => post.status && post.status !== 'published'))('returns 404 for $status with published=$published', async post => {
+        state.single = post
+        const { GET } = await import('@/app/api/blog/[slug]/route')
+        const response = await GET(new Request(`http://t/api/blog/${post.slug}`), { params: Promise.resolve({ slug: post.slug }) })
+        expect(response.status).toBe(404)
+        expect(await response.text()).not.toContain('confidential')
+        expect(state.findOneFilter).toEqual({ slug: post.slug, ...statusQuery('published') })
+    })
+
     it('does not expose removed legacy text alongside the edited public body', async () => {
         const contentJson = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Current article' }] }] }
         state.single = { slug: 'workshop', published: true, contentFormat: 'tiptap', contentJson, content: 'Removed private schedule' }
@@ -193,6 +222,13 @@ describe('GET /api/blog/[slug]', () => {
 })
 
 describe('POST /api/admin/blog', () => {
+    it('saves unlisted from the first write without publishing it', async () => {
+        const { POST } = await import('@/app/api/admin/blog/route')
+        await POST(new Request('http://t/api/admin/blog', { method: 'POST', body: JSON.stringify({ _id: 'a', title: 'Guide', slug: 'link-guide', status: 'unlisted', content: 'Guide' }) }))
+        expect(state.saved).toMatchObject({ status: 'unlisted', published: false })
+        expect(state.saved.publishDate).toBeInstanceOf(Date)
+    })
+
     it('clears the old source when an edited article is published', async () => {
         const contentJson = { type: 'doc', content: [{ type: 'htmlBlock', attrs: { html: '<p>Current workshop guide</p>' } }] }
         state.single = { _id: 'a', publishDate: '2026-01-01T00:00:00.000Z' }

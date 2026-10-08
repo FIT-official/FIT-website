@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { statusQuery } from '@/lib/blog/status'
+import { matchesBlogFilter, visibilityPosts } from '../helpers/blogFilter'
 import { buildPublicSitemap } from '@/lib/seo/sitemap'
 import { NON_PUBLIC_PRODUCT_SLUGS } from '@/lib/productPublicContent'
 import robots from '@/app/robots'
@@ -25,7 +26,7 @@ vi.mock('@/models/BlogPost', () => ({ default: {
         db.postFilter = filter
         return { select: fields => {
             db.postFields = fields
-            return { lean: async () => db.posts }
+            return { lean: async () => db.posts.filter(post => matchesBlogFilter(post, filter)) }
         } }
     }),
 } }))
@@ -98,6 +99,7 @@ describe('public sitemap URLs', () => {
         const entries = buildPublicSitemap({ posts: [
             { slug: '3d-printer-repair', status: 'published', published: false },
             { slug: 'legacy', published: true },
+            { slug: 'unlisted', status: 'unlisted', published: true },
             { slug: 'hidden', status: 'hidden', published: true },
             { slug: 'draft', status: 'draft', published: true },
             { slug: 'scheduled', status: 'draft', scheduledFor: '2026-01-01' },
@@ -136,6 +138,14 @@ describe('public sitemap URLs', () => {
 })
 
 describe('sitemap database route', () => {
+    it('excludes every nonpublic status even with stale published flags', async () => {
+        db.posts = visibilityPosts
+        const { default: sitemap } = await import('@/app/sitemap')
+        const entries = await sitemap()
+        expect(entries.filter(entry => entry.url.includes('/blog/')).map(entry => entry.url.split('/').pop())).toEqual(['public-guide', 'legacy-guide'])
+        expect(db.postFilter).toEqual(statusQuery('published'))
+    })
+
     it('queries current public records with minimal fields and the existing publication semantics', async () => {
         db.products = [{ slug: 'pla', hidden: false }]
         db.posts = [{ slug: '3d-printer-repair', status: 'published' }]

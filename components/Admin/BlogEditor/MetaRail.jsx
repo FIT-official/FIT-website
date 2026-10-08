@@ -292,6 +292,7 @@ export default function MetaRail({
                             >
                                 <option value="draft">Draft</option>
                                 <option value="published">Published</option>
+                                <option value="unlisted">Unlisted (link only, noindex)</option>
                                 <option value="hidden">Hidden</option>
                             </select>
                             {publishBlocked && (

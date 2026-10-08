@@ -5,16 +5,17 @@ import { blogDescription, blogJsonLd, blogMetadata } from '@/lib/seo/blog'
 import { creatorMetadata, getPublicCreators } from '@/lib/seo/creators'
 import { renderPublicMarkdown } from '@/lib/seo/publicContent'
 import { statusQuery } from '@/lib/blog/status'
+import { matchesBlogFilter, visibilityPosts } from '../helpers/blogFilter'
 
 const state = vi.hoisted(() => ({ posts: [], post: null, total: 0, users: [], creator: null, products: [], viewer: null, admin: false, blogFilter: null, blogFields: '', skip: 0, userFilter: null, userProjection: null, countsFilter: null }))
 vi.mock('@/lib/db', () => ({ connectToDatabase: vi.fn(async () => {}) }))
 vi.mock('@/lib/blog/sortIndex', () => ({ BLOG_SORT_INDEX: { publishDate: -1, createdAt: -1 }, ensureBlogSortIndex: vi.fn(async () => {}) }))
 vi.mock('@/models/BlogPost', () => ({ default: {
-    findOne: () => ({ lean: async () => state.post }),
-    countDocuments: async () => state.total,
+    findOne: filter => ({ lean: async () => state.post && matchesBlogFilter(state.post, filter) ? state.post : null }),
+    countDocuments: async filter => { state.countFilter = filter; return state.total },
     find: filter => {
         state.blogFilter = filter
-        const chain = { select: fields => { state.blogFields = fields; return chain }, sort: () => chain, skip: n => { state.skip = n; return chain }, limit: () => chain, hint: () => chain, lean: async () => state.posts }
+        const chain = { select: fields => { state.blogFields = fields; return chain }, sort: () => chain, skip: n => { state.skip = n; return chain }, limit: () => chain, hint: () => chain, lean: async () => state.posts.filter(post => matchesBlogFilter(post, filter)) }
         return chain
     },
 } }))
@@ -47,8 +48,48 @@ beforeEach(() => {
 })
 
 describe('public blog search content', () => {
+    it('keeps unlisted, hidden and draft records out of blog HTML, schema and RSC props', async () => {
+        state.posts = visibilityPosts
+        const { default: Blog } = await import('@/app/blog/page')
+        const page = await Blog({ searchParams: Promise.resolve({ q: 'confidential', tag: 'sensor', category: 'electronics', featured: 'true', sort: 'asc' }) })
+        for (const output of [renderToStaticMarkup(page), JSON.stringify(page)]) {
+            expect(output).toContain('public-guide')
+            expect(output).toContain('legacy-guide')
+            expect(output).not.toContain('confidential')
+            for (const post of visibilityPosts.slice(2)) expect(output).not.toContain(post.slug)
+        }
+        expect(state.countFilter).toEqual(statusQuery('published'))
+        expect(state.blogFilter).toEqual(statusQuery('published'))
+    })
+    it('serves an exact unlisted link signed out, with normal metadata but no preview or schema and a published-only related pool', async () => {
+        state.post = { slug: 'link-guide', title: 'Link guide', status: 'unlisted', published: false, content: 'Link only body', categories: ['electronics'] }
+        state.posts = visibilityPosts
+        const { default: BlogPage, generateMetadata } = await import('@/app/blog/[blogSlug]/page')
+        const params = Promise.resolve({ blogSlug: 'link-guide' })
+        const page = await BlogPage({ params })
+        const html = renderToStaticMarkup(page)
+        expect(html).toContain('Link only body')
+        expect(html).not.toContain('application/ld+json')
+        expect(JSON.stringify(page)).toContain('"preview":false')
+        expect(JSON.stringify(page)).not.toContain('confidential')
+        const metadata = await generateMetadata({ params })
+        expect(metadata.title).toBe('Link guide | Fix It Today')
+        expect(metadata.description).toBe('Link only body')
+        expect(metadata.robots).toEqual({ index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } })
+        await expect(BlogPage({ params: Promise.resolve({ blogSlug: 'other-guide' }) })).rejects.toThrow('NEXT_NOT_FOUND')
+    }, 15000)
+    it.each(['draft', 'hidden'])('rejects %s signed out even with a stale published flag', async status => {
+        state.post = { slug: 'confidential', title: 'Confidential', status, published: true, content: 'Secret body' }
+        const { default: BlogPage, generateMetadata } = await import('@/app/blog/[blogSlug]/page')
+        const params = Promise.resolve({ blogSlug: 'confidential' })
+        await expect(BlogPage({ params })).rejects.toThrow('NEXT_NOT_FOUND')
+        expect((await generateMetadata({ params })).title).toContain('unavailable')
+        state.viewer = 'admin'; state.admin = true
+        expect(renderToStaticMarkup(await BlogPage({ params }))).toContain('Secret body')
+    })
+
     it('renders article links before effects and provides crawlable pagination after 200 posts', async () => {
-        state.posts = [{ _id: 'a', slug: 'printer-care', title: 'Printer care', excerpt: 'Keep your printer working.', tags: [], publishDate: '2026-09-01' }]
+        state.posts = [{ _id: 'a', slug: 'printer-care', title: 'Printer care', published: true, excerpt: 'Keep your printer working.', tags: [], publishDate: '2026-09-01' }]
         state.total = 201
         const { default: Blog, generateMetadata } = await import('@/app/blog/page')
         const html = renderToStaticMarkup(await Blog())

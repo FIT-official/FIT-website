@@ -22,6 +22,8 @@ import Subscriber from '@/models/Subscriber'
 import WelcomeSequence from '@/models/WelcomeSequence'
 import BlogPost from '@/models/BlogPost'
 import { sendEmail } from '@/lib/email'
+import { statusQuery } from '@/lib/blog/status'
+import { matchesBlogFilter, visibilityPosts } from '../helpers/blogFilter'
 
 const NOW = new Date('2026-08-17T10:00:00Z')
 
@@ -66,6 +68,19 @@ beforeEach(() => {
 })
 
 describe('dispatchDueCampaigns', () => {
+    it('omits unlisted, hidden and draft articles from stale campaign selections', async () => {
+        claimsOnce(campaign({ articleIds: visibilityPosts.map(post => post._id) }))
+        subscriberFindReturns([subscriber('a@example.com', 'tok-a')])
+        BlogPost.find.mockImplementation(filter => ({ select: () => ({ lean: async () => visibilityPosts.filter(post => matchesBlogFilter(post, filter)) }) }))
+        await dispatchDueCampaigns(NOW)
+        expect(BlogPost.find).toHaveBeenCalledWith({ _id: { $in: visibilityPosts.map(post => post._id) }, ...statusQuery('published') })
+        const message = JSON.stringify(sendEmail.mock.calls)
+        expect(message).toContain('public-guide')
+        expect(message).toContain('legacy-guide')
+        expect(message).not.toContain('confidential')
+        for (const post of visibilityPosts.slice(2)) expect(message).not.toContain(post.slug)
+    })
+
     it('claims a due campaign, sends to the active audience, and records each send', async () => {
         claimsOnce(campaign())
         subscriberFindReturns([

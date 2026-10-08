@@ -165,11 +165,11 @@ describe('server shop catalogue', () => {
 })
 
 describe('blog search metadata', () => {
-    it('uses the published-status filter and a www canonical with an absolute social image', async () => {
+    it('uses the readable-status filter and a www canonical with an absolute social image', async () => {
         state.post = { slug: '3d-printer-repair', title: 'Printer Repair', status: 'published', heroImage: 'guides/repair.jpg' }
         const { generateMetadata } = await import('@/app/blog/[blogSlug]/page')
         const metadata = await generateMetadata({ params: Promise.resolve({ blogSlug: state.post.slug }) })
-        expect(state.postFilter).toEqual({ slug: state.post.slug, ...statusQuery('published') })
+        expect(state.postFilter).toEqual({ slug: state.post.slug, $or: [statusQuery('published'), { status: 'unlisted' }] })
         expect(metadata.alternates.canonical).toBe('https://www.fixitoday.com/blog/3d-printer-repair')
         expect(metadata.openGraph.url).toBe(metadata.alternates.canonical)
         expect(metadata.openGraph.images).toEqual(['https://www.fixitoday.com/api/proxy?key=guides%2Frepair.jpg'])
@@ -189,7 +189,7 @@ describe('blog search metadata', () => {
     it('does not advertise missing or unpublished articles through metadata', async () => {
         const { generateMetadata } = await import('@/app/blog/[blogSlug]/page')
         const metadata = await generateMetadata({ params: Promise.resolve({ blogSlug: 'draft-preview' }) })
-        expect(state.postFilter).toEqual({ slug: 'draft-preview', ...statusQuery('published') })
+        expect(state.postFilter).toEqual({ slug: 'draft-preview', $or: [statusQuery('published'), { status: 'unlisted' }] })
         expect(metadata.robots).toEqual({ index: false, follow: false })
         expect(metadata).not.toHaveProperty('alternates.canonical')
     })

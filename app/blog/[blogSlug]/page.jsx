@@ -30,9 +30,10 @@ export default async function BlogPage({ params }) {
     const post = await BlogPost.findOne({ slug: blogSlug }).lean()
     if (!post) notFound()
 
-    const isPublished = effectiveStatus(post) === 'published'
+    const status = effectiveStatus(post)
+    const isPublished = status === 'published'
     let preview = false
-    if (!isPublished) {
+    if (!isPublished && status !== 'unlisted') {
         if (!(await viewerIsAdmin())) notFound()
         preview = true
     }
@@ -60,7 +61,7 @@ export default async function BlogPage({ params }) {
     const safeRelated = JSON.parse(JSON.stringify(related))
 
     return <>
-        {!preview && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(blogJsonLd(post)) }} />}
+        {isPublished && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(blogJsonLd(post)) }} />}
         <BlogPageClient post={safePost} contentHtml={contentHtml} related={safeRelated} preview={preview} />
     </>
 }
@@ -68,6 +69,6 @@ export default async function BlogPage({ params }) {
 export async function generateMetadata({ params }) {
     const { blogSlug } = await params
     await connectToDatabase()
-    const post = await BlogPost.findOne({ slug: blogSlug, ...statusQuery('published') }).lean()
+    const post = await BlogPost.findOne({ slug: blogSlug, $or: [statusQuery('published'), { status: 'unlisted' }] }).lean()
     return blogMetadata(post)
 }

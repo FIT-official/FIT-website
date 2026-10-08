@@ -175,7 +175,7 @@ export async function GET(req) {
     ]);
     for (const p of posts) p.status = effectiveStatus(p);
 
-    const counts = { all: statusRows.length, published: 0, draft: 0, hidden: 0 };
+    const counts = { all: statusRows.length, published: 0, draft: 0, hidden: 0, unlisted: 0 };
     for (const row of statusRows) {
         const s = effectiveStatus(row);
         counts[s] = (counts[s] || 0) + 1;

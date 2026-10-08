@@ -1,5 +1,6 @@
 import { connectToDatabase } from '@/lib/db'
 import BlogPost from '@/models/BlogPost'
+import { statusQuery } from '@/lib/blog/status'
 import { buildRssXml } from '@/lib/blog/rss'
 import { BLOG_SORT_INDEX, ensureBlogSortIndex } from '@/lib/blog/sortIndex'
 
@@ -9,7 +10,7 @@ export const runtime = 'nodejs'
 export async function GET() {
     await connectToDatabase()
     await ensureBlogSortIndex()
-    const posts = await BlogPost.find({ published: true })
+    const posts = await BlogPost.find(statusQuery('published'))
         .select('title slug excerpt publishDate')
         .sort({ publishDate: -1 })
         .hint(BLOG_SORT_INDEX)

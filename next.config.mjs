@@ -86,7 +86,11 @@ const nextConfig = {
         ].map(([from, to]) => ({ source: `/products/${from}`, destination: `/products/${to}`, permanent: true }));
     },
     async headers() {
+        const unlistedHeaders = (process.env.UNLISTED_BLOG_SLUGS || '').split(',')
+            .map(slug => slug.trim()).filter(slug => /^[a-z0-9-]+$/.test(slug))
+            .map(slug => ({ source: `/blog/${slug}`, headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] }));
         return [
+            ...unlistedHeaders,
             {
                 source: "/(.*)",
                 headers: [

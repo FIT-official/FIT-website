@@ -26,12 +26,21 @@ describe('statusWrite', () => {
     expect(statusWrite('hidden', earlier, now)).toEqual({ status: 'hidden', published: false, publishDate: earlier })
     expect(statusWrite('draft', null, now).publishDate).toBeNull()
   })
+  it('unlisted stamps the date once and keeps published false', () => {
+    expect(statusWrite('unlisted', null, now)).toEqual({ status: 'unlisted', published: false, publishDate: now })
+    const earlier = new Date('2026-01-01')
+    expect(statusWrite('unlisted', earlier, now).publishDate).toBe(earlier)
+  })
   it('rejects unknown statuses as draft', () => {
     expect(statusWrite('nonsense', null, now).status).toBe('draft')
   })
 })
 
 describe('statusQuery', () => {
+  it('unlisted matches only explicit status', () => {
+    expect(statusQuery('unlisted')).toEqual({ status: 'unlisted' })
+    expect(effectiveStatus({ status: 'unlisted', published: true })).toBe('unlisted')
+  })
   it('published matches status OR the legacy published boolean', () => {
     expect(statusQuery('published')).toEqual({
       $or: [{ status: 'published' }, { status: null, published: true }],

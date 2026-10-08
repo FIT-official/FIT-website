@@ -22,7 +22,7 @@ const BlogPostSchema = new mongoose.Schema({
     // `status` and `published` are kept in sync on every write. No schema
     // default: legacy docs lack `status`, and defaulting to 'draft' would
     // misreport published legacy posts — use effectiveStatus() to read.
-    status: { type: String, enum: ['draft', 'published', 'hidden'] },
+    status: { type: String, enum: ['draft', 'published', 'hidden', 'unlisted'] },
     published: { type: Boolean, default: false },
     publishDate: { type: Date },
     scheduledFor: { type: Date }, // draft + scheduledFor <= now → cron publishes

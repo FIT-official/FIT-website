@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import BlogPost from '@/models/BlogPost'
-import { statusWrite } from '@/lib/blog/status'
+import { statusWrite, statusQuery } from '@/lib/blog/status'
 import { verifyCronSecret } from '@/lib/verifyCronSecret'
 
 export const runtime = 'nodejs'
@@ -26,7 +26,7 @@ export async function GET(req) {
     await connectToDatabase()
     const now = new Date()
     const due = await BlogPost.find({
-        published: { $ne: true },
+        ...statusQuery('draft'),
         scheduledFor: { $ne: null, $lte: now },
     }).limit(100)
 

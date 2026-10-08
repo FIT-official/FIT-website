@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import BlogPost from '@/models/BlogPost';
+import { statusQuery } from '@/lib/blog/status';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -9,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(req, { params }) {
     const { slug } = await params;
     await connectToDatabase();
-    const post = await BlogPost.findOne({ slug, published: true }).lean();
+    const post = await BlogPost.findOne({ slug, ...statusQuery('published') }).lean();
     if (!post) return NextResponse.json({ ok: false, error: 'Not found' }, { status: 404 });
     // Older imported posts may still carry their pre-edit source. Readers
     // should receive only the body that is currently published.

@@ -55,6 +55,7 @@ const STATUS_TONES = {
     published: 'ok',
     draft: 'hatch',
     hidden: 'paper',
+    unlisted: 'paper',
 }
 
 const QUIET_ICON =
@@ -402,6 +403,7 @@ export default function BlogManagement() {
         { key: 'all', label: 'All', count: counts.all ?? 0 },
         { key: 'published', label: 'Published', count: counts.published || 0 },
         { key: 'draft', label: 'Draft', count: counts.draft || 0 },
+        { key: 'unlisted', label: 'Unlisted', count: counts.unlisted || 0 },
         { key: 'hidden', label: 'Hidden', count: counts.hidden || 0 },
     ]
     const changeFilter = (key) => {
