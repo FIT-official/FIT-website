@@ -16,4 +16,13 @@ describe('private lesson projection', () => {
     it('passes only the seven pupil instruction slides after teacher verification', async () => { h.access.mockResolvedValue({ role: 'teacher' }); const page = await Page(); expect(h.access).toHaveBeenCalledOnce(); expect(page.props.deck.slides).toHaveLength(7); expect(JSON.stringify(page.props)).not.toMatch(/speakerNotes|studentName|credentials|audit|feedbackCount/); expect(page.props.deck.workshopUrl).toBe('https://www.fixitoday.com/workshop') })
     it('unmounts surrounding storefront and dashboard UI on the exact projection route', () => { const { rerender } = render(<PresentationBoundary presentation={<p>Instructions only</p>}><p>Private dashboard</p></PresentationBoundary>); expect(screen.queryByText('Private dashboard')).toBe(null); h.pathname = '/admin/workshop'; rerender(<PresentationBoundary presentation={<p>Instructions only</p>}><p>Private dashboard</p></PresentationBoundary>); expect(screen.queryByText('Instructions only')).toBe(null); expect(screen.getByText('Private dashboard')).toBeInTheDocument() })
     it('renders each block once, supports bounded buttons and keyboard navigation', () => { render(<LessonProjection deck={deck} />); expect(screen.getAllByText('Our design workshop')).toHaveLength(1); expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled(); fireEvent.click(screen.getByRole('button', { name: 'Next' })); expect(screen.getByText('Explore the ideas')).toBeInTheDocument(); fireEvent.keyDown(window, { key: 'End' }); expect(screen.getByText('Final check')).toBeInTheDocument(); expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled(); fireEvent.keyDown(window, { key: 'Home' }); expect(screen.getByText('Our design workshop')).toBeInTheDocument() })
+    it('keeps the clean projection usable when the browser refuses fullscreen', async () => {
+        render(<LessonProjection deck={deck} />)
+        screen.getByRole('main').requestFullscreen = vi.fn().mockRejectedValue(new Error('User activation required'))
+        fireEvent.click(screen.getByRole('button', { name: 'Full screen' }))
+        expect(await screen.findByRole('status')).toHaveTextContent('Press F11 on Windows')
+        fireEvent.click(screen.getByRole('button', { name: 'Next' }))
+        expect(screen.getByText('Explore the ideas')).toBeInTheDocument()
+        expect(document.body.textContent).not.toMatch(/studentName|audit|credentials/)
+    })
 })

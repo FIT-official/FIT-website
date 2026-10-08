@@ -26,11 +26,13 @@ export default function LessonProjection({ deck }) {
         return () => window.removeEventListener('keydown', key)
     }, [last])
     async function fullscreen() {
+        const fallback = 'Press F11 on Windows, or use your browser\'s full-screen menu. The slide view is ready to project.'
         try {
             if (document.fullscreenElement) await document.exitFullscreen()
             else if (root.current.requestFullscreen) await root.current.requestFullscreen()
-            else setMessage('Use your browser full-screen control.')
-        } catch { setMessage('Use your browser full-screen control.') }
+            else { setMessage(fallback); return }
+            setMessage('')
+        } catch { setMessage(fallback) }
     }
     return <main ref={root} className={styles.root} aria-label="Lesson instructions">
         <div ref={viewport} className={styles.viewport}>

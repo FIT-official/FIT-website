@@ -4,7 +4,14 @@ const h = vi.hoisted(() => ({ rows: new Map(), touched: [], reads: [], admin: fa
 vi.mock('@/lib/workshopDatabase', () => ({ workshopDatabase: async () => ({ collection(name) {
     if (!['workshopGuestSessions', 'workshopGuestLessons', 'workshopGuestRateLimits', 'workshopGuestDrafts'].includes(name)) throw Error('Guest attempted a legacy collection: ' + name)
     h.touched.push(name); if (!h.rows.has(name)) h.rows.set(name, new Map()); const rows = h.rows.get(name)
-    return { findOne: async (q, options) => { h.reads.push({ name, q, options }); return rows.has(q._id) ? structuredClone(rows.get(q._id)) : null }, insertOne: async row => { if (rows.has(row._id)) throw Object.assign(Error(), { code: 11000 }); rows.set(row._id, structuredClone(row)) }, deleteOne: async q => ({ deletedCount: rows.delete(q._id) ? 1 : 0 }), updateOne: async (q, update) => { if (name === 'workshopGuestRateLimits') return { modifiedCount: 1 }; const row = rows.get(q._id); if (!row) return { modifiedCount: 0 }; Object.assign(row, update.$set); return { modifiedCount: 1 } }, replaceOne: async (q, row) => { if (rows.get(q._id)?.version !== q.version) return { modifiedCount: 0 }; rows.set(q._id, structuredClone(row)); return { modifiedCount: 1 } }, find: q => ({ limit: () => ({ toArray: async () => [...rows.values()].filter(row => q._id.$in.includes(row._id)).map(row => structuredClone(row)) }) }) }
+    const aggregate = pipeline => ({ toArray: async () => {
+        h.reads.push({ name, pipeline })
+        const row = rows.get(pipeline[0].$match._id)
+        if (!row || row.enabled !== true || row.session !== '2026-10-09' || !(row.expiresAt instanceof Date) || row.expiresAt <= new Date() || !/^guest_[0-9a-f-]+$/i.test(row.seat) || !/^g(?:[1-9]|10)$/.test(row.group)) return []
+        const state = h.rows.get('workshopGuestLessons')?.get('2026-10-09')
+        return [{ ...structuredClone(row), lesson: state ? [structuredClone(state)] : [] }]
+    } })
+    return { collectionName: name, aggregate, findOne: async (q, options) => { h.reads.push({ name, q, options }); return rows.has(q._id) ? structuredClone(rows.get(q._id)) : null }, insertOne: async row => { if (rows.has(row._id)) throw Object.assign(Error(), { code: 11000 }); rows.set(row._id, structuredClone(row)) }, deleteOne: async q => ({ deletedCount: rows.delete(q._id) ? 1 : 0 }), updateOne: async (q, update) => { if (name === 'workshopGuestRateLimits') return { modifiedCount: 1 }; const row = rows.get(q._id); if (!row) return { modifiedCount: 0 }; Object.assign(row, update.$set); return { modifiedCount: 1 } }, replaceOne: async (q, row) => { if (rows.get(q._id)?.version !== q.version) return { modifiedCount: 0 }; rows.set(q._id, structuredClone(row)); return { modifiedCount: 1 } }, find: q => ({ limit: () => ({ toArray: async () => [...rows.values()].filter(row => q._id.$in.includes(row._id)).map(row => structuredClone(row)) }) }) }
 } }) }))
 vi.mock('@/lib/authenticate', () => { class UnauthorizedError extends Error { constructor() { super('Teacher sign-in required.'); this.status = 401 } } return { UnauthorizedError, authenticate: async () => { if (!h.signedIn) throw new UnauthorizedError(); return { userId: 'synthetic-teacher' } } } })
 vi.mock('@/lib/checkPrivileges', () => ({ checkAdminPrivileges: async () => h.admin }))
@@ -21,18 +28,19 @@ async function join(name = 'Alex', group = 'g2') { const r = await sessionPOST(r
 beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-09T02:00:00Z')); h.rows.clear(); h.touched = []; h.reads = []; h.admin = false; h.signedIn = false; h.rows.set('workshopGuestLessons', new Map([['2026-10-09', { ...emptyLesson(), entryOpen: true, version: 1 }]])) })
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs() })
 describe('guest routes never reveal legacy class data', () => {
-    it('uses one projected lesson read for changed/unchanged polls and rechecks revoked access', async () => {
+    it('uses one fresh session/lesson command for changed and unchanged polls and rechecks revoked access', async () => {
         const a = await join()
         h.reads = []
         const changed = await classroomGET(req('/api/workshop/guest/classroom?since=0&seat=' + a.identity.seat, 'GET', undefined, a.cookie))
         expect(changed.status).toBe(200)
-        const reads = h.reads.filter(row => row.name === 'workshopGuestLessons')
+        const reads = h.reads
         expect(reads).toHaveLength(1)
-        expect(reads[0].options.projection.feedback.$cond[0]).toEqual({ $eq: ['$version', 0] })
-        expect(changed.headers.get('server-timing')).toMatch(/session;dur=\d+/)
+        expect(reads[0].name).toBe('workshopGuestSessions')
+        expect(reads[0].pipeline[2].$lookup.from).toBe('workshopGuestLessons')
+        expect(changed.headers.get('server-timing')).toMatch(/snapshot;dur=\d+/)
         h.reads = []
         const unchanged = await classroomGET(req('/api/workshop/guest/classroom?since=1&seat=' + a.identity.seat, 'GET', undefined, a.cookie))
-        expect(unchanged.status).toBe(304); expect(await unchanged.text()).toBe(''); expect(unchanged.headers.get('cache-control')).toBe('private, no-store'); expect(h.reads.filter(row => row.name === 'workshopGuestLessons')).toHaveLength(1)
+        expect(unchanged.status).toBe(304); expect(await unchanged.text()).toBe(''); expect(unchanged.headers.get('cache-control')).toBe('private, no-store'); expect(h.reads).toHaveLength(1)
         const wrongHint = await classroomGET(req('/api/workshop/guest/classroom?since=1&seat=someone-else', 'GET', undefined, a.cookie))
         expect(wrongHint.status).toBe(200); expect((await wrongHint.json()).seat).toBe(a.identity.seat)
         for (const row of h.rows.get('workshopGuestSessions').values()) row.enabled = false

@@ -40,6 +40,19 @@ describe('Mongo duration correlation', () => {
         client.emit('commandSucceeded', { requestId: 3, duration: 100 })
         expect(result).toEqual([])
     })
+    it('measures checkout-to-command separately when driver checkout duration is unavailable', () => {
+        const client = new EventEmitter(), result = []
+        attachMongoTiming(client)
+        withMongoTiming((...row) => result.push(row), () => {
+            client.emit('connectionCheckOutStarted', {})
+            client.emit('commandStarted', { address: 'private', connectionId: 1, requestId: 1, commandName: 'find' })
+            client.emit('commandSucceeded', { requestId: 1, duration: 42 })
+        })
+        expect(result[0][0]).toBe('checkout_to_command')
+        expect(result[0][1]).toBeGreaterThanOrEqual(0)
+        expect(result[1]).toEqual(['command', 42])
+        expect(result.some(row => row[0] === 'pool')).toBe(false)
+    })
     it('adds numeric pool and command durations without changing response data or access headers', async () => {
         const client = new EventEmitter(), timing = workshopTiming()
         attachMongoTiming(client)
