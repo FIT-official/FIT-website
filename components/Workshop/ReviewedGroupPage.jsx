@@ -6,7 +6,7 @@ export default function ReviewedGroupPage({ group, classroom = false }) {
     if (classroom && group.reading) return <StudentProjectReading group={group} />
     const Container = classroom ? 'article' : 'main', Heading = classroom ? 'h2' : 'h1'
     return <Container className="px-5 md:px-10 py-12 max-w-6xl mx-auto">
-        <nav aria-label="Workshop navigation" className="flex flex-wrap gap-4 print:hidden"><Link href="/workshop" className="underline">All groups</Link><Link href="/blog/design-thinking-workshop" className="underline">Workshop guide</Link></nav>
+        <nav aria-label="Workshop navigation" className="flex flex-wrap gap-4 print:hidden"><Link href={'/workshop/' + group.id + '/classroom'} className="underline">Open Group {group.number} classroom</Link><Link href="/workshop" className="underline">All groups</Link><Link href="/blog/design-thinking-workshop" className="underline">Workshop guide</Link></nav>
         <p className="mt-8 text-sm">Friday 9 October 2026 · 30 minutes</p>
         <Heading className="text-3xl md:text-4xl mt-2">Group {group.number}: compare your two ideas</Heading>
         <p className="mt-4 max-w-3xl">Choose one difficulty to help with. Compare both ideas, make one useful change and explain a fair test. The model examples show design proposals, not equipment proven to work.</p>

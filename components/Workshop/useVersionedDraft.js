@@ -9,16 +9,17 @@ async function request(url, method = 'GET', payload) {
     if (!response.ok) throw Object.assign(Error(result.error || 'Draft recovery unavailable.'), { status: response.status })
     return result
 }
+const draftUrl = seat => '/api/workshop/drafts?homeGroup=g' + seat.match(/^group(\d+)student/)[1]
 async function loadSeat(seat, fresh = false) {
     if (fresh) cache.delete(seat)
-    if (!cache.has(seat)) cache.set(seat, request('/api/workshop/drafts').then(result => { if (result.seat !== seat) throw Object.assign(Error('Your class account changed. Your draft is kept; sign in again.'), { status: 403 }); return result.drafts }).catch(error => { cache.delete(seat); throw error }))
+    if (!cache.has(seat)) cache.set(seat, request(draftUrl(seat)).then(result => { if (result.seat !== seat) throw Object.assign(Error('Your class account changed. Your draft is kept; sign in again.'), { status: 403 }); return result.drafts }).catch(error => { cache.delete(seat); throw error }))
     return cache.get(seat)
 }
 export function useVersionedDraft(key, seat, topic, create, enabled = true) {
     const factory = useRef(create); factory.current = create
     const controller = useRef(null), [view, setView] = useState(null)
     useEffect(() => {
-        const model = new DraftController({ key, seat, topic, enabled, create: factory.current, storage: localStorage, online: () => navigator.onLine !== false, load: fresh => loadSeat(seat, fresh), save: async payload => { const result = await request('/api/workshop/drafts', 'POST', payload); cache.delete(seat); return result }, onChange: setView })
+        const model = new DraftController({ key, seat, topic, enabled, create: factory.current, storage: localStorage, online: () => navigator.onLine !== false, load: fresh => loadSeat(seat, fresh), save: async payload => { const result = await request(draftUrl(seat), 'POST', payload); cache.delete(seat); return result }, onChange: setView })
         controller.current = model; model.start()
         const changed = event => { if (event.key === key) model.otherTab(event.newValue) }, online = () => model.retry()
         window.addEventListener('storage', changed); window.addEventListener('online', online)

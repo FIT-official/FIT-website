@@ -1,11 +1,11 @@
-import { requireWorkshopAccess } from '@/lib/workshopAccess'
+import { requireWorkshopAccess, verifyWorkshopHomeGroup } from '@/lib/workshopAccess'
 import { classroomView, readLesson, submitClassroom, ClassroomError } from '@/lib/workshopClassroomStore'
 import { classDb, classJson, classFailure, jsonBody, sameOrigin, limitClassOperation } from '@/lib/workshopHttp'
 import { WORKSHOP_SESSION } from '@/lib/workshopFeedback'
 export const runtime = 'nodejs'
 export async function GET(request) {
     try {
-        const access = await requireWorkshopAccess(request), db = await classDb()
+        const access = await requireWorkshopAccess(request); verifyWorkshopHomeGroup(request, access); const db = await classDb()
         const store = db.collection('workshopLessons'), since = new URL(request.url).searchParams.get('since')
         if (access.role === 'student' && since !== null && /^\d+$/.test(since) && new URL(request.url).searchParams.get('seat') === access.seat) {
             const state = await store.findOne({ _id: WORKSHOP_SESSION }, { projection: { version: 1 } })
@@ -24,7 +24,7 @@ export async function GET(request) {
 export async function POST(request) {
     try {
         sameOrigin(request)
-        const access = await requireWorkshopAccess(request), input = await jsonBody(request), db = await classDb()
+        const access = await requireWorkshopAccess(request); verifyWorkshopHomeGroup(request, access); const input = await jsonBody(request), db = await classDb()
         const { expectedSeat, ...submission } = input
         if (expectedSeat !== undefined && expectedSeat !== access.seat) throw new ClassroomError('Your class account changed. Your draft is kept; sign in again.', 403)
         await limitClassOperation(db, 'submit-' + (access.seat || 'teacher'), 15)

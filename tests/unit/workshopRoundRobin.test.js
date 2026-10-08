@@ -17,9 +17,9 @@ describe('individual additive round-robin classroom', () => {
         const rows = (await db.findOne()).refinements; expect(rows).toHaveLength(5); expect(new Set(rows.map(row => row.seat)).size).toBe(5); expect(rows.every(row => row.authorVersion === 1 && row.ideas.length === 2)).toBe(true)
         const newRevision = { ...refinement(), phaseVersion: 1, expectedVersion: 1, expectedEntryVersion: 1 }; await submitClassroom(db, access(1), newRevision, now); expect((await db.findOne()).refinements).toHaveLength(6); expect((await db.findOne()).refinements.filter(row => row.seat === access(2).seat)).toHaveLength(1)
     })
-    it('rejects wrong target/project/round but reconciles the original lost-response receipt after closure', async () => {
+    it('permits other peer targets, rejects stale project/round and reconciles the lost-response receipt after closure', async () => {
         const db = store({ ...emptyLesson(), version: 1, phase: 'FEEDBACK', feedbackOpen: true }), payload = feedback(), receipt = await submitClassroom(db, access(1), payload, now)
-        await expect(submitClassroom(db, access(1), { ...feedback(), presentingGroup: 'g3' }, now)).rejects.toMatchObject({ status: 403 })
+        expect(await submitClassroom(db, access(1), { ...feedback(), presentingGroup: 'g3' }, now)).toMatchObject({ confirmed: true })
         await expect(submitClassroom(db, access(1), { ...feedback(), projectVersion: 'stale' }, now)).rejects.toMatchObject({ status: 409 })
         await expect(submitClassroom(db, access(1), { ...feedback(), reviewRound: 2 }, now)).rejects.toMatchObject({ status: 409 })
         await moderateClassroom(db, teacher, { action: 'phase', expectedVersion: (await db.findOne()).version, phase: 'PRESENT', feedbackOpen: false, refinementOpen: false, showFeedback: false }, now)

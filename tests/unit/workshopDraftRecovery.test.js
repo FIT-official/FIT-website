@@ -17,13 +17,13 @@ describe('bounded individual draft recovery', () => {
         expect(await saveWorkshopDraft(db, access, requests[0], now)).toMatchObject({ version: 1, unchanged: true })
         expect(JSON.stringify(draftView(record))).not.toContain('requestId'); expect(JSON.stringify(draftView(record))).not.toContain('hash')
     })
-    it('rejects changed request reuse, stale versions, wrong seat, wrong target and expired writes', async () => {
+    it('rejects changed request reuse, stale versions, wrong seat, self-review target and expired writes', async () => {
         const db = store(), payload = { seat: access.seat, topic, requestId: randomUUID(), expectedVersion: 0, content: { idea: '1', whatWorks: 'draft', question: '', improvement: '' } }
         await saveWorkshopDraft(db, access, payload, now)
         await expect(saveWorkshopDraft(db, access, { ...payload, content: { ...payload.content, whatWorks: 'different' } }, now)).rejects.toMatchObject({ status: 409 })
         await expect(saveWorkshopDraft(db, access, { ...payload, requestId: randomUUID() }, now)).rejects.toMatchObject({ status: 409 })
         await expect(saveWorkshopDraft(db, access, { ...payload, seat: 'group2student2' }, now)).rejects.toMatchObject({ status: 403 })
-        await expect(saveWorkshopDraft(db, access, { ...payload, topic: 'feedback-g4-idea1' }, now)).rejects.toMatchObject({ status: 403 })
+        await expect(saveWorkshopDraft(db, access, { ...payload, topic: 'feedback-g2-idea1' }, now)).rejects.toMatchObject({ status: 400 })
         await expect(saveWorkshopDraft(db, access, payload, new Date('2026-10-11T00:00:00Z'))).rejects.toMatchObject({ status: 410 })
         expect(draftTopics(access.seat)).toHaveLength(20); expect(draftTopics(access.seat)).not.toContain('refinement-g1-idea1')
     })

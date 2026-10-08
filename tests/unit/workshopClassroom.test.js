@@ -60,7 +60,7 @@ describe('server-authoritative classroom', () => {
     it('never returns private audit/hash information to students and can hide all class feedback', async () => {
         const db = store(open('FEEDBACK')); await submitClassroom(db, student, feedback(), now)
         const state = await readLesson(db), view = classroomView(state, { ...student, seat: 'group3student1', group: 'g3' })
-        expect(view.audit).toBeUndefined(); expect(view.feedback[0].payloadHash).toBeUndefined(); expect(view.feedback[0].seat).toBeUndefined()
+        expect(view.audit).toBeUndefined(); expect(view.feedback[0].payloadHash).toBeUndefined(); expect(view.feedback[0].seat).toBe(student.seat)
         expect(classroomView({ ...state, showFeedback: false }, student).feedback).toHaveLength(0)
     })
     it('never confirms failed database writes and rejects receipts reused for changed content', async () => {
