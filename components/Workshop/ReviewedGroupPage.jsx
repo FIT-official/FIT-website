@@ -8,7 +8,7 @@ export default function ReviewedGroupPage({ group, classroom = false }) {
     const Container = classroom ? 'article' : 'main', Heading = classroom ? 'h2' : 'h1'
     return <Container className="px-5 md:px-10 py-12 max-w-6xl mx-auto">
         <nav aria-label="Workshop navigation" className="flex flex-wrap gap-4 print:hidden"><Link href={'/workshop/' + group.id + '/classroom'} className="underline">Open Group {group.number} classroom</Link><Link href="/workshop" className="underline">All groups</Link><Link href="/blog/design-thinking-workshop" className="underline">Workshop guide</Link></nav>
-        <p className="mt-8 text-sm">Friday 9 October 2026 · 30 minutes</p>
+
         <Heading className="text-3xl md:text-4xl mt-2">Group {group.number}: compare your two ideas</Heading>
         <p className="mt-4 max-w-3xl">Choose one difficulty to help with. Compare both ideas, make one useful change and explain a fair test. The model examples show design proposals, not equipment proven to work.</p>
         <div className="grid lg:grid-cols-2 gap-6 mt-8">{group.ideas.map((idea, index) => <section key={idea.title} className="border border-borderColor rounded-xl p-5 md:p-7" aria-labelledby={'idea-' + group.id + '-' + (index + 1)}>
@@ -28,7 +28,7 @@ export default function ReviewedGroupPage({ group, classroom = false }) {
         </section>)}</div>
         <h2 className="text-2xl mt-10">Your three activities</h2>
         <div className="grid md:grid-cols-3 gap-5 mt-5">{group.activities.map((activity, index) => <section key={activity.title} className="border border-borderColor rounded-xl p-5">
-            <p className="text-sm">Activity {index + 1} · {activity.minutes} minutes</p><h3 className="text-xl mt-2">{activity.title}</h3><p className="mt-3">{activity.goal}</p>
+            <p className="text-sm">Activity {index + 1}</p><h3 className="text-xl mt-2">{activity.title}</h3><p className="mt-3">{activity.goal}</p>
             <ol className="list-decimal pl-5 mt-4 space-y-2">{activity.steps.map(step => <li key={step}>{step}</li>)}</ol>
             <p className="mt-4 text-sm"><strong>Check:</strong> {activity.successCheck}</p>
         </section>)}</div>

@@ -6,6 +6,7 @@ import { useClassPolling } from './useClassPolling'
 import WorkshopAudit from './WorkshopAudit'
 import GuestTeacherResponses from './GuestTeacherResponses'
 import TeacherTinkercad from './TeacherTinkercad'
+import TeacherBackup from './TeacherBackup'
 export default function GuestTeacherClassroom() {
     const [selectedGroup, setSelectedGroup] = useState('all'), [lesson, setLesson] = useState(null), [busy, setBusy] = useState(false), [message, setMessage] = useState('Loading teacher controls…')
     async function refresh() { try { setLesson(await classroomRequest('/api/admin/workshop/guest')); setMessage('') } catch (error) { setMessage(error.message); if ([401, 403].includes(error.status)) setLesson(null) } }
@@ -20,6 +21,7 @@ export default function GuestTeacherClassroom() {
         </section>
         <GuestTeacherResponses lesson={lesson} busy={busy} onAction={action} groupFilter={selectedGroup} onGroupChange={setSelectedGroup} />
         <TeacherTinkercad />
+        <TeacherBackup />
         <details className="border rounded-xl p-5 mt-6"><summary className="cursor-pointer text-xl">Class settings — entry {lesson.entryOpen ? 'open' : 'closed'}, feedback {lesson.feedbackOpen ? 'open' : 'closed'}, refinement {lesson.refinementOpen ? 'open' : 'closed'}</summary>
         <section className="border rounded-xl p-5 mt-5"><h2 className="text-2xl">Student entry: {lesson.entryOpen ? 'open' : 'closed'}</h2><p className="mt-3">Open entry when students should join. Closing entry stops new sessions; it does not remove work or sign out students who have already joined.</p><button type="button" className="formWhiteButton mt-4" aria-pressed={lesson.entryOpen} disabled={busy} onClick={() => action({ action: 'entry', expectedVersion: lesson.version, entryOpen: !lesson.entryOpen })}>{lesson.entryOpen ? 'Close student entry' : 'Open student entry'}</button><Link className="formWhiteButton ml-3 mt-4" href="/workshop/entry">Open student entry page</Link></section>
         <section className="border rounded-xl p-5 mt-5"><h2 className="text-2xl">Student activity</h2><label className="block mt-3">Choose an activity<select className="formInput block" value={lesson.navigationTarget || 'FEEDBACK'} disabled={busy} onChange={event => action({ action: 'navigation', expectedVersion: lesson.version, target: event.target.value, locked: Boolean(lesson.navigationLocked) })}><option value="FEEDBACK">Feedback</option><option value="REFINE">Refine</option></select></label><button type="button" className="formWhiteButton mt-3" disabled={busy} aria-pressed={Boolean(lesson.navigationLocked)} onClick={() => action({ action: 'navigation', expectedVersion: lesson.version, target: lesson.navigationTarget || 'FEEDBACK', locked: !lesson.navigationLocked })}>{lesson.navigationLocked ? 'Unlock student activities' : 'Lock students to this activity'}</button><p className="text-sm mt-3">Changes reach students on their next automatic refresh. Their unfinished answers are kept.</p></section>
