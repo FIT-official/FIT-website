@@ -594,7 +594,7 @@
           "nextTest": "Test known, unknown, dirty, obscured and multiple items; report confusion cases, jams and rejected items.",
           "designSafeguards": "Confidence thresholds need calibration; hold the item in the chamber when uncertain; add jam detection, manual release and accessible stop.",
           "problemContext": "Wrong items and food or liquid residues can spoil a recycling collection. Feedback at the bin could help someone correct a choice before the item disappears inside. The important challenge is deciding what the system genuinely knows and what it still needs to ask the user.",
-          "studentExplanation": "The original recycling-bin guard gives red or green feedback for items going into one bin. The proposed refinement adds a lit inspection chamber, a camera, a small computer, two disposal outlets and a way to take an item back. The camera provides an image; trained software proposes an item category. A locally checked rule set helps decide its disposal route. Appearance alone may not reveal food residue or whether a special collection route is required, so the system asks for missing information. An uncertain item stays accessible in the chamber. After a supported decision is confirmed, the diverter moves to the selected route and the gate releases one item. The two outlets and automatic recognition are proposed additions that require separate testing.",
+          "studentExplanation": "The original recycling-bin guard gives red or green feedback for items going into one bin. The proposed refinement adds a lit inspection chamber, a camera, a small computer, two disposal outlets and a way to take an item back. The camera provides an image; trained software proposes an item category. A locally checked rule set helps decide its disposal route. Appearance alone may not reveal food residue or whether a special collection route is required, so the system asks for missing information. An uncertain item stays accessible in the chamber. After a supported decision is confirmed, the diverter moves to the selected route and the gate releases one item. The two outlets and automatic recognition are proposed additions that require separate testing. After position confirmation, a fixed collection funnel catches the released item and guides it into the diverter; this proposed path remains untested.",
           "mechanismSteps": [
             "Place one item on the closed, supported flap in the lit chamber.",
             "The software proposes a class and asks about missing condition information.",
@@ -611,7 +611,7 @@
               "status": "Storyboard proposal; check against the audited drawing before use."
             },
             {
-              "caption": "ROUTE: the diverter reaches its checked position before the supported flap opens and releases the item.",
+              "caption": "ROUTE: confirm the diverter position, then open the supported holding flap; the fixed funnel catches released items and guides them into the central diverter inlet. This path remains proposed and untested.",
               "status": "Storyboard proposal; check against the audited drawing before use."
             }
           ],
@@ -625,7 +625,7 @@
               "checkedDate": "2026-10-08"
             }
           ],
-          "readingWordCount": 213,
+          "readingWordCount": 235,
           "auditUnresolved": "The current drawing does not adequately show item support; the flap and its load path require correction."
         }
       ],
