@@ -106,6 +106,7 @@ describe('shared database connection', () => {
         expect(mongoose.connect).toHaveBeenCalledWith(uri, {
             bufferCommands: false, maxPoolSize: 5, minPoolSize: 0, maxIdleTimeMS: 60000,
             serverSelectionTimeoutMS: 8000, connectTimeoutMS: 8000, socketTimeoutMS: 15000,
+            monitorCommands: true,
         })
         expect(mongoose.disconnect).not.toHaveBeenCalled()
     })
