@@ -1,5 +1,5 @@
 {
-  "title": "FIT design workshop",
+  "title": "FIT design class",
   "workshopUrl": "https://www.fixitoday.com/workshop",
   "canvas": {
     "width": 1280,
@@ -14,10 +14,10 @@
   "slides": [
     {
       "id": 1,
-      "title": "Our design workshop",
+      "title": "Our design class",
       "blocks": [
         {
-          "text": "Our design workshop",
+          "text": "Our design class",
           "x": 72,
           "y": 48,
           "width": 1136,
@@ -37,7 +37,7 @@
           "color": "#265B74"
         },
         {
-          "text": "1   Select “Enter workshop”",
+          "text": "1   Select “Enter class”",
           "x": 72,
           "y": 305,
           "width": 1136,
@@ -57,7 +57,7 @@
           "color": "#202D35"
         },
         {
-          "text": "3   Select “Enter workshop” to join",
+          "text": "3   Select “Enter class” to join",
           "x": 72,
           "y": 467,
           "width": 1136,
@@ -569,7 +569,7 @@
           "color": "#202D35"
         },
         {
-          "text": "3   Use the student login shown on your\n     workshop page.",
+          "text": "3   Use the student login shown on your\n     class page.",
           "x": 72,
           "y": 476,
           "width": 1136,

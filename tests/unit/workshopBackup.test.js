@@ -83,7 +83,7 @@ describe('complete private Excel workshop backup', () => {
     it('preserves entry-switch history with readable Open and Closed values', async () => {
         const audit = backupAudit({ action: 'guestEntry', actor: 'PRIVATE-CLERK-ID', at, before: false, after: true }, source, new Map(), 0)
         const { zip } = await build([audit], { audit: 1 }), sheet = (await excel(zip)).getWorksheet('Edit history')
-        expect(sheet.getCell('E2').value).toBe('Workshop entry')
+        expect(sheet.getCell('E2').value).toBe('Class entry')
         expect(sheet.getCell('F2').value).toBe('Closed'); expect(sheet.getCell('G2').value).toBe('Open')
         const record = JSON.parse((await zip.file('Archive/records-001.jsonl').async('text')).trim())
         expect(record.before).toEqual({ entryOpen: false }); expect(record.after).toEqual({ entryOpen: true })

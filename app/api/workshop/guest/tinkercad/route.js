@@ -15,7 +15,7 @@ export async function POST(request) {
         await claimTinkercadAssignment(db, access)
         // Recheck expiry/revocation after the write and return a fresh approval view.
         const current = await requireGuestAccess(request)
-        if (current.seat !== access.seat) throw Object.assign(Error('Your workshop session changed.'), { status: 401 })
+        if (current.seat !== access.seat) throw Object.assign(Error('Your class session changed.'), { status: 401 })
         return classJson(await readTinkercadAssignment(db, current))
     } catch (error) { return classFailure(error) }
 }

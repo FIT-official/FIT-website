@@ -77,7 +77,7 @@ const NAV_GROUPS = [
     {
         title: 'Operations',
         items: [
-            { key: 'workshop', label: 'Live Workshop', icon: IoPeopleOutline, description: 'Control lesson stages, see student submissions and moderate classroom feedback.' },
+            { key: 'workshop', label: 'Live Class', icon: IoPeopleOutline, description: 'Control lesson stages, see student submissions and moderate classroom feedback.' },
             {
                 key: 'customPrintRequests',
                 label: 'Print Requests',

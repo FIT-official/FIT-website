@@ -10,7 +10,7 @@ export async function POST(request) {
         const input = await jsonBody(request, 500)
         if (!input || Object.keys(input).some(key => !['name', 'group'].includes(key))) throw new GuestAccessError('Enter your name and choose your group.', 400)
         const created = newGuest(input.group, input.name), db = await guestDb(), lessons = db.collection('workshopGuestLessons'), state = await readLesson(lessons)
-        if (!state.entryOpen) throw new GuestAccessError('Your teacher has not opened workshop entry yet.', 403)
+        if (!state.entryOpen) throw new GuestAccessError('Your teacher has not opened class entry yet.', 403)
         await limitGuestOperation(db, 'entry-global', 200)
         await limitGuestOperation(db, 'entry-' + guestHash(request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'shared'), 80)
         const sessions = db.collection('workshopGuestSessions'), oldToken = guestToken(request)
