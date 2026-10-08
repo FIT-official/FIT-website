@@ -1,0 +1,1158 @@
+[
+  {
+    "id": "g1",
+    "number": 1,
+    "ideas": [
+      {
+        "title": "Foldable tray",
+        "originalProblem": "Our project is a foldable tray.",
+        "originalSolution": "Our oval tray has three round spaces and a central fold.",
+        "improvedProblem": "If carrying or storing a tray is difficult, the user needs a tray that fits that task. We need to find out which part is awkward.",
+        "reason": "Choose a real task first. This lets us check whether folding helps instead of judging the shape alone.",
+        "changes": [
+          {
+            "change": "Add a separate hinge pin",
+            "why": "The two halves can turn in a controlled way."
+          },
+          {
+            "change": "Next design step: add an open stop",
+            "why": "Draw where contact faces would meet so the tray cannot open too far."
+          }
+        ],
+        "howItWorks": "The central hinge lets the two halves fold. The drawing shows the tray shape and hinge; an open stop and any closure still need to be designed and checked before carrying objects.",
+        "printedParts": [
+          "Two tray leaves",
+          "Hinge knuckles",
+          "Open stop and closure still to design"
+        ],
+        "suppliedParts": [
+          "Measured hinge pin or suitable fastener",
+          "Light practice objects"
+        ],
+        "boundary": "Use an empty model on a flat surface until the stop and closure have been designed and checked by a teacher. Use light dummy objects only. This is not a food-contact test.",
+        "test": [
+          "Use this comparison: An ordinary tray carrying the same light objects.",
+          "Try opening, using and storing both trays five times. Keep the objects, route and storage place the same.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "measure": "Plan how to count spills and accidental closures after a teacher checks the stop. Compare storage space."
+      },
+      {
+        "title": "Rolling bin",
+        "originalProblem": "People keep littering.",
+        "originalSolution": "A bin with a peaked lid rolls on wheels, with a smaller wheeled companion. It brings a place for rubbish closer to the person.",
+        "improvedProblem": "A person far from a bin needs an easy place to put rubbish instead of leaving it behind.",
+        "reason": "This lets us compare convenience with an ordinary nearby bin.",
+        "changes": [
+          {
+            "change": "Add a handle and wheel stops",
+            "why": "A person can move the bin and park it without it rolling away."
+          },
+          {
+            "change": "Keep a wide opening",
+            "why": "Clean practice scraps can go in without aiming at a small hole."
+          }
+        ],
+        "boundary": "Move it by hand on a clear floor. Do not claim it drives itself.",
+        "test": [
+          "Compare collecting ten clean paper scraps with a parked rolling bin and an ordinary nearby bin. Count leftovers and the distance walked."
+        ],
+        "question": "Does moving the bin help more than placing an ordinary bin nearby?"
+      }
+    ],
+    "activities": [
+      {
+        "title": "Improve the problem",
+        "minutes": 10,
+        "goal": "Name a person, one difficult step and the evidence we need.",
+        "steps": [
+          "Read the problem statement and the suggested wording.",
+          "Ask someone what they would carry in the tray and where they would put it away.",
+          "Choose one difficult step. Complete your own improved statement."
+        ],
+        "questions": [
+          "Who will use the tray, and what will they carry?",
+          "Which is difficult now: carrying, using or storing it?",
+          "Would a plain tray already solve that difficulty?"
+        ],
+        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+      },
+      {
+        "title": "Make the idea work",
+        "minutes": 10,
+        "goal": "Show a useful change and explain how the parts connect.",
+        "steps": [
+          "Show the tray open and folded.",
+          "Draw where you would add faces to stop it opening too far.",
+          "Decide whether it needs a latch and show how it would open."
+        ],
+        "questions": [
+          "What will stop the tray opening too far?",
+          "Can the latch be reached without fingers entering the hinge?",
+          "Which size comes from measuring the actual practice objects?"
+        ],
+        "successCheck": "The drawing shows an input, movement or action, and a result. It distinguishes the printed structure from supplied equipment."
+      },
+      {
+        "title": "Test and explain",
+        "minutes": 10,
+        "goal": "Compare fairly and explain what the result means.",
+        "steps": [
+          "Use this comparison: An ordinary tray carrying the same light objects.",
+          "Try opening, using and storing both trays five times. Keep the objects, route and storage place the same.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ],
+        "successCheck": "Five opening and closing cycles without jamming, with the tray reaching a level stop each time; keep the fold only if storage improves without making use harder."
+      }
+    ]
+  },
+  {
+    "id": "g2",
+    "number": 2,
+    "ideas": [
+      {
+        "title": "Mushroom lamp",
+        "originalProblem": "Elderly people tend to fall when they get out of bed at night",
+        "originalSolution": "Our mushroom lamp turns on when someone sits up. We drew several shapes and proposed magnetic charging.",
+        "improvedProblem": "An older person getting out of bed at night needs to see the nearby floor before standing up.",
+        "reason": "This names the person and the useful task. We can compare floor visibility and control use without claiming the lamp prevents falls.",
+        "changes": [
+          {
+            "change": "Use a wider, low base",
+            "why": "It may rock less in the chosen position."
+          },
+          {
+            "change": "Expose a person-motion sensor and add a simple ON/OFF button",
+            "why": "The input and the way to stop the system are clear."
+          },
+          {
+            "change": "Try a removable cap lip",
+            "why": "It may direct light towards the floor and reduce direct glare."
+          }
+        ],
+        "howItWorks": "When ON is enabled, a real person-motion sensor signals a controller to light an LED. OFF disables it. The printed cap, stem and base support the modules; a matched bought adapter supplies low-voltage power.",
+        "printedParts": [
+          "Mushroom cap and removable lip",
+          "Stem and wider base",
+          "Button and sensor openings"
+        ],
+        "suppliedParts": [
+          "Person-motion sensor",
+          "LED and control module",
+          "Simple button",
+          "Matched bought wall adapter and cable"
+        ],
+        "boundary": "An adult selects and connects compatible low-voltage equipment. Pupils do not open an adapter or build mains wiring. A prop-motion IMU is not a stationary person-motion sensor.",
+        "test": [
+          "Use this comparison: The same light at the same position without the added cap lip; include an existing nightlight if available.",
+          "Compare the two versions from a safe seated position. Try five movements in front of the stationary lamp and check OFF.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "measure": "Record floor-symbol visibility, direct view of the LED, successful activations and rocking."
+      },
+      {
+        "title": "Sorting robot bin",
+        "originalProblem": "Everyone is throwing things in the wrong bin.",
+        "originalSolution": "The original robot bin directs items to several compartments. This two-category practice version tests the guiding movement after a person chooses a category.",
+        "improvedProblem": "A person with one confusing item needs to know which local bin it belongs in.",
+        "reason": "We can test an actual sorting decision instead of assuming a sensor knows every material.",
+        "changes": [
+          {
+            "change": "Add clear compartment labels",
+            "why": "People can check where an item will go."
+          },
+          {
+            "change": "Use a person-operated selector first",
+            "why": "The movement can be tested without pretending the model recognises materials."
+          }
+        ],
+        "boundary": "Use clean, dry practice items. Keep fingers out of moving parts.",
+        "test": [
+          "Use five clean sample items and teacher-checked bin rules. Choose a compartment, move the guide and count items reaching the intended space."
+        ],
+        "question": "What information does the bin need before it can choose the right compartment?"
+      }
+    ],
+    "activities": [
+      {
+        "title": "Improve the problem",
+        "minutes": 10,
+        "goal": "Name a person, one difficult step and the evidence we need.",
+        "steps": [
+          "Read the problem statement and the suggested wording.",
+          "Ask which step is difficult at the actual bedside: seeing the floor, reaching a control or avoiding glare.",
+          "Choose one difficult step. Complete your own improved statement."
+        ],
+        "questions": [
+          "Where would the lamp stand, and what floor area must be visible?",
+          "What does a motion nightlight already do?",
+          "Which single change would make this placement easier to use?"
+        ],
+        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+      },
+      {
+        "title": "Make the idea work",
+        "minutes": 10,
+        "goal": "Show a useful change and explain how the parts connect.",
+        "steps": [
+          "Mark the sensor facing the person and keep it uncovered.",
+          "Draw the light path towards the floor and the rear cable route.",
+          "Label ON/OFF and the separate bought adapter."
+        ],
+        "questions": [
+          "Could the cap hide the sensor?",
+          "Does the wider base actually stay steady with its cable attached?",
+          "Can a person find and switch OFF the lamp easily?"
+        ],
+        "successCheck": "The drawing shows an input, movement or action, and a result. It distinguishes the printed structure from supplied equipment."
+      },
+      {
+        "title": "Test and explain",
+        "minutes": 10,
+        "goal": "Compare fairly and explain what the result means.",
+        "steps": [
+          "Use this comparison: The same light at the same position without the added cap lip; include an existing nightlight if available.",
+          "Compare the two versions from a safe seated position. Try five movements in front of the stationary lamp and check OFF.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ],
+        "successCheck": "Keep the lip only if the floor stays visible, glare improves for the observer and sensing is no worse. OFF must remain off during movement."
+      }
+    ]
+  },
+  {
+    "id": "g3",
+    "number": 3,
+    "ideas": [
+      {
+        "title": "Sound companion",
+        "originalProblem": "A person living alone wants something warm to hold, a sound to hear and an easy way to reach family.",
+        "originalSolution": "Our cat sings when patted and sends Hello through its paw.",
+        "improvedProblem": "A person living alone needs an easy way to hear a chosen sound and send a hello to family.",
+        "reason": "Choose one clear action and one person. A sound or hello can be demonstrated separately from a live conversation.",
+        "changes": [
+          {
+            "change": "Try a clear sound button instead of patting",
+            "why": "Compare this change with the original pat-to-sing action and see which is easier."
+          },
+          {
+            "change": "Give the heart and paw different jobs",
+            "why": "The person can learn one control for sound and one for hello."
+          },
+          {
+            "change": "Make start and stop explicit",
+            "why": "The user can choose when sound plays."
+          }
+        ],
+        "howItWorks": "The heart operates a switch that starts or stops a selected tune. A paw switch sends a short radio message to a second nearby board. The receiver can play a brief acknowledgement sound.",
+        "printedParts": [
+          "Removable control cradle",
+          "Guides behind heart and paw controls"
+        ],
+        "suppliedParts": [
+          "Soft sleeve or plush",
+          "Two suitable controllers",
+          "Speaker or board with sound output",
+          "Switches and approved battery supplies"
+        ],
+        "boundary": "Short radio messages do not create a remote voice conversation or AI companion. Use teacher-prepared low-voltage electronics and a willing tester.",
+        "test": [
+          "Use this comparison: A simple sound button with the same tune, and an ordinary hello message.",
+          "Ask a willing person to start and stop the sound without hints. Send five nearby hello messages and count acknowledgements.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "measure": "Count correct first actions, accidental presses and received messages."
+      },
+      {
+        "title": "Parcel box",
+        "originalProblem": "Parcels left outside the door can be taken by other people.",
+        "originalSolution": "A box holds a parcel under an angled cover, with a string, pole and lock.",
+        "improvedProblem": "A person receiving a parcel needs a clear way to place it inside and collect it again.",
+        "reason": "We can check access and closing before making a claim about security.",
+        "changes": [
+          {
+            "change": "Give the cover a clear hinge and stop",
+            "why": "It opens in a controlled way without falling backwards."
+          },
+          {
+            "change": "Keep the lock easy to reach",
+            "why": "The owner can practise opening and closing without reaching inside the hinge."
+          }
+        ],
+        "boundary": "Use a dummy parcel and a teacher-checked model. This test does not prove theft resistance.",
+        "test": [
+          "Compare an ordinary box with this cover using the same dummy parcel. Try placing, closing, unlocking and retrieving it five times."
+        ],
+        "question": "How does the delivery person put a parcel in, and how does the owner get it out?"
+      }
+    ],
+    "activities": [
+      {
+        "title": "Improve the problem",
+        "minutes": 10,
+        "goal": "Name a person, one difficult step and the evidence we need.",
+        "steps": [
+          "Read the problem statement and the suggested wording.",
+          "Ask a willing person what sound they would enjoy and how they would expect to stop it.",
+          "Choose one difficult step. Complete your own improved statement."
+        ],
+        "questions": [
+          "Who wants this sound, and at what moment?",
+          "Do they want a recording, a hello signal or a real conversation?",
+          "What can the class actually demonstrate?"
+        ],
+        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+      },
+      {
+        "title": "Make the idea work",
+        "minutes": 10,
+        "goal": "Show a useful change and explain how the parts connect.",
+        "steps": [
+          "Show the soft outside and the removable cradle inside.",
+          "Trace heart press to sound and paw press to the nearby receiver.",
+          "Label how to stop the sound."
+        ],
+        "questions": [
+          "Can the user tell the controls apart by touch?",
+          "Can the fabric press a switch accidentally?",
+          "How will the electronics be removed for care of the sleeve?"
+        ],
+        "successCheck": "The drawing shows an input, movement or action, and a result. It distinguishes the printed structure from supplied equipment."
+      },
+      {
+        "title": "Test and explain",
+        "minutes": 10,
+        "goal": "Compare fairly and explain what the result means.",
+        "steps": [
+          "Use this comparison: A simple sound button with the same tune, and an ordinary hello message.",
+          "Ask a willing person to start and stop the sound without hints. Send five nearby hello messages and count acknowledgements.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ],
+        "successCheck": "The person can start and stop the sound and explain the paw action; record all five hello attempts, including any missed messages."
+      }
+    ]
+  },
+  {
+    "id": "g4",
+    "number": 4,
+    "ideas": [
+      {
+        "title": "Plant care",
+        "originalProblem": "People are busy and forget to water their plants.",
+        "originalSolution": "Our pot stores rain or wasted water and is meant to water a plant when its soil is dry. The class test uses clean water.",
+        "improvedProblem": "A busy plant owner needs a way to keep a plant watered when a watering is missed.",
+        "reason": "Start with the plant, pot and missed interval. Then look for an extra difficulty that an ordinary self-watering pot leaves.",
+        "changes": [
+          {
+            "change": "Use a bought clear reservoir",
+            "why": "The stored water and refill level are visible."
+          },
+          {
+            "change": "Guide one continuous wick from water into soil",
+            "why": "The water path can be explained and checked."
+          },
+          {
+            "change": "Add an open side-access wick guide",
+            "why": "The owner may be able to inspect or reseat the exposed wick without moving the plant."
+          }
+        ],
+        "howItWorks": "A cotton wick links the water reservoir to the soil. The printed insert supports the plant above the water. The open-sided guide moves away from the wick for inspection while the wick stays in place.",
+        "printedParts": [
+          "Pot insert sized to the reservoir",
+          "Open-sided removable wick guide",
+          "Refill and level features"
+        ],
+        "suppliedParts": [
+          "Leak-tight clear container",
+          "Suitable wick",
+          "Planting medium and practice plant or test pot",
+          "Clean water"
+        ],
+        "boundary": "A wick is not an electronic dry-soil sensor. A short lesson cannot prove long-term plant health. Use clean water; the printed part does not need to be the leak-tight reservoir.",
+        "test": [
+          "Use this comparison: A plain wick reservoir with the same container, wick and planting medium.",
+          "For class, demonstrate the path and compare access to the wick. Plan a longer water-delivery comparison with equal starting water and conditions.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "measure": "Count steps or disturbance needed to inspect the wick. Later measure water delivered or reservoir change over an agreed interval."
+      },
+      {
+        "title": "Doorbell wristband",
+        "originalProblem": "People with hearing difficulties may not hear the doorbell at home.",
+        "originalSolution": "A wristband flashes and vibrates when the doorbell rings.",
+        "improvedProblem": "A person who misses a doorbell needs an alert they can notice where they usually sit or move.",
+        "reason": "The useful result is noticing the visitor, so we can compare different cues.",
+        "changes": [
+          {
+            "change": "Provide separate light and vibration cues",
+            "why": "The person can choose which cue they notice best."
+          },
+          {
+            "change": "Use an adjustable strap and reachable control",
+            "why": "The band can fit comfortably and be easy to check."
+          }
+        ],
+        "boundary": "An adult checks the separate receiver, battery and vibration parts. Waterproofing has not been tested.",
+        "test": [
+          "With a willing person, compare five agreed light or vibration cues in a quiet role-play. Record noticed and missed cues."
+        ],
+        "question": "Which cue does the person notice best, and where will they wear or keep it?"
+      }
+    ],
+    "activities": [
+      {
+        "title": "Improve the problem",
+        "minutes": 10,
+        "goal": "Name a person, one difficult step and the evidence we need.",
+        "steps": [
+          "Read the problem statement and the suggested wording.",
+          "Ask what actually goes wrong when watering is missed, and whether checking or refilling an existing reservoir is difficult.",
+          "Choose one difficult step. Complete your own improved statement."
+        ],
+        "questions": [
+          "Which plant and pot are we helping?",
+          "What does an ordinary wick pot already solve?",
+          "Is seeing or reaching the wick a real remaining difficulty?"
+        ],
+        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+      },
+      {
+        "title": "Make the idea work",
+        "minutes": 10,
+        "goal": "Show a useful change and explain how the parts connect.",
+        "steps": [
+          "Trace one unbroken wick from below the water surface into the soil.",
+          "Show a gap between stored water and the pot floor.",
+          "Show the guide moving sideways without pulling out the buried wick."
+        ],
+        "questions": [
+          "Does the lower wick stay in the water as the level drops?",
+          "Can the guide come off without breaking the water path?",
+          "Where can water be added without spilling into the wrong place?"
+        ],
+        "successCheck": "The drawing shows an input, movement or action, and a result. It distinguishes the printed structure from supplied equipment."
+      },
+      {
+        "title": "Test and explain",
+        "minutes": 10,
+        "goal": "Compare fairly and explain what the result means.",
+        "steps": [
+          "Use this comparison: A plain wick reservoir with the same container, wick and planting medium.",
+          "For class, demonstrate the path and compare access to the wick. Plan a longer water-delivery comparison with equal starting water and conditions.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ],
+        "successCheck": "Keep the guide only if inspection is easier and the wick remains connected. The longer trial must show suitable delivery for the chosen pot without overflow."
+      }
+    ]
+  },
+  {
+    "id": "g5",
+    "number": 5,
+    "ideas": [
+      {
+        "title": "Parcel notice",
+        "originalProblem": "Our topic is parcels at the door.",
+        "originalSolution": "Our topic is parcels left at the door. This parcel notice is a starting idea to discuss.",
+        "improvedProblem": "A parcel recipient needs to notice a delivery when the usual knock or message is missed.",
+        "reason": "A real example can show whether notice is the difficulty, rather than storage, collection or security.",
+        "changes": [
+          {
+            "change": "Make the input a guided pressure plate",
+            "why": "A dummy parcel can produce a visible, repeatable movement."
+          },
+          {
+            "change": "Use a switch and nearby radio receiver",
+            "why": "The arrival can be signalled at a different place."
+          },
+          {
+            "change": "Keep an icon until acknowledgement",
+            "why": "A short signal can leave a reminder for the recipient to check."
+          }
+        ],
+        "howItWorks": "The parcel lowers a spring-returned plate onto a microswitch. A controller sends a short message. The receiver shows an icon until its acknowledgement button is pressed.",
+        "printedParts": [
+          "Guided plate and base",
+          "Controller and receiver cases"
+        ],
+        "suppliedParts": [
+          "Suitable return spring and microswitch",
+          "Two radio boards",
+          "Buttons and approved battery supplies",
+          "Dummy parcel"
+        ],
+        "boundary": "This is a tabletop arrival demonstration, not theft prevention or a weatherproof doormat. An adult prepares the electronics and selects the spring.",
+        "test": [
+          "Use this comparison: An ordinary knock or message in the same pretend delivery routine.",
+          "Use five dummy deliveries. A tester at the receiver acknowledges each alert. Include a light parcel and a parcel left in place.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "measure": "Count deliveries noticed, repeated alerts and plate resets."
+      },
+      {
+        "title": "Crossing the road",
+        "originalProblem": "Our topic is crossing the road.",
+        "originalSolution": "A reminder cuff is one idea to discuss. The group still needs to explain its own drawing.",
+        "improvedProblem": "A person approaching a crossing needs to remember the safe steps taught by an adult.",
+        "reason": "This gives us one small reminder task to discuss without claiming a device makes traffic safe.",
+        "changes": [
+          {
+            "change": "Use a short readable reminder",
+            "why": "The person can explain the message in their own words."
+          },
+          {
+            "change": "Make the message face the wearer",
+            "why": "It can be read without twisting the wrist."
+          }
+        ],
+        "boundary": "This is a classroom discussion. Do not test in live traffic or rely on the cuff for road safety.",
+        "test": [
+          "Use a paper road scene indoors. Ask a pupil to explain the reminder and choose what to do next. Compare with an ordinary instruction card."
+        ],
+        "question": "What does your original small drawing show, and who would use your idea?"
+      }
+    ],
+    "activities": [
+      {
+        "title": "Improve the problem",
+        "minutes": 10,
+        "goal": "Name a person, one difficult step and the evidence we need.",
+        "steps": [
+          "Read the problem statement and the suggested wording.",
+          "Ask a recipient to describe a missed parcel notice and the method they use now.",
+          "Choose one difficult step. Complete your own improved statement."
+        ],
+        "questions": [
+          "Was the notice missed, or was collecting the parcel difficult?",
+          "Where must the alert be noticed?",
+          "What should happen if a parcel stays on the plate?"
+        ],
+        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+      },
+      {
+        "title": "Make the idea work",
+        "minutes": 10,
+        "goal": "Show a useful change and explain how the parts connect.",
+        "steps": [
+          "Show the plate above the switch and the spring returning it.",
+          "Draw a radio arrow to the separate receiver.",
+          "Label who presses acknowledge and what that changes."
+        ],
+        "questions": [
+          "Will a light parcel move the plate enough?",
+          "What stops repeated alerts from one delivery?",
+          "Can the parcel be removed without trapping the plate?"
+        ],
+        "successCheck": "The drawing shows an input, movement or action, and a result. It distinguishes the printed structure from supplied equipment."
+      },
+      {
+        "title": "Test and explain",
+        "minutes": 10,
+        "goal": "Compare fairly and explain what the result means.",
+        "steps": [
+          "Use this comparison: An ordinary knock or message in the same pretend delivery routine.",
+          "Use five dummy deliveries. A tester at the receiver acknowledges each alert. Include a light parcel and a parcel left in place.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ],
+        "successCheck": "Each agreed test parcel should produce one clear arrival event; acknowledgement clears the reminder, and removal lets the plate reset."
+      }
+    ]
+  },
+  {
+    "id": "g6",
+    "number": 6,
+    "ideas": [
+      {
+        "title": "Drone response",
+        "originalProblem": "There is a fire. A fire scanner alerts drones.",
+        "originalSolution": "Our drone is meant to help put out a fire and search for people with a light. This drawing develops the light and operator link. We still need to explain how it would put out the fire.",
+        "improvedProblem": "A rescue team needs clear information about a place that is difficult to see or reach.",
+        "reason": "This names the information the drone should help gather before choosing its equipment.",
+        "changes": [
+          {
+            "change": "Show the drone and its search light",
+            "why": "The drawing explains the flying response idea."
+          },
+          {
+            "change": "Show what the operator needs to know",
+            "why": "The group can explain the message and the next action."
+          }
+        ],
+        "howItWorks": "A detector sends an alert. The group explains how an operator directs the drone, uses its light and receives information. Equipment and mechanism choices remain to be confirmed.",
+        "printedParts": [
+          "Possible housing or light mount, only after checking the selected drone"
+        ],
+        "suppliedParts": [
+          "Suitable drone and controller selected by a qualified adult",
+          "Compatible light and communication equipment if needed"
+        ],
+        "boundary": "This is a design discussion, not a flight or fire test. A qualified adult must check any real drone, equipment and safe operating location.",
+        "test": [
+          "Compare a clear location message with a vague message in an indoor role-play.",
+          "Use pretend messages and a paper plan indoors.",
+          "Record which messages let the receiver identify the right place."
+        ],
+        "measure": "Count which messages let the listener identify the correct place on a paper plan."
+      },
+      {
+        "title": "Detect and alert",
+        "originalProblem": "A fire scanner detects a problem and alerts the drone.",
+        "originalSolution": "The scanner detects a fire, alerts the drone and is meant to show people a way out. This drawing develops the alert and location message. We still need to explain the projected guidance.",
+        "improvedProblem": "A person receiving an alert needs to know what happened and where help is needed.",
+        "reason": "The message can be checked before claiming a reliable detection system.",
+        "changes": [
+          {
+            "change": "Include a location in the alert",
+            "why": "The receiver knows which place to check."
+          },
+          {
+            "change": "Show the receiver and its next action",
+            "why": "The group can explain the link from detection to drone response."
+          }
+        ],
+        "boundary": "Do not use fire, heat, smoke or powder. The detector and drone functions still need real equipment and adult checks.",
+        "test": [
+          "Use five pretend alert cards and a paper plan. Compare messages with and without locations. Record whether the receiver chooses the right place."
+        ],
+        "question": "What detects the problem, who receives the message, and what happens next?"
+      }
+    ],
+    "activities": [
+      {
+        "title": "Improve the problem",
+        "minutes": 10,
+        "goal": "Name a person, one difficult step and the evidence we need.",
+        "steps": [
+          "Read the drone response and detection sections.",
+          "Name who needs the information and where.",
+          "Explain what the drone should help them see or learn."
+        ],
+        "questions": [
+          "Who receives the alert?",
+          "What information is missing?",
+          "Who controls the drone?"
+        ],
+        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+      },
+      {
+        "title": "Make the idea work",
+        "minutes": 10,
+        "goal": "Show a useful change and explain how the parts connect.",
+        "steps": [
+          "Draw the drone and the light.",
+          "Label what it receives and what it sends back.",
+          "Explain who controls it and how it stops."
+        ],
+        "questions": [
+          "What does the drone help someone see?",
+          "What message does it receive?",
+          "Who decides its next action?"
+        ],
+        "successCheck": "The drawing shows an input, movement or action, and a result. It distinguishes the printed structure from supplied equipment."
+      },
+      {
+        "title": "Test and explain",
+        "minutes": 10,
+        "goal": "Compare fairly and explain what the result means.",
+        "steps": [
+          "Compare a clear location message with a vague message in an indoor role-play.",
+          "Use pretend messages and a paper plan indoors.",
+          "Record which messages let the receiver identify the right place."
+        ],
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ],
+        "successCheck": "The receiver identifies the intended place from the message. This checks communication only, not flight or fire response."
+      }
+    ]
+  },
+  {
+    "id": "g7",
+    "number": 7,
+    "ideas": [
+      {
+        "title": "Recycling reasons quiz",
+        "originalProblem": "People not knowing what goes in which bin.",
+        "originalSolution": "Our quiz helps people choose which bin to use.",
+        "improvedProblem": "People using a shared bin need help to check a confusing item before dropping it in.",
+        "reason": "A correct answer and a reason show more understanding than recognising a familiar picture.",
+        "changes": [
+          {
+            "change": "Keep one item and change its condition",
+            "why": "The learner can see why the next action may change."
+          },
+          {
+            "change": "Hide the reason behind a sliding cover",
+            "why": "The learner makes a choice before looking."
+          },
+          {
+            "change": "Add guide rails and retaining stops",
+            "why": "The moving parts stay aligned and attached."
+          }
+        ],
+        "howItWorks": "A manual slider selects the item condition. A separate cover reveals the matching paper reason row after the learner chooses an answer. Teacher-approved paper cards contain the recycling rules.",
+        "printedParts": [
+          "Base and guide rails",
+          "Condition slider",
+          "Answer cover and retaining features"
+        ],
+        "suppliedParts": [
+          "Printed paper cards",
+          "Checked retaining fasteners if required"
+        ],
+        "boundary": "The model is a manual learning aid. It does not recognise real rubbish. The teacher checks every local rule and example.",
+        "test": [
+          "Use this comparison: Ordinary recycling rule cards with the same information.",
+          "After trying each method, use five new teacher-approved examples. Ask for the action and the reason, not only a score.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "measure": "Count correct actions and explanations on unfamiliar examples; note slider jams."
+      },
+      {
+        "title": "Bin feedback",
+        "originalProblem": "People keep throwing things in the wrong bin.",
+        "originalSolution": "A bin gives red or green feedback about a sorting choice.",
+        "improvedProblem": "A person with a confusing item needs to understand why it belongs in a particular bin.",
+        "reason": "An explanation helps the person make the next choice as well.",
+        "changes": [
+          {
+            "change": "Show a reason with each colour",
+            "why": "The user learns what was right or wrong."
+          },
+          {
+            "change": "Use a teacher-controlled choice first",
+            "why": "The feedback can be tried before adding any unproved item sensor."
+          }
+        ],
+        "boundary": "A coloured light does not identify a material by itself. Use clean practice items.",
+        "test": [
+          "Use five clean items with teacher-checked rules. Give a word or symbol as well as colour, then ask the person to explain the choice."
+        ],
+        "question": "How will someone understand the feedback if they cannot tell the colours apart?"
+      }
+    ],
+    "activities": [
+      {
+        "title": "Improve the problem",
+        "minutes": 10,
+        "goal": "Name a person, one difficult step and the evidence we need.",
+        "steps": [
+          "Read the problem statement and the suggested wording.",
+          "Ask which item or condition confuses people at the actual bin.",
+          "Choose one difficult step. Complete your own improved statement."
+        ],
+        "questions": [
+          "Which one item will stay the same?",
+          "What condition changes the decision?",
+          "What reason should the learner explain?"
+        ],
+        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+      },
+      {
+        "title": "Make the idea work",
+        "minutes": 10,
+        "goal": "Show a useful change and explain how the parts connect.",
+        "steps": [
+          "Show the same-item card and two condition positions.",
+          "Use separate arrows for changing condition and revealing the reason.",
+          "Mark where the sliders stop so they stay in their rails."
+        ],
+        "questions": [
+          "Can the cover reveal the correct row without showing the answer early?",
+          "Do the stops keep the slider attached?",
+          "Can the paper card be changed without rebuilding the whole model?"
+        ],
+        "successCheck": "The drawing shows an input, movement or action, and a result. It distinguishes the printed structure from supplied equipment."
+      },
+      {
+        "title": "Test and explain",
+        "minutes": 10,
+        "goal": "Compare fairly and explain what the result means.",
+        "steps": [
+          "Use this comparison: Ordinary recycling rule cards with the same information.",
+          "After trying each method, use five new teacher-approved examples. Ask for the action and the reason, not only a score.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ],
+        "successCheck": "The moving parts complete ten manual cycles without leaving their guides. Keep the extra mechanism only if it improves explanation or use compared with plain cards."
+      }
+    ]
+  },
+  {
+    "id": "g8",
+    "number": 8,
+    "ideas": [
+      {
+        "title": "Reachable light control",
+        "originalProblem": "The light switch is too far from the bed, and the room is dark.",
+        "originalSolution": "Our round pendant has side-by-side ON and OFF controls for a light.",
+        "improvedProblem": "An older person in bed needs to control the room light without getting up to reach a distant switch.",
+        "reason": "The reach difficulty is specific. We can compare control use from the same comfortable position.",
+        "changes": [
+          {
+            "change": "Keep the round case and side-by-side controls",
+            "why": "The main original form remains recognisable."
+          },
+          {
+            "change": "Add different raised shapes and a separating ridge",
+            "why": "ON and OFF may be easier to distinguish in a single-grey print."
+          },
+          {
+            "change": "Guide caps onto a matched remote module",
+            "why": "Each press has a real path to a switch."
+          }
+        ],
+        "howItWorks": "A cap presses its aligned switch on a compatible remote module. The matched receiver controls a low-voltage lamp. The printed case guides the caps and supports the module.",
+        "printedParts": [
+          "Round case and back",
+          "Two guided button caps",
+          "Tactile shapes and separating ridge"
+        ],
+        "suppliedParts": [
+          "Compatible remote and receiver",
+          "Low-voltage lamp",
+          "Appropriate fasteners and supply"
+        ],
+        "boundary": "Tactile shapes are not automatically valid Braille. An adult pairs compatible equipment; pupils do not switch or wire mains electricity.",
+        "test": [
+          "Use this comparison: The same compatible remote placed within comfortable reach.",
+          "From a safe seated position, compare finding and pressing ON/OFF with the ordinary remote and the new case.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "measure": "Count correct first choices, mistaken presses and requests for help."
+      },
+      {
+        "title": "Firestructor cooking screen",
+        "originalProblem": "Food is left cooking when someone walks away and forgets.",
+        "originalSolution": "Firestructor shows cooking instructions and recipes on a screen.",
+        "improvedProblem": "A person following a recipe needs clear instructions and a way to keep track of the current step.",
+        "reason": "We can compare how clearly the steps are understood in a cold practice activity.",
+        "changes": [
+          {
+            "change": "Show clear steps with Next and Back controls",
+            "why": "The person can move through the recipe and repeat an instruction."
+          },
+          {
+            "change": "Support the screen and tidy the cable",
+            "why": "The instructions stay readable while the lead stays out of the work area."
+          }
+        ],
+        "boundary": "Do not use a hot stove. A recipe screen does not detect or stop a fire.",
+        "test": [
+          "Use the same cold pretend recipe on paper and on the screen. Count missed steps and requests for help. Ask which instructions were easier to follow."
+        ],
+        "question": "Which cooking step is forgotten, and what should the reminder ask the person to do?"
+      }
+    ],
+    "activities": [
+      {
+        "title": "Improve the problem",
+        "minutes": 10,
+        "goal": "Name a person, one difficult step and the evidence we need.",
+        "steps": [
+          "Read the problem statement and the suggested wording.",
+          "Ask the intended user whether reaching, finding or pressing the present control is difficult.",
+          "Choose one difficult step. Complete your own improved statement."
+        ],
+        "questions": [
+          "Can the ordinary remote simply be moved within reach?",
+          "How will ON and OFF feel different without relying on colour?",
+          "What size and force suit the actual person?"
+        ],
+        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+      },
+      {
+        "title": "Make the idea work",
+        "minutes": 10,
+        "goal": "Show a useful change and explain how the parts connect.",
+        "steps": [
+          "Keep two controls side by side in a round case.",
+          "Show each cap aligned with its switch.",
+          "Draw the signal going to the matching lamp receiver."
+        ],
+        "questions": [
+          "Can one cap press the other switch accidentally?",
+          "What guides and returns each cap?",
+          "Can the case open for fitting or changing the module?"
+        ],
+        "successCheck": "The drawing shows an input, movement or action, and a result. It distinguishes the printed structure from supplied equipment."
+      },
+      {
+        "title": "Test and explain",
+        "minutes": 10,
+        "goal": "Compare fairly and explain what the result means.",
+        "steps": [
+          "Use this comparison: The same compatible remote placed within comfortable reach.",
+          "From a safe seated position, compare finding and pressing ON/OFF with the ordinary remote and the new case.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ],
+        "successCheck": "Keep the case only if it reduces confusion or effort without creating accidental presses. Demonstrate both ON and OFF on the matched low-voltage lamp."
+      }
+    ]
+  },
+  {
+    "id": "g9",
+    "number": 9,
+    "ideas": [
+      {
+        "title": "Phone sleep holder",
+        "originalProblem": "wasting phone energy and too much screen time",
+        "originalSolution": "Our phone-sized bed holder has a blanket, charging pocket, lock and custom headboard.",
+        "improvedProblem": "Someone choosing a phone break needs help to stop screen use during an agreed rest period.",
+        "reason": "First find the reason for pickups. Screen time and energy are different outcomes, and a holder does not prove either benefit by its shape.",
+        "changes": [
+          {
+            "change": "Make the blanket a guided slider",
+            "why": "It can cover and uncover the screen in a repeatable way."
+          },
+          {
+            "change": "Next design step: add an end stop",
+            "why": "Decide how to keep the sliding cover attached while still letting the phone come out."
+          }
+        ],
+        "howItWorks": "A card phone fits in the cradle. The blanket slides along side rails using its pull tab. An end stop and any locking mechanism still need to be designed. A separate channel leads towards the proposed charging pocket.",
+        "printedParts": [
+          "Phone-sized cradle and headboard",
+          "Blanket slider, rails and pull tab",
+          "End stop and any lock still to design",
+          "Separate cable channel"
+        ],
+        "suppliedParts": [
+          "Measured card phone or dummy",
+          "Cable for an unplugged routing check"
+        ],
+        "boundary": "The drawing shows a manual sliding cover, not a timed lock. Use a dummy phone first. Live charging needs separate hardware and ventilation checks. No energy saving is claimed.",
+        "test": [
+          "Use this comparison: An ordinary phone parking place during the same voluntary routine.",
+          "Use a dummy first for five open/close cycles. For a voluntary behaviour comparison, count pickups and ask why each happens.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "measure": "Record fit, jams, accidental release and pickup reasons."
+      },
+      {
+        "title": "Recycling mascot",
+        "originalProblem": "People put the wrong things in the blue bin.",
+        "originalSolution": "Two mascot designs give feedback. Correct choices earn stickers, with a keychain reward.",
+        "improvedProblem": "A person sorting rubbish needs to understand a confusing item before choosing the blue bin.",
+        "reason": "We can check whether the person learns the rule rather than only collecting a reward.",
+        "changes": [
+          {
+            "change": "Put a short reason on the screen",
+            "why": "The mascot explains the choice."
+          },
+          {
+            "change": "Keep rewards separate from the item opening",
+            "why": "Stickers can be collected without reaching near the rubbish."
+          }
+        ],
+        "boundary": "Use clean items and a person to select the feedback. Fake hands must not grab a person.",
+        "test": [
+          "Compare explanation-only feedback with explanation plus a sticker. Then ask about new items without rewards."
+        ],
+        "question": "Will the person still choose correctly when no sticker is offered?"
+      }
+    ],
+    "activities": [
+      {
+        "title": "Improve the problem",
+        "minutes": 10,
+        "goal": "Name a person, one difficult step and the evidence we need.",
+        "steps": [
+          "Read the problem statement and the suggested wording.",
+          "Ask why a person picks up the phone during the agreed break: a useful task, a notification, habit or another reason.",
+          "Choose one difficult step. Complete your own improved statement."
+        ],
+        "questions": [
+          "Which pickup is the design meant to change?",
+          "Would an ordinary parking place already help?",
+          "What must remain easy to do when the person needs the phone?"
+        ],
+        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+      },
+      {
+        "title": "Make the idea work",
+        "minutes": 10,
+        "goal": "Show a useful change and explain how the parts connect.",
+        "steps": [
+          "Measure a dummy phone and show how it enters the cradle.",
+          "Draw the blanket motion and pull tab. Add your plan for an end stop.",
+          "Keep the cable clear of moving rails."
+        ],
+        "questions": [
+          "Can the phone be taken out easily?",
+          "What will stop the cover sliding off?",
+          "How will you keep the cable clear of the rails?"
+        ],
+        "successCheck": "The drawing shows an input, movement or action, and a result. It distinguishes the printed structure from supplied equipment."
+      },
+      {
+        "title": "Test and explain",
+        "minutes": 10,
+        "goal": "Compare fairly and explain what the result means.",
+        "steps": [
+          "Use this comparison: An ordinary phone parking place during the same voluntary routine.",
+          "Use a dummy first for five open/close cycles. For a voluntary behaviour comparison, count pickups and ask why each happens.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ],
+        "successCheck": "The dummy fits and is retrieved in all five cycles without trapped cable. Keep the behaviour feature only if the real comparison shows a useful difference."
+      }
+    ]
+  },
+  {
+    "id": "g10",
+    "number": 10,
+    "ideas": [
+      {
+        "title": "Living-room caption display",
+        "originalProblem": "Cannot hear clearly",
+        "originalSolution": "Our caption display shows spoken words as text for a person who cannot hear clearly.",
+        "improvedProblem": "A person who cannot hear speech clearly needs to follow the words in an everyday conversation.",
+        "reason": "Name the conversation and person, then check whether the displayed words can be followed.",
+        "changes": [
+          {
+            "change": "Use a compatible device running speech-to-text software",
+            "why": "The proposal has a real route from speech to captions."
+          },
+          {
+            "change": "Support it in a frame with a tilt hinge and stops",
+            "why": "The screen can be positioned for the reader."
+          },
+          {
+            "change": "Try a removable shade and rear cable route",
+            "why": "Glare and cable interference can be compared."
+          }
+        ],
+        "howItWorks": "A suitable microphone and speech-to-text app on a supplied phone or tablet produce captions. A printed frame holds the device. A hinge and stop positions change its viewing angle; a removable shade may reduce glare.",
+        "printedParts": [
+          "Screen frame and base",
+          "Tilt hinge and stops",
+          "Removable shade",
+          "Cable guide"
+        ],
+        "suppliedParts": [
+          "Compatible caption-app device",
+          "Compatible microphone if needed",
+          "Suitable fasteners and approved supply"
+        ],
+        "boundary": "A basic micro:bit sound-level sensor measures loudness, not words. A printed frame does not produce captions. The fire-car alternative is a manual demonstration only, without fire or powder.",
+        "test": [
+          "Use this comparison: The same caption device in an ordinary position or stand.",
+          "Use the same short phrases, reader position and lighting. Compare readability with two frame positions or with and without the shade.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "measure": "Count important missed words and requests to reposition the screen. Separate transcription errors from visibility problems."
+      },
+      {
+        "title": "Fire response car",
+        "originalProblem": "The group wants to help people with cooking or gas-related fire problems.",
+        "originalSolution": "A wheeled car carries a jointed arm and a quick-release extinguisher holder.",
+        "improvedProblem": "A person responding to a fire needs help reaching a dangerous area without entering it.",
+        "reason": "This keeps the real need clear. The class can safely check movement and stability, while emergency functions remain untested.",
+        "changes": [
+          {
+            "change": "Give each joint a clear stop",
+            "why": "The arm has a repeatable range of movement."
+          },
+          {
+            "change": "Keep the body stable while the arm moves",
+            "why": "We can check whether the arm makes the model tip."
+          }
+        ],
+        "boundary": "Use no fire, heat, gas, powder or pressure. Do not attach a real extinguisher or claim the model is fireproof.",
+        "test": [
+          "Use a hand-moved model with a lightweight dummy payload. Try five arm positions and check stability on a clear floor."
+        ],
+        "question": "What keeps the car stable when its arm reaches forwards or sideways?"
+      }
+    ],
+    "activities": [
+      {
+        "title": "Improve the problem",
+        "minutes": 10,
+        "goal": "Name a person, one difficult step and the evidence we need.",
+        "steps": [
+          "Read the problem statement and the suggested wording.",
+          "Ask a willing listener which situation and viewing position make speech or captions difficult to follow.",
+          "Choose one difficult step. Complete your own improved statement."
+        ],
+        "questions": [
+          "Is the difficulty hearing, reading small words, glare or missing speech?",
+          "What does an ordinary caption app already do?",
+          "Which printed change would help the actual reader?"
+        ],
+        "successCheck": "The statement names who needs help and what is difficult without promising an unproved result."
+      },
+      {
+        "title": "Make the idea work",
+        "minutes": 10,
+        "goal": "Show a useful change and explain how the parts connect.",
+        "steps": [
+          "Trace speech to microphone, software, screen and reader.",
+          "Show the hinge axis and two stable viewing positions.",
+          "Keep the cable away from the moving hinge."
+        ],
+        "questions": [
+          "Can the reader see the whole screen at each angle?",
+          "Does the shade cover useful text or microphones?",
+          "What holds the device securely without blocking controls?"
+        ],
+        "successCheck": "The drawing shows an input, movement or action, and a result. It distinguishes the printed structure from supplied equipment."
+      },
+      {
+        "title": "Test and explain",
+        "minutes": 10,
+        "goal": "Compare fairly and explain what the result means.",
+        "steps": [
+          "Use this comparison: The same caption device in an ordinary position or stand.",
+          "Use the same short phrases, reader position and lighting. Compare readability with two frame positions or with and without the shade.",
+          "Record what happened, or write the test plan if the equipment is not available. Explain one next change."
+        ],
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ],
+        "successCheck": "Keep the printed change only if readability or positioning improves without hiding text or obstructing controls. Record errors made by the app."
+      }
+    ]
+  }
+]

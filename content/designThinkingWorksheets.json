@@ -1,0 +1,952 @@
+[
+  {
+    "group": "g1",
+    "imageKeys": [
+      "g1_folding_tray",
+      "g1_rolling_bin"
+    ],
+    "fields": [
+      {
+        "id": "g01-problem-person",
+        "label": "The person and place",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g01-problem-difficulty",
+        "label": "The difficult step",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g01-problem-evidence",
+        "label": "What we know or need to find out",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g01-problem-problem",
+        "label": "Our improved problem statement",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g01-idea-change",
+        "label": "One change we choose and why",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g01-idea-parts",
+        "label": "Printed parts and parts we need to supply",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g01-test-comparison",
+        "label": "What we compare and keep the same",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g01-test-result",
+        "label": "Our result or planned measurement",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g01-test-next",
+        "label": "Our next change and reason",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g01-test-presentation",
+        "label": "Our main message for the presentation",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      }
+    ],
+    "questions": [
+      {
+        "title": "Improve the problem",
+        "questions": [
+          "Who will use the tray, and what will they carry?",
+          "Which is difficult now: carrying, using or storing it?",
+          "Would a plain tray already solve that difficulty?"
+        ]
+      },
+      {
+        "title": "Make the idea work",
+        "questions": [
+          "What will stop the tray opening too far?",
+          "Can the latch be reached without fingers entering the hinge?",
+          "Which size comes from measuring the actual practice objects?"
+        ]
+      },
+      {
+        "title": "Test and explain",
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ]
+      }
+    ]
+  },
+  {
+    "group": "g2",
+    "imageKeys": [
+      "g2_motion_lamp",
+      "g2_sorting_bin"
+    ],
+    "fields": [
+      {
+        "id": "g02-problem-person",
+        "label": "The person and place",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g02-problem-difficulty",
+        "label": "The difficult step",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g02-problem-evidence",
+        "label": "What we know or need to find out",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g02-problem-problem",
+        "label": "Our improved problem statement",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g02-idea-change",
+        "label": "One change we choose and why",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g02-idea-parts",
+        "label": "Printed parts and parts we need to supply",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g02-test-comparison",
+        "label": "What we compare and keep the same",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g02-test-result",
+        "label": "Our result or planned measurement",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g02-test-next",
+        "label": "Our next change and reason",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g02-test-presentation",
+        "label": "Our main message for the presentation",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      }
+    ],
+    "questions": [
+      {
+        "title": "Improve the problem",
+        "questions": [
+          "Where would the lamp stand, and what floor area must be visible?",
+          "What does a motion nightlight already do?",
+          "Which single change would make this placement easier to use?"
+        ]
+      },
+      {
+        "title": "Make the idea work",
+        "questions": [
+          "Could the cap hide the sensor?",
+          "Does the wider base actually stay steady with its cable attached?",
+          "Can a person find and switch OFF the lamp easily?"
+        ]
+      },
+      {
+        "title": "Test and explain",
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ]
+      }
+    ]
+  },
+  {
+    "group": "g3",
+    "imageKeys": [
+      "g3_sound_companion",
+      "g3_parcel_box"
+    ],
+    "fields": [
+      {
+        "id": "g03-problem-person",
+        "label": "The person and place",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g03-problem-difficulty",
+        "label": "The difficult step",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g03-problem-evidence",
+        "label": "What we know or need to find out",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g03-problem-problem",
+        "label": "Our improved problem statement",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g03-idea-change",
+        "label": "One change we choose and why",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g03-idea-parts",
+        "label": "Printed parts and parts we need to supply",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g03-test-comparison",
+        "label": "What we compare and keep the same",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g03-test-result",
+        "label": "Our result or planned measurement",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g03-test-next",
+        "label": "Our next change and reason",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g03-test-presentation",
+        "label": "Our main message for the presentation",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      }
+    ],
+    "questions": [
+      {
+        "title": "Improve the problem",
+        "questions": [
+          "Who wants this sound, and at what moment?",
+          "Do they want a recording, a hello signal or a real conversation?",
+          "What can the class actually demonstrate?"
+        ]
+      },
+      {
+        "title": "Make the idea work",
+        "questions": [
+          "Can the user tell the controls apart by touch?",
+          "Can the fabric press a switch accidentally?",
+          "How will the electronics be removed for care of the sleeve?"
+        ]
+      },
+      {
+        "title": "Test and explain",
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ]
+      }
+    ]
+  },
+  {
+    "group": "g4",
+    "imageKeys": [
+      "g4_wick_pot",
+      "g4_doorbell_band"
+    ],
+    "fields": [
+      {
+        "id": "g04-problem-person",
+        "label": "The person and place",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g04-problem-difficulty",
+        "label": "The difficult step",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g04-problem-evidence",
+        "label": "What we know or need to find out",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g04-problem-problem",
+        "label": "Our improved problem statement",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g04-idea-change",
+        "label": "One change we choose and why",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g04-idea-parts",
+        "label": "Printed parts and parts we need to supply",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g04-test-comparison",
+        "label": "What we compare and keep the same",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g04-test-result",
+        "label": "Our result or planned measurement",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g04-test-next",
+        "label": "Our next change and reason",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g04-test-presentation",
+        "label": "Our main message for the presentation",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      }
+    ],
+    "questions": [
+      {
+        "title": "Improve the problem",
+        "questions": [
+          "Which plant and pot are we helping?",
+          "What does an ordinary wick pot already solve?",
+          "Is seeing or reaching the wick a real remaining difficulty?"
+        ]
+      },
+      {
+        "title": "Make the idea work",
+        "questions": [
+          "Does the lower wick stay in the water as the level drops?",
+          "Can the guide come off without breaking the water path?",
+          "Where can water be added without spilling into the wrong place?"
+        ]
+      },
+      {
+        "title": "Test and explain",
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ]
+      }
+    ]
+  },
+  {
+    "group": "g5",
+    "imageKeys": [
+      "g5_parcel_alert",
+      "g5_crossing_cuff"
+    ],
+    "fields": [
+      {
+        "id": "g05-problem-person",
+        "label": "The person and place",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g05-problem-difficulty",
+        "label": "The difficult step",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g05-problem-evidence",
+        "label": "What we know or need to find out",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g05-problem-problem",
+        "label": "Our improved problem statement",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g05-idea-change",
+        "label": "One change we choose and why",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g05-idea-parts",
+        "label": "Printed parts and parts we need to supply",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g05-test-comparison",
+        "label": "What we compare and keep the same",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g05-test-result",
+        "label": "Our result or planned measurement",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g05-test-next",
+        "label": "Our next change and reason",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g05-test-presentation",
+        "label": "Our main message for the presentation",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      }
+    ],
+    "questions": [
+      {
+        "title": "Improve the problem",
+        "questions": [
+          "Was the notice missed, or was collecting the parcel difficult?",
+          "Where must the alert be noticed?",
+          "What should happen if a parcel stays on the plate?"
+        ]
+      },
+      {
+        "title": "Make the idea work",
+        "questions": [
+          "Will a light parcel move the plate enough?",
+          "What stops repeated alerts from one delivery?",
+          "Can the parcel be removed without trapping the plate?"
+        ]
+      },
+      {
+        "title": "Test and explain",
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ]
+      }
+    ]
+  },
+  {
+    "group": "g6",
+    "imageKeys": [
+      "g6_drone",
+      "g6_detect_alert"
+    ],
+    "fields": [
+      {
+        "id": "g06-problem-person",
+        "label": "The person and place",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g06-problem-difficulty",
+        "label": "The difficult step",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g06-problem-evidence",
+        "label": "What we know or need to find out",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g06-problem-problem",
+        "label": "Our improved problem statement",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g06-idea-change",
+        "label": "One change we choose and why",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g06-idea-parts",
+        "label": "Printed parts and parts we need to supply",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g06-test-comparison",
+        "label": "What we compare and keep the same",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g06-test-result",
+        "label": "Our result or planned measurement",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g06-test-next",
+        "label": "Our next change and reason",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g06-test-presentation",
+        "label": "Our main message for the presentation",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      }
+    ],
+    "questions": [
+      {
+        "title": "Improve the problem",
+        "questions": [
+          "Who receives the alert?",
+          "What information is missing?",
+          "Who controls the drone?"
+        ]
+      },
+      {
+        "title": "Make the idea work",
+        "questions": [
+          "What does the drone help someone see?",
+          "What message does it receive?",
+          "Who decides its next action?"
+        ]
+      },
+      {
+        "title": "Test and explain",
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ]
+      }
+    ]
+  },
+  {
+    "group": "g7",
+    "imageKeys": [
+      "g7_condition_quiz",
+      "g7_feedback_bin"
+    ],
+    "fields": [
+      {
+        "id": "g07-problem-person",
+        "label": "The person and place",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g07-problem-difficulty",
+        "label": "The difficult step",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g07-problem-evidence",
+        "label": "What we know or need to find out",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g07-problem-problem",
+        "label": "Our improved problem statement",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g07-idea-change",
+        "label": "One change we choose and why",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g07-idea-parts",
+        "label": "Printed parts and parts we need to supply",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g07-test-comparison",
+        "label": "What we compare and keep the same",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g07-test-result",
+        "label": "Our result or planned measurement",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g07-test-next",
+        "label": "Our next change and reason",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g07-test-presentation",
+        "label": "Our main message for the presentation",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      }
+    ],
+    "questions": [
+      {
+        "title": "Improve the problem",
+        "questions": [
+          "Which one item will stay the same?",
+          "What condition changes the decision?",
+          "What reason should the learner explain?"
+        ]
+      },
+      {
+        "title": "Make the idea work",
+        "questions": [
+          "Can the cover reveal the correct row without showing the answer early?",
+          "Do the stops keep the slider attached?",
+          "Can the paper card be changed without rebuilding the whole model?"
+        ]
+      },
+      {
+        "title": "Test and explain",
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ]
+      }
+    ]
+  },
+  {
+    "group": "g8",
+    "imageKeys": [
+      "g8_pendant",
+      "g8_cooking_screen"
+    ],
+    "fields": [
+      {
+        "id": "g08-problem-person",
+        "label": "The person and place",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g08-problem-difficulty",
+        "label": "The difficult step",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g08-problem-evidence",
+        "label": "What we know or need to find out",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g08-problem-problem",
+        "label": "Our improved problem statement",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g08-idea-change",
+        "label": "One change we choose and why",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g08-idea-parts",
+        "label": "Printed parts and parts we need to supply",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g08-test-comparison",
+        "label": "What we compare and keep the same",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g08-test-result",
+        "label": "Our result or planned measurement",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g08-test-next",
+        "label": "Our next change and reason",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g08-test-presentation",
+        "label": "Our main message for the presentation",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      }
+    ],
+    "questions": [
+      {
+        "title": "Improve the problem",
+        "questions": [
+          "Can the ordinary remote simply be moved within reach?",
+          "How will ON and OFF feel different without relying on colour?",
+          "What size and force suit the actual person?"
+        ]
+      },
+      {
+        "title": "Make the idea work",
+        "questions": [
+          "Can one cap press the other switch accidentally?",
+          "What guides and returns each cap?",
+          "Can the case open for fitting or changing the module?"
+        ]
+      },
+      {
+        "title": "Test and explain",
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ]
+      }
+    ]
+  },
+  {
+    "group": "g9",
+    "imageKeys": [
+      "g9_phone_bed",
+      "g9_recycling_mascot"
+    ],
+    "fields": [
+      {
+        "id": "g09-problem-person",
+        "label": "The person and place",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g09-problem-difficulty",
+        "label": "The difficult step",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g09-problem-evidence",
+        "label": "What we know or need to find out",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g09-problem-problem",
+        "label": "Our improved problem statement",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g09-idea-change",
+        "label": "One change we choose and why",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g09-idea-parts",
+        "label": "Printed parts and parts we need to supply",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g09-test-comparison",
+        "label": "What we compare and keep the same",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g09-test-result",
+        "label": "Our result or planned measurement",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g09-test-next",
+        "label": "Our next change and reason",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g09-test-presentation",
+        "label": "Our main message for the presentation",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      }
+    ],
+    "questions": [
+      {
+        "title": "Improve the problem",
+        "questions": [
+          "Which pickup is the design meant to change?",
+          "Would an ordinary parking place already help?",
+          "What must remain easy to do when the person needs the phone?"
+        ]
+      },
+      {
+        "title": "Make the idea work",
+        "questions": [
+          "Can the phone be taken out easily?",
+          "What will stop the cover sliding off?",
+          "How will you keep the cable clear of the rails?"
+        ]
+      },
+      {
+        "title": "Test and explain",
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ]
+      }
+    ]
+  },
+  {
+    "group": "g10",
+    "imageKeys": [
+      "g10_caption_display",
+      "g10_fire_car"
+    ],
+    "fields": [
+      {
+        "id": "g10-problem-person",
+        "label": "The person and place",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g10-problem-difficulty",
+        "label": "The difficult step",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g10-problem-evidence",
+        "label": "What we know or need to find out",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g10-problem-problem",
+        "label": "Our improved problem statement",
+        "activity": "Improve the problem",
+        "prompt": "Name a person, one difficult step and the evidence we need."
+      },
+      {
+        "id": "g10-idea-change",
+        "label": "One change we choose and why",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g10-idea-parts",
+        "label": "Printed parts and parts we need to supply",
+        "activity": "Make the idea work",
+        "prompt": "Show a useful change and explain how the parts connect."
+      },
+      {
+        "id": "g10-test-comparison",
+        "label": "What we compare and keep the same",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g10-test-result",
+        "label": "Our result or planned measurement",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g10-test-next",
+        "label": "Our next change and reason",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      },
+      {
+        "id": "g10-test-presentation",
+        "label": "Our main message for the presentation",
+        "activity": "Test and explain",
+        "prompt": "Compare fairly and explain what the result means."
+      }
+    ],
+    "questions": [
+      {
+        "title": "Improve the problem",
+        "questions": [
+          "Is the difficulty hearing, reading small words, glare or missing speech?",
+          "What does an ordinary caption app already do?",
+          "Which printed change would help the actual reader?"
+        ]
+      },
+      {
+        "title": "Make the idea work",
+        "questions": [
+          "Can the reader see the whole screen at each angle?",
+          "Does the shade cover useful text or microphones?",
+          "What holds the device securely without blocking controls?"
+        ]
+      },
+      {
+        "title": "Test and explain",
+        "questions": [
+          "What will we keep the same?",
+          "What result will we count or observe?",
+          "What would make us keep, change or reject the added feature?"
+        ]
+      }
+    ]
+  }
+]

@@ -18,6 +18,7 @@ import CustomersPanel from '@/components/Admin/CustomersPanel'
 import CreatorSubscriptions from '@/components/Admin/CreatorSubscriptions'
 import NotificationsBell from '@/components/DashboardComponents/NotificationsBell'
 import EventManagement from '@/components/Admin/EventManagement'
+import TeacherClassroom from '@/components/Workshop/TeacherClassroom'
 import Overview from '@/components/Admin/Overview'
 import OnboardingWizard from '@/components/Admin/OnboardingWizard'
 import { buildSetupChecklist, needsOnboarding } from '@/lib/admin/setupChecklist'
@@ -76,6 +77,7 @@ const NAV_GROUPS = [
     {
         title: 'Operations',
         items: [
+            { key: 'workshop', label: 'Live Workshop', icon: IoPeopleOutline, description: 'Control lesson stages, see student submissions and moderate classroom feedback.' },
             {
                 key: 'customPrintRequests',
                 label: 'Print Requests',
@@ -186,6 +188,7 @@ const NAV_GROUPS = [
 ]
 
 const PANELS = {
+    workshop: TeacherClassroom,
     content: ContentManagement,
     payments: CreatorPayments,
     events: EventManagement,

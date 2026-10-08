@@ -9,6 +9,7 @@ import Blog from './Blog'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { programmePostCopy } from '@/lib/blog/programmeCopy'
+import { workshopPost } from '@/lib/blog/designThinkingWorkshop'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,7 +36,8 @@ export default async function BlogLayout({ searchParams } = {}) {
         .select('title slug excerpt heroImage tags categories featured publishDate createdAt readingTimeMinutes')
         .sort({ publishDate: -1, createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize).lean()
     if (page > 1 && !posts.length) notFound()
-    const initialPosts = JSON.parse(JSON.stringify(posts)).map(programmePostCopy).map(post => ({
+    const listedPosts = page === 1 ? [workshopPost, ...posts.filter(post => post.slug !== workshopPost.slug)] : posts
+    const initialPosts = JSON.parse(JSON.stringify(listedPosts)).map(programmePostCopy).map(post => ({
         ...post,
         publishDateFormatted: validIsoDate(post.publishDate)
             ? new Date(post.publishDate).toLocaleDateString('en-GB', { timeZone: 'UTC' }) : null,
