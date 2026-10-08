@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/db';
 import BlogPost from '@/models/BlogPost';
 import { statusQuery } from '@/lib/blog/status';
 import { BLOG_SORT_INDEX, ensureBlogSortIndex } from '@/lib/blog/sortIndex';
+import { programmePostCopy } from '@/lib/blog/programmeCopy';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -19,5 +20,5 @@ export async function GET() {
         .hint(BLOG_SORT_INDEX)
         .limit(200)
         .lean();
-    return NextResponse.json({ ok: true, posts });
+    return NextResponse.json({ ok: true, posts: posts.map(programmePostCopy) });
 }

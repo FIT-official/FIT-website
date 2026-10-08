@@ -8,8 +8,9 @@ import { threeDPenPhotos, miniatureEscapeRoomPhoto, nyghMiniatureRoomPhoto } fro
 
 const description = '3D pen, 3D printing, Arduino electronics and robotics workshops for schools in Singapore. Explore practical projects and plan a programme for your students.'
 const hero = { ...threeDPenPhotos[0], displayZoom: 2, displayFocus: '82% 62%' }
-// Existing approved project photographs. School-specific photos keep their
-// actual attribution; these do not represent Bartley or Boon Lay sessions.
+const programmePhoto = { ...nyghMiniatureRoomPhoto, alt: 'A finished miniature room with a blue door and clock', caption: 'A finished miniature room from a 3D design and electronics project.', album: 'Miniature room models' }
+const programmePhotos = schoolWorkshopPhotos.map(photo => ({ ...photo, alt: photo.alt.replace(/ at NYGH| with NYGH students|NYGH /g, ''), caption: photo.caption.replace(/ at NYGH/g, ''), album: '3D design and model making' }))
+// Existing approved programme photographs; describe the project without school names.
 const buttonPhoto = escapeRoomPhotos.find(photo => photo.src.endsWith('/escape-room-button-lights.jpg'))
 export const metadata = programmeMetadata({ title: 'School STEM & Robotics Workshops Singapore | Fix It Today', description, path: '/school-programmes', image: hero.src, imageAlt: hero.alt })
 
@@ -39,10 +40,10 @@ export default function SchoolProgrammes() {
             </div>
             <WorkshopList items={[
                 { title: '3D pen making', description: 'Trace a few shapes and join them into a model. Start with a guided first piece, then add details or make a shared class display.', concepts: 'See how flat pieces connect and what helps a model stand up.', href: '#pen-programmes', link: 'Explore 3D pen programmes', photo: threeDPenPhotos[1] },
-                { title: '3D design & printing', description: 'Model a keychain, phone stand or small box in Tinkercad, then compare the design with a printed part.', concepts: 'Explore dimensions, clearance, layers and print orientation.', href: '/blog/tinkercad-keychain-tutorial', link: 'Try a first modelling project', photo: nyghMiniatureRoomPhoto },
+                { title: '3D design & printing', description: 'Model a keychain, phone stand or small box in Tinkercad, then compare the design with a printed part.', concepts: 'Explore dimensions, clearance, layers and print orientation.', href: '/blog/tinkercad-keychain-tutorial', link: 'Try a first modelling project', photo: programmePhoto },
                 { title: 'Electronics', description: 'Connect a sensor or button to a light or display. Build a temperature monitor, reaction game or interactive exhibit.', concepts: 'Press a button or read a sensor, then see the circuit respond.', href: '/blog/arduino-nano-dht11-workshop-guide', link: 'An Arduino sensor project', photo: buttonPhoto },
                 { title: 'Robotics', description: 'Use a sensor and motor to make a device respond to its surroundings. Test when it should move, stop or signal an obstacle.', concepts: 'Connect sensing, thresholds and movement through repeated tests.' },
-                { title: 'Project mentoring', description: 'Develop a prototype over several sessions. Projects can combine a printed enclosure, electronics and a presentation of the work.', concepts: 'Keep the first attempt, make a change and compare the results.', photo: nyghMiniatureRoomPhoto },
+                { title: 'Project mentoring', description: 'Develop a prototype over several sessions. Projects can combine a printed enclosure, electronics and a presentation of the work.', concepts: 'Keep the first attempt, make a change and compare the results.', photo: programmePhoto },
             ]} />
         </section>
 
@@ -63,8 +64,8 @@ export default function SchoolProgrammes() {
                 <div><h3>Facilitator support</h3><p>Training and project guidance for the people running a programme, exhibition or competition activity.</p></div>
             </div>
         </section>
-        <ProjectGallery photos={[...threeDPenPhotos, ...schoolWorkshopPhotos.filter(photo => /room-models|printed-mechanism/.test(photo.src)), miniatureEscapeRoomPhoto, ...escapeRoomPhotos.filter(photo => /button-lights|sensor-wiring|electronics/.test(photo.src))]} title="Things we have made"
-            intro="A FIT miniature escape-room build, 3D pen models from the EEEAA 30th Anniversary workshop, and room models and mechanisms from NYGH. Each photograph names its project." />
+        <ProjectGallery photos={[...threeDPenPhotos, ...programmePhotos.filter(photo => /room-models/.test(photo.src)), miniatureEscapeRoomPhoto, ...escapeRoomPhotos.filter(photo => /button-lights|sensor-wiring|electronics/.test(photo.src))]} title="Things we have made"
+            intro="A FIT miniature escape-room build, 3D pen models from an anniversary workshop, and room models from 3D design sessions. Each photograph describes its project." />
         <Questions items={[
             { question: 'Do students need prior experience?', answer: 'Beginner sessions can start with guided modelling or simple circuits. Tell us the students’ level and any coding or design experience so we can choose a suitable task.' },
             { question: 'Does the school need its own equipment?', answer: 'Let us know which laptops, printers and electronics kits are available. We’ll agree on equipment, materials and any printing needed before or after the session.' },
@@ -72,9 +73,9 @@ export default function SchoolProgrammes() {
             { question: 'How is the programme priced?', answer: 'The quote depends on the group size, number of sessions, materials, equipment and project support. Share your budget early so we can plan a suitable scope.' },
         ]} />
         <ReadingList items={[
-            { href: '/blog/3d-printing', topic: 'Start here', title: 'How 3D printing works', photo: nyghMiniatureRoomPhoto },
-            { href: '/blog/tinkercad-toolbox-guide', topic: 'Design', title: 'Your first Tinkercad tools', photo: nyghMiniatureRoomPhoto },
-            { href: '/blog/3d-printing-theory-and-material-properties', topic: 'Materials', title: 'From plastic to a useful part', photo: nyghMiniatureRoomPhoto },
+            { href: '/blog/3d-printing', topic: 'Start here', title: 'How 3D printing works', photo: programmePhoto },
+            { href: '/blog/tinkercad-toolbox-guide', topic: 'Design', title: 'Your first Tinkercad tools', photo: programmePhoto },
+            { href: '/blog/3d-printing-theory-and-material-properties', topic: 'Materials', title: 'From plastic to a useful part', photo: programmePhoto },
             { href: '/blog/arduino-nano-io-expansion-shield-wiring', topic: 'Electronics', title: 'Connect an Arduino project', photo: buttonPhoto },
         ]} />
     </ProgrammeLayout>

@@ -61,27 +61,27 @@ export const escapeRoomPhotos = [
 export const teachingPhotos = [
   {
     src: '/images/collaborations/nygh-classroom-workshop.jpg',
-    alt: 'FIT instructor leading a classroom workshop with NYGH students seated around tables',
-    caption: 'Classroom teaching at Nanyang Girls’ High School.',
+    alt: 'FIT instructor leading a classroom workshop seated around tables',
+    caption: 'Classroom teaching at a 3D design and model-making programme.',
     width: 1280,
     height: 960,
-    album: 'School workshops / NYGH',
+    album: '3D design and model making',
   },
   {
     src: '/images/collaborations/nygh-group-guidance.jpg',
-    alt: 'FIT instructor supporting a small group of NYGH students working together around a laptop',
+    alt: 'FIT instructor supporting a small group of Students working together around a laptop',
     caption: 'Working through a design with a small group of students.',
     width: 1280,
     height: 960,
-    album: 'School workshops / NYGH',
+    album: '3D design and model making',
   },
   {
     src: '/images/collaborations/nygh-workshop-instructor.jpg',
-    alt: 'FIT instructor explaining a workshop task to NYGH students in front of a projected lesson',
+    alt: 'FIT instructor explaining a workshop task to Students in front of a projected lesson',
     caption: 'Explaining the task before students put it into practice.',
     width: 1280,
     height: 960,
-    album: 'School workshops / NYGH',
+    album: '3D design and model making',
   },
 ]
 
@@ -89,43 +89,35 @@ export const schoolWorkshopPhotos = [
   ...teachingPhotos,
   {
     "src": "/images/collaborations/nygh-3d-design-workshop.jpg",
-    "alt": "An instructor introducing 3D printing examples to a class at NYGH",
+    "alt": "An instructor introducing 3D printing examples to a class",
     "caption": "Exploring what a 3D printer can make.",
     "width": 1280,
     "height": 960,
-    "album": "School workshops / NYGH"
+    "album": "3D design and model making"
   },
   {
     "src": "/images/collaborations/nygh-model-measuring.jpg",
-    "alt": "NYGH students measuring a panel for their room model",
+    "alt": "Students measuring a panel for their room model",
     "caption": "Measuring the next part of a room model.",
     "width": 1080,
     "height": 1440,
-    "album": "School workshops / NYGH"
+    "album": "3D design and model making"
   },
   {
     "src": "/images/collaborations/nygh-room-models.jpg",
-    "alt": "White panel room models under construction at NYGH",
+    "alt": "White panel room models under construction",
     "caption": "Room layouts taking shape in the classroom.",
     "width": 1080,
     "height": 1440,
-    "album": "School workshops / NYGH"
-  },
-  {
-    "src": "/images/collaborations/nygh-printed-mechanism.jpg",
-    "alt": "Blue printed mechanism components with gear teeth and circular openings",
-    "caption": "Printed parts ready to become a moving mechanism.",
-    "width": 1080,
-    "height": 1440,
-    "album": "School workshops / NYGH"
+    "album": "3D design and model making"
   },
   {
     "src": "/images/collaborations/nygh-model-planning.jpg",
-    "alt": "Students planning a room model around a white panel at NYGH",
+    "alt": "Students planning a room model around a white panel",
     "caption": "Planning the layout before the build.",
     "width": 960,
     "height": 1280,
-    "album": "School workshops / NYGH"
+    "album": "3D design and model making"
   }
 ]
 

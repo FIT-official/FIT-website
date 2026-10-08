@@ -11,6 +11,8 @@ import { BLOG_SORT_INDEX, ensureBlogSortIndex } from '@/lib/blog/sortIndex'
 import { blogJsonLd, blogMetadata } from '@/lib/seo/blog'
 import { renderPublicMarkdown, validIsoDate } from '@/lib/seo/publicContent'
 import BlogPageClient from './BlogPageClient'
+import { omitRejectedPhoto } from '@/lib/blog/excludedPhoto'
+import { programmePostCopy, programmeHtmlCopy } from '@/lib/blog/programmeCopy'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,7 +29,7 @@ async function viewerIsAdmin() {
 export default async function BlogPage({ params }) {
     const { blogSlug } = await params
     await connectToDatabase()
-    const post = await BlogPost.findOne({ slug: blogSlug }).lean()
+    const post = programmePostCopy(await BlogPost.findOne({ slug: blogSlug }).lean())
     if (!post) notFound()
 
     const status = effectiveStatus(post)
@@ -38,8 +40,8 @@ export default async function BlogPage({ params }) {
         preview = true
     }
 
-    const contentHtml = post.contentFormat === 'tiptap'
-        ? renderTiptapHtml(post.contentJson) : renderPublicMarkdown(post.content)
+    const contentHtml = programmeHtmlCopy(omitRejectedPhoto(post.contentFormat === 'tiptap'
+        ? renderTiptapHtml(post.contentJson) : renderPublicMarkdown(post.content)), blogSlug)
 
     await ensureBlogSortIndex()
     const pool = await BlogPost.find(statusQuery('published'))
@@ -48,7 +50,7 @@ export default async function BlogPage({ params }) {
         .hint(BLOG_SORT_INDEX)
         .limit(50)
         .lean()
-    const related = pickRelated(post, pool, 3)
+    const related = pickRelated(post, pool.map(programmePostCopy), 3)
 
     // Pass display fields only. Edited rich text must never fall back to an
     // old imported source that can include subsequently removed information.
@@ -70,5 +72,5 @@ export async function generateMetadata({ params }) {
     const { blogSlug } = await params
     await connectToDatabase()
     const post = await BlogPost.findOne({ slug: blogSlug, $or: [statusQuery('published'), { status: 'unlisted' }] }).lean()
-    return blogMetadata(post)
+    return blogMetadata(programmePostCopy(post))
 }
