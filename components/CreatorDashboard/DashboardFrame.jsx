@@ -1,23 +1,33 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
+import home from '@/components/Home/v2/home.module.css';
 import './dashboard.css';
-export function StatusBadge({ status }) {
-    return <span className={`cd-badge cd-${status}`}>{status.replaceAll('_', ' ')}</span>;
+export const cardClass = `${home.serviceCard} ${home.cardBody} cd-card`;
+export const buttonClass = home.button;
+export function StatusBadge({ status = 'unknown' }) {
+    const label = status.toLowerCase();
+    return <span className={`cd-badge cd-${label}`}>{label.replaceAll('_', ' ')}</span>;
 }
 export default function DashboardFrame({ title, owner = false, fixture = false, publicTracking = false, children }) {
     const base = owner ? '/admin/creator-dashboard' : '/dashboard/creator';
-    return <main className="cd-root">
-        <header className="cd-header"><Link href={base} className="cd-brand">FIT <span>Creator workspace</span></Link><span>{publicTracking ? 'Order tracking' : owner ? 'Owner' : 'Creator'}</span></header>
-        <div className="cd-layout" style={publicTracking ? { gridTemplateColumns: '1fr' } : undefined}>{!publicTracking && <nav className="cd-nav" aria-label="Creator workspace">
+    return <main className={`${home.home} cd-root`}>
+        <section className={`${home.hero} cd-hero`}>
+            <div className={home.heroContent}>
+                <p className={home.eyebrow}>{publicTracking ? 'Order tracking' : owner ? 'Fix It Today · Workshop' : 'Fix It Today · Your store'}</p>
+                <h1>{title}</h1>
+                <p className={home.heroPromise}>{publicTracking ? 'From a design to a finished print.' : owner ? 'Orders, printers and fulfilment across your community.' : 'Your orders, your printers, your next creation.'}</p>
+            </div>
+        </section>
+        {!publicTracking && <nav className="cd-nav" aria-label="Creator workspace">
             <Link href={base}>Overview</Link><Link href={`${base}/orders`}>Orders</Link>
-            {owner && <><Link href={`${base}/queue`}>Print queue</Link><Link href={`${base}/materials`}>Materials</Link></>}
+            <Link href={owner ? `${base}/queue` : `${base}/jobs`}>Print queue</Link>
+            <Link href={`${base}/fleet`}>Printer fleet</Link><Link href={`${base}/payouts`}>Payouts</Link>
             <Link href="/dashboard/creator/uploads">Uploads</Link>
-            {!owner && <Link href="/dashboard/creator/jobs">Print status</Link>}
+            {owner && <Link href={`${base}/materials`}>Materials</Link>}
             <Link href={owner ? '/admin' : '/dashboard/products'}>{owner ? 'Shop admin' : 'My products'}</Link>
-            <div className="cd-nav-note">One place for orders,<br />files and fulfilment.</div>
-        </nav>}<section className="cd-content">
+        </nav>}
+        <section className={`${home.section} cd-content`}>
             {fixture && <p className="cd-notice">Demo workspace · sample data · changes are disabled</p>}
-            <p className="cd-eyebrow">FIX IT TODAY / {owner ? 'WORKSHOP' : 'YOUR STORE'}</p><h1>{title}</h1>
             {children}
-        </section></div>
+        </section>
     </main>;
 }

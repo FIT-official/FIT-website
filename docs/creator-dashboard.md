@@ -6,7 +6,9 @@ The workspace adds store-scoped orders, private print-file intake and a manual w
 
 `CREATOR_DASHBOARD_ENABLED` defaults off. Only the exact value `true` enables the new pages and APIs. Write handlers check the flag again. Do not enable real integrations on a preview that shares production credentials.
 
-`CREATOR_DASHBOARD_FIXTURES=true`, together with the main flag, renders synthetic, read-only pages without database, inventory or account queries. This works in local development and Vercel preview; it is ignored on production deployments. Fixture APIs reject requests. The root layout omits account providers and analytics on fixture surfaces. Tracking also omits analytics to keep bearer tokens out of third-party telemetry.
+`CREATOR_DASHBOARD_FIXTURES=true`, together with the main flag, renders synthetic, read-only pages without database, inventory or account queries only when `NODE_ENV` is not `production`. Production-built Vercel previews do not bypass authentication. Development aliases supply a signed-out Clerk component shim; the fixture middleware blocks every write and limits reads to local sample endpoints. The database connector rejects fixture calls before inspecting its cached connection. Tracking and dashboard pages omit analytics to keep private links out of third-party telemetry.
+
+All workspace views use the shared `SiteFrame` (Navbar, MaintenanceBanner, Footer), the site font and colours, and home v2 hero, section, card and button classes. Inputs reuse `formInput`. Workspace CSS only adds data layouts, tables and status badges. The creator subtree skips the older sidebar so it does not render a second dashboard shell.
 
 The order webhook extension additionally requires a `STRIPE_SECRET_KEY` with the test prefix and an event with `livemode: false`. Signature verification still uses `STRIPE_SESSION_COMPLETE_SIGNING_SECRET`. Other deployments retain the existing checkout behaviour. Independent creator checkout is enabled only behind this test-payment gate; no payout integration is implied.
 
@@ -36,7 +38,7 @@ Order fields retain existing names: `orderId` is the order number, `userId` is t
 
 New models have automatic collection and index creation disabled. Enabled write paths explicitly prepare their collections and indexes before transactions; the tracking-token index is prepared only by the verified test webhook. Importing a disabled dashboard route therefore cannot create its database structures.
 
-The status graph is `paid → in_production → qc → ready / shipped → delivered`, with cancellation where permitted and full refunds handled by the verified webhook. Manual requests cannot set payment states. Partial refund allocation remains deferred. FIT fulfilment is the default; creator status edits require a server-stored `fulfilment: creator` value. No address is returned by the new creator APIs.
+The status graph is `paid → in_production → qc → ready / shipped → delivered`, with cancellation where permitted and full refunds handled by the verified webhook. Manual requests cannot set payment states. Partial refund allocation remains deferred. Creators operate their own print queue, which advances production and QC. The existing `fulfilment` field governs dispatch: FIT dispatch remains the default; direct creator dispatch edits require a server-stored `fulfilment: creator` value. No address is returned by the new creator APIs.
 
 Tracking tokens are 16 cryptographically random bytes. `/track/[token]` renders only item names, quantities and status history; invalid tokens call `notFound()`. Dynamic pages refresh every four seconds. Hosted latency still needs measurement.
 
@@ -58,9 +60,23 @@ Application access expires after seven days pending or thirty days clean. Actual
 
 ## Workshop and materials
 
-`/admin/creator-dashboard` shows orders and the manual fleet; `/orders`, `/queue` and `/materials` provide owner views. `/dashboard/creator/orders`, `/uploads` and `/jobs` provide store-scoped views. The public tracking route is separate.
+`/admin/creator-dashboard` shows orders and printer assignments; `/orders`, `/queue`, `/fleet`, `/payouts` and `/materials` provide owner views. `/dashboard/creator/orders`, `/uploads`, `/jobs`, `/fleet` and `/payouts` provide store-scoped views. The public tracking route is separate.
 
-Print jobs are created automatically for paid print items and manually by the owner. Assignment uses the in-repo manual printer list. Printing requires a printer; completion moves the linked sub-order to QC; failure preserves the original and creates one queued reprint. Priority sorts first; up/down reorders within priority. Creator job responses omit printer, stock and upload details. Lists are bounded to 200 rows. No physical printer is contacted.
+Print jobs are created automatically for paid print items and manually by an owner or creator in their own store. `Printer` and `PrintJob` require `storeId`. All interactive lists, reads, assignments, status updates and reorders use `scopeQueryForStore`. Owners see all stores, with audited View-as filters for orders, queue, fleet and payouts. A job may be assigned only to a printer in the same store, even by the owner. Missing ownership fails closed; no seed or ownership migration runs automatically. Printing revalidates the printer's ownership. Completion moves the linked sub-order to QC; failure preserves the original and creates one queued reprint. Priority sorts first; up/down reorders within the same store and priority. Lists are bounded to 200 rows.
+
+## Printer adapters
+
+`lib/creatorDashboard/printerAdapters` mirrors the integration note's types in JSDoc. All modes expose normalized `getStatus`, `getProgress`, `getTemps`, descriptor and capability methods. Results use `{ok: true, value}`; failures throw typed `PrinterError` subclasses with safe messages, stable codes and retry information. Unsupported upload/start/pause/resume/stop calls throw `PrinterCapabilityError`. This exception convention follows the dashboard ruling rather than the note's returned error union.
+
+The effective capability matrix distinguishes `mock`, `manual`, `prusalink` and `bambu_lan`. Mock states (idle, printing, paused, error, offline) are deterministic; mock controls only alter an in-memory simulation. Manual status has no measured temperatures or progress. PrusaLink and Bambu LAN consume only normalized Bridge summaries already supplied to the adapter. Missing summaries or two missed 60-second reporting intervals show `OFFLINE / bridge_not_connected`; stale readings are hidden. Invalid or cross-store/printer summaries fail closed. All Bambu and Prusa control capabilities are false in this scaffold.
+
+The planned FIT Bridge initiates outbound WSS to FIT. No Bridge registration, authentication receiver, WSS service or LAN client is implemented here. Printer IPs, access codes and full serials are not model fields or adapter inputs. No hardware is contacted and no cloud printer service is used. A directory source guard rejects networking clients. Hardware timing and actual database-export checks remain unverified.
+
+## Payout estimates
+
+`lib/creator/payoutConfig.js` holds the placeholder FIT rate (10%) and Stripe estimate (3.4% + 50 cents per sub-order). Both need Chairman selection; these are not actual processor rates or a fee agreement. The view has no onboarding or transfer controls and calls no Stripe payout API.
+
+Gross is the item-snapshot value. Delivery, tax and discounts outside those snapshots are excluded. New webhook items preserve `unitAmountCents`; older dollar prices are converted by decimal parsing. Multiplication and half-up fee rounding use integer cents and BigInt intermediates. Net = gross − estimated Stripe fee − FIT fee. Totals sum the already rounded rows; tiny orders may correctly show a negative estimate. The fixed estimate is per sub-order, not an allocation of a checkout's actual fee. Cancelled and refunded rows are excluded, with refund fee retention and partial refunds left for reconciliation. Totals describe the latest 200 visible rows, not a settlement balance.
 
 Materials reuse the existing Sheet reader, with an owner-only API. The reader has a read-only OAuth scope. Refresh is on demand and every fifteen minutes while the page is open. Missing credentials produce the existing dated snapshot, clearly labelled. Malformed material rows are reported. The service account's actual Viewer permission remains a deployment check. Reservations, stock mutations and low-stock alerts are not included.
 
@@ -68,4 +84,6 @@ Materials reuse the existing Sheet reader, with an owner-only API. The reader ha
 
 The new targeted tests cover authorization, real Stripe signature generation with dummy credentials, transactional replay/rollback, status transitions, file validation, mock storage ownership/expiry, print queue behaviour, fixture isolation and UI rendering. Database transactions are mocked in memory; they do not establish hosted database performance.
 
-To export synthetic HTML, set `CREATOR_SCREENSHOT_DIR` and run the targeted `creatorDashboardUi.test.jsx` test with two workers. Run `corepack yarn node scripts/preview-creator-dashboard.mjs <directory>` to capture it. The script blocks network access and closes its browser; it needs no server or service credentials.
+`corepack yarn node scripts/dev-creator-fixtures.mjs 3107 <server-manifest.json>` starts one Next development worker on loopback with an OS-only environment allowlist and both fixture flags. It refuses to start if any Next environment file exists (filenames checked only). It records the exact server PID. There are no invented service keys. Development-only Clerk aliases are never selected in production.
+
+Run `corepack yarn node scripts/preview-creator-dashboard.mjs <directory> http://127.0.0.1:3107` with the installed Playwright. It captures actual pages at 1440×1000 and 390×844, including `/?home=v2` and `/shop`, full-page views, and three-column comparisons (home, workspace view, shop). It blocks external browser requests, checks status, layout overflow, header/footer presence and page errors, and closes the browser. The public catalogue uses the repo's 13-item Bambu fixture with representative local filament artwork, not live inventory. Stop only the recorded server PID afterward. No build is required.

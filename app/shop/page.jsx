@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { SITE_URL } from '@/lib/seo/site';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { getShopProducts } from '@/lib/seo/shop';
+import { fixtureMode } from '@/lib/creatorDashboard/flags';
 
 export const dynamic = 'force-dynamic';
 const BASE_URL = SITE_URL;
@@ -31,7 +32,8 @@ const SHOP_JSON_LD = {
 
 async function ShopLayout({ searchParams }) {
     const params = await searchParams || {};
-    const products = await getShopProducts(params);
+    const fixture = fixtureMode();
+    const products = fixture ? (await import('@/lib/creatorDashboard/preview/catalog')).previewCatalogue : await getShopProducts(params);
     return (
         <>
             <script
@@ -39,6 +41,7 @@ async function ShopLayout({ searchParams }) {
                 dangerouslySetInnerHTML={{ __html: jsonLdString(SHOP_JSON_LD) }}
             />
             <section className="px-8 pt-12 pb-6">
+                {fixture && <p className="text-xs text-lightColor mb-4">Local catalogue sample · representative filament artwork · no live stock</p>}
                 <h1 className="text-2xl md:text-3xl mb-4">3D Printing Filament and Electronics in Singapore</h1>
                 <p className="text-sm max-w-3xl mb-4">Browse PLA and PETG filament, microcontrollers, sensors and other electronics for your projects. Check each product for its specifications, available options and current price.</p>
                 <div className="flex flex-wrap gap-4 text-sm underline">

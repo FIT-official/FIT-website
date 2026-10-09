@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import "./dashboard.css";
+import SiteFrame from '@/components/General/SiteFrame';
 import Navbar from "@/components/General/Navbar";
 import MaintenanceBanner from '@/components/MaintenanceBanner';
 import Footer from "@/components/General/Footer";
@@ -65,14 +66,23 @@ export const metadata = {
   robots: { index: true, follow: true, googleBot: { 'max-image-preview': 'large' } },
 };
 
-export default async function RootLayout({ children }) {
-  if (dashboardEnabled()) {
-    const surface = (await headers()).get('x-fit-creator-surface');
-    // Tracking tokens must not enter analytics. Fixture pages have no account/DB probes.
-    if (surface === 'tracking' || (surface === 'dashboard' && fixtureMode())) {
-      return <html lang="en"><body style={{ margin: 0, background: '#f6f8f5' }}>{children}</body></html>;
-    }
-  }
+export default function RootLayout({ children }) {
+  return dashboardEnabled() ? <CreatorRootLayout>{children}</CreatorRootLayout> : <StorefrontLayout>{children}</StorefrontLayout>;
+}
+
+async function CreatorRootLayout({ children }) {
+  const surface = dashboardEnabled() ? (await headers()).get('x-fit-creator-surface') : null;
+  // Private links and dashboard paths never enter analytics. Local fixtures use
+  // the same frame with a dev-only signed-out Clerk shim and no service clients.
+  if (surface === 'tracking' || surface === 'dashboard' || fixtureMode()) return (
+    <ClerkProvider><html lang="en"><body className={`${inter.variable} antialiased`}>
+      <ToastProvider><ClientProviders><SiteFrame>{children}</SiteFrame></ClientProviders></ToastProvider>
+    </body></html></ClerkProvider>
+  );
+  return <StorefrontLayout>{children}</StorefrontLayout>;
+}
+
+function StorefrontLayout({ children }) {
   return (
     <ClerkProvider>
       <html lang="en">
