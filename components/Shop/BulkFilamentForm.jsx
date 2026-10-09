@@ -182,7 +182,7 @@ export default function BulkFilamentForm() {
               <optgroup label="Bambu Lab">{catalogue.filter(p => p.brand === 'Bambu Lab').map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</optgroup>
             </select>
           </label>
-          {catalogue.some(p => p.brand === 'Bambu Lab') && <p className="mt-3 text-sm">{BAMBU_PRICE_NOTICE}</p>}
+          {product?.brand === 'Bambu Lab' && <p className="mt-3 text-sm">{BAMBU_PRICE_NOTICE}</p>}
           {product?.pricingMode === 'list' && <p className="mt-2 text-xs text-slate-600">Stock source: {product.stockSource === 'shop' ? 'current shop inventory' : product.stockSource}. Limits include shared colour and spool stock.</p>}
           {product && <><div className="mt-4 grid gap-4 sm:grid-cols-2">{product.types.map(t => /^spool$/i.test(t.label) ? <fieldset key={t.id} className="min-w-0 sm:col-span-2">
             <legend className="text-sm font-semibold">Spool option</legend>
