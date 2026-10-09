@@ -2,11 +2,10 @@
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { GoStar } from "react-icons/go";
-import Image from "next/image";
+import ProductImage from "./ProductImage";
 import { useEffect, useState } from "react";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
-import LinkToolTip from "./LinkToolTip";
 import { getDiscountedPrice } from "@/utils/discount";
 import ShopAddToCart from './Cart/ShopAddToCart';
 
@@ -50,14 +49,7 @@ function ProductCard({ product }) {
         return () => { cancelled = true; };
     }, [isPublicSeed, isLoaded, isSignedIn, viewerId, product._id, product.likes, product.likeCount, product.creatorUserId]);
 
-    const [tooltip, setTooltip] = useState(null);
     const [hoveringLink, setHoveringLink] = useState(false);
-
-    const images = product.images || [];
-    const primaryImageKey = images[0];
-    const imageSrc = primaryImageKey
-        ? `/api/proxy?key=${encodeURIComponent(primaryImageKey)}`
-        : '/placeholder.jpg';
 
     const reviews = product.reviews || [];
     const salesCount = product.salesCount ?? product.sales?.length ?? 0;
@@ -135,29 +127,18 @@ function ProductCard({ product }) {
     return (
         <div
             className="relative flex flex-col gap-3 p-4 transition-all duration-500 ease-in-out cursor-pointer"
-            onMouseMove={e => {
-                if (!hoveringLink) {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setTooltip({
-                        x: e.clientX - rect.left,
-                        y: e.clientY - rect.top,
-                    });
-                }
-            }}
-            onMouseLeave={() => setTooltip(null)}
             onClick={handleCardClick}
             role="button"
         >
-            {!hoveringLink && <LinkToolTip tooltip={tooltip} title={"View " + product.name} />}
-            <Image
-                src={imageSrc}
+            <ProductImage
+                src={product.images?.[0]}
                 alt={product.name}
                 width={400}
                 height={400}
                 className="flex w-full object-cover bg-borderColor aspect-square mb-2"
             />
             <div className="flex flex-col w-full items-center justify-center relative">
-                <a href={`/products/${encodeURIComponent(product.slug)}`} onClick={e => e.stopPropagation()} className="text-xs uppercase font-normal flex hover:underline">{product.name}</a>
+                <a href={`/products/${encodeURIComponent(product.slug)}`} onClick={e => e.stopPropagation()} className="text-xs uppercase font-normal text-center break-words w-full px-5 hover:underline">{product.name}</a>
 
                 <p className="text-base font-bold flex items-end">
                     {(() => {
@@ -228,7 +209,6 @@ function ProductCard({ product }) {
                         title={`${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`}
                         onMouseEnter={() => {
                             setHoveringLink(true);
-                            setTooltip(null);
                         }}
                         onMouseLeave={() => setHoveringLink(false)}
                     >

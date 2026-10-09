@@ -34,6 +34,15 @@ afterEach(() => {
 })
 
 describe('server-rendered shop cards', () => {
+    it('shows the full name once without a cursor-following view pill', () => {
+        session.user = null; session.isSignedIn = false
+        const name = 'Black - Blue 170 pcs in 1 Screwdriver Kit with a long caption'
+        render(<ProductCard product={{ ...publicProduct, name, images: ['/product-images/kit.png'] }} />)
+        fireEvent.mouseMove(screen.getByRole('button'), { clientX: 150, clientY: 120 })
+        expect(screen.getAllByText(name)).toHaveLength(1)
+        expect(screen.queryByText(`View ${name}`)).toBeNull()
+        expect(screen.getByRole('link', { name })).toHaveAttribute('href', '/products/lanbo-pla')
+    })
     it('lets a guest select a filament colour and add from the listing', async () => {
         session.user = null; session.isSignedIn = false
         render(<ProductCard product={{ ...publicProduct, productType: 'shop', listing: 'fit', infiniteStock: true,
