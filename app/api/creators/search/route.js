@@ -1,3 +1,4 @@
+import { publicCreatorFilter, isPublicCreator } from '@/lib/creatorDashboard/directory';
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
@@ -16,6 +17,7 @@ export async function GET(request) {
         const limit = Math.min(Number(searchParams.get("limit")) || 20, 50);
 
         const baseFilter = {
+            ...publicCreatorFilter(),
             // A "creator" is a subscribed/admin user who has set a shop display name,
             // or an existing creator with products/role.
             $or: [
@@ -55,7 +57,7 @@ export async function GET(request) {
             }
         }
 
-        const result = creators.map((u) => {
+        const result = creators.filter(u => isPublicCreator(u) && isPublicCreator({ userId: u.userId, publicMetadata: profileCache[u.userId]?.publicMetadata })).map((u) => {
             const profile = profileCache[u.userId];
             const raw = (typeof u.metadata?.displayName === 'string') ? u.metadata.displayName.trim() : '';
             const displayName = raw && !isLikelyClerkUserId(raw) ? raw : 'Unnamed Store';

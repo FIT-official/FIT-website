@@ -1,3 +1,4 @@
+import { publicCreatorFilter, isPublicCreator } from '@/lib/creatorDashboard/directory';
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
@@ -33,6 +34,7 @@ export async function GET(request) {
         await connectToDatabase();
 
         const filter = {
+        ...publicCreatorFilter(),
             shop: { $exists: true, $ne: null },
             "shop.published": { $ne: false },
             "metadata.displayName": { $exists: true, $type: "string", $ne: "" },
@@ -63,7 +65,7 @@ export async function GET(request) {
             for (const row of rows || []) counts.set(row._id, row.count);
         }
 
-        const creators = users
+        const creators = users.filter(isPublicCreator)
             .map((u) => {
                 const displayName = sanitizeDisplayName(u?.metadata?.displayName, "Unnamed Store");
                 const shop = u.shop || {};

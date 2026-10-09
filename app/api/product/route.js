@@ -11,6 +11,8 @@ import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3 } from "@/lib/s3";
 import { reserveCreatorQuota, releaseProductQuota, CreatorQuotaError } from "@/lib/creatorQuota";
 import { editableProduct, productForViewer } from "@/lib/productAccess";
+import { getScope } from '@/lib/auth/scope';
+import { creatorProductInput } from '@/lib/creatorDashboard/productPolicy';
 import { shippingCostsInput } from '@/lib/shopShipping';
 
 export const dynamic = 'force-dynamic';
@@ -51,8 +53,9 @@ export async function POST(req) {
         if (!userId)
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+        const scope = await getScope(userId);
+        const input = creatorProductInput(await req.json(), scope);
         await connectToDatabase();
-        const input = await req.json();
         const body = { ...editableProduct(input), creatorUserId: userId };
         const requiredFields = [
             "creatorUserId",
@@ -101,7 +104,7 @@ export async function POST(req) {
         const client = await clerkClient()
         const userObj = await client.users.getUser(userId)
         if (userObj && userObj.publicMetadata && userObj.publicMetadata.role) {
-            userRole = userObj.publicMetadata.role;
+            userRole = scope.role === "owner" ? "admin" : userObj.publicMetadata.role;
         }
         if (productType === "shop" && userRole !== "admin") {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -173,6 +176,7 @@ export async function POST(req) {
     } catch (err) {
         if (reservation && !created) await reservation.release().catch(console.error);
         if (err instanceof CreatorQuotaError) return NextResponse.json({ error: err.message }, { status: err.status });
+        if (err.status) return NextResponse.json({ error: err.message }, { status: err.status });
         console.error(err);
         return NextResponse.json({ error: "Server error" }, { status: 500 });
     }
@@ -184,8 +188,9 @@ export async function PUT(req) {
         if (!userId)
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+        const scope = await getScope(userId);
+        const input = creatorProductInput(await req.json(), scope);
         await connectToDatabase();
-        const input = await req.json();
         const body = editableProduct(input);
 
         const { searchParams } = new URL(req.url);
@@ -206,7 +211,7 @@ export async function PUT(req) {
         const client = await clerkClient()
         const userObj = await client.users.getUser(userId)
         if (userObj && userObj.publicMetadata && userObj.publicMetadata.role) {
-            userRole = userObj.publicMetadata.role;
+            userRole = scope.role === "owner" ? "admin" : userObj.publicMetadata.role;
         }
         if (prevProduct.creatorUserId !== userId && userRole !== "admin") {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -324,6 +329,7 @@ export async function PUT(req) {
         }
         return NextResponse.json({ success: true, product: updated }, { status: 200 });
     } catch (err) {
+        if (err.status) return NextResponse.json({ error: err.message }, { status: err.status });
         console.error(err);
         return NextResponse.json({ error: "Server error" }, { status: 500 });
     }
