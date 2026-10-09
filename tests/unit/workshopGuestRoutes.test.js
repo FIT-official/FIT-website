@@ -28,6 +28,61 @@ async function join(name = 'Alex', group = 'g2') { const r = await sessionPOST(r
 beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-09T02:00:00Z')); h.rows.clear(); h.touched = []; h.reads = []; h.admin = false; h.signedIn = false; h.rows.set('workshopGuestLessons', new Map([['2026-10-09', { ...emptyLesson(), entryOpen: true, version: 1 }]])) })
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs() })
 describe('guest routes never reveal legacy class data', () => {
+    it('reuses the same private identity for a name part while preserving its full name, work and draft', async () => {
+        const a = await join('Alex Tan'), b = await join('Alex Lee')
+        const draft = { seat: a.identity.seat, topic: 'feedback-g3-idea1', expectedVersion: 0, requestId: randomUUID(), content: { idea: '1', whatWorks: 'Saved draft', question: '', improvement: '' } }
+        expect((await draftsPOST(req('/api/workshop/guest/drafts?homeGroup=g2', 'POST', draft, a.cookie))).status).toBe(200)
+        Object.assign(lesson(), { feedbackOpen: true, refinementOpen: true })
+        const response = { kind: 'feedback', expectedSeat: a.identity.seat, submissionId: randomUUID(), phaseVersion: 0, session: '2026-10-09', presentingGroup: 'g3', visitingGroup: 'g2', idea: '1', whatWorks: 'Saved response', question: 'How?', improvement: 'Add labels' }
+        expect((await classroomPOST(req('/api/workshop/guest/classroom?homeGroup=g2', 'POST', response, a.cookie))).status).toBe(200)
+        const beforeSessions = structuredClone([...h.rows.get('workshopGuestSessions')]), beforeDrafts = structuredClone([...h.rows.get('workshopGuestDrafts')]), beforeLesson = structuredClone(lesson())
+        for (const part of ['alex', '  TAN  ', 'lex ta']) {
+            h.reads = []
+            const retry = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: part, group: 'g2' }, a.cookie))
+            expect(retry.status).toBe(200); expect(await retry.json()).toEqual(a.identity)
+            expect(retry.headers.get('set-cookie').split(';')[0]).toBe(a.cookie)
+            const reads = h.reads.filter(row => row.name === 'workshopGuestSessions')
+            expect(reads).toHaveLength(1); expect(Object.keys(reads[0].q)).toEqual(['_id'])
+        }
+        expect([...h.rows.get('workshopGuestSessions')]).toEqual(beforeSessions)
+        expect([...h.rows.get('workshopGuestDrafts')]).toEqual(beforeDrafts); expect(lesson()).toEqual(beforeLesson)
+        expect((await draftsGET(req('/api/workshop/guest/drafts?homeGroup=g2', 'GET', undefined, b.cookie)).then(r => r.json())).drafts).toHaveLength(0)
+        expect(h.touched.every(name => name.startsWith('workshopGuest'))).toBe(true)
+    })
+    it('does not choose between colliding name parts or expose another full name', async () => {
+        const a = await join('Alex Tan'), b = await join('Alex Lee'), c = await join('Sam Tan')
+        const before = structuredClone([...h.rows.get('workshopGuestSessions')])
+        for (const [identity, name] of [[a, 'Alex'], [b, 'Alex'], [c, 'Tan']]) {
+            const retry = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name, group: 'g2' }, identity.cookie))
+            expect(await retry.json()).toEqual(identity.identity)
+        }
+        const mismatch = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'Lee', group: 'g2' }, a.cookie))
+        expect(mismatch.status).toBe(409); expect(JSON.stringify(await mismatch.json())).not.toMatch(/Alex Lee|Sam Tan|guest_/)
+        expect([...h.rows.get('workshopGuestSessions')]).toEqual(before)
+    })
+    it.each(['missing', 'unknown', 'revoked', 'expired'])('does not recover an existing account from a partial name and a %s cookie', async state => {
+        const a = await join('Alex Tan'), rows = h.rows.get('workshopGuestSessions'), old = [...rows.values()][0]
+        let cookie = a.cookie
+        if (state === 'missing') cookie = ''
+        if (state === 'unknown') cookie = 'fit_workshop_guest=' + '0'.repeat(64)
+        if (state === 'revoked') old.enabled = false
+        if (state === 'expired') old.expiresAt = new Date('2026-10-09T01:59:59Z')
+        const before = structuredClone(old); h.reads = []
+        const joined = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'Alex', group: 'g2' }, cookie))
+        expect(joined.status).toBe(200)
+        const body = await joined.json()
+        expect(body.name).toBe('Alex'); expect(body.seat).not.toBe(a.identity.seat)
+        expect(body).not.toHaveProperty('studentLogin'); expect(body).not.toHaveProperty('matches')
+        expect(rows.get(old._id)).toEqual(before); expect(rows.size).toBe(2)
+        for (const read of h.reads.filter(row => row.name === 'workshopGuestSessions')) expect(Object.keys(read.q)).toEqual(['_id'])
+    })
+    it('does not create a different identity on an unmatched part, wrong group or closed entry', async () => {
+        const a = await join('Alex Tan'), before = structuredClone([...h.rows.get('workshopGuestSessions')])
+        for (const input of [{ name: 'Lee', group: 'g2' }, { name: 'Alex', group: 'g3' }]) expect((await sessionPOST(req('/api/workshop/guest/session', 'POST', input, a.cookie))).status).toBe(409)
+        lesson().entryOpen = false
+        expect((await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'Tan', group: 'g2' }, a.cookie))).status).toBe(403)
+        expect([...h.rows.get('workshopGuestSessions')]).toEqual(before)
+    })
     it.each([0, 1])('renews an original 24-hour cookie during classroom polling, since=%s', async since => {
         const a = await join(), rows = h.rows.get('workshopGuestSessions'), row = [...rows.values()][0]
         row.expiresAt = new Date('2026-10-10T02:00:00Z')

@@ -1,5 +1,5 @@
 import { guestDb, classJson, classFailure, sameOrigin, jsonBody, limitGuestOperation } from '@/lib/workshopGuestHttp'
-import { guestToken, guestHash, guestAccess, newGuest, guestCookie, requireGuestEnabled, GuestAccessError, guestNameKey } from '@/lib/workshopGuestIdentity'
+import { guestToken, guestHash, guestAccess, newGuest, guestCookie, requireGuestEnabled, GuestAccessError, guestNamePartMatches } from '@/lib/workshopGuestIdentity'
 import { readLesson } from '@/lib/workshopGuestClassroomStore'
 import { WORKSHOP_SESSION } from '@/lib/workshopFeedback'
 import { renewGuestSession, withGuestCookie } from '@/lib/workshopGuestContinuity'
@@ -32,7 +32,7 @@ export async function POST(request) {
         if (oldToken) {
             try {
                 const row = await sessions.findOne({ _id: guestHash(oldToken) }), old = guestAccess(row)
-                if (old.group === input.group && guestNameKey(old.name) === guestNameKey(input.name)) {
+                if (guestNamePartMatches(old, input.group, input.name)) {
                     const access = await renewGuestSession(sessions, oldToken, row)
                     return withGuestCookie(classJson({ seat: access.seat, group: access.group, name: access.name, selfReported: true }), request, access)
                 }
