@@ -9,8 +9,11 @@ const isStoreRoute = createRouteMatcher(['/shop(.*)', '/products(.*)', '/cart(.*
 const isServicePage = createRouteMatcher(['/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair', '/maker-tools', '/community', '/community/(.*)'])
 const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)'])
 const isSsoCallback = createRouteMatcher(['/sign-up/sso-callback(.*)', '/sign-in/sso-callback(.*)'])
+const isMakerPlayground = createRouteMatcher(['/maker-tools/playground', '/maker-tools/playground/'])
 
 async function handleRequest(auth, req) {
+    // The local-only educational editor does not depend on an account or onboarding.
+    if (isMakerPlayground(req)) return NextResponse.next()
     // API handlers enforce their own authentication/signatures. A browser
     // onboarding redirect must never replace JSON or consume a Stripe webhook.
     if (isApiRoute(req)) return NextResponse.next()
