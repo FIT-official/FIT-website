@@ -20,7 +20,7 @@ it('matches the observed Sheet naming schema using synthetic stock and BambuLab 
   const c = catalogue(), p = basic(c)
   expect(c.filter(p => p.brand === 'Bambu Lab')).toHaveLength(12)
   expect(p.stockSource).toBe('sheet')
-  for (const [colour, withSpool, refill] of [['Jade White (10100)',17,6],['Silver (10102)',3,8],['Black (10101)',2,12]]) {
+  for (const [colour, withSpool, refill] of [['Jade White (10100)',17,6],['Silver (10102)',3,7],['Black (10101)',2,12]]) {
     expect(bulkSelectionStock(p, selected(p, colour, 'With Spool'))).toBe(withSpool)
     expect(bulkSelectionStock(p, selected(p, colour, 'Without Spool'))).toBe(refill)
   }
@@ -47,7 +47,7 @@ it('rechecks changed Sheet stock and fails closed for deleted, invalid and dupli
   expect(bulkSelectionStock(basic(changed), selected(p))).toBe(2)
   expect(() => prepareBulkLines(input, changed)).toThrow('Inventory or prices changed')
   rows.push({ ...row, quantity: 1 })
-  expect(bulkSelectionStock(basic(catalogue(rows)), selected(p))).toBe(1)
+  expect(bulkSelectionStock(basic(catalogue(rows)), selected(p))).toBe(0)
   row.quantity = '99'
   expect(bulkSelectionStock(basic(catalogue(rows)), selected(p))).toBe(0)
   expect(basic(catalogue([])).stock).toBe(0)

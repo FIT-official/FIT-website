@@ -2,6 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fixtureCatalogue, fixtureInput, fixtureLine } from '../fixtures/bulkFilament'
 import bambuRecords from '../fixtures/bambuShop.json'
+import bambuStock from '../fixtures/bambuStock-2026-10-09.json'
 import { bambuBulkCatalogue } from '@/lib/bulkFilamentBambu'
 const mock=vi.hoisted(()=>({auth:vi.fn(),admin:vi.fn(),db:vi.fn(),catalogue:vi.fn(),rate:vi.fn(),notify:vi.fn(),store:{findOne:vi.fn(),insertOne:vi.fn(),findOneAndUpdate:vi.fn(),find:vi.fn()}}))
 vi.mock('@/lib/bulkFilamentEmail',()=>({notifyBulkOwner:mock.notify,bulkEmailStatus:d=>d?.notifications?.email?.status || 'not_configured'}))
@@ -25,11 +26,12 @@ beforeEach(()=>{
 })
 describe('bulk API security and responses',()=>{
   it('exposes twelve Bambu filaments and stores the server price despite client price fields', async () => {
-    const products = [...fixtureCatalogue(), ...bambuBulkCatalogue(bambuRecords, { rows: [] })]
+    const products = [...fixtureCatalogue(), ...bambuBulkCatalogue(bambuRecords, { rows: bambuStock.rows, source: 'sheet' })]
     mock.catalogue.mockResolvedValue(products)
     const body = await (await catalogueGET()).json()
     expect(body.products.filter(p => p.brand === 'Bambu Lab')).toHaveLength(12)
-    expect(body.products.find(p => p.brand === 'Bambu Lab')).toMatchObject({ stockSource: 'shop', pricingMode: 'list', priceNotice: 'Bambu Lab, list price, quote confirmed by FIT' })
+    expect(body.products.find(p => p.slug?.endsWith('-abs'))).toMatchObject({ stockSource: 'sheet', pricingMode: 'list', priceNotice: 'Bambu Lab, list price, quote confirmed by FIT' })
+    expect(body.products.find(p => p.slug?.endsWith('pva-support')).stockSource).toBe('shop')
     const p = products.find(p => p.slug?.endsWith('-abs')), input = fixtureInput(products)
     input.lines = [{ productId: p.id, version: p.version, options: p.types.map(t => ({ typeId: t.id, optionId: t.options[0].id })), quantity: 1, unitCents: 1 }]
     expect((await POST(request(input))).status).toBe(201)

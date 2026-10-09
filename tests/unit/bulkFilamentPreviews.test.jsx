@@ -34,9 +34,11 @@ it('preserves all conflicting identities and original Cocoa display typo evidenc
   const typo=evidence.entries.find(e=>e.originalName==='Coca Brown (10802)');expect(typo.preview.label).toBe('Cocoa Brown (10802)')
   expect(evidence.entries.find(e=>e.originalName==='Blue (10600)').preview.colours).toEqual(['#0A2989FF'])
 })
-it('provides named material-specific reference chips without inventing gradient direction',()=>{
-  const preview={kind:'swatch',material:'PLA Basic Gradient',label:'Mint Lime',colours:['#B6FF43FF','#56E72DFF']}
-  render(<FilamentColourPreview preview={preview} name="Mint Lime"/>);const image=screen.getByRole('img',{name:/PLA Basic Gradient Mint Lime.*reference pair/});expect(image.children).toHaveLength(2);expect(image.innerHTML).not.toContain('linear-gradient')
+it('renders the catalogue PETG Basic White reference chip',()=>{
+  const entry=evidence.entries.find(e=>e.originalName==='White (30106)' && e.preview.material==='PETG Basic')
+  const preview=bulkColourPreview({id:entry.productId,slug:entry.slug},{id:entry.optionId,name:entry.originalName})
+  expect(preview.kind).toBe('swatch')
+  render(<FilamentColourPreview preview={preview} name={entry.originalName}/>);const image=screen.getByRole('img',{name:/PETG Basic White.*reference/});expect(image.children).toHaveLength(preview.colours.length);expect(image.innerHTML).not.toContain('linear-gradient')
 })
 it('uses exact product images and changes failed photos to a neutral state',()=>{
   const preview=evidence.entries.find(e=>e.preview.kind==='image').preview

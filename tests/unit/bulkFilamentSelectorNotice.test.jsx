@@ -5,6 +5,7 @@ import { bambuBulkCatalogue } from '@/lib/bulkFilamentBambu'
 import { BAMBU_PRICE_NOTICE, bulkListUnitCents } from '@/lib/bulkFilamentConfig'
 import { getDefaultVariantSelections } from '@/lib/seo/product'
 import records from '../fixtures/bambuShop.json'
+import sheet from '../fixtures/bambuSheet.json'
 import { fixtureCatalogue, fixtureRows } from '../fixtures/bulkFilament'
 
 vi.mock('next/link', () => ({ default: ({ children, ...props }) => <a {...props}>{children}</a> }))
@@ -19,7 +20,7 @@ for (const product of currentRecords) {
     if (refill > 0) type.options.unshift(...type.options.splice(refill, 1))
   }
 }
-const bambu = () => bambuBulkCatalogue(currentRecords, { rows: [], source: 'snapshot' })
+const bambu = () => bambuBulkCatalogue(currentRecords, { rows: sheet.rows, source: 'snapshot' })
 const catalogue = () => [...fixtureCatalogue([...fixtureRows(),
   { product: 'FIT PLA', brand: 'FIT', material: 'PLA', colour: 'Marble White', barcode: '909', quantity: 12 },
 ]), ...bambu()]
