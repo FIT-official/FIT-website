@@ -5,7 +5,7 @@ import { AdminSettingsProvider, useAdminSettings } from '@/utils/AdminSettingsCo
 import { CurrencyProvider, useCurrency } from '@/components/General/CurrencyContext';
 import { getAllCategories, getAllSubcategories } from '@/lib/categoriesHelper';
 const auth = vi.hoisted(() => ({ isLoaded: true, isSignedIn: false, user: null }));
-vi.mock('@clerk/nextjs', () => ({ useUser: () => auth }));
+vi.mock('@clerk/nextjs', () => ({ useAuth: () => ({ ...auth, userId: auth.user?.id }) }));
 
 function Probe() {
     const role = useUserRole();
@@ -16,7 +16,7 @@ function Providers() { return <UserRoleProvider><AdminSettingsProvider><Probe />
 beforeEach(() => {
     Object.assign(auth, { isLoaded: true, isSignedIn: false, user: null });
     vi.stubGlobal('fetch', vi.fn());
-    sessionStorage.clear();
+    localStorage.clear();
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
@@ -80,7 +80,7 @@ it('caches the display currency across mounts without a third-party request', as
     fetch.mockResolvedValue({ ok: true, json: async () => ({ currency: 'SGD' }) });
     function Currency() { return <output>{useCurrency()}</output>; }
     const first = render(<CurrencyProvider><Currency /></CurrencyProvider>);
-    await waitFor(() => expect(sessionStorage.getItem('fit-display-currency')).toBe('SGD'));
+    await waitFor(() => expect(JSON.parse(localStorage.getItem('fit-display-currency'))?.currency).toBe('SGD'));
     first.unmount();
     render(<CurrencyProvider><Currency /></CurrencyProvider>);
     expect(fetch.mock.calls.map(call => call[0])).toEqual(['/api/display-currency']);
