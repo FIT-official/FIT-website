@@ -52,6 +52,7 @@ vi.mock('@/models/Product', () => ({ default: {
     },
 } }));
 vi.mock('@/models/Order', () => ({ default: class {
+    static collection = { createIndex: async () => {} };
     static findOne(filter) { return { session: async () => { const row = f.draft.orders.find(o => o.stripePaymentIntentId === filter.stripePaymentIntentId && o.creatorDashboard); if (!row) return null; return { ...row, save: async () => Object.assign(row, { status: 'refunded' }) }; } }; }
     constructor(data) { Object.assign(this, { _id: '200000000000000000000001' }, data); }
     async save(options) {
@@ -108,13 +109,15 @@ beforeEach(() => {
     vi.stubEnv('STRIPE_SECRET_KEY', testKey);
     setup(); vi.stubEnv('CREATOR_DASHBOARD_ENABLED', 'true'); vi.stubEnv('CREATOR_DASHBOARD_FIXTURES', 'false');
 });
-vi.mock('@/models/PrintJob', () => ({ default: { create: async rows => { rows.forEach((row, index) => { row._id = `job-${index}`; }); f.draft.jobs.push(...structuredClone(rows)); return rows; } } }));
+vi.mock('@/models/PrintJob', () => ({ default: { createCollection: async () => {}, createIndexes: async () => {}, create: async rows => { rows.forEach((row, index) => { row._id = `job-${index}`; }); f.draft.jobs.push(...structuredClone(rows)); return rows; } } }));
 vi.mock('@/models/SubOrder', () => ({ default: {
+    createCollection: async () => {}, createIndexes: async () => {},
     updateOne: async () => ({}),
     updateMany: async (filter, update) => { let count = 0; for (const row of f.draft.subOrders) { if (row.orderId === filter.orderId && row.status !== 'refunded') { row.status = update.$set.status; row.statusHistory.push(update.$push.statusHistory); count++; } } return { modifiedCount: count }; },
     create: async (rows, options) => { f.options.push(options); rows.forEach((row, index) => { row._id = String(index + 1).padStart(24, '0'); }); f.draft.subOrders.push(...structuredClone(rows)); return rows; },
 } }));
 vi.mock('@/models/ProcessedStripeEvent', () => ({ default: {
+    createCollection: async () => {}, createIndexes: async () => {},
     findOne: query => ({ session: async () => f.draft.events.find(e => e.eventId === query.eventId) }),
     create: async (rows, options) => { f.options.push(options); if (f.draft.events.some(e => e.eventId === rows[0].eventId)) throw Object.assign(new Error('Duplicate'), { code: 11000 }); f.draft.events.push(...rows); },
 } }));

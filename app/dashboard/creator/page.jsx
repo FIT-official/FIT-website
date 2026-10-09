@@ -1,1 +1,2 @@
-export { default, dynamic } from './orders/page';
+export const dynamic = 'force-dynamic';
+export { default } from './orders/page';

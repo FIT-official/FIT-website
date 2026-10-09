@@ -56,6 +56,11 @@ const isActiveLink = (link, pathname) =>
     link.exact ? pathname === link.href : pathname === link.href || pathname.startsWith(`${link.href}/`)
 
 export default function CreatorShell({ children }) {
+    const pathname = usePathname() || '';
+    if (pathname === '/dashboard/creator' || pathname.startsWith('/dashboard/creator/')) return children;
+    return <LegacyCreatorShell>{children}</LegacyCreatorShell>;
+}
+function LegacyCreatorShell({ children }) {
     const { user, isLoaded } = useUser()
     const { isAdmin } = useAccess()
     const { loading: entitlementsLoading, canAccessDashboard } = useEntitlements()

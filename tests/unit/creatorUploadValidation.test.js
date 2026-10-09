@@ -60,7 +60,8 @@ describe('private print upload validation', () => {
         expect(() => readSafe3mf(many)).toThrow('oversized ZIP');
     });
     it('rejects script entries, traversal, external entities and missing model structure', async () => {
-        for (const extra of [{ 'evil.js': 'alert(1)' }, { '../secret': 'x' }, { 'Metadata/test.xml': '<!ENTITY x SYSTEM "file:///x">' }]) {
+        for (const extra of [{ 'evil.js': 'alert(1)' }, { '../secret': 'x' }, { 'Metadata/test.xml': '<!ENTITY x SYSTEM "file:///x">' },
+            { 'Metadata/readme.txt': 'MZ executable' }, { 'Metadata/helper.dat': '#!/bin/sh\necho test' }, { 'hidden.exe ': 'x' }]) {
             const bytes = await zip(extra); expect(() => readSafe3mf(bytes)).toThrow();
         }
         const bad = new JSZip(); bad.file('readme.txt', 'x'); expect(() => readSafe3mf(Buffer.from('MZ'))).toThrow();

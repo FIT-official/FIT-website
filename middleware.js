@@ -16,10 +16,12 @@ const isMakerPlayground = createRouteMatcher(['/maker-tools/playground', '/maker
 
 async function handleRequest(auth, req) {
     const path = new URL(req.url).pathname
+    const dashboardNext = () => { const headers = new Headers(req.headers); headers.set('x-fit-creator-surface', path.startsWith('/track/') ? 'tracking' : 'dashboard'); return NextResponse.next({ request: { headers } }); }
     const newDashboard = path.startsWith('/dashboard/creator') || path.startsWith('/admin/creator-dashboard') || path.startsWith('/api/creator-dashboard') || path === '/api/orders' || path.startsWith('/track/')
     if (newDashboard) {
         if (!dashboardEnabled()) return new NextResponse('Not found', { status: 404 })
-        if (fixtureMode() && !path.startsWith('/api/')) return NextResponse.next()
+        if (fixtureMode() && !path.startsWith('/api/')) return dashboardNext()
+        if (path.startsWith('/track/')) return dashboardNext()
         if (!path.startsWith('/track/') && !path.startsWith('/api/')) {
             const session = await auth()
             if (!session.userId) { await auth.protect(); return new NextResponse('Unauthorized', { status: 401 }) }
@@ -27,6 +29,7 @@ async function handleRequest(auth, req) {
             const scope = scopeFromUser(session.userId, user)
             const roles = path.startsWith('/admin/') ? ['owner'] : ['owner', 'creator']
             if (!roles.includes(scope.role)) return new NextResponse('Forbidden', { status: 403 })
+            return dashboardNext()
         }
     }
     // API handlers enforce their own authentication/signatures. A browser

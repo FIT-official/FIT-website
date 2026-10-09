@@ -46,6 +46,16 @@ beforeEach(() => {
 })
 
 describe('GET /api/creators', () => {
+    it('keeps the configured FIT house account and owner roles out of public results', async () => {
+        vi.stubEnv('FIT_OWNER_USER_ID', 'user_house');
+        try {
+            state.users = [user('user_house', 'House'), user('user_a', 'Maker'),
+                { ...user('user_owner', 'Owner'), metadata: { displayName: 'Owner', role: 'owner' } }];
+            const { body } = await get();
+            expect(body.creators.map(creator => creator.userId)).toEqual(['user_a']);
+            expect(state.findArgs.filter.userId).toEqual({ $ne: 'user_house' });
+        } finally { vi.unstubAllEnvs(); }
+    });
     it('filters to users with a shop that is not unpublished and a display name, public projection only', async () => {
         await get()
         expect(state.findArgs.filter).toMatchObject({

@@ -10,11 +10,13 @@ export async function PUT(req, { params }) {
         if (record.scanStatus !== 'pending' || record.processing) return dashboardJson({ error: 'Upload already submitted' }, 409);
         if (Date.now() > new Date(record.ipConsent.at).getTime() + 600000) return dashboardJson({ error: 'Upload reservation expired' }, 410);
         if (req.headers.get('content-type') !== record.contentType) return dashboardJson({ error: 'Content type mismatch' }, 400);
+        const quarantineKey = record.s3Key;
         const bytes = await boundedBytes(req.body, Math.min(record.sizeBytes, MOCK_MAX_BYTES));
         if (bytes.length !== record.sizeBytes) return dashboardJson({ error: 'File size mismatch' }, 413);
         const total = [...mockUploadState.objects.values()].reduce((sum, body) => sum + body.length, 0);
         if (total + bytes.length > 64 * 1024 * 1024) return dashboardJson({ error: 'Mock storage is full' }, 503);
-        mockUploadState.objects.set(record.s3Key, bytes);
+        if (record.scanStatus !== 'pending' || record.processing || record.s3Key !== quarantineKey) return dashboardJson({ error: 'Upload already submitted' }, 409);
+        mockUploadState.objects.set(quarantineKey, bytes);
         return dashboardJson({ stored: true, storageLabel: storage.label });
     } catch (error) { return dashboardError(error); }
 }

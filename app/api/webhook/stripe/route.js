@@ -1,4 +1,5 @@
-import { dashboardEventEnabled, recordPaidSubOrders, recordRefund } from '@/lib/creatorDashboard/verifiedWebhook';
+import { notifyOrderStatus } from '@/lib/creatorDashboard/notifications';
+import { dashboardEventEnabled } from '@/lib/creatorDashboard/flags';
 import { NextResponse } from 'next/server';
 import { backorders } from '@/lib/shopBackorders/host';
 import { randomUUID } from 'node:crypto';
@@ -69,7 +70,7 @@ export async function POST(req) {
         return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 400 });
     }
     if (event.type === 'charge.refunded' && dashboardEventEnabled(event)) {
-        try { return NextResponse.json(await recordRefund(event, await connectToDatabase())); }
+        try { const database = await connectToDatabase(); const { recordRefund, initializeOrderStorage } = await import('@/lib/creatorDashboard/verifiedWebhook'); await initializeOrderStorage(event); return NextResponse.json(await recordRefund(event, database)); }
         catch (error) { return NextResponse.json({ error: 'Unable to reconcile refund; retry required' }, { status: error.status || 500 }); }
     }
     if (!['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(event.type)) {
@@ -81,6 +82,7 @@ export async function POST(req) {
     let dbSession;
     try {
         const database = await connectToDatabase();
+        if (dashboardEventEnabled(event)) await (await import('@/lib/creatorDashboard/verifiedWebhook')).initializeOrderStorage(event);
         const checkout = await CheckoutSession.findOne({ sessionId: payment.id });
         if (!checkout) return NextResponse.json({ error: 'Checkout session not found' }, { status: 404 });
         if (checkout.status === 'completed') {
@@ -105,7 +107,7 @@ export async function POST(req) {
         // No nontransactional fallback: partial fulfilment followed by a retry
         // would otherwise grant assets or decrement inventory more than once.
         dbSession = await database.startSession();
-        let duplicate = false;
+        let duplicate = false, dashboardOrder;
         let notifications = [];
         let orderItems = [];
         await dbSession.withTransaction(async () => {
@@ -186,8 +188,9 @@ export async function POST(req) {
                 statusHistory: [{ status: 'pending', timestamp: new Date(), updatedBy: 'system', note: 'Paid checkout verified against purchase snapshot' }],
                 customerNote: orderItems.map(item => item.orderNote).filter(Boolean).join('; '),
             });
-            if (dashboardEventEnabled(event)) await recordPaidSubOrders(event, newOrder, snapshots, dbSession);
+            if (dashboardEventEnabled(event)) await (await import('@/lib/creatorDashboard/verifiedWebhook')).recordPaidSubOrders(event, newOrder, snapshots, dbSession);
             await newOrder.save({ session: dbSession });
+            if (dashboardEventEnabled(event)) dashboardOrder = newOrder;
             user.orderHistory.push(...orderItems.map(item => ({ cartItem: {
                 // Legacy readers multiply this all-in unit price by quantity.
                 ...item, price: item.totalPrice / item.quantity,
@@ -203,7 +206,10 @@ export async function POST(req) {
         });
         if (duplicate) return NextResponse.json({ received: true, duplicate: true });
 
-        if (dashboardEventEnabled(event)) return NextResponse.json({ received: true });
+        if (dashboardEventEnabled(event)) {
+            if (dashboardOrder) await notifyOrderStatus(dashboardOrder, 'paid').catch(() => console.info('Creator payment notification failed'));
+            return NextResponse.json({ received: true });
+        }
 
         // These external side effects run only after commit. They are best-effort;
         // a notification outage never rolls back a captured and fulfilled payment.
