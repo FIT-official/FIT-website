@@ -4,6 +4,7 @@ import { connectToDatabase } from "@/lib/db";
 import ContentBlock from "@/models/ContentBlock";
 import BlogPost from '@/models/BlogPost';
 import { statusQuery } from '@/lib/blog/status';
+import { filterShopBanner } from '@/lib/shopBanner';
 
 async function publicBlogPicks(contentPath, data) {
     if (contentPath !== 'navigation/mega-menu' || !Array.isArray(data.frontmatter?.featuredPosts)) return data;
@@ -27,10 +28,10 @@ export async function GET(req) {
         const dbBlock = await ContentBlock.findOne({ path: contentPath }).lean();
 
         if (dbBlock) {
-            return NextResponse.json(await publicBlogPicks(contentPath, {
+            return NextResponse.json(await filterShopBanner(contentPath, await publicBlogPicks(contentPath, {
                 frontmatter: dbBlock.frontmatter || {},
                 content: dbBlock.content || "",
-            }));
+            })));
         }
 
         // 2) Fallback to MDX file content (seed defaults)
@@ -44,7 +45,7 @@ export async function GET(req) {
             return NextResponse.json({ error: "Content not found" }, { status: 404 });
         }
 
-        return NextResponse.json(await publicBlogPicks(contentPath, fileContent));
+        return NextResponse.json(await filterShopBanner(contentPath, await publicBlogPicks(contentPath, fileContent)));
     } catch (error) {
         console.error("Error fetching content:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
