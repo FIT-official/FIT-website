@@ -42,6 +42,7 @@ async function ShopLayout({ searchParams }) {
                 <p className="text-sm max-w-3xl mb-4">Browse PLA and PETG filament, microcontrollers, sensors and other electronics for your projects. Check each product for its specifications, available options and current price.</p>
                 <div className="flex flex-wrap gap-4 text-sm underline">
                     <Link href="/shop">All shop products</Link>
+                    <Link href="/shop/bulk-filament">Bulk filament enquiry</Link>
                     <Link href="/shop?productCategory=Filament">Filament</Link>
                     <Link href="/shop?productCategory=Electronics">Electronics</Link>
                     <Link href="/blog/3d-printing-filament-types-guide">Compare PLA, PETG and other materials</Link>
