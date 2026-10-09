@@ -30,6 +30,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
 
     const [liked, setLiked] = useState(false);
     const [product, setProduct] = useState(initialProduct);
+    const galleryImages = product ? (product.images?.length ? product.images : [null]) : [];
     const [selectedVariantOptions, setSelectedVariantOptions] = useState(() => getDefaultVariantSelections(initialProduct));
     const [isAdding, setIsAdding] = useState(false);
     const [cartError, setCartError] = useState('');
@@ -178,7 +179,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
             setDisplayModelUrl(null);
         }
 
-        const imagesCount = Array.isArray(product?.images) ? product.images.length : 0;
+        const imagesCount = Math.max(1, Array.isArray(product?.images) ? product.images.length : 0);
         const hasViewableModel = !!product?.viewableModel;
         setTotalTabs(imagesCount + (hasViewableModel ? 1 : 0));
 
@@ -527,7 +528,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                     </div>
                                 </div>
                             )}
-                            {product?.images?.map((image, idx) => (
+                            {galleryImages.map((image, idx) => (
                                 <div key={idx} className='flex aspect-square h-full'>
                                     <ProductImage
                                         src={image}
@@ -565,7 +566,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                 )}
 
                                 {
-                                    product?.images?.map((image, idx) => (
+                                    galleryImages.map((image, idx) => (
                                         <div
                                             key={idx}
                                             className='flex h-25 aspect-square bg-borderColor cursor-pointer'

@@ -34,6 +34,14 @@ afterEach(() => {
 })
 
 describe('server-rendered shop cards', () => {
+    it('replaces a broken product image with the neutral FIT graphic', () => {
+        session.user = null; session.isSignedIn = false
+        render(<ProductCard product={{ ...publicProduct, images: ['/missing-product.png'] }} />)
+        const image = screen.getByAltText(publicProduct.name)
+        fireEvent.error(image)
+        expect(image).toHaveAttribute('src', '/product-images/photo-pending.svg')
+        expect(image.getAttribute('src')).not.toContain('placeholder.jpg')
+    })
     it('shows the full name once without a cursor-following view pill', () => {
         session.user = null; session.isSignedIn = false
         const name = 'Black - Blue 170 pcs in 1 Screwdriver Kit with a long caption'

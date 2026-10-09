@@ -7,7 +7,7 @@ import { ConnectionNotice, StoreError, useStoreConnection } from '@/components/C
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { GoChevronLeft } from 'react-icons/go';
-import Image from 'next/image';
+import ProductImage from '@/components/ProductImage';
 import { useToast } from '@/components/General/ToastProvider';
 import CartSummarySkeleton from './components/CartSummarySkeleton';
 import CartItemSkeleton from './components/CartItemSkeleton';
@@ -629,10 +629,8 @@ function Cart() {
                                             <React.Fragment>
                                                 {/* custom print display */}
                                                 <div className='flex w-full h-full items-center justify-start'>
-                                                    <Image
-                                                        src={product.images?.[0]
-                                                            ? `/api/proxy?key=${encodeURIComponent(product.images[0])}`
-                                                            : '/placeholder.jpg'}
+                                                    <ProductImage
+                                                        src={product.images?.[0]}
                                                         alt={product.name || 'Custom 3D Print'}
                                                         width={64}
                                                         height={64}
@@ -794,8 +792,8 @@ function Cart() {
                                         ) : (
                                             <React.Fragment>
                                                 <div className='flex w-full h-full items-center justify-start'>
-                                                    <Image
-                                                        src={`/api/proxy?key=${encodeURIComponent(product.images[0])}`}
+                                                    <ProductImage
+                                                        src={product.images?.[0]}
                                                         alt={product.name}
                                                         width={64}
                                                         height={64}
