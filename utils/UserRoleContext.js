@@ -1,11 +1,11 @@
 "use client"
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 
 const UserRoleContext = createContext(null);
 
 export function UserRoleProvider({ children }) {
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isLoaded, isSignedIn, userId } = useAuth();
   const [role, setRole] = useState(null);
   const [roleUserId, setRoleUserId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ export function UserRoleProvider({ children }) {
         const data = await res.json();
         if (isMounted) {
           setRole(data.role || 'user');
-          setRoleUserId(user?.id);
+          setRoleUserId(userId);
           setError(null);
         }
       } catch (err) {
@@ -36,10 +36,10 @@ export function UserRoleProvider({ children }) {
     }
     fetchRole();
     return () => { isMounted = false; };
-  }, [isLoaded, isSignedIn, user?.id]);
+  }, [isLoaded, isSignedIn, userId]);
 
   return React.createElement(UserRoleContext.Provider, {
-    value: { role: isSignedIn && roleUserId === user?.id ? role : null, loading, error },
+    value: { role: isSignedIn && roleUserId === userId ? role : null, loading, error },
   }, children);
 }
 

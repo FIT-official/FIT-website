@@ -55,6 +55,18 @@ it.each(['navigation/mega-menu', 'home/print-cta', 'prints/banner'])('returns em
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ frontmatter: {}, content: '' });
 });
+it('projects only public category fields even if a document includes private settings', async () => {
+    mocks.lean.mockResolvedValue({ privateSetting: 'private', additionalCategories: [
+        { name: 'parts', displayName: 'Parts', type: 'shop', isActive: true, internalNotes: 'private',
+            subcategories: [{ name: 'tools', displayName: 'Tools', isActive: true, internalNotes: 'private' }] },
+    ] });
+    const response = await categories();
+    expect(await response.json()).toEqual({ categories: [
+        { name: 'parts', displayName: 'Parts', type: 'shop', isActive: true,
+            subcategories: [{ name: 'tools', displayName: 'Tools', isActive: true }] },
+    ] });
+    expect(mocks.select).toHaveBeenCalledWith('additionalCategories');
+});
 it('keeps unknown required content missing and preserves configured optional content', async () => {
     expect((await content(new Request('http://localhost/api/content?path=unknown'))).status).toBe(404);
     mocks.content.mockResolvedValue({ frontmatter: { title: 'Configured' }, content: 'Text' });
