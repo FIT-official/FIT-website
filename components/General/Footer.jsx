@@ -3,9 +3,11 @@ import Logo from '../Logo'
 import { FaLinkedin, FaWhatsapp } from 'react-icons/fa'
 import { HiOutlineMail } from 'react-icons/hi'
 import Link from 'next/link'
+import { siteFacts } from '@/lib/home/siteFacts'
+import { VisitDetails, whatsappHref } from '@/components/Home/v2/FactSections'
 
 function Footer() {
-    const whatsappNumber = (process.env.NEXT_PUBLIC_FIT_WHATSAPP_NUMBER || '').replace(/\D/g, '');
+    const whatsapp = whatsappHref(siteFacts.whatsappNumber);
     return (
         <footer className='flex flex-col w-full min-h-[40vh] px-12 py-12'>
             {/* top section */}
@@ -51,7 +53,8 @@ function Footer() {
                             {/* <Link href='https://instagram.com' target="_blank" rel="noopener noreferrer" className='footerLink'>
                                 <FaInstagram size={16} className='flex' /> Instagram
                             </Link> */}
-                            {whatsappNumber && <Link href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" className='footerLink'>
+                            <VisitDetails />
+                            {whatsapp && <Link href={whatsapp} target="_blank" rel="noopener noreferrer" className='footerLink'>
                                 <FaWhatsapp size={16} className='flex' /> WhatsApp
                             </Link>}
                             {/* <Link href='https://telegram.org' target="_blank" rel="noopener noreferrer" className='footerLink'>
