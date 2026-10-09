@@ -30,7 +30,7 @@ describe('bulk API security and responses',()=>{
     const body = await (await catalogueGET()).json()
     expect(body.products.filter(p => p.brand === 'Bambu Lab')).toHaveLength(12)
     expect(body.products.find(p => p.brand === 'Bambu Lab')).toMatchObject({ stockSource: 'shop', pricingMode: 'list', priceNotice: 'Bambu Lab, list price, quote confirmed by FIT' })
-    const p = products.find(p => p.brand === 'Bambu Lab'), input = fixtureInput(products)
+    const p = products.find(p => p.slug?.endsWith('-abs')), input = fixtureInput(products)
     input.lines = [{ productId: p.id, version: p.version, options: p.types.map(t => ({ typeId: t.id, optionId: t.options[0].id })), quantity: 1, unitCents: 1 }]
     expect((await POST(request(input))).status).toBe(201)
     expect(mock.store.insertOne).toHaveBeenCalledOnce()

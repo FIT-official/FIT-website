@@ -1154,19 +1154,39 @@
       "optionId": "6aa8ead8a1ca543d895a4911",
       "originalName": "White (40100)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "White (40100)",
         "material": "ABS",
-        "status": "verified",
-        "colours": [
-          "#FFFFFFFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8ead8a1ca543d895a4911.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/abs-filament?variant=41216786694280",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
-        "bambu_studio"
+        "bambu_studio",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/products/ABS_White.png?v=1735869755",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/abs-filament?variant=41216786694280",
+        "variantId": "41216786694280",
+        "sha256": "f35325820ba322c3c7ab5e9bb9b5a08775276e113d249a025c9a73ae0fab84a7",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "White (40100)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "100586b1744a1c027a18bcd8c0393a4fdc6b8ea4da06f1fd2b0fbe1647a6c6eb",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eae5a1ca543d895a4919",
@@ -1175,19 +1195,39 @@
       "optionId": "6aa8eae5a1ca543d895a491b",
       "originalName": "Black (45101)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Black (45101)",
         "material": "ASA",
-        "status": "verified",
-        "colours": [
-          "#000000FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eae5a1ca543d895a491b.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/asa-filament?variant=41227780817032",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
-        "bambu_studio"
+        "bambu_studio",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/black.png?v=1710407947",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/asa-filament?variant=41227780817032",
+        "variantId": "41227780817032",
+        "sha256": "e7b962c5a5968933375f310e2d8c33919707fd0e7ba483467401b43d61370af2",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Black (45101)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "1b57818a78bfb5494aae26feebb01061214b0d77aa3e753ef8c596f24c39bf3f",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eae5a1ca543d895a4919",
@@ -1196,21 +1236,40 @@
       "optionId": "6aa8eae5a1ca543d895a491c",
       "originalName": "Grey (45102)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Grey (45102)",
         "material": "ASA",
-        "status": "verified",
-        "colours": [
-          "#8A949EFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eae5a1ca543d895a491c.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/asa-filament?variant=41227780882568",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
-        "bambu_studio"
+        "bambu_studio",
+        "bambu_official_product_photos"
       ],
       "notes": [
-        "Grey/Gray spelling difference only; inventory label preserved."
-      ]
+        "Grey/Gray spelling difference only; inventory label preserved.",
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/gray.png?v=1710407947",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/asa-filament?variant=41227780882568",
+        "variantId": "41227780882568",
+        "sha256": "5f5a276ef6b6ada2e873c7f2052c5a54b022187627a1b123a6248c3fceb8a25d",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Grey (45102)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "f8f0342aedb2b43d91c3cf4bc76de477b8821f78992c6c137d1864b819697f79",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eae5a1ca543d895a4919",
@@ -1219,19 +1278,39 @@
       "optionId": "6aa8eae5a1ca543d895a491d",
       "originalName": "White (45100)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "White (45100)",
         "material": "ASA",
-        "status": "verified",
-        "colours": [
-          "#FFFAF2FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eae5a1ca543d895a491d.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/asa-filament?variant=41227780849800",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
-        "bambu_studio"
+        "bambu_studio",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/white.png?v=1690442903",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/asa-filament?variant=41227780849800",
+        "variantId": "41227780849800",
+        "sha256": "82522237e0a9e78a241909cead15ce305f0e550ecf346352e457768f2dfa2f87",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "White (45100)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "169f17f345d065ec1716b94c09dad70853cebebfbe23e6a7fb7b8336dfaea4a1",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eaeda1ca543d895a4927",
@@ -1282,20 +1361,40 @@
       "optionId": "6974d555afadda8ec64083c5",
       "originalName": "Jade White (10100)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Jade White (10100)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#FFFFFFFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083c5.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41078274687112",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/White.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41078274687112",
+        "variantId": "41078274687112",
+        "sha256": "a344ff20fbd6f6d8a635d7cd9b76919f5c755d9d3931e31bbf11d9bee9ccb65c",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Jade White (10100)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "67e741679d8d2ca8dda2246a4a3cd4429cd69fd562c269f49d6279df41a3e9d5",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1304,20 +1403,40 @@
       "optionId": "6974d555afadda8ec64083c6",
       "originalName": "Silver (10102)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Silver (10102)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#A6A9AAFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083c6.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41078274949256",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/Sliver.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41078274949256",
+        "variantId": "41078274949256",
+        "sha256": "5ecc70807718b5fcb35a2b940c0e9332357ba0de00338229bbcf1b27e4488f67",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Silver (10102)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "66de7d372b5c31e5623d0dd5f4485f7e9c51a7d08432c9f526bd898832e82f62",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1326,20 +1445,40 @@
       "optionId": "6974d555afadda8ec64083c7",
       "originalName": "Gray (10103)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Gray (10103)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#8E9089FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083c7.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41211562819720",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/products/PLA-Basic_Gray.png?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41211562819720",
+        "variantId": "41211562819720",
+        "sha256": "51ca5fbdd40df03d0cffec235f4a2bd44c98ec37073a71c6a72f47b9da410471",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Gray (10103)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "11396e685964f48583310d755d38415c349eaf68d0215915d27e511de93217c9",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1348,20 +1487,40 @@
       "optionId": "6974d555afadda8ec64083c8",
       "originalName": "Red (10200)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Red (10200)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#C12E1FFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083c8.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41078274621576",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/Red.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41078274621576",
+        "variantId": "41078274621576",
+        "sha256": "3ea226bdd1ddcf690d58072166044d26097923f7812f682b75df5cb0510a4056",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Red (10200)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "ea9cdfa0d898becc78b2a45bec9f450a7cba4527537d6542f294f744d14ceac4",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1370,20 +1529,40 @@
       "optionId": "6974d555afadda8ec64083c9",
       "originalName": "Magenta (10202)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Magenta (10202)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#EC008CFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083c9.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41884192211080",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/Magenta.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41884192211080",
+        "variantId": "41884192211080",
+        "sha256": "3f63320221cc3f13b59bd4ed1a093a94404af7ddb15ca9cddfd316199fc36a8a",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Magenta (10202)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "878677f16d67718d10b565e44cfcf9b167b871a65392ae0b24099f1717f4d836",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1392,20 +1571,40 @@
       "optionId": "6974d555afadda8ec64083ca",
       "originalName": "Cobalt Blue (10604)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Cobalt Blue (10604)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#0056B8FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083ca.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43045599215752",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/CobaltBlue.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43045599215752",
+        "variantId": "43045599215752",
+        "sha256": "fdf07fb6fdd063b389e05751b8f8eb130e14a44fd963f3edc3ee29a078f12383",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Cobalt Blue (10604)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "09b37b12fa0f4baefc65d762e9d56f40d89ed9eaa7dc91017ecc5bcbe981919f",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1414,20 +1613,40 @@
       "optionId": "6974d555afadda8ec64083cb",
       "originalName": "Sunflower Yellow (10402)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Sunflower Yellow (10402)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#FEC600FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083cb.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43302513279112",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/SunflowerYellow.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43302513279112",
+        "variantId": "43302513279112",
+        "sha256": "882c536184f16da845e14b6472ad33fe795faf5cc4cbadf4dc4be9bd9ed8972a",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Sunflower Yellow (10402)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "3d85b6bec0b935dc520a8a070f8da9782cd77bf29c62e78ed33b0e83179d18d2",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1436,22 +1655,41 @@
       "optionId": "6974d555afadda8ec64083cc",
       "originalName": "Coca Brown (10802)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Cocoa Brown (10802)",
         "material": "PLA Basic",
-        "status": "label_typo",
-        "colours": [
-          "#6F5034FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083cc.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43302516195464",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
       "notes": [
-        "Inventory Coca Brown differs from manufacturer Cocoa Brown; code matches."
-      ]
+        "Inventory Coca Brown differs from manufacturer Cocoa Brown; code matches.",
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/CocoaBrown.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43302516195464",
+        "variantId": "43302516195464",
+        "sha256": "0b27e5371c150d6657df445f2a2573328fcd92b6cc41f8d105e37307db7fb3ed",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Coca Brown (10802)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "6b2449939c825410a277b87f8de9c5d59c550a5fac8acf52b7ddf0a2c2282094",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1460,20 +1698,40 @@
       "optionId": "6974d555afadda8ec64083cd",
       "originalName": "Mistletoe Green (10502)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Mistletoe Green (10502)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#3F8E43FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083cd.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43257238290568",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/063c3c25cb6510ea2566af540e5e3c99_287359af-ac7d-4683-ad97-25e7a1f420f3.png?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43257238290568",
+        "variantId": "43257238290568",
+        "sha256": "770166e3e1a9e387a44aa9a0093fdedf26473cd63862255f34a87bb2b4afa499",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Mistletoe Green (10502)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "9eb53f23c99ab1f9ec477d8cf886e670cb9414e6b042317096c213445f80b3ab",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1482,20 +1740,40 @@
       "optionId": "6974d555afadda8ec64083ce",
       "originalName": "Purple (10700)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Purple (10700)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#5E43B7FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083ce.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41884191752328",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/PLAPurple.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41884191752328",
+        "variantId": "41884191752328",
+        "sha256": "b19cbebb7d6242ebe5ddcf65d281f0efe2dca1780b15e55839e51e3f15c48482",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Purple (10700)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "c68c672aac305457135917309afa5092f34509362dec8436f7b3e8ad7898c008",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1504,20 +1782,40 @@
       "optionId": "6974d555afadda8ec64083cf",
       "originalName": "Pink (10203)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Pink (10203)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#F55A74FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083cf.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=40475106902152",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/Pink.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=40475106902152",
+        "variantId": "40475106902152",
+        "sha256": "1fca8aacf82fd0dabb1d0b2cb37c8b6dd1cf5b151b02e56f92e42f3c4923f97a",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Pink (10203)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "eb5c3aa1a543c2f16c944e7fb417cafd89e89e2a7eadbef099ef94a2d0e8bb9f",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1526,20 +1824,40 @@
       "optionId": "6974d555afadda8ec64083d0",
       "originalName": "Bambu Green (10501)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Bambu Green (10501)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#00AE42FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083d0.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41135419228296",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/Bambu_Green.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41135419228296",
+        "variantId": "41135419228296",
+        "sha256": "1af01ee50f192b7ed8621c2faa8da1eac5246cac40d92ebf9ecfb97d42ec10c2",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Bambu Green (10501)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "5797d37ad16585aa0ab6797bb59163efdb8ecc85e7fa1bf64182a0a74cb94ff2",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1548,20 +1866,40 @@
       "optionId": "6974d555afadda8ec64083d1",
       "originalName": "Bronze (10801)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Bronze (10801)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#847D48FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083d1.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41142328492168",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/Bronze.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41142328492168",
+        "variantId": "41142328492168",
+        "sha256": "e6368e89089887100d60d6e5dcc248c493a55e0e95c390babc75f1c3f3d9561b",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Bronze (10801)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "6d15ca9344a43860c685b1ecb4fde68296fc499333ebfb37a1eff85e7bcd5880",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1570,20 +1908,40 @@
       "optionId": "6974d555afadda8ec64083d2",
       "originalName": "Yellow (10400)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Yellow (10400)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#F4EE2AFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083d2.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=40475106836616",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/Yellow.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=40475106836616",
+        "variantId": "40475106836616",
+        "sha256": "363b614481930c401e76b820ca7f66a210946d7006f61cef003e434c75a6fb0d",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Yellow (10400)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "38c4d16bb3938e8100efa4f8585c140001984a20751b2d1a8969f8a6c7a0a996",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1592,20 +1950,40 @@
       "optionId": "6974d555afadda8ec64083d3",
       "originalName": "Hot Pink (10204)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Hot Pink (10204)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#F5547CFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083d3.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43302516457608",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/HotPink.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43302516457608",
+        "variantId": "43302516457608",
+        "sha256": "603f3cd65f121a2243773d821c0114d84723b1ce6d83ff44e8373d7e790483a8",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Hot Pink (10204)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "2d86d79e7e94a487f1f2bc80936da7fc4e4c9e6409f1995d6efd12c551f25cb4",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1614,20 +1992,40 @@
       "optionId": "6974d555afadda8ec64083d4",
       "originalName": "Cyan (10603)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Cyan (10603)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#0086D6FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083d4.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43257238749320",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/products/CMYK-Cyan-1.png?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43257238749320",
+        "variantId": "43257238749320",
+        "sha256": "fe05bebb23a43d80bdb41526aa6cf90aaec080b3ad473257c09541e19576fe33",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Cyan (10603)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "e10c381d90f38b6ce8d69bc26fe4b9382e6606c5db29127b0b78e998ad4bc24e",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1636,20 +2034,40 @@
       "optionId": "6974d555afadda8ec64083d5",
       "originalName": "Blue Gray (10602)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Blue Gray (10602)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#5B6579FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083d5.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=40475106869384",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/products/PLA-Basic_Blue-Gray.png?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=40475106869384",
+        "variantId": "40475106869384",
+        "sha256": "74e210e1cc7128ba0603b764f01c43672347cfa69d07d7833ae4b36e83c3e2ef",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Blue Gray (10602)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "2d9423b0f9c29c7a1280587c58a8bfd6bccbe59f49f654763322b99eb0e3cfcd",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1658,20 +2076,40 @@
       "optionId": "6974d555afadda8ec64083d6",
       "originalName": "Orange (10300)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Orange (10300)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#FF6A13FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083d6.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=40475106672776",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/Orange.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=40475106672776",
+        "variantId": "40475106672776",
+        "sha256": "728f5ea6ceeef6727bffac808baa1d7c0d633d09a3bd6e3dedd719afd10601af",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Orange (10300)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "d6848f29677196f4ceb919dd989c453cb678102096112d1cf12e6c1a73dbe0a9",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1680,20 +2118,40 @@
       "optionId": "6974d555afadda8ec64083d7",
       "originalName": "Brown (10800)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Brown (10800)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#9D432CFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083d7.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41201524768904",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/products/PLA-Basic_Brown.png?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41201524768904",
+        "variantId": "41201524768904",
+        "sha256": "dce8afb85d44591d934fec5d1225de2f449515ca83cec4e7a03404895442af92",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Brown (10800)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "8c913214905a4c12201d4a77784f4a2d1cfabb29be5daf0efdaa5fcbc1c40145",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1702,20 +2160,40 @@
       "optionId": "6974d555afadda8ec64083d8",
       "originalName": "Indigo Purple (10701)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Indigo Purple (10701)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#482960FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083d8.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43302514098312",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/IndigoPurple.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43302514098312",
+        "variantId": "43302514098312",
+        "sha256": "b3f80105668b2f0e897ce075adc911635efc2a01f0eabd5169742971561b905e",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Indigo Purple (10701)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "902056a651f8818426e37340df0661b300dd923a534a5789b15fe4423a94ee5a",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1724,20 +2202,40 @@
       "optionId": "6974d555afadda8ec64083d9",
       "originalName": "Gold (10401)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Gold (10401)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#E4BD68FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083d9.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41884191195272",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/Gold.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41884191195272",
+        "variantId": "41884191195272",
+        "sha256": "cf167d53dd63029542450b72ec269c7b66ee5d05de394e52409e436472a5df81",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Gold (10401)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "c899957be69c0eb7f4d2735e8fcc6d3d8bd94cd6369d11c41d308b770a0a92aa",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1746,20 +2244,40 @@
       "optionId": "6974d555afadda8ec64083da",
       "originalName": "Pumpkin Orange (10301)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Pumpkin Orange (10301)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#FF9016FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083da.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43302515998856",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/PumpkinOrange.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43302515998856",
+        "variantId": "43302515998856",
+        "sha256": "37e1e9b94a655636cb97a5a61fd4b1effc16cd6cf1c87ee228c0d35dcca8a0b7",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Pumpkin Orange (10301)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "2445ec5c78821e83d2652621ea9e5adbff725ec6c317c5cb35a989baa239dbf1",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1768,20 +2286,40 @@
       "optionId": "6974d555afadda8ec64083db",
       "originalName": "Beige (10201)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Beige (10201)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#F7E6DEFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083db.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=40475106771080",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/Beige.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=40475106771080",
+        "variantId": "40475106771080",
+        "sha256": "04d8973255bd28b0e853d1473be696b745f911e74cb96ab6be3888f30403ac34",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Beige (10201)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "1a6a8d668d0eecd0354f0d7837d0d173eec36e1e26c59892a08143d16bc514e8",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1790,20 +2328,40 @@
       "optionId": "6974d555afadda8ec64083dc",
       "originalName": "Black (10101)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Black (10101)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#000000FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6974d555afadda8ec64083dc.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41078274654344",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/products/PLA-Basic_Black_e33768fd-c87a-4b2d-a3f7-0b3afc81f13f.png?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=41078274654344",
+        "variantId": "41078274654344",
+        "sha256": "b04a505d2a14660bd4af720324ede6c7d55a86cf9584a0c5144a22136c828125",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Black (10101)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "0b239c189898ed4fbb461ae490851fe3593fc377151b320f891a981fe81e83c5",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1812,20 +2370,40 @@
       "optionId": "6aa7fc92f6a86fe1ad3e8812",
       "originalName": "Dark Gray (10105)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Dark Gray (10105)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#545454FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa7fc92f6a86fe1ad3e8812.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=42844629008520",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/dark_gray_e27e0fae-6cfd-4efe-b9c5-35c904403eab.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=42844629008520",
+        "variantId": "42844629008520",
+        "sha256": "fabc6f43541b2d759096eaad1b8dd85a6694fa842cc0f6c681a17eeb925877e5",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Dark Gray (10105)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "3918cd22de82518679a4e6e3449426dd94aa532ab213d2274a3315305ed7a509",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1834,20 +2412,40 @@
       "optionId": "6aa7fc92f6a86fe1ad3e8813",
       "originalName": "Light Gray (10104)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Light Gray (10104)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#D1D3D5FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa7fc92f6a86fe1ad3e8813.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=42844628975752",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/light_gray_25c0c41d-107b-4d05-96d1-3de1efb728d9.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=42844628975752",
+        "variantId": "42844628975752",
+        "sha256": "a6a3139986567bfab30b6005f6740483496fe313a88893993186b969943d2fe7",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Light Gray (10104)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "1a4614227ccdd4d2b70a9ebe8d01e1b10c2142e0f6d811982a12b4b346a8b98d",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1856,20 +2454,40 @@
       "optionId": "6aa7fc92f6a86fe1ad3e8814",
       "originalName": "Maroon Red (10205)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Maroon Red (10205)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#9D2235FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa7fc92f6a86fe1ad3e8814.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43045591679112",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/MaroonRed.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43045591679112",
+        "variantId": "43045591679112",
+        "sha256": "08b15237646671db440d9d8a6512cc5f214739f9d1e7281fa494acc52260eb3b",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Maroon Red (10205)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "5ac6b94ba62d3f949fc9145f58fba1d700832a4b2cc12d7e6505a596ef07633e",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1878,20 +2496,40 @@
       "optionId": "6aa7fc92f6a86fe1ad3e8815",
       "originalName": "Bright Green (10503)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Bright Green (10503)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#BECF00FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa7fc92f6a86fe1ad3e8815.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43045598167176",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/BrightGreen.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43045598167176",
+        "variantId": "43045598167176",
+        "sha256": "15f37ea9a62ef6a001c6c152ba76f050bc8e6d39de2dee6b5f9b7533773e1dee",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Bright Green (10503)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "ba5581031b5301410f9855409dc40854a664dc0b245c6f0cfbb4b1e6515119aa",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1900,20 +2538,40 @@
       "optionId": "6aa7fc92f6a86fe1ad3e8816",
       "originalName": "Turquoise (10605)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Turquoise (10605)",
         "material": "PLA Basic",
-        "status": "verified",
-        "colours": [
-          "#00B1B7FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa7fc92f6a86fe1ad3e8816.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43045596921992",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_basic_pdf"
+        "bambu_pla_basic_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/Turquoise.jpg?v=1739413402",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-filament?variant=43045596921992",
+        "variantId": "43045596921992",
+        "sha256": "b6275d2c8d4409a986ba88af0bf9bc253fffafb194613f5ecdf79c01754d9ef5",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Turquoise (10605)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "c8047509f104b5d20e968ca6d5329ff9479b33393a108641c5274400e6a8375e",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6974d555afadda8ec64083c3",
@@ -1946,22 +2604,40 @@
       "optionId": "6aa8ead1a1ca543d895a4902",
       "originalName": "Mint Lime (10904)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Mint Lime (10904)",
         "material": "PLA Basic Gradient",
-        "status": "verified",
-        "colours": [
-          "#B6FF43FF",
-          "#4EC939FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8ead1a1ca543d895a4902.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-gradient?variant=43158301245576",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
-        "bambu_studio"
+        "bambu_studio",
+        "bambu_official_product_photos"
       ],
       "notes": [
-        "Two manufacturer-specified reference colours only. Do not imply exact gradient direction, transition length or printed pattern."
-      ]
+        "Two manufacturer-specified reference colours only. Do not imply exact gradient direction, transition length or printed pattern.",
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/gradient_green.jpg?v=1739342980",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-gradient?variant=43158301245576",
+        "variantId": "43158301245576",
+        "sha256": "9df8a6a14a1eff46516d774668c5d6ccbf03686af6af8c034376b3ff39afa672",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Mint Lime (10904)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "87a1ae02fbafd02c1564a9f8a1ea88a9e50e9b5ef017ca91c166673ccaacdef1",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8ead1a1ca543d895a4900",
@@ -1970,22 +2646,40 @@
       "optionId": "6aa8ead1a1ca543d895a4903",
       "originalName": "Pink Citrus (10903)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Pink Citrus (10903)",
         "material": "PLA Basic Gradient",
-        "status": "verified",
-        "colours": [
-          "#F78F77FF",
-          "#E4505AFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8ead1a1ca543d895a4903.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-gradient?variant=43158301278344",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
-        "bambu_studio"
+        "bambu_studio",
+        "bambu_official_product_photos"
       ],
       "notes": [
-        "Two manufacturer-specified reference colours only. Do not imply exact gradient direction, transition length or printed pattern."
-      ]
+        "Two manufacturer-specified reference colours only. Do not imply exact gradient direction, transition length or printed pattern.",
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/pink_gradient.jpg?v=1739342980",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-gradient?variant=43158301278344",
+        "variantId": "43158301278344",
+        "sha256": "df5d38500029e8f9f451bced9944689d7a0be87fe95bb379bcde78a75a68d1a8",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Pink Citrus (10903)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "e76cdb0605427d7678906f6c7bc6207a3883c33064eb31edf245897d23551976",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8ead1a1ca543d895a4900",
@@ -1994,22 +2688,40 @@
       "optionId": "6aa8ead1a1ca543d895a4904",
       "originalName": "Ocean to Meadow (10902)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Ocean to Meadow (10902)",
         "material": "PLA Basic Gradient",
-        "status": "verified",
-        "colours": [
-          "#307FE2FF",
-          "#54FF9BFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8ead1a1ca543d895a4904.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-gradient?variant=41215835635848",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
-        "bambu_studio"
+        "bambu_studio",
+        "bambu_official_product_photos"
       ],
       "notes": [
-        "Two manufacturer-specified reference colours only. Do not imply exact gradient direction, transition length or printed pattern."
-      ]
+        "Two manufacturer-specified reference colours only. Do not imply exact gradient direction, transition length or printed pattern.",
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/A00-M2-1.75-1000-spl.png?v=1739342980",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-basic-gradient?variant=41215835635848",
+        "variantId": "41215835635848",
+        "sha256": "2434ded34d3ce5316273cf72dc99e39766c127681ee915f12ec4008f17a7504f",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Ocean to Meadow (10902)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "2c0034ea7c449b8ea2e7d97db063b44e0cdf80a614903aac9543459c1c9e8783",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8ead1a1ca543d895a4900",
@@ -2039,19 +2751,40 @@
       "optionId": "6aa8eaf1a1ca543d895a4930",
       "originalName": "Glow Green (15500)",
       "preview": {
-        "kind": "unavailable",
+        "kind": "image",
         "label": "Glow Green (15500)",
         "material": "PLA Glow",
-        "status": "verified",
-        "reason": "An exact product photo is needed to show its daylight and glow appearance."
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eaf1a1ca543d895a4930.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-glow?variant=41558487859336",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_glow_store"
+        "bambu_glow_store",
+        "bambu_official_product_photos"
       ],
       "notes": [
-        "Manufacturer colour reference, not an appearance preview. Needs exact product photograph to show daylight versus charged glow appearance."
-      ]
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/4fefbcd44633bcd5e4f4663eafb78c3c_daf55bfd-5c08-4aee-822c-ce72d7fee205.png?v=1715325121",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-glow?variant=41558487859336",
+        "variantId": "41558487859336",
+        "sha256": "266031c02cc725d319cb78a22e4ce796c496c7aef49912d7cfcfabb154ff0462",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Glow Green (15500)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "5e2bade1991432d26fccbbd2d312a375b12ce1eeb698f24aabd077894fd8780a",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eaf1a1ca543d895a492e",
@@ -2060,19 +2793,40 @@
       "optionId": "6aa8eaf1a1ca543d895a4931",
       "originalName": "Glow Yellow (15400)",
       "preview": {
-        "kind": "unavailable",
+        "kind": "image",
         "label": "Glow Yellow (15400)",
         "material": "PLA Glow",
-        "status": "verified",
-        "reason": "An exact product photo is needed to show its daylight and glow appearance."
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eaf1a1ca543d895a4931.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-glow?variant=41558487924872",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_glow_store"
+        "bambu_glow_store",
+        "bambu_official_product_photos"
       ],
       "notes": [
-        "Manufacturer colour reference, not an appearance preview. Needs exact product photograph to show daylight versus charged glow appearance."
-      ]
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/6fdaecdc33b9371fb7c326d4bd52932b.png?v=1717490439",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-glow?variant=41558487924872",
+        "variantId": "41558487924872",
+        "sha256": "af4693fc0ea410e4665d91ebdde7b6d2a652e0e8ef8a57d7703ea1e7518aee8b",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Glow Yellow (15400)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "d9c452ad55d48655a03f4ddd4c9da50a682e634cae21d741cc3e39cf05db4fa7",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8ead5a1ca543d895a4909",
@@ -2102,20 +2856,40 @@
       "optionId": "6aa8eacda1ca543d895a48f4",
       "originalName": "Ivory White (11100)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Ivory White (11100)",
         "material": "PLA Matte",
-        "status": "verified",
-        "colours": [
-          "#FFFFFFFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eacda1ca543d895a48f4.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-matte?variant=41078280159368",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_matte_pdf"
+        "bambu_pla_matte_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/products/PLA-Matte_Ivory-White.png?v=1717490452",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-matte?variant=41078280159368",
+        "variantId": "41078280159368",
+        "sha256": "5792f611cb8e2718ed3f29b113ec482e36ef862c51693bab6a5c4d9d4987c4ee",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Ivory White (11100)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "a6bb6915a14308792dae51651bc76837bfc87d403dd57103941da9f4baa39ae9",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eacda1ca543d895a48f2",
@@ -2124,20 +2898,40 @@
       "optionId": "6aa8eacda1ca543d895a48f5",
       "originalName": "Ash Gray (11102)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Ash Gray (11102)",
         "material": "PLA Matte",
-        "status": "verified",
-        "colours": [
-          "#9B9EA0FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eacda1ca543d895a48f5.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-matte?variant=41078280192136",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_matte_pdf"
+        "bambu_pla_matte_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/products/PLA-Matte_Ash-Gray_3b86b0a0-d6ff-43ad-95ca-1ea963d69abf.png?v=1717490452",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-matte?variant=41078280192136",
+        "variantId": "41078280192136",
+        "sha256": "de97bfa33f47751f2a778e85dd925cf3def4f3d74559b2ef46db354f26495361",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Ash Gray (11102)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "864211d4c54d09fee23c90f286ba6e1e9ce87143565fe9a0d65dbded2ac47936",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eacda1ca543d895a48f2",
@@ -2146,20 +2940,40 @@
       "optionId": "6aa8eacda1ca543d895a48f6",
       "originalName": "Sakura Pink (11201)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Sakura Pink (11201)",
         "material": "PLA Matte",
-        "status": "verified",
-        "colours": [
-          "#E8AFCFFF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eacda1ca543d895a48f6.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-matte?variant=40489681879176",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_matte_pdf"
+        "bambu_pla_matte_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/products/PLA-Matte_Sakura-Pink.png?v=1717490452",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-matte?variant=40489681879176",
+        "variantId": "40489681879176",
+        "sha256": "9822da17a4f824233426a26bce826e3f175c7c6192b73bcb52ad52406bdedc4e",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Sakura Pink (11201)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "74bd1ccea4243276d1cdaa72dd73a15fa898bc145840616b8055ee1296113a8d",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eacda1ca543d895a48f2",
@@ -2168,20 +2982,40 @@
       "optionId": "6aa8eacda1ca543d895a48f7",
       "originalName": "Lemon Yellow (11400)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Lemon Yellow (11400)",
         "material": "PLA Matte",
-        "status": "verified",
-        "colours": [
-          "#F7D959FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eacda1ca543d895a48f7.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-matte?variant=40489681911944",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_matte_pdf"
+        "bambu_pla_matte_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/products/PLA-Matte_Yellow.png?v=1721296419",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-matte?variant=40489681911944",
+        "variantId": "40489681911944",
+        "sha256": "5c0d9231df8187c26a9b287adc091b7e6fa3b14e9215d0462eae22586869cdfb",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Lemon Yellow (11400)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "942d6a6664b4d97338c5f46d75317bd2c4efc8fa121c52495dc450a43144e5db",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eacda1ca543d895a48f2",
@@ -2190,20 +3024,40 @@
       "optionId": "6aa8eacda1ca543d895a48f8",
       "originalName": "Charcoal (11101)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Charcoal (11101)",
         "material": "PLA Matte",
-        "status": "verified",
-        "colours": [
-          "#000000FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eacda1ca543d895a48f8.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-matte?variant=41078280126600",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_pla_matte_pdf"
+        "bambu_pla_matte_pdf",
+        "bambu_official_product_photos"
       ],
-      "notes": []
+      "notes": [
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/PLA-Matte_Charcoal.png?v=1717490452",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-matte?variant=41078280126600",
+        "variantId": "41078280126600",
+        "sha256": "d91ca7582d8bf029b4922115440df368a1153cd1c7829ab89d0b63f4e7d36d86",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Charcoal (11101)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "17790fcbd5f7473824ffa6f772dca8f8cb0e229e176251973b20b60442e7ad32",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eacda1ca543d895a48f2",
@@ -2233,22 +3087,40 @@
       "optionId": "6aa8eaf9a1ca543d895a493e",
       "originalName": "Silver (13109)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Silver (13109)",
         "material": "PLA Silk+",
-        "status": "verified",
-        "colours": [
-          "#C8C8C8FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eaf9a1ca543d895a493e.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-silk-upgrade?variant=43128679760008",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_silk_store"
+        "bambu_silk_store",
+        "bambu_official_product_photos"
       ],
       "notes": [
-        "Swatch indicates manufacturer base colour only; silk sheen is not simulated."
-      ]
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/PLA_Silk_11.jpg?v=1740038711",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-silk-upgrade?variant=43128679760008",
+        "variantId": "43128679760008",
+        "sha256": "4e87ee11a051118225a6b22b8613549dcf6c4fbe32a5053ed621613ed0d88be3",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Silver (13109)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "6142a6c5cc063b2734711df7c5d124bb1fe92217afeb1ed21e40ce6eb745c3b9",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eaf9a1ca543d895a493c",
@@ -2257,22 +3129,40 @@
       "optionId": "6aa8eaf9a1ca543d895a493f",
       "originalName": "Mint (13507)",
       "preview": {
-        "kind": "swatch",
+        "kind": "image",
         "label": "Mint (13507)",
         "material": "PLA Silk+",
-        "status": "verified",
-        "colours": [
-          "#96DCB9FF"
-        ],
-        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eaf9a1ca543d895a493f.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-silk-upgrade?variant=43128679825544",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_silk_store"
+        "bambu_silk_store",
+        "bambu_official_product_photos"
       ],
       "notes": [
-        "Swatch indicates manufacturer base colour only; silk sheen is not simulated."
-      ]
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/PLA_Silk_2_58fea091-c6cb-45e3-95f0-3c9b11c57f89.jpg?v=1740038711",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-silk-upgrade?variant=43128679825544",
+        "variantId": "43128679825544",
+        "sha256": "cd2d038aa8f0d2585f2e93fa31037981e6cc3a6ab290442a5eaf127452aef576",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Mint (13507)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "b1ef48ea83f2ca7c77c2cea7eedd40aa72fe35461fc147d2356ec7455ee3c4ed",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eafca1ca543d895a4943",
@@ -2323,19 +3213,40 @@
       "optionId": "6aa8eaf5a1ca543d895a4937",
       "originalName": "Black Walnut (13107)",
       "preview": {
-        "kind": "unavailable",
+        "kind": "image",
         "label": "Black Walnut (13107)",
         "material": "PLA Wood",
-        "status": "verified",
-        "reason": "An exact product photo is needed to show its wood colour and texture."
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eaf5a1ca543d895a4937.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-wood?variant=43075831955592",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_wood_store"
+        "bambu_wood_store",
+        "bambu_official_product_photos"
       ],
       "notes": [
-        "Manufacturer colour reference, not an appearance preview. Needs exact product photograph to show wood texture."
-      ]
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/4_edf1bf62-74b1-4ae2-b03a-d66d6b475191.jpg?v=1738738699",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-wood?variant=43075831955592",
+        "variantId": "43075831955592",
+        "sha256": "1e30b32b73bdcdc99a883198b775b425ba1356a5b6c15100eae5f358c4eaf625",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Black Walnut (13107)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "70a5cc81ec6271179d98a1596a78bf534fd7d24eb85d7a55e429f91cac3c9556",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eaf5a1ca543d895a4935",
@@ -2344,19 +3255,40 @@
       "optionId": "6aa8eaf5a1ca543d895a4938",
       "originalName": "Rosewood (13204)",
       "preview": {
-        "kind": "unavailable",
+        "kind": "image",
         "label": "Rosewood (13204)",
         "material": "PLA Wood",
-        "status": "verified",
-        "reason": "An exact product photo is needed to show its wood colour and texture."
+        "status": "verified_official_variant_photo",
+        "src": "/images/filament/bambu/6aa8eaf5a1ca543d895a4938.webp",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-wood?variant=43075831988360",
+        "imageDescription": "official printed sample"
       },
       "sourceIds": [
         "bambu_studio",
-        "bambu_wood_store"
+        "bambu_wood_store",
+        "bambu_official_product_photos"
       ],
       "notes": [
-        "Manufacturer colour reference, not an appearance preview. Needs exact product photograph to show wood texture."
-      ]
+        "Official printed sample illustrates colour and finish, not the stock spool or supplied packaging. Packaging remains the separately selected spool/refill option."
+      ],
+      "photoEvidence": {
+        "imageUrl": "https://cdn.shopify.com/s/files/1/0584/7236/6216/files/2_1d60446b-f861-4001-9603-2ee01c41de2e.jpg?v=1738738699",
+        "sourceUrl": "https://bambulab-us.myshopify.com/products/pla-wood?variant=43075831988360",
+        "variantId": "43075831988360",
+        "sha256": "0b37f78a6f507178a84fec166c6d0754a6a8ab3e1e788ffc6bf7f221ac932966",
+        "dimensions": [
+          2800,
+          2800
+        ],
+        "observedAt": "2026-10-09",
+        "exactOriginalOptionName": "Rosewood (13204)",
+        "verifiedBy": "Exact-ID manufacturer variant join supplied by research worker; all 47 downloads decoded and contact sheets visually inspected locally.",
+        "servedSha256": "f304b65dbe33b00c6cce4707d1de78cecf550dda74bb9085cd7b124a16bc8e2f",
+        "servedDimensions": [
+          384,
+          384
+        ]
+      }
     },
     {
       "productId": "6aa8eae9a1ca543d895a4921",

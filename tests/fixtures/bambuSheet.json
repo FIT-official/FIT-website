@@ -1,0 +1,78 @@
+{
+  "fixtureType": "synthetic",
+  "description": "Invented stock quantities and barcode identifiers. Public filament names/codes exercise the observed Sheet schema. This is not inventory data.",
+  "rows": [
+    {
+      "product": "Bambu Lab PLA Basic",
+      "material": "PLA Basic",
+      "brand": "BambuLab",
+      "colour": "Jade White (10100) (With Spool)",
+      "quantity": 17,
+      "barcode": "SYNTHETIC-10100-With-Spool"
+    },
+    {
+      "product": "Bambu Lab PLA Basic",
+      "material": "PLA Basic",
+      "brand": "BambuLab",
+      "colour": "Jade White (10100) (Without Spool)",
+      "quantity": 6,
+      "barcode": "SYNTHETIC-10100-Without-Spool"
+    },
+    {
+      "product": "Bambu Lab PLA Basic",
+      "material": "PLA Basic",
+      "brand": "BambuLab",
+      "colour": "Silver (10102) (With Spool)",
+      "quantity": 3,
+      "barcode": "SYNTHETIC-10102-With-Spool"
+    },
+    {
+      "product": "Bambu Lab PLA Basic",
+      "material": "PLA Basic",
+      "brand": "BambuLab",
+      "colour": "Silver (10102) (Without Spool)",
+      "quantity": 8,
+      "barcode": "SYNTHETIC-10102-Without-Spool"
+    },
+    {
+      "product": "Bambu Lab PLA Basic",
+      "material": "PLA Basic",
+      "brand": "BambuLab",
+      "colour": "Black (10101) (With Spool)",
+      "quantity": 2,
+      "barcode": "SYNTHETIC-10101-With-Spool"
+    },
+    {
+      "product": "Bambu Lab PLA Basic",
+      "material": "PLA Basic",
+      "brand": "BambuLab",
+      "colour": "Black (10101) (Without Spool)",
+      "quantity": 12,
+      "barcode": "SYNTHETIC-10101-Without-Spool"
+    },
+    {
+      "product": "Bambu Lab PLA Basic Gradient",
+      "material": "PLA Basic Gradient",
+      "brand": "BambuLab",
+      "colour": "Cotton Candy Cloud (10907) (With Spool)",
+      "quantity": 3,
+      "barcode": "SYNTHETIC-GRADIENT"
+    },
+    {
+      "product": "ASA Gray 45102",
+      "material": "ASA",
+      "brand": "BambuLab",
+      "colour": "-",
+      "quantity": 9,
+      "barcode": "SYNTHETIC-ASA"
+    },
+    {
+      "product": "66400 PVA White",
+      "material": "PVA",
+      "brand": "BambuLab",
+      "colour": "-",
+      "quantity": 99,
+      "barcode": "SYNTHETIC-PVA"
+    }
+  ]
+}

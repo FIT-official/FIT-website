@@ -48,12 +48,12 @@ it('uses selected variant list fees and invalidates old versions when price or s
   }
 })
 
-it('uses exact Sheet colour stock when present and shop stock otherwise', () => {
+it('does not infer spool stock from a Sheet row without a spool identity', () => {
   const record = records[0], row = { brand: 'Bambu Lab', product: record.name, colour: record.variantTypes[0].options[0].name, quantity: 3 }
   const p = basic(bambuBulkCatalogue(records, { rows: [row], source: 'snapshot' }))
-  expect(p.types[0].options[0]).toMatchObject({ stock: 3, stockSource: 'snapshot' })
-  expect(p.types[0].options[1].stockSource).toBe('shop')
-  expect(p.stockSource).toBe('mixed')
+  expect(p.types[0].options[0]).toMatchObject({ stock: 0, stockSource: 'snapshot' })
+  expect(p.types[0].options[1]).toMatchObject({ stock: 0, stockSource: 'snapshot' })
+  expect(p.stockSource).toBe('snapshot')
 })
 
 it('rejects above-colour stock and cumulative shared spool and product limits', () => {
