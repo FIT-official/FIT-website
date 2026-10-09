@@ -2,6 +2,7 @@ import { clerkMiddleware, clerkClient, createRouteMatcher } from '@clerk/nextjs/
 import { NextResponse } from 'next/server'
 import { isUnlistedBlogPath } from '@/lib/blog/unlistedRobots'
 import { subscriptionIntentTarget, subscriptionPriceId, withSubscriptionIntent } from '@/lib/subscriptionIntent'
+import { maintenanceResponse } from '@/lib/maintenance/middleware'
 
 const isPrivateRoute = createRouteMatcher(['/dashboard(.*)', '/account(.*)', '/admin(.*)', '/onboarding'])
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
@@ -14,6 +15,8 @@ async function handleRequest(auth, req) {
     // API handlers enforce their own authentication/signatures. A browser
     // onboarding redirect must never replace JSON or consume a Stripe webhook.
     if (isApiRoute(req)) return NextResponse.next()
+    const maintenance = await maintenanceResponse(auth, req)
+    if (maintenance) return maintenance
     // Clerk must finish OAuth account linking/session activation before any
     // onboarding or authenticated-signin redirect can run.
     if (isSsoCallback(req)) return NextResponse.next()
