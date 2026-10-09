@@ -103,11 +103,7 @@ describe('CreatorShell', () => {
 
     it('the dashboard layout wraps subpages in the shell: products page gets the rail with its link active', async () => {
         mockPathname = '/dashboard/products'
-        render(
-            <DashboardLayout>
-                <MyProducts />
-            </DashboardLayout>,
-        )
+        render(await DashboardLayout({ children: <MyProducts /> }))
         // The products page renders inside the shell...
         expect(await screen.findByText('Stock Your Shelf')).toBeInTheDocument()
         // ...with the rail present and its own route highlighted.

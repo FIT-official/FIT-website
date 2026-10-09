@@ -1,4 +1,9 @@
 import { publicProductImages } from './lib/publicProductImages.mjs';
+import { localFixtureRuntime } from './lib/creatorDashboard/previewRuntime.mjs';
+import { fileURLToPath } from 'node:url';
+const fixtureAliases = localFixtureRuntime() ? {
+    '@clerk/nextjs': fileURLToPath(new URL('./lib/creatorDashboard/preview/Clerk.jsx', import.meta.url)),
+} : {};
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -9,10 +14,9 @@ const nextConfig = {
     // Keep metadata blocking for browsers and crawlers. Route content must also
     // stay outside layout Suspense boundaries so notFound can set HTTP 404.
     htmlLimitedBots: /.*/,
-    // Silence Next.js 16 warning about having a webpack config
-    // without a Turbopack config. We don't need any special
-    // Turbopack settings right now, so an empty object is fine.
-    turbopack: {},
+    // Only local development fixtures replace client identity hooks. Server
+    // authorization uses the real Clerk SDK in every production build.
+    turbopack: { resolveAlias: fixtureAliases },
     // Clerk middleware makes every request body buffer through the proxy,
     // whose default cap is 10MB. Print-time calibration uploads whole models
     // (route enforces its own 40MB Content-Length guard), so match that here.
@@ -48,6 +52,10 @@ const nextConfig = {
         ],
     },
     webpack: (config, { isServer }) => {
+        if (localFixtureRuntime()) {
+            config.resolve.alias = { ...config.resolve.alias, ...Object.fromEntries(Object.entries(fixtureAliases).map(([key, value]) => [`${key}$`, value])) };
+            config.parallelism = 2;
+        }
         // Handle gltfjsx and other AST parsing libraries
         config.resolve.fallback = {
             ...config.resolve.fallback,

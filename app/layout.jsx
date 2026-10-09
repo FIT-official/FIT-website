@@ -5,9 +5,7 @@ import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import "./dashboard.css";
-import Navbar from "@/components/General/Navbar";
-import MaintenanceBanner from '@/components/MaintenanceBanner';
-import Footer from "@/components/General/Footer";
+import SiteFrame from '@/components/General/SiteFrame';
 import Smooth from "@/components/General/Smooth";
 import { ToastProvider } from "@/components/General/ToastProvider";
 import ChatLauncher from "@/components/Chat/ChatLauncher";
@@ -66,13 +64,14 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  if (dashboardEnabled()) {
-    const surface = (await headers()).get('x-fit-creator-surface');
-    // Tracking tokens must not enter analytics. Fixture pages have no account/DB probes.
-    if (surface === 'tracking' || (surface === 'dashboard' && fixtureMode())) {
-      return <html lang="en"><body style={{ margin: 0, background: '#f6f8f5' }}>{children}</body></html>;
-    }
-  }
+  const surface = dashboardEnabled() ? (await headers()).get('x-fit-creator-surface') : null;
+  // Private links and dashboard paths never enter analytics. Local fixtures use
+  // the same frame with a dev-only signed-out Clerk shim and no service clients.
+  if (surface === 'tracking' || surface === 'dashboard' || fixtureMode()) return (
+    <ClerkProvider><html lang="en"><body className={`${inter.variable} antialiased`}>
+      <ToastProvider><ClientProviders><SiteFrame>{children}</SiteFrame></ClientProviders></ToastProvider>
+    </body></html></ClerkProvider>
+  );
   return (
     <ClerkProvider>
       <html lang="en">
@@ -90,18 +89,8 @@ export default async function RootLayout({ children }) {
                 <ToastProvider>
                   <AnalyticsConsentProvider><GoogleMeasurementProvider><PostHogProvider>
                   <ClientProviders>
-                    <div className="flex flex-row items-center justify-center bg-baseColor">
-                      <div data-fit-page-frame className="flex flex-col md:w-[90vw] lg:w-[85vw] max-w-[1350px] w-screen border-l border-r border-borderColor transition-all duration-300 ease-in-out overflow-hidden bg-background">
-                        <MaintenanceBanner />
-                        <Suspense fallback={<div className="h-14" />}><Navbar /></Suspense>
-                        <div className='lg:hidden flex h-14 w-full bg-background' />
-                        {/* Keep route existence checks in the shell: a fallback here
-                            commits HTTP 200 before an async page can call notFound(). */}
-                        {children}
-                        <Footer />
-                      </div>
-                      <Suspense><ChatLauncher /></Suspense>
-                    </div>
+                    <SiteFrame>{children}</SiteFrame>
+                    <Suspense><ChatLauncher /></Suspense>
                   </ClientProviders>
                   </PostHogProvider></GoogleMeasurementProvider></AnalyticsConsentProvider>
                 </ToastProvider>

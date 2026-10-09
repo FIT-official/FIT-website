@@ -5,6 +5,7 @@ import { scopeFromUser } from '@/lib/auth/scope'
 import { isUnlistedBlogPath } from '@/lib/blog/unlistedRobots'
 import { subscriptionIntentTarget, subscriptionPriceId, withSubscriptionIntent } from '@/lib/subscriptionIntent'
 import { maintenanceResponse } from '@/lib/maintenance/middleware'
+import { fixtureResponse } from '@/lib/creatorDashboard/preview/middleware'
 
 const isPrivateRoute = createRouteMatcher(['/dashboard(.*)', '/account(.*)', '/admin(.*)', '/onboarding'])
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
@@ -94,7 +95,7 @@ async function handleRequest(auth, req) {
     }
 }
 
-export default clerkMiddleware(async (auth, req) => {
+const authenticatedMiddleware = clerkMiddleware(async (auth, req) => {
     const response = await handleRequest(auth, req)
     if (await isUnlistedBlogPath(new URL(req.url).pathname)) {
         const result = response || NextResponse.next()
@@ -103,6 +104,14 @@ export default clerkMiddleware(async (auth, req) => {
     }
     return response
 })
+
+export default function middleware(...args) {
+    // Runs before Clerk only in non-production fixture mode. Production and
+    // production-built Vercel previews always retain the authenticated path.
+    const request = args[0]?.url ? args[0] : args[1];
+    const preview = fixtureResponse(request);
+    return preview || authenticatedMiddleware(...args);
+}
 
 export const config = {
     matcher: [
