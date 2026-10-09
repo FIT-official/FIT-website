@@ -31,7 +31,7 @@ export default function LocalWorksheet({ group, fields, ideas }) {
     }
     function download() {
         const text = JSON.stringify(workshopAnswerExport(draft, fields), null, 2), url = URL.createObjectURL(new Blob([text], { type: 'application/json' }))
-        const link = document.createElement('a'); link.href = url; link.download = 'FIT-workshop-' + group + '-answers.json'; link.click()
+        const link = document.createElement('a'); link.href = url; link.download = 'FIT-class-' + group + '-answers.json'; link.click()
         setTimeout(() => URL.revokeObjectURL(url), 1000)
     }
     function check(event) {

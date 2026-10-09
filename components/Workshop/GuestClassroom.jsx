@@ -12,7 +12,7 @@ import GuestRefineWorkspace from './GuestRefineWorkspace'
 import IncomingFeedback from './GuestIncomingFeedback'
 import GuestIdeaReading from './GuestIdeaReading'
 import GuestTinkercad from './GuestTinkercad'
-import { GUEST_RETURN_GUIDANCE } from '@/lib/workshopGuestPolicy'
+import GuestReturnHelp from './GuestReturnHelp'
 import styles from './GuestClassroom.module.css'
 import design from './ClassroomDesign.module.css'
 import { ClassBrand, ClassIcon, IdeaPal } from './ClassroomDecor'
@@ -53,11 +53,11 @@ export default function GuestClassroom({ homeGroup = null }) {
                 <form onSubmit={enter} className="mt-5"><label className="block">Your name<input className="formInput block w-full" autoComplete="off" required maxLength={60} value={name} onChange={event => setName(event.target.value)} /></label><label className="block mt-4">Your group<select className="formInput block w-full" value={group} onChange={event => setGroup(event.target.value)}>{workshopGroups.map(row => <option key={row.id} value={row.id}>Group {row.number}</option>)}</select></label><button type="submit" className="formBlackButton mt-5" disabled={busy || !entryOpen}>{busy ? 'Entering…' : 'Enter class'}<ClassIcon kind="ARROW" /></button></form>
                 <p role="status" aria-live="polite" className={message ? design.status : ''}>{message}</p>{actualHome && <Link className="formWhiteButton mt-3" href={'/workshop/' + actualHome + '/classroom'}>Continue my Group {actualHome.slice(1)} session</Link>}
             </section>
-        </div><p className={design.guidance}>{GUEST_RETURN_GUIDANCE}</p>
+        </div><GuestReturnHelp />
     </main>
     const own = workshopClassroomGroupPage(lesson.group), targetGroup = targetRound === lesson.assignment.round && target || lesson.assignment.target, peer = workshopClassroomGroupPage(targetGroup)
     const activeView = lesson.navigationLocked ? lesson.navigationTarget : viewPhase, names = { PRESENT: 'Explore', FEEDBACK: 'Feedback', REFINE: 'Refine' }
-    return <main className={design.shell + ' ph-no-capture ph-mask'}><ClassBrand /><header className={design.studentHeader}><div><p className={design.eyebrow}>Let&apos;s make ideas better</p><h1>Group {lesson.group.slice(1)} class</h1><p className={design.studentName}>{lesson.studentName}</p></div><button type="button" className="formWhiteButton" disabled={busy} onClick={leave}>Leave class</button></header><p className={design.guidance}>{GUEST_RETURN_GUIDANCE}</p>
+    return <main className={design.shell + ' ph-no-capture ph-mask'}><ClassBrand /><header className={design.studentHeader}><div><p className={design.eyebrow}>Let&apos;s make ideas better</p><h1>Group {lesson.group.slice(1)} class</h1><p className={design.studentName}>{lesson.studentName}</p></div><button type="button" className="formWhiteButton" disabled={busy} onClick={leave}>Leave class</button></header><GuestReturnHelp />
         {offline && <p role="status" className="mt-3">You are offline. Keep writing here, then reconnect to save.</p>}
         {lesson.navigationLocked && <p role="status" className="border rounded-lg p-3 mt-4">Stay on {names[lesson.navigationTarget]} for now. Your teacher will let you know when to move on.</p>}
         {message && <p role="status" aria-live="polite" className="mt-3">{message}</p>}

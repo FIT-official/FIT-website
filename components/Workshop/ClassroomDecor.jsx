@@ -19,12 +19,20 @@ export function ClassIcon({ kind }) {
 }
 
 export function IdeaPal() {
-    return <svg className={styles.pal} viewBox="0 0 168 138" fill="none" aria-hidden="true" focusable="false">
+    return <svg className={styles.pal} viewBox="0 0 168 138" preserveAspectRatio="xMidYMid meet" fill="none" aria-hidden="true" focusable="false">
         <path d="m26 29-8-7M45 18l-2-10M17 47 7 48M137 24l7-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-        <rect x="68" y="40" width="80" height="80" rx="23" fill="white" stroke="currentColor" strokeWidth="2.5" transform="rotate(10 68 40)" />
-        <rect x="29" y="32" width="82" height="82" rx="23" fill="#ffdd00" stroke="currentColor" strokeWidth="2.5" transform="rotate(-10 29 32)" />
-        <path d="m46 64 3-1M75 59l3-1M54 78q13 13 25-4" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-        <path d="m126 83 2 1M146 87l2 1M128 101q8 8 16 2" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        <g transform="rotate(10 114 86)">
+            <rect x="76" y="48" width="76" height="76" rx="21" fill="white" stroke="currentColor" strokeWidth="2.5" />
+            <circle cx="122" cy="82" r="1.8" fill="currentColor" />
+            <circle cx="138" cy="82" r="1.8" fill="currentColor" />
+            <path d="M121 98q9 9 18 0" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        </g>
+        <g transform="rotate(-10 70 73)">
+            <rect x="29" y="32" width="82" height="82" rx="23" fill="#ffdd00" stroke="currentColor" strokeWidth="2.5" />
+            <circle cx="54" cy="65" r="2" fill="currentColor" />
+            <circle cx="82" cy="65" r="2" fill="currentColor" />
+            <path d="M54 80q14 14 29 0" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+        </g>
         <path d="m120 7 3 8 8 3-8 3-3 8-3-8-8-3 8-3 3-8Z" fill="currentColor" />
     </svg>
 }

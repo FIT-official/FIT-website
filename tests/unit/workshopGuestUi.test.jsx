@@ -28,7 +28,10 @@ describe('name and group entry with confirmed states', () => {
             expect(within(article).getAllByRole('img').length).toBeGreaterThan(0)
             expect(article.querySelectorAll('p').length).toBeGreaterThan(0)
         }
-        expect(screen.getByText(/Return to \/workshop using this same browser/)).toBeInTheDocument()
+        expect(screen.getByText('Return to class using the same browser and device.')).toBeVisible()
+        const returnHelp = screen.getByText('Help returning to class').closest('details')
+        expect(returnHelp).not.toHaveAttribute('open')
+        expect(within(returnHelp).getByText(/30 November 2026/)).not.toBeVisible()
         fireEvent.change(first, { target: { value: 'Keep my first idea change' } })
         fireEvent.change(second, { target: { value: 'Keep my second idea change' } })
         fireEvent.click(screen.getByRole('link', { name: 'Read Idea 2', exact: true }))
