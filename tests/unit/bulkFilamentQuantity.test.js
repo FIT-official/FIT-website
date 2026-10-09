@@ -3,6 +3,39 @@ import { expect, it } from 'vitest'
 import { bulkTier, priceBulkLines } from '@/lib/bulkFilamentConfig'
 import { parseBulkInput, prepareBulkLines } from '@/lib/bulkFilament'
 import { fixtureCatalogue, fixtureInput, fixtureLine } from '../fixtures/bulkFilament'
+import { BULK_STOCK_SNAPSHOT } from '@/lib/bulkFilamentStockSnapshot'
+
+it.each([[1,1990],[10,1890],[20,1830],[50,1790],[100,1750]])('prices FIT Marble at the Marble ladder for %i combined PLA rolls', (total, cents) => {
+  const c = fixtureCatalogue(BULK_STOCK_SNAPSHOT.rows.map(row => row.barcode === '312' ? { ...row, quantity: 100 } : row))
+  const input = fixtureInput(c)
+  input.lines = [fixtureLine(c, 'FIT', 'PLA', 'Grey Marble', 1)]
+  if (total > 1) input.lines.push(fixtureLine(c, 'Lanbo', 'PLA', 'Black', total - 1))
+  expect(prepareBulkLines(parseBulkInput(input), c).find(l => l.colour === 'Grey Marble')).toMatchObject({ ladder: 'SPECIALTY_PLA', tierRolls: total, unitCents: cents })
+})
+
+it('shares one PLA tier across plain PLA, FIT Marble and Lanbo Marble while PETG stays separate', () => {
+  const c = fixtureCatalogue(BULK_STOCK_SNAPSHOT.rows), input = fixtureInput(c)
+  input.lines = [fixtureLine(c,'Lanbo','PLA','Black',6), fixtureLine(c,'FIT','PLA','Grey Marble',8), fixtureLine(c,'Lanbo','PLA','Marble',6), fixtureLine(c,'Lanbo','PETG','Black',9)]
+  const rows = prepareBulkLines(parseBulkInput(input), c)
+  expect(rows.filter(l => l.material === 'PLA')).toHaveLength(3)
+  for (const row of rows.filter(l => l.material === 'PLA')) {
+    expect(row.tierRolls).toBe(20)
+    expect(row.unitCents).toBe(row.ladder === 'PLA' ? 1330 : 1830)
+  }
+  expect(rows.find(l => l.material === 'PETG')).toMatchObject({ tierRolls: 9, unitCents: 1390 })
+})
+
+it.each([['Grey Marble',20],['Marble',15],['Beige Marble',10]])('allows eight through Sheet stock for FIT %s, capped only at %i', (colour, stock) => {
+  const c = fixtureCatalogue(BULK_STOCK_SNAPSHOT.rows), input = fixtureInput(c)
+  for (let quantity = 8; quantity <= stock; quantity++) {
+    input.lines = [fixtureLine(c,'FIT','PLA',colour,quantity)]
+    expect(prepareBulkLines(parseBulkInput(input),c)[0]).toMatchObject({ quantity, ladder: 'SPECIALTY_PLA' })
+  }
+  input.lines[0].quantity = stock + 1
+  expect(() => prepareBulkLines(parseBulkInput(input),c)).toThrow(`1 to ${stock}`)
+  input.lines = [fixtureLine(c,'FIT','PLA',colour,stock), fixtureLine(c,'FIT','PLA',colour,1)]
+  expect(() => prepareBulkLines(parseBulkInput(input),c)).toThrow(`1 to ${stock}`)
+})
 const boundaries = [9,10,19,20,49,50,99,100]
 for (const [ladder, expected] of Object.entries({
   PLA: [1490,1390,1390,1330,1330,1290,1290,1250],
