@@ -3,7 +3,7 @@
   "installCommand": "yarn install --ignore-engines",
   "framework": "nextjs",
   "regions": [
-    "iad1"
+    "sin1"
   ],
   "functions": {
     "app/api/workshop/**/route.js": {

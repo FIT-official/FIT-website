@@ -11,6 +11,7 @@ import DeliveryTypeManagement from '@/components/Admin/DeliveryTypeManagement'
 import OrderStatusManagement from '@/components/Admin/OrderStatusManagement'
 import CustomPrintProductManagement from '@/components/Admin/CustomPrintProductManagement'
 import CustomPrintRequests from '@/components/Admin/CustomPrintRequests'
+import PrinterRepairManagement from '@/components/Admin/PrinterRepairManagement'
 import BulkFilamentRequests from '@/components/Admin/BulkFilamentRequests'
 import QuotingPricingManagement from '@/components/Admin/QuotingPricingManagement'
 import PrintTimeCalibration from '@/components/Admin/PrintTimeCalibration'
@@ -78,6 +79,7 @@ const NAV_GROUPS = [
     {
         title: 'Operations',
         items: [
+            { key: 'printerRepair', label: 'Printer Assessments', icon: IoPrintOutline, description: 'Review repair enquiries and owner email status.' },
             { key: 'bulkFilament', label: 'Bulk Filament', icon: IoCubeOutline, description: 'Review filament enquiries and extra-roll availability.' },
             { key: 'workshop', label: 'Live Class', icon: IoPeopleOutline, description: 'Control lesson stages, see student submissions and moderate classroom feedback.' },
             {
@@ -202,6 +204,7 @@ const PANELS = {
     customPrint: CustomPrintProductManagement,
     customPrintRequests: CustomPrintRequests,
     bulkFilament: BulkFilamentRequests,
+    printerRepair: PrinterRepairManagement,
     quoting: QuotingPricingManagement,
     printTiming: PrintTimeCalibration,
     reviews: ReviewManagement,

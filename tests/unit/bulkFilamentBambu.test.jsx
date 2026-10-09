@@ -1,6 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import records from '../fixtures/bambuShop.json'
+import sheet from '../fixtures/bambuSheet.json'
 import { bambuBulkCatalogue } from '@/lib/bulkFilamentBambu'
 import { bulkListUnitCents, BAMBU_PRICE_NOTICE } from '@/lib/bulkFilamentConfig'
 import { parseBulkInput, prepareBulkLines, saveBulkRequest } from '@/lib/bulkFilament'
@@ -10,7 +11,8 @@ import BulkFilamentRequests from '@/components/Admin/BulkFilamentRequests'
 import { fixtureCatalogue, fixtureInput, fixtureLine, memoryStore } from '../fixtures/bulkFilament'
 
 vi.mock('next/link', () => ({ default: ({ children, ...props }) => <a {...props}>{children}</a> }))
-const catalogue = () => [...fixtureCatalogue(), ...bambuBulkCatalogue(records, { rows: [], source: 'snapshot' })]
+const stock = () => ({ rows: structuredClone(sheet.rows), source: 'snapshot' })
+const catalogue = () => [...fixtureCatalogue(), ...bambuBulkCatalogue(records, stock())]
 const basic = c => c.find(p => p.slug?.endsWith('1kg-pla-basic'))
 const bambuLine = (p, quantity = 5) => ({ productId: p.id, version: p.version, quantity, remarks: '',
   options: p.types.map(t => ({ typeId: t.id, optionId: (t.options.find(o => o.name === 'Without Spool') || t.options[0]).id })) })
@@ -22,7 +24,8 @@ it('includes all 12 shop filament identities, prices, stock sources and unavaila
   expect(c.map(p => p.id).sort()).toEqual(records.filter(p => p.slug.includes('filament')).map(p => p._id).sort())
   expect(copy).toEqual(records)
   for (const p of c) {
-    expect(p).toMatchObject({ brand: 'Bambu Lab', stockSource: 'shop', priceNotice: BAMBU_PRICE_NOTICE })
+    expect(p).toMatchObject({ brand: 'Bambu Lab', priceNotice: BAMBU_PRICE_NOTICE })
+    if (!p.slug.endsWith('pva-support')) expect(p.stock).toBe(0)
     const line = bambuLine(p, 1)
     expect(bulkListUnitCents(p, Object.fromEntries(line.options.map(o => [o.typeId, o.optionId])))).toBe(Math.round(p.basePrice.presentmentAmount * 100))
   }
@@ -44,7 +47,7 @@ it('uses selected variant list fees and invalidates old versions when price or s
   expect(prepareBulkLines(parseBulkInput(b), c)[0].unitCents).toBe(2590)
   for (const change of [r => { r.basePrice.presentmentAmount += 1 }, r => { r.variantTypes[0].options[0].stock -= 1 }]) {
     const next = structuredClone(records); change(next.find(r => r._id === p.id))
-    expect(() => prepareBulkLines(parseBulkInput(b), bambuBulkCatalogue(next, { rows: [] }))).toThrow('Inventory or prices changed')
+    expect(() => prepareBulkLines(parseBulkInput(b), bambuBulkCatalogue(next, stock()))).toThrow('Inventory or prices changed')
   }
 })
 
@@ -60,8 +63,10 @@ it('rejects above-colour stock and cumulative shared spool and product limits', 
   for (const limit of ['colour', 'spool', 'product']) {
     const c = catalogue(), p = basic(c), b = fixtureInput(c)
     b.lines = [bambuLine(p, 4), bambuLine(p, 4)]
+    const spool = p.types.find(t => t.label === 'Spool')
+    b.lines.forEach(line => { line.options.find(o => o.typeId === spool.id).optionId = spool.options.find(o => o.name === 'With Spool').id })
     if (limit === 'colour') p.types[0].options[0].stock = 7
-    if (limit === 'spool') p.types.find(t => t.label === 'Spool').options.find(o => o.name === 'Without Spool').stock = 7
+    if (limit === 'spool') spool.options.find(o => o.name === 'With Spool').stock = 7
     if (limit === 'product') p.stock = 7
     expect(() => prepareBulkLines(parseBulkInput(b), c)).toThrow(/stock|choose 1 to 7/)
   }
@@ -105,7 +110,7 @@ it('shows the separate group, list-price line, stock maximum and unavailable col
   fireEvent.change(screen.getByLabelText('Product / material'), { target: { value: p.id } })
   expect(screen.getByRole('option', { name: /Silver.*Unavailable/ })).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: 'Add colour to enquiry' }))
-  expect(screen.getByLabelText('Quantity line 1')).toHaveAttribute('max', '67')
+  expect(screen.getByLabelText('Quantity line 1')).toHaveAttribute('max', '17')
   const line = screen.getByRole('region', { name: 'Request line 1' })
   expect(line).toHaveTextContent(BAMBU_PRICE_NOTICE)
   expect(line).toHaveTextContent('$25.90 / roll x 1 = $25.90')
@@ -117,7 +122,7 @@ it('shows the separate group, list-price line, stock maximum and unavailable col
   expect(screen.getByRole('region', { name: 'Request line 2' })).toHaveTextContent('PLA band <10 (9 rolls combined)')
   expect(screen.getByRole('region', { name: 'Request line 2' })).toHaveTextContent('$14.90 / roll x 9 = $134.10')
   expect(line).toHaveTextContent('$25.90 / roll x 5 = $129.50')
-  fireEvent.change(screen.getByLabelText('Quantity line 1'), { target: { value: '68' } })
+  fireEvent.change(screen.getByLabelText('Quantity line 1'), { target: { value: '18' } })
   expect(screen.getByText(/Estimate unavailable/)).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Send request to FIT' })).toBeDisabled()
 })

@@ -38,13 +38,30 @@ describe('Free onboarding routing', () => {
         expect(response.status).toBe(200)
         expect(mocks.auth).not.toHaveBeenCalled()
     })
-    it.each(['/shop', '/products/1kg-pla-3d-printing-filament-lanbo', '/cart', '/checkout', '/checkout/return', '/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping'])('keeps %s public without depending on Clerk account lookup', async path => {
+    it.each(['/shop', '/products/1kg-pla-3d-printing-filament-lanbo', '/cart', '/checkout', '/checkout/return', '/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair'])('keeps %s public without depending on Clerk account lookup', async path => {
         const auth = vi.fn().mockRejectedValue(new Error('Clerk unavailable'))
         auth.protect = vi.fn()
         const response = await middleware(auth, new Request(`https://fit.example${path}`))
         expect(response.status).toBe(200)
         expect(auth).not.toHaveBeenCalled()
         expect(auth.protect).not.toHaveBeenCalled()
+    })
+    it.each([null, 'user_new'])('preserves the saved repair URL for customer %s without onboarding', async userId => {
+        const auth = vi.fn().mockResolvedValue({ userId, sessionClaims: { metadata: { onboardingComplete: false } } })
+        auth.protect = vi.fn()
+        const url = 'https://fit.example/printer-repair?request=12345678-1234-4234-8234-123456789abc'
+        const request = new Request(url)
+        const response = await middleware(auth, request)
+        expect(response.status).toBe(200)
+        expect(response.headers.get('location')).toBeNull()
+        expect(request.url).toBe(url)
+        expect(auth).not.toHaveBeenCalled()
+        expect(mocks.getUser).not.toHaveBeenCalled()
+        expect(auth.protect).not.toHaveBeenCalled()
+    })
+    it('does not extend the public repair exemption to unrelated paths', async () => {
+        const response = await middleware(mocks.auth, new Request('https://fit.example/printer-repair-private'))
+        expect(response.headers.get('location')).toBe('https://fit.example/onboarding')
     })
     it.each(['/sign-up/sso-callback', '/sign-in/sso-callback'])('allows Clerk to complete %s without redirecting', async (path) => {
         const auth = vi.fn()

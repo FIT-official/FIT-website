@@ -1,0 +1,1676 @@
+{
+  "source": "Read-only box exports from 2026-10-09: bambu_shop_live.json, bambu_sheet_rows.tsv, bambu_barcode_rows.json, BAMBU_STOCK_DIFF.csv. Public stock/identity/price fields only. TSV omits brand/material; adapter inputs reconstruct BambuLab branding and ASA material from this Bambu-only export. Snapshot, not live inventory.",
+  "products": [
+    {
+      "_id": "6974d555afadda8ec64083c3",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 21.9
+      },
+      "stock": 397,
+      "productType": "shop",
+      "variantTypes": [
+        {
+          "_id": "6974d555afadda8ec64083c4",
+          "name": "Colour",
+          "options": [
+            {
+              "_id": "6974d555afadda8ec64083c5",
+              "name": "Jade White (10100)",
+              "stock": 67,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083c6",
+              "name": "Silver (10102)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083c7",
+              "name": "Gray (10103)",
+              "stock": 8,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083c8",
+              "name": "Red (10200)",
+              "stock": 10,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083c9",
+              "name": "Magenta (10202)",
+              "stock": 30,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083ca",
+              "name": "Cobalt Blue (10604)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083cb",
+              "name": "Sunflower Yellow (10402)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083cc",
+              "name": "Coca Brown (10802)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083cd",
+              "name": "Mistletoe Green (10502)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083ce",
+              "name": "Purple (10700)",
+              "stock": 17,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083cf",
+              "name": "Pink (10203)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083d0",
+              "name": "Bambu Green (10501)",
+              "stock": 17,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083d1",
+              "name": "Bronze (10801)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083d2",
+              "name": "Yellow (10400)",
+              "stock": 40,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083d3",
+              "name": "Hot Pink (10204)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083d4",
+              "name": "Cyan (10603)",
+              "stock": 31,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083d5",
+              "name": "Blue Gray (10602)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083d6",
+              "name": "Orange (10300)",
+              "stock": 18,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083d7",
+              "name": "Brown (10800)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083d8",
+              "name": "Indigo Purple (10701)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083d9",
+              "name": "Gold (10401)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083da",
+              "name": "Pumpkin Orange (10301)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083db",
+              "name": "Beige (10201)",
+              "stock": 7,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083dc",
+              "name": "Black (10101)",
+              "stock": 31,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa7fc92f6a86fe1ad3e8812",
+              "name": "Dark Gray (10105)",
+              "stock": 5,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa7fc92f6a86fe1ad3e8813",
+              "name": "Light Gray (10104)",
+              "stock": 5,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa7fc92f6a86fe1ad3e8814",
+              "name": "Maroon Red (10205)",
+              "stock": 5,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa7fc92f6a86fe1ad3e8815",
+              "name": "Bright Green (10503)",
+              "stock": 5,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa7fc92f6a86fe1ad3e8816",
+              "name": "Turquoise (10605)",
+              "stock": 5,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa7fc92f6a86fe1ad3e8817",
+              "name": "Blue (10600)",
+              "stock": 5,
+              "additionalFee": 0
+            }
+          ]
+        },
+        {
+          "_id": "6974d555afadda8ec64083dd",
+          "name": "Spool",
+          "options": [
+            {
+              "_id": "6974d555afadda8ec64083df",
+              "name": "Without Spool",
+              "stock": 220,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6974d555afadda8ec64083de",
+              "name": "With Spool",
+              "stock": 177,
+              "additionalFee": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "6aa8eacda1ca543d895a48f2",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Matte",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-matte",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 21.9
+      },
+      "stock": 42,
+      "productType": "shop",
+      "variantTypes": [
+        {
+          "_id": "6aa8eacda1ca543d895a48f3",
+          "name": "Colour",
+          "options": [
+            {
+              "_id": "6aa8eacda1ca543d895a48f4",
+              "name": "Ivory White (11100)",
+              "stock": 12,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eacda1ca543d895a48f5",
+              "name": "Ash Gray (11102)",
+              "stock": 11,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eacda1ca543d895a48f6",
+              "name": "Sakura Pink (11201)",
+              "stock": 3,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eacda1ca543d895a48f7",
+              "name": "Lemon Yellow (11400)",
+              "stock": 3,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eacda1ca543d895a48f8",
+              "name": "Charcoal (11101)",
+              "stock": 10,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eacda1ca543d895a48f9",
+              "name": "Sky Blue (11601)",
+              "stock": 3,
+              "additionalFee": 0
+            }
+          ]
+        },
+        {
+          "_id": "6aa8eacda1ca543d895a48fa",
+          "name": "Spool",
+          "options": [
+            {
+              "_id": "6aa8eacda1ca543d895a48fb",
+              "name": "Without Spool",
+              "stock": 42,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eacda1ca543d895a48fc",
+              "name": "With Spool",
+              "stock": 0,
+              "additionalFee": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "6aa8ead1a1ca543d895a4900",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Basic Gradient",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic-gradient",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 28.9
+      },
+      "stock": 9,
+      "productType": "shop",
+      "variantTypes": [
+        {
+          "_id": "6aa8ead1a1ca543d895a4901",
+          "name": "Colour",
+          "options": [
+            {
+              "_id": "6aa8ead1a1ca543d895a4902",
+              "name": "Mint Lime (10904)",
+              "stock": 2,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8ead1a1ca543d895a4903",
+              "name": "Pink Citrus (10903)",
+              "stock": 2,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8ead1a1ca543d895a4904",
+              "name": "Ocean to Meadow (10902)",
+              "stock": 4,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8ead1a1ca543d895a4905",
+              "name": "Cotton Candy Cloud (10905)",
+              "stock": 1,
+              "additionalFee": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "6aa8ead5a1ca543d895a4909",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Lite",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-lite",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 17.9
+      },
+      "stock": 2,
+      "productType": "shop",
+      "variantTypes": [
+        {
+          "_id": "6aa8ead5a1ca543d895a490a",
+          "name": "Colour",
+          "options": [
+            {
+              "_id": "6aa8ead5a1ca543d895a490b",
+              "name": "Cocoa Brown (16800)",
+              "stock": 2,
+              "additionalFee": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "6aa8ead8a1ca543d895a490f",
+      "name": "Bambu Lab 3D Printing Filament 1kg ABS",
+      "slug": "bambu-lab-3d-printing-filament-1kg-abs",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 21.9
+      },
+      "stock": 23,
+      "productType": "shop",
+      "variantTypes": [
+        {
+          "_id": "6aa8ead8a1ca543d895a4910",
+          "name": "Colour",
+          "options": [
+            {
+              "_id": "6aa8ead8a1ca543d895a4911",
+              "name": "White (40100)",
+              "stock": 23,
+              "additionalFee": 0
+            }
+          ]
+        },
+        {
+          "_id": "6aa8ead8a1ca543d895a4912",
+          "name": "Spool",
+          "options": [
+            {
+              "_id": "6aa8ead8a1ca543d895a4913",
+              "name": "Without Spool",
+              "stock": 10,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8ead8a1ca543d895a4914",
+              "name": "With Spool",
+              "stock": 13,
+              "additionalFee": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "6aa8eae5a1ca543d895a4919",
+      "name": "Bambu Lab 3D Printing Filament 1kg ASA",
+      "slug": "bambu-lab-3d-printing-filament-1kg-asa",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 33
+      },
+      "stock": 41,
+      "productType": "shop",
+      "variantTypes": [
+        {
+          "_id": "6aa8eae5a1ca543d895a491a",
+          "name": "Colour",
+          "options": [
+            {
+              "_id": "6aa8eae5a1ca543d895a491b",
+              "name": "Black (45101)",
+              "stock": 5,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eae5a1ca543d895a491c",
+              "name": "Grey (45102)",
+              "stock": 25,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eae5a1ca543d895a491d",
+              "name": "White (45100)",
+              "stock": 11,
+              "additionalFee": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "6aa8eae9a1ca543d895a4921",
+      "name": "Bambu Lab 3D Printing Filament 0.5kg PVA Support",
+      "slug": "bambu-lab-3d-printing-filament-05kg-pva-support",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 52.9
+      },
+      "stock": 10,
+      "productType": "shop",
+      "variantTypes": [
+        {
+          "_id": "6aa8eae9a1ca543d895a4922",
+          "name": "Colour",
+          "options": [
+            {
+              "_id": "6aa8eae9a1ca543d895a4923",
+              "name": "White (66400)",
+              "stock": 10,
+              "additionalFee": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "6aa8eaeda1ca543d895a4927",
+      "name": "Bambu Lab 3D Printing Filament 1kg PETG Basic",
+      "slug": "bambu-lab-3d-printing-filament-1kg-petg-basic",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 25.9
+      },
+      "stock": 11,
+      "productType": "shop",
+      "variantTypes": [
+        {
+          "_id": "6aa8eaeda1ca543d895a4928",
+          "name": "Colour",
+          "options": [
+            {
+              "_id": "6aa8eaeda1ca543d895a4929",
+              "name": "White (30106)",
+              "stock": 9,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eaeda1ca543d895a492a",
+              "name": "Black (30105)",
+              "stock": 2,
+              "additionalFee": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "6aa8eaf1a1ca543d895a492e",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Glow",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-glow",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 29.9
+      },
+      "stock": 2,
+      "productType": "shop",
+      "variantTypes": [
+        {
+          "_id": "6aa8eaf1a1ca543d895a492f",
+          "name": "Colour",
+          "options": [
+            {
+              "_id": "6aa8eaf1a1ca543d895a4930",
+              "name": "Glow Green (15500)",
+              "stock": 1,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eaf1a1ca543d895a4931",
+              "name": "Glow Yellow (15400)",
+              "stock": 1,
+              "additionalFee": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "6aa8eaf5a1ca543d895a4935",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Wood",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-wood",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 24.9
+      },
+      "stock": 5,
+      "productType": "shop",
+      "variantTypes": [
+        {
+          "_id": "6aa8eaf5a1ca543d895a4936",
+          "name": "Colour",
+          "options": [
+            {
+              "_id": "6aa8eaf5a1ca543d895a4937",
+              "name": "Black Walnut (13107)",
+              "stock": 1,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eaf5a1ca543d895a4938",
+              "name": "Rosewood (13204)",
+              "stock": 4,
+              "additionalFee": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "6aa8eaf9a1ca543d895a493c",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Silk+",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-silk",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 29.9
+      },
+      "stock": 2,
+      "productType": "shop",
+      "variantTypes": [
+        {
+          "_id": "6aa8eaf9a1ca543d895a493d",
+          "name": "Colour",
+          "options": [
+            {
+              "_id": "6aa8eaf9a1ca543d895a493e",
+              "name": "Silver (13109)",
+              "stock": 1,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eaf9a1ca543d895a493f",
+              "name": "Mint (13507)",
+              "stock": 1,
+              "additionalFee": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "6aa8eafca1ca543d895a4943",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Tough+",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-tough",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 39.9
+      },
+      "stock": 4,
+      "productType": "shop",
+      "variantTypes": [
+        {
+          "_id": "6aa8eafca1ca543d895a4944",
+          "name": "Colour",
+          "options": [
+            {
+              "_id": "6aa8eafca1ca543d895a4945",
+              "name": "White (12107)",
+              "stock": 2,
+              "additionalFee": 0
+            },
+            {
+              "_id": "6aa8eafca1ca543d895a4946",
+              "name": "Black (12104)",
+              "stock": 2,
+              "additionalFee": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "6aa8ecaea1a0725a1406b55a",
+      "name": "Bambu Lithophane LED Backlight",
+      "slug": "bambu-lithophane-led-backlight",
+      "basePrice": {
+        "presentmentCurrency": "SGD",
+        "presentmentAmount": 7.8
+      },
+      "stock": 10,
+      "productType": "shop",
+      "variantTypes": []
+    }
+  ],
+  "rows": [
+    {
+      "barcode": "6975337030041",
+      "product": "Bambu Lab PLA Matte",
+      "colour": "Ivory White (11100) (Without Spool)",
+      "quantity": 9,
+      "sheetRows": [
+        274
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Matte"
+    },
+    {
+      "barcode": "6975337030058",
+      "product": "Bambu Lab PLA Matte",
+      "colour": "Ash Gray (11102) (Without Spool)",
+      "quantity": 11,
+      "sheetRows": [
+        275
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Matte"
+    },
+    {
+      "barcode": "6975337030072",
+      "product": "Bambu Lab PLA Matte",
+      "colour": "Sakura Pink (11201) (Without Spool)",
+      "quantity": 3,
+      "sheetRows": [
+        276
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Matte"
+    },
+    {
+      "barcode": "6975337030096",
+      "product": "Bambu Lab PLA Matte",
+      "colour": "Lemon Yellow (11400) (Without Spool)",
+      "quantity": 3,
+      "sheetRows": [
+        277
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Matte"
+    },
+    {
+      "barcode": "6975337030102",
+      "product": "Bambu Lab PLA Matte",
+      "colour": "Charcoal (11101) (Without Spool)",
+      "quantity": 14,
+      "sheetRows": [
+        278
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Matte"
+    },
+    {
+      "barcode": "6975337030140",
+      "product": "Bambu Lab PLA Matte",
+      "colour": "Sky Blue (11601) (Without Spool)",
+      "quantity": 3,
+      "sheetRows": [
+        279
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Matte"
+    },
+    {
+      "barcode": "6975337032939",
+      "product": "ASA Gray 45102",
+      "colour": "-",
+      "quantity": 45,
+      "sheetRows": [
+        284
+      ],
+      "brand": "BambuLab",
+      "material": "ASA"
+    },
+    {
+      "barcode": "6975337038641",
+      "product": "PLA-Basic CMYK Set",
+      "colour": "—",
+      "quantity": 20,
+      "sheetRows": [
+        310
+      ],
+      "brand": "BambuLab",
+      "material": "PLA-Basic CMYK Set"
+    },
+    {
+      "barcode": "6975337031383",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Black (10101) (With Spool)",
+      "quantity": 4,
+      "sheetRows": [
+        319
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337032922",
+      "product": "ASA White 45100",
+      "colour": "-",
+      "quantity": 11,
+      "sheetRows": [
+        323
+      ],
+      "brand": "BambuLab",
+      "material": "ASA"
+    },
+    {
+      "barcode": "6975337031024",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Jade White (10100) (With Spool)",
+      "quantity": 31,
+      "sheetRows": [
+        341
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337031390",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Silver (10102) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        342
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337032328",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Gray (10103) (With Spool)",
+      "quantity": 3,
+      "sheetRows": [
+        343
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337031413",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Red (10200) (With Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        344
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337032045",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Yellow (10400) (Without Spool)",
+      "quantity": 10,
+      "sheetRows": [
+        345
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252426961",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Cobalt Blue (10604) (Without Spool)",
+      "quantity": 10,
+      "sheetRows": [
+        346
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337036517",
+      "product": "Bambu Lab PLA Basic Gradient",
+      "colour": "Mint Lime (10904) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        347
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic Gradient"
+    },
+    {
+      "barcode": "6975337036500",
+      "product": "Bambu Lab PLA Basic Gradient",
+      "colour": "Pink Citrus (10903) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        348
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic Gradient"
+    },
+    {
+      "barcode": "6975337032083",
+      "product": "Bambu Lab PLA Basic Gradient",
+      "colour": "Ocean to Meadow (10902) (With Spool)",
+      "quantity": 4,
+      "sheetRows": [
+        349
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic Gradient"
+    },
+    {
+      "barcode": "6977252429122",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Sunflower Yellow (10402) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        350
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252429108",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Coca Brown (10802) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        351
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337035046",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Mistletoe Green (10502) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        352
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337031932",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Purple (10700) (With Spool)",
+      "quantity": 1,
+      "sheetRows": [
+        353
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337032359",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Pink (10203) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        354
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337033684",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Bambu Green (10501) (With Spool)",
+      "quantity": 8,
+      "sheetRows": [
+        355
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337031918",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Bronze (10801) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        356
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337031956",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Yellow (10400) (With Spool)",
+      "quantity": 30,
+      "sheetRows": [
+        357
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252429092",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Hot Pink (10204) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        358
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337032052",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Cyan (10603) (Without Spool)",
+      "quantity": 10,
+      "sheetRows": [
+        359
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337032342",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Blue Gray (10602) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        360
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337032311",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Orange (10300) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        361
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337032373",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Brown (10800) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        362
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252429115",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Indigo Purple (10701) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        363
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337031925",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Gold (10401) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        364
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252429085",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Pumpkin Orange (10301) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        365
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337030201",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Beige (10201) (Without Spool)",
+      "quantity": 12,
+      "sheetRows": [
+        366
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6937285506634",
+      "product": "Bambu Lab PLA Lite",
+      "colour": "Cocoa Brown (16800) (Without Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        370
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Lite"
+    },
+    {
+      "barcode": "6975337031338",
+      "product": "Bambu Lab PLA Matte",
+      "colour": "Charcoal (11101) (With Spool)",
+      "quantity": 0,
+      "sheetRows": [
+        372
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Matte"
+    },
+    {
+      "barcode": "6975337030348",
+      "product": "Bambu Lab ABS",
+      "colour": "White (40100) Without Spool",
+      "quantity": 5,
+      "sheetRows": [
+        380
+      ],
+      "brand": "BambuLab",
+      "material": "ABS"
+    },
+    {
+      "barcode": "6974337030041",
+      "product": "11100 Ivory White",
+      "colour": "-",
+      "quantity": 10,
+      "sheetRows": [
+        381
+      ],
+      "brand": "BambuLab",
+      "material": "11100 Ivory White"
+    },
+    {
+      "barcode": "6975337036708",
+      "product": "66400 PVA White",
+      "colour": "-",
+      "quantity": 12,
+      "sheetRows": [
+        382
+      ],
+      "brand": "BambuLab",
+      "material": "66400 PVA White"
+    },
+    {
+      "barcode": "6975337031178",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Black (10101) (Without Spool)",
+      "quantity": 39,
+      "sheetRows": [
+        384
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337030898",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Orange (10300) (Without Spool)",
+      "quantity": 22,
+      "sheetRows": [
+        386
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337032885",
+      "product": "Bambu Lab ABS",
+      "colour": "White (40100) (With Spool)",
+      "quantity": 13,
+      "sheetRows": [
+        387
+      ],
+      "brand": "BambuLab",
+      "material": "ABS"
+    },
+    {
+      "barcode": "6975337037378",
+      "product": "Bambu Lab PETG HF",
+      "colour": "Black (33102) (Without Spool)",
+      "quantity": 0,
+      "sheetRows": [
+        388
+      ],
+      "brand": "BambuLab",
+      "material": "PETG HF"
+    },
+    {
+      "barcode": "6937285509727",
+      "product": "Bambu Lab PETG Basic",
+      "colour": "White (30106) (With Spool)",
+      "quantity": 4,
+      "sheetRows": [
+        389
+      ],
+      "brand": "BambuLab",
+      "material": "PETG Basic"
+    },
+    {
+      "barcode": "6937285509710",
+      "product": "Bambu Lab PETG Basic",
+      "colour": "Black (30105) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        390
+      ],
+      "brand": "BambuLab",
+      "material": "PETG Basic"
+    },
+    {
+      "barcode": "6975337039075",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Dark Gray (10105) (Without Spool)",
+      "quantity": 4,
+      "sheetRows": [
+        393
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337030195",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Gray (10103) (Without Spool)",
+      "quantity": 6,
+      "sheetRows": [
+        394
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337039082",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Light Gray (10104) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        395
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252427203",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Maroon Red (10205) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        397
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337030270",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Red (10200) (Without Spool)",
+      "quantity": 3,
+      "sheetRows": [
+        398
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252426978",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Hot Pink (10204) (Without Spool)",
+      "quantity": 3,
+      "sheetRows": [
+        400
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337030249",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Pink (10203) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        401
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252426954",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Pumpkin Orange (10301) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        402
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252427197",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Sunflower Yellow (10402) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        403
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337035817",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Bambu Green (10501) (Without Spool)",
+      "quantity": 7,
+      "sheetRows": [
+        406
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337035787",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Mistletoe Green (10502) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        407
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252427227",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Indigo Purple (10701) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        408
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337030232",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Blue Gray (10602) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        412
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337037361",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Bronze (10801) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        413
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252426985",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Cocoa Brown (10802) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        414
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337030263",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Brown (10800) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        415
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252424776",
+      "product": "Bambu Lab PLA Wood",
+      "colour": "Rosewood (13204) (With Spool)",
+      "quantity": 1,
+      "sheetRows": [
+        420
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Wood"
+    },
+    {
+      "barcode": "6977252427340",
+      "product": "Bambu Lab PLA Silk+",
+      "colour": "Mint (13507) (With Spool)",
+      "quantity": 1,
+      "sheetRows": [
+        422
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Silk+"
+    },
+    {
+      "barcode": "6937285500717",
+      "product": "Bambu Lab PLA Tough+",
+      "colour": "White (12107) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        424
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Tough+"
+    },
+    {
+      "barcode": "6937285500694",
+      "product": "Bambu Lab PLA Tough+",
+      "colour": "Black (12104) (With Spool)",
+      "quantity": 2,
+      "sheetRows": [
+        425
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Tough+"
+    },
+    {
+      "barcode": "6977252428200",
+      "product": "Bambu Lab PLA Matte",
+      "colour": "Nardo Gray (11104) (Without Spool)",
+      "quantity": 4,
+      "sheetRows": [
+        437
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Matte"
+    },
+    {
+      "barcode": "6975337030164",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Jade White (10100) (Without Spool)",
+      "quantity": 15,
+      "sheetRows": [
+        469
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6977252427111",
+      "product": "Bambu Lab PLA Basic Gradient",
+      "colour": "Cotton Candy Cloud (10907) (With Spool)",
+      "quantity": 1,
+      "sheetRows": [
+        470
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic Gradient"
+    },
+    {
+      "barcode": "6975337038214",
+      "product": "Bambu Lab PETG HF",
+      "colour": "Gray (33101) (With Spool)",
+      "quantity": 0,
+      "sheetRows": [
+        471
+      ],
+      "brand": "BambuLab",
+      "material": "PETG HF"
+    },
+    {
+      "barcode": "6975337037354",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Gold (10401) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        472
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337030218",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Silver (10102) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        473
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    },
+    {
+      "barcode": "6975337033912",
+      "product": "Bambu Lab PLA Glow",
+      "colour": "Glow Yellow (15400) (With Spool)",
+      "quantity": 1,
+      "sheetRows": [
+        474
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Glow"
+    },
+    {
+      "barcode": "6975337033943",
+      "product": "Bambu Lab PLA Glow",
+      "colour": "Glow Green (15500) (With Spool)",
+      "quantity": 1,
+      "sheetRows": [
+        475
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Glow"
+    },
+    {
+      "barcode": "6977252424769",
+      "product": "Bambu Lab PLA Wood",
+      "colour": "Black Walnut (13107) (With Spool)",
+      "quantity": 1,
+      "sheetRows": [
+        476
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Wood"
+    },
+    {
+      "barcode": "6975337030157",
+      "product": "Bambu Lab PLA Matte",
+      "colour": "Lilac Purple (11700) (Without Spool)",
+      "quantity": 0,
+      "sheetRows": [
+        477
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Matte"
+    },
+    {
+      "barcode": "6975337037347",
+      "product": "Bambu Lab PLA Matte",
+      "colour": "Dark Blue (11602) (Without Spool)",
+      "quantity": 0,
+      "sheetRows": [
+        478
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Matte"
+    },
+    {
+      "barcode": "6977252427210",
+      "product": "Bambu Lab PLA Basic",
+      "colour": "Turquoise (10605) (Without Spool)",
+      "quantity": 5,
+      "sheetRows": [
+        479
+      ],
+      "brand": "BambuLab",
+      "material": "PLA Basic"
+    }
+  ],
+  "differences": [
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg ABS",
+      "colour": "White (40100)",
+      "sheetQuantity": 18,
+      "shopStock": 23,
+      "cap": 18
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg ASA",
+      "colour": "Black (45101)",
+      "sheetQuantity": 0,
+      "shopStock": 5,
+      "cap": 0
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg ASA",
+      "colour": "Grey (45102)",
+      "sheetQuantity": 45,
+      "shopStock": 25,
+      "cap": 25
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PETG Basic",
+      "colour": "White (30106)",
+      "sheetQuantity": 4,
+      "shopStock": 9,
+      "cap": 4
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Jade White (10100)",
+      "sheetQuantity": 46,
+      "shopStock": 67,
+      "cap": 46
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Gray (10103)",
+      "sheetQuantity": 9,
+      "shopStock": 8,
+      "cap": 8
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Red (10200)",
+      "sheetQuantity": 8,
+      "shopStock": 10,
+      "cap": 8
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Magenta (10202)",
+      "sheetQuantity": 0,
+      "shopStock": 30,
+      "cap": 0
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Cobalt Blue (10604)",
+      "sheetQuantity": 10,
+      "shopStock": 7,
+      "cap": 7
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Purple (10700)",
+      "sheetQuantity": 1,
+      "shopStock": 17,
+      "cap": 1
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Bambu Green (10501)",
+      "sheetQuantity": 15,
+      "shopStock": 17,
+      "cap": 15
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Hot Pink (10204)",
+      "sheetQuantity": 5,
+      "shopStock": 7,
+      "cap": 5
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Cyan (10603)",
+      "sheetQuantity": 10,
+      "shopStock": 31,
+      "cap": 10
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Orange (10300)",
+      "sheetQuantity": 24,
+      "shopStock": 18,
+      "cap": 18
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Beige (10201)",
+      "sheetQuantity": 12,
+      "shopStock": 7,
+      "cap": 7
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Black (10101)",
+      "sheetQuantity": 43,
+      "shopStock": 31,
+      "cap": 31
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Dark Gray (10105)",
+      "sheetQuantity": 4,
+      "shopStock": 5,
+      "cap": 4
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Bright Green (10503)",
+      "sheetQuantity": 0,
+      "shopStock": 5,
+      "cap": 0
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colour": "Blue (10600)",
+      "sheetQuantity": 0,
+      "shopStock": 5,
+      "cap": 0
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Basic Gradient",
+      "colour": "Cotton Candy Cloud (10905)",
+      "sheetQuantity": 0,
+      "shopStock": 1,
+      "cap": 0
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Matte",
+      "colour": "Ivory White (11100)",
+      "sheetQuantity": 9,
+      "shopStock": 12,
+      "cap": 9
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Matte",
+      "colour": "Charcoal (11101)",
+      "sheetQuantity": 14,
+      "shopStock": 10,
+      "cap": 10
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Silk+",
+      "colour": "Silver (13109)",
+      "sheetQuantity": 0,
+      "shopStock": 1,
+      "cap": 0
+    },
+    {
+      "product": "Bambu Lab 3D Printing Filament 1kg PLA Wood",
+      "colour": "Rosewood (13204)",
+      "sheetQuantity": 1,
+      "shopStock": 4,
+      "cap": 1
+    }
+  ]
+}

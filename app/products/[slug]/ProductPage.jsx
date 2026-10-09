@@ -19,6 +19,7 @@ import { getDefaultVariantSelections } from '@/lib/seo/product';
 import { publicProductDescription } from '@/lib/productPublicContent';
 import { useInventoryRefresh } from '@/utils/useInventoryRefresh';
 import { productVariantLabel } from '@/lib/productVariantLabel';
+import { defaultCartDelivery } from '@/lib/cartDelivery';
 
 const ModelViewer = dynamic(() => import("@/components/3D/ModelViewer"), { ssr: false });
 
@@ -274,7 +275,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                 productId: product._id,
                 quantity: 1,
                 selectedVariants: isCustomPrint ? {} : selectedVariantOptions,
-                chosenDeliveryType: product.delivery?.deliveryTypes?.[0]?.type || "selfCollect",
+                chosenDeliveryType: defaultCartDelivery(product),
                 isCustomPrint: isCustomPrint, // Flag for cart to show upload interface
             };
 

@@ -22,6 +22,7 @@ import DeliveryAddressPrompt from '@/components/Cart/DeliveryAddressPrompt';
 import { ADD_ADDRESS_TO_CHECKOUT, deliveryMismatchReason } from '@/lib/checkoutAddressGate';
 import { HiCheck, HiExclamationCircle } from 'react-icons/hi';
 import { FaRegCircleCheck } from 'react-icons/fa6';
+import { cartDeliveryLabel } from '@/lib/cartDelivery';
 
 // Public display metadata; delivery fees are calculated by checkout on the server.
 async function fetchDeliveryTypesMeta() {
@@ -665,7 +666,7 @@ function Cart() {
                                                         >
                                                             {customPrintRequest.delivery.deliveryTypes.map(dt => (
                                                                 <option key={dt.type} value={dt.type}>
-                                                                    {dt.type}
+                                                                    {cartDeliveryLabel(dt.type, deliveryTypesMeta, dt)}
                                                                 </option>
                                                             ))}
                                                         </select>
@@ -837,7 +838,7 @@ function Cart() {
                                                     >
                                                         {(product.delivery?.deliveryTypes || []).map(dt => (
                                                             <option key={dt.type} value={dt.type}>
-                                                                {dt.type}
+                                                                {cartDeliveryLabel(dt.type, deliveryTypesMeta, dt)}
                                                             </option>
                                                         ))}
                                                     </select>
@@ -1140,7 +1141,7 @@ function Cart() {
                                                 <div key={idx} className="flex flex-col gap-1 py-2 border-b border-borderColor last:border-b-0">
                                                     <div className="flex justify-between font-normal text-lightColor gap-20">
                                                         <span>
-                                                            {deliveryMeta?.displayName || item.chosenDeliveryType || 'Delivery'} for {item.name}
+                                                            {cartDeliveryLabel(item.chosenDeliveryType, deliveryTypesMeta)} for {item.name}
                                                             {item.quantity > 1 ? ` x${item.quantity}` : ""}
                                                         </span>
                                                         <span className='font-medium text-textColor text-right'>
@@ -1152,7 +1153,7 @@ function Cart() {
                                                     )}
                                                     {deliveryMeta && (
                                                         <div className="flex flex-col text-[11px] text-lightColor ml-1 mt-0.5">
-                                                            <span><b>Type:</b> {deliveryMeta.displayName} ({deliveryMeta.name})</span>
+                                                            <span><b>Type:</b> {cartDeliveryLabel(item.chosenDeliveryType, deliveryTypesMeta)}</span>
                                                             {deliveryMeta.description && <span><b>About:</b> {deliveryMeta.description}</span>}
                                                         </div>
                                                     )}

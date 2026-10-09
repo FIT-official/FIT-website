@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import "./dashboard.css";
 import Navbar from "@/components/General/Navbar";
+import MaintenanceBanner from '@/components/MaintenanceBanner';
 import Footer from "@/components/General/Footer";
 import Smooth from "@/components/General/Smooth";
 import { ToastProvider } from "@/components/General/ToastProvider";
@@ -32,7 +33,7 @@ const GEO_JSON_LD = {
       "@id": "https://www.fixitoday.com/#organization",
       "name": "Fix It Today®",
       "url": "https://www.fixitoday.com",
-      "logo": "https://www.fixitoday.com/fitogimage.png",
+      "logo": "https://www.fixitoday.com/fitogimage.jpg",
       "description": "3D printing, custom metal parts, CAD design, electronics, printer repair and STEM workshops in Singapore.",
       "email": "fixittoday.contact@gmail.com",
       "sameAs": ["https://www.linkedin.com/company/fix-it-today-sg"],
@@ -59,8 +60,8 @@ export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'Fix It Today | 3D Printing & Custom Parts Singapore',
   description: '3D printing, custom metal parts, CAD design, electronics, printer repair and STEM workshops in Singapore.',
-  openGraph: { siteName: 'Fix It Today', locale: 'en_SG', type: 'website', images: [absoluteUrl('/fitogimage.png')] },
-  twitter: { card: 'summary_large_image', images: [absoluteUrl('/fitogimage.png')] },
+  openGraph: { siteName: 'Fix It Today', locale: 'en_SG', type: 'website', images: [absoluteUrl('/fitogimage.jpg')] },
+  twitter: { card: 'summary_large_image', images: [absoluteUrl('/fitogimage.jpg')] },
   robots: { index: true, follow: true, googleBot: { 'max-image-preview': 'large' } },
 };
 
@@ -91,9 +92,12 @@ export default async function RootLayout({ children }) {
                   <ClientProviders>
                     <div className="flex flex-row items-center justify-center bg-baseColor">
                       <div data-fit-page-frame className="flex flex-col md:w-[90vw] lg:w-[85vw] max-w-[1350px] w-screen border-l border-r border-borderColor transition-all duration-300 ease-in-out overflow-hidden bg-background">
+                        <MaintenanceBanner />
                         <Suspense fallback={<div className="h-14" />}><Navbar /></Suspense>
                         <div className='lg:hidden flex h-14 w-full bg-background' />
-                        <Suspense>{children}</Suspense>
+                        {/* Keep route existence checks in the shell: a fallback here
+                            commits HTTP 200 before an async page can call notFound(). */}
+                        {children}
                         <Footer />
                       </div>
                       <Suspense><ChatLauncher /></Suspense>

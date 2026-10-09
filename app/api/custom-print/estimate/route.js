@@ -43,7 +43,7 @@ export async function POST(req) {
         if (!request.creatorUserId) {
             return NextResponse.json({ error: 'Fix It Today requests are priced with an instant quote.' }, { status: 409 })
         }
-        if (!ESTIMATE_STATUSES.includes(request.status) || request.paidAt) {
+        if (!ESTIMATE_STATUSES.includes(request.status) || request.paidAt || request.stripeSessionId || request.stripePaymentIntentId) {
             return NextResponse.json({ error: 'The print farm has already priced this request.' }, { status: 409 })
         }
 
@@ -58,7 +58,14 @@ export async function POST(req) {
 
         const { estimate, pricedWith } = outcome.body
         const saved = await CustomPrintRequest.findOneAndUpdate(
-            { requestId, userId, creatorUserId: request.creatorUserId, status: request.status },
+            // Measurement can outlive a model/settings edit. Apply the same
+            // saved-version and payment locks as the chargeable quote path.
+            { requestId, userId, creatorUserId: request.creatorUserId, status: request.status,
+                paidAt: null, stripeSessionId: null, stripePaymentIntentId: null,
+                'modelFile.s3Key': request.modelFile?.s3Key,
+                ...(request.updatedAt ? { updatedAt: request.updatedAt } : {}),
+                ...(request.printConfiguration?.configuredAt ? { 'printConfiguration.configuredAt': request.printConfiguration.configuredAt } : {}),
+            },
             { $set: { estimate, estimatedAt: new Date(), pricedWith } },
             { new: true, runValidators: true },
         )

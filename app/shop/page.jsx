@@ -47,7 +47,7 @@ async function ShopLayout({ searchParams }) {
                     <Link href="/shop?productCategory=Filament">Filament</Link>
                     <Link href="/shop?productCategory=Electronics">Electronics</Link>
                     <Link href="/blog/3d-printing-filament-types-guide">Compare PLA, PETG and other materials</Link>
-                    <Link href="/blog/3d-printer-repair">3D printer repair and maintenance</Link>
+                    <Link href="/printer-repair">3D printer repair and maintenance</Link>
                 </div>
             </section>
             <ShopPage initialProducts={products} />

@@ -6,7 +6,8 @@ const nextConfig = {
         NEXT_PUBLIC_PRODUCT_IMAGE_PATHS: JSON.stringify(publicProductImages()),
     },
     poweredByHeader: false,
-    // Resolve metadata visibility checks before Suspense can send HTTP 200.
+    // Keep metadata blocking for browsers and crawlers. Route content must also
+    // stay outside layout Suspense boundaries so notFound can set HTTP 404.
     htmlLimitedBots: /.*/,
     // Silence Next.js 16 warning about having a webpack config
     // without a Turbopack config. We don't need any special
