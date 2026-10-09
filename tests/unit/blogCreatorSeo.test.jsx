@@ -148,9 +148,19 @@ describe('public blog search content', () => {
         expect(renderPublicMarkdown('[bad](jav&#x61;script:alert%281%29)')).not.toContain('href=')
     })
 
-    it('rejects unpublished posts publicly while keeping admin previews noindex and without public schema', async () => {
-        state.post = { slug: 'draft', title: 'Draft', status: 'draft', content: 'Preview body', categories: [] }
+    it('rejects an unknown post in both the server page and metadata', async () => {
         const { default: BlogPage, generateMetadata } = await import('@/app/blog/[blogSlug]/page')
+        const params = Promise.resolve({ blogSlug: 'no-such-post-xyz' })
+        await expect(BlogPage({ params })).rejects.toThrow('NEXT_NOT_FOUND')
+        await expect(generateMetadata({ params })).rejects.toThrow('NEXT_NOT_FOUND')
+    })
+
+    it.each(['draft', 'hidden'])('rejects %s posts publicly while keeping admin previews noindex and without public schema', async status => {
+        state.post = { slug: 'draft', title: 'Draft', status, content: 'Preview body', categories: [] }
+        const { default: BlogPage, generateMetadata } = await import('@/app/blog/[blogSlug]/page')
+        await expect(BlogPage({ params: Promise.resolve({ blogSlug: 'draft' }) })).rejects.toThrow('NEXT_NOT_FOUND')
+        await expect(generateMetadata({ params: Promise.resolve({ blogSlug: 'draft' }) })).rejects.toThrow('NEXT_NOT_FOUND')
+        state.viewer = 'customer'
         await expect(BlogPage({ params: Promise.resolve({ blogSlug: 'draft' }) })).rejects.toThrow('NEXT_NOT_FOUND')
         state.viewer = 'admin'; state.admin = true
         const html = renderToStaticMarkup(await BlogPage({ params: Promise.resolve({ blogSlug: 'draft' }) }))

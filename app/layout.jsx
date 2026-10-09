@@ -84,7 +84,9 @@ export default function RootLayout({ children }) {
                       <div data-fit-page-frame className="flex flex-col md:w-[90vw] lg:w-[85vw] max-w-[1350px] w-screen border-l border-r border-borderColor transition-all duration-300 ease-in-out overflow-hidden bg-background">
                         <Suspense fallback={<div className="h-14" />}><Navbar /></Suspense>
                         <div className='lg:hidden flex h-14 w-full bg-background' />
-                        <Suspense>{children}</Suspense>
+                        {/* Keep route existence checks in the shell: a fallback here
+                            commits HTTP 200 before an async page can call notFound(). */}
+                        {children}
                         <Footer />
                       </div>
                       <Suspense><ChatLauncher /></Suspense>
