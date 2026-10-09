@@ -52,7 +52,8 @@ describe('Edge Config availability', () => {
         expect(b).toEqual(a)
         expect(fetch).toHaveBeenCalledOnce()
         const [url, options] = fetch.mock.calls[0]
-        expect(url.toString()).toBe('https://edge-config.vercel.com/ecfg_example/items?token=test-only-token')
+        expect(url.toString()).toBe('https://edge-config.vercel.com/ecfg_example/items')
+        expect(options.headers).toEqual({ Authorization: 'Bearer test-only-token' })
         expect(options.cache).toBe('no-store')
         expect(options.redirect).toBe('error')
         await vi.advanceTimersByTimeAsync(9_999)
