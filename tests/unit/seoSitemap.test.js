@@ -62,7 +62,7 @@ describe('public sitemap URLs', () => {
             'https://www.fixitoday.com/research-fabrication', 'https://www.fixitoday.com/metal-fabrication',
             'https://www.fixitoday.com/3d-design-printing', 'https://www.fixitoday.com/electronics-prototyping',
             'https://www.fixitoday.com/printer-repair',
-            'https://www.fixitoday.com/privacy', 'https://www.fixitoday.com/terms',
+            'https://www.fixitoday.com/maker-tools', 'https://www.fixitoday.com/privacy', 'https://www.fixitoday.com/terms',
         ])
         expect(entries.every(entry => !('lastModified' in entry))).toBe(true)
     })
