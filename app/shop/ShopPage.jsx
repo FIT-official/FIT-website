@@ -1,16 +1,19 @@
 'use client'
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { GoChevronDown } from "react-icons/go";
 import { AnimatePresence, motion } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
 import { useContent } from "@/utils/useContent";
+import { useInventoryRefresh } from '@/utils/useInventoryRefresh';
 import { cataloguePrice } from '@/lib/productCatalogue';
 
 function ShopPage({ initialProducts = [] }) {
     const products = initialProducts;
+    const router = useRouter();
+    useInventoryRefresh(() => router.refresh());
     const searchParams = useSearchParams();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [priceRange, setPriceRange] = useState(null);

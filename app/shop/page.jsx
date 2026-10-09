@@ -5,6 +5,7 @@ import { SITE_URL } from '@/lib/seo/site';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { getShopProducts } from '@/lib/seo/shop';
 
+export const dynamic = 'force-dynamic';
 const BASE_URL = SITE_URL;
 const title = '3D Printing Filament & Electronics Singapore | Fix It Today';
 const description = 'Shop 3D printing filament, ESP32 boards, sensors and electronics in Singapore. Check product details, available options and current prices at Fix It Today.';

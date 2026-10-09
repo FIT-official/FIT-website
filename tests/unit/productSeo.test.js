@@ -98,7 +98,7 @@ describe('product offer accuracy', () => {
         expect(productJsonLd({ ...product, variantTypes: [], stock: 3 }).offers.price).toBe('20.00')
     })
 
-    it('uses active single-item discounts including global events and variant minimums', () => {
+    it('uses approved Lanbo product discounts and variant minimums without global events', () => {
         vi.useFakeTimers()
         vi.setSystemTime(new Date('2026-09-12T00:00:00Z'))
         const schema = productJsonLd({
@@ -109,7 +109,7 @@ describe('product offer accuracy', () => {
                 { tiers: [{ minQty: 3, percentage: 30 }] },
             ],
         }, [{ percentage: 10, startDate: '2026-09-01', endDate: '2026-09-30' }])
-        expect(schema.offers.price).toBe('20.00')
+        expect(schema.offers.price).toBe('22.50')
     })
 
     it('does not advertise quote-only print base prices or unknown offer data', () => {

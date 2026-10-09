@@ -10,12 +10,13 @@ import { HiCubeTransparent } from 'react-icons/hi';
 import { BiPrinter } from 'react-icons/bi';
 import dynamic from 'next/dynamic';
 import { IoMdCheckmark } from 'react-icons/io';
-import { getDiscountedPrice, getEffectivePercentageForRule } from '@/utils/discount';
+import { getDiscountedPrice, getEffectivePercentageForRule, isFilamentProduct } from '@/utils/discount';
 import ReviewSection from '@/components/ProductPage/ReviewSection';
 import { storeFetch, addShopItem } from '@/lib/storeRequest';
 import { ConnectionNotice, StoreError, useStoreConnection } from '@/components/Cart/StoreFeedback';
 import { getDefaultVariantSelections } from '@/lib/seo/product';
 import { publicProductDescription } from '@/lib/productPublicContent';
+import { useInventoryRefresh } from '@/utils/useInventoryRefresh';
 import { productVariantLabel } from '@/lib/productVariantLabel';
 
 const ModelViewer = dynamic(() => import("@/components/3D/ModelViewer"), { ssr: false });
@@ -35,6 +36,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
     const addLock = useRef(false);
     const [productError, setProductError] = useState('');
     const [reloadProduct, setReloadProduct] = useState(0);
+    useInventoryRefresh(() => setReloadProduct(v => v + 1));
     const offline = useStoreConnection(() => setReloadProduct(v => v + 1));
     const [showAdded, setShowAdded] = useState(false);
     const [isOwnProduct, setIsOwnProduct] = useState(false);
@@ -386,7 +388,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
         const totalPrice = basePrice + additionalFees;
 
         const appliedGlobalEvents = [];
-        if (Array.isArray(globalDiscountRules) && globalDiscountRules.length > 0) {
+        if (!isFilamentProduct(product) && Array.isArray(globalDiscountRules) && globalDiscountRules.length > 0) {
             globalDiscountRules.forEach(rule => {
                 const effective = getEffectivePercentageForRule(rule, totalPrice, 1);
                 if (effective > 0 && rule.eventName) {

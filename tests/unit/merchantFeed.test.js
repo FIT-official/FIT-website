@@ -11,9 +11,9 @@ const product = {
 }
 
 describe('Merchant Center catalogue', () => {
-    it('matches the default purchasable variant, single-item discounts and stock', () => {
+    it('matches the default variant and blocks unapproved filament event discounts', () => {
         expect(merchantProduct(product, [{ percentage: 20 }])).toMatchObject({
-            id: 'filament1', title: 'PLA & PETG - Blue', price: '20.00 SGD', availability: 'in_stock',
+            id: 'filament1', title: 'PLA & PETG - Blue', price: '25.00 SGD', availability: 'in_stock',
             link: 'https://www.fixitoday.com/products/pla-filament',
         })
         expect(merchantProduct({ ...product, stock: 0 }).availability).toBe('out_of_stock')
@@ -52,8 +52,10 @@ describe('Merchant Center catalogue', () => {
     it('advertises free shipping only when the single-item order passes the private cost check', () => {
         const stocked = { ...product, shippingCosts: { unitCost: 1, packingCost: 1, deliveryCost: 6.2, confirmed: true } }
         expect(merchantProduct(stocked).shipping.price).toBe('0.00 SGD')
-        // A discount reduces the order to the excluded S$20 boundary.
-        expect(merchantProduct(stocked, [{ percentage: 20 }]).shipping.price).toBe('6.20 SGD')
+        // Unapproved filament promotions cannot change the order value.
+        expect(merchantProduct(stocked, [{ percentage: 20 }]).shipping.price).toBe('0.00 SGD')
+        // Existing global promotions still affect unrelated shop products.
+        expect(merchantProduct({ ...stocked, slug: 'sensor', name: 'Sensor', categoryId: 'Electronics' }, [{ percentage: 20 }]).shipping.price).toBe('6.20 SGD')
         expect(buildMerchantFeed([stocked])).not.toMatch(/shippingCosts|unitCost|packingCost|confirmed/)
     })
 
@@ -84,7 +86,7 @@ it('serves current prices and fails closed when promotions cannot be read', asyn
     const ok = await GET()
     expect(ok.status).toBe(200)
     expect(ok.headers.get('content-type')).toContain('application/xml')
-    expect(await ok.text()).toContain('<g:price>22.50 SGD</g:price>')
+    expect(await ok.text()).toContain('<g:price>25.00 SGD</g:price>')
     Event.find.mockReturnValue({ select: vi.fn(() => ({ lean: vi.fn().mockRejectedValue(new Error('offline')) })) })
     const failed = await GET()
     expect(failed.status).toBe(503)

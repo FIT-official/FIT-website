@@ -13,6 +13,8 @@ import { reserveCreatorQuota, releaseProductQuota, CreatorQuotaError } from "@/l
 import { editableProduct, productForViewer } from "@/lib/productAccess";
 import { shippingCostsInput } from '@/lib/shopShipping';
 
+export const dynamic = 'force-dynamic';
+const productJson = (body, init = {}) => NextResponse.json(body, { ...init, headers: { ...init.headers, 'Cache-Control': 'private, no-store' } });
 const BUCKET_NAME = process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
 
 async function deleteS3Object(key, ownerId) {
@@ -357,7 +359,7 @@ export async function GET(req) {
             const projection = isAdmin ? '+shippingCosts' : undefined;
             const product = await Product.findOne({ slug }).select(projection).lean();
             if (!productForViewer(product, userId, isAdmin)) {
-                return NextResponse.json({ product: null }, { status: 200 });
+                return productJson({ product: null }, { status: 200 });
             }
 
             // Enrich with creator display name + URL slug.
@@ -378,7 +380,7 @@ export async function GET(req) {
                 }
             }
 
-            return NextResponse.json(
+            return productJson(
                 {
                     product: {
                         ...productForViewer(product, userId, isAdmin),
@@ -441,12 +443,12 @@ export async function GET(req) {
                 filter._id = { $in: idArr };
             } else {
                 // Avoid Mongoose CastErrors when callers pass non-ObjectId ids.
-                return NextResponse.json({ products: [] }, { status: 200 });
+                return productJson({ products: [] }, { status: 200 });
             }
         }
         if (productId) {
             if (!isObjectIdString(productId)) {
-                return NextResponse.json({ error: "Invalid productId" }, { status: 400 });
+                return productJson({ error: "Invalid productId" }, { status: 400 });
             }
             filter._id = productId;
         }
@@ -488,7 +490,7 @@ export async function GET(req) {
             !isPublicCatalogueListing &&
             !hasAnyCategoryFilter
         ) {
-            return NextResponse.json({ error: "Missing productCategory or productSubCategory" }, { status: 400 });
+            return productJson({ error: "Missing productCategory or productSubCategory" }, { status: 400 });
         }
 
         // Public catalogue visibility cannot be bypassed with includeHidden.
@@ -513,13 +515,13 @@ export async function GET(req) {
         const products = (await query.lean()).map(product => productForViewer(product, userId, isAdmin)).filter(Boolean);
 
         if (productId) {
-            return NextResponse.json({ product: products[0] || null }, { status: 200 });
+            return productJson({ product: products[0] || null }, { status: 200 });
         }
 
-        return NextResponse.json({ products }, { status: 200 });
+        return productJson({ products }, { status: 200 });
     } catch (err) {
         console.error(err);
-        return NextResponse.json({ error: "Server error" }, { status: 500 });
+        return productJson({ error: "Server error" }, { status: 500 });
     }
 }
 

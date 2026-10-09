@@ -1,4 +1,5 @@
 'use client'
+import { filamentOptionLabel } from '@/lib/filamentLabels'
 import { useCallback, useEffect, useState } from 'react'
 function RequestCard({ row, onSaved }) {
   const [status,setStatus] = useState(row.status), [note,setNote] = useState(row.ownerNote || '')
@@ -19,7 +20,8 @@ function RequestCard({ row, onSaved }) {
       <div className="text-xs text-slate-500"><p>{new Date(row.createdAt).toLocaleString('en-SG')}</p><p className="break-all">{row._id}</p></div></div>
     <p className="mt-4 text-sm font-semibold">Preparation / availability check</p>
     <ul className="mt-2 space-y-3">{row.lines.map((line,i) => <li key={i} className="rounded-xl bg-slate-50 p-3 text-sm">
-      <strong>{line.productName}</strong><p>{line.options.map(o => o.type + ': ' + o.name).join(' · ')}</p>
+      <strong>{line.productName}</strong><p>{line.options.map(o => o.type + ': ' + filamentOptionLabel(o.type,o.name)).join(' · ')}</p>
+      <p className="mt-1 font-medium">Total requested: {line.quantity ?? line.recordedQuantity + line.extraQuantity} rolls</p>
       <p className="mt-1">{line.recordedQuantity} from recorded stock requested + <strong>{line.extraQuantity} extra rolls to confirm</strong></p>
       <p>Public list price at submission: {line.publicUnitPrice ? line.publicUnitPrice.currency + ' ' + line.publicUnitPrice.amount.toFixed(2) + ' / roll' : 'Quotation required'}</p>
       {line.remarks && <p className="mt-1 whitespace-pre-wrap">Remarks: {line.remarks}</p>}

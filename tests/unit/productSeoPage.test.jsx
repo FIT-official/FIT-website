@@ -39,14 +39,14 @@ beforeEach(() => {
 })
 
 describe('product server rendering', () => {
-    it('renders product title, description and selected-variant discounted price before any effects or browser fetch', () => {
+    it('renders product title and normal Lanbo selected-variant price without an unapproved global discount', () => {
         const html = renderToStaticMarkup(<ProductPage
             initialProduct={publicProductSeed(product)}
             initialGlobalDiscountRules={[{ percentage: 20 }]}
         />)
         expect(html).toContain('<h1>Lanbo PLA Filament</h1>')
         expect(html).toContain(product.description)
-        expect(html).toContain('SGD 20.00')
+        expect(html).toContain('SGD 25.00')
         expect(html).toContain('value="Blue" selected=""')
         expect(html).not.toContain('animate-pulse')
     })

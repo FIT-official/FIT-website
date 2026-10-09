@@ -1,6 +1,8 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { filamentOptionLabel } from '@/lib/filamentLabels'
+import { useInventoryRefresh } from '@/utils/useInventoryRefresh'
 const STORAGE_KEY = 'fit-bulk-filament-pending-v1'
 const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-950 focus:outline-2 focus:outline-offset-2 focus:outline-emerald-700 disabled:bg-slate-100'
 const buttonClass = 'rounded-xl bg-emerald-800 px-5 py-3 font-medium text-white disabled:opacity-50'
@@ -21,15 +23,24 @@ export default function BulkFilamentForm() {
   const [customer, setCustomer] = useState({ name: '', email: '', phone: '', organisation: '' })
   const [fulfilment, setFulfilment] = useState('collection'), [address, setAddress] = useState(''), [notes, setNotes] = useState('')
   const [confirmReview, setConfirmReview] = useState(false), [clientRequestId, setClientRequestId] = useState('')
+  const chooser = useRef(null), initialChoice = useRef(false), inventoryFetch = useRef(false)
+  useInventoryRefresh(loadCatalogue, !busy && !pending && !receipt)
   const product = catalogue.find(p => p.id === productId), chosen = selection(product, options)
   async function loadCatalogue() {
+    if (inventoryFetch.current) return
+    inventoryFetch.current = true
     setLoading(true)
     try {
       const response = await fetch('/api/bulk-filament/catalogue', { cache: 'no-store' }), data = await response.json()
       if (!response.ok) throw Error(data.error || 'Inventory is unavailable.')
       setCatalogue(data.products); setCheckedAt(data.checkedAt)
+      if (!initialChoice.current && data.products.length) {
+        initialChoice.current = true
+        const first = data.products[0]
+        setProductId(first.id); setOptions(Object.fromEntries(first.types.map(t => [t.id, t.options[0].id])))
+      }
     } catch (e) { setError(e.message || 'Inventory is unavailable. Please retry.') }
-    finally { setLoading(false) }
+    finally { inventoryFetch.current = false; setLoading(false) }
   }
   useEffect(() => {
     setClientRequestId(crypto.randomUUID())
@@ -38,7 +49,7 @@ export default function BulkFilamentForm() {
       if (saved?.receipt) setReceipt(saved.receipt)
       else if (saved?.input) {
         const value = saved.input
-        setPending(value); setLines(value.lines); setCustomer(value.customer); setFulfilment(value.fulfilment)
+        setPending(value); setLines(value.lines.map(({ recordedQuantity, extraQuantity, ...line }) => ({ ...line, quantity: line.quantity ?? recordedQuantity + extraQuantity }))); setCustomer(value.customer); setFulfilment(value.fulfilment)
         setAddress(value.address); setNotes(value.notes); setConfirmReview(true); setClientRequestId(value.clientRequestId)
       }
     } catch { /* An unavailable browser store does not block the form. */ }
@@ -56,7 +67,17 @@ export default function BulkFilamentForm() {
       setError('That selection is already in your request. Edit its quantities below.'); return
     }
     if (lines.length >= 50) { setError('Use up to 50 lines per request.'); return }
-    setLines([...lines, { productId: product.id, version: product.version, options: selected, recordedQuantity: 0, extraQuantity: 0, remarks: '' }]); setError('')
+    setLines([...lines, { productId: product.id, version: product.version, options: selected, quantity: 1, remarks: '' }]); setError('')
+  }
+  function anotherColour() {
+    const first = catalogue[0]
+    if (first) {
+      chooseProduct(first.id)
+      const colour = first.types.find(t => t.id === first.colourTypeId)
+      const next = colour?.options.find(o => !lines.some(l => l.productId === first.id && l.options.some(s => s.typeId === colour.id && s.optionId === o.id)))
+      if (next) setOptions(Object.fromEntries(first.types.map(t => [t.id, t.id === colour.id ? next.id : t.options[0].id])))
+    }
+    chooser.current?.focus(); chooser.current?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
   }
   function editLine(index, key, value) { setLines(lines.map((line,i) => i === index ? { ...line, [key]: value } : line)) }
   async function refresh() {
@@ -94,7 +115,7 @@ export default function BulkFilamentForm() {
       <p className="text-sm font-semibold uppercase tracking-widest text-emerald-800">Request received</p>
       <h1 className="mt-3">Your filament request is with FIT</h1>
       <p className="mt-4">The owner can now review it in the dashboard. Availability, the final quotation and collection or delivery arrangements need confirmation.</p>
-      <p className="mt-4 font-medium">{receipt.recordedRolls} rolls requested from recorded stock · {receipt.extraRolls} extra rolls to check</p>
+      <p className="mt-4 font-medium">{receipt.totalRolls ?? receipt.recordedRolls + receipt.extraRolls} rolls requested</p>
       <p className="mt-4">No stock has been reserved and no payment has been taken. This is not a confirmed order.</p>
       <p className="mt-5 text-sm">Save your request reference:</p><p className="mt-1 break-all font-mono text-sm">{receipt.requestId}</p>
       <p className="mt-4 text-sm text-slate-600">This page is your receipt. An email or Telegram confirmation is not sent automatically.</p>
@@ -106,9 +127,9 @@ export default function BulkFilamentForm() {
     <div className="mt-6 rounded-3xl bg-slate-950 px-6 py-8 text-white sm:px-10">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">Filament for your next project</p>
       <h1 className="mt-3 text-white!">Bulk filament enquiry</h1>
-      <p className="mt-4 max-w-3xl text-slate-200">Choose from our recorded inventory. Need more? Request up to 20 additional rolls per colour and we will check whether they are available.</p>
+      <p className="mt-4 max-w-3xl text-slate-200">Choose several colours and set the quantity of each. Availability and your final quotation will be confirmed by FIT.</p>
       <div className="mt-6 grid gap-3 text-sm sm:grid-cols-3">
-        <p className="rounded-xl bg-white/10 p-4"><strong className="block text-white">1. Choose your rolls</strong>Recorded quantities stay separate from extras.</p>
+        <p className="rounded-xl bg-white/10 p-4"><strong className="block text-white">1. Choose your colours</strong>Add as many colours as your project needs.</p>
         <p className="rounded-xl bg-white/10 p-4"><strong className="block text-white">2. Send an enquiry</strong>No payment and no stock reservation.</p>
         <p className="rounded-xl bg-white/10 p-4"><strong className="block text-white">3. FIT checks availability</strong>Price and fulfilment are confirmed with you.</p>
       </div>
@@ -117,7 +138,7 @@ export default function BulkFilamentForm() {
     {pending && <div role="status" className="my-5 rounded-xl border border-amber-300 bg-amber-50 p-4">Submission confirmation is pending. Your entries are locked to this reference so a retry cannot create a duplicate. Use “Retry this request” below.</div>}
     <form onSubmit={submit}>
       <fieldset disabled={busy || !!pending} className="mt-8 min-w-0">
-        <legend className="mb-4 text-xl font-semibold">1. Select filament</legend>
+        <legend className="mb-4 text-xl font-semibold">1. Select your colours and quantities</legend>
         <div className="rounded-2xl border border-slate-200 p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-slate-600">{loading ? 'Loading recorded inventory…' : checkedAt ? 'Inventory checked ' + new Date(checkedAt).toLocaleString('en-SG') : 'Inventory unavailable'}</p>
@@ -125,22 +146,30 @@ export default function BulkFilamentForm() {
           </div>
           {!loading && catalogue.length === 0 && <p className="mt-4">No selectable filament inventory is available right now. Please refresh or contact FIT.</p>}
           <label className="mt-5 block text-sm font-medium">Product / material
-            <select className={inputClass + ' mt-2'} value={productId} onChange={e => chooseProduct(e.target.value)}>
+            <select ref={chooser} className={inputClass + ' mt-2'} value={productId} onChange={e => chooseProduct(e.target.value)}>
               <option value="">Choose a filament product</option>
               {catalogue.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </label>
-          {product && <><div className="mt-4 grid gap-4 sm:grid-cols-2">{product.types.map(t => <label key={t.id} className="block text-sm font-medium">{t.label}
+          {product && <><div className="mt-4 grid gap-4 sm:grid-cols-2">{product.types.map(t => /^spool$/i.test(t.label) ? <fieldset key={t.id} className="min-w-0 sm:col-span-2">
+            <legend className="text-sm font-semibold">Spool option</legend>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2">{t.options.map(o => <label key={o.id} className={'flex cursor-pointer items-start gap-3 rounded-xl border p-4 ' + (options[t.id] === o.id ? 'border-emerald-700 bg-emerald-50' : 'border-slate-300 bg-white')}>
+              <input type="radio" aria-label={filamentOptionLabel(t.label,o.name) + ' ' + (o.stock == null ? 'Remaining stock unverified' : o.stock + ' rolls recorded remaining')} name={'spool-' + t.id} value={o.id} checked={options[t.id] === o.id} onChange={() => setOptions({ ...options, [t.id]: o.id })} className="mt-1"/>
+              <span><strong className="block">{filamentOptionLabel(t.label,o.name)}</strong><span className="mt-1 block text-sm">{o.stock == null ? 'Remaining stock unverified' : o.stock + ' rolls recorded remaining'}</span></span>
+            </label>)}</div>
+            <p className="mt-2 text-xs text-slate-600">Spool counts may be shared across colours. FIT confirms availability of your selected combination.</p>
+          </fieldset> : <label key={t.id} className="block text-sm font-medium">{t.label}
             <select className={inputClass + ' mt-2'} value={options[t.id] || ''} onChange={e => setOptions({ ...options, [t.id]: e.target.value })}>
-              {t.options.map(o => <option key={o.id} value={o.id}>{o.name} — {o.stock == null ? 'stock unverified' : o.stock + ' recorded'}</option>)}
+              {t.options.map(o => <option key={o.id} value={o.id}>{o.name} — {o.stock == null ? 'stock unverified' : o.stock + ' recorded remaining'}</option>)}
             </select></label>)}</div>
             <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
-              <p><strong>{chosen.stock == null ? 'Stock unverified' : chosen.stock + ' recorded rolls limit'}</strong><br/><span className="text-sm text-slate-600">Public list price: {money(chosen.price)} per roll</span></p>
-              <button type="button" onClick={addLine} className={buttonClass}>Add selection</button>
+              <p><strong>{chosen.stock == null ? 'Stock unverified' : chosen.stock + ' recorded stock limit for this selection'}</strong><br/><span className="text-sm text-slate-600">Public list price: {money(chosen.price)} per roll</span></p>
+              <button type="button" onClick={addLine} className={buttonClass}>Add colour to enquiry</button>
             </div></>}
-          <p className="mt-4 text-xs text-slate-600">Colour, material and spool counts can share stock. The displayed limit is the lowest recorded count for your selection, not a guarantee of that exact combination. FIT checks every request. Extra rolls are uncounted and require manual confirmation.</p>
+          <p className="mt-4 text-xs text-slate-600">You can request more than the recorded stock. All quantities are subject to availability confirmation.</p>
         </div>
-        <div className="mt-7 flex items-center justify-between"><h2>Your selections</h2><span className="text-sm text-slate-500">{lines.length} / 50 lines</span></div>
+        <div className="mt-7 flex items-center justify-between"><h2>Selected colours</h2><span className="text-sm text-slate-500">{lines.length} / 50 selections</span></div>
+        <p className="mt-2 text-sm text-slate-600">Set one quantity for each colour. You can edit or remove any selection before sending.</p>
         {lines.length === 0 && <p className="my-4 text-slate-600">Add a product and colour above to start your request.</p>}
         {lines.map((line,index) => {
           const p = catalogue.find(p => p.id === line.productId)
@@ -148,17 +177,18 @@ export default function BulkFilamentForm() {
           const info = selection(p, selectedOptions)
           return <section key={line.productId + JSON.stringify(line.options)} className="mt-4 rounded-2xl border border-slate-200 p-5" aria-label={'Request line ' + (index + 1)}>
             <div className="flex items-start justify-between gap-4"><div><h3 className="font-semibold text-slate-950!">{p?.name || 'Product no longer available'}</h3>
-              <p className="mt-1 text-sm">{p?.types.map(t => t.label + ': ' + (t.options.find(o => o.id === selectedOptions[t.id])?.name || 'Unavailable')).join(' · ')}</p>
-              <p className="mt-2 text-sm text-slate-600">Recorded limit: {info.stock ?? 'unverified'} · Public list price: {money(info.price)} / roll</p></div>
+              <p className="mt-1 text-sm">{p?.types.map(t => t.label + ': ' + filamentOptionLabel(t.label, t.options.find(o => o.id === selectedOptions[t.id])?.name || 'Unavailable')).join(' · ')}</p>
+              {p?.types.filter(t => /^spool$/i.test(t.label)).map(t => { const o = t.options.find(o => o.id === selectedOptions[t.id]); return <p key={t.id} className="mt-1 text-sm font-medium">{filamentOptionLabel(t.label,o?.name || 'Unavailable')}: {o?.stock == null ? 'remaining stock unverified' : o.stock + ' rolls recorded remaining'}</p> })}
+              <p className="mt-2 text-sm text-slate-600">Recorded stock limit: {info.stock ?? 'unverified'} · Public list price: {money(info.price)} / roll</p></div>
               <button type="button" aria-label={'Remove line ' + (index + 1)} className="text-sm underline" onClick={() => setLines(lines.filter((_,i) => i !== index))}>Remove</button></div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm font-medium">Rolls from recorded stock<input aria-label={'Recorded rolls line ' + (index + 1)} className={inputClass + ' mt-2'} type="number" min="0" max={info.stock ?? 0} step="1" required value={line.recordedQuantity} onChange={e => editLine(index,'recordedQuantity',e.target.value === '' ? '' : Number(e.target.value))}/></label>
-              <label className="block text-sm font-medium">Extra rolls to check (0–20)<input aria-label={'Extra rolls line ' + (index + 1)} className={inputClass + ' mt-2'} type="number" min="0" max="20" step="1" required value={line.extraQuantity} onChange={e => editLine(index,'extraQuantity',e.target.value === '' ? '' : Number(e.target.value))}/></label>
+            <div className="mt-4 max-w-sm">
+              <label className="block text-sm font-medium">Quantity (rolls)<input aria-label={'Quantity line ' + (index + 1)} className={inputClass + ' mt-2'} type="number" min="1" max={(info.stock ?? 0) + 20} step="1" required value={line.quantity} onChange={e => editLine(index,'quantity',e.target.value === '' ? '' : Number(e.target.value))}/></label>
             </div>
-            <p className="mt-2 text-xs text-amber-800">The 20-extra limit is shared by the same colour across spool choices for this product and material.</p>
+            <p className="mt-2 text-sm text-slate-600">List-price estimate: {money(info.price && { ...info.price, amount: Math.round(info.price.amount * Number(line.quantity || 0) * 100) / 100 })}. Availability and final quotation to confirm.</p>
             <label className="mt-4 block text-sm">Item remarks<input className={inputClass + ' mt-2'} maxLength={500} value={line.remarks} onChange={e => editLine(index,'remarks',e.target.value)} placeholder="Any details FIT should check for this selection"/></label>
           </section>
         })}
+        {lines.length > 0 && <button type="button" onClick={anotherColour} disabled={lines.length >= 50 || loading} className={buttonClass + ' mt-5'}>Add another colour</button>}
         {stale && lines.length > 0 && <div className="mt-4 rounded-xl bg-amber-50 p-4 text-amber-950"><p>Inventory or prices have changed. Review the refreshed limits above and adjust quantities before accepting.</p><button type="button" className="mt-3 font-medium underline" onClick={acceptInventory}>I have reviewed the refreshed inventory</button></div>}
         <h2 className="mt-9">2. Your contact and fulfilment preference</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -167,11 +197,11 @@ export default function BulkFilamentForm() {
         <label className="mt-5 block text-sm font-medium">One fulfilment preference for this request<select className={inputClass + ' mt-2'} value={fulfilment} onChange={e => setFulfilment(e.target.value)}><option value="collection">Collection — details to confirm</option><option value="delivery">Delivery enquiry — charge and timing to confirm</option></select></label>
         {fulfilment === 'delivery' && <label className="mt-4 block text-sm font-medium">Delivery address<textarea className={inputClass + ' mt-2'} required maxLength={1000} value={address} onChange={e => setAddress(e.target.value)}/></label>}
         <label className="mt-4 block text-sm font-medium">Notes (optional)<textarea className={inputClass + ' mt-2'} maxLength={2000} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Project needs or timing you would like FIT to consider"/></label>
-        <label className="mt-6 flex items-start gap-3 rounded-xl bg-slate-100 p-4 text-sm"><input className="mt-1 h-4 w-4 shrink-0" type="checkbox" required checked={confirmReview} onChange={e => setConfirmReview(e.target.checked)}/><span>I understand this is an enquiry for owner review. All stock, extra rolls, final pricing and fulfilment need confirmation. No rolls are reserved, no payment is taken and no delivery date is promised.</span></label>
+        <label className="mt-6 flex items-start gap-3 rounded-xl bg-slate-100 p-4 text-sm"><input className="mt-1 h-4 w-4 shrink-0" type="checkbox" required checked={confirmReview} onChange={e => setConfirmReview(e.target.checked)}/><span>I understand this is an enquiry for review. All stock, extra rolls, final pricing and fulfilment need confirmation. No rolls are reserved, no payment is taken and no delivery date is confirmed.</span></label>
       </fieldset>
       <div className="mt-6 flex flex-wrap items-center gap-4">
         <button className={buttonClass} type="submit" disabled={busy || (!pending && (loading || !catalogue.length || !lines.length || stale))}>{busy ? 'Checking and submitting…' : pending ? 'Retry this request' : 'Send request to FIT'}</button>
-        <p className="text-xs text-slate-600">Your contact details are shared with the FIT owner for this enquiry. <Link href="/privacy" className="underline">Privacy policy</Link></p>
+        <p className="text-xs text-slate-600">Your contact details are shared with the FIT for this enquiry. <Link href="/privacy" className="underline">Privacy policy</Link></p>
       </div>
     </form>
   </main>

@@ -178,3 +178,16 @@ describe('GET /api/product listing filter', () => {
         expect(res.status).toBe(400)
     })
 })
+
+it('reads committed inventory on each product request and forbids HTTP caching',async()=>{
+  const {GET,dynamic}=await import('@/app/api/product/route')
+  const Product=(await import('@/models/Product')).default
+  expect(dynamic).toBe('force-dynamic')
+  for(const stock of [10,0,3]) {
+    const row={_id:'111111111111111111111111',name:'Lanbo PLA',slug:'lanbo-pla',hidden:false,listing:'fit',productType:'shop',stock}
+    Product.find.mockImplementationOnce(()=>{const q={select:()=>q,limit:()=>q,lean:async()=>[row]};return q})
+    const response=await GET(new Request('http://t/api/product?productType=shop&productCategory=Filament'))
+    expect(response.headers.get('cache-control')).toBe('private, no-store')
+    expect((await response.json()).products[0].stock).toBe(stock)
+  }
+})
