@@ -40,6 +40,8 @@ export async function GET(req) {
             query.userId = requestedUserId || clerkUserId;
         }
 
+        if (!isAdmin) query.userId = clerkUserId;
+
         // Fetch orders
         let orders = await Order.find(query).sort({ createdAt: -1 });
 

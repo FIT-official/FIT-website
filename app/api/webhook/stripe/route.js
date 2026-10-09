@@ -1,3 +1,4 @@
+import { dashboardEventEnabled, recordPaidSubOrders, recordRefund } from '@/lib/creatorDashboard/verifiedWebhook';
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
 import Stripe from 'stripe';
@@ -62,6 +63,10 @@ export async function POST(req) {
         event = stripe.webhooks.constructEvent(await req.text(), req.headers.get('stripe-signature'), webhookSecret);
     } catch {
         return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 400 });
+    }
+    if (event.type === 'charge.refunded' && dashboardEventEnabled(event)) {
+        try { return NextResponse.json(await recordRefund(event, await connectToDatabase())); }
+        catch (error) { return NextResponse.json({ error: 'Unable to reconcile refund; retry required' }, { status: error.status || 500 }); }
     }
     if (!['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(event.type)) {
         return NextResponse.json({ received: true });
@@ -175,6 +180,7 @@ export async function POST(req) {
                 statusHistory: [{ status: 'pending', timestamp: new Date(), updatedBy: 'system', note: 'Paid checkout verified against purchase snapshot' }],
                 customerNote: orderItems.map(item => item.orderNote).filter(Boolean).join('; '),
             });
+            if (dashboardEventEnabled(event)) await recordPaidSubOrders(event, newOrder, snapshots, dbSession);
             await newOrder.save({ session: dbSession });
             user.orderHistory.push(...orderItems.map(item => ({ cartItem: {
                 // Legacy readers multiply this all-in unit price by quantity.
@@ -190,6 +196,8 @@ export async function POST(req) {
             await user.save({ session: dbSession });
         });
         if (duplicate) return NextResponse.json({ received: true, duplicate: true });
+
+        if (dashboardEventEnabled(event)) return NextResponse.json({ received: true });
 
         // These external side effects run only after commit. They are best-effort;
         // a notification outage never rolls back a captured and fulfilled payment.

@@ -1,3 +1,4 @@
+import { testPaymentsEnabled } from '@/lib/creatorDashboard/flags';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { clerkClient } from '@clerk/nextjs/server';
@@ -136,7 +137,7 @@ export async function POST(req) {
                 }
                 // Funds currently settle to FIT. Independent creator products
                 // cannot use this checkout until their payout flow exists.
-                if (product.listing !== 'fit') {
+                if (product.listing !== 'fit' && !testPaymentsEnabled()) {
                     if (!sellerChecks.has(product.creatorUserId)) {
                         sellerChecks.set(product.creatorUserId, await storeDeadline(checkAdminPrivileges(product.creatorUserId)));
                     }

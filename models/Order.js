@@ -87,7 +87,7 @@ const OrderSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: [
-            "pending", "processing", "confirmed", "shipped", "delivered",
+            "paid", "in_production", "qc", "ready", "pending", "processing", "confirmed", "shipped", "delivered",
             "cancelled", "on_hold", "refunded", "partially_refunded"
         ],
         default: "pending",
@@ -99,6 +99,8 @@ const OrderSchema = new mongoose.Schema({
         note: { type: String, default: "" }
     }],
 
+    creatorDashboard: { type: Boolean, default: false },
+    trackingToken: { type: String, select: false },
     // Tracking
     trackingNumber: { type: String, default: null },
     trackingUrl: { type: String, default: null },
@@ -123,6 +125,7 @@ const OrderSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Index for faster queries
+OrderSchema.index({ trackingToken: 1 }, { unique: true, partialFilterExpression: { trackingToken: { $type: 'string' } } });
 OrderSchema.index({ userId: 1, createdAt: -1 });
 // stripeSessionId and orderId already have inline unique/index definitions
 
