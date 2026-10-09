@@ -1111,18 +1111,18 @@
       "optionId": "6974c75458c1b629ea92e775",
       "originalName": "Wood Colour",
       "preview": {
-        "kind": "image",
+        "kind": "unavailable",
         "label": "Wood Colour",
         "material": "PLA",
-        "status": "unambiguous_name_normalization",
-        "src": "https://www.tyzh.com/static/upload/image/20260825/1787632512290921.jpg",
+        "status": "source_unavailable",
+        "reason": "The Wood Colour manufacturer photo is unavailable. No verified replacement preview is available.",
         "sourceUrl": "https://www.tyzh.com/?list_47/1001.html"
       },
       "sourceIds": [
         "lanbo_catalogue"
       ],
       "notes": [
-        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Original manufacturer image failed to load on 2026-10-09; hidden without substituting a photo or inferred swatch. Local reuse permission is unverified.",
         "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
       ]
     },

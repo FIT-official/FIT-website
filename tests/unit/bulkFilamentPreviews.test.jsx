@@ -2,15 +2,24 @@ import liveIdentities from '../fixtures/bulkColourIdentities-2026-10-09.json'
 import { afterEach, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import evidence from '@/lib/bulkFilamentPreviews.json'
-import { bulkColourPreview } from '@/lib/bulkFilamentPreviews'
+import { bulkColourPreview, bulkSheetColourPreview } from '@/lib/bulkFilamentPreviews'
 import FilamentColourPreview from '@/components/Shop/FilamentColourPreview'
 afterEach(cleanup)
+it('hides the unavailable Wood photo without fetching or inventing a replacement', () => {
+  const preview = bulkSheetColourPreview({ brand: 'Lanbo', material: 'PLA', colour: 'Wood Colour' })
+  expect(preview).toMatchObject({ kind: 'unavailable', status: 'source_unavailable' })
+  expect(preview).not.toHaveProperty('src')
+  expect(preview).not.toHaveProperty('colours')
+  const view = render(<FilamentColourPreview preview={preview} name="Wood Colour" />)
+  expect(screen.getByText('Preview unavailable')).toBeInTheDocument()
+  expect(view.container.querySelector('img')).toBeNull()
+})
 it('keeps all 111 original inventory identities with only verified display previews',()=>{
   expect(evidence.entries).toHaveLength(111)
   expect(new Set(evidence.entries.map(e=>e.productId+':'+e.optionId)).size).toBe(111)
-  expect(evidence.entries.filter(e=>e.preview.kind==='image')).toHaveLength(42)
+  expect(evidence.entries.filter(e=>e.preview.kind==='image')).toHaveLength(41)
   expect(evidence.entries.filter(e=>e.preview.kind==='swatch')).toHaveLength(49)
-  expect(evidence.entries.filter(e=>e.preview.kind==='unavailable')).toHaveLength(20)
+  expect(evidence.entries.filter(e=>e.preview.kind==='unavailable')).toHaveLength(21)
   for(const e of evidence.entries){expect(bulkColourPreview({id:e.productId,slug:e.slug},{id:e.optionId,name:e.originalName})).toEqual(e.preview)}
 })
 it('fails closed for changed names, IDs, materials or products',()=>{

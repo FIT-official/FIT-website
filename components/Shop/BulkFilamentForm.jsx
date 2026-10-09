@@ -10,6 +10,14 @@ const STORAGE_KEY = 'fit-bulk-filament-pending-v2'
 const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-950 focus:outline-2 focus:outline-offset-2 focus:outline-emerald-700 disabled:bg-slate-100'
 const buttonClass = 'rounded-xl bg-emerald-800 px-5 py-3 font-medium text-white disabled:opacity-50'
 const money = price => price ? new Intl.NumberFormat('en-SG', { style: 'currency', currency: price.currency }).format(price.amount) : 'Owner quotation'
+function ColourOptions({ product, type }) {
+  const option = o => <option key={o.id} value={o.id}>{o.name} — {o.stock == null ? 'stock unverified' : o.stock + ' recorded remaining'}</option>
+  if (product.brand !== 'Lanbo' || product.material !== 'PLA' || type.id !== product.colourTypeId) return type.options.map(option)
+  return ['PLA', 'SPECIALTY_PLA'].map(ladder => {
+    const colours = type.options.filter(o => o.ladder === ladder)
+    return colours.length > 0 && <optgroup key={ladder} label={'Lanbo ' + BULK_LADDERS[ladder].label}>{colours.map(option)}</optgroup>
+  })
+}
 function selection(product, options) {
   const selected = product?.types.map(t => t.options.find(o => o.id === options[t.id])) || []
   const stocks = [product?.stock, ...selected.map(o => o?.stock)]
@@ -93,12 +101,13 @@ export default function BulkFilamentForm() {
     setConfirmReview(false); setError('')
   }
   const pricedInputs = lines.map(line => ({ ...line, ladder: selection(catalogue.find(p => p.id === line.productId), Object.fromEntries(line.options.map(o => [o.typeId, o.optionId]))).ladder }))
-  const prices = pricedInputs.every(l => l.ladder && Number.isSafeInteger(l.quantity) && l.quantity > 0) ? priceBulkLines(pricedInputs) : []
   const quantityErrors = lines.map(line => {
     const p = catalogue.find(p => p.id === line.productId), info = selection(p, Object.fromEntries(line.options.map(o => [o.typeId, o.optionId])))
     const total = lines.filter(l => l.productId === line.productId && JSON.stringify(l.options) === JSON.stringify(line.options)).reduce((n,l) => n + Number(l.quantity || 0), 0)
     return !Number.isSafeInteger(line.quantity) || line.quantity < 1 || total > (info.stock ?? 0) ? `Choose 1 to ${info.stock ?? 0} rolls for this colour.` : ''
   })
+  // Invalid quantities must not contribute to either the pooled band or a quote.
+  const prices = !quantityErrors.some(Boolean) && pricedInputs.every(l => l.ladder) ? priceBulkLines(pricedInputs) : []
   const stale = lines.some(l => catalogue.find(p => p.id === l.productId)?.version !== l.version)
   async function submit(event) {
     event.preventDefault(); setError('')
@@ -176,9 +185,10 @@ export default function BulkFilamentForm() {
             <p className="mt-2 text-xs text-slate-600">Spool counts may be shared across colours. FIT confirms availability of your selected combination.</p>
           </fieldset> : <label key={t.id} className="block text-sm font-medium">{t.label}
             <select className={inputClass + ' mt-2'} value={options[t.id] || ''} onChange={e => setOptions({ ...options, [t.id]: e.target.value })}>
-              {t.options.map(o => <option key={o.id} value={o.id}>{o.name} — {o.stock == null ? 'stock unverified' : o.stock + ' recorded remaining'}</option>)}
+              <ColourOptions product={product} type={t}/>
             </select></label>)}</div>
             <div className="mt-4 flex items-center gap-3"><FilamentColourPreview preview={chosen.colour?.preview} name={chosen.colour?.name || 'Selected colour'}/><p className="text-xs text-slate-600">{chosen.colour?.preview?.reason || 'Screen colours are approximate. Finish, lighting and batch affect appearance.'}</p></div>
+            {chosen.ladder === 'SPECIALTY_PLA' && <p className="mt-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-950">Premium · {BULK_LADDERS[chosen.ladder].label}</p>}
             <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
               <p><strong>{chosen.stock == null ? 'Stock unverified' : chosen.stock + ' recorded stock limit for this selection'}</strong><br/><span className="text-sm text-slate-600">{chosen.ladder && <>Under 10 rolls: {money({ amount: bulkTier(chosen.ladder,1).unitCents / 100, currency: 'SGD' })} per 1kg roll</>}</span></p>
               <button type="button" onClick={addLine} disabled={!chosen.stock} className={buttonClass}>Add colour to enquiry</button>
@@ -195,6 +205,7 @@ export default function BulkFilamentForm() {
           return <section key={line.productId + JSON.stringify(line.options)} className="mt-4 rounded-2xl border border-slate-200 p-5" aria-label={'Request line ' + (index + 1)}>
             <div className="flex items-start justify-between gap-4"><div><h3 className="font-semibold text-slate-950!">{p?.name || 'Product no longer available'}</h3>
               <p className="mt-1 text-sm">{p?.types.map(t => t.label + ': ' + filamentOptionLabel(t.label, t.options.find(o => o.id === selectedOptions[t.id])?.name || 'Unavailable')).join(' · ')}</p>
+              {info.ladder === 'SPECIALTY_PLA' && <p className="mt-2 text-sm font-semibold text-amber-900">Premium · {BULK_LADDERS[info.ladder].label}</p>}
               {p?.types.filter(t => /^spool$/i.test(t.label)).map(t => { const o = t.options.find(o => o.id === selectedOptions[t.id]); return <p key={t.id} className="mt-1 text-sm font-medium">{filamentOptionLabel(t.label,o?.name || 'Unavailable')}: {o?.stock == null ? 'remaining stock unverified' : o.stock + ' rolls recorded remaining'}</p> })}
               <p className="mt-2 text-sm text-slate-600">Available stock: {info.stock ?? 'unverified'} rolls</p></div>
               <button type="button" aria-label={'Remove line ' + (index + 1)} className="text-sm underline" onClick={() => setLines(lines.filter((_,i) => i !== index))}>Remove</button></div>
@@ -207,6 +218,7 @@ export default function BulkFilamentForm() {
           </section>
         })}
         {prices.length > 0 && <p className="mt-5 text-lg font-semibold">Indicative total: {money({ amount: prices.reduce((n,l) => n + l.lineCents, 0) / 100, currency: 'SGD' })}</p>}
+        {quantityErrors.some(Boolean) && <p className="mt-5 text-sm text-amber-900">Estimate unavailable. Correct the quantities above to see prices and the combined tier.</p>}
         {lines.length > 0 && <button type="button" onClick={anotherColour} disabled={lines.length >= 50 || loading} className={buttonClass + ' mt-5'}>Add another colour</button>}
         {stale && lines.length > 0 && <div className="mt-4 rounded-xl bg-amber-50 p-4 text-amber-950"><p>Inventory or prices have changed. Review the refreshed limits above and adjust quantities before accepting.</p><button type="button" className="mt-3 font-medium underline" onClick={acceptInventory}>I have reviewed the refreshed inventory</button></div>}
         <h2 className="mt-9">2. Your contact and fulfilment preference</h2>

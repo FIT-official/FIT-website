@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { fixtureCatalogue, fixtureInput } from '../fixtures/bulkFilament'
+import { fixtureCatalogue, fixtureInput, fixtureLine } from '../fixtures/bulkFilament'
 const mock=vi.hoisted(()=>({auth:vi.fn(),admin:vi.fn(),db:vi.fn(),catalogue:vi.fn(),rate:vi.fn(),notify:vi.fn(),store:{findOne:vi.fn(),insertOne:vi.fn(),findOneAndUpdate:vi.fn(),find:vi.fn()}}))
 vi.mock('@/lib/bulkFilamentEmail',()=>({notifyBulkOwner:mock.notify,bulkEmailStatus:d=>d?.notifications?.email?.status || 'not_configured'}))
 vi.mock('@clerk/nextjs/server',()=>({auth:mock.auth}))
@@ -22,6 +22,15 @@ beforeEach(()=>{
   mock.rate.mockResolvedValue();mock.store.findOne.mockResolvedValue(null);mock.store.insertOne.mockResolvedValue({acknowledged:true})
 })
 describe('bulk API security and responses',()=>{
+  it('rejects eight Lanbo Marble rolls before persistence or owner notification', async () => {
+    const catalogue = fixtureCatalogue(), input = fixtureInput(catalogue)
+    input.lines = [fixtureLine(catalogue, 'Lanbo', 'PLA', 'Marble', 8)]
+    const result = await POST(request(input))
+    expect(result.status).toBe(409)
+    expect((await result.json()).error).toContain('choose 1 to 7 rolls')
+    expect(mock.store.insertOne).not.toHaveBeenCalled()
+    expect(mock.notify).not.toHaveBeenCalled()
+  })
   it('exposes safe canonical catalogue with no-store',async()=>{const r=await catalogueGET();expect(r.status).toBe(200);expect(r.headers.get('cache-control')).toContain('no-store');expect(await r.json()).not.toHaveProperty('maxExtraPerColour')})
   it('rejects foreign origin before persistence',async()=>{const r=await POST(request({},'https://foreign.test'));expect(r.status).toBe(403);expect(mock.db).not.toHaveBeenCalled()})
   it('rejects missing origin',async()=>{const r=await POST(new Request('https://fit.test/api',{method:'POST',body:'{}'}));expect(r.status).toBe(403)})
