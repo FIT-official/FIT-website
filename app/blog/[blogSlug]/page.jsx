@@ -57,6 +57,7 @@ export default async function BlogPage({ params }) {
     const publicFields = ['_id', 'title', 'slug', 'excerpt', 'heroImage', 'cta', 'tags', 'categories', 'publishDate', 'readingTimeMinutes', 'authorName']
     const safePost = JSON.parse(JSON.stringify(Object.fromEntries(publicFields
         .filter(field => post[field] !== undefined).map(field => [field, post[field]]))))
+    if (blogSlug === '3d-printer-repair') safePost.cta = { ...(safePost.cta || {}), tag: 'Printer repair', text: 'Request a printer assessment', url: '/printer-repair' }
     safePost.publishDateFormatted = validIsoDate(post.publishDate)
         ? new Date(post.publishDate).toLocaleDateString('en-GB', { timeZone: 'UTC' }) : null
     if (!validIsoDate(post.publishDate)) safePost.publishDate = null

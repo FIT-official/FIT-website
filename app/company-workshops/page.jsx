@@ -64,7 +64,7 @@ export default function CompanyWorkshops() {
         ]} />
         <section className={`${styles.section} ${styles.services}`}>
             <div><h2>Already have a model?</h2><p>Upload it for a printing quote. Check the dimensions, material and intended use before ordering.</p><TextLink href="/prints/request">Request a 3D print</TextLink></div>
-            <div><h2>A printer that needs attention?</h2><p>Share the make, model, symptoms and photos. We’ll assess the issue and explain the proposed work.</p><TextLink href="/blog/3d-printer-repair">Printer repair & maintenance</TextLink></div>
+            <div><h2>A printer that needs attention?</h2><p>Share the make, model, symptoms and photos. We’ll assess the issue and explain the proposed work.</p><TextLink href="/printer-repair">Printer repair & maintenance</TextLink></div>
         </section>
         <ReadingList items={[
             { href: '/blog/3d-printing', topic: 'The basics', title: 'From a digital model to a print' },

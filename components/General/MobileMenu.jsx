@@ -337,7 +337,7 @@ function MobileMenu({ open, onClose, triggerRef, shopCategories = [], printCateg
                                 onNavigate={onClose}
                                 reduceMotion={reduceMotion}
                             />
-                            <SheetRow href="/research-fabrication" icon={IoConstructOutline} label="Services" active={['/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping'].some(path => pathname === path || pathname?.startsWith(`${path}/`))} onNavigate={onClose} />
+                            <SheetRow href="/research-fabrication" icon={IoConstructOutline} label="Services" active={['/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair'].some(path => pathname === path || pathname?.startsWith(`${path}/`))} onNavigate={onClose} />
                             <SheetRow href="/school-programmes" icon={IoPeopleOutline} label="School programmes" active={pathname?.startsWith('/school-programmes')} onNavigate={onClose} />
                             <SheetRow href="/company-workshops" icon={IoPeopleOutline} label="Company workshops" active={pathname?.startsWith('/company-workshops')} onNavigate={onClose} />
                             <SheetRow href="/creators" icon={IoPeopleOutline} label="Creators" active={pathname?.startsWith('/creators')} onNavigate={onClose} />

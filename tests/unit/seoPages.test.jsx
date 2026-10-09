@@ -95,7 +95,7 @@ describe('public landing pages before browser effects', () => {
             text: 'Current creator services', heroImage: 'admin/uploads/home/current.jpg', darkOverlay: 20,
         })
         expect(html).toContain('3D printing and custom parts in Singapore')
-        expect(html).toContain('href="/blog/3d-printer-repair"')
+        expect(html).toContain('href="/printer-repair"')
         expect(html).toContain('href="/shop"')
         expect(metadata.alternates.canonical).toBe('https://www.fixitoday.com/')
         expect(metadata.openGraph.url).toBe(metadata.alternates.canonical)
