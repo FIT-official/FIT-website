@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fixtureCatalogue, fixtureInput, fixtureLine } from '../fixtures/bulkFilament'
+import bambuRecords from '../fixtures/bambuShop.json'
+import { bambuBulkCatalogue } from '@/lib/bulkFilamentBambu'
 const mock=vi.hoisted(()=>({auth:vi.fn(),admin:vi.fn(),db:vi.fn(),catalogue:vi.fn(),rate:vi.fn(),notify:vi.fn(),store:{findOne:vi.fn(),insertOne:vi.fn(),findOneAndUpdate:vi.fn(),find:vi.fn()}}))
 vi.mock('@/lib/bulkFilamentEmail',()=>({notifyBulkOwner:mock.notify,bulkEmailStatus:d=>d?.notifications?.email?.status || 'not_configured'}))
 vi.mock('@clerk/nextjs/server',()=>({auth:mock.auth}))
@@ -22,6 +24,18 @@ beforeEach(()=>{
   mock.rate.mockResolvedValue();mock.store.findOne.mockResolvedValue(null);mock.store.insertOne.mockResolvedValue({acknowledged:true})
 })
 describe('bulk API security and responses',()=>{
+  it('exposes twelve Bambu filaments and stores the server price despite client price fields', async () => {
+    const products = [...fixtureCatalogue(), ...bambuBulkCatalogue(bambuRecords, { rows: [] })]
+    mock.catalogue.mockResolvedValue(products)
+    const body = await (await catalogueGET()).json()
+    expect(body.products.filter(p => p.brand === 'Bambu Lab')).toHaveLength(12)
+    expect(body.products.find(p => p.brand === 'Bambu Lab')).toMatchObject({ stockSource: 'shop', pricingMode: 'list', priceNotice: 'Bambu Lab, list price, quote confirmed by FIT' })
+    const p = products.find(p => p.brand === 'Bambu Lab'), input = fixtureInput(products)
+    input.lines = [{ productId: p.id, version: p.version, options: p.types.map(t => ({ typeId: t.id, optionId: t.options[0].id })), quantity: 1, unitCents: 1 }]
+    expect((await POST(request(input))).status).toBe(201)
+    expect(mock.store.insertOne).toHaveBeenCalledOnce()
+    expect(mock.store.insertOne.mock.calls[0][0]).toMatchObject({ totalCents: 2190, lines: [expect.objectContaining({ unitCents: 2190, lineCents: 2190, ladder: 'BAMBU_LIST' })] })
+  })
   it('rejects eight Lanbo Marble rolls before persistence or owner notification', async () => {
     const catalogue = fixtureCatalogue(), input = fixtureInput(catalogue)
     input.lines = [fixtureLine(catalogue, 'Lanbo', 'PLA', 'Marble', 8)]

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import FilamentColourPreview from './FilamentColourPreview'
 import { bulkEmailCopy } from '@/lib/bulkEmailCopy'
-import { BULK_BANDS, BULK_LADDERS, BULK_PRICE_NOTICE, BULK_CONSENT, bulkTier, priceBulkLines } from '@/lib/bulkFilamentConfig'
+import { BAMBU_PRICE_NOTICE, bulkListUnitCents, BULK_BANDS, BULK_LADDERS, BULK_PRICE_NOTICE, BULK_CONSENT, bulkTier, priceBulkLines } from '@/lib/bulkFilamentConfig'
 import { filamentOptionLabel } from '@/lib/filamentLabels'
 import { useInventoryRefresh } from '@/utils/useInventoryRefresh'
 const STORAGE_KEY = 'fit-bulk-filament-pending-v2'
@@ -11,7 +11,7 @@ const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2
 const buttonClass = 'rounded-xl bg-emerald-800 px-5 py-3 font-medium text-white disabled:opacity-50'
 const money = price => price ? new Intl.NumberFormat('en-SG', { style: 'currency', currency: price.currency }).format(price.amount) : 'Owner quotation'
 function ColourOptions({ product, type }) {
-  const option = o => <option key={o.id} value={o.id}>{o.name} — {o.stock == null ? 'stock unverified' : o.stock + ' recorded remaining'}</option>
+  const option = o => <option key={o.id} value={o.id}>{o.name} — {o.stock == null ? 'stock unverified' : o.stock === 0 ? 'Unavailable (0 recorded remaining)' : o.stock + ' recorded remaining'}</option>
   if (product.brand !== 'Lanbo' || product.material !== 'PLA' || type.id !== product.colourTypeId) return type.options.map(option)
   return ['PLA', 'SPECIALTY_PLA'].map(ladder => {
     const colours = type.options.filter(o => o.ladder === ladder)
@@ -23,7 +23,7 @@ function selection(product, options) {
   const stocks = [product?.stock, ...selected.map(o => o?.stock)]
   const known = stocks.every(v => Number.isSafeInteger(v) && v >= 0)
   const ladder = selected.find(o => o?.ladder)?.ladder
-  return { stock: known ? Math.min(...stocks) : null, ladder, colour: selected[0] }
+  return { stock: known ? Math.min(...stocks) : null, ladder, listUnitCents: bulkListUnitCents(product, options), colour: selected.find(o => product?.types.find(t => t.id === product.colourTypeId)?.options.includes(o)) }
 }
 export default function BulkFilamentForm() {
   const [catalogue, setCatalogue] = useState([]), [checkedAt, setCheckedAt] = useState(''), [stockSource, setStockSource] = useState('')
@@ -100,11 +100,26 @@ export default function BulkFilamentForm() {
     setLines(lines.map(l => ({ ...l, version: catalogue.find(p => p.id === l.productId)?.version || l.version })))
     setConfirmReview(false); setError('')
   }
-  const pricedInputs = lines.map(line => ({ ...line, ladder: selection(catalogue.find(p => p.id === line.productId), Object.fromEntries(line.options.map(o => [o.typeId, o.optionId]))).ladder }))
-  const quantityErrors = lines.map(line => {
-    const p = catalogue.find(p => p.id === line.productId), info = selection(p, Object.fromEntries(line.options.map(o => [o.typeId, o.optionId])))
-    const total = lines.filter(l => l.productId === line.productId && JSON.stringify(l.options) === JSON.stringify(line.options)).reduce((n,l) => n + Number(l.quantity || 0), 0)
-    return !Number.isSafeInteger(line.quantity) || line.quantity < 1 || total > (info.stock ?? 0) ? `Choose 1 to ${info.stock ?? 0} rolls for this colour.` : ''
+  const pricedInputs = lines.map(line => {
+    const info = selection(catalogue.find(p => p.id === line.productId), Object.fromEntries(line.options.map(o => [o.typeId, o.optionId])))
+    return { ...line, ladder: info.ladder, listUnitCents: info.listUnitCents }
+  })
+  function lineStock(line, index) {
+    const p = catalogue.find(p => p.id === line.productId)
+    const info = selection(p, Object.fromEntries(line.options.map(o => [o.typeId, o.optionId])))
+    if (p?.pricingMode !== 'list') return info.stock ?? 0
+    const others = lines.filter((l, i) => i !== index && l.productId === p.id)
+    return Math.max(0, Math.min(p.stock - others.reduce((n, l) => n + Number(l.quantity || 0), 0),
+      ...line.options.map(o => {
+        const stock = p.types.find(t => t.id === o.typeId)?.options.find(v => v.id === o.optionId)?.stock ?? 0
+        return stock - others.filter(l => l.options.some(v => v.typeId === o.typeId && v.optionId === o.optionId)).reduce((n, l) => n + Number(l.quantity || 0), 0)
+      })))
+  }
+  const quantityErrors = lines.map((line, index) => {
+    const maximum = lineStock(line, index)
+    const p = catalogue.find(p => p.id === line.productId)
+    const total = p?.pricingMode === 'list' ? line.quantity : lines.filter(l => l.productId === line.productId && JSON.stringify(l.options) === JSON.stringify(line.options)).reduce((n,l) => n + Number(l.quantity || 0), 0)
+    return !Number.isSafeInteger(line.quantity) || line.quantity < 1 || total > maximum ? `Choose 1 to ${maximum} rolls for this colour.` : ''
   })
   // Invalid quantities must not contribute to either the pooled band or a quote.
   const prices = !quantityErrors.some(Boolean) && pricedInputs.every(l => l.ladder) ? priceBulkLines(pricedInputs) : []
@@ -156,7 +171,7 @@ export default function BulkFilamentForm() {
       </div>
     </div>
     <section className="mt-6 rounded-2xl border border-slate-200 p-5" aria-label="Bulk prices">
-      <h2>Prices per 1kg roll</h2><p className="mt-2 text-sm">Mix colours within PLA or PETG. Plain, Marble and Wood PLA count together; PETG counts separately.</p>
+      <h2>Prices per 1kg roll</h2><p className="mt-2 text-sm">Mix Lanbo and FIT colours within PLA or PETG. Plain, Marble and Wood PLA count together; PETG counts separately. Bambu Lab uses list prices and does not count towards these tiers.</p>
       <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-xs sm:text-sm"><thead><tr><th className="px-1 py-2 sm:p-2">SGD / roll</th>{BULK_BANDS.map(b => <th className="whitespace-nowrap px-1 py-2 sm:p-2" key={b.min}>{b.label}</th>)}</tr></thead><tbody>{Object.values(BULK_LADDERS).map(l => <tr key={l.label} className="border-t border-slate-200"><th className="px-1 py-2 sm:p-2">{l.label}</th>{l.cents.map((c,i) => <td className="px-1 py-2 sm:p-2" key={i}>${(c / 100).toFixed(2)}</td>)}</tr>)}</tbody></table></div><p className="mt-3 text-sm text-slate-600">{BULK_PRICE_NOTICE}</p>
     </section>
     {error && <div role="alert" className="my-5 rounded-xl border border-red-300 bg-red-50 p-4 text-red-900">{error}</div>}
@@ -173,9 +188,12 @@ export default function BulkFilamentForm() {
           <label className="mt-5 block text-sm font-medium">Product / material
             <select ref={chooser} className={inputClass + ' mt-2'} value={productId} onChange={e => chooseProduct(e.target.value)}>
               <option value="">Choose a filament product</option>
-              {catalogue.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {catalogue.filter(p => p.brand !== 'Bambu Lab').map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              <optgroup label="Bambu Lab">{catalogue.filter(p => p.brand === 'Bambu Lab').map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</optgroup>
             </select>
           </label>
+          {catalogue.some(p => p.brand === 'Bambu Lab') && <p className="mt-3 text-sm">{BAMBU_PRICE_NOTICE}</p>}
+          {product?.pricingMode === 'list' && <p className="mt-2 text-xs text-slate-600">Stock source: {product.stockSource === 'shop' ? 'current shop inventory' : product.stockSource}. Limits include shared colour and spool stock.</p>}
           {product && <><div className="mt-4 grid gap-4 sm:grid-cols-2">{product.types.map(t => /^spool$/i.test(t.label) ? <fieldset key={t.id} className="min-w-0 sm:col-span-2">
             <legend className="text-sm font-semibold">Spool option</legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-2">{t.options.map(o => <label key={o.id} className={'flex cursor-pointer items-start gap-3 rounded-xl border p-4 ' + (options[t.id] === o.id ? 'border-emerald-700 bg-emerald-50' : 'border-slate-300 bg-white')}>
@@ -190,7 +208,7 @@ export default function BulkFilamentForm() {
             <div className="mt-4 flex items-center gap-3"><FilamentColourPreview preview={chosen.colour?.preview} name={chosen.colour?.name || 'Selected colour'}/><p className="text-xs text-slate-600">{chosen.colour?.preview?.reason || 'Screen colours are approximate. Finish, lighting and batch affect appearance.'}</p></div>
             {chosen.ladder === 'SPECIALTY_PLA' && <p className="mt-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-950">Premium · {BULK_LADDERS[chosen.ladder].label}</p>}
             <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
-              <p><strong>{chosen.stock == null ? 'Stock unverified' : chosen.stock + ' recorded stock limit for this selection'}</strong><br/><span className="text-sm text-slate-600">{chosen.ladder && <>Under 10 rolls: {money({ amount: bulkTier(chosen.ladder,1).unitCents / 100, currency: 'SGD' })} per 1kg roll</>}</span></p>
+              <p><strong>{chosen.stock == null ? 'Stock unverified' : chosen.stock + ' recorded stock limit for this selection'}</strong><br/><span className="text-sm text-slate-600">{chosen.ladder === 'BAMBU_LIST' ? <>List price: {money({ amount: chosen.listUnitCents / 100, currency: 'SGD' })} per roll</> : chosen.ladder && <>Under 10 rolls: {money({ amount: bulkTier(chosen.ladder,1).unitCents / 100, currency: 'SGD' })} per 1kg roll</>}</span></p>
               <button type="button" onClick={addLine} disabled={!chosen.stock} className={buttonClass}>Add colour to enquiry</button>
             </div></>}
           <p className="mt-4 text-xs text-slate-600">Quantities must stay within available stock for each colour. No stock is reserved by this enquiry.</p>
@@ -210,10 +228,10 @@ export default function BulkFilamentForm() {
               <p className="mt-2 text-sm text-slate-600">Available stock: {info.stock ?? 'unverified'} rolls</p></div>
               <button type="button" aria-label={'Remove line ' + (index + 1)} className="text-sm underline" onClick={() => setLines(lines.filter((_,i) => i !== index))}>Remove</button></div>
             <div className="mt-4 max-w-sm">
-              <label className="block text-sm font-medium">Quantity (rolls)<input aria-label={'Quantity line ' + (index + 1)} className={inputClass + ' mt-2'} type="number" min="1" max={info.stock ?? 0} aria-invalid={!!quantityErrors[index]} aria-describedby={quantityErrors[index] ? `quantity-error-${index}` : undefined} step="1" required value={line.quantity} onChange={e => editLine(index,'quantity',e.target.value === '' ? '' : Number(e.target.value))}/></label>
+              <label className="block text-sm font-medium">Quantity (rolls)<input aria-label={'Quantity line ' + (index + 1)} className={inputClass + ' mt-2'} type="number" min="1" max={lineStock(line, index)} aria-invalid={!!quantityErrors[index]} aria-describedby={quantityErrors[index] ? `quantity-error-${index}` : undefined} step="1" required value={line.quantity} onChange={e => editLine(index,'quantity',e.target.value === '' ? '' : Number(e.target.value))}/></label>
             </div>
             {quantityErrors[index] && <p id={`quantity-error-${index}`} role="alert" className="mt-2 text-sm font-medium text-red-700">{quantityErrors[index]}</p>}
-            {prices[index] && <p className="mt-3 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-950">{BULK_LADDERS[prices[index].ladder].label} | {p.material} band {prices[index].band} ({prices[index].tierRolls} rolls combined)<br/><strong>{money({ amount: prices[index].unitCents / 100, currency: 'SGD' })} / roll x {line.quantity} = {money({ amount: prices[index].lineCents / 100, currency: 'SGD' })}</strong><br/>{BULK_PRICE_NOTICE}</p>}
+            {prices[index] && <p className="mt-3 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-950">{prices[index].ladder === 'BAMBU_LIST' ? BAMBU_PRICE_NOTICE : <>{BULK_LADDERS[prices[index].ladder].label} | {p.material} band {prices[index].band} ({prices[index].tierRolls} rolls combined)</>}<br/><strong>{money({ amount: prices[index].unitCents / 100, currency: 'SGD' })} / roll x {line.quantity} = {money({ amount: prices[index].lineCents / 100, currency: 'SGD' })}</strong><br/>{prices[index].priceNotice || BULK_PRICE_NOTICE}</p>}
             <label className="mt-4 block text-sm">Item remarks<input className={inputClass + ' mt-2'} maxLength={500} value={line.remarks} onChange={e => editLine(index,'remarks',e.target.value)} placeholder="Any details FIT should check for this selection"/></label>
           </section>
         })}

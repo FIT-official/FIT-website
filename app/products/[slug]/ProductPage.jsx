@@ -1,4 +1,5 @@
 'use client'
+import { productListPrice } from '@/lib/productListPrice';
 import { useUser } from '@clerk/nextjs';
 import { useParams, useRouter } from 'next/navigation';
 import posthog from 'posthog-js';
@@ -370,23 +371,8 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
     const calculateTotalPrice = () => {
         if (!product) return { total: 0, currency: 'SGD', breakdown: null, discountedTotal: null, effectivePercentage: null, appliedGlobalEvents: [] };
 
-        const basePrice = product.basePrice?.presentmentAmount || 0;
+        const { base: basePrice, additional: additionalFees, total: totalPrice } = productListPrice(product, selectedVariantOptions);
         const currency = product.basePrice?.presentmentCurrency || 'SGD';
-
-        let additionalFees = 0;
-        if (product.variantTypes && product.variantTypes.length > 0) {
-            product.variantTypes.forEach(variantType => {
-                const selectedOption = selectedVariantOptions[variantType.name];
-                if (selectedOption) {
-                    const option = variantType.options.find(opt => opt.name === selectedOption);
-                    if (option) {
-                        additionalFees += option.additionalFee || 0;
-                    }
-                }
-            });
-        }
-
-        const totalPrice = basePrice + additionalFees;
 
         const appliedGlobalEvents = [];
         if (!isFilamentProduct(product) && Array.isArray(globalDiscountRules) && globalDiscountRules.length > 0) {

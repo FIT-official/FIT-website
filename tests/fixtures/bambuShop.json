@@ -1,0 +1,743 @@
+[
+  {
+    "_id": "6974d555afadda8ec64083c3",
+    "name": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+    "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 21.9
+    },
+    "stock": 397,
+    "variantTypes": [
+      {
+        "name": "Spool",
+        "options": [
+          {
+            "name": "Jade White (10100)",
+            "additionalFee": 0,
+            "stock": 67,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083c5"
+          },
+          {
+            "name": "Silver (10102)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083c6"
+          },
+          {
+            "name": "Gray (10103)",
+            "additionalFee": 0,
+            "stock": 8,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083c7"
+          },
+          {
+            "name": "Red (10200)",
+            "additionalFee": 0,
+            "stock": 10,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083c8"
+          },
+          {
+            "name": "Magenta (10202)",
+            "additionalFee": 0,
+            "stock": 30,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083c9"
+          },
+          {
+            "name": "Cobalt Blue (10604)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083ca"
+          },
+          {
+            "name": "Sunflower Yellow (10402)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083cb"
+          },
+          {
+            "name": "Coca Brown (10802)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083cc"
+          },
+          {
+            "name": "Mistletoe Green (10502)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083cd"
+          },
+          {
+            "name": "Purple (10700)",
+            "additionalFee": 0,
+            "stock": 17,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083ce"
+          },
+          {
+            "name": "Pink (10203)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083cf"
+          },
+          {
+            "name": "Bambu Green (10501)",
+            "additionalFee": 0,
+            "stock": 17,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083d0"
+          },
+          {
+            "name": "Bronze (10801)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083d1"
+          },
+          {
+            "name": "Yellow (10400)",
+            "additionalFee": 0,
+            "stock": 40,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083d2"
+          },
+          {
+            "name": "Hot Pink (10204)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083d3"
+          },
+          {
+            "name": "Cyan (10603)",
+            "additionalFee": 0,
+            "stock": 31,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083d4"
+          },
+          {
+            "name": "Blue Gray (10602)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083d5"
+          },
+          {
+            "name": "Orange (10300)",
+            "additionalFee": 0,
+            "stock": 18,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083d6"
+          },
+          {
+            "name": "Brown (10800)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083d7"
+          },
+          {
+            "name": "Indigo Purple (10701)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083d8"
+          },
+          {
+            "name": "Gold (10401)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083d9"
+          },
+          {
+            "name": "Pumpkin Orange (10301)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083da"
+          },
+          {
+            "name": "Beige (10201)",
+            "additionalFee": 0,
+            "stock": 7,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083db"
+          },
+          {
+            "name": "Black (10101)",
+            "additionalFee": 0,
+            "stock": 31,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083dc"
+          },
+          {
+            "name": "Dark Gray (10105)",
+            "additionalFee": 0,
+            "stock": 5,
+            "image": null,
+            "hex": null,
+            "_id": "6aa7fc92f6a86fe1ad3e8812"
+          },
+          {
+            "name": "Light Gray (10104)",
+            "additionalFee": 0,
+            "stock": 5,
+            "image": null,
+            "hex": null,
+            "_id": "6aa7fc92f6a86fe1ad3e8813"
+          },
+          {
+            "name": "Maroon Red (10205)",
+            "additionalFee": 0,
+            "stock": 5,
+            "image": null,
+            "hex": null,
+            "_id": "6aa7fc92f6a86fe1ad3e8814"
+          },
+          {
+            "name": "Bright Green (10503)",
+            "additionalFee": 0,
+            "stock": 5,
+            "image": null,
+            "hex": null,
+            "_id": "6aa7fc92f6a86fe1ad3e8815"
+          },
+          {
+            "name": "Turquoise (10605)",
+            "additionalFee": 0,
+            "stock": 5,
+            "image": null,
+            "hex": null,
+            "_id": "6aa7fc92f6a86fe1ad3e8816"
+          },
+          {
+            "name": "Blue (10600)",
+            "additionalFee": 0,
+            "stock": 5,
+            "image": null,
+            "hex": null,
+            "_id": "6aa7fc92f6a86fe1ad3e8817"
+          }
+        ],
+        "_id": "6974d555afadda8ec64083c4"
+      },
+      {
+        "name": "Colour",
+        "options": [
+          {
+            "name": "With Spool",
+            "additionalFee": 4,
+            "stock": 177,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083de"
+          },
+          {
+            "name": "Without Spool",
+            "additionalFee": 0,
+            "stock": 220,
+            "image": null,
+            "hex": null,
+            "_id": "6974d555afadda8ec64083df"
+          }
+        ],
+        "_id": "6974d555afadda8ec64083dd"
+      }
+    ]
+  },
+  {
+    "_id": "6aa8eacda1ca543d895a48f2",
+    "name": "Bambu Lab 3D Printing Filament 1kg PLA Matte",
+    "slug": "bambu-lab-3d-printing-filament-1kg-pla-matte",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 21.9
+    },
+    "stock": 42,
+    "variantTypes": [
+      {
+        "name": "Colour",
+        "options": [
+          {
+            "name": "Ivory White (11100)",
+            "additionalFee": 0,
+            "stock": 12,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eacda1ca543d895a48f4"
+          },
+          {
+            "name": "Ash Gray (11102)",
+            "additionalFee": 0,
+            "stock": 11,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eacda1ca543d895a48f5"
+          },
+          {
+            "name": "Sakura Pink (11201)",
+            "additionalFee": 0,
+            "stock": 3,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eacda1ca543d895a48f6"
+          },
+          {
+            "name": "Lemon Yellow (11400)",
+            "additionalFee": 0,
+            "stock": 3,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eacda1ca543d895a48f7"
+          },
+          {
+            "name": "Charcoal (11101)",
+            "additionalFee": 0,
+            "stock": 10,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eacda1ca543d895a48f8"
+          },
+          {
+            "name": "Sky Blue (11601)",
+            "additionalFee": 0,
+            "stock": 3,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eacda1ca543d895a48f9"
+          }
+        ],
+        "_id": "6aa8eacda1ca543d895a48f3"
+      },
+      {
+        "name": "Spool",
+        "options": [
+          {
+            "name": "Without Spool",
+            "additionalFee": 0,
+            "stock": 42,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eacda1ca543d895a48fb"
+          },
+          {
+            "name": "With Spool",
+            "additionalFee": 4,
+            "stock": 0,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eacda1ca543d895a48fc"
+          }
+        ],
+        "_id": "6aa8eacda1ca543d895a48fa"
+      }
+    ]
+  },
+  {
+    "_id": "6aa8ead1a1ca543d895a4900",
+    "name": "Bambu Lab 3D Printing Filament 1kg PLA Basic Gradient",
+    "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic-gradient",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 28.9
+    },
+    "stock": 9,
+    "variantTypes": [
+      {
+        "name": "Colour",
+        "options": [
+          {
+            "name": "Mint Lime (10904)",
+            "additionalFee": 0,
+            "stock": 2,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8ead1a1ca543d895a4902"
+          },
+          {
+            "name": "Pink Citrus (10903)",
+            "additionalFee": 0,
+            "stock": 2,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8ead1a1ca543d895a4903"
+          },
+          {
+            "name": "Ocean to Meadow (10902)",
+            "additionalFee": 0,
+            "stock": 4,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8ead1a1ca543d895a4904"
+          },
+          {
+            "name": "Cotton Candy Cloud (10905)",
+            "additionalFee": 0,
+            "stock": 1,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8ead1a1ca543d895a4905"
+          }
+        ],
+        "_id": "6aa8ead1a1ca543d895a4901"
+      }
+    ]
+  },
+  {
+    "_id": "6aa8ead5a1ca543d895a4909",
+    "name": "Bambu Lab 3D Printing Filament 1kg PLA Lite",
+    "slug": "bambu-lab-3d-printing-filament-1kg-pla-lite",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 17.9
+    },
+    "stock": 2,
+    "variantTypes": [
+      {
+        "name": "Colour",
+        "options": [
+          {
+            "name": "Cocoa Brown (16800)",
+            "additionalFee": 0,
+            "stock": 2,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8ead5a1ca543d895a490b"
+          }
+        ],
+        "_id": "6aa8ead5a1ca543d895a490a"
+      }
+    ]
+  },
+  {
+    "_id": "6aa8ead8a1ca543d895a490f",
+    "name": "Bambu Lab 3D Printing Filament 1kg ABS",
+    "slug": "bambu-lab-3d-printing-filament-1kg-abs",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 21.9
+    },
+    "stock": 23,
+    "variantTypes": [
+      {
+        "name": "Colour",
+        "options": [
+          {
+            "name": "White (40100)",
+            "additionalFee": 0,
+            "stock": 23,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8ead8a1ca543d895a4911"
+          }
+        ],
+        "_id": "6aa8ead8a1ca543d895a4910"
+      },
+      {
+        "name": "Spool",
+        "options": [
+          {
+            "name": "Without Spool",
+            "additionalFee": 0,
+            "stock": 10,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8ead8a1ca543d895a4913"
+          },
+          {
+            "name": "With Spool",
+            "additionalFee": 4,
+            "stock": 13,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8ead8a1ca543d895a4914"
+          }
+        ],
+        "_id": "6aa8ead8a1ca543d895a4912"
+      }
+    ]
+  },
+  {
+    "_id": "6aa8eae5a1ca543d895a4919",
+    "name": "Bambu Lab 3D Printing Filament 1kg ASA",
+    "slug": "bambu-lab-3d-printing-filament-1kg-asa",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 33
+    },
+    "stock": 41,
+    "variantTypes": [
+      {
+        "name": "Colour",
+        "options": [
+          {
+            "name": "Black (45101)",
+            "additionalFee": 0,
+            "stock": 5,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eae5a1ca543d895a491b"
+          },
+          {
+            "name": "Grey (45102)",
+            "additionalFee": 0,
+            "stock": 25,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eae5a1ca543d895a491c"
+          },
+          {
+            "name": "White (45100)",
+            "additionalFee": 0,
+            "stock": 11,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eae5a1ca543d895a491d"
+          }
+        ],
+        "_id": "6aa8eae5a1ca543d895a491a"
+      }
+    ]
+  },
+  {
+    "_id": "6aa8eae9a1ca543d895a4921",
+    "name": "Bambu Lab 3D Printing Filament 1kg PVA Support",
+    "slug": "bambu-lab-3d-printing-filament-1kg-pva-support",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 52.9
+    },
+    "stock": 10,
+    "variantTypes": [
+      {
+        "name": "Colour",
+        "options": [
+          {
+            "name": "White (66400)",
+            "additionalFee": 0,
+            "stock": 10,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eae9a1ca543d895a4923"
+          }
+        ],
+        "_id": "6aa8eae9a1ca543d895a4922"
+      }
+    ]
+  },
+  {
+    "_id": "6aa8eaeda1ca543d895a4927",
+    "name": "Bambu Lab 3D Printing Filament 1kg PETG Basic",
+    "slug": "bambu-lab-3d-printing-filament-1kg-petg-basic",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 25.9
+    },
+    "stock": 11,
+    "variantTypes": [
+      {
+        "name": "Colour",
+        "options": [
+          {
+            "name": "White (30106)",
+            "additionalFee": 0,
+            "stock": 9,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eaeda1ca543d895a4929"
+          },
+          {
+            "name": "Black (30105)",
+            "additionalFee": 0,
+            "stock": 2,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eaeda1ca543d895a492a"
+          }
+        ],
+        "_id": "6aa8eaeda1ca543d895a4928"
+      }
+    ]
+  },
+  {
+    "_id": "6aa8eaf1a1ca543d895a492e",
+    "name": "Bambu Lab 3D Printing Filament 1kg PLA Glow",
+    "slug": "bambu-lab-3d-printing-filament-1kg-pla-glow",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 29.9
+    },
+    "stock": 2,
+    "variantTypes": [
+      {
+        "name": "Colour",
+        "options": [
+          {
+            "name": "Glow Green (15500)",
+            "additionalFee": 0,
+            "stock": 1,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eaf1a1ca543d895a4930"
+          },
+          {
+            "name": "Glow Yellow (15400)",
+            "additionalFee": 0,
+            "stock": 1,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eaf1a1ca543d895a4931"
+          }
+        ],
+        "_id": "6aa8eaf1a1ca543d895a492f"
+      }
+    ]
+  },
+  {
+    "_id": "6aa8eaf5a1ca543d895a4935",
+    "name": "Bambu Lab 3D Printing Filament 1kg PLA Wood",
+    "slug": "bambu-lab-3d-printing-filament-1kg-pla-wood",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 24.9
+    },
+    "stock": 5,
+    "variantTypes": [
+      {
+        "name": "Colour",
+        "options": [
+          {
+            "name": "Black Walnut (13107)",
+            "additionalFee": 0,
+            "stock": 1,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eaf5a1ca543d895a4937"
+          },
+          {
+            "name": "Rosewood (13204)",
+            "additionalFee": 0,
+            "stock": 4,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eaf5a1ca543d895a4938"
+          }
+        ],
+        "_id": "6aa8eaf5a1ca543d895a4936"
+      }
+    ]
+  },
+  {
+    "_id": "6aa8eaf9a1ca543d895a493c",
+    "name": "Bambu Lab 3D Printing Filament 1kg PLA Silk+",
+    "slug": "bambu-lab-3d-printing-filament-1kg-pla-silk",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 29.9
+    },
+    "stock": 2,
+    "variantTypes": [
+      {
+        "name": "Colour",
+        "options": [
+          {
+            "name": "Silver (13109)",
+            "additionalFee": 0,
+            "stock": 1,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eaf9a1ca543d895a493e"
+          },
+          {
+            "name": "Mint (13507)",
+            "additionalFee": 0,
+            "stock": 1,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eaf9a1ca543d895a493f"
+          }
+        ],
+        "_id": "6aa8eaf9a1ca543d895a493d"
+      }
+    ]
+  },
+  {
+    "_id": "6aa8eafca1ca543d895a4943",
+    "name": "Bambu Lab 3D Printing Filament 1kg PLA Tough+",
+    "slug": "bambu-lab-3d-printing-filament-1kg-pla-tough",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 39.9
+    },
+    "stock": 4,
+    "variantTypes": [
+      {
+        "name": "Colour",
+        "options": [
+          {
+            "name": "White (12107)",
+            "additionalFee": 0,
+            "stock": 2,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eafca1ca543d895a4945"
+          },
+          {
+            "name": "Black (12104)",
+            "additionalFee": 0,
+            "stock": 2,
+            "image": null,
+            "hex": null,
+            "_id": "6aa8eafca1ca543d895a4946"
+          }
+        ],
+        "_id": "6aa8eafca1ca543d895a4944"
+      }
+    ]
+  },
+  {
+    "_id": "6aa8ecaea1a0725a1406b55a",
+    "name": "Bambu Lithophane LED Backlight",
+    "slug": "bambu-lithophane-led-backlight",
+    "basePrice": {
+      "presentmentCurrency": "SGD",
+      "presentmentAmount": 7.8
+    },
+    "stock": 10,
+    "variantTypes": []
+  }
+]
