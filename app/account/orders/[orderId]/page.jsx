@@ -27,7 +27,7 @@ export async function generateMetadata(props) {
                 siteName: "Fix It Today®",
                 images: [
                     {
-                        url: order.items?.[0]?.product?.images?.[0] || "/fitogimage.png",
+                        url: order.items?.[0]?.product?.images?.[0] || "/fitogimage.jpg",
                         width: 800,
                         height: 800,
                         alt: "Fix It Today® Order",

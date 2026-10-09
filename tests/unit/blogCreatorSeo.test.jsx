@@ -107,7 +107,7 @@ describe('public blog search content', () => {
         const post = { slug: 'future guide', title: 'Future guide', status: 'published', contentFormat: 'tiptap', content: 'REMOVED CONFIDENTIAL TIMELINE', contentJson: { type: 'doc', content: [{ type: 'text', text: 'Connect a sensor and record measurements.' }] }, publishDate: 'invalid', updatedAt: 'invalid' }
         const metadata = blogMetadata(post)
         expect(metadata.description).toBe('Connect a sensor and record measurements.')
-        expect(metadata.twitter.images).toEqual(['https://www.fixitoday.com/fitogimage.png'])
+        expect(metadata.twitter.images).toEqual(['https://www.fixitoday.com/fitogimage.jpg'])
         expect(metadata.alternates.canonical).toBe('https://www.fixitoday.com/blog/future%20guide')
         expect(JSON.stringify(metadata)).not.toContain('REMOVED')
         expect(blogJsonLd(post).datePublished).toBeUndefined()
