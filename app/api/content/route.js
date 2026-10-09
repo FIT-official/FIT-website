@@ -37,6 +37,10 @@ export async function GET(req) {
         const fileContent = getContentByPath(contentPath);
 
         if (!fileContent) {
+            // These optional sections have client defaults and need no CMS entry.
+            if (['navigation/mega-menu', 'home/print-cta', 'prints/banner'].includes(contentPath)) {
+                return NextResponse.json({ frontmatter: {}, content: '' });
+            }
             return NextResponse.json({ error: "Content not found" }, { status: 404 });
         }
 
