@@ -38,6 +38,10 @@ async function main(){
   const post=()=>({clientRequestId:randomUUID(),kind:'project',topic:'coding',title:'A synthetic maker project',displayName:'Synthetic maker',body:'A small synthetic project used only for local community verification.',guidelinesAccepted:true,website:''})
   const comment=()=>({clientRequestId:randomUUID(),displayName:'Synthetic reply',body:'A useful synthetic reply for moderation verification.',guidelinesAccepted:true,website:''})
   const approve=async entry=>{state.admin=true;const r=await call(api.moderate,{action:'approve',entryId:entry.entryId,revision:entry.revision,note:''},200,'POST');state.admin=false;return r.entry}
+  await Promise.all([api.Entry.init(),api.Report.init()])
+  assert.equal((await call(api.feed)).items.length,0)
+  assert.deepEqual(await mongoose.connection.db.listCollections().toArray(),[])
+  mark('Model initialization and an empty public feed do not create collections or indexes')
   const draft=post(),replays=await Promise.all(Array.from({length:12},()=>api.submit(req(draft,'POST'))))
   receipt.concurrentResponses=await Promise.all(replays.map(async response=>({status:response.status,data:await response.clone().json()})))
   assert.equal(replays.filter(r=>r.status===201).length,1);assert.equal(replays.filter(r=>r.status===200).length,11);assert.equal(await api.Entry.countDocuments(),1)

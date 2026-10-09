@@ -1,12 +1,12 @@
 "use client"
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import { useUserRole } from './UserRoleContext';
 
 const AdminSettingsContext = createContext(null);
 
 export function AdminSettingsProvider({ children }) {
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isLoaded, isSignedIn, userId } = useAuth();
   const { role, loading: roleLoading } = useUserRole() || {};
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,7 @@ export function AdminSettingsProvider({ children }) {
     }
     fetchSettings();
     return () => { isMounted = false; };
-  }, [isLoaded, isSignedIn, user?.id, role, roleLoading]);
+  }, [isLoaded, isSignedIn, userId, role, roleLoading]);
 
   return React.createElement(AdminSettingsContext.Provider, {
     value: { settings: isSignedIn && role === 'admin' ? settings : null, loading, error },

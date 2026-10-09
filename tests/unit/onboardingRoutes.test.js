@@ -19,6 +19,25 @@ beforeEach(() => {
 })
 
 describe('Free onboarding routing', () => {
+    it.each(['/admin', '/admin/products', '/dashboard', '/account'])('protects signed-out %s through the same Clerk sign-in redirect', async path => {
+        const redirect = new Error('CLERK_SIGN_IN_REDIRECT')
+        const auth = vi.fn().mockResolvedValue({ userId: null })
+        auth.protect = vi.fn().mockRejectedValue(redirect)
+        await expect(middleware(auth, new Request(`https://fit.example${path}`))).rejects.toBe(redirect)
+        expect(auth.protect).toHaveBeenCalledOnce()
+        expect(mocks.getUser).not.toHaveBeenCalled()
+    })
+    it('lets a signed-in, onboarded admin request reach the page authorization check', async () => {
+        mocks.auth.mockResolvedValue({ userId: 'admin', sessionClaims: { metadata: { onboardingComplete: true } } })
+        const response = await middleware(mocks.auth, new Request('https://fit.example/admin'))
+        expect(response.status).toBe(200)
+        expect(response.headers.get('location')).toBeNull()
+    })
+    it('leaves admin API authorization with its handlers', async () => {
+        const response = await middleware(mocks.auth, new Request('https://fit.example/api/admin/settings'))
+        expect(response.status).toBe(200)
+        expect(mocks.auth).not.toHaveBeenCalled()
+    })
     it.each(['/shop', '/products/1kg-pla-3d-printing-filament-lanbo', '/cart', '/checkout', '/checkout/return', '/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair'])('keeps %s public without depending on Clerk account lookup', async path => {
         const auth = vi.fn().mockRejectedValue(new Error('Clerk unavailable'))
         auth.protect = vi.fn()

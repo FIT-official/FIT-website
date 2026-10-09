@@ -3,7 +3,8 @@ import { workshopGroupPage } from '@/lib/workshopPages'
 import Classroom from '@/components/Workshop/GuestClassroom'
 export async function generateMetadata({ params }) {
     const { group: id } = await params, group = workshopGroupPage(id)
-    return { title: group ? 'Group ' + group.number + ' classroom | Fix It Today' : 'Group not found', robots: { index: false, follow: false } }
+    if (!group) notFound()
+    return { title: 'Group ' + group.number + ' classroom | Fix It Today', robots: { index: false, follow: false } }
 }
 export default async function GroupClassroomPage({ params }) {
     const { group: id } = await params

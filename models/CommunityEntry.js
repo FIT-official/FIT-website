@@ -8,7 +8,7 @@ const schema = new mongoose.Schema({
   status: { type: String, enum: ['pending', 'approved', 'rejected', 'hidden', 'withdrawn'], default: 'pending' },
   revision: { type: Number, default: 1 }, createdAt: Date, updatedAt: Date, publishedAt: Date,
   moderationNote: { type: String, maxlength: 500, default: '' }, audit: { type: [mongoose.Schema.Types.Mixed], default: [] },
-}, { collection: 'communityentries', autoIndex: false })
+}, { collection: 'communityentries', autoIndex: false, autoCreate: false })
 schema.index({ entryId: 1 }, { unique: true })
 schema.index({ ownerUserId: 1, clientRequestId: 1 }, { unique: true })
 schema.index({ status: 1, parentId: 1, createdAt: -1, entryId: -1 })

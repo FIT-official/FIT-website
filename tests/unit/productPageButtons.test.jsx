@@ -80,10 +80,13 @@ describe('ProductPage purchase buttons', () => {
 
     it('lets a guest add a seeded shop product without private creator data', async () => {
         useUser.mockReturnValue({ user: null, isLoaded: true, isSignedIn: false })
-        const product = { ...shopProduct, creatorUserId: undefined, slug: '1kg-pla-3d-printing-filament-lanbo' }
+        const product = { ...shopProduct, creatorUserId: undefined, slug: '1kg-pla-3d-printing-filament-lanbo',
+            delivery: { deliveryTypes: [{ type: 'express-courier', price: 30 }, { type: 'standard-shipping', price: 6.2 }, { type: 'pick-up', price: 0 }] } }
         render(<ProductPage initialProduct={product} />)
         fireEvent.click(screen.getByRole('button', { name: 'Add to Cart' }))
         await waitFor(() => expect(global.fetch).toHaveBeenCalledWith('/api/user/cart', expect.objectContaining({ method: 'POST' })))
+        const add = global.fetch.mock.calls.find(([url, init]) => url === '/api/user/cart' && init?.method === 'POST')
+        expect(JSON.parse(add[1].body).cartItem.chosenDeliveryType).toBe('standard-shipping')
         expect(await screen.findByText('Added to cart')).toBeInTheDocument()
     })
 

@@ -4,7 +4,7 @@ import { estimateMaterial, planProject, validateInventory } from '@/lib/makerToo
 import { makerCatalogue } from '@/lib/makerTools/catalogue'
 import { bambuBulkCatalogue } from '@/lib/bulkFilamentBambu'
 import products from '../fixtures/bambuShop.json'
-import { bulkCombinationKey } from '@/lib/bulkFilamentSelection'
+import stockEvidence from '../fixtures/bambuStock-2026-10-09.json'
 
 const ref = COLOURS.find(c => c.name === 'Jade White')
 const spool = (overrides = {}) => ({ id: 'spool-1', label: 'My white', brand: ref.brand, material: ref.material, referenceId: ref.id, hex: ref.hex, remainingGrams: 400, diameter: 1.75, format: 'spool', ...overrides })
@@ -85,16 +85,24 @@ describe('manual inventory validation and allocation', () => {
 describe('exact catalogue offers', () => {
   const catalogue = () => bambuBulkCatalogue(products, { rows: [], source: 'shop', checkedAt: '2026-10-09T15:00:00Z' })
   it('never calls aggregate colour/spool totals a confirmed combination', () => {
-    const offers = makerCatalogue(catalogue())
+    const all = catalogue()
+    for (const p of all) delete p.combinationStock
+    const offers = makerCatalogue(all)
     expect(offers.length).toBeGreaterThan(20)
     expect(offers.every(o => o.availableRolls === null && o.netGrams === 1000)).toBe(true)
     expect(offers.every(o => o.href === '/products/bambu-lab-3d-printing-filament-1kg-pla-basic')).toBe(true)
   })
   it('keeps spool/refill combinations separate and never revives snapshot stock', () => {
-    const all = catalogue(), p = all.find(p => p.slug.endsWith('1kg-pla-basic'))
-    const c = p.types.find(t => t.id === p.colourTypeId), s = p.types.find(t => t.label === 'Spool')
-    p.combinationStock = { [bulkCombinationKey({ [c.id]: c.options[0].id, [s.id]: s.options[0].id })]: 2 }
-    expect(makerCatalogue(all).filter(o => o.optionId === c.options[0].id).map(o => o.availableRolls).sort()).toEqual([0, 2])
+    // Historical fixture verifies the shared live-source policy; it is not a current stock claim.
+    const all = bambuBulkCatalogue(stockEvidence.products, { rows: stockEvidence.rows, source: 'sheet', checkedAt: '2026-10-09' })
+    const p = all.find(p => p.slug.endsWith('1kg-pla-basic'))
+    const c = p.types.find(t => t.id === p.colourTypeId)
+    const black = c.options.find(o => o.name === 'Black (10101)')
+    expect(makerCatalogue(all).filter(o => o.optionId === black.id).map(o => o.availableRolls).sort((a, b) => a - b)).toEqual([4, 31])
+    black.shopStock = 2
+    expect(makerCatalogue(all).filter(o => o.optionId === black.id).map(o => o.availableRolls)).toEqual([2, 2])
+    black.shopStock = 0
+    expect(makerCatalogue(all).filter(o => o.optionId === black.id).every(o => o.availableRolls === 0)).toBe(true)
     p.stockSource = 'snapshot'; expect(makerCatalogue(all).every(o => o.availableRolls === null)).toBe(true)
   })
   it('fails closed when a reviewed colour identity changes', () => {
