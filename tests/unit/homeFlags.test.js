@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { normalizeHomeFlag, useHomeV2, HOME_SECTIONS } from '@/lib/home/flags'
+import { normalizeHomeFlag, shouldRenderHomeV2, HOME_SECTIONS } from '@/lib/home/flags'
 
 beforeEach(() => {
     vi.resetModules()
@@ -16,7 +16,7 @@ describe('home version selection', () => {
         [{ home: ['v2', 'v1'] }, { enabled: true }, false], [{ home: 'unknown' }, null, false],
         [{}, { enabled: 'true' }, false],
     ])('selects the correct home for %j and %j', (params, flag, expected) => {
-        expect(useHomeV2(params, flag)).toBe(expected)
+        expect(shouldRenderHomeV2(params, flag)).toBe(expected)
     })
     it('defaults built sections on and only explicit false hides a known section', () => {
         const flag = normalizeHomeFlag({ enabled: true, sections: { bulk: false, faq: true, hero: 'false', unknown: false } })
