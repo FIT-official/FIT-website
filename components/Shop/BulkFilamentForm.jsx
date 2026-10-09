@@ -1,20 +1,14 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import FilamentColourPreview from './FilamentColourPreview'
 import { filamentOptionLabel } from '@/lib/filamentLabels'
+import { bulkSelection as selection, bulkEstimateSummary, bulkPricingQuantities, bulkDiscountCategory } from '@/lib/bulkFilamentPricing'
 import { useInventoryRefresh } from '@/utils/useInventoryRefresh'
 const STORAGE_KEY = 'fit-bulk-filament-pending-v1'
 const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-950 focus:outline-2 focus:outline-offset-2 focus:outline-emerald-700 disabled:bg-slate-100'
 const buttonClass = 'rounded-xl bg-emerald-800 px-5 py-3 font-medium text-white disabled:opacity-50'
 const money = price => price ? new Intl.NumberFormat('en-SG', { style: 'currency', currency: price.currency }).format(price.amount) : 'Owner quotation'
-function selection(product, options) {
-  const selected = product?.types.map(t => t.options.find(o => o.id === options[t.id])) || []
-  const stocks = [product?.stock, ...selected.map(o => o?.stock)]
-  const known = stocks.every(v => Number.isSafeInteger(v) && v >= 0)
-  const fees = selected.map(o => o?.fee)
-  const amount = product?.price && fees.every(v => typeof v === 'number') ? product.price.amount + fees.reduce((n,v) => n + v, 0) : null
-  return { stock: known ? Math.min(...stocks) : null, price: amount != null && amount >= 0 ? { amount, currency: product.price.currency } : null }
-}
 export default function BulkFilamentForm() {
   const [catalogue, setCatalogue] = useState([]), [checkedAt, setCheckedAt] = useState('')
   const [loading, setLoading] = useState(true), [error, setError] = useState(''), [busy, setBusy] = useState(false)
@@ -89,6 +83,8 @@ export default function BulkFilamentForm() {
     setLines(lines.map(l => ({ ...l, version: catalogue.find(p => p.id === l.productId)?.version || l.version })))
     setConfirmReview(false); setError('')
   }
+  const categoryQuantities = bulkPricingQuantities(lines, catalogue)
+  const estimateSummary = bulkEstimateSummary(lines.map(line => selection(catalogue.find(p => p.id === line.productId), Object.fromEntries(line.options.map(o => [o.typeId, o.optionId])), line.quantity, categoryQuantities.get(bulkDiscountCategory(catalogue.find(p => p.id === line.productId)))).estimate))
   const stale = lines.some(l => catalogue.find(p => p.id === l.productId)?.version !== l.version)
   async function submit(event) {
     event.preventDefault(); setError(''); setBusy(true)
@@ -116,6 +112,7 @@ export default function BulkFilamentForm() {
       <h1 className="mt-3">Your filament request is with FIT</h1>
       <p className="mt-4">The owner can now review it in the dashboard. Availability, the final quotation and collection or delivery arrangements need confirmation.</p>
       <p className="mt-4 font-medium">{receipt.totalRolls ?? receipt.recordedRolls + receipt.extraRolls} rolls requested</p>
+      {receipt.estimatedTotals?.totals.map(total => <p key={total.currency} className="mt-2 font-medium">{receipt.estimatedTotals.unpricedLines ? 'Priced selections estimate' : 'Estimated grand total'}: {money({ amount: total.total, currency: total.currency })}</p>)}
       <p className="mt-4">No stock has been reserved and no payment has been taken. This is not a confirmed order.</p>
       <p className="mt-5 text-sm">Save your request reference:</p><p className="mt-1 break-all font-mono text-sm">{receipt.requestId}</p>
       <p className="mt-4 text-sm text-slate-600">This page is your receipt. An email or Telegram confirmation is not sent automatically.</p>
@@ -158,6 +155,16 @@ export default function BulkFilamentForm() {
               <span><strong className="block">{filamentOptionLabel(t.label,o.name)}</strong><span className="mt-1 block text-sm">{o.stock == null ? 'Remaining stock unverified' : o.stock + ' rolls recorded remaining'}</span></span>
             </label>)}</div>
             <p className="mt-2 text-xs text-slate-600">Spool counts may be shared across colours. FIT confirms availability of your selected combination.</p>
+          </fieldset> : t.id === product.colourTypeId ? <fieldset key={t.id} className="min-w-0 sm:col-span-2">
+            <legend className="text-sm font-semibold">Colour</legend>
+            <div className="mt-2 grid max-h-80 grid-cols-1 gap-2 overflow-y-auto rounded-xl border border-slate-200 p-2 min-[360px]:grid-cols-2 sm:grid-cols-3">
+              {t.options.map(o => <label key={o.id} className={'flex min-w-0 cursor-pointer items-center gap-2 rounded-xl border p-2 ' + (options[t.id] === o.id ? 'border-emerald-700 bg-emerald-50' : 'border-slate-200 bg-white')}>
+                <input type="radio" name={'colour-' + t.id} aria-label={o.preview?.label || o.name} checked={options[t.id] === o.id} onChange={() => setOptions({ ...options, [t.id]: o.id })} className="shrink-0"/>
+                <FilamentColourPreview compact preview={o.preview} name={o.name}/>
+                <span className="min-w-0 break-words text-xs"><strong className="block">{o.preview?.label || o.name}</strong><span className="mt-1 block text-slate-600">{o.stock == null ? 'Stock unverified' : o.stock + ' recorded remaining'}</span>{o.preview?.reason && <span className="mt-1 block text-[10px] leading-snug text-slate-600">{o.preview.reason}</span>}</span>
+              </label>)}
+            </div>
+            <p className="mt-2 text-xs text-slate-600">Screen colours may vary. Finish, lighting and batch affect appearance. Gradient chips are colour references; sheen, glow and texture are not simulated.</p>
           </fieldset> : <label key={t.id} className="block text-sm font-medium">{t.label}
             <select className={inputClass + ' mt-2'} value={options[t.id] || ''} onChange={e => setOptions({ ...options, [t.id]: e.target.value })}>
               {t.options.map(o => <option key={o.id} value={o.id}>{o.name} — {o.stock == null ? 'stock unverified' : o.stock + ' recorded remaining'}</option>)}
@@ -174,22 +181,46 @@ export default function BulkFilamentForm() {
         {lines.map((line,index) => {
           const p = catalogue.find(p => p.id === line.productId)
           const selectedOptions = Object.fromEntries(line.options.map(o => [o.typeId, o.optionId]))
-          const info = selection(p, selectedOptions)
+          const info = selection(p, selectedOptions, line.quantity, categoryQuantities.get(bulkDiscountCategory(p)))
+          const colour = p?.types.find(t => t.id === p.colourTypeId)?.options.find(o => o.id === selectedOptions[p.colourTypeId])
           return <section key={line.productId + JSON.stringify(line.options)} className="mt-4 rounded-2xl border border-slate-200 p-5" aria-label={'Request line ' + (index + 1)}>
-            <div className="flex items-start justify-between gap-4"><div><h3 className="font-semibold text-slate-950!">{p?.name || 'Product no longer available'}</h3>
-              <p className="mt-1 text-sm">{p?.types.map(t => t.label + ': ' + filamentOptionLabel(t.label, t.options.find(o => o.id === selectedOptions[t.id])?.name || 'Unavailable')).join(' · ')}</p>
-              {p?.types.filter(t => /^spool$/i.test(t.label)).map(t => { const o = t.options.find(o => o.id === selectedOptions[t.id]); return <p key={t.id} className="mt-1 text-sm font-medium">{filamentOptionLabel(t.label,o?.name || 'Unavailable')}: {o?.stock == null ? 'remaining stock unverified' : o.stock + ' rolls recorded remaining'}</p> })}
-              <p className="mt-2 text-sm text-slate-600">Recorded stock limit: {info.stock ?? 'unverified'} · Public list price: {money(info.price)} / roll</p></div>
-              <button type="button" aria-label={'Remove line ' + (index + 1)} className="text-sm underline" onClick={() => setLines(lines.filter((_,i) => i !== index))}>Remove</button></div>
-            <div className="mt-4 max-w-sm">
-              <label className="block text-sm font-medium">Quantity (rolls)<input aria-label={'Quantity line ' + (index + 1)} className={inputClass + ' mt-2'} type="number" min="1" max={(info.stock ?? 0) + 20} step="1" required value={line.quantity} onChange={e => editLine(index,'quantity',e.target.value === '' ? '' : Number(e.target.value))}/></label>
+            <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_16rem]">
+              <div className="min-w-0">
+                <div className="flex items-start gap-3"><FilamentColourPreview preview={colour?.preview} name={colour?.name || 'Selected colour'}/>
+                  <div className="min-w-0 flex-1 break-words"><h3 className="font-semibold text-slate-950!">{p?.name || 'Product no longer available'}</h3>
+                    <p className="mt-1 text-sm">{p?.types.map(t => t.label + ': ' + (t.id === p.colourTypeId && colour?.preview?.label || filamentOptionLabel(t.label, t.options.find(o => o.id === selectedOptions[t.id])?.name || 'Unavailable'))).join(' · ')}</p>
+                    <p className="mt-2 text-xs text-slate-600">{info.stock == null ? 'Stock unverified' : info.stock + ' recorded stock limit'}</p>
+                    {p?.types.filter(t => /^spool$/i.test(t.label)).map(t => { const o = t.options.find(o => o.id === selectedOptions[t.id]); return <p key={t.id} className="mt-1 text-xs text-slate-600">{filamentOptionLabel(t.label,o?.name || 'Unavailable')}: {o?.stock == null ? 'remaining stock unverified' : o.stock + ' rolls recorded remaining'}</p> })}
+                    {colour?.preview?.sourceUrl && <a href={colour.preview.sourceUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs underline">Colour reference</a>}
+                  </div>
+                </div>
+                {colour?.preview?.reason && <p className="mt-3 text-xs text-slate-600">{colour.preview.reason}</p>}
+                <label className="mt-4 block text-sm">Item remarks<input className={inputClass + ' mt-2'} maxLength={500} value={line.remarks} onChange={e => editLine(index,'remarks',e.target.value)} placeholder="Any details FIT should check for this selection"/></label>
+              </div>
+              <div className="min-w-0 rounded-xl bg-slate-50 p-4 sm:text-right">
+                <label className="flex items-center justify-between gap-3 text-sm font-medium"><span>Quantity</span><input aria-label={'Quantity line ' + (index + 1)} className={inputClass.replace('w-full','w-24') + ' text-right'} type="number" min="1" max={(info.stock ?? 0) + 20} step="1" required value={line.quantity} onChange={e => editLine(index,'quantity',e.target.value === '' ? '' : Number(e.target.value))}/></label>
+                <dl className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 text-sm">
+                  <dt className="text-left text-slate-600">Normal / roll</dt><dd className="text-right">{money(info.price)}</dd>
+                  {info.estimate?.discountAmount.amount > 0 && <><dt className="text-left text-slate-600">Bulk / roll</dt><dd className="text-right">{money(info.estimate.estimatedUnitPrice)}</dd><dt className="text-left text-emerald-800">Saving</dt><dd className="text-right text-emerald-800">−{money(info.estimate.discountAmount)}</dd></>}
+                  <dt className="border-t pt-3 text-left font-semibold">Estimated line total</dt><dd className="border-t pt-3 text-right text-lg font-semibold" aria-live="polite">{money(info.estimate?.estimatedLineTotal)}</dd>
+                </dl>
+                {info.estimate?.appliedTier && <p className="mt-2 text-xs text-slate-600">Based on {info.estimate.appliedTier.categoryQuantity} {info.estimate.appliedTier.category} rolls across selected colours.</p>}
+                <button type="button" aria-label={'Remove line ' + (index + 1)} className="mt-4 text-xs underline" onClick={() => setLines(lines.filter((_,i) => i !== index))}>Remove</button>
+              </div>
             </div>
-            <p className="mt-2 text-sm text-slate-600">List-price estimate: {money(info.price && { ...info.price, amount: Math.round(info.price.amount * Number(line.quantity || 0) * 100) / 100 })}. Availability and final quotation to confirm.</p>
-            <label className="mt-4 block text-sm">Item remarks<input className={inputClass + ' mt-2'} maxLength={500} value={line.remarks} onChange={e => editLine(index,'remarks',e.target.value)} placeholder="Any details FIT should check for this selection"/></label>
           </section>
         })}
         {lines.length > 0 && <button type="button" onClick={anotherColour} disabled={lines.length >= 50 || loading} className={buttonClass + ' mt-5'}>Add another colour</button>}
         {stale && lines.length > 0 && <div className="mt-4 rounded-xl bg-amber-50 p-4 text-amber-950"><p>Inventory or prices have changed. Review the refreshed limits above and adjust quantities before accepting.</p><button type="button" className="mt-3 font-medium underline" onClick={acceptInventory}>I have reviewed the refreshed inventory</button></div>}
+        {lines.length > 0 && <section className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-right" aria-label="Filament estimate" aria-live="polite">
+          <h2>{estimateSummary.unpricedLines ? 'Priced selections estimate' : 'Estimated grand total'}</h2>
+          {estimateSummary.totals.map(total => <div key={total.currency} className="mt-3">
+            {total.discount > 0 && <><p className="text-sm">Subtotal: {money({ amount: total.subtotal, currency: total.currency })}</p><p className="text-sm text-emerald-800">Discount: −{money({ amount: total.discount, currency: total.currency })}</p></>}
+            <p className="text-2xl font-semibold">{money({ amount: total.total, currency: total.currency })}</p>
+          </div>)}
+          {estimateSummary.unpricedLines > 0 && <p className="mt-2 text-sm">Some selections need a quotation.</p>}
+          <p className="mt-2 text-sm text-slate-700">Availability, final pricing and fulfilment need confirmation. Delivery, if requested, is quoted separately.</p>
+        </section>}
         <h2 className="mt-9">2. Your contact and fulfilment preference</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {[['name','Name','text'],['email','Email','email'],['phone','Phone','tel'],['organisation','Organisation (optional)','text']].map(([key,label,type]) => <label key={key} className="block text-sm font-medium">{label}<input className={inputClass + ' mt-2'} type={type} required={key !== 'organisation'} autoComplete={key === 'name' ? 'name' : key === 'phone' ? 'tel' : key === 'email' ? 'email' : 'organization'} maxLength={key === 'email' ? 254 : key === 'phone' ? 40 : key === 'organisation' ? 160 : 120} value={customer[key]} onChange={e => setCustomer({ ...customer, [key]: e.target.value })}/></label>)}

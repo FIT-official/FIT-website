@@ -130,3 +130,19 @@ it('retains the exact legacy pending retry but uses one quantity after an invent
   const sent=JSON.parse(fetch.mock.calls.at(-1)[1].body).lines[0]
   expect(sent.quantity).toBe(5);expect(sent).not.toHaveProperty('recordedQuantity');expect(sent).not.toHaveProperty('extraQuantity')
 })
+
+it('calculates approved pooled category discounts and totals as colour quantities change without adding client price fields',async()=>{
+  const product=fixtureProduct();product.name='1kg PLA 3D Printing Filament - Lanbo';product.slug='1kg-pla-3d-printing-filament-lanbo';product.basePrice.presentmentAmount=14.9;product.discount={percentage:99}
+  fetch.mockResolvedValue(response({products:bulkCatalogue([product])}));render(<BulkFilamentForm/>);await screen.findByRole('button',{name:'Add colour to enquiry'})
+  fireEvent.click(screen.getByRole('button',{name:'Add colour to enquiry'}));fireEvent.change(screen.getByLabelText('Quantity line 1'),{target:{value:'4'}})
+  fireEvent.click(screen.getByRole('radio',{name:'White',exact:true}));fireEvent.click(screen.getByRole('button',{name:'Add colour to enquiry'}));fireEvent.change(screen.getByLabelText('Quantity line 2'),{target:{value:'6'}})
+  expect(screen.getByRole('region',{name:'Filament estimate'})).toHaveTextContent('Subtotal: $149.00Discount: −$10.00$139.00')
+  expect(screen.getByRole('region',{name:'Request line 1'})).toHaveTextContent('Estimated line total$55.60')
+  expect(screen.getByRole('region',{name:'Request line 2'})).toHaveTextContent('Estimated line total$83.40')
+  fireEvent.click(screen.getByRole('button',{name:'Remove line 1'}));expect(screen.getByRole('region',{name:'Filament estimate'})).toHaveTextContent('$89.40')
+})
+it('shows estimates without unnecessary discount notices when no approved rate exists',async()=>{
+  render(<BulkFilamentForm/>);await choose();fireEvent.change(screen.getByLabelText('Quantity line 1'),{target:{value:'3'}})
+  expect(screen.getByRole('region',{name:'Filament estimate'})).toHaveTextContent('Estimated grand total$30.00')
+  expect(screen.queryByText(/no discount|Discount:/i)).not.toBeInTheDocument()
+})

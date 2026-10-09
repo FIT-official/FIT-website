@@ -117,6 +117,22 @@ async function main() {
     assert.equal((await products.findOne({ _id: id })).variantTypes[0].options[1].stock, 7)
     receipt.checks.push('canonical Mongo stock edits 0/2/10 propagate on next catalogue read; old snapshots and over-cap totals rejected; other colour unchanged')
 
+    // Canonical price fixture and approved rational tiers, only in the owned disposable database.
+    await products.updateOne({ _id: id }, { $set: { name: 'Synthetic Lanbo PLA filament', slug: '1kg-pla-3d-printing-filament-lanbo', 'basePrice.presentmentAmount': 14.9, discount: { percentage: 99 }, discounts: [] } })
+    const priced = await loadBulkCatalogue()
+    const pricedInput = { ...input, clientRequestId: randomUUID(), lines: input.lines.map((line,i) => ({ ...line, version: priced[0].version, quantity: i ? 6 : 4 })) }
+    const estimateResult = await saveBulkRequest(durable, pricedInput, async () => priced)
+    assert.deepEqual(estimateResult.receipt.estimatedTotals, { totals: [{ currency: 'SGD', subtotal: 149, discount: 10, total: 139 }], unpricedLines: 0 })
+    const pricedSaved = await durable.findOne({ _id: pricedInput.clientRequestId })
+    assert.deepEqual(pricedSaved.lines.map(l => [l.publicUnitPrice.amount,l.appliedTier.categoryQuantity,l.estimatedUnitPrice.amount,l.estimatedLineTotal.amount]), [[14.9,10,13.9,55.6],[14.9,10,13.9,83.4]])
+    await products.updateOne({ _id: id }, { $set: { 'basePrice.presentmentAmount': 15.9 } })
+    const changedPrice = await loadBulkCatalogue()
+    assert.throws(() => prepareBulkLines(pricedInput, changedPrice), { status: 409 })
+    await mongoose.disconnect(); await mongoose.connect(uri, { autoIndex: false, maxPoolSize: 4 })
+    const pricedReplay = await saveBulkRequest(mongoose.connection.db.collection('bulkFilamentRequests'), pricedInput, async () => { throw Error('saved estimate must not be repriced') })
+    assert.deepEqual(pricedReplay.receipt, estimateResult.receipt)
+    receipt.checks.push('server-derived discount and totals persist in Mongo; changed canonical prices invalidate unsaved snapshots; saved receipt survives reconnect without repricing')
+
     receipt.status = 'passed'
 
   } catch (error) { receipt.status = 'failed'; receipt.error = error.message; process.exitCode = 1 }

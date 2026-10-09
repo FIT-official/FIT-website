@@ -24,8 +24,11 @@ function RequestCard({ row, onSaved }) {
       <p className="mt-1 font-medium">Total requested: {line.quantity ?? line.recordedQuantity + line.extraQuantity} rolls</p>
       <p className="mt-1">{line.recordedQuantity} from recorded stock requested + <strong>{line.extraQuantity} extra rolls to confirm</strong></p>
       <p>Public list price at submission: {line.publicUnitPrice ? line.publicUnitPrice.currency + ' ' + line.publicUnitPrice.amount.toFixed(2) + ' / roll' : 'Quotation required'}</p>
+      {line.discountAmount?.amount > 0 && <p>Discount at submission: {line.discountAmount.currency} {line.discountAmount.amount.toFixed(2)}</p>}
+      {line.estimatedLineTotal && <p>Estimated line total at submission: {line.estimatedLineTotal.currency} {line.estimatedLineTotal.amount.toFixed(2)}</p>}
       {line.remarks && <p className="mt-1 whitespace-pre-wrap">Remarks: {line.remarks}</p>}
     </li>)}</ul>
+    {row.estimatedTotals?.totals.map(total => <p key={total.currency} className="mt-3 font-semibold">{row.estimatedTotals.unpricedLines ? 'Priced selections estimate' : 'Estimated filament total'} at submission: {total.currency} {total.total.toFixed(2)}</p>)}
     {row.notes && <p className="mt-3 whitespace-pre-wrap text-sm">Customer notes: {row.notes}</p>}
     <p className="mt-3 text-xs text-amber-900">Request only. No stock reserved, payment taken or delivery promised. Email and Telegram alerts are not configured for this form.</p>
     <div className="mt-5 grid gap-3 sm:grid-cols-[160px_1fr_auto]">

@@ -1,0 +1,2382 @@
+{
+  "provenance": {
+    "reviewedAt": "2026-10-09",
+    "description": "Exact existing inventory matched to manufacturer colour evidence; original private source retained in release audit."
+  },
+  "disclaimer": "Colours shown on screen are approximate. Finish, lighting, printer settings and batch can change physical appearance.",
+  "sources": {
+    "bambu_studio": {
+      "url": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json",
+      "type": "official manufacturer software colour data",
+      "observed": "2026-10-09",
+      "key": "fila_type + fila_color_code; English fila_color_name and fila_color RGBA array",
+      "note": "Moving master URL, web source reported cached three weeks ago."
+    },
+    "bambu_pla_basic_pdf": {
+      "url": "https://store.bblcdn.eu/s8/default/903b60b06ac142e9b1b49ad53cfa4c82/Bambu_PLA_Basic_Hex_Code.pdf",
+      "type": "official manufacturer colour reference"
+    },
+    "bambu_pla_matte_pdf": {
+      "url": "https://store.bblcdn.eu/s8/default/f131f643495b417197832b291fc7b068/Bambu_PLA_Matte_Hex_Code.pdf",
+      "type": "official manufacturer colour reference"
+    },
+    "bambu_silk_store": {
+      "url": "https://asia.store.bambulab.com/products/pla-silk-upgrade",
+      "type": "official manufacturer product table"
+    },
+    "lanbo_storefront": {
+      "url": "https://cxlanboprint.en.alibaba.com/ru_RU/productlist.html",
+      "type": "manufacturer storefront identity only",
+      "manufacturer": "Cixi Lanbo Printing Supplies Co., Ltd.",
+      "note": "Not an exact colour evidence source by itself."
+    },
+    "bambu_blue_jp": {
+      "url": "https://jp.store.bambulab.com/products/pla-basic-filament?variant=47482709639460",
+      "type": "official manufacturer regional product listing",
+      "observed": "2026-10-09",
+      "note": "Search-indexed page explicitly lists Blue (10600); direct page returned 402. Bambu Studio current source instead uses Blue 10601."
+    },
+    "bambu_wood_store": {
+      "url": "https://bambulab-us.myshopify.com/products/pla-wood",
+      "type": "manufacturer product page",
+      "note": "Confirms Black Walnut13107 and Rosewood13204, respective hex values, and natural wood texture variation."
+    },
+    "bambu_glow_store": {
+      "url": "https://bambulab-us.myshopify.com/products/pla-glow",
+      "type": "manufacturer product page",
+      "note": "Confirms Glow Green15500 and Glow Yellow15400 and that appearance glows in low light; hex alone is not a daylight/glow simulation."
+    },
+    "lanbo_catalogue": {
+      "url": "https://www.tyzh.com/?list_37/",
+      "type": "manufacturer self-published catalogue",
+      "manufacturer": "CIXI LANBO PRINTING SUPPLIES CO., LTD.",
+      "observed": "2026-10-09",
+      "note": "Site gives exact English and Chinese legal names. No independent domain ownership corroboration located; product-specific images and native English names matched."
+    }
+  },
+  "entries": [
+    {
+      "productId": "6a3b99fd18a7b14fab8b72a4",
+      "slug": "1kg-marble-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b99fd18a7b14fab8b72a5",
+      "optionId": "6a3b99fd18a7b14fab8b72a6",
+      "originalName": "Marble",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Marble",
+        "material": "Marble PLA",
+        "status": "unresolved",
+        "reason": "This Marble PLA product has not been matched to the supplier’s standard PLA Marble Colour photo."
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Catalogue has standard PLA Marble. Cannot establish whether separate Marble PLA inventory product is identical to PLA Marble Colour.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e64",
+      "originalName": "Black",
+      "preview": {
+        "kind": "image",
+        "label": "Black",
+        "material": "PETG",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787711819815103.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1181.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e65",
+      "originalName": "Red",
+      "preview": {
+        "kind": "image",
+        "label": "Red",
+        "material": "PETG",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787711835383846.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1182.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e66",
+      "originalName": "Green",
+      "preview": {
+        "kind": "image",
+        "label": "Green",
+        "material": "PETG",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787712027763363.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1191.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e67",
+      "originalName": "Blue",
+      "preview": {
+        "kind": "image",
+        "label": "Blue",
+        "material": "PETG",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787711986115911.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1189.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e68",
+      "originalName": "Transparent",
+      "preview": {
+        "kind": "image",
+        "label": "Transparent",
+        "material": "PETG",
+        "status": "unambiguous_name_normalization",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787712076402227.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1193.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e69",
+      "originalName": "Yellow",
+      "preview": {
+        "kind": "image",
+        "label": "Yellow",
+        "material": "PETG",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787711849254386.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1183.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e6a",
+      "originalName": "Orange",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Orange",
+        "material": "PETG",
+        "status": "unresolved",
+        "reason": "The supplier lists two orange variants; the matching stock colour needs confirmation."
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Two different orange variants; neither named plain Orange.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e6b",
+      "originalName": "Pearl White",
+      "preview": {
+        "kind": "image",
+        "label": "Pearl White",
+        "material": "PETG",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787712254167341.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1200.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e6c",
+      "originalName": "Forest Green",
+      "preview": {
+        "kind": "image",
+        "label": "Forest Green",
+        "material": "PETG",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787712040109100.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1192.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e6d",
+      "originalName": "Technology Grey",
+      "preview": {
+        "kind": "image",
+        "label": "Technology Grey",
+        "material": "PETG",
+        "status": "unambiguous_name_normalization",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787711939182934.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1187.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e6e",
+      "originalName": "Coffee Gold",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Coffee Gold",
+        "material": "PETG",
+        "status": "unresolved",
+        "reason": "The supplier’s Coffee photo cannot be confirmed as Coffee Gold."
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Coffee is not established as Coffee Gold.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e6f",
+      "originalName": "Grey",
+      "preview": {
+        "kind": "image",
+        "label": "Grey",
+        "material": "PETG",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787711865757858.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1184.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e70",
+      "originalName": "Orange Yellow",
+      "preview": {
+        "kind": "image",
+        "label": "Orange Yellow",
+        "material": "PETG",
+        "status": "unambiguous_name_normalization",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787711621562722.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1178.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e71",
+      "originalName": "Silvery",
+      "preview": {
+        "kind": "image",
+        "label": "Silvery",
+        "material": "PETG",
+        "status": "unambiguous_name_normalization",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787712200469665.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1198.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e72",
+      "originalName": "Navy Grey",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Navy Grey",
+        "material": "PETG",
+        "status": "unresolved",
+        "reason": "No verified Lanbo PETG Navy Grey photo is available."
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "No matching colour name in standard material catalogue.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e73",
+      "originalName": "Purple",
+      "preview": {
+        "kind": "image",
+        "label": "Purple",
+        "material": "PETG",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787712282980184.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1201.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e74",
+      "originalName": "Cherry Pink",
+      "preview": {
+        "kind": "image",
+        "label": "Cherry Pink",
+        "material": "PETG",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787712230901063.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1199.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e75",
+      "originalName": "Pink",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Pink",
+        "material": "PETG",
+        "status": "unresolved",
+        "reason": "Only Cherry Pink was verified; it is a separate selectable colour."
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Only Cherry Pink found, already a separate inventory entry.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b925f39fde201cc5d6e63",
+      "optionId": "6a3b925f39fde201cc5d6e76",
+      "originalName": "Bright Green",
+      "preview": {
+        "kind": "image",
+        "label": "Bright Green",
+        "material": "PETG",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260826/1787712010570354.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1190.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "693e38618065b53baa7c5946",
+      "originalName": "Black",
+      "preview": {
+        "kind": "image",
+        "label": "Black",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787632699614503.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1006.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "693e38618065b53baa7c5947",
+      "originalName": "White",
+      "preview": {
+        "kind": "image",
+        "label": "White",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787618198409721.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/995.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e75b",
+      "originalName": "Red",
+      "preview": {
+        "kind": "image",
+        "label": "Red",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787632714791879.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1007.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e75c",
+      "originalName": "Green",
+      "preview": {
+        "kind": "image",
+        "label": "Green",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633511568387.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1018.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e75d",
+      "originalName": "Blue",
+      "preview": {
+        "kind": "image",
+        "label": "Blue",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633384171165.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1015.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e75e",
+      "originalName": "Transparent",
+      "preview": {
+        "kind": "image",
+        "label": "Transparent",
+        "material": "PLA",
+        "status": "unambiguous_name_normalization",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633682996235.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1021.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e75f",
+      "originalName": "Yellow",
+      "preview": {
+        "kind": "image",
+        "label": "Yellow",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633051962521.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1009.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e760",
+      "originalName": "Orange",
+      "preview": {
+        "kind": "image",
+        "label": "Orange",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633247426785.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1012.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e761",
+      "originalName": "Ivory White",
+      "preview": {
+        "kind": "image",
+        "label": "Ivory White",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633762436071.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1023.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e762",
+      "originalName": "Natural Colour",
+      "preview": {
+        "kind": "image",
+        "label": "Natural Colour",
+        "material": "PLA",
+        "status": "unambiguous_name_normalization",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787618339934059.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/998.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e763",
+      "originalName": "Technology Grey",
+      "preview": {
+        "kind": "image",
+        "label": "Technology Grey",
+        "material": "PLA",
+        "status": "unambiguous_name_normalization",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633323192429.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1014.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e764",
+      "originalName": "Grey",
+      "preview": {
+        "kind": "image",
+        "label": "Grey",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633113144825.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1010.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e765",
+      "originalName": "Black Grey",
+      "preview": {
+        "kind": "image",
+        "label": "Black Grey",
+        "material": "PLA",
+        "status": "unambiguous_name_normalization",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787632612975188.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1005.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e766",
+      "originalName": "Navy Grey",
+      "preview": {
+        "kind": "image",
+        "label": "Navy Grey",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787632580579616.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1004.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e767",
+      "originalName": "Silver",
+      "preview": {
+        "kind": "image",
+        "label": "Silver",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633805330403.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1024.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e768",
+      "originalName": "Orange Yellow",
+      "preview": {
+        "kind": "image",
+        "label": "Orange Yellow",
+        "material": "PLA",
+        "status": "unambiguous_name_normalization",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787632423871883.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/999.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e769",
+      "originalName": "Cherry Pink",
+      "preview": {
+        "kind": "image",
+        "label": "Cherry Pink",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633859369000.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1025.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e76a",
+      "originalName": "Mint Green",
+      "preview": {
+        "kind": "image",
+        "label": "Mint Green",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787618261454323.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/996.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e76b",
+      "originalName": "Bright Green",
+      "preview": {
+        "kind": "image",
+        "label": "Bright Green",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633483816295.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1017.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e76c",
+      "originalName": "Mango",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Mango",
+        "material": "PLA",
+        "status": "unresolved",
+        "reason": "No verified Lanbo PLA Mango photo is available."
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Mango not found; Creamy and Bright Yellow are distinct names and were not inferred to match.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e76d",
+      "originalName": "Sky Blue",
+      "preview": {
+        "kind": "image",
+        "label": "Sky Blue",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633964348779.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1027.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e76e",
+      "originalName": "Golden",
+      "preview": {
+        "kind": "image",
+        "label": "Golden",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633155578258.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1011.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e76f",
+      "originalName": "Cyan",
+      "preview": {
+        "kind": "image",
+        "label": "Cyan",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633660144142.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1020.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e770",
+      "originalName": "Pink Rose",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Pink Rose",
+        "material": "PLA",
+        "status": "unresolved",
+        "reason": "The supplier’s Pink photo cannot be confirmed as Pink Rose."
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Catalogue Pink cannot be established as inventory Pink Rose.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e771",
+      "originalName": "Skin",
+      "preview": {
+        "kind": "image",
+        "label": "Skin",
+        "material": "PLA",
+        "status": "unambiguous_name_normalization",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787632553205238.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1003.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e772",
+      "originalName": "Sapphire Blue",
+      "preview": {
+        "kind": "image",
+        "label": "Sapphire Blue",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787618302204875.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/997.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e773",
+      "originalName": "Coffee",
+      "preview": {
+        "kind": "image",
+        "label": "Coffee",
+        "material": "PLA",
+        "status": "exact_name_match",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787633289482849.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1013.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e774",
+      "originalName": "Marble Colour",
+      "preview": {
+        "kind": "image",
+        "label": "Marble Colour",
+        "material": "PLA",
+        "status": "unambiguous_name_normalization",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787632482687676.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1000.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "693e38618065b53baa7c5945",
+      "optionId": "6974c75458c1b629ea92e775",
+      "originalName": "Wood Colour",
+      "preview": {
+        "kind": "image",
+        "label": "Wood Colour",
+        "material": "PLA",
+        "status": "unambiguous_name_normalization",
+        "src": "https://www.tyzh.com/static/upload/image/20260825/1787632512290921.jpg",
+        "sourceUrl": "https://www.tyzh.com/?list_47/1001.html"
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Direct named catalogue image; no colour codes inferred or stored.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6a3b99a72c857659957ef798",
+      "slug": "1kg-wood-pla-3d-printing-filament-lanbo",
+      "colourTypeId": "6a3b99a72c857659957ef799",
+      "optionId": "6a3b99a72c857659957ef79a",
+      "originalName": "Wood",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Wood",
+        "material": "Wood PLA",
+        "status": "unresolved",
+        "reason": "The recorded Wood colour does not identify which supplier wood tone is stocked."
+      },
+      "sourceIds": [
+        "lanbo_catalogue"
+      ],
+      "notes": [
+        "Four wood-material variants exist; plain Wood inventory does not identify which wood tone.",
+        "Manufacturer self-published catalogue: English legal name CIXI LANBO PRINTING SUPPLIES CO., LTD.; Chinese legal name 慈溪市兰博打印耗材有限公司. No independent domain ownership corroboration located."
+      ]
+    },
+    {
+      "productId": "6aa8ead8a1ca543d895a490f",
+      "slug": "bambu-lab-3d-printing-filament-1kg-abs",
+      "colourTypeId": "6aa8ead8a1ca543d895a4910",
+      "optionId": "6aa8ead8a1ca543d895a4911",
+      "originalName": "White (40100)",
+      "preview": {
+        "kind": "swatch",
+        "label": "White (40100)",
+        "material": "ABS",
+        "status": "verified",
+        "colours": [
+          "#FFFFFFFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6aa8eae5a1ca543d895a4919",
+      "slug": "bambu-lab-3d-printing-filament-1kg-asa",
+      "colourTypeId": "6aa8eae5a1ca543d895a491a",
+      "optionId": "6aa8eae5a1ca543d895a491b",
+      "originalName": "Black (45101)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Black (45101)",
+        "material": "ASA",
+        "status": "verified",
+        "colours": [
+          "#000000FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6aa8eae5a1ca543d895a4919",
+      "slug": "bambu-lab-3d-printing-filament-1kg-asa",
+      "colourTypeId": "6aa8eae5a1ca543d895a491a",
+      "optionId": "6aa8eae5a1ca543d895a491c",
+      "originalName": "Grey (45102)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Grey (45102)",
+        "material": "ASA",
+        "status": "verified",
+        "colours": [
+          "#8A949EFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": [
+        "Grey/Gray spelling difference only; inventory label preserved."
+      ]
+    },
+    {
+      "productId": "6aa8eae5a1ca543d895a4919",
+      "slug": "bambu-lab-3d-printing-filament-1kg-asa",
+      "colourTypeId": "6aa8eae5a1ca543d895a491a",
+      "optionId": "6aa8eae5a1ca543d895a491d",
+      "originalName": "White (45100)",
+      "preview": {
+        "kind": "swatch",
+        "label": "White (45100)",
+        "material": "ASA",
+        "status": "verified",
+        "colours": [
+          "#FFFAF2FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6aa8eaeda1ca543d895a4927",
+      "slug": "bambu-lab-3d-printing-filament-1kg-petg-basic",
+      "colourTypeId": "6aa8eaeda1ca543d895a4928",
+      "optionId": "6aa8eaeda1ca543d895a4929",
+      "originalName": "White (30106)",
+      "preview": {
+        "kind": "swatch",
+        "label": "White (30106)",
+        "material": "PETG Basic",
+        "status": "verified",
+        "colours": [
+          "#FFFFFFFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6aa8eaeda1ca543d895a4927",
+      "slug": "bambu-lab-3d-printing-filament-1kg-petg-basic",
+      "colourTypeId": "6aa8eaeda1ca543d895a4928",
+      "optionId": "6aa8eaeda1ca543d895a492a",
+      "originalName": "Black (30105)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Black (30105)",
+        "material": "PETG Basic",
+        "status": "verified",
+        "colours": [
+          "#000000FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083c5",
+      "originalName": "Jade White (10100)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Jade White (10100)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#FFFFFFFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083c6",
+      "originalName": "Silver (10102)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Silver (10102)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#A6A9AAFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083c7",
+      "originalName": "Gray (10103)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Gray (10103)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#8E9089FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083c8",
+      "originalName": "Red (10200)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Red (10200)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#C12E1FFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083c9",
+      "originalName": "Magenta (10202)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Magenta (10202)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#EC008CFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083ca",
+      "originalName": "Cobalt Blue (10604)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Cobalt Blue (10604)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#0056B8FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083cb",
+      "originalName": "Sunflower Yellow (10402)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Sunflower Yellow (10402)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#FEC600FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083cc",
+      "originalName": "Coca Brown (10802)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Cocoa Brown (10802)",
+        "material": "PLA Basic",
+        "status": "label_typo",
+        "colours": [
+          "#6F5034FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": [
+        "Inventory Coca Brown differs from manufacturer Cocoa Brown; code matches."
+      ]
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083cd",
+      "originalName": "Mistletoe Green (10502)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Mistletoe Green (10502)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#3F8E43FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083ce",
+      "originalName": "Purple (10700)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Purple (10700)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#5E43B7FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083cf",
+      "originalName": "Pink (10203)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Pink (10203)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#F55A74FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083d0",
+      "originalName": "Bambu Green (10501)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Bambu Green (10501)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#00AE42FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083d1",
+      "originalName": "Bronze (10801)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Bronze (10801)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#847D48FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083d2",
+      "originalName": "Yellow (10400)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Yellow (10400)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#F4EE2AFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083d3",
+      "originalName": "Hot Pink (10204)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Hot Pink (10204)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#F5547CFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083d4",
+      "originalName": "Cyan (10603)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Cyan (10603)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#0086D6FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083d5",
+      "originalName": "Blue Gray (10602)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Blue Gray (10602)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#5B6579FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083d6",
+      "originalName": "Orange (10300)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Orange (10300)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#FF6A13FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083d7",
+      "originalName": "Brown (10800)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Brown (10800)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#9D432CFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083d8",
+      "originalName": "Indigo Purple (10701)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Indigo Purple (10701)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#482960FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083d9",
+      "originalName": "Gold (10401)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Gold (10401)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#E4BD68FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083da",
+      "originalName": "Pumpkin Orange (10301)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Pumpkin Orange (10301)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#FF9016FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083db",
+      "originalName": "Beige (10201)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Beige (10201)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#F7E6DEFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6974d555afadda8ec64083dc",
+      "originalName": "Black (10101)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Black (10101)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#000000FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6aa7fc92f6a86fe1ad3e8812",
+      "originalName": "Dark Gray (10105)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Dark Gray (10105)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#545454FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6aa7fc92f6a86fe1ad3e8813",
+      "originalName": "Light Gray (10104)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Light Gray (10104)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#D1D3D5FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6aa7fc92f6a86fe1ad3e8814",
+      "originalName": "Maroon Red (10205)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Maroon Red (10205)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#9D2235FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6aa7fc92f6a86fe1ad3e8815",
+      "originalName": "Bright Green (10503)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Bright Green (10503)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#BECF00FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6aa7fc92f6a86fe1ad3e8816",
+      "originalName": "Turquoise (10605)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Turquoise (10605)",
+        "material": "PLA Basic",
+        "status": "verified",
+        "colours": [
+          "#00B1B7FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "colourTypeId": "6974d555afadda8ec64083c4",
+      "optionId": "6aa7fc92f6a86fe1ad3e8817",
+      "originalName": "Blue (10600)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Blue (10600)",
+        "material": "PLA Basic",
+        "status": "official_source_code_discrepancy",
+        "colours": [
+          "#0A2989FF"
+        ],
+        "sourceUrl": "https://jp.store.bambulab.com/products/pla-basic-filament?variant=47482709639460"
+      },
+      "sourceIds": [
+        "bambu_blue_jp",
+        "bambu_pla_basic_pdf"
+      ],
+      "notes": [
+        "Official Japan store indexed listing confirms Blue (10600); current Bambu Studio uses 10601 for Blue instead. Official PLA Basic colour PDF gives Blue #0A2989. No change to inventory code recommended. Exact variant direct-page verification unavailable (402); preserve this provenance caveat."
+      ]
+    },
+    {
+      "productId": "6aa8ead1a1ca543d895a4900",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic-gradient",
+      "colourTypeId": "6aa8ead1a1ca543d895a4901",
+      "optionId": "6aa8ead1a1ca543d895a4902",
+      "originalName": "Mint Lime (10904)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Mint Lime (10904)",
+        "material": "PLA Basic Gradient",
+        "status": "verified",
+        "colours": [
+          "#B6FF43FF",
+          "#4EC939FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": [
+        "Two manufacturer-specified reference colours only. Do not imply exact gradient direction, transition length or printed pattern."
+      ]
+    },
+    {
+      "productId": "6aa8ead1a1ca543d895a4900",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic-gradient",
+      "colourTypeId": "6aa8ead1a1ca543d895a4901",
+      "optionId": "6aa8ead1a1ca543d895a4903",
+      "originalName": "Pink Citrus (10903)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Pink Citrus (10903)",
+        "material": "PLA Basic Gradient",
+        "status": "verified",
+        "colours": [
+          "#F78F77FF",
+          "#E4505AFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": [
+        "Two manufacturer-specified reference colours only. Do not imply exact gradient direction, transition length or printed pattern."
+      ]
+    },
+    {
+      "productId": "6aa8ead1a1ca543d895a4900",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic-gradient",
+      "colourTypeId": "6aa8ead1a1ca543d895a4901",
+      "optionId": "6aa8ead1a1ca543d895a4904",
+      "originalName": "Ocean to Meadow (10902)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Ocean to Meadow (10902)",
+        "material": "PLA Basic Gradient",
+        "status": "verified",
+        "colours": [
+          "#307FE2FF",
+          "#54FF9BFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": [
+        "Two manufacturer-specified reference colours only. Do not imply exact gradient direction, transition length or printed pattern."
+      ]
+    },
+    {
+      "productId": "6aa8ead1a1ca543d895a4900",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic-gradient",
+      "colourTypeId": "6aa8ead1a1ca543d895a4901",
+      "optionId": "6aa8ead1a1ca543d895a4905",
+      "originalName": "Cotton Candy Cloud (10905)",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Cotton Candy Cloud (10905)",
+        "material": "PLA Basic Gradient",
+        "status": "name_code_conflict",
+        "reason": "Colour needs confirmation: the manufacturer associates code 10905 with Blueberry Bubblegum."
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": [
+        "Two manufacturer-specified reference colours only. Do not imply exact gradient direction, transition length or printed pattern.",
+        "Code 10905 maps to Blueberry Bubblegum. Inventory label Cotton Candy Cloud maps to 10907 (#E7C1D5,#8EC9E9). Values in rgba are code-based research evidence ONLY, not approved display mapping."
+      ]
+    },
+    {
+      "productId": "6aa8eaf1a1ca543d895a492e",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-glow",
+      "colourTypeId": "6aa8eaf1a1ca543d895a492f",
+      "optionId": "6aa8eaf1a1ca543d895a4930",
+      "originalName": "Glow Green (15500)",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Glow Green (15500)",
+        "material": "PLA Glow",
+        "status": "verified",
+        "reason": "An exact product photo is needed to show its daylight and glow appearance."
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_glow_store"
+      ],
+      "notes": [
+        "Manufacturer colour reference, not an appearance preview. Needs exact product photograph to show daylight versus charged glow appearance."
+      ]
+    },
+    {
+      "productId": "6aa8eaf1a1ca543d895a492e",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-glow",
+      "colourTypeId": "6aa8eaf1a1ca543d895a492f",
+      "optionId": "6aa8eaf1a1ca543d895a4931",
+      "originalName": "Glow Yellow (15400)",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Glow Yellow (15400)",
+        "material": "PLA Glow",
+        "status": "verified",
+        "reason": "An exact product photo is needed to show its daylight and glow appearance."
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_glow_store"
+      ],
+      "notes": [
+        "Manufacturer colour reference, not an appearance preview. Needs exact product photograph to show daylight versus charged glow appearance."
+      ]
+    },
+    {
+      "productId": "6aa8ead5a1ca543d895a4909",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-lite",
+      "colourTypeId": "6aa8ead5a1ca543d895a490a",
+      "optionId": "6aa8ead5a1ca543d895a490b",
+      "originalName": "Cocoa Brown (16800)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Cocoa Brown (16800)",
+        "material": "PLA Lite",
+        "status": "verified",
+        "colours": [
+          "#745335FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6aa8eacda1ca543d895a48f2",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-matte",
+      "colourTypeId": "6aa8eacda1ca543d895a48f3",
+      "optionId": "6aa8eacda1ca543d895a48f4",
+      "originalName": "Ivory White (11100)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Ivory White (11100)",
+        "material": "PLA Matte",
+        "status": "verified",
+        "colours": [
+          "#FFFFFFFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_matte_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6aa8eacda1ca543d895a48f2",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-matte",
+      "colourTypeId": "6aa8eacda1ca543d895a48f3",
+      "optionId": "6aa8eacda1ca543d895a48f5",
+      "originalName": "Ash Gray (11102)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Ash Gray (11102)",
+        "material": "PLA Matte",
+        "status": "verified",
+        "colours": [
+          "#9B9EA0FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_matte_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6aa8eacda1ca543d895a48f2",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-matte",
+      "colourTypeId": "6aa8eacda1ca543d895a48f3",
+      "optionId": "6aa8eacda1ca543d895a48f6",
+      "originalName": "Sakura Pink (11201)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Sakura Pink (11201)",
+        "material": "PLA Matte",
+        "status": "verified",
+        "colours": [
+          "#E8AFCFFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_matte_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6aa8eacda1ca543d895a48f2",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-matte",
+      "colourTypeId": "6aa8eacda1ca543d895a48f3",
+      "optionId": "6aa8eacda1ca543d895a48f7",
+      "originalName": "Lemon Yellow (11400)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Lemon Yellow (11400)",
+        "material": "PLA Matte",
+        "status": "verified",
+        "colours": [
+          "#F7D959FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_matte_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6aa8eacda1ca543d895a48f2",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-matte",
+      "colourTypeId": "6aa8eacda1ca543d895a48f3",
+      "optionId": "6aa8eacda1ca543d895a48f8",
+      "originalName": "Charcoal (11101)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Charcoal (11101)",
+        "material": "PLA Matte",
+        "status": "verified",
+        "colours": [
+          "#000000FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_matte_pdf"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6aa8eacda1ca543d895a48f2",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-matte",
+      "colourTypeId": "6aa8eacda1ca543d895a48f3",
+      "optionId": "6aa8eacda1ca543d895a48f9",
+      "originalName": "Sky Blue (11601)",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Sky Blue (11601)",
+        "material": "PLA Matte",
+        "status": "name_code_conflict",
+        "reason": "Colour needs confirmation: the manufacturer associates code 11601 with Ice Blue."
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_pla_matte_pdf"
+      ],
+      "notes": [
+        "Code 11601 maps to Ice Blue. Inventory label Sky Blue maps to 11603 (#56B7E6). Values in rgba are code-based research evidence ONLY, not an approved display mapping."
+      ]
+    },
+    {
+      "productId": "6aa8eaf9a1ca543d895a493c",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-silk",
+      "colourTypeId": "6aa8eaf9a1ca543d895a493d",
+      "optionId": "6aa8eaf9a1ca543d895a493e",
+      "originalName": "Silver (13109)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Silver (13109)",
+        "material": "PLA Silk+",
+        "status": "verified",
+        "colours": [
+          "#C8C8C8FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_silk_store"
+      ],
+      "notes": [
+        "Swatch indicates manufacturer base colour only; silk sheen is not simulated."
+      ]
+    },
+    {
+      "productId": "6aa8eaf9a1ca543d895a493c",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-silk",
+      "colourTypeId": "6aa8eaf9a1ca543d895a493d",
+      "optionId": "6aa8eaf9a1ca543d895a493f",
+      "originalName": "Mint (13507)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Mint (13507)",
+        "material": "PLA Silk+",
+        "status": "verified",
+        "colours": [
+          "#96DCB9FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_silk_store"
+      ],
+      "notes": [
+        "Swatch indicates manufacturer base colour only; silk sheen is not simulated."
+      ]
+    },
+    {
+      "productId": "6aa8eafca1ca543d895a4943",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-tough",
+      "colourTypeId": "6aa8eafca1ca543d895a4944",
+      "optionId": "6aa8eafca1ca543d895a4945",
+      "originalName": "White (12107)",
+      "preview": {
+        "kind": "swatch",
+        "label": "White (12107)",
+        "material": "PLA Tough+",
+        "status": "verified",
+        "colours": [
+          "#FFFFFFFF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6aa8eafca1ca543d895a4943",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-tough",
+      "colourTypeId": "6aa8eafca1ca543d895a4944",
+      "optionId": "6aa8eafca1ca543d895a4946",
+      "originalName": "Black (12104)",
+      "preview": {
+        "kind": "swatch",
+        "label": "Black (12104)",
+        "material": "PLA Tough+",
+        "status": "verified",
+        "colours": [
+          "#000000FF"
+        ],
+        "sourceUrl": "https://raw.githubusercontent.com/bambulab/BambuStudio/refs/heads/master/resources/profiles/BBL/filament/filaments_color_codes.json"
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": []
+    },
+    {
+      "productId": "6aa8eaf5a1ca543d895a4935",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-wood",
+      "colourTypeId": "6aa8eaf5a1ca543d895a4936",
+      "optionId": "6aa8eaf5a1ca543d895a4937",
+      "originalName": "Black Walnut (13107)",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Black Walnut (13107)",
+        "material": "PLA Wood",
+        "status": "verified",
+        "reason": "An exact product photo is needed to show its wood colour and texture."
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_wood_store"
+      ],
+      "notes": [
+        "Manufacturer colour reference, not an appearance preview. Needs exact product photograph to show wood texture."
+      ]
+    },
+    {
+      "productId": "6aa8eaf5a1ca543d895a4935",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-wood",
+      "colourTypeId": "6aa8eaf5a1ca543d895a4936",
+      "optionId": "6aa8eaf5a1ca543d895a4938",
+      "originalName": "Rosewood (13204)",
+      "preview": {
+        "kind": "unavailable",
+        "label": "Rosewood (13204)",
+        "material": "PLA Wood",
+        "status": "verified",
+        "reason": "An exact product photo is needed to show its wood colour and texture."
+      },
+      "sourceIds": [
+        "bambu_studio",
+        "bambu_wood_store"
+      ],
+      "notes": [
+        "Manufacturer colour reference, not an appearance preview. Needs exact product photograph to show wood texture."
+      ]
+    },
+    {
+      "productId": "6aa8eae9a1ca543d895a4921",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pva-support",
+      "colourTypeId": "6aa8eae9a1ca543d895a4922",
+      "optionId": "6aa8eae9a1ca543d895a4923",
+      "originalName": "White (66400)",
+      "preview": {
+        "kind": "unavailable",
+        "label": "White (66400)",
+        "material": "PVA Support",
+        "status": "name_code_conflict",
+        "reason": "Colour needs confirmation: the manufacturer associates code 66400 with Clear."
+      },
+      "sourceIds": [
+        "bambu_studio"
+      ],
+      "notes": [
+        "PVA 66400 is Clear, not White. Preserve RGBA alpha (80 hex); do not flatten to opaque white. Resolve inventory label before preview."
+      ]
+    }
+  ]
+}
