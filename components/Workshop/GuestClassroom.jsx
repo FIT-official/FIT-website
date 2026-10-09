@@ -8,10 +8,11 @@ import { useClassPolling } from './useClassPolling'
 import { clearDraftCache } from './useGuestVersionedDraft'
 import ReviewedGroupPage from './ReviewedGroupPage'
 import GuestFeedbackForm from './GuestFeedbackForm'
-import GuestRefinementForm from './GuestRefinementForm'
+import GuestRefineWorkspace from './GuestRefineWorkspace'
 import IncomingFeedback from './GuestIncomingFeedback'
 import GuestIdeaReading from './GuestIdeaReading'
 import GuestTinkercad from './GuestTinkercad'
+import { GUEST_RETURN_GUIDANCE } from '@/lib/workshopGuestPolicy'
 import styles from './GuestClassroom.module.css'
 export const classroomRequest = apiRequest
 export default function GuestClassroom({ homeGroup = null }) {
@@ -42,10 +43,10 @@ export default function GuestClassroom({ homeGroup = null }) {
         try { const identity = await classroomRequest('/api/workshop/guest/session', 'POST', { name, group }); const next = await classroomRequest('/api/workshop/guest/classroom?homeGroup=' + identity.group); current.current = { version: next.version, seat: next.seat }; setLesson(next); setViewPhase(next.phase); setMessage(''); try { localStorage.setItem('fit:guest:authSignal', crypto.randomUUID()) } catch {} router.replace('/workshop/' + identity.group + '/classroom') } catch (error) { setMessage(error.message) } finally { lock.current = false; setBusy(false) }
     }
     async function leave() { if (lock.current) return; lock.current = true; setBusy(true); try { await classroomRequest('/api/workshop/guest/session', 'DELETE'); current.current = { version: null, seat: null }; sequence.current++; clearDraftCache(); setLesson(null); setViewPhase(null); setName(''); setMessage('You left this session. Your submitted work stays recorded.'); try { localStorage.setItem('fit:guest:authSignal', crypto.randomUUID()) } catch {} router.replace('/workshop/entry'); await refresh() } catch (error) { setMessage(error.message) } finally { lock.current = false; setBusy(false) } }
-    if (!lesson) return <main className="max-w-xl mx-auto p-6 py-12 ph-no-capture ph-mask"><h1 className="text-3xl">Enter the class</h1><p className="mt-3">Choose your group and enter your name.</p><form onSubmit={enter} className="mt-5"><label className="block">Your name<input className="formInput block w-full" autoComplete="off" required maxLength={60} value={name} onChange={event => setName(event.target.value)} /></label><label className="block mt-4">Your group<select className="formInput block w-full" value={group} onChange={event => setGroup(event.target.value)}>{workshopGroups.map(row => <option key={row.id} value={row.id}>Group {row.number}</option>)}</select></label><button type="submit" className="formBlackButton mt-5" disabled={busy || !entryOpen}>{busy ? 'Entering…' : 'Enter class'}</button></form><p role="status" aria-live="polite" className="mt-4">{message}</p>{actualHome && <Link className="formWhiteButton mt-3" href={'/workshop/' + actualHome + '/classroom'}>Continue my Group {actualHome.slice(1)} session</Link>}</main>
+    if (!lesson) return <main className="max-w-xl mx-auto p-6 py-12 ph-no-capture ph-mask"><h1 className="text-3xl">Enter the class</h1><p className="mt-3">Choose your group and enter your name.</p><p className="mt-2 text-sm text-gray-600">{GUEST_RETURN_GUIDANCE}</p><form onSubmit={enter} className="mt-5"><label className="block">Your name<input className="formInput block w-full" autoComplete="off" required maxLength={60} value={name} onChange={event => setName(event.target.value)} /></label><label className="block mt-4">Your group<select className="formInput block w-full" value={group} onChange={event => setGroup(event.target.value)}>{workshopGroups.map(row => <option key={row.id} value={row.id}>Group {row.number}</option>)}</select></label><button type="submit" className="formBlackButton mt-5" disabled={busy || !entryOpen}>{busy ? 'Entering…' : 'Enter class'}</button></form><p role="status" aria-live="polite" className="mt-4">{message}</p>{actualHome && <Link className="formWhiteButton mt-3" href={'/workshop/' + actualHome + '/classroom'}>Continue my Group {actualHome.slice(1)} session</Link>}</main>
     const own = workshopClassroomGroupPage(lesson.group), targetGroup = targetRound === lesson.assignment.round && target || lesson.assignment.target, peer = workshopClassroomGroupPage(targetGroup)
     const activeView = lesson.navigationLocked ? lesson.navigationTarget : viewPhase, names = { PRESENT: 'Explore', FEEDBACK: 'Feedback', REFINE: 'Refine' }
-    return <main className="max-w-6xl mx-auto px-5 py-8 ph-no-capture ph-mask"><h1 className="text-3xl font-bold">Group {lesson.group.slice(1)} class</h1><p className="mt-2">{lesson.studentName}</p>
+    return <main className="max-w-6xl mx-auto px-5 py-8 ph-no-capture ph-mask"><h1 className="text-3xl font-bold">Group {lesson.group.slice(1)} class</h1><p className="mt-2">{lesson.studentName}</p><p className="mt-2 text-sm text-gray-600">{GUEST_RETURN_GUIDANCE}</p>
         {offline && <p role="status" className="mt-3">You are offline. Keep writing here, then reconnect to save.</p>}
         {lesson.navigationLocked && <p role="status" className="border rounded-lg p-3 mt-4">Stay on {names[lesson.navigationTarget]} for now. Your teacher will let you know when to move on.</p>}
         {message && <p role="status" aria-live="polite" className="mt-3">{message}</p>}
@@ -58,7 +59,7 @@ export default function GuestClassroom({ homeGroup = null }) {
             <nav aria-label="Move between idea and feedback" className={styles.jumps}><a className="formBlackButton" href="#feedback-writing">Write feedback</a><a className="formWhiteButton" href="#feedback-idea">Back to idea</a></nav>
             <div className={styles.columns}><div id="feedback-idea" className={styles.idea}><GuestIdeaReading group={peer} idea={selectedIdea} /><a className="formWhiteButton mt-4" href="#feedback-writing">Write feedback</a></div><div id="feedback-writing" className={styles.form}><a className="underline text-sm" href="#feedback-idea">Back to idea</a><GuestFeedbackForm key={lesson.seat + ':' + peer.id + ':' + lesson.assignment.round} group={peer} lesson={lesson} onRefresh={refresh} selectedIdea={selectedIdea} onIdeaChange={setSelectedIdea} /></div></div>
         </section>}
-        {activeView === 'REFINE' && <><details className="border rounded-lg p-4 mt-6"><summary className="cursor-pointer font-semibold">Read your group’s ideas</summary><ReviewedGroupPage group={own} classroom /></details><GuestRefinementForm key={lesson.seat} lesson={lesson} onRefresh={refresh} /></>}
+        {activeView === 'REFINE' && <GuestRefineWorkspace key={lesson.seat} group={own} lesson={lesson} onRefresh={refresh} />}
         <IncomingFeedback lesson={lesson} />
     </main>
 }

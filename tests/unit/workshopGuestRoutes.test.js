@@ -28,6 +28,46 @@ async function join(name = 'Alex', group = 'g2') { const r = await sessionPOST(r
 beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-09T02:00:00Z')); h.rows.clear(); h.touched = []; h.reads = []; h.admin = false; h.signedIn = false; h.rows.set('workshopGuestLessons', new Map([['2026-10-09', { ...emptyLesson(), entryOpen: true, version: 1 }]])) })
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs() })
 describe('guest routes never reveal legacy class data', () => {
+    it.each([0, 1])('renews an original 24-hour cookie during classroom polling, since=%s', async since => {
+        const a = await join(), rows = h.rows.get('workshopGuestSessions'), row = [...rows.values()][0]
+        row.expiresAt = new Date('2026-10-10T02:00:00Z')
+        const before = structuredClone(row)
+        const response = await classroomGET(req('/api/workshop/guest/classroom?since=' + since + '&seat=' + a.identity.seat, 'GET', undefined, a.cookie))
+        expect(response.status).toBe(since ? 304 : 200)
+        expect(response.headers.get('set-cookie').split(';')[0]).toBe(a.cookie)
+        expect(row).toEqual({ ...before, expiresAt: new Date('2026-11-30T15:59:00Z') })
+        expect(rows.size).toBe(1)
+    })
+    it('renews through session status even if entry is closed, without opening any control', async () => {
+        const a = await join(), row = [...h.rows.get('workshopGuestSessions').values()][0]
+        row.expiresAt = new Date('2026-10-10T02:00:00Z'); lesson().entryOpen = false
+        const before = structuredClone(lesson()), response = await sessionGET(req('/api/workshop/guest/session', 'GET', undefined, a.cookie))
+        expect(await response.json()).toMatchObject({ seat: a.identity.seat, entryOpen: false, expiresAt: '2026-11-30T15:59:00.000Z' })
+        expect(response.headers.get('set-cookie').split(';')[0]).toBe(a.cookie)
+        expect(lesson()).toEqual(before)
+    })
+    it('keeps old-expiry drafts and existing responses readable by the original identity in November', async () => {
+        const a = await join(), p = { seat: a.identity.seat, topic: 'feedback-g3-idea1', expectedVersion: 0, requestId: randomUUID(), content: { idea: '1', whatWorks: 'Existing text', question: '', improvement: '' } }
+        expect((await draftsPOST(req('/api/workshop/guest/drafts?homeGroup=g2', 'POST', p, a.cookie))).status).toBe(200)
+        for (const row of h.rows.get('workshopGuestDrafts').values()) row.expiresAt = new Date('2026-10-11T00:00:00Z')
+        const saved = structuredClone([...h.rows.get('workshopGuestDrafts')])
+        Object.assign(lesson(), { feedbackOpen: true, refinementOpen: true, showFeedback: true })
+        const payload = { kind: 'feedback', expectedSeat: a.identity.seat, submissionId: randomUUID(), phaseVersion: 0, session: '2026-10-09', presentingGroup: 'g3', visitingGroup: 'g2', idea: '1', whatWorks: 'Existing response', question: 'How?', improvement: 'Add labels' }
+        expect((await classroomPOST(req('/api/workshop/guest/classroom?homeGroup=g2', 'POST', payload, a.cookie))).status).toBe(200)
+        vi.setSystemTime(new Date('2026-11-30T15:58:59Z'))
+        const draft = await draftsGET(req('/api/workshop/guest/drafts?homeGroup=g2', 'GET', undefined, a.cookie)).then(r => r.json())
+        expect(draft.drafts[0].snapshots.at(-1).content.whatWorks).toBe('Existing text')
+        expect([...h.rows.get('workshopGuestDrafts')]).toEqual(saved)
+        expect((await classroomPOST(req('/api/workshop/guest/classroom?homeGroup=g2', 'POST', payload, a.cookie))).status).toBe(200)
+        expect(lesson().feedback).toHaveLength(1)
+        expect((await classroomPOST(req('/api/workshop/guest/classroom?homeGroup=g2', 'POST', { ...payload, submissionId: randomUUID(), whatWorks: 'New November response' }, a.cookie))).status).toBe(200)
+        expect((await draftsPOST(req('/api/workshop/guest/drafts?homeGroup=g2', 'POST', { ...p, expectedVersion: 1, requestId: randomUUID(), content: { ...p.content, whatWorks: 'November draft' } }, a.cookie))).status).toBe(200)
+        const revision = { kind: 'refinement', promptVersion: 2, expectedSeat: a.identity.seat, submissionId: randomUUID(), phaseVersion: 0, expectedVersion: 0, expectedEntryVersion: 0, ideas: [1, 2].map(() => ({ change: 'Add a label', reason: 'Make the part clear', test: 'Ask a classmate' })) }
+        expect((await classroomPOST(req('/api/workshop/guest/classroom?homeGroup=g2', 'POST', revision, a.cookie))).status).toBe(200)
+        expect(lesson().refinements).toHaveLength(1)
+        vi.setSystemTime(new Date('2026-11-30T15:59:00Z'))
+        for (const handler of [classroomGET, draftsGET]) expect((await handler(req('/api/workshop/guest/classroom?homeGroup=g2', 'GET', undefined, a.cookie))).status).toBe(401)
+    })
     it('reuses only the cookie-owned session for case/space variants and preserves its record and draft', async () => {
         const a = await join('Alex Tan'), b = await join('ALEX TAN')
         const draft = { seat: a.identity.seat, topic: 'feedback-g3-idea1', expectedVersion: 0, requestId: randomUUID(), content: { idea: '1', whatWorks: 'My saved work', question: '', improvement: '' } }
@@ -38,7 +78,7 @@ describe('guest routes never reveal legacy class data', () => {
         expect(retry.status).toBe(200)
         expect(await retry.json()).toEqual({ ...a.identity, name: 'Alex Tan' })
         expect(retry.headers.get('set-cookie').split(';')[0]).toBe(a.cookie)
-        expect(retry.headers.get('set-cookie')).toContain('Max-Age=82800')
+        expect(retry.headers.get('set-cookie')).toContain('Max-Age=' + Math.floor((new Date('2026-11-30T15:59:00Z') - new Date()) / 1000))
         expect([...h.rows.get('workshopGuestSessions')]).toEqual(before)
         expect([...h.rows.get('workshopGuestDrafts')]).toEqual(beforeDrafts)
         const reads = h.reads.filter(row => row.name === 'workshopGuestSessions')

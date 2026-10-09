@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 const h = vi.hoisted(() => ({ replace: vi.fn(), fetch: vi.fn(), poll: null, lesson: null, entryOpen: true }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: h.replace }) }))
 vi.mock('next/link', () => ({ default: ({ href, children, ...props }) => <a href={href} {...props}>{children}</a> }))
-vi.mock('next/image', () => ({ default: () => null }))
+vi.mock('next/image', () => ({ default: ({ alt, src }) => <span role="img" aria-label={alt} data-src={src} /> }))
 vi.mock('@/components/Workshop/useClassPolling', async () => { const { useEffect, useRef } = await import('react'); return { useClassPolling: callback => { const initial = useRef(callback); h.poll = callback; useEffect(() => { initial.current() }, []) } } })
 import GuestClassroom from '@/components/Workshop/GuestClassroom'
 import GuestTeacherClassroom from '@/components/Workshop/GuestTeacherClassroom'
@@ -13,6 +13,31 @@ const response = (value, status = 200) => ({ ok: status < 400, status, json: asy
 beforeEach(() => { h.lesson = null; h.entryOpen = true; h.replace.mockReset(); localStorage.clear(); vi.stubGlobal('fetch', h.fetch); h.fetch.mockReset(); h.fetch.mockImplementation(async url => String(url).includes('/session') ? response({ entryOpen: h.entryOpen }) : h.lesson ? response(h.lesson) : response({ error: 'Choose your group and enter your name.' }, 401)) })
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); localStorage.clear() })
 describe('name and group entry with confirmed states', () => {
+    it('shows both complete Refine ideas immediately and keeps drafts while navigating', async () => {
+        h.lesson = { ...lesson(), phase: 'REFINE', refinementOpen: true, feedbackOpen: true }
+        h.fetch.mockImplementation(async (url, options = {}) => {
+            if (String(url).includes('/drafts')) return options.method === 'POST' ? response({ saved: true, version: 1 }) : response({ seat, drafts: [] })
+            return response(h.lesson)
+        })
+        render(<GuestClassroom homeGroup="g2" />)
+        const first = await screen.findByRole('textbox', { name: 'Idea 1: What would you change to improve this idea?' })
+        const second = screen.getByRole('textbox', { name: 'Idea 2: What would you change to improve this idea?' })
+        for (const number of [1, 2]) {
+            const article = screen.getByRole('article', { name: 'Group 2 Idea ' + number })
+            expect(article.closest('details')).toBe(null)
+            expect(within(article).getAllByRole('img').length).toBeGreaterThan(0)
+            expect(article.querySelectorAll('p').length).toBeGreaterThan(0)
+        }
+        expect(screen.getByText(/Return to \/workshop using this same browser/)).toBeInTheDocument()
+        fireEvent.change(first, { target: { value: 'Keep my first idea change' } })
+        fireEvent.change(second, { target: { value: 'Keep my second idea change' } })
+        fireEvent.click(screen.getByRole('link', { name: 'Read Idea 2', exact: true }))
+        expect(first).toHaveValue('Keep my first idea change'); expect(second).toHaveValue('Keep my second idea change')
+        fireEvent.click(screen.getByRole('button', { name: 'Feedback', exact: true }))
+        fireEvent.click(screen.getByRole('button', { name: 'Refine', exact: true }))
+        expect(await screen.findByRole('textbox', { name: 'Idea 1: What would you change to improve this idea?' })).toHaveValue('Keep my first idea change')
+        expect(screen.getByRole('textbox', { name: 'Idea 2: What would you change to improve this idea?' })).toHaveValue('Keep my second idea change')
+    })
     it('shows only name, ten groups and one entry button; waits for server confirmation', async () => {
         let resolve; const entering = new Promise(done => { resolve = done })
         h.fetch.mockImplementation(async (url, options = {}) => { if (options.method === 'POST') { await entering; h.lesson = lesson(); return response({ seat, name: 'Alex', group: 'g2' }) } return String(url).includes('/session') ? response({ entryOpen: true }) : h.lesson ? response(h.lesson) : response({ error: 'Enter your name.' }, 401) })
