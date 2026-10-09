@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import posthog from 'posthog-js';
 import { useEffect, useRef, useState } from 'react';
 import { GoChevronLeft, GoChevronRight, GoDownload, GoPlus, GoStar, GoStarFill } from 'react-icons/go';
-import Image from 'next/image';
+import ProductImage from '@/components/ProductImage';
 import Link from 'next/link';
 import { HiCubeTransparent } from 'react-icons/hi';
 import { BiPrinter } from 'react-icons/bi';
@@ -30,6 +30,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
 
     const [liked, setLiked] = useState(false);
     const [product, setProduct] = useState(initialProduct);
+    const galleryImages = product ? (product.images?.length ? product.images : [null]) : [];
     const [selectedVariantOptions, setSelectedVariantOptions] = useState(() => getDefaultVariantSelections(initialProduct));
     const [isAdding, setIsAdding] = useState(false);
     const [cartError, setCartError] = useState('');
@@ -178,7 +179,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
             setDisplayModelUrl(null);
         }
 
-        const imagesCount = Array.isArray(product?.images) ? product.images.length : 0;
+        const imagesCount = Math.max(1, Array.isArray(product?.images) ? product.images.length : 0);
         const hasViewableModel = !!product?.viewableModel;
         setTotalTabs(imagesCount + (hasViewableModel ? 1 : 0));
 
@@ -527,10 +528,10 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                     </div>
                                 </div>
                             )}
-                            {product?.images?.map((image, idx) => (
+                            {galleryImages.map((image, idx) => (
                                 <div key={idx} className='flex aspect-square h-full'>
-                                    <Image
-                                        src={`/api/proxy?key=${encodeURIComponent(image)}`}
+                                    <ProductImage
+                                        src={image}
                                         alt={`${product.name}, image ${idx + 1}`}
                                         priority={idx === 0}
                                         width={600}
@@ -565,14 +566,14 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                 )}
 
                                 {
-                                    product?.images?.map((image, idx) => (
+                                    galleryImages.map((image, idx) => (
                                         <div
                                             key={idx}
                                             className='flex h-25 aspect-square bg-borderColor cursor-pointer'
                                             onClick={() => handleTabClick(idx + (displayModelUrl ? 1 : 0))}
                                         >
-                                            <Image
-                                                src={`/api/proxy?key=${encodeURIComponent(image)}`}
+                                            <ProductImage
+                                                src={image}
                                                 alt={`${product.name}, image ${idx + 1}`}
                                                 width={100}
                                                 height={100}

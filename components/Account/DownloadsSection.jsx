@@ -4,7 +4,7 @@
 // chip in a horizontally scrolling strip (replaces the old chevron carousel;
 // every asset stays reachable). Fetch/download endpoints unchanged.
 import { useEffect, useState } from 'react'
-import Image from 'next/image'
+import ProductImage from '@/components/ProductImage'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { IoMdDownload } from 'react-icons/io'
@@ -102,12 +102,8 @@ function DownloadsSection({ user, isLoaded }) {
                             <div className="flex flex-col md:flex-row md:items-center gap-4">
                                 <div className="flex flex-row gap-4 items-center min-w-0 md:w-1/2">
                                     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-[var(--dash-r-inner)] border border-[var(--dash-line)] bg-[var(--dash-canvas)]">
-                                        <Image
-                                            src={
-                                                transaction.product?.images?.[0]
-                                                    ? `/api/proxy?key=${encodeURIComponent(transaction.product.images[0])}`
-                                                    : '/placeholder.jpg'
-                                            }
+                                        <ProductImage
+                                            src={transaction.product?.images?.[0]}
                                             alt={transaction.product?.name || 'Product'}
                                             width={64}
                                             height={64}

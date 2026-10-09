@@ -1,3 +1,4 @@
+import { PRODUCT_IMAGE_PLACEHOLDER } from '@/lib/productImage'
 import React, { useRef, useState } from 'react'
 import Image from 'next/image'
 import { RxCross1 } from 'react-icons/rx'
@@ -142,8 +143,8 @@ const ImageDrop = function ImageDrop({
                                     className="w-20 h-20 object-cover rounded-sm border border-borderColor"
                                     onError={e => {
                                         // fallback to placeholder if image fails
-                                        if (e?.target?.src && !e.target.src.endsWith('/placeholder.jpg')) {
-                                            e.target.src = '/placeholder.jpg';
+                                        if (e?.target?.src && !e.target.src.endsWith(PRODUCT_IMAGE_PLACEHOLDER)) {
+                                            e.target.src = PRODUCT_IMAGE_PLACEHOLDER;
                                         }
                                     }}
                                 />
@@ -163,7 +164,7 @@ const ImageDrop = function ImageDrop({
                             src={renderPreviewSrc(currentValues[0], pendingFiles && pendingFiles[0])}
                             alt="Preview"
                             className="max-h-32 rounded-md border border-gray-300"
-                            onError={(e) => { e.currentTarget.src = '/placeholder.jpg' }}
+                            onError={(e) => { if (!e.currentTarget.src.endsWith(PRODUCT_IMAGE_PLACEHOLDER)) e.currentTarget.src = PRODUCT_IMAGE_PLACEHOLDER }}
                         />
                     ) : (
                         <div className="text-xs font-medium text-lightColor/50">No image selected.</div>

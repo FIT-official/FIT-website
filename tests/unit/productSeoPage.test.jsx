@@ -49,6 +49,8 @@ describe('product server rendering', () => {
         expect(html).toContain('SGD 25.00')
         expect(html).toContain('value="Blue" selected=""')
         expect(html).not.toContain('animate-pulse')
+        expect(html).toContain('src="/product-images/photo-pending.svg"')
+        expect(html).not.toContain('placeholder.jpg')
     })
 
     it('renders metadata, matching schema and visible HTML without calling the website API', async () => {

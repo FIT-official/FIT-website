@@ -65,6 +65,7 @@ describe('product metadata', () => {
         expect(productImageUrl('/filament.webp')).toBe('https://www.fixitoday.com/filament.webp')
         expect(productImageUrl('https://cdn.example.com/filament.webp')).toBe('https://cdn.example.com/filament.webp')
         expect(productImageUrl(null)).toBeNull()
+        expect(productImageUrl('/placeholder.jpg')).toBe('https://www.fixitoday.com/product-images/photo-pending.svg')
     })
 
     it('creates individual metadata for both catalogue types with a safe social fallback', () => {
@@ -75,7 +76,7 @@ describe('product metadata', () => {
             expect(metadata.description).toContain(product.name)
             expect(metadata.alternates.canonical).toBe(`https://www.fixitoday.com/products/${productType}-model`)
             expect(metadata.openGraph.url).toBe(metadata.alternates.canonical)
-            expect(metadata.twitter.images).toEqual(['https://www.fixitoday.com/fitogimage.png'])
+            expect(metadata.twitter.images).toEqual(['https://www.fixitoday.com/product-images/photo-pending.svg'])
         }
         expect(productDescription('Maker&#39;s holder &#x2014; 20 mm')).toBe('Maker\'s holder — 20 mm')
     })
