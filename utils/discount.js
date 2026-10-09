@@ -2,7 +2,10 @@
 // Brand identity comes from canonical catalogue labels, never descriptions
 // (Lanbo descriptions list compatible Bambu printers).
 export function isFilamentProduct(product) {
-    return product.productType !== 'print' && (/^filament$/i.test(product.categoryId || '') || (!product.categoryId && product.category === 1) || /\bfilament\b/i.test(String(product.name || '') + ' ' + String(product.slug || '')));
+    if (product.productType === 'print') return false;
+    if (product.categoryId) return /^filament$/i.test(product.categoryId);
+    if (Number.isInteger(product.category)) return product.category === 1;
+    return /\bfilament\b/i.test(String(product.name || '') + ' ' + String(product.slug || ''));
 }
 export function discountRulesForProduct(product, extraRules = []) {
     const filament = isFilamentProduct(product);
