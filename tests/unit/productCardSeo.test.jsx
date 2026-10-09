@@ -34,6 +34,13 @@ afterEach(() => {
 })
 
 describe('server-rendered shop cards', () => {
+    it.each(['copper-stripboard.png', 'rain-water-sensor-representative.png', 'bh1750-representative.png'])('replaces missing local %s before the browser requests it', file => {
+        session.user = null; session.isSignedIn = false
+        const html = renderToStaticMarkup(<ProductCard product={{ ...publicProduct, images: [`/product-images/${file}`] }} />)
+        expect(html).toContain('src="/product-images/photo-pending.svg"')
+        expect(html).not.toContain(file)
+        expect(html).not.toContain('/_next/image')
+    })
     it('replaces a broken product image with the neutral FIT graphic', () => {
         session.user = null; session.isSignedIn = false
         render(<ProductCard product={{ ...publicProduct, images: ['/missing-product.png'] }} />)

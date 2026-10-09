@@ -1,5 +1,10 @@
+import { publicProductImages } from './lib/publicProductImages.mjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    env: {
+        NEXT_PUBLIC_PRODUCT_IMAGE_PATHS: JSON.stringify(publicProductImages()),
+    },
     poweredByHeader: false,
     // Resolve metadata visibility checks before Suspense can send HTTP 200.
     htmlLimitedBots: /.*/,
