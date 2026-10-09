@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    poweredByHeader: false,
     // Resolve metadata visibility checks before Suspense can send HTTP 200.
     htmlLimitedBots: /.*/,
     // Silence Next.js 16 warning about having a webpack config
@@ -100,6 +101,26 @@ const nextConfig = {
                     {
                         key: "Content-Security-Policy",
                         value: "frame-ancestors 'self' https://pay.google.com; frame-src 'self' https://pay.google.com https://js.stripe.com https://challenges.cloudflare.com https://www.google.com/shopping/customerreviews/optin; ",
+                    },
+                    { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+                    { key: 'X-Content-Type-Options', value: 'nosniff' },
+                    { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+                    { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(self "https://js.stripe.com" "https://pay.google.com")' },
+                    {
+                        key: 'Content-Security-Policy-Report-Only',
+                        value: [
+                            "default-src 'self'",
+                            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://clerk.fixitoday.com https://*.clerk.com https://js.stripe.com https://us.i.posthog.com https://us-assets.i.posthog.com https://pay.google.com https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com https://www.gstatic.com https://challenges.cloudflare.com",
+                            "style-src 'self' 'unsafe-inline'",
+                            "img-src 'self' data: blob: https:",
+                            "font-src 'self' data: https:",
+                            "connect-src 'self' https: wss:",
+                            "worker-src 'self' blob:",
+                            "frame-src 'self' https://pay.google.com https://js.stripe.com https://challenges.cloudflare.com https://www.google.com/shopping/customerreviews/optin",
+                            "frame-ancestors 'self' https://pay.google.com",
+                            "object-src 'none'",
+                            "base-uri 'self'",
+                        ].join('; ') + ';',
                     },
                 ],
             },
