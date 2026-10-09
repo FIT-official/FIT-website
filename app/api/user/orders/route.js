@@ -132,6 +132,7 @@ export async function PUT(req) {
 
         await connectToDatabase();
         const { orderId, status, trackingId } = await req.json();
+        if (status === 'paid') return NextResponse.json({ error: 'Payment states require a verified Stripe webhook' }, { status: 403 });
 
         if (!orderId) {
             return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
