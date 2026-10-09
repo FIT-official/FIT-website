@@ -1,4 +1,5 @@
 'use client'
+import { BULK_PRICE_NOTICE } from '@/lib/bulkFilamentConfig'
 import { filamentOptionLabel } from '@/lib/filamentLabels'
 import { useCallback, useEffect, useState } from 'react'
 function RequestCard({ row, onSaved }) {
@@ -21,13 +22,17 @@ function RequestCard({ row, onSaved }) {
     <p className="mt-4 text-sm font-semibold">Preparation / availability check</p>
     <ul className="mt-2 space-y-3">{row.lines.map((line,i) => <li key={i} className="rounded-xl bg-slate-50 p-3 text-sm">
       <strong>{line.productName}</strong><p>{line.options.map(o => o.type + ': ' + filamentOptionLabel(o.type,o.name)).join(' · ')}</p>
-      <p className="mt-1 font-medium">Total requested: {line.quantity ?? line.recordedQuantity + line.extraQuantity} rolls</p>
-      <p className="mt-1">{line.recordedQuantity} from recorded stock requested + <strong>{line.extraQuantity} extra rolls to confirm</strong></p>
-      <p>Public list price at submission: {line.publicUnitPrice ? line.publicUnitPrice.currency + ' ' + line.publicUnitPrice.amount.toFixed(2) + ' / roll' : 'Quotation required'}</p>
+      <p className="mt-1 font-medium">Total requested: {line.quantity ?? 'Legacy request: review original record'} rolls</p>
+      <p>{line.material} band {line.band || 'Not recorded'} · {line.tierRolls ?? 'Not recorded'} rolls combined</p>
+      <p>Unit price: {Number.isInteger(line.unitCents) ? 'SGD ' + (line.unitCents / 100).toFixed(2) : 'Legacy price: review original record'} / roll</p>
+      <p>Line total: {Number.isInteger(line.lineCents) ? 'SGD ' + (line.lineCents / 100).toFixed(2) : 'Not recorded'}</p>
+      <p>{BULK_PRICE_NOTICE}</p>
       {line.remarks && <p className="mt-1 whitespace-pre-wrap">Remarks: {line.remarks}</p>}
     </li>)}</ul>
+    {Number.isInteger(row.totalCents) && <p className="mt-3 font-semibold">Indicative total: SGD {(row.totalCents / 100).toFixed(2)}</p>}
+    <p className="mt-3 text-xs">PDPA consent: {row.consent?.accepted ? 'Accepted at ' + new Date(row.consent.acceptedAt).toLocaleString('en-SG') : 'Not recorded (legacy request)'}</p>
     {row.notes && <p className="mt-3 whitespace-pre-wrap text-sm">Customer notes: {row.notes}</p>}
-    <p className="mt-3 text-xs text-amber-900">Request only. No stock reserved, payment taken or delivery promised. Email and Telegram alerts are not configured for this form.</p>
+    <p className="mt-3 text-xs text-amber-900">Request only. No stock reserved, payment taken or delivery promised. Owner email: {row.notifications?.email || 'Not recorded'}.</p>
     <div className="mt-5 grid gap-3 sm:grid-cols-[160px_1fr_auto]">
       <label className="text-sm">Status<select className="mt-1 w-full rounded-lg border p-2" value={status} onChange={e => setStatus(e.target.value)}>{['new','reviewing','contacted','closed'].map(value => <option key={value}>{value}</option>)}</select></label>
       <label className="text-sm">Internal owner note<textarea className="mt-1 w-full rounded-lg border p-2" maxLength={2000} value={note} onChange={e => setNote(e.target.value)}/></label>
