@@ -16,7 +16,14 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }) {
 	const { id } = await params;
-	return creatorMetadata(await resolveCreatorByIdOrName(id));
+	const creator = await resolveCreatorByIdOrName(id);
+	if (!creator) notFound();
+	if (creator.shop?.published === false) {
+		let userId = null;
+		try { userId = (await auth())?.userId; } catch { /* Signed out. */ }
+		if (!userId || (userId !== creator.userId && !(await checkAdminPrivileges(userId)))) notFound();
+	}
+	return creatorMetadata(creator);
 }
 
 function serializeForClient(value) {
