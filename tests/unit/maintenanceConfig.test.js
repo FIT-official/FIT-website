@@ -55,7 +55,7 @@ describe('Edge Config availability', () => {
         expect(url.toString()).toBe('https://edge-config.vercel.com/ecfg_example/items')
         expect(options.headers).toEqual({ Authorization: 'Bearer test-only-token' })
         expect(options.cache).toBe('no-store')
-        expect(options.redirect).toBe('error')
+        expect(options.redirect).toBe('manual')
         await vi.advanceTimersByTimeAsync(9_999)
         await readMaintenanceConfig()
         expect(fetch).toHaveBeenCalledOnce()
