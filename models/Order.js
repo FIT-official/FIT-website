@@ -125,7 +125,7 @@ const OrderSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Index for faster queries
-OrderSchema.index({ trackingToken: 1 }, { unique: true, partialFilterExpression: { trackingToken: { $type: 'string' } } });
+// The tracking index is created explicitly by the enabled test webhook, never on a live/off import.
 OrderSchema.index({ userId: 1, createdAt: -1 });
 // stripeSessionId and orderId already have inline unique/index definitions
 

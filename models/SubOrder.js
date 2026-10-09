@@ -7,7 +7,7 @@ const schema = new mongoose.Schema({
     statusHistory: [{ status: String, at: { type: Date, default: Date.now }, by: String }],
     fulfilment: { type: String, enum: ['fit', 'creator'], default: 'fit' },
     tracking: String,
-}, { timestamps: true });
+}, { timestamps: true, autoCreate: false, autoIndex: false });
 schema.index({ orderId: 1, storeId: 1 }, { unique: true });
 schema.index({ storeId: 1, createdAt: -1 });
 export default mongoose.models.SubOrder || mongoose.model('SubOrder', schema);

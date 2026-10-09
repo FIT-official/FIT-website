@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import DashboardFrame, { StatusBadge } from './DashboardFrame';
 import StlPreview from './StlPreview';
 const NOTICE = 'I own this design or have the right to have it printed. FIT uses it only to quote and fulfil this order and deletes it under the approved retention policy.';
@@ -59,7 +60,7 @@ export default function UploadsView({ fixture = false, owner = false, storageLab
             </form>
         </section><aside className="cd-card"><h2>Before printing</h2><p>STEP files need conversion in Bambu Studio.</p><p className="cd-muted">Virus check: EICAR signature stand-in. Full ClamAV scanning will run on the FIT Bridge.</p><p className="cd-muted">Volume assumes STL coordinates in millimetres and a closed, consistently oriented mesh. Open meshes can give an inaccurate volume.</p><p className="cd-muted">Storage deletion schedules need bucket approval. Downloads expire after ten minutes.</p></aside></div>
         {preview && <section className="cd-card"><h2>Model preview</h2><StlPreview file={preview} /></section>}
-        {thumbnail && <section className="cd-card"><h2>Embedded plate preview</h2>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={thumbnail} alt="Embedded 3MF plate" style={{ maxWidth: 500, width: '100%' }} /></section>}
+        {thumbnail && <section className="cd-card"><h2>Embedded plate preview</h2><Image src={thumbnail} alt="Embedded 3MF plate" width={500} height={300} unoptimized style={{ maxWidth: 500, width: '100%', height: 'auto' }} /></section>}
         {uploads.length > 0 && <section className="cd-card"><h2>Your files</h2><div className="cd-table-wrap"><table className="cd-table"><thead><tr><th>File</th><th>Check</th><th>Geometry</th><th>Download</th></tr></thead><tbody>{uploads.map(item => <tr key={item.uploadId}><td>{item.filename}<div className="cd-muted">{(item.sizeBytes / 1024 / 1024).toFixed(2)} MB</div></td><td><StatusBadge status={item.scanStatus} />{item.needsConversion && <p className="cd-muted">Needs conversion</p>}</td><td>{item.bbox ? `${item.bbox.x.toFixed(1)} × ${item.bbox.y.toFixed(1)} × ${item.bbox.z.toFixed(1)} mm; ${item.volumeCm3.toFixed(2)} cm³` : '—'}</td><td><button disabled={fixture || item.scanStatus !== 'clean'} onClick={() => download(item.uploadId)}>Download</button></td></tr>)}</tbody></table></div></section>}
     </DashboardFrame>;
 }

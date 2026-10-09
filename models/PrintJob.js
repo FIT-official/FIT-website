@@ -7,7 +7,7 @@ const schema = new mongoose.Schema({
     status: { type: String, enum: ['quote_due', 'queued', 'assigned', 'printing', 'qc', 'done', 'failed'], default: 'queued' },
     statusHistory: [{ status: String, at: { type: Date, default: Date.now }, by: String, note: String }],
     notes: String, reprintOf: String, attempt: { type: Number, default: 0 },
-}, { timestamps: true });
+}, { timestamps: true, autoCreate: false, autoIndex: false });
 schema.index({ 'source.refId': 1, attempt: 1 }, { unique: true });
 schema.index({ reprintOf: 1 }, { unique: true, partialFilterExpression: { reprintOf: { $type: 'string' } } });
 schema.index({ priority: -1, position: 1, createdAt: 1 });

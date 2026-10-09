@@ -1,3 +1,5 @@
+import { headers } from 'next/headers';
+import { dashboardEnabled, fixtureMode } from '@/lib/creatorDashboard/flags';
 import { jsonLdString } from '@/lib/jsonLd'
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -62,7 +64,14 @@ export const metadata = {
   robots: { index: true, follow: true, googleBot: { 'max-image-preview': 'large' } },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  if (dashboardEnabled()) {
+    const surface = (await headers()).get('x-fit-creator-surface');
+    // Tracking tokens must not enter analytics. Fixture pages have no account/DB probes.
+    if (surface === 'tracking' || (surface === 'dashboard' && fixtureMode())) {
+      return <html lang="en"><body style={{ margin: 0, background: '#f6f8f5' }}>{children}</body></html>;
+    }
+  }
   return (
     <ClerkProvider>
       <html lang="en">

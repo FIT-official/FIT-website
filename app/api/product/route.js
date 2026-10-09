@@ -11,6 +11,7 @@ import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3 } from "@/lib/s3";
 import { reserveCreatorQuota, releaseProductQuota, CreatorQuotaError } from "@/lib/creatorQuota";
 import { editableProduct, productForViewer } from "@/lib/productAccess";
+import { dashboardEnabled, DashboardError } from '@/lib/creatorDashboard/flags';
 import { getScope } from '@/lib/auth/scope';
 import { creatorProductInput } from '@/lib/creatorDashboard/productPolicy';
 import { shippingCostsInput } from '@/lib/shopShipping';
@@ -54,6 +55,7 @@ export async function POST(req) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
         const scope = await getScope(userId);
+        if (dashboardEnabled() && !['owner', 'creator'].includes(scope.role)) throw new DashboardError('Forbidden', 403);
         const input = creatorProductInput(await req.json(), scope);
         await connectToDatabase();
         const body = { ...editableProduct(input), creatorUserId: userId };
@@ -189,6 +191,7 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
         const scope = await getScope(userId);
+        if (dashboardEnabled() && !['owner', 'creator'].includes(scope.role)) throw new DashboardError('Forbidden', 403);
         const input = creatorProductInput(await req.json(), scope);
         await connectToDatabase();
         const body = editableProduct(input);

@@ -7,7 +7,7 @@ const schema = new mongoose.Schema({
     scanEngine: String, processing: { type: Boolean, default: false }, thumbKey: String,
     bbox: { x: Number, y: Number, z: Number }, volumeCm3: Number, estGrams: Number, estMinutes: Number,
     needsConversion: Boolean, ipConsent: { at: Date, version: String }, deleteAfter: Date,
-}, { timestamps: true });
+}, { timestamps: true, autoCreate: false, autoIndex: false });
 schema.index({ ownerId: 1, jobId: 1 });
 schema.index({ storeId: 1, createdAt: -1 });
 export default mongoose.models.Upload || mongoose.model('Upload', schema);

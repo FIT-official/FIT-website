@@ -25,6 +25,7 @@ function update(rows, filter, changes) {
 vi.mock('@clerk/nextjs/server', () => ({ auth: async () => ({ userId: f.userId }), clerkClient: async () => ({ users: { getUser: async () => ({ publicMetadata: { role: f.role } }) } }) }));
 vi.mock('@/lib/db', () => ({ connectToDatabase: f.db }));
 vi.mock('@/models/PrintJob', () => ({ default: {
+    createCollection: async () => {}, createIndexes: async () => {},
     find: query => chain(() => f.jobs.filter(row => matches(row, query))), findById: id => chain(() => f.jobs.find(row => row._id === id)),
     findOneAndUpdate: (filter, changes) => chain(() => update(f.jobs, filter, changes)),
     exists: query => ({ session: async () => f.jobs.some(row => matches(row, query)) }),
