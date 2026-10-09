@@ -38,6 +38,7 @@ it('all fixture page entrypoints render without auth, DB, Stripe or Sheet access
 });
 it('fixture mode is ignored in production and only exact true enables flags', async () => {
     vi.stubEnv('NODE_ENV', 'production'); vi.stubEnv('VERCEL_ENV', 'production'); expect(fixtureMode()).toBe(false);
+    vi.stubEnv('VERCEL_ENV', 'preview'); expect(fixtureMode()).toBe(false);
     f.auth.mockResolvedValue({ userId: null }); await expect(pageScope()).rejects.toThrow('redirect');
     vi.stubEnv('CREATOR_DASHBOARD_ENABLED', 'TRUE'); await expect(pageScope()).rejects.toThrow('404');
 });
