@@ -227,7 +227,7 @@ const CustomPrintRequestSchema = new mongoose.Schema({
 
 // Indexes for efficient queries
 CustomPrintRequestSchema.index({ userId: 1, status: 1 })
-CustomPrintRequestSchema.index({ requestId: 1 })
+// requestId already declares its unique index on the schema field.
 CustomPrintRequestSchema.index({ configDeadline: 1, status: 1 })
 CustomPrintRequestSchema.index({ status: 1, paidAt: 1 })
 

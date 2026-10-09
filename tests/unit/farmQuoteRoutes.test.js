@@ -51,6 +51,8 @@ import { POST as quotePOST } from '@/app/api/quote/route'
 import { POST as estimatePOST } from '@/app/api/custom-print/estimate/route'
 import { getFilamentAvailability } from '@/lib/filamentInventory'
 import { calculateInstantQuote } from '@/lib/quoting/quote'
+import CustomPrintRequest from '@/models/CustomPrintRequest'
+import { recomputeMetricsFromModel } from '@/lib/quoting/serverGeometry'
 
 const post = (handler, body) => handler(new Request('http://t/api', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }))
 const metrics = { volumeCm3: 24, dimensionsCm: { length: 8, width: 4.2, height: 1.8 }, confidence: 'high' }
@@ -185,5 +187,56 @@ describe('POST /api/custom-print/estimate', () => {
         const res = await post(estimatePOST, { requestId: REQUEST_ID })
         expect(res.status).toBe(422)
         expect((await res.json()).manualReviewRequired).toBe(true)
+    })
+})
+
+
+describe('creator estimate save races', () => {
+    const initialTime = new Date('2026-10-09T10:00:00Z')
+    const changedTime = new Date('2026-10-09T10:01:00Z')
+    const valueAt = (object, key) => key.split('.').reduce((value, part) => value?.[part], object)
+    const same = (a, b) => a instanceof Date || b instanceof Date ? Number(a) === Number(b) : a == null && b == null || a === b
+
+    beforeEach(() => {
+        state.request = creatorRequest({ updatedAt: initialTime })
+        state.request.printConfiguration.configuredAt = initialTime
+        CustomPrintRequest.findOneAndUpdate.mockImplementation(async (filter, update) => {
+            state.updates.push({ filter, update })
+            if (!Object.entries(filter).every(([key, expected]) => same(valueAt(state.request, key), expected))) return null
+            state.request = { ...state.request, ...update.$set }
+            return state.request
+        })
+    })
+
+    it('saves an unchanged version and leaves the estimate separate from a payable quote', async () => {
+        expect((await post(estimatePOST, { requestId: REQUEST_ID, deliveryType: 'courier' })).status).toBe(200)
+        expect(state.request.estimate.total).toBeGreaterThan(0)
+        expect(state.request).not.toHaveProperty('quote')
+    })
+
+    it.each(['model', 'settings', 'note'])('refuses a stale estimate after a same-status %s edit', async kind => {
+        recomputeMetricsFromModel.mockImplementationOnce(async () => {
+            state.request = { ...state.request, updatedAt: changedTime,
+                ...(kind === 'model' ? { modelFile: { originalName: 'replacement.stl', s3Key: 'models/buyer/replacement.stl' } } : {}),
+                ...(kind === 'settings' ? { printConfiguration: { ...state.request.printConfiguration, configuredAt: changedTime } } : {}),
+                ...(kind === 'note' ? { customerNote: 'Changed while measuring' } : {}) }
+            return state.metrics
+        })
+        const response = await post(estimatePOST, { requestId: REQUEST_ID })
+        expect(response.status).toBe(409)
+        expect(state.request).not.toHaveProperty('estimate')
+    })
+
+    it.each(['model', 'settings', 'payment'])('guards legacy records without updatedAt against a concurrent %s change', async kind => {
+        delete state.request.updatedAt
+        recomputeMetricsFromModel.mockImplementationOnce(async () => {
+            state.request = { ...state.request,
+                ...(kind === 'model' ? { modelFile: { originalName: 'replacement.stl', s3Key: 'models/buyer/replacement.stl' } } : {}),
+                ...(kind === 'settings' ? { printConfiguration: { ...state.request.printConfiguration, configuredAt: changedTime } } : {}),
+                ...(kind === 'payment' ? { paidAt: changedTime, stripeSessionId: 'cs_synthetic_locked' } : {}) }
+            return state.metrics
+        })
+        expect((await post(estimatePOST, { requestId: REQUEST_ID })).status).toBe(409)
+        expect(state.request).not.toHaveProperty('estimate')
     })
 })
