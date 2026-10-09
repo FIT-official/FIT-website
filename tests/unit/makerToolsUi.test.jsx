@@ -75,3 +75,10 @@ it('shows catalogue failure honestly and keeps references usable', async () => {
   fireEvent.click(screen.getByLabelText('Confirmed in stock only'))
   expect(screen.getByText(/No confirmed stock matches/)).toBeVisible()
 })
+
+it('connects the workbench to its released learning and community destinations', async () => {
+  render(<MakerTools />); await screen.findByText(/Catalogue loaded/)
+  expect(screen.getByRole('link', { name: 'Open coding playground' })).toHaveAttribute('href', '/maker-tools/playground')
+  expect(screen.getByRole('link', { name: 'Common printing problems' })).toHaveAttribute('href', '/guides/3d-printing-problems')
+  expect(screen.getByRole('link', { name: /Explore Community/ })).toHaveAttribute('href', '/community')
+})

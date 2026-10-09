@@ -6,7 +6,7 @@ import { subscriptionIntentTarget, subscriptionPriceId, withSubscriptionIntent }
 const isPrivateRoute = createRouteMatcher(['/dashboard(.*)', '/account(.*)', '/onboarding'])
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
 const isStoreRoute = createRouteMatcher(['/shop(.*)', '/products(.*)', '/cart(.*)', '/checkout(.*)'])
-const isServicePage = createRouteMatcher(['/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair', '/maker-tools', '/community', '/community/(.*)'])
+const isServicePage = createRouteMatcher(['/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair', '/maker-tools', '/guides/3d-printing-problems', '/guides/3d-printing-problems/', '/community', '/community/(.*)'])
 const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)'])
 const isSsoCallback = createRouteMatcher(['/sign-up/sso-callback(.*)', '/sign-in/sso-callback(.*)'])
 const isMakerPlayground = createRouteMatcher(['/maker-tools/playground', '/maker-tools/playground/'])
