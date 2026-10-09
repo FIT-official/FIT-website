@@ -1,0 +1,13 @@
+[
+  { "source": "makeraccess-arduino-sensor-kit", "target": "install-arduino-ide-windows-macos" },
+  { "source": "makeraccess-maker-ideas-library", "target": "makeraccess-tools-fasteners-repair" },
+  { "source": "ntu-mse-materials-innovation-challenge-resources", "target": "install-arduino-ide-windows-macos" },
+  { "source": "ntu-mse-materials-innovation-challenge-participant-resources", "target": "install-arduino-ide-windows-macos" },
+  { "source": "3d-printer-guides", "target": "bambu-lab-a1-mini-printing-guide" },
+  { "source": "3d-printer-guides", "target": "bambu-lab-a1-printing-guide" },
+  { "source": "3d-printer-guides", "target": "prusa-mk3s-plus-printing-guide" },
+  { "source": "3d-printer-guides", "target": "prusa-xl-printing-guide" },
+  { "source": "arduino-nano-dht11-workshop-guide", "target": "electronics-workshop" },
+  { "source": "arduino-nano-dht11-workshop-guide", "target": "install-arduino-ide-windows-macos" },
+  { "source": "arduino-nano-io-expansion-shield-wiring", "target": "install-arduino-ide-windows-macos" }
+]
