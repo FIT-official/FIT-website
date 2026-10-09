@@ -79,6 +79,7 @@ const nextConfig = {
     skipTrailingSlashRedirect: true,
     async redirects() {
         return [
+            ['bambu-lab-3d-printing-filament-1kg-pva-support', 'bambu-lab-3d-printing-filament-05kg-pva-support'],
             ['esp32-wroomdevkit-30pin-2', 'esp32-wroomdevkit-30pin'],
             ['esp32-wroomdevkit-30pin-3', 'esp32-wroomdevkit-30pin'],
             ['copper-stripboard-65145cm-254mm-2', 'copper-stripboard-65145cm-254mm'],
