@@ -1,7 +1,7 @@
 {
   "provenance": {
     "reviewedAt": "2026-10-09",
-    "description": "Exact existing inventory matched to manufacturer colour evidence; original private source retained in release audit."
+    "description": "Exact existing inventory matched to manufacturer colour evidence; original private source retained in release audit. Reconciled against 18 public products / 111 colour options on 2026-10-09; five FIT texture options have explicit unavailable previews."
   },
   "disclaimer": "Colours shown on screen are approximate. Finish, lighting, printer settings and batch can change physical appearance.",
   "sources": {
@@ -2377,6 +2377,66 @@
       "notes": [
         "PVA 66400 is Clear, not White. Preserve RGBA alpha (80 hex); do not flatten to opaque white. Resolve inventory label before preview."
       ]
+    },
+    {
+      "productId": "6a3b9a60e30b0ba74b95ccd9",
+      "slug": "1kg-marble-pla-3d-printing-filament-fit",
+      "optionId": "6a3b9a60e30b0ba74b95ccdb",
+      "originalName": "Grey Marble",
+      "preview": {
+        "kind": "unavailable",
+        "status": "missing_verified_asset",
+        "label": "FIT Grey Marble",
+        "reason": "No verified FIT Grey Marble product photo is available. A flat swatch would not show this filament's texture reliably."
+      }
+    },
+    {
+      "productId": "6a3b9a60e30b0ba74b95ccd9",
+      "slug": "1kg-marble-pla-3d-printing-filament-fit",
+      "optionId": "6a3b9a60e30b0ba74b95ccdc",
+      "originalName": "Marble",
+      "preview": {
+        "kind": "unavailable",
+        "status": "missing_verified_asset",
+        "label": "FIT Marble",
+        "reason": "No verified FIT Marble product photo is available. A flat swatch would not show this filament's texture reliably."
+      }
+    },
+    {
+      "productId": "6a3b9a60e30b0ba74b95ccd9",
+      "slug": "1kg-marble-pla-3d-printing-filament-fit",
+      "optionId": "6a3b9a60e30b0ba74b95ccdd",
+      "originalName": "Beige Marble",
+      "preview": {
+        "kind": "unavailable",
+        "status": "missing_verified_asset",
+        "label": "FIT Beige Marble",
+        "reason": "No verified FIT Beige Marble product photo is available. A flat swatch would not show this filament's texture reliably."
+      }
+    },
+    {
+      "productId": "6a3b9a3018a7b14fab8b72f5",
+      "slug": "1kg-wood-pla-3d-printing-filament-fit",
+      "optionId": "6a3b9a3018a7b14fab8b72f7",
+      "originalName": "Light Wood",
+      "preview": {
+        "kind": "unavailable",
+        "status": "missing_verified_asset",
+        "label": "FIT Light Wood",
+        "reason": "No verified FIT Light Wood product photo is available. A flat swatch would not show this filament's texture reliably."
+      }
+    },
+    {
+      "productId": "6a3b9a3018a7b14fab8b72f5",
+      "slug": "1kg-wood-pla-3d-printing-filament-fit",
+      "optionId": "6a3b9a3018a7b14fab8b72f8",
+      "originalName": "Dark Wood",
+      "preview": {
+        "kind": "unavailable",
+        "status": "missing_verified_asset",
+        "label": "FIT Dark Wood",
+        "reason": "No verified FIT Dark Wood product photo is available. A flat swatch would not show this filament's texture reliably."
+      }
     }
   ]
 }

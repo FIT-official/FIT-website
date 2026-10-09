@@ -1,9 +1,21 @@
 'use client'
+import { bulkEmailCopy } from '@/lib/bulkEmailCopy'
 import { filamentOptionLabel } from '@/lib/filamentLabels'
 import { useCallback, useEffect, useState } from 'react'
 function RequestCard({ row, onSaved }) {
   const [status,setStatus] = useState(row.status), [note,setNote] = useState(row.ownerNote || '')
   const [busy,setBusy] = useState(false), [error,setError] = useState('')
+  const emailStatus = row.ownerEmailStatus || (typeof row.notifications?.email === 'object' ? row.notifications.email.status : row.notifications?.email)
+  const canRetry = ['pending','failed','not_configured'].includes(emailStatus) && typeof row.notifications?.email === 'object' && row.notifications.email.attempts < 3
+  async function retryEmail() {
+    setBusy(true); setError('')
+    try {
+      const response = await fetch('/api/admin/bulk-filament', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId: row._id, action: 'retry_owner_email' }) })
+      const data = await response.json()
+      if (!response.ok) throw Error(data.error || 'Could not check email status.')
+      onSaved(data.request)
+    } catch(e) { setError(e.message) } finally { setBusy(false) }
+  }
   async function save() {
     setBusy(true); setError('')
     try {
@@ -30,7 +42,14 @@ function RequestCard({ row, onSaved }) {
     </li>)}</ul>
     {row.estimatedTotals?.totals.map(total => <p key={total.currency} className="mt-3 font-semibold">{row.estimatedTotals.unpricedLines ? 'Priced selections estimate' : 'Estimated filament total'} at submission: {total.currency} {total.total.toFixed(2)}</p>)}
     {row.notes && <p className="mt-3 whitespace-pre-wrap text-sm">Customer notes: {row.notes}</p>}
-    <p className="mt-3 text-xs text-amber-900">Request only. No stock reserved, payment taken or delivery promised. Email and Telegram alerts are not configured for this form.</p>
+    <p className="mt-3 text-xs text-amber-900">Request only. No stock reserved, payment taken or delivery promised. Telegram alerts are not configured for this form.</p>
+    <div className="mt-3 rounded-xl border border-slate-200 p-3 text-sm" aria-label="Owner email status">
+      <p>{bulkEmailCopy(emailStatus)}</p>
+      {row.notifications?.email?.recipient && <p className="mt-1 break-all">Recipient: {row.notifications.email.recipient}</p>}
+      {row.notifications?.email?.attempts > 0 && <p>Attempts: {row.notifications.email.attempts} / 3</p>}
+      {emailStatus === 'uncertain' && <p>Check the owner inbox and provider records using this request reference before any manual follow-up. Automatic resend is disabled to prevent duplicate alerts.</p>}
+      {canRetry && <button className="mt-2 rounded-lg border px-3 py-2 disabled:opacity-50" disabled={busy} onClick={retryEmail}>Retry owner email</button>}
+    </div>
     <div className="mt-5 grid gap-3 sm:grid-cols-[160px_1fr_auto]">
       <label className="text-sm">Status<select className="mt-1 w-full rounded-lg border p-2" value={status} onChange={e => setStatus(e.target.value)}>{['new','reviewing','contacted','closed'].map(value => <option key={value}>{value}</option>)}</select></label>
       <label className="text-sm">Internal owner note<textarea className="mt-1 w-full rounded-lg border p-2" maxLength={2000} value={note} onChange={e => setNote(e.target.value)}/></label>

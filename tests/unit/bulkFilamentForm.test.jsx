@@ -27,7 +27,7 @@ it('renders a clear successful request receipt and exact notification coverage',
   render(<BulkFilamentForm/>);await fill();fetch.mockResolvedValue(response({requestId:'synthetic-reference',recordedRolls:2,extraRolls:20},201))
   fireEvent.click(screen.getByRole('button',{name:'Send request to FIT'}))
   expect(await screen.findByText('Your filament request is with FIT')).toBeInTheDocument();expect(screen.getByText('synthetic-reference')).toBeInTheDocument()
-  expect(screen.getByText(/An email or Telegram confirmation is not sent automatically/)).toBeInTheDocument()
+  expect(screen.getByText(/Customer email and Telegram confirmations are not sent automatically/)).toBeInTheDocument()
 })
 it('retries the exact same payload and reference after uncertain delivery',async()=>{
   render(<BulkFilamentForm/>);await fill();fetch.mockRejectedValueOnce(Error('Connection lost'))

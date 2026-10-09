@@ -1,4 +1,5 @@
 'use client'
+import { bulkEmailCopy } from '@/lib/bulkEmailCopy'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import FilamentColourPreview from './FilamentColourPreview'
@@ -115,7 +116,7 @@ export default function BulkFilamentForm() {
       {receipt.estimatedTotals?.totals.map(total => <p key={total.currency} className="mt-2 font-medium">{receipt.estimatedTotals.unpricedLines ? 'Priced selections estimate' : 'Estimated grand total'}: {money({ amount: total.total, currency: total.currency })}</p>)}
       <p className="mt-4">No stock has been reserved and no payment has been taken. This is not a confirmed order.</p>
       <p className="mt-5 text-sm">Save your request reference:</p><p className="mt-1 break-all font-mono text-sm">{receipt.requestId}</p>
-      <p className="mt-4 text-sm text-slate-600">This page is your receipt. An email or Telegram confirmation is not sent automatically.</p>
+      <p className="mt-4 text-sm text-slate-600">{bulkEmailCopy(receipt.ownerEmailStatus)} This page is your receipt. Customer email and Telegram confirmations are not sent automatically.</p>
     </div>
     <button className={buttonClass + ' mt-6'} onClick={() => { remember(null); setReceipt(null); setLines([]); setConfirmReview(false); setClientRequestId(crypto.randomUUID()) }}>Start another request</button>
   </main>

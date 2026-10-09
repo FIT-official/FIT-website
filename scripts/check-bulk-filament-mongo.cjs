@@ -95,7 +95,7 @@ async function main() {
     receipt.checks.push('atomic rate limit accepts 30, rejects 5 and resets in the same document')
     assert.deepEqual(product,fixtureProduct())
     assert.equal(await rateDb.collection('products').countDocuments(),0)
-    assert.deepEqual((await durable.findOne({_id:input.clientRequestId})).notifications,{email:'not_configured',telegram:'not_configured'})
+    assert.deepEqual((await durable.findOne({_id:input.clientRequestId})).notifications,{email:{status:'pending',attempts:0},telegram:'not_configured'})
     receipt.checks.push('no inventory writes, notifications, payment or order side effects')
     // Only this explicitly owned empty test database receives synthetic stock edits.
     const products = rateDb.collection('products'), id = new mongoose.Types.ObjectId(product._id)
@@ -133,6 +133,40 @@ async function main() {
     assert.deepEqual(pricedReplay.receipt, estimateResult.receipt)
     receipt.checks.push('server-derived discount and totals persist in Mongo; changed canonical prices invalidate unsaved snapshots; saved receipt survives reconnect without repricing')
 
+    const emailBundle = path.join(out, 'email.cjs')
+    await esbuild.build({ entryPoints: ['lib/bulkFilamentEmail.js'], outfile: emailBundle, bundle: true, platform: 'node', format: 'cjs', packages: 'external', alias: { '@': process.cwd() } })
+    const { notifyBulkOwner, BULK_OWNER_EMAIL } = require(emailBundle)
+    const emailStore = mongoose.connection.db.collection('bulkFilamentRequests')
+    const stockBefore = await mongoose.connection.db.collection('products').find({}).toArray()
+    const mailOptions = { env: { GMAIL_USER: 'synthetic@example.invalid', GMAIL_PASSWORD: 'inert-synthetic' } }
+    let providerCalls = 0, captured
+    const send = async message => { providerCalls++; captured=message; return { accepted: [BULK_OWNER_EMAIL] } }
+    await Promise.all(Array.from({ length: 12 }, () => notifyBulkOwner(emailStore, pricedInput.clientRequestId, { ...mailOptions, send })))
+    assert.equal(providerCalls, 1)
+    assert.match(captured.text, /SGD public subtotal: 149.00; discount: 10.00; estimated filament total: 139.00/)
+    assert.equal((await emailStore.findOne({ _id: pricedInput.clientRequestId })).notifications.email.status, 'accepted')
+    receipt.checks.push('12 concurrent durable email claims produce exactly one mocked SMTP send with exact saved 139.00 estimate')
+    await mongoose.disconnect(); await mongoose.connect(uri, { autoIndex: false, maxPoolSize: 4 })
+    const mailStore = mongoose.connection.db.collection('bulkFilamentRequests')
+    assert.equal(await notifyBulkOwner(mailStore, pricedInput.clientRequestId, { ...mailOptions, send, retry: true }), 'accepted')
+    assert.equal(providerCalls, 1)
+    receipt.checks.push('accepted email status survives Mongo reconnect; public replay and owner retry do not resend')
+    const failedId=randomUUID();await saveBulkRequest(mailStore,{...input,clientRequestId:failedId},async()=>catalogue)
+    let failedCalls=0
+    const reject = async () => { failedCalls++; throw Object.assign(Error('Synthetic SMTP rejection'), { responseCode: 451 }) }
+    assert.equal(await notifyBulkOwner(mailStore,failedId,{...mailOptions,send:reject}),'failed')
+    assert.equal(await notifyBulkOwner(mailStore,failedId,{...mailOptions,send:reject}),'failed');assert.equal(failedCalls,1)
+    assert.equal(await notifyBulkOwner(mailStore,failedId,{...mailOptions,send,retry:true}),'accepted')
+    assert.equal((await mailStore.findOne({_id:failedId})).notifications.email.attempts,2)
+    receipt.checks.push('explicit SMTP failure is durable; public retry sends nothing; owner retry atomically records second accepted attempt')
+    const unknownId=randomUUID();await saveBulkRequest(mailStore,{...input,clientRequestId:unknownId},async()=>catalogue)
+    let unknownCalls=0;const unknown=async()=>{unknownCalls++;throw Error('Synthetic lost SMTP acknowledgement')}
+    assert.equal(await notifyBulkOwner(mailStore,unknownId,{...mailOptions,send:unknown}),'uncertain')
+    assert.equal(await notifyBulkOwner(mailStore,unknownId,{...mailOptions,send:unknown,retry:true}),'uncertain');assert.equal(unknownCalls,1)
+    receipt.checks.push('ambiguous SMTP outcome persists and blocks automatic/manual API resend')
+    assert.deepEqual(await mongoose.connection.db.collection('products').find({}).toArray(),stockBefore)
+    receipt.checks.push('email attempts leave all inventory records exactly unchanged; all transports mocked, no provider sends')
+    receipt.mockedEmailCalls = providerCalls + failedCalls + unknownCalls
     receipt.status = 'passed'
 
   } catch (error) { receipt.status = 'failed'; receipt.error = error.message; process.exitCode = 1 }

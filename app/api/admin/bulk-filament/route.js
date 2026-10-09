@@ -1,3 +1,4 @@
+import { notifyBulkOwner, bulkEmailStatus } from '@/lib/bulkFilamentEmail'
 import { auth } from '@clerk/nextjs/server'
 import { checkAdminPrivileges } from '@/lib/checkPrivileges'
 import { bulkFail } from '@/lib/bulkFilament'
@@ -22,7 +23,7 @@ export async function GET(request) {
     const db = await bulkDb()
     const rows = await db.collection('bulkFilamentRequests').find(cursor ? { $or: [{ createdAt: { $lt: new Date(cursor.at) } }, { createdAt: new Date(cursor.at), _id: { $lt: cursor.id } }] } : {})
       .project({ fingerprint: 0 }).sort({ createdAt: -1, _id: -1 }).limit(101).toArray()
-    return bulkJson({ requests: rows.slice(0,100), next: rows.length > 100 ? Buffer.from(JSON.stringify({ at: rows[99].createdAt.toISOString(), id: rows[99]._id })).toString('base64url') : null })
+    return bulkJson({ requests: rows.slice(0,100).map(row => ({ ...row, ownerEmailStatus: bulkEmailStatus(row) })), next: rows.length > 100 ? Buffer.from(JSON.stringify({ at: rows[99].createdAt.toISOString(), id: rows[99]._id })).toString('base64url') : null })
   } catch (error) { return bulkFailure(error) }
 }
 export async function PATCH(request) {
@@ -38,5 +39,20 @@ export async function PATCH(request) {
       { returnDocument: 'after', projection: { fingerprint: 0 } })
     if (!updated) bulkFail('Another administrator updated this request. Refresh before saving.', 409, 'stale_request')
     return bulkJson({ request: updated })
+  } catch (error) { return bulkFailure(error) }
+}
+
+export async function POST(request) {
+  try {
+    bulkSameOrigin(request)
+    await admin()
+    const body = await readBulkJson(request)
+    if (typeof body.requestId !== 'string' || !/^[0-9a-f-]{36}$/.test(body.requestId) || body.action !== 'retry_owner_email') bulkFail('Check the email retry request.')
+    const store = (await bulkDb()).collection('bulkFilamentRequests')
+    const existing = await store.findOne({ _id: body.requestId })
+    if (!existing) bulkFail('Request not found.', 404)
+    const ownerEmailStatus = await notifyBulkOwner(store, body.requestId, { retry: true })
+    const row = await store.findOne({ _id: body.requestId }, { projection: { fingerprint: 0 } })
+    return bulkJson({ request: { ...row, ownerEmailStatus } })
   } catch (error) { return bulkFailure(error) }
 }

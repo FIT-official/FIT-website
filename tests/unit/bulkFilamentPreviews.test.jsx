@@ -1,15 +1,16 @@
+import liveIdentities from '../fixtures/bulkColourIdentities-2026-10-09.json'
 import { afterEach, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import evidence from '@/lib/bulkFilamentPreviews.json'
 import { bulkColourPreview } from '@/lib/bulkFilamentPreviews'
 import FilamentColourPreview from '@/components/Shop/FilamentColourPreview'
 afterEach(cleanup)
-it('keeps all 106 original inventory identities with only verified display previews',()=>{
-  expect(evidence.entries).toHaveLength(106)
-  expect(new Set(evidence.entries.map(e=>e.productId+':'+e.optionId)).size).toBe(106)
+it('keeps all 111 original inventory identities with only verified display previews',()=>{
+  expect(evidence.entries).toHaveLength(111)
+  expect(new Set(evidence.entries.map(e=>e.productId+':'+e.optionId)).size).toBe(111)
   expect(evidence.entries.filter(e=>e.preview.kind==='image')).toHaveLength(42)
   expect(evidence.entries.filter(e=>e.preview.kind==='swatch')).toHaveLength(49)
-  expect(evidence.entries.filter(e=>e.preview.kind==='unavailable')).toHaveLength(15)
+  expect(evidence.entries.filter(e=>e.preview.kind==='unavailable')).toHaveLength(20)
   for(const e of evidence.entries){expect(bulkColourPreview({id:e.productId,slug:e.slug},{id:e.optionId,name:e.originalName})).toEqual(e.preview)}
 })
 it('fails closed for changed names, IDs, materials or products',()=>{
@@ -36,4 +37,13 @@ it('explains every unavailable preview without substituting another colour',()=>
     const view=render(<FilamentColourPreview preview={e.preview} name={e.originalName}/>);
     expect(screen.getByRole('img',{name:e.preview.label+': preview unavailable. '+e.preview.reason})).toBeInTheDocument();view.unmount()
   }
+})
+
+it('covers every one of the 111 live colour identities across 18 products without dropping FIT options',()=>{
+  expect(liveIdentities.products).toHaveLength(18)
+  const checked=liveIdentities.products.flatMap(product=>product.colours.map(option=>({product,option,preview:bulkColourPreview(product,option)})))
+  expect(checked).toHaveLength(111);expect(checked.every(e=>e.preview)).toBe(true)
+  expect(new Set(evidence.entries.map(e=>e.productId)).size).toBe(18)
+  const fit=checked.filter(e=>e.product.slug.endsWith('-fit'))
+  expect(fit).toHaveLength(5);expect(fit.every(e=>e.preview.kind==='unavailable'&&e.preview.reason.startsWith('No verified FIT '))).toBe(true)
 })

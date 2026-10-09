@@ -2,7 +2,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fixtureProduct, fixtureInput } from '../fixtures/bulkFilament'
 import { bulkCatalogue } from '@/lib/bulkFilament'
-const mock=vi.hoisted(()=>({auth:vi.fn(),admin:vi.fn(),db:vi.fn(),catalogue:vi.fn(),rate:vi.fn(),store:{findOne:vi.fn(),insertOne:vi.fn(),findOneAndUpdate:vi.fn(),find:vi.fn()}}))
+const mock=vi.hoisted(()=>({auth:vi.fn(),admin:vi.fn(),db:vi.fn(),catalogue:vi.fn(),rate:vi.fn(),notify:vi.fn(),store:{findOne:vi.fn(),insertOne:vi.fn(),findOneAndUpdate:vi.fn(),find:vi.fn()}}))
+vi.mock('@/lib/bulkFilamentEmail',()=>({notifyBulkOwner:mock.notify,bulkEmailStatus:d=>d?.notifications?.email?.status || 'not_configured'}))
 vi.mock('@clerk/nextjs/server',()=>({auth:mock.auth}))
 vi.mock('@/lib/checkPrivileges',()=>({checkAdminPrivileges:mock.admin}))
 vi.mock('@/lib/bulkFilamentHttp',async()=>{
@@ -14,10 +15,10 @@ vi.mock('@/lib/bulkFilamentHttp',async()=>{
 })
 import { POST } from '@/app/api/bulk-filament/requests/route'
 import { GET as catalogueGET } from '@/app/api/bulk-filament/catalogue/route'
-import { GET, PATCH } from '@/app/api/admin/bulk-filament/route'
+import { GET, PATCH, POST as retryPOST } from '@/app/api/admin/bulk-filament/route'
 const request=(body,origin='https://fit.test',method='POST')=>new Request('https://fit.test/api/bulk-filament/requests',{method,headers:{origin,'Content-Type':'application/json'},body:JSON.stringify(body)})
 beforeEach(()=>{
-  vi.clearAllMocks();mock.auth.mockResolvedValue({userId:'admin'});mock.admin.mockResolvedValue(true)
+  vi.clearAllMocks();mock.notify.mockResolvedValue('not_configured');mock.auth.mockResolvedValue({userId:'admin'});mock.admin.mockResolvedValue(true)
   mock.db.mockResolvedValue({collection:()=>mock.store});mock.catalogue.mockResolvedValue(bulkCatalogue([fixtureProduct()]))
   mock.rate.mockResolvedValue();mock.store.findOne.mockResolvedValue(null);mock.store.insertOne.mockResolvedValue({acknowledged:true})
 })
@@ -44,4 +45,31 @@ describe('bulk API security and responses',()=>{
     const r=await PATCH(request({requestId:'12345678-1234-4234-8234-123456789abc',revision:0,status:'reviewing',ownerNote:'Check actual rolls'},'https://fit.test','PATCH'))
     expect(r.status).toBe(409);expect(mock.store.findOneAndUpdate.mock.calls[0][0].revision).toBe(0)
   })
+})
+
+it.each(['accepted','failed','uncertain','sending'])('returns a saved enquiry receipt with truthful provider outcome %s',async status=>{
+  mock.notify.mockResolvedValue(status)
+  const r=await POST(request(fixtureInput(bulkCatalogue([fixtureProduct()]))))
+  expect(r.status).toBe(201);expect(await r.json()).toMatchObject({status:'new',ownerEmailStatus:status,notificationCoverage:status==='accepted'?'owner_dashboard_and_email_provider':'owner_dashboard_only'})
+  expect(mock.store.insertOne).toHaveBeenCalledOnce()
+})
+it.each([null,'customer'])('protects owner email retries from non-admin %s',async user=>{
+  mock.auth.mockResolvedValue({userId:user});mock.admin.mockResolvedValue(false)
+  expect((await retryPOST(request({action:'retry_owner_email',requestId:'12345678-1234-4234-8234-123456789abc'}))).status).toBe(user?403:401)
+  expect(mock.notify).not.toHaveBeenCalled()
+})
+it('blocks cross-origin owner retries before auth or sending',async()=>{
+  expect((await retryPOST(request({},'https://foreign.test'))).status).toBe(403);expect(mock.notify).not.toHaveBeenCalled()
+})
+it('requires the explicit retry action and an existing enquiry',async()=>{
+  expect((await retryPOST(request({}))).status).toBe(400)
+  expect((await retryPOST(request({action:'retry_owner_email',requestId:'12345678-1234-4234-8234-123456789abc'}))).status).toBe(404)
+  expect(mock.notify).not.toHaveBeenCalled()
+})
+it('lets the authenticated owner retry without changing enquiry content or sending customer communications',async()=>{
+  const doc={_id:'12345678-1234-4234-8234-123456789abc',status:'new',revision:0,notifications:{email:{status:'failed',attempts:1}}}
+  mock.store.findOne.mockResolvedValue(doc);mock.notify.mockResolvedValue('accepted')
+  const r=await retryPOST(request({action:'retry_owner_email',requestId:doc._id}))
+  expect(r.status).toBe(200);expect((await r.json()).request.ownerEmailStatus).toBe('accepted')
+  expect(mock.notify).toHaveBeenCalledWith(mock.store,doc._id,{retry:true});expect(mock.store.insertOne).not.toHaveBeenCalled();expect(mock.store.findOneAndUpdate).not.toHaveBeenCalled()
 })

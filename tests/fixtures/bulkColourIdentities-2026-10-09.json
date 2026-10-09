@@ -1,0 +1,575 @@
+{
+  "source": "Public bulk catalogue observed 2026-10-09T07:44:56Z; identities only, no stock or price fixture",
+  "products": [
+    {
+      "id": "693e38618065b53baa7c5944",
+      "slug": "1kg-pla-3d-printing-filament-lanbo",
+      "name": "1kg PLA 3D Printing Filament - Lanbo",
+      "colours": [
+        {
+          "id": "693e38618065b53baa7c5946",
+          "name": "Black"
+        },
+        {
+          "id": "693e38618065b53baa7c5947",
+          "name": "White"
+        },
+        {
+          "id": "6974c75458c1b629ea92e75b",
+          "name": "Red"
+        },
+        {
+          "id": "6974c75458c1b629ea92e75c",
+          "name": "Green"
+        },
+        {
+          "id": "6974c75458c1b629ea92e75d",
+          "name": "Blue"
+        },
+        {
+          "id": "6974c75458c1b629ea92e75e",
+          "name": "Transparent"
+        },
+        {
+          "id": "6974c75458c1b629ea92e75f",
+          "name": "Yellow"
+        },
+        {
+          "id": "6974c75458c1b629ea92e760",
+          "name": "Orange"
+        },
+        {
+          "id": "6974c75458c1b629ea92e761",
+          "name": "Ivory White"
+        },
+        {
+          "id": "6974c75458c1b629ea92e762",
+          "name": "Natural Colour"
+        },
+        {
+          "id": "6974c75458c1b629ea92e763",
+          "name": "Technology Grey"
+        },
+        {
+          "id": "6974c75458c1b629ea92e764",
+          "name": "Grey"
+        },
+        {
+          "id": "6974c75458c1b629ea92e765",
+          "name": "Black Grey"
+        },
+        {
+          "id": "6974c75458c1b629ea92e766",
+          "name": "Navy Grey"
+        },
+        {
+          "id": "6974c75458c1b629ea92e767",
+          "name": "Silver"
+        },
+        {
+          "id": "6974c75458c1b629ea92e768",
+          "name": "Orange Yellow"
+        },
+        {
+          "id": "6974c75458c1b629ea92e769",
+          "name": "Cherry Pink"
+        },
+        {
+          "id": "6974c75458c1b629ea92e76a",
+          "name": "Mint Green"
+        },
+        {
+          "id": "6974c75458c1b629ea92e76b",
+          "name": "Bright Green"
+        },
+        {
+          "id": "6974c75458c1b629ea92e76c",
+          "name": "Mango"
+        },
+        {
+          "id": "6974c75458c1b629ea92e76d",
+          "name": "Sky Blue"
+        },
+        {
+          "id": "6974c75458c1b629ea92e76e",
+          "name": "Golden"
+        },
+        {
+          "id": "6974c75458c1b629ea92e76f",
+          "name": "Cyan"
+        },
+        {
+          "id": "6974c75458c1b629ea92e770",
+          "name": "Pink Rose"
+        },
+        {
+          "id": "6974c75458c1b629ea92e771",
+          "name": "Skin"
+        },
+        {
+          "id": "6974c75458c1b629ea92e772",
+          "name": "Sapphire Blue"
+        },
+        {
+          "id": "6974c75458c1b629ea92e773",
+          "name": "Coffee"
+        },
+        {
+          "id": "6974c75458c1b629ea92e774",
+          "name": "Marble Colour"
+        },
+        {
+          "id": "6974c75458c1b629ea92e775",
+          "name": "Wood Colour"
+        }
+      ]
+    },
+    {
+      "id": "6a3b925f39fde201cc5d6e62",
+      "slug": "1kg-petg-3d-printing-filament-lanbo",
+      "name": "1kg PETG 3D Printing Filament - Lanbo",
+      "colours": [
+        {
+          "id": "6a3b925f39fde201cc5d6e64",
+          "name": "Black"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e65",
+          "name": "Red"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e66",
+          "name": "Green"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e67",
+          "name": "Blue"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e68",
+          "name": "Transparent"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e69",
+          "name": "Yellow"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e6a",
+          "name": "Orange"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e6b",
+          "name": "Pearl White"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e6c",
+          "name": "Forest Green"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e6d",
+          "name": "Technology Grey"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e6e",
+          "name": "Coffee Gold"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e6f",
+          "name": "Grey"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e70",
+          "name": "Orange Yellow"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e71",
+          "name": "Silvery"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e72",
+          "name": "Navy Grey"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e73",
+          "name": "Purple"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e74",
+          "name": "Cherry Pink"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e75",
+          "name": "Pink"
+        },
+        {
+          "id": "6a3b925f39fde201cc5d6e76",
+          "name": "Bright Green"
+        }
+      ]
+    },
+    {
+      "id": "6a3b9a60e30b0ba74b95ccd9",
+      "slug": "1kg-marble-pla-3d-printing-filament-fit",
+      "name": "1kg Marble PLA 3D Printing Filament - FIT",
+      "colours": [
+        {
+          "id": "6a3b9a60e30b0ba74b95ccdb",
+          "name": "Grey Marble"
+        },
+        {
+          "id": "6a3b9a60e30b0ba74b95ccdc",
+          "name": "Marble"
+        },
+        {
+          "id": "6a3b9a60e30b0ba74b95ccdd",
+          "name": "Beige Marble"
+        }
+      ]
+    },
+    {
+      "id": "6a3b99fd18a7b14fab8b72a4",
+      "slug": "1kg-marble-pla-3d-printing-filament-lanbo",
+      "name": "1kg Marble PLA 3D Printing Filament - Lanbo",
+      "colours": [
+        {
+          "id": "6a3b99fd18a7b14fab8b72a6",
+          "name": "Marble"
+        }
+      ]
+    },
+    {
+      "id": "6a3b9a3018a7b14fab8b72f5",
+      "slug": "1kg-wood-pla-3d-printing-filament-fit",
+      "name": "1kg Wood PLA 3D Printing Filament - FIT",
+      "colours": [
+        {
+          "id": "6a3b9a3018a7b14fab8b72f7",
+          "name": "Light Wood"
+        },
+        {
+          "id": "6a3b9a3018a7b14fab8b72f8",
+          "name": "Dark Wood"
+        }
+      ]
+    },
+    {
+      "id": "6a3b99a72c857659957ef798",
+      "slug": "1kg-wood-pla-3d-printing-filament-lanbo",
+      "name": "1kg Wood PLA 3D Printing Filament - Lanbo",
+      "colours": [
+        {
+          "id": "6a3b99a72c857659957ef79a",
+          "name": "Wood"
+        }
+      ]
+    },
+    {
+      "id": "6aa8ead8a1ca543d895a490f",
+      "slug": "bambu-lab-3d-printing-filament-1kg-abs",
+      "name": "Bambu Lab 3D Printing Filament 1kg ABS",
+      "colours": [
+        {
+          "id": "6aa8ead8a1ca543d895a4911",
+          "name": "White (40100)"
+        }
+      ]
+    },
+    {
+      "id": "6aa8eae5a1ca543d895a4919",
+      "slug": "bambu-lab-3d-printing-filament-1kg-asa",
+      "name": "Bambu Lab 3D Printing Filament 1kg ASA",
+      "colours": [
+        {
+          "id": "6aa8eae5a1ca543d895a491b",
+          "name": "Black (45101)"
+        },
+        {
+          "id": "6aa8eae5a1ca543d895a491c",
+          "name": "Grey (45102)"
+        },
+        {
+          "id": "6aa8eae5a1ca543d895a491d",
+          "name": "White (45100)"
+        }
+      ]
+    },
+    {
+      "id": "6aa8eaeda1ca543d895a4927",
+      "slug": "bambu-lab-3d-printing-filament-1kg-petg-basic",
+      "name": "Bambu Lab 3D Printing Filament 1kg PETG Basic",
+      "colours": [
+        {
+          "id": "6aa8eaeda1ca543d895a4929",
+          "name": "White (30106)"
+        },
+        {
+          "id": "6aa8eaeda1ca543d895a492a",
+          "name": "Black (30105)"
+        }
+      ]
+    },
+    {
+      "id": "6974d555afadda8ec64083c3",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Basic",
+      "colours": [
+        {
+          "id": "6974d555afadda8ec64083c5",
+          "name": "Jade White (10100)"
+        },
+        {
+          "id": "6974d555afadda8ec64083c6",
+          "name": "Silver (10102)"
+        },
+        {
+          "id": "6974d555afadda8ec64083c7",
+          "name": "Gray (10103)"
+        },
+        {
+          "id": "6974d555afadda8ec64083c8",
+          "name": "Red (10200)"
+        },
+        {
+          "id": "6974d555afadda8ec64083c9",
+          "name": "Magenta (10202)"
+        },
+        {
+          "id": "6974d555afadda8ec64083ca",
+          "name": "Cobalt Blue (10604)"
+        },
+        {
+          "id": "6974d555afadda8ec64083cb",
+          "name": "Sunflower Yellow (10402)"
+        },
+        {
+          "id": "6974d555afadda8ec64083cc",
+          "name": "Coca Brown (10802)"
+        },
+        {
+          "id": "6974d555afadda8ec64083cd",
+          "name": "Mistletoe Green (10502)"
+        },
+        {
+          "id": "6974d555afadda8ec64083ce",
+          "name": "Purple (10700)"
+        },
+        {
+          "id": "6974d555afadda8ec64083cf",
+          "name": "Pink (10203)"
+        },
+        {
+          "id": "6974d555afadda8ec64083d0",
+          "name": "Bambu Green (10501)"
+        },
+        {
+          "id": "6974d555afadda8ec64083d1",
+          "name": "Bronze (10801)"
+        },
+        {
+          "id": "6974d555afadda8ec64083d2",
+          "name": "Yellow (10400)"
+        },
+        {
+          "id": "6974d555afadda8ec64083d3",
+          "name": "Hot Pink (10204)"
+        },
+        {
+          "id": "6974d555afadda8ec64083d4",
+          "name": "Cyan (10603)"
+        },
+        {
+          "id": "6974d555afadda8ec64083d5",
+          "name": "Blue Gray (10602)"
+        },
+        {
+          "id": "6974d555afadda8ec64083d6",
+          "name": "Orange (10300)"
+        },
+        {
+          "id": "6974d555afadda8ec64083d7",
+          "name": "Brown (10800)"
+        },
+        {
+          "id": "6974d555afadda8ec64083d8",
+          "name": "Indigo Purple (10701)"
+        },
+        {
+          "id": "6974d555afadda8ec64083d9",
+          "name": "Gold (10401)"
+        },
+        {
+          "id": "6974d555afadda8ec64083da",
+          "name": "Pumpkin Orange (10301)"
+        },
+        {
+          "id": "6974d555afadda8ec64083db",
+          "name": "Beige (10201)"
+        },
+        {
+          "id": "6974d555afadda8ec64083dc",
+          "name": "Black (10101)"
+        },
+        {
+          "id": "6aa7fc92f6a86fe1ad3e8812",
+          "name": "Dark Gray (10105)"
+        },
+        {
+          "id": "6aa7fc92f6a86fe1ad3e8813",
+          "name": "Light Gray (10104)"
+        },
+        {
+          "id": "6aa7fc92f6a86fe1ad3e8814",
+          "name": "Maroon Red (10205)"
+        },
+        {
+          "id": "6aa7fc92f6a86fe1ad3e8815",
+          "name": "Bright Green (10503)"
+        },
+        {
+          "id": "6aa7fc92f6a86fe1ad3e8816",
+          "name": "Turquoise (10605)"
+        },
+        {
+          "id": "6aa7fc92f6a86fe1ad3e8817",
+          "name": "Blue (10600)"
+        }
+      ]
+    },
+    {
+      "id": "6aa8ead1a1ca543d895a4900",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-basic-gradient",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Basic Gradient",
+      "colours": [
+        {
+          "id": "6aa8ead1a1ca543d895a4902",
+          "name": "Mint Lime (10904)"
+        },
+        {
+          "id": "6aa8ead1a1ca543d895a4903",
+          "name": "Pink Citrus (10903)"
+        },
+        {
+          "id": "6aa8ead1a1ca543d895a4904",
+          "name": "Ocean to Meadow (10902)"
+        },
+        {
+          "id": "6aa8ead1a1ca543d895a4905",
+          "name": "Cotton Candy Cloud (10905)"
+        }
+      ]
+    },
+    {
+      "id": "6aa8eaf1a1ca543d895a492e",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-glow",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Glow",
+      "colours": [
+        {
+          "id": "6aa8eaf1a1ca543d895a4930",
+          "name": "Glow Green (15500)"
+        },
+        {
+          "id": "6aa8eaf1a1ca543d895a4931",
+          "name": "Glow Yellow (15400)"
+        }
+      ]
+    },
+    {
+      "id": "6aa8ead5a1ca543d895a4909",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-lite",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Lite",
+      "colours": [
+        {
+          "id": "6aa8ead5a1ca543d895a490b",
+          "name": "Cocoa Brown (16800)"
+        }
+      ]
+    },
+    {
+      "id": "6aa8eacda1ca543d895a48f2",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-matte",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Matte",
+      "colours": [
+        {
+          "id": "6aa8eacda1ca543d895a48f4",
+          "name": "Ivory White (11100)"
+        },
+        {
+          "id": "6aa8eacda1ca543d895a48f5",
+          "name": "Ash Gray (11102)"
+        },
+        {
+          "id": "6aa8eacda1ca543d895a48f6",
+          "name": "Sakura Pink (11201)"
+        },
+        {
+          "id": "6aa8eacda1ca543d895a48f7",
+          "name": "Lemon Yellow (11400)"
+        },
+        {
+          "id": "6aa8eacda1ca543d895a48f8",
+          "name": "Charcoal (11101)"
+        },
+        {
+          "id": "6aa8eacda1ca543d895a48f9",
+          "name": "Sky Blue (11601)"
+        }
+      ]
+    },
+    {
+      "id": "6aa8eaf9a1ca543d895a493c",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-silk",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Silk+",
+      "colours": [
+        {
+          "id": "6aa8eaf9a1ca543d895a493e",
+          "name": "Silver (13109)"
+        },
+        {
+          "id": "6aa8eaf9a1ca543d895a493f",
+          "name": "Mint (13507)"
+        }
+      ]
+    },
+    {
+      "id": "6aa8eafca1ca543d895a4943",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-tough",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Tough+",
+      "colours": [
+        {
+          "id": "6aa8eafca1ca543d895a4945",
+          "name": "White (12107)"
+        },
+        {
+          "id": "6aa8eafca1ca543d895a4946",
+          "name": "Black (12104)"
+        }
+      ]
+    },
+    {
+      "id": "6aa8eaf5a1ca543d895a4935",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pla-wood",
+      "name": "Bambu Lab 3D Printing Filament 1kg PLA Wood",
+      "colours": [
+        {
+          "id": "6aa8eaf5a1ca543d895a4937",
+          "name": "Black Walnut (13107)"
+        },
+        {
+          "id": "6aa8eaf5a1ca543d895a4938",
+          "name": "Rosewood (13204)"
+        }
+      ]
+    },
+    {
+      "id": "6aa8eae9a1ca543d895a4921",
+      "slug": "bambu-lab-3d-printing-filament-1kg-pva-support",
+      "name": "Bambu Lab 3D Printing Filament 1kg PVA Support",
+      "colours": [
+        {
+          "id": "6aa8eae9a1ca543d895a4923",
+          "name": "White (66400)"
+        }
+      ]
+    }
+  ]
+}
