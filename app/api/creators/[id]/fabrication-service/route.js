@@ -9,9 +9,11 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request, props) {
   try {
-    await enforceFabricationRate(request, 'public')
     const { id } = await props.params
-    const service = await loadPublicFabrication(id, catalogPageOptions(request.url))
+    const service = await loadPublicFabrication(id, {
+      ...catalogPageOptions(request.url),
+      beforeAvailable: () => enforceFabricationRate(request, 'public'),
+    })
     if (!service) return json({ enabled: false })
     const catalog = await shapeFabricationCatalog(service.catalog, service.creator.userId)
     return json({ ...catalog, enabled: true, creator: service.creator, nextCursor: service.nextCursor, total: service.total,
