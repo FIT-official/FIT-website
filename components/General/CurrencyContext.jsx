@@ -10,11 +10,17 @@ export function CurrencyProvider({ children }) {
     useEffect(() => {
         async function detectCurrency() {
             try {
-                const res = await fetch("https://ipapi.co/json/");
+                const cached = sessionStorage.getItem('fit-display-currency');
+                if (supportedCountries.some(country => country.currency === cached)) {
+                    setCurrency(cached);
+                    return;
+                }
+                const res = await fetch('/api/display-currency');
+                if (!res.ok) return;
                 const data = await res.json();
-                const countryCode = data.country;
-                const found = supportedCountries.find(c => c.code === countryCode);
-                setCurrency(found?.currency || "SGD");
+                const detected = supportedCountries.some(country => country.currency === data.currency) ? data.currency : 'SGD';
+                setCurrency(detected);
+                sessionStorage.setItem('fit-display-currency', detected);
             } catch {
                 setCurrency("SGD");
             }

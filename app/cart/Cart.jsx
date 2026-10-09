@@ -23,13 +23,13 @@ import { ADD_ADDRESS_TO_CHECKOUT, deliveryMismatchReason } from '@/lib/checkoutA
 import { HiCheck, HiExclamationCircle } from 'react-icons/hi';
 import { FaRegCircleCheck } from 'react-icons/fa6';
 
-// Helper to fetch delivery type metadata from /api/admin/settings (AppSettings)
+// Public display metadata; delivery fees are calculated by checkout on the server.
 async function fetchDeliveryTypesMeta() {
     try {
-        const res = await storeFetch('/api/admin/settings');
+        const res = await storeFetch('/api/delivery-types');
         if (!res.ok) return {};
         const data = await res.json();
-        const types = (data?.settings?.additionalDeliveryTypes || []).reduce((acc, dt) => {
+        const types = (data.deliveryTypes || []).reduce((acc, dt) => {
             acc[dt.name] = dt;
             return acc;
         }, {});

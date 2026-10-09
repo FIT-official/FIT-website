@@ -7,18 +7,10 @@ export async function GET(request) {
     try {
         await connectToDatabase();
 
-        let settings = await AppSettings.findById(getAppSettingsId());
-        if (!settings) {
-            settings = new AppSettings({
-                _id: getAppSettingsId(),
-                additionalDeliveryTypes: [],
-                additionalOrderStatuses: [],
-                additionalCategories: []
-            });
-            await settings.save();
-        }
+        const settings = await AppSettings.findById(getAppSettingsId())
+            .select('additionalCategories').lean();
 
-        const categories = (settings.additionalCategories || []).map(cat => ({
+        const categories = (settings?.additionalCategories || []).map(cat => ({
             name: cat.name,
             displayName: cat.displayName,
             type: cat.type,

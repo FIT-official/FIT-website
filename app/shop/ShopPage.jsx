@@ -25,7 +25,7 @@ function ShopPage({ initialProducts = [] }) {
     useEffect(() => { setSearch(urlSearch); }, [urlSearch]);
 
     const { content: bannerContent } = useContent('shop/banner', {
-        bannerImage: '/placeholder.jpg'
+        bannerImage: ''
     });
 
     const [bannerSrc, setBannerSrc] = useState(null);
@@ -34,7 +34,7 @@ function ShopPage({ initialProducts = [] }) {
     useEffect(() => {
         const bi = bannerContent?.bannerImage;
         if (!bi || bi === '/placeholder.jpg') {
-            setBannerSrc('/placeholder.jpg');
+            setBannerSrc(null);
             setIsBannerLoaded(false);
             return;
         }
@@ -94,7 +94,7 @@ function ShopPage({ initialProducts = [] }) {
 
     return (
         <div className='fle flex-col w-full min-h-[92vh] border-b border-borderColor px-8'>
-            <div className="mb-4 w-full mt-8">
+            {bannerSrc && <div className="mb-4 w-full mt-8">
                 <div className="relative aspect-16/5 w-full">
                     {bannerSrc && (
                         <Image
@@ -106,13 +106,13 @@ function ShopPage({ initialProducts = [] }) {
                             className={`object-cover transition-all duration-500 ease-in-out ${isBannerLoaded ? 'opacity-100' : 'opacity-0'}`}
                             onLoad={() => setIsBannerLoaded(true)}
                             onError={() => {
-                                setBannerSrc('/placeholder.jpg');
-                                setIsBannerLoaded(true);
+                                setBannerSrc(null);
+                                setIsBannerLoaded(false);
                             }}
                         />
                     )}
                 </div>
-            </div>
+            </div>}
 
             <div className='flex justify-between w-full border border-borderColor p-2 rounded-lg bg-baseColor mb-4'>
                 <input
