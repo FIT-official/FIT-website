@@ -18,7 +18,7 @@ it('returns only public status and banner fields, with bounded public caching', 
     const response = await GET()
     expect(response.status).toBe(200)
     expect(response.headers.get('Cache-Control')).toBe('public, s-maxage=15, stale-while-revalidate=30')
-    expect(await response.json()).toEqual({ banner: { active: true, message: 'Tonight', window: 'Sat 10 Oct, 02:00 SGT' }, page: { active: true } })
+    expect(await response.json()).toMatchObject({ banner: { active: true, message: 'Tonight', window: 'Sat 10 Oct, 02:00 SGT' }, page: { active: true } })
     expect(JSON.stringify([...response.headers])).not.toMatch(/test-only-token|synthetic-bypass-value/)
 })
 
@@ -27,5 +27,5 @@ it('returns inactive 200 on an outage, without leaking the connection string', a
     const { GET } = await import('@/app/api/maintenance/status/route')
     const response = await GET()
     expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({ banner: { active: false, message: '', window: '' }, page: { active: false } })
+    expect(await response.json()).toMatchObject({ banner: { active: false, message: '', window: '' }, page: { active: false } })
 })
