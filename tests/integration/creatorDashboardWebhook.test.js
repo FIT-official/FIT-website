@@ -99,7 +99,7 @@ function setup() {
         user: { userId: 'buyer', cart: [originalCart()], orderHistory: [] },
         products: { product1: { _id: 'product1', name: 'Changed after checkout', basePrice: { presentmentAmount: 999 },
             paidAssets: ['private/replacement.stl'], stock: 10, infiniteStock: false, variantTypes: [], sales: [] } },
-        requests: {}, orders: [], assets: [], subOrders: [], events: [] };
+        requests: {}, orders: [], assets: [], subOrders: [], events: [], jobs: [] };
     f.failOrder = false; f.failTransaction = false; f.options = []; f.transactions = 0;
     f.sendEmail.mockReset(); f.notify.mockReset();
 }
@@ -108,9 +108,11 @@ beforeEach(() => {
     vi.stubEnv('STRIPE_SECRET_KEY', testKey);
     setup(); vi.stubEnv('CREATOR_DASHBOARD_ENABLED', 'true'); vi.stubEnv('CREATOR_DASHBOARD_FIXTURES', 'false');
 });
+vi.mock('@/models/PrintJob', () => ({ default: { create: async rows => { rows.forEach((row, index) => { row._id = `job-${index}`; }); f.draft.jobs.push(...structuredClone(rows)); return rows; } } }));
 vi.mock('@/models/SubOrder', () => ({ default: {
+    updateOne: async () => ({}),
     updateMany: async (filter, update) => { let count = 0; for (const row of f.draft.subOrders) { if (row.orderId === filter.orderId && row.status !== 'refunded') { row.status = update.$set.status; row.statusHistory.push(update.$push.statusHistory); count++; } } return { modifiedCount: count }; },
-    create: async (rows, options) => { f.options.push(options); f.draft.subOrders.push(...structuredClone(rows)); return rows; },
+    create: async (rows, options) => { f.options.push(options); rows.forEach((row, index) => { row._id = String(index + 1).padStart(24, '0'); }); f.draft.subOrders.push(...structuredClone(rows)); return rows; },
 } }));
 vi.mock('@/models/ProcessedStripeEvent', () => ({ default: {
     findOne: query => ({ session: async () => f.draft.events.find(e => e.eventId === query.eventId) }),
@@ -127,6 +129,8 @@ describe('creator dashboard signed Stripe integration', () => {
         expect(f.state.orders).toHaveLength(1); expect(f.state.subOrders).toHaveLength(2); expect(f.state.events).toHaveLength(1);
         expect(f.state.orders[0].status).toBe('paid'); expect(f.state.orders[0].trackingToken).toMatch(/^[a-f0-9]{32}$/);
         expect(f.state.subOrders.map(s => s.storeId)).toEqual(['user_A', 'user_B']);
+        expect(f.state.jobs).toHaveLength(2); expect(f.state.jobs.every(job => job.status === 'queued')).toBe(true);
+        expect(f.state.jobs[0].source.refId).toBe(String(f.state.subOrders[0]._id));
         expect(f.options.every(o => o.session === dbSession)).toBe(true);
         expect(f.sendEmail).not.toHaveBeenCalled();
     });
