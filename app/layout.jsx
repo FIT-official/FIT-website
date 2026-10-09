@@ -31,7 +31,7 @@ const GEO_JSON_LD = {
       "@id": "https://www.fixitoday.com/#organization",
       "name": "Fix It Today®",
       "url": "https://www.fixitoday.com",
-      "logo": "https://www.fixitoday.com/fitogimage.png",
+      "logo": "https://www.fixitoday.com/fitogimage.jpg",
       "description": "3D printing, custom metal parts, CAD design, electronics, printer repair and STEM workshops in Singapore.",
       "email": "fixittoday.contact@gmail.com",
       "sameAs": ["https://www.linkedin.com/company/fix-it-today-sg"],
@@ -58,8 +58,8 @@ export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'Fix It Today | 3D Printing & Custom Parts Singapore',
   description: '3D printing, custom metal parts, CAD design, electronics, printer repair and STEM workshops in Singapore.',
-  openGraph: { siteName: 'Fix It Today', locale: 'en_SG', type: 'website', images: [absoluteUrl('/fitogimage.png')] },
-  twitter: { card: 'summary_large_image', images: [absoluteUrl('/fitogimage.png')] },
+  openGraph: { siteName: 'Fix It Today', locale: 'en_SG', type: 'website', images: [absoluteUrl('/fitogimage.jpg')] },
+  twitter: { card: 'summary_large_image', images: [absoluteUrl('/fitogimage.jpg')] },
   robots: { index: true, follow: true, googleBot: { 'max-image-preview': 'large' } },
 };
 

@@ -21,7 +21,7 @@ describe('page search metadata', () => {
 
     it('provides a real fallback share image when no page image is supplied', () => {
         const metadata = buildPageMetadata({ title: 'FIT', description: 'FIT services.', path: '/', image: '' })
-        expect(metadata.openGraph.images).toEqual(['https://www.fixitoday.com/fitogimage.png'])
+        expect(metadata.openGraph.images).toEqual(['https://www.fixitoday.com/fitogimage.jpg'])
     })
 
     it('overrides general and Google robots for private pages', () => {

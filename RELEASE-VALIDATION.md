@@ -27,3 +27,14 @@ A separate authenticated production repair readiness URL was blocked by the brow
 The release still requires exact-commit CI, candidate preview health, a fresh main-head check and confirmed production deployment identity. Keep existing maintenance settings unchanged. No live payments, orders, enquiries, customer/owner communications, public test posts, private account record writes or unverified photography are part of release testing.
 
 The earlier commerce audit gaps remain separate: notification identity/delivery, STEP conversion, approved repair charges, creator smart replies and fleet telemetry. Source feature limits and official references are recorded in the existing readiness files.
+
+
+## Subsequent main reconciliation
+
+Canonical main advanced to `5b309ac2290f3d45ddf0651aedacc40f2434f4f6` during candidate CI. Its six additional commits are preserved, including the gated homepage, shared bounded Edge Config read, conditional confirmed facts, compressed social image and Singapore function region. No flags, credentials or infrastructure settings were changed by this integration.
+
+The merged source passes 226 focused homepage/maintenance/route/stock tests (12 files), a fresh complete production build, and whole-repository lint (zero errors / 28 existing warnings). Receipts: `release-5b309-home-maintenance-receipt.json`, `e-node22-full-default-release-5b309-integrated-receipt.json`, and `release-5b309-integrated-lint-receipt.json` in `../receipts`. Full regression/coverage for the new exact merge commit is delegated to the existing GitHub CI workflow before production publication; the earlier 3491-test local result is evidence for its predecessor, not the updated source.
+
+The predecessor preview `dpl_9PTWwrX7bwsh6BcNfWP1mxFFqFKm` at `https://fit-website-p3zzfd0p3-fit-admins-projects.vercel.app/community` reached "No published posts yet" through the actual service path. This verifies the configured preview database and rate-limit service without writes to community records. Preview Clerk authentication rejects the preview hostname because the configured production keys allow only `fixitoday.com`; no origin grants or credentials were changed. Production-domain authentication remains a post-deployment check.
+
+The production middleware alert was investigated separately in `../INCIDENT-20261009.md`: platform-resolved 50-response scanner-like burst at 17:05–17:10 UTC, before the 17:16 readiness check; five unauthenticated public endpoints returned 200 at 17:34 UTC, and maintenance reported inactive with `source:ok`. No rollback was performed. The separate missing-image `/api/proxy` log remains outside this feature release.

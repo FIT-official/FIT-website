@@ -10,7 +10,7 @@ export const metadata = {
         siteName: "Fix It Today®",
         images: [
             {
-                url: "/fitogimage.png",
+                url: "/fitogimage.jpg",
                 width: 800,
                 height: 800,
                 alt: "Fix It Today® Photo",
