@@ -4,7 +4,7 @@
 // is now "Add to cart" (the page completes the request itself) and the print
 // choices are Strength / Surface quality instead of a purpose preset.
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 const state = vi.hoisted(() => ({ user: null, store: {}, push: vi.fn(), creator: '', failSave: false }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: state.push }), useSearchParams: () => new URLSearchParams(state.creator ? { creator: state.creator } : {}) }))
 vi.mock('next/link', () => ({ default: ({ children, ...props }) => <a {...props}>{children}</a> }))
@@ -218,6 +218,37 @@ describe('creator print farm mode', () => {
     const panel = screen.getByRole('complementary', { name: 'Your price' })
     expect(await within(panel).findByText('Courier')).toBeInTheDocument()
     expect(within(panel).getByText('Printed by').nextSibling).toHaveTextContent('Print Studio')
+  })
+
+  it.each(['before', 'after'])('keeps an early courier choice when platform delivery loads %s the farm', async order => {
+    const base = global.fetch.getMockImplementation()
+    let releaseFarm, releaseConfig
+    global.fetch.mockImplementation(async (url, init) => {
+      if (url.includes('/print-service')) return new Promise(resolve => { releaseFarm = () => resolve(ok(farmResponse({ ...profile, machineLimits: null }))) })
+      if (url === '/api/quote/config') return new Promise(resolve => { releaseConfig = () => resolve(ok({ deliveryTypes: [{ type: 'pickup', displayName: 'Collect', price: 0, needsAddress: false }] })) })
+      return base(url, init)
+    })
+    state.creator = 'print-studio'
+    // A native click as the options enter the DOM exercises the interval before
+    // passive default-selection effects settle; fireEvent's act flush hides it.
+    const observer = new MutationObserver(() => {
+      const courier = document.querySelector('input[type="radio"][value="courier"]')
+      if (!courier) return
+      observer.disconnect()
+      courier.click()
+    })
+    observer.observe(document.body, { childList: true, subtree: true })
+    try {
+      render(<PrintRequestFlow />)
+      if (order === 'before') await act(async () => releaseConfig())
+      releaseFarm()
+      const courier = await screen.findByRole('radio', { name: /Courier/ })
+      if (order === 'after') await act(async () => releaseConfig())
+      await waitFor(() => expect(courier).toBeChecked())
+      fireEvent.click(within(screen.getByRole('group', { name: 'Material' })).getByRole('button', { name: 'TPU' })); upload()
+      expect(await within(screen.getByRole('complementary', { name: 'Your price' })).findByText('Courier')).toBeInTheDocument()
+      expect(courier).toBeChecked()
+    } finally { observer.disconnect() }
   })
 
   it('blocks a model larger than the farm machine limits', async () => {
