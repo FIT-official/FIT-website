@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { randomUUID } from 'node:crypto'
-import { newGuest, guestAccess, guestName, guestCookie, guestToken, requireGuestEnabled } from '@/lib/workshopGuestIdentity'
+import { newGuest, guestAccess, guestName, guestNameKey, guestCookie, guestToken, requireGuestEnabled } from '@/lib/workshopGuestIdentity'
 import { emptyLesson, submitClassroom, moderateClassroom, classroomView, readLesson, setGuestEntry } from '@/lib/workshopGuestClassroomStore'
 import { saveWorkshopDraft, draftId } from '@/lib/workshopGuestDraftStore'
 const now = new Date('2026-10-09T02:00:00Z'), teacher = { role: 'teacher', userId: 'synthetic-teacher' }
@@ -10,6 +10,14 @@ const open = phase => ({ ...emptyLesson(), phase, feedbackOpen: phase === 'FEEDB
 const feedback = access => ({ kind: 'feedback', submissionId: randomUUID(), phaseVersion: 0, session: '2026-10-09', presentingGroup: 'g3', visitingGroup: access.group, idea: '1', whatWorks: 'The base is wide.', question: 'How does the part move?', improvement: 'Label the two parts.' })
 const refinement = () => ({ kind: 'refinement', submissionId: randomUUID(), phaseVersion: 0, expectedVersion: 0, expectedEntryVersion: 0, ideas: [1, 2].map(() => ({ feedbackUsed: 'Check the joint.', change: 'Add a label.', reason: 'The sequence is clearer.', test: 'Compare two shape models.' })) })
 describe('self-reported guest identities and isolated contributions', () => {
+    it('compares case and outer/repeated spaces without changing display names or removing accents', () => {
+        expect(guestNameKey('  ALEX   Tan  ')).toBe(guestNameKey('Alex Tan'))
+        expect(guestName('  ALEX   Tan  ')).toBe('ALEX Tan')
+        expect(guestNameKey('\u00c9LODIE')).toBe(guestNameKey('e\u0301lodie'))
+        expect(guestNameKey('\u00c9lodie')).not.toBe(guestNameKey('Elodie'))
+        expect(guestNameKey("O'Neil")).not.toBe(guestNameKey('ONeil'))
+        expect(() => guestNameKey('\nAlex')).toThrow()
+    })
     it('makes duplicate names independent and keeps tokens outside response identity', () => { const a = newGuest('g2', 'Alex', now), b = newGuest('g2', 'Alex', now); expect(a.record.seat).not.toBe(b.record.seat); expect(a.token).not.toBe(b.token); expect(a.record._id).not.toBe(a.token); expect(guestAccess(a.record, now)).not.toHaveProperty('_id'); expect(guestAccess(a.record, now)).not.toHaveProperty('token') })
     it('validates Unicode names and group range without requiring passwords', () => { expect(guestName('  李 明  ')).toBe('李 明'); expect(guestName("O'Neil")).toBe("O'Neil"); for (const name of ['', '<script>', 'test@example.com', 'https://x.test', '\nAlex', 'x'.repeat(61)]) expect(() => guestName(name)).toThrow(); for (const group of ['g0', 'g11', 'group1']) expect(() => newGuest(group, 'Alex', now)).toThrow() })
     it('expires sessions and denies revoked identities immediately', () => { const row = newGuest('g2', 'Alex', now).record; expect(() => guestAccess({ ...row, enabled: false }, now)).toThrow(); expect(() => guestAccess(row, row.expiresAt)).toThrow(); expect(() => guestAccess({ ...row, group: 'g11' }, now)).toThrow(); expect(() => newGuest('g2', 'Alex', new Date('2026-10-11T00:00:00Z'))).toThrow(); expect(row.expiresAt.getTime() - now.getTime()).toBe(86400000) })

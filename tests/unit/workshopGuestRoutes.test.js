@@ -28,6 +28,56 @@ async function join(name = 'Alex', group = 'g2') { const r = await sessionPOST(r
 beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-09T02:00:00Z')); h.rows.clear(); h.touched = []; h.reads = []; h.admin = false; h.signedIn = false; h.rows.set('workshopGuestLessons', new Map([['2026-10-09', { ...emptyLesson(), entryOpen: true, version: 1 }]])) })
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs() })
 describe('guest routes never reveal legacy class data', () => {
+    it('reuses only the cookie-owned session for case/space variants and preserves its record and draft', async () => {
+        const a = await join('Alex Tan'), b = await join('ALEX TAN')
+        const draft = { seat: a.identity.seat, topic: 'feedback-g3-idea1', expectedVersion: 0, requestId: randomUUID(), content: { idea: '1', whatWorks: 'My saved work', question: '', improvement: '' } }
+        expect((await draftsPOST(req('/api/workshop/guest/drafts?homeGroup=g2', 'POST', draft, a.cookie))).status).toBe(200)
+        const before = structuredClone([...h.rows.get('workshopGuestSessions')]), beforeDrafts = structuredClone([...h.rows.get('workshopGuestDrafts')])
+        vi.setSystemTime(new Date('2026-10-09T03:00:00Z')); h.reads = []
+        const retry = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: '  aLEX   tAN  ', group: 'g2' }, a.cookie))
+        expect(retry.status).toBe(200)
+        expect(await retry.json()).toEqual({ ...a.identity, name: 'Alex Tan' })
+        expect(retry.headers.get('set-cookie').split(';')[0]).toBe(a.cookie)
+        expect(retry.headers.get('set-cookie')).toContain('Max-Age=82800')
+        expect([...h.rows.get('workshopGuestSessions')]).toEqual(before)
+        expect([...h.rows.get('workshopGuestDrafts')]).toEqual(beforeDrafts)
+        const reads = h.reads.filter(row => row.name === 'workshopGuestSessions')
+        expect(reads).toHaveLength(1); expect(Object.keys(reads[0].q)).toEqual(['_id'])
+        const own = await draftsGET(req('/api/workshop/guest/drafts?homeGroup=g2', 'GET', undefined, a.cookie)).then(r => r.json())
+        const other = await draftsGET(req('/api/workshop/guest/drafts?homeGroup=g2', 'GET', undefined, b.cookie)).then(r => r.json())
+        expect(own.drafts).toHaveLength(1); expect(other.drafts).toHaveLength(0)
+    })
+    it('keeps two Group 4 same-name browser sessions distinct when each changes capitalization', async () => {
+        const a = await join('Kevin', 'g4'), b = await join('  KEVIN  ', 'g4')
+        expect(a.identity.seat).not.toBe(b.identity.seat)
+        for (const identity of [a, b]) {
+            const retry = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'kevin', group: 'g4' }, identity.cookie))
+            expect(retry.status).toBe(200); expect(await retry.json()).toEqual(identity.identity)
+        }
+        expect(h.rows.get('workshopGuestSessions').size).toBe(2)
+    })
+    it.each([{ name: 'ALEX', group: 'g3' }, { name: 'Alexandra', group: 'g2' }])('rejects a different identity despite a valid cookie: %j', async input => {
+        const a = await join(), before = structuredClone([...h.rows.get('workshopGuestSessions')])
+        expect((await sessionPOST(req('/api/workshop/guest/session', 'POST', input, a.cookie))).status).toBe(409)
+        expect([...h.rows.get('workshopGuestSessions')]).toEqual(before)
+    })
+    it.each(['missing', 'unknown', 'revoked', 'expired'])('never recovers another same-name session from a %s cookie', async state => {
+        const a = await join(), rows = h.rows.get('workshopGuestSessions'), old = [...rows.values()][0]
+        let cookie = a.cookie
+        if (state === 'missing') cookie = ''
+        if (state === 'unknown') cookie = 'fit_workshop_guest=' + '0'.repeat(64)
+        if (state === 'revoked') old.enabled = false
+        if (state === 'expired') old.expiresAt = new Date('2026-10-09T01:59:59Z')
+        const before = structuredClone(old)
+        const retry = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'ALEX', group: 'g2' }, cookie))
+        expect(retry.status).toBe(200); expect((await retry.json()).seat).not.toBe(a.identity.seat)
+        expect(rows.get(old._id)).toEqual(before); expect(rows.size).toBe(2)
+    })
+    it('still requires open teacher entry for a case-insensitive session retry', async () => {
+        const a = await join(); lesson().entryOpen = false
+        expect((await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'ALEX', group: 'g2' }, a.cookie))).status).toBe(403)
+        expect(h.rows.get('workshopGuestSessions').size).toBe(1)
+    })
     it('uses one fresh session/lesson command for changed and unchanged polls and rechecks revoked access', async () => {
         const a = await join()
         h.reads = []
