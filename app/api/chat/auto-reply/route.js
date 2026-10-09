@@ -4,15 +4,18 @@ import { getStreamServerClient } from "@/lib/streamChat";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
 import ChannelSummary from "@/models/ChannelSummary";
+import { sendWelcomeOnce } from '@/lib/chat/welcome';
 
 export async function POST(request) {
     try {
         const { userId } = await authenticate(request);
 
-        const body = await request.json();
+        let body;
+        try { body = await request.json(); }
+        catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
         const { channelId } = body || {};
 
-        if (!channelId) {
+        if (typeof channelId !== 'string' || !channelId.trim() || channelId.length > 128) {
             return NextResponse.json({ error: "channelId is required" }, { status: 400 });
         }
 
@@ -20,7 +23,7 @@ export async function POST(request) {
 
         // Look up the messaging channel for this id
         const channels = await serverClient.queryChannels(
-            { type: "messaging", id: channelId },
+            { type: "messaging", id: channelId, members: { $in: [userId] } },
             {},
             { limit: 1 }
         );
@@ -40,6 +43,17 @@ export async function POST(request) {
         const membersArray = Array.isArray(rawMembers)
             ? rawMembers
             : Object.values(rawMembers || {});
+
+        // The server SDK can access every channel. Authenticate the caller's
+        // membership before reading saved replies or writing any summary/message.
+        const memberIds = membersArray.map(member => member?.user_id).filter(Boolean);
+        if (!memberIds.includes(userId)) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+        if (channel.id !== channelId || channel.data?.kind !== 'creator' ||
+            new Set(memberIds).size !== 2 || memberIds.length !== 2) {
+            return NextResponse.json({ error: "Auto-replies require a creator conversation" }, { status: 400 });
+        }
 
         const otherMember = membersArray.find(
             (m) => m && m.user_id && m.user_id !== userId
@@ -103,14 +117,13 @@ export async function POST(request) {
         const creator = await User.findOne({ userId: otherUserId }).lean();
         const autoReply = creator?.metadata?.autoReplyMessage;
 
-        if (!autoReply || !autoReply.trim()) {
+        if (typeof autoReply !== 'string' || !autoReply.trim()) {
             return NextResponse.json({ success: true });
         }
 
         // Send the auto-reply from the creator account into this channel.
-        await channel.sendMessage({
-            text: autoReply,
-            user_id: otherUserId,
+        await sendWelcomeOnce({ channelId, responderId: otherUserId,
+            send: () => channel.sendMessage({ text: autoReply, user_id: otherUserId }),
         });
 
         return NextResponse.json({ success: true });
