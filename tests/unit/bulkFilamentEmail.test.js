@@ -1,8 +1,8 @@
 // @vitest-environment node
 import { beforeEach, expect, it, vi } from 'vitest'
-import { bulkCatalogue, parseBulkInput, saveBulkRequest } from '@/lib/bulkFilament'
+import { parseBulkInput, saveBulkRequest } from '@/lib/bulkFilament'
 import { bulkOwnerMessage, bulkEmailStatus, notifyBulkOwner, BULK_OWNER_EMAIL } from '@/lib/bulkFilamentEmail'
-import { fixtureProduct, fixtureInput } from '../fixtures/bulkFilament'
+import { fixtureCatalogue, fixtureInput, fixtureLine } from '../fixtures/bulkFilament'
 vi.mock('@/lib/email', () => ({ sendEmail: vi.fn(() => { throw Error('Real provider forbidden in tests') }) }))
 const env = { GMAIL_USER: 'synthetic@example.invalid', GMAIL_PASSWORD: 'synthetic-not-a-credential' }
 const accepted = () => ({ accepted: [BULK_OWNER_EMAIL] })
@@ -26,13 +26,12 @@ function memory() {
 }
 let store, input, catalogue, original
 beforeEach(async () => {
-  const product = fixtureProduct(); product.slug = '1kg-pla-3d-printing-filament-lanbo'; product.basePrice.presentmentAmount = 14.9; product.stock = 50
-  product.variantTypes.forEach(t => t.options.forEach(o => o.stock = 50))
-  original = structuredClone(product); catalogue = bulkCatalogue([product]); const body = fixtureInput(catalogue)
-  body.lines[0] = { ...body.lines[0], quantity: 4, price: 0.01, estimatedLineTotal: 0.01, remarks: '<img src=x onerror=alert(1)> separate bag' }
-  delete body.lines[0].recordedQuantity; delete body.lines[0].extraQuantity
-  const second = structuredClone(body.lines[0]); second.options[0].optionId = '444444444444444444444444'; second.quantity = 6; second.remarks = 'Keep labelled'
-  body.lines.push(second); input = parseBulkInput(body); store = memory(); await saveBulkRequest(store, input, async () => catalogue)
+  catalogue = fixtureCatalogue(); original = structuredClone(catalogue)
+  const body = fixtureInput(catalogue); body.customer.phone = '+65 8000 0000'
+  body.lines = [fixtureLine(catalogue, 'Lanbo', 'PLA', 'Black', 4), fixtureLine(catalogue, 'Lanbo', 'PLA', 'White', 6)]
+  body.lines[0] = { ...body.lines[0], price: 0.01, lineCents: 1, remarks: '<img src=x onerror=alert(1)> separate bag' }
+  body.lines[1].remarks = 'Keep labelled'
+  input = parseBulkInput(body); store = memory(); await saveBulkRequest(store, input, async () => catalogue)
 })
 const notify = options => notifyBulkOwner(store, input.clientRequestId, { env, ...options })
 it('sends exact canonical preparation details before payment information, with no invented totals', async () => {
@@ -42,12 +41,12 @@ it('sends exact canonical preparation details before payment information, with n
   expect(message.text.startsWith('Customer: Synthetic QA\nPhone: +65 8000 0000\nCollection:')).toBe(true)
   expect(message.text).toContain('Quantity: 4 rolls'); expect(message.text).toContain('Quantity: 6 rolls')
   expect(message.text).toContain('Item remarks: Keep labelled')
-  expect(message.text).toContain('SGD public subtotal: 149.00; discount: 10.00; estimated filament total: 139.00')
-  expect(message.text).toContain('estimated line total: SGD 55.60'); expect(message.text).toContain('estimated line total: SGD 83.40')
+  expect(message.text).toContain('Indicative filament total: SGD 139.00')
+  expect(message.text).toContain('Indicative line total: SGD 55.60'); expect(message.text).toContain('Indicative line total: SGD 83.40')
   expect(message.text.indexOf('Item remarks: Keep labelled')).toBeLessThan(message.text.indexOf('Payment / Stripe:'))
   expect(message.text).toContain('no payment taken; no Stripe transaction'); expect(message.text).toContain('No stock reserved')
   expect(message.html).not.toContain('<img'); expect(message.html).toContain('&lt;img')
-  expect(message.text).not.toContain('0.01'); expect(catalogue[0].stock).toBe(original.stock)
+  expect(message.text).not.toContain('0.01'); expect(catalogue).toEqual(original)
   expect(store.docs.get(input.clientRequestId).notifications.email).toMatchObject({ status: 'accepted', attempts: 1, recipient: BULK_OWNER_EMAIL })
 })
 it('collapses twelve simultaneous attempts and subsequent replay to one provider send', async () => {
@@ -116,9 +115,9 @@ it('does not call the provider if the durable claim database is unavailable', as
   expect(await notify({ send })).toBe('uncertain'); expect(send).not.toHaveBeenCalled()
 })
 it('keeps one delivery address and marks unpriced geometry or prices as requiring quotation', () => {
-  const doc = store.docs.get(input.clientRequestId); doc.fulfilment = 'delivery'; doc.address = 'SYNTHETIC ADDRESS'; doc.lines[0].estimatedLineTotal=null; doc.estimatedTotals.unpricedLines=1
+  const doc = store.docs.get(input.clientRequestId); doc.fulfilment = 'delivery'; doc.address = 'SYNTHETIC ADDRESS'; doc.lines[0].lineCents=null; doc.totalCents=null
   const message=bulkOwnerMessage(doc)
   expect(message.text).toContain('Delivery enquiry: SYNTHETIC ADDRESS'); expect(message.text).not.toContain('Collection:')
-  expect(message.text).toContain('1 line(s) still require a quotation'); expect(message.text).toContain('estimated line total: Quotation required')
+  expect(message.text).toContain('Indicative filament total: Quotation required'); expect(message.text).toContain('Indicative line total: Quotation required')
 })
 it('handles legacy absent notification data without promising an alert', () => { expect(bulkEmailStatus({})).toBe('not_configured') })

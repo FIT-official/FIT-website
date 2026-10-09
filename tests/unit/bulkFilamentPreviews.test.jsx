@@ -47,3 +47,14 @@ it('covers every one of the 111 live colour identities across 18 products withou
   const fit=checked.filter(e=>e.product.slug.endsWith('-fit'))
   expect(fit).toHaveLength(5);expect(fit.every(e=>e.preview.kind==='unavailable'&&e.preview.reason.startsWith('No verified FIT '))).toBe(true)
 })
+
+it('keeps all preview data free of price and stock fields', () => {
+  const walk = value => {
+    if (!value || typeof value !== 'object') return
+    for (const [key, child] of Object.entries(value)) {
+      expect(key).not.toMatch(/price|stock|quantity|discount|tier|amount/i)
+      walk(child)
+    }
+  }
+  walk(evidence)
+})

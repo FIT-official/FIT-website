@@ -1,100 +1,63 @@
 // @vitest-environment node
-import { describe, expect, it } from 'vitest'
-import { bulkCatalogue, parseBulkInput, prepareBulkLines, saveBulkRequest } from '@/lib/bulkFilament'
-import { fixtureProduct, fixtureInput } from '../fixtures/bulkFilament'
-const setup = () => { const product = fixtureProduct(), catalogue = bulkCatalogue([product]); return { product, catalogue, input: fixtureInput(catalogue) } }
-describe('bulk filament authoritative inventory', () => {
-  it('preserves canonical identities and stock without adding the allowance', () => {
-    const { product,catalogue,input } = setup()
-    const before = structuredClone(product), lines = prepareBulkLines(parseBulkInput(input), catalogue)
-    expect(lines[0]).toMatchObject({ recordedQuantity: 2, extraQuantity: 20, recordedProductStock: 12, publicUnitPrice: { amount: 10, currency: 'SGD' } })
-    expect(product).toEqual(before)
-  })
-  it.each(['hidden','flaggedForModeration'])('excludes %s products', field => { const p=fixtureProduct(); p[field]=true; expect(bulkCatalogue([p])).toEqual([]) })
-  it.each([{listing:'creator'},{productType:'print'},{categoryId:'Electronics'},{slug:'creator-product'}])('excludes non-FIT/non-filament records %j', fields => expect(bulkCatalogue([{...fixtureProduct(),...fields}])).toEqual([]))
-  it('repairs verified legacy labels without changing IDs', () => {
-    const p=fixtureProduct(); p.slug='bambu-lab-3d-printing-filament-1kg-pla-basic'; p.variantTypes[0].name='Spool'
-    p.variantTypes[0].options.forEach((o,i)=>o.name='Colour ('+(10100+i)+')'); p.variantTypes[1].name='Colour'
-    const c=bulkCatalogue([p]); expect(c[0].types.map(t=>t.label)).toEqual(['Colour','Spool']); expect(c[0].colourTypeId).toBe(p.variantTypes[0]._id)
-  })
-  it('does not manufacture a colour dimension',()=>{const p=fixtureProduct();p.variantTypes[0].name='Size';expect(bulkCatalogue([p])).toEqual([])})
-  it('keeps missing stock unknown and allows only the manual extra request',()=>{
-    const p=fixtureProduct();delete p.variantTypes[0].options[0].stock;const c=bulkCatalogue([p]), b=fixtureInput(c)
-    expect(()=>prepareBulkLines(parseBulkInput(b),c)).toThrow('Recorded stock')
-    b.lines[0].recordedQuantity=0;expect(prepareBulkLines(parseBulkInput(b),c)[0].extraQuantity).toBe(20)
-  })
-  it.each([NaN,Infinity,-1,0.5,'2',null])('rejects noninteger or invalid requested quantity %s', value=>{
-    const {input}=setup();input.lines[0].recordedQuantity=value;expect(()=>parseBulkInput(input)).toThrow()
-  })
-  it.each([21,-1,0.1,'20',Infinity])('rejects invalid extras %s',value=>{const {input}=setup();input.lines[0].extraQuantity=value;expect(()=>parseBulkInput(input)).toThrow()})
-  it('rejects an empty line and duplicate lines',()=>{const {input}=setup();input.lines[0].recordedQuantity=0;input.lines[0].extraQuantity=0;expect(()=>parseBulkInput(input)).toThrow();input.lines[0].extraQuantity=1;input.lines.push(structuredClone(input.lines[0]));expect(()=>parseBulkInput(input)).toThrow('duplicate')})
-  it('caps extras across spool choices for the same colour',()=>{
-    const {input,catalogue}=setup();const other=structuredClone(input.lines[0]);other.options[1].optionId='777777777777777777777777';other.extraQuantity=1;input.lines.push(other)
-    expect(()=>prepareBulkLines(parseBulkInput(input),catalogue)).toThrow('shared across spool')
-  })
-  it('aggregates the shared colour stock across spool choices',()=>{
-    const {input,catalogue}=setup();input.lines[0].recordedQuantity=3;input.lines[0].extraQuantity=0
-    const other=structuredClone(input.lines[0]);other.options[1].optionId='777777777777777777777777';input.lines.push(other)
-    expect(()=>prepareBulkLines(parseBulkInput(input),catalogue)).toThrow('shared stock')
-  })
-  it('aggregates the shared spool stock across colours',()=>{
-    const {input,catalogue}=setup();input.lines[0].recordedQuantity=4;input.lines[0].extraQuantity=0
-    const other=structuredClone(input.lines[0]);other.options[0].optionId='444444444444444444444444';input.lines.push(other)
-    expect(()=>prepareBulkLines(parseBulkInput(input),catalogue)).toThrow('shared stock')
-  })
-  it('allows 20 extras separately for distinct colours',()=>{
-    const {input,catalogue}=setup();const other=structuredClone(input.lines[0]);other.options[0].optionId='444444444444444444444444';input.lines.push(other)
-    expect(prepareBulkLines(parseBulkInput(input),catalogue).reduce((n,l)=>n+l.extraQuantity,0)).toBe(40)
-  })
-  it('uses public base price and option fees, never client totals or discounts',()=>{
-    const {input,catalogue}=setup();input.lines[0].price=0.01;input.lines[0].options[1].optionId='777777777777777777777777'
-    expect(prepareBulkLines(parseBulkInput(input),catalogue)[0].publicUnitPrice.amount).toBe(14)
-  })
-  it('does not invent a price for quote-only products',()=>{const p=fixtureProduct();p.quoteOnly=true;const c=bulkCatalogue([p]);expect(prepareBulkLines(parseBulkInput(fixtureInput(c)),c)[0].publicUnitPrice).toBe(null)})
-  it.each(['stock','price','name','option'])('rejects stale %s snapshots',what=>{
-    const {input,product}=setup()
-    if(what==='stock')product.stock--;if(what==='price')product.basePrice.presentmentAmount++;if(what==='name')product.name+=' changed';if(what==='option')product.variantTypes[0].options[0]._id='888888888888888888888888'
-    expect(()=>prepareBulkLines(parseBulkInput(input),bulkCatalogue([product]))).toThrow('changed')
-  })
-  it('rejects forged, duplicate, missing and cross-product option identities',()=>{
-    for(const change of [b=>b.lines[0].options[0].optionId='999999999999999999999999',b=>b.lines[0].options.push(b.lines[0].options[0]),b=>b.lines[0].options.pop()]){
-      const {input,catalogue}=setup();change(input);expect(()=>prepareBulkLines(parseBulkInput(input),catalogue)).toThrow()
-    }
-  })
-  it('requires contact, one fulfilment, delivery address and review acknowledgement',()=>{
-    for(const change of [b=>b.customer.email='wrong',b=>b.customer.phone='bad',b=>b.customer.name='',b=>b.fulfilment=['collection','delivery'],b=>b.fulfilment='delivery',b=>b.confirmReview=false]){
-      const {input}=setup();change(input);expect(()=>parseBulkInput(input)).toThrow()
-    }
-  })
+import { expect, it } from 'vitest'
+import { parseBulkInput, prepareBulkLines, saveBulkRequest } from '@/lib/bulkFilament'
+import { parseBulkStock } from '@/lib/bulkFilamentStock'
+import { fixtureRows, fixtureCatalogue, fixtureInput, memoryStore } from '../fixtures/bulkFilament'
+it('shows FIT Marble only when the Sheet contains it, using Sheet quantities',()=>{
+  expect(fixtureCatalogue().some(p=>p.brand==='FIT')).toBe(false)
+  const c=fixtureCatalogue([...fixtureRows(),{product:'FIT PLA ',brand:'FIT',material:'PLA',colour:'Marble',barcode:'836',quantity:15}])
+  expect(c.find(p=>p.brand==='FIT').types[0].options[0]).toMatchObject({name:'Marble',stock:15,ladder:'SPECIALTY_PLA'})
 })
-describe('bulk request durable idempotency',()=>{
-  function memory(){const docs=new Map();return {docs,async findOne(q){return docs.get(q._id)||null},async insertOne(d){if(docs.has(d._id))throw Object.assign(Error('duplicate'),{code:11000});docs.set(d._id,structuredClone(d))}}}
-  it('collapses concurrent retries to one persisted request, without stock writes',async()=>{
-    const {input,catalogue}=setup(),store=memory(),body=parseBulkInput(input)
-    const results=await Promise.all(Array.from({length:12},()=>saveBulkRequest(store,body,async()=>catalogue)))
-    expect(store.docs.size).toBe(1);expect(results.filter(r=>r.created)).toHaveLength(1)
-    expect(results[0].receipt).not.toHaveProperty('customer');expect(results[0].receipt.notificationCoverage).toBe('owner_dashboard_only')
-  })
-  it('recovers the same receipt even if stock later changes or becomes unavailable',async()=>{
-    const {input,catalogue}=setup(),store=memory(),body=parseBulkInput(input)
-    const first=await saveBulkRequest(store,body,async()=>catalogue)
-    const second=await saveBulkRequest(store,body,async()=>{throw Error('must not read stock')})
-    expect(second.receipt).toEqual(first.receipt);expect(second.created).toBe(false)
-  })
-  it('recovers an insert whose acknowledgement was lost',async()=>{
-    const {input,catalogue}=setup(),store=memory(),original=store.insertOne
-    store.insertOne=async d=>{await original(d);throw Error('lost ack')}
-    expect((await saveBulkRequest(store,parseBulkInput(input),async()=>catalogue)).created).toBe(false);expect(store.docs.size).toBe(1)
-  })
-  it('rejects payload changes on an existing reference without altering the original',async()=>{
-    const {input,catalogue}=setup(),store=memory()
-    await saveBulkRequest(store,parseBulkInput(input),async()=>catalogue);input.notes='changed'
-    await expect(saveBulkRequest(store,parseBulkInput(input),async()=>catalogue)).rejects.toMatchObject({status:409,code:'idempotency_conflict'})
-    expect([...store.docs.values()][0].notes).toBe('SYNTHETIC TEST ONLY')
-  })
-  it('keeps independent concurrent enquiries unreserved, requiring owner review',async()=>{
-    const {input,catalogue}=setup(),store=memory(),other=structuredClone(input);other.clientRequestId='22345678-1234-4234-8234-123456789abc'
-    await Promise.all([input,other].map(b=>saveBulkRequest(store,parseBulkInput(b),async()=>catalogue)))
-    expect(store.docs.size).toBe(2);expect([...store.docs.values()].every(d=>d.status==='new')).toBe(true)
-  })
+it('does not accept unrelated Sheet products and uses the smaller duplicate quantity',()=>{
+  const rows=fixtureRows(); rows.push({...rows[2],quantity:5}); rows.push({...rows[0],brand:'Other'})
+  expect(parseBulkStock(rows).find(r=>r.barcode==='838').available).toBe(5)
+  expect(parseBulkStock(rows)).toHaveLength(6)
+})
+it.each([null,-1,'9',1.5])('invalid Sheet quantity %s is unavailable',quantity=>{
+  const rows=fixtureRows();rows[0].quantity=quantity
+  expect(fixtureCatalogue(rows)[0].types[0].options[0].stock).toBe(0)
+})
+it.each([undefined,'','+65 8000 0000'])('phone is optional (%s)',phone=>{
+  const b=fixtureInput();b.customer.phone=phone;expect(parseBulkInput(b).customer.phone).toBe(phone||'')
+})
+it.each([false,undefined,'true',1])('requires explicit consent (%s)',consent=>{
+  const b=fixtureInput();b.consent=consent;expect(()=>parseBulkInput(b)).toThrow('Consent')
+})
+it('validates contact, fulfilment, review and identities',()=>{
+  for(const change of [b=>b.customer.email='bad',b=>b.customer.phone='bad',b=>b.customer.name='',b=>b.fulfilment='delivery',b=>b.confirmReview=false,b=>b.lines[0].options[0].optionId='0'.repeat(24),b=>b.lines[0].options.push(b.lines[0].options[0]),b=>b.lines[0].options=[]]){
+    const b=fixtureInput();change(b);expect(()=>prepareBulkLines(parseBulkInput(b),fixtureCatalogue())).toThrow()
+  }
+})
+it('rejects stale stock but ignores the read timestamp when quantities are unchanged',()=>{
+  const c=fixtureCatalogue(),b=fixtureInput(c),rows=fixtureRows();rows[0].quantity--
+  expect(()=>prepareBulkLines(parseBulkInput(b),fixtureCatalogue(rows))).toThrow('changed')
+  expect(c[0].version).toBe(fixtureCatalogue()[0].version)
+})
+it('never trusts client price or discount fields',()=>{
+  const c=fixtureCatalogue(),b=fixtureInput(c);b.lines[0].unitCents=1;b.discount=100
+  expect(prepareBulkLines(parseBulkInput(b),c)[0]).toMatchObject({unitCents:1490,lineCents:2980})
+})
+it('persists exact pricing, stock evidence and dated consent, with a private receipt',async()=>{
+  const store=memoryStore(),c=fixtureCatalogue(),b=parseBulkInput(fixtureInput(c))
+  const result=await saveBulkRequest(store,b,async()=>c,new Date('2026-10-09T01:00:00Z'))
+  const doc=store.docs.get(b.clientRequestId)
+  expect(doc).toMatchObject({totalCents:2980,consent:{accepted:true},notifications:{email:{status:'pending',attempts:0}}})
+  expect(doc.lines[0]).toMatchObject({band:'<10',unitCents:1490,lineCents:2980,inventorySource:'snapshot'})
+  expect(result.receipt).not.toHaveProperty('customer')
+})
+it('collapses concurrent retries to one stored request',async()=>{
+  const store=memoryStore(),c=fixtureCatalogue(),b=parseBulkInput(fixtureInput(c))
+  const results=await Promise.all(Array.from({length:12},()=>saveBulkRequest(store,b,async()=>c)))
+  expect(store.docs.size).toBe(1);expect(results.filter(r=>r.created)).toHaveLength(1)
+})
+it('replays without reloading stock and rejects changed payloads',async()=>{
+  const store=memoryStore(),c=fixtureCatalogue(),b=parseBulkInput(fixtureInput(c))
+  const first=await saveBulkRequest(store,b,async()=>c)
+  expect((await saveBulkRequest(store,b,async()=>{throw Error('no read')})).receipt).toEqual(first.receipt)
+  await expect(saveBulkRequest(store,{...b,notes:'changed'},async()=>c)).rejects.toMatchObject({status:409,code:'idempotency_conflict'})
+})
+it('recovers a stored insert whose acknowledgement was lost',async()=>{
+  const store=memoryStore(),insert=store.insertOne,c=fixtureCatalogue(),b=parseBulkInput(fixtureInput(c))
+  store.insertOne=async doc=>{await insert(doc);throw Error('lost acknowledgement')}
+  expect((await saveBulkRequest(store,b,async()=>c)).created).toBe(false);expect(store.docs.size).toBe(1)
 })

@@ -9,7 +9,7 @@ beforeEach(()=>{sessionStorage.clear();vi.stubGlobal('fetch',vi.fn())})
 afterEach(()=>{cleanup();vi.unstubAllGlobals()})
 const row=status=>({_id:'12345678-1234-4234-8234-123456789abc',status:'new',revision:0,createdAt:'2026-10-09',customer:{name:'Synthetic QA',phone:'+65 8000 0000',email:'qa@example.invalid'},fulfilment:'collection',lines:[],ownerEmailStatus:status,notifications:{email:{status,attempts:1,recipient:'fixittoday.contact@gmail.com'}}})
 it.each(['accepted','failed','uncertain','sending','not_configured'])('shows saved public receipt with accurate email outcome %s',async status=>{
-  sessionStorage.setItem('fit-bulk-filament-pending-v1',JSON.stringify({receipt:{requestId:'test-receipt',totalRolls:10,ownerEmailStatus:status}}))
+  sessionStorage.setItem('fit-bulk-filament-pending-v2',JSON.stringify({receipt:{requestId:'test-receipt',totalRolls:10,ownerEmailStatus:status}}))
   fetch.mockResolvedValue(response({products:[]})); render(<BulkFilamentForm/>);
   expect(await screen.findByText('test-receipt')).toBeInTheDocument()
   expect(screen.getByText(text=>text.includes(bulkEmailCopy(status)))).toBeInTheDocument()

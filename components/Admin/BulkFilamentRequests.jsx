@@ -1,4 +1,5 @@
 'use client'
+import { BULK_PRICE_NOTICE } from '@/lib/bulkFilamentConfig'
 import { bulkEmailCopy } from '@/lib/bulkEmailCopy'
 import { filamentOptionLabel } from '@/lib/filamentLabels'
 import { useCallback, useEffect, useState } from 'react'
@@ -33,14 +34,15 @@ function RequestCard({ row, onSaved }) {
     <p className="mt-4 text-sm font-semibold">Preparation / availability check</p>
     <ul className="mt-2 space-y-3">{row.lines.map((line,i) => <li key={i} className="rounded-xl bg-slate-50 p-3 text-sm">
       <strong>{line.productName}</strong><p>{line.options.map(o => o.type + ': ' + filamentOptionLabel(o.type,o.name)).join(' · ')}</p>
-      <p className="mt-1 font-medium">Total requested: {line.quantity ?? line.recordedQuantity + line.extraQuantity} rolls</p>
-      <p className="mt-1">{line.recordedQuantity} from recorded stock requested + <strong>{line.extraQuantity} extra rolls to confirm</strong></p>
-      <p>Public list price at submission: {line.publicUnitPrice ? line.publicUnitPrice.currency + ' ' + line.publicUnitPrice.amount.toFixed(2) + ' / roll' : 'Quotation required'}</p>
-      {line.discountAmount?.amount > 0 && <p>Discount at submission: {line.discountAmount.currency} {line.discountAmount.amount.toFixed(2)}</p>}
-      {line.estimatedLineTotal && <p>Estimated line total at submission: {line.estimatedLineTotal.currency} {line.estimatedLineTotal.amount.toFixed(2)}</p>}
+      <p className="mt-1 font-medium">Total requested: {line.quantity ?? 'Legacy request: review original record'} rolls</p>
+      <p>{line.material} band {line.band || 'Not recorded'} · {line.tierRolls ?? 'Not recorded'} rolls combined</p>
+      <p>Unit price: {Number.isInteger(line.unitCents) ? 'SGD ' + (line.unitCents / 100).toFixed(2) : 'Legacy price: review original record'} / roll</p>
+      <p>Line total: {Number.isInteger(line.lineCents) ? 'SGD ' + (line.lineCents / 100).toFixed(2) : 'Not recorded'}</p>
+      <p>{BULK_PRICE_NOTICE}</p>
       {line.remarks && <p className="mt-1 whitespace-pre-wrap">Remarks: {line.remarks}</p>}
     </li>)}</ul>
-    {row.estimatedTotals?.totals.map(total => <p key={total.currency} className="mt-3 font-semibold">{row.estimatedTotals.unpricedLines ? 'Priced selections estimate' : 'Estimated filament total'} at submission: {total.currency} {total.total.toFixed(2)}</p>)}
+    {Number.isInteger(row.totalCents) && <p className="mt-3 font-semibold">Indicative total: SGD {(row.totalCents / 100).toFixed(2)}</p>}
+    <p className="mt-3 text-xs">PDPA consent: {row.consent?.accepted ? 'Accepted at ' + new Date(row.consent.acceptedAt).toLocaleString('en-SG') : 'Not recorded (legacy request)'}</p>
     {row.notes && <p className="mt-3 whitespace-pre-wrap text-sm">Customer notes: {row.notes}</p>}
     <p className="mt-3 text-xs text-amber-900">Request only. No stock reserved, payment taken or delivery promised. Telegram alerts are not configured for this form.</p>
     <div className="mt-3 rounded-xl border border-slate-200 p-3 text-sm" aria-label="Owner email status">

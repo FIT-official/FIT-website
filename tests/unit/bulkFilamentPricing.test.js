@@ -1,89 +1,74 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
-import { bulkCatalogue, parseBulkInput, prepareBulkLines, saveBulkRequest } from '@/lib/bulkFilament'
-import { bulkDiscountEligible, bulkPricingQuantities, bulkSelection, bulkEstimateSummary } from '@/lib/bulkFilamentPricing'
-import { fixtureInput, fixtureProduct } from '../fixtures/bulkFilament'
-const lanbo = (slug = '1kg-pla-3d-printing-filament-lanbo', amount=14.9) => ({ ...fixtureProduct(), name: slug, slug, basePrice:{presentmentAmount:amount,presentmentCurrency:'SGD'} })
-const selection = p => Object.fromEntries(p.types.map(t => [t.id,t.options[0].id]))
-const estimate = (raw, quantity, categoryQuantity=quantity) => { const p=bulkCatalogue([raw])[0];return bulkSelection(p,selection(p),quantity,categoryQuantity).estimate }
-const totalLine = (p,quantity,colour=0) => ({productId:p.id,version:p.version,options:p.types.map(t=>({typeId:t.id,optionId:t.options[t.id===p.colourTypeId?colour:0].id})),quantity,remarks:''})
-describe('approved equivalent bulk pricing',()=>{
-  it.each([[9,14.9],[10,13.9],[19,13.9],[20,13.3],[49,13.3],[50,12.9],[99,12.9],[100,12.5]])('prices %s PLA rolls at %s per roll', (quantity,price)=>{
-    const e=estimate(lanbo(),quantity)
-    expect(e.estimatedUnitPrice.amount).toBe(price)
-    expect(e.estimatedLineTotal.amount).toBe(Math.round(price*100)*quantity/100)
-    expect(e.publicUnitPrice.amount).toBe(14.9)
+import { parseBulkInput, prepareBulkLines, saveBulkRequest } from '@/lib/bulkFilament'
+import { bulkTier, priceBulkLines } from '@/lib/bulkFilamentConfig'
+import { fixtureRows, fixtureCatalogue, fixtureInput, fixtureLine, memoryStore } from '../fixtures/bulkFilament'
+const priced = (lines, rows = fixtureRows()) => {
+  const c = fixtureCatalogue(rows), body = fixtureInput(c)
+  body.lines = lines.map(([material, colour, quantity]) => fixtureLine(c, 'Lanbo', material, colour, quantity))
+  return prepareBulkLines(parseBulkInput(body), c)
+}
+describe('bulk filament pricing', () => {
+  it.each([[9,1490],[10,1390],[19,1390],[20,1330],[49,1330],[50,1290],[99,1290],[100,1250]])('prices %s PLA rolls at %s cents per roll', (quantity, unitCents) => {
+    expect(priceBulkLines([{ ladder: 'PLA', quantity }])[0]).toMatchObject({ unitCents, lineCents: unitCents * quantity })
   })
-  it.each([[10,12.97],[20,12.41],[50,12.03],[100,11.66]])('uses the equivalent rational discount for %s PETG rolls', (quantity,price)=>{
-    expect(estimate(lanbo('1kg-petg-3d-printing-filament-lanbo',13.9),quantity).estimatedUnitPrice.amount).toBe(price)
+  it.each([[10,1340],[20,1280],[50,1240],[100,1200]])('uses the PETG ladder for %s rolls', (quantity, unitCents) => {
+    expect(bulkTier('PETG', quantity).unitCents).toBe(unitCents)
   })
-  it('supports Lanbo silk at its own canonical price',()=>{
-    const e=estimate(lanbo('synthetic-lanbo-pla-silk-filament',23),10)
-    expect(e.estimatedUnitPrice.amount).toBe(21.46)
-    expect(e.appliedTier.category).toBe('Lanbo silk')
+  it('does not admit Lanbo silk without an approved Sheet material', () => {
+    expect(fixtureCatalogue([{product:'Lanbo Silk',brand:'Lanbo',material:'Silk',colour:'Black',barcode:'1',quantity:10}])).toEqual([])
   })
-  it.each(['bambu-lab-3d-printing-filament-1kg-pla-silk','bambu-lab-3d-printing-filament-1kg-pla-basic','1kg-wood-pla-3d-printing-filament-lanbo','1kg-marble-pla-3d-printing-filament-lanbo','fit-pla-filament'])('never discounts %s, even with stored discounts and large quantities',slug=>{
-    const raw={...fixtureProduct(),name:slug,slug,discount:{percentage:99}}
-    expect(bulkDiscountEligible(raw)).toBe(false)
-    expect(estimate(raw,100).estimatedLineTotal.amount).toBe(1000)
+  it.each(['Bambu', 'Other'])('excludes unsupported brand %s regardless of discounts or quantity', brand => {
+    expect(fixtureCatalogue(fixtureRows().map(row => ({...row,brand,discount:{percentage:99},quantity:100})))).toEqual([])
   })
-  it('does not infer eligibility from descriptions or a conflicting Bambu label',()=>{
-    const raw=lanbo();raw.name='Bambu Lab PLA';raw.description='Lanbo silk compatible'
-    expect(estimate(raw,100).estimatedUnitPrice.amount).toBe(14.9)
+  it('prices Marble and Wood on their own ladder instead of excluding them from tiers', () => {
+    const lines=priced([['PLA','Marble',4],['PLA','Wood Colour',6]])
+    expect(lines.map(l=>l.unitCents)).toEqual([1890,1890])
   })
-  it('ignores all stored percentage discounts and never stacks them',()=>{
-    const raw=lanbo();raw.discount={percentage:99};raw.discounts=[{percentage:70}]
-    expect(estimate(raw,10).estimatedUnitPrice.amount).toBe(13.9)
-    expect(estimate(raw,9).estimatedUnitPrice.amount).toBe(14.9)
+  it('does not infer eligibility from descriptions or a conflicting product identity', () => {
+    expect(fixtureCatalogue(fixtureRows().map(row=>({...row,product:'Bambu PLA',description:'Lanbo compatible'})))).toEqual([])
   })
-  it('includes canonical option fees before exact rational rounding once per unit',()=>{
-    const raw=lanbo();raw.variantTypes[1].options[0].additionalFee=4
-    expect(estimate(raw,10)).toMatchObject({publicUnitPrice:{amount:18.9},estimatedUnitPrice:{amount:17.63},estimatedLineTotal:{amount:176.3},discountAmount:{amount:12.7}})
-    expect(estimate(lanbo(undefined,7.45),10).estimatedUnitPrice.amount).toBe(6.95)
+  it('ignores stored percentage discounts and never stacks them', () => {
+    const rows=fixtureRows().map(row=>({...row,discount:{percentage:99},discounts:[{percentage:70}]}))
+    expect(priced([['PLA','Black',10]],rows)[0].unitCents).toBe(1390)
+    expect(priced([['PLA','Black',9]],rows)[0].unitCents).toBe(1490)
   })
-  it('pools colours only within separate eligible categories and excludes Bambu',()=>{
-    const pla=lanbo(),petg=lanbo('1kg-petg-3d-printing-filament-lanbo',13.9),bambu=lanbo('bambu-lab-3d-printing-filament-1kg-pla-silk',29)
-    petg._id='888888888888888888888888';bambu._id='999999999999999999999999'
-    const c=bulkCatalogue([pla,petg,bambu]),p=c.find(x=>x.id===pla._id),g=c.find(x=>x.id===petg._id),b=c.find(x=>x.id===bambu._id)
-    const body=fixtureInput(c);body.lines=[totalLine(p,4),totalLine(p,6,1),totalLine(g,9),totalLine(b,20)]
-    const quantities=bulkPricingQuantities(body.lines,c)
-    expect([...quantities]).toEqual([['Lanbo PLA',10],['Lanbo PETG',9]])
-    const rows=prepareBulkLines(parseBulkInput(body),c)
-    expect(rows.filter(r=>r.productId===p.id).map(r=>r.estimatedUnitPrice.amount)).toEqual([13.9,13.9])
-    expect(rows.find(r=>r.productId===g.id).estimatedUnitPrice.amount).toBe(13.9)
-    expect(rows.find(r=>r.productId===b.id).estimatedUnitPrice.amount).toBe(29)
-    body.lines.find(r=>r.productId===g.id).quantity=10
-    expect(prepareBulkLines(parseBulkInput(body),c).find(r=>r.productId===g.id).estimatedUnitPrice.amount).toBe(12.97)
+  it('uses exact ladder cents without catalogue prices or option fees', () => {
+    const rows=fixtureRows().map(row=>({...row,price:7.45,additionalFee:4}))
+    expect(priced([['PLA','Black',10]],rows)[0]).toMatchObject({unitCents:1390,lineCents:13900})
   })
-  it('counts split lines once each while retaining stock limits',()=>{
-    const c=bulkCatalogue([lanbo()]),body=fixtureInput(c);body.lines=[totalLine(c[0],5),totalLine(c[0],5)]
-    expect(prepareBulkLines(parseBulkInput(body),c).map(r=>r.estimatedLineTotal.amount)).toEqual([69.5,69.5])
-    body.lines[1].quantity=21
-    expect(()=>prepareBulkLines(parseBulkInput(body),c)).toThrow('availability')
+  it('pools PLA colours and specialties, keeps PETG separate and excludes unsupported brands', () => {
+    const lines=priced([['PLA','Black',4],['PLA','White',6],['PETG','Black',9]])
+    expect(lines.filter(l=>l.material==='PLA').map(l=>l.unitCents)).toEqual([1390,1390])
+    expect(lines.find(l=>l.material==='PETG').unitCents).toBe(1390)
+    expect(priced([['PETG','Black',10]])[0].unitCents).toBe(1340)
   })
-  it('keeps invalid quantities, unknown prices and money overflow unquoted',()=>{
-    const p=bulkCatalogue([lanbo()])[0]
-    for(const q of ['',0,-1,1.5,Infinity])expect(bulkSelection(p,selection(p),q).estimate).toBeNull()
-    p.price=null;expect(bulkSelection(p,selection(p),3).estimate).toBeNull()
-    p.price={amount:Number.MAX_SAFE_INTEGER/100,currency:'SGD'};expect(bulkSelection(p,selection(p),100).estimate).toBeNull()
+  it('counts split lines once each while retaining stock limits', () => {
+    expect(priced([['PLA','Black',5],['PLA','Black',5]]).map(l=>l.lineCents)).toEqual([6950,6950])
+    expect(()=>priced([['PLA','Black',5],['PLA','Black',21]])).toThrow('1 to 14')
   })
-  it('does not combine currencies or hide unquoted lines',()=>{
-    const a=estimate(lanbo(),10),raw=lanbo();raw.basePrice.presentmentCurrency='USD';const b=estimate(raw,2)
-    expect(bulkEstimateSummary([a,b,null])).toEqual({totals:[{currency:'SGD',subtotal:149,discount:10,total:139},{currency:'USD',subtotal:29.8,discount:0,total:29.8}],unpricedLines:1})
+  it('rejects invalid and excessive quantities instead of creating unquoted lines', () => {
+    for(const q of ['',0,-1,1.5,Infinity,Number.MAX_SAFE_INTEGER]) expect(()=>priced([['PLA','Black',q]])).toThrow()
   })
-  it('rejects changed canonical prices and strips forged discounts/category quantities',()=>{
-    const raw=lanbo(),c=bulkCatalogue([raw]),body=fixtureInput(c);body.lines=[{...totalLine(c[0],10),discountPercentage:100,categoryQuantity:1000,estimatedLineTotal:{amount:0,currency:'SGD'}}]
-    expect(prepareBulkLines(parseBulkInput(body),c)[0].estimatedLineTotal.amount).toBe(139)
-    raw.basePrice.presentmentAmount=15.9
-    expect(()=>prepareBulkLines(parseBulkInput(body),bulkCatalogue([raw]))).toThrow('changed')
+  it('uses SGD only and rejects an unknown material instead of mixing unquoted currencies', () => {
+    expect(priced([['PLA','Black',2]])[0].currency).toBe('SGD')
+    expect(()=>bulkTier('UNKNOWN',10)).toThrow('Invalid tier')
   })
-  it('versions the approved schedule and persists the original receipt after price changes',async()=>{
-    const raw=lanbo(),c=bulkCatalogue([raw]),input=fixtureInput(c);input.lines=[totalLine(c[0],4),totalLine(c[0],6,1)]
-    expect(c[0].pricingSchedule.tiers.map(t=>t.numerator)).toEqual([1390,1330,1290,1250])
-    let saved;const store={findOne:async()=>saved,insertOne:async doc=>{saved=structuredClone(doc)}}
-    const body=parseBulkInput(input),first=await saveBulkRequest(store,body,async()=>c)
-    expect(saved.lines.map(l=>l.appliedTier.categoryQuantity)).toEqual([10,10])
-    expect(first.receipt.estimatedTotals.totals[0]).toEqual({currency:'SGD',subtotal:149,discount:10,total:139})
-    raw.basePrice.presentmentAmount=25;const replay=await saveBulkRequest(store,body,async()=>bulkCatalogue([raw]));expect(replay.receipt).toEqual(first.receipt)
+  it('rejects changed Sheet stock and strips forged discounts and category quantities', () => {
+    const c=fixtureCatalogue(),body=fixtureInput(c)
+    body.lines[0]={...body.lines[0],quantity:10,discountPercentage:100,categoryQuantity:1000,lineCents:0}
+    expect(prepareBulkLines(parseBulkInput(body),c)[0].lineCents).toBe(13900)
+    const rows=fixtureRows();rows[0].quantity=13
+    expect(()=>prepareBulkLines(parseBulkInput(body),fixtureCatalogue(rows))).toThrow('changed')
+  })
+  it('versions the approved catalogue and preserves saved prices when stock changes', async () => {
+    const c=fixtureCatalogue(),body=fixtureInput(c),store=memoryStore()
+    body.lines=[fixtureLine(c,'Lanbo','PLA','Black',4),fixtureLine(c,'Lanbo','PLA','White',6)]
+    const input=parseBulkInput(body),first=await saveBulkRequest(store,input,async()=>c)
+    expect(store.docs.get(input.clientRequestId)).toMatchObject({totalCents:13900})
+    expect(store.docs.get(input.clientRequestId).lines.map(l=>l.tierRolls)).toEqual([10,10])
+    const rows=fixtureRows();rows[0].quantity=0
+    expect(fixtureCatalogue(rows)[0].version).not.toBe(c[0].version)
+    expect((await saveBulkRequest(store,input,async()=>fixtureCatalogue(rows))).receipt).toEqual(first.receipt)
   })
 })
