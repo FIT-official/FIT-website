@@ -20,6 +20,13 @@ function fixture() {
 }
 beforeEach(() => { cleanup(); addShopItem.mockReset().mockResolvedValue({}); });
 describe('inline shop variant labels', () => {
+  it('adds a guest shop item with standard delivery when express is listed first', async () => {
+    const product = fixture();
+    product.delivery.deliveryTypes = [{ type: 'express-courier', price: 30 }, { type: 'standard-shipping', price: 6.2 }, { type: 'pick-up', price: 0 }];
+    render(<ShopAddToCart product={product} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Add to Cart' }));
+    await waitFor(() => expect(addShopItem).toHaveBeenCalledWith(expect.objectContaining({ chosenDeliveryType: 'standard-shipping' })));
+  });
   it('labels the verified legacy PLA Basic colour and packing selects correctly for screen readers', () => {
     render(<ShopAddToCart product={fixture()} />);
     expect(screen.getByRole('combobox', { name: 'Fixture PLA Basic Colour' })).toHaveValue('Jade White (10100)');
