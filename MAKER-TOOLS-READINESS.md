@@ -5,6 +5,7 @@ Local feature candidate for the coordinated release owner. Do not publish indepe
 ## Delivered behaviour
 
 - `/maker-tools`, linked from desktop/mobile navigation and Shop, with a public sitemap entry.
+- Shared Community integration is coordinated with the community owner: desktop/mobile links, a Maker Tools hub link, exact `/community` and `/community/(.*)` public matchers, and only the static `/community` sitemap entry. `/community-private` remains outside the exemption. Release this integration together with the owner's separately built Community destination.
 - 30 Bambu Lab PLA Basic reference colours ranked by sRGB → D65 CIELAB → Delta E 1976. Same HEX is explicitly a reference match, not a physical colour guarantee or a confidence percentage.
 - Existing exact catalogue identities and reviewed photos are reused. The adapter accepts only the 1 kg PLA Basic product, reviewed colour identity and explicit spool/refill options. It calls stock confirmed only when the existing catalogue supplies combination stock from Sheet/shop; historical snapshots and independent option totals remain unconfirmed. Product links require the customer to select and review the named variant. No checkout or stock reservation occurs.
 - Material estimator accepts grams, metres or deposited-plastic cm³, with editable density/diameter, support/purge, copies and reserve. Material cost is optional SGD/kg; print duration is only entered slicer minutes × copies. No geometry, infill or exact duration is fabricated. Estimates export to JSON.
@@ -40,3 +41,7 @@ Local feature candidate for the coordinated release owner. Do not publish indepe
 - `node scripts/check-maker-tools.cjs <existing-mongod.exe>` runs actual private routes against an isolated loopback Mongo process and closes only its own process.
 - Add `--browser` after the coordinated browser slot is available. It builds the actual React component into a local acceptance fixture, uses actual inventory API/Mongo, blocks external browser requests, saves screenshots/export evidence and closes only its owned context/server/database. It requires an existing build for global CSS and a recorded public catalogue JSON at `../receipts/public-catalogue.json`; the screenshot stock is labelled as a historical snapshot.
 - Evidence receipts live outside the tracked source in `../receipts/`; final handoff gives exact commands, commit and outcomes.
+
+## Shared file ownership for integration
+
+This branch owns `components/General/Navbar.jsx`, `components/General/MobileMenu.jsx`, `app/shop/page.jsx`, `middleware.js` and `lib/seo/sitemap.js`, plus their navigation/sitemap/boundary tests. The Community owner keeps `app/community/**`, Community APIs/models/components and the admin queue. No homepage or admin integration is changed here. The desktop navigation uses normal flex spacing to fit both destinations at 1024 px; the existing mobile menu remains the phone navigation.

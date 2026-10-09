@@ -2,7 +2,7 @@
 // node scripts/check-maker-tools.cjs <existing-mongod.exe> [--browser]
 const fs = require('node:fs'), path = require('node:path'), net = require('node:net'), http = require('node:http')
 const assert = require('node:assert/strict'), { randomUUID } = require('node:crypto'), { spawn } = require('node:child_process')
-const allowed = /^(PATH|SYSTEMROOT|WINDIR|COMSPEC|PATHEXT|USERPROFILE|APPDATA|LOCALAPPDATA|HOMEDRIVE|HOMEPATH|PROCESSOR_ARCHITECTURE)$/i
+const allowed = /^(PATH|SYSTEMROOT|SYSTEMDRIVE|WINDIR|COMSPEC|PATHEXT|USERPROFILE|APPDATA|LOCALAPPDATA|HOMEDRIVE|HOMEPATH|PROCESSOR_ARCHITECTURE|TEMP|TMP)$/i
 for (const key of Object.keys(process.env)) if (!allowed.test(key)) delete process.env[key]
 process.env.NODE_ENV = 'test'
 const mongoose = require('mongoose'), esbuild = require('esbuild')
@@ -70,13 +70,18 @@ async function main() {
       // historical, so screenshots cannot imply this fixture has live availability.
       const offers = api.makerCatalogue(publicCatalogue.products.map(p => ({ ...p, stockSource: 'snapshot' })))
       const browserEdge = {
-        '@clerk/nextjs': "export const useUser=()=>({isLoaded:true,user:{id:'fixture-alice'}});export const SignInButton=({children})=>children;",
+        '@clerk/nextjs': "export const useUser=()=>({isLoaded:true,isSignedIn:!location.search.includes('guest'),user:location.search.includes('guest')?null:{id:'fixture-alice'}});export const SignInButton=({children})=>children;export const SignOutButton=({children})=>children;",
         'next/link': "import React from 'react';export default function Link({children,...p}){return React.createElement('a',p,children)}",
         'next/image': "import React from 'react';export default function Image({unoptimized,...p}){return React.createElement('img',p)}",
+        'next/navigation': "const params=new URLSearchParams();export const usePathname=()=>'/maker-tools';export const useSearchParams=()=>params;export const useRouter=()=>({push:()=>{},replace:()=>{}});",
+        '@/utils/useEntitlements': 'export default()=>({loading:false,canUseMessaging:false,canAccessDashboard:false});',
+        '@/utils/useContent': 'export const useContent=()=>({content:{},isLoading:false});',
+        '@/utils/useAccess': 'export default()=>({loading:false,canAccess:false,isAdmin:false});',
+        './AccountDropdown': "import React from 'react';export default()=>React.createElement('span',null,'Test account');",
       }
       const client = path.join(root, 'browser.js')
-      await esbuild.build({ stdin: { contents: "import React from 'react';import{createRoot}from'react-dom/client';import MakerTools from './components/MakerTools/MakerTools';createRoot(document.getElementById('app')).render(<MakerTools/>);", loader: 'jsx', resolveDir: repo }, outfile: client, bundle: true, platform: 'browser', format: 'iife', jsx: 'automatic', alias: { '@': repo }, define: { 'process.env.NODE_ENV': '"production"' }, plugins: [{ name: 'browser-fixture', setup(build) {
-        build.onResolve({ filter: /^(@clerk\/nextjs|next\/link|next\/image)$/ }, args => ({ path: args.path, namespace: 'browser-fixture' }))
+      await esbuild.build({ stdin: { contents: "import React from 'react';import{createRoot}from'react-dom/client';import MakerTools from './components/MakerTools/MakerTools';import Navbar from './components/General/Navbar';createRoot(document.getElementById('app')).render(<><Navbar/><div className='h-14 lg:hidden'/><MakerTools/></>);", loader: 'jsx', resolveDir: repo }, outfile: client, bundle: true, platform: 'browser', format: 'iife', jsx: 'automatic', alias: { '@': repo }, define: { 'process.env.NODE_ENV': '"production"' }, plugins: [{ name: 'browser-fixture', setup(build) {
+        build.onResolve({ filter: /^(?:@clerk\/nextjs|next\/(?:link|image|navigation)|@\/utils\/(?:useEntitlements|useContent|useAccess)|\.\/AccountDropdown)$/ }, args => ({ path: args.path, namespace: 'browser-fixture' }))
         build.onLoad({ filter: /.*/, namespace: 'browser-fixture' }, args => ({ contents: browserEdge[args.path], loader: 'js', resolveDir: repo }))
       } }] })
       const cssFiles = fs.readdirSync(path.join(repo, '.next/static/chunks')).filter(n => n.endsWith('.css'))
@@ -84,6 +89,7 @@ async function main() {
       server = http.createServer(async (incoming, outgoing) => {
         try {
           const url = new URL(incoming.url, 'http://127.0.0.1')
+          if (['/api/categories', '/api/blog', '/api/chat/inbox'].includes(url.pathname)) { outgoing.setHeader('Content-Type', 'application/json'); outgoing.end(JSON.stringify({ categories: [], posts: [], channels: [] })); return }
           if (url.pathname === '/api/maker-tools/catalogue') { outgoing.setHeader('Content-Type', 'application/json'); outgoing.end(JSON.stringify({ offers })); return }
           if (url.pathname === '/api/maker-tools/inventory') {
             globalThis.__makerActor = 'fixture-alice'
@@ -96,7 +102,7 @@ async function main() {
           if (url.pathname === '/browser.js' || url.pathname === '/browser.css') { outgoing.setHeader('Content-Type', url.pathname.endsWith('.js') ? 'text/javascript' : 'text/css'); outgoing.end(fs.readFileSync(path.join(root, url.pathname.slice(1)))); return }
           if (url.pathname === '/global.css') { outgoing.setHeader('Content-Type', 'text/css'); outgoing.end(globalCss); return }
           if (url.pathname.startsWith('/images/filament/bambu/') && /^\/images\/filament\/bambu\/[a-f0-9]+\.webp$/.test(url.pathname)) { outgoing.setHeader('Content-Type', 'image/webp'); outgoing.end(fs.readFileSync(path.join(repo, 'public', url.pathname))); return }
-          if (url.pathname === '/') { outgoing.setHeader('Content-Type', 'text/html'); outgoing.end('<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/global.css"><link rel="stylesheet" href="/browser.css"><style>body{margin:0;font-family:Arial,sans-serif}#app{max-width:1200px;margin:auto}.fixture{padding:10px;background:#e8eedc;font:11px Arial;text-align:center}</style></head><body><div class="fixture">LOCAL ACCEPTANCE FIXTURE · synthetic account · recorded catalogue · no purchases</div><div id="app"></div><script src="/browser.js"></script></body></html>'); return }
+          if (url.pathname === '/') { outgoing.setHeader('Content-Type', 'text/html'); outgoing.end('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/global.css"><link rel="stylesheet" href="/browser.css"><style>body{margin:0;font-family:Arial,sans-serif}#app{max-width:1200px;margin:auto}.fixture{padding:10px;background:#e8eedc;font:11px Arial;text-align:center}</style></head><body><div class="fixture">LOCAL ACCEPTANCE FIXTURE · synthetic account · recorded catalogue · no purchases</div><div id="app"></div><script src="/browser.js"></script></body></html>'); return }
           outgoing.writeHead(404); outgoing.end('Fixture route unavailable')
         } catch (e) { outgoing.writeHead(500); outgoing.end('Fixture error'); receipt.serverError = e.stack }
       })
@@ -105,13 +111,17 @@ async function main() {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, acceptDownloads: true })
       await context.route('**/*', route => { const url = new URL(route.request().url()); if (url.origin !== base && !url.href.startsWith('blob:')) { receipt.externalRequests.push(url.origin); return route.abort() } return route.continue() })
       const page = await context.newPage(), errors = []; page.on('pageerror', e => errors.push(e.message))
+      async function screenshot(name, fullPage = true) {
+        await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }))
+        await page.screenshot({ path: path.join(root, name), fullPage })
+      }
       await page.goto(base, { waitUntil: 'networkidle' }); await page.getByText(/Catalogue loaded/).waitFor()
-      await page.screenshot({ path: path.join(root, '01-mobile-colour.png'), fullPage: true })
+      await screenshot('01-mobile-colour.png')
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
       await page.getByRole('button', { name: /Material estimator/ }).click()
       await page.getByLabel('Known input').selectOption('length'); await page.getByLabel('Amount per copy (m)').fill('100')
       await page.getByText('328.08 g', { exact: true }).waitFor()
-      await page.screenshot({ path: path.join(root, '02-mobile-estimator.png'), fullPage: true })
+      await screenshot('02-mobile-estimator.png')
       await page.getByRole('button', { name: /My filament/ }).click()
       await page.getByLabel('My spool label', { exact: false }).fill('Test white spool')
       await page.getByLabel('Remaining net filament', { exact: true }).fill('0.4'); await page.getByLabel('Quantity unit').selectOption('kg')
@@ -122,21 +132,34 @@ async function main() {
       const pendingDownload = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export my filament' }).click()
       const downloaded = await pendingDownload; const downloadPath = path.join(root, 'inventory-export.json'); await downloaded.saveAs(downloadPath)
       const exported = JSON.parse(fs.readFileSync(downloadPath, 'utf8')); assert.equal(exported.spools[0].remainingGrams, 400); assert.ok(!JSON.stringify(exported).includes('fixture-alice'))
-      await page.screenshot({ path: path.join(root, '03-mobile-inventory.png'), fullPage: true })
+      await screenshot('03-mobile-inventory.png')
       await page.getByRole('button', { name: /Project planner/ }).click(); await page.getByLabel('Required grams for colour 1').fill('600')
       await page.getByText('260 g', { exact: true }).waitFor()
       await page.getByRole('button', { name: '+ Add colour' }).click(); await page.getByLabel('Required grams for colour 2').fill('100')
       await page.getByText('370 g', { exact: true }).waitFor()
       assert.equal(await page.getByRole('heading', { name: 'Jade White', exact: true }).count(), 1)
-      await page.screenshot({ path: path.join(root, '04-mobile-plan.png'), fullPage: true })
+      await screenshot('04-mobile-plan.png')
       const link = page.getByRole('link', { name: /View product & select Jade White/ }).first()
       assert.equal(await link.getAttribute('href'), '/products/bambu-lab-3d-printing-filament-1kg-pla-basic')
       await page.setViewportSize({ width: 1440, height: 1000 }); await page.getByRole('button', { name: /Colour matcher/ }).click()
-      await page.screenshot({ path: path.join(root, '05-desktop-colour.png'), fullPage: true })
+      await screenshot('05-desktop-colour.png')
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
+      await page.setViewportSize({ width: 1024, height: 900 }); await page.goto(base + '/?guest=1', { waitUntil: 'networkidle' })
+      const boxes = await page.getByRole('navigation', { name: 'Primary', exact: true }).getByRole('link').evaluateAll(links => links.filter(a => a.getBoundingClientRect().width).map(a => { const r = a.getBoundingClientRect(); return { text: a.textContent, left: r.left, right: r.right } }).sort((a, b) => a.left - b.left))
+      for (let i = 1; i < boxes.length; i++) assert.ok(boxes[i].left >= boxes[i - 1].right, 'Desktop nav overlap: ' + boxes[i].text)
+      await screenshot('06-desktop-1024-navigation.png', false)
+      await page.setViewportSize({ width: 390, height: 844 }); await page.getByRole('button', { name: 'Open menu' }).click()
+      await page.getByRole('dialog').getByRole('link', { name: 'Community', exact: true }).waitFor()
+      assert.equal(await page.getByRole('dialog').getByRole('link', { name: 'Maker Tools', exact: true }).getAttribute('href'), '/maker-tools')
+      await page.waitForFunction(() => {
+        const dialog = document.querySelector('[role="dialog"]')?.getBoundingClientRect()
+        return dialog && Math.abs(dialog.right - innerWidth) < 1
+      })
+      await screenshot('07-mobile-navigation.png', false)
       assert.deepEqual(errors, []); assert.deepEqual(receipt.externalRequests, [])
       mark('390px and 1440px browser layouts fit viewport, with no uncaught page errors or external HTTP')
       mark('Browser metre conversion, kg inventory save/reload/export and repeated-colour shortage planning pass against actual local API/Mongo')
+      mark('Actual FIT desktop navigation has no overlapping links at 1024px; mobile menu exposes Maker Tools and Community')
       receipt.browser = { base, screenshots: fs.readdirSync(root).filter(n => n.endsWith('.png')), errors }
     }
     receipt.success = true

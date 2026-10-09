@@ -249,5 +249,6 @@ export default function MakerTools() {
     <nav className={styles.breadcrumb} aria-label="Breadcrumb"><Link href="/shop">Shop</Link><span>/</span><span aria-current="page">Maker Tools</span></nav>
     <header className={styles.hero}><div><p className={styles.eyebrow}>FIT / THE MAKER WORKBENCH</p><h1>Make more.<br /><span>Guess less.</span></h1><p>Find your colour. Know your material.<br className={styles.desktopBreak} /> Plan the next print with what you already own.</p></div><div className={styles.heroArt} aria-hidden="true"><div className={styles.swatches}>{['#00AE42', '#FEC600', '#FF6A13', '#0086D6', '#EC008C'].map((c, i) => <span key={c} style={{ backgroundColor: c, transform: `rotate(${(i - 2) * 10}deg)` }} />)}</div><span>30 COLOURS. YOUR NEXT IDEA.</span></div></header>
     {isLoaded ? <Workspace key={user?.id || 'guest'} userId={user?.id || null} /> : <p className={styles.empty}>Loading Maker Tools…</p>}
+    <section className={styles.community}><div><p className={styles.eyebrow}>MAKE SOMETHING TOGETHER</p><h2>A place for your next question or project.</h2><p>Share what you are making and learn with the FIT maker community.</p></div><Link className={styles.primary} href="/community">Explore Community →</Link></section>
   </main>
 }

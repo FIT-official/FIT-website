@@ -423,3 +423,15 @@ describe('Navbar mobile menu', () => {
         expect(document.body.style.overflow).toBe('')
     })
 })
+
+
+it('exposes Maker Tools and Community destinations in desktop and mobile navigation', async () => {
+    render(<Navbar />)
+    const primary = screen.getByRole('navigation', { name: 'Primary' })
+    expect(within(primary).getByRole('link', { name: 'Maker Tools' })).toHaveAttribute('href', '/maker-tools')
+    expect(within(primary).getByRole('link', { name: 'Community' })).toHaveAttribute('href', '/community')
+    fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByRole('link', { name: 'Maker Tools' })).toHaveAttribute('href', '/maker-tools')
+    expect(within(dialog).getByRole('link', { name: 'Community' })).toHaveAttribute('href', '/community')
+})
