@@ -4,6 +4,8 @@ import { WORKSHOP_SESSION } from '@/lib/workshopFeedback'
 import { classroomRequest } from './GuestClassroom'
 import { useVersionedDraft } from './useGuestVersionedDraft'
 import DraftHistory from './DraftHistory'
+import design from './ClassroomDesign.module.css'
+import { ClassIcon } from './ClassroomDecor'
 const labels = { whatWorks: 'What works well, and why?', question: 'What question would you ask the presenters?', improvement: 'What specific improvement do you suggest?' }
 export default function GuestFeedbackForm({ group, lesson, onRefresh, selectedIdea, onIdeaChange }) {
     const [localIdea, setLocalIdea] = useState('1'), idea = selectedIdea || localIdea, setIdea = onIdeaChange || setLocalIdea
@@ -22,14 +24,14 @@ export default function GuestFeedbackForm({ group, lesson, onRefresh, selectedId
         finally { lock.current = false; setBusy(false) }
     }
     if (group.id === lesson.group) return <p>Your group does not review itself.</p>
-    return <section className="ph-mask ph-no-capture border rounded-xl p-5 mt-5">
+    return <section className={design.panel + ' ' + design.writing + ' ph-mask ph-no-capture mt-5'}>
         <h3 className="text-2xl font-bold">Write your feedback here</h3>
         <label className="block mt-3">Choose the idea<select value={idea} className="formInput block w-full" disabled={busy || draft?.pending} onChange={event => { setIdea(event.target.value); setMessage('') }}>{group.ideas.map((value, index) => <option key={value.title} value={String(index + 1)}>Idea {index + 1}: {value.title}</option>)}</select></label>
         {!draft ? <p>Loading this idea&apos;s draft.</p> : <form aria-label={'Feedback for Group ' + group.number} onSubmit={submit}>
             <fieldset disabled={busy || draft.pending || Boolean(draft.receipt)}>{Object.entries(labels).map(([field, label]) => <label key={field} className="block mt-4">{label}<span id={group.id + '-' + idea + '-' + field + '-hint'} className="block text-sm mt-2">{prompts[field]}</span><textarea aria-label={label} aria-describedby={group.id + '-' + idea + '-' + field + '-hint'} required maxLength={600} rows={5} value={draft[field]} onChange={event => save({ ...draft, [field]: event.target.value })} className="formInput block w-full" /></label>)}</fieldset>
             <DraftHistory controls={history} disabled={busy || draft.pending || Boolean(draft.receipt)} status={warning} />
-            {!draft.receipt && <button type="submit" className="formBlackButton mt-4" disabled={busy || !draft.pending && (!allowed || history.conflict)}>{busy ? 'Submitting.' : draft.pending ? 'Try Submit again' : 'Submit'}</button>}
-            {draft.receipt && <><p role="status" className="font-semibold mt-4">Submitted</p><button type="button" className="formWhiteButton mt-3" onClick={() => { save({ id: crypto.randomUUID(), idea, whatWorks: '', question: '', improvement: '', receipt: null, pending: false, payload: null }); setMessage('') }}>Write new feedback</button></>}
+            {!draft.receipt && <button type="submit" className="formBlackButton mt-4" disabled={busy || !draft.pending && (!allowed || history.conflict)}>{busy ? 'Submitting.' : draft.pending ? 'Try Submit again' : 'Submit'}<ClassIcon kind="ARROW" /></button>}
+            {draft.receipt && <><p role="status" className={design.receipt}><ClassIcon kind="CHECK" />Submitted</p><button type="button" className="formWhiteButton mt-3" onClick={() => { save({ id: crypto.randomUUID(), idea, whatWorks: '', question: '', improvement: '', receipt: null, pending: false, payload: null }); setMessage('') }}>Write new feedback</button></>}
             {!allowed && <p className="mt-3">{!lesson.feedbackOpen ? 'Your teacher has paused feedback. You can keep writing.' : 'First submit feedback for Group ' + lesson.assignment.target.slice(1) + '. You can read this idea and keep your draft.'}</p>}
             <p role="status" aria-live="polite" className="mt-3">{message}</p>
         </form>}

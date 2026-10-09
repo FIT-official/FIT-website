@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react'
 import { groupName, groupTeacherWork, teacherWork } from '@/lib/workshopTeacherView'
 import TeacherWorkCard from './TeacherWorkCard'
+import design from './ClassroomDesign.module.css'
 
 export default function GroupedTeacherResponses({ lesson, busy, onAction, groupFilter, onGroupChange }) {
     const [groupBy, setGroupBy] = useState('source')
@@ -25,10 +26,10 @@ export default function GroupedTeacherResponses({ lesson, busy, onAction, groupF
         return result
     }, [lesson.audit])
     function reset() { setGroup('all'); setSearch(''); setStatus('all'); setType('all'); setClosed({}) }
-    return <section aria-labelledby="responses-title" className="mt-8">
+    return <section aria-labelledby="responses-title" className={design.teacherWork}>
         <h2 id="responses-title" className="text-2xl">Student work{group !== 'all' ? ' — ' + groupName(group) : ''}</h2>
         <p className="mt-2 text-sm">Browse each student’s comments and revisions together. New submissions appear automatically.</p>
-        <div className="border rounded-xl p-4 mt-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: '16px' }}>
+        <div className={design.filterPanel} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: '16px' }}>
             <label>Find a student or comment<input type="search" className="formInput block w-full" placeholder="Search names or responses" value={search} onChange={event => { setSearch(event.target.value); setClosed({}) }} /></label>
             <label>Group<select className="formInput block w-full" aria-label="Group" value={group} onChange={event => { setGroup(event.target.value); setClosed({}) }}><option value="all">All groups</option>{groups.map(id => <option key={id} value={id}>{groupName(id)}</option>)}</select></label>
             <label>Organise by<select className="formInput block w-full" value={groupBy} onChange={event => { setGroupBy(event.target.value); setGroup('all'); setClosed({}) }}><option value="source">Student’s group</option><option value="target">Group receiving feedback</option></select></label>
@@ -49,7 +50,7 @@ export default function GroupedTeacherResponses({ lesson, busy, onAction, groupF
         </div>
         {!count && <p className="border rounded-xl p-5 mt-4">{all.length ? 'No work matches these filters. Try another name or group, or clear the filters.' : 'No submissions yet. Students’ comments and revisions will appear here.'}</p>}
         {sections.map(section => <section className="border rounded-xl mt-5 overflow-hidden" key={section.id} aria-label={`${groupName(section.id)} work`}>
-            <h3><button type="button" className="w-full p-4 text-left flex flex-wrap justify-between items-center gap-3" style={{ background: '#f3f5f7' }} aria-expanded={!closed[section.id]}
+            <h3><button type="button" className={design.teacherGroupHeading + ' w-full p-4 text-left flex flex-wrap justify-between items-center gap-3'} aria-expanded={!closed[section.id]}
                 aria-controls={`work-${groupBy}-${section.id}`} onClick={() => setClosed(current => ({ ...current, [section.id]: !current[section.id] }))}>
                 <span className="text-xl font-semibold">{groupName(section.id)}{groupBy === 'target' ? ' · received feedback and revisions' : ''}</span>
                 <span className="text-sm">{section.count} {section.count === 1 ? 'submission' : 'submissions'} · {closed[section.id] ? 'Expand' : 'Collapse'}</span>

@@ -40,7 +40,8 @@ describe('private group project reader', () => {
             expect(screen.getByRole('status')).toHaveTextContent('Group ' + group.number + ' of 10')
             expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(2)
             for (const [index, idea] of group.ideas.entries()) expect(screen.getByRole('heading', { name: 'Idea ' + (index + 1) + ': ' + idea.title })).toBeInTheDocument()
-            expect(screen.getAllByRole('img')).toHaveLength(2)
+            expect(screen.getByRole('img', { name: 'FIT', exact: true })).toBeInTheDocument()
+            expect(within(screen.getByRole('region', { name: 'Project details' })).getAllByRole('img')).toHaveLength(2)
             if (group.number < 10) fireEvent.click(screen.getByRole('button', { name: 'Next group' }))
         }
         expect(screen.getByRole('button', { name: 'Next group' })).toBeDisabled()

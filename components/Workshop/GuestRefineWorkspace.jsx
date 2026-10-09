@@ -1,15 +1,16 @@
 import GuestIdeaReading from './GuestIdeaReading'
 import GuestRefinementForm from './GuestRefinementForm'
 import styles from './GuestClassroom.module.css'
+import design from './ClassroomDesign.module.css'
+import { ClassIcon } from './ClassroomDecor'
 
 export default function GuestRefineWorkspace({ group, lesson, onRefresh }) {
     return <section className="mt-8" aria-label="Refine your two ideas">
-        <h2 className="text-3xl font-bold">Read your ideas, then improve them</h2>
-        <p className="mt-3">Look at both pictures and descriptions. Write your changes beside them or below.</p>
+        <div className={design.sectionHeading}><ClassIcon kind="REFINE" /><div><h2>Read your ideas, then improve them</h2><p>Look at both pictures and descriptions. Write your changes beside them or below.</p></div></div>
         <nav className={styles.refineLinks} aria-label="Move between your ideas and writing">
             <a className="formWhiteButton" href="#refine-idea-1">Read Idea 1</a>
             <a className="formWhiteButton" href="#refine-idea-2">Read Idea 2</a>
-            <a className="formBlackButton" href="#refine-writing">Write your changes</a>
+            <a className="formWhiteButton" href="#refine-writing">Write your changes</a>
         </nav>
         <div className={styles.columns}>
             <div className={styles.idea}>

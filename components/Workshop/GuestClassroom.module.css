@@ -2,6 +2,7 @@
 .idea, .form { min-width: 0; scroll-margin-top: 24px; }
 .jumps { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
 .refineLinks { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
-.refineIdea { min-width: 0; scroll-margin-top: 24px; border: 1px solid #d1d5db; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
-.refineWriting { min-width: 0; scroll-margin-top: 24px; border-top: 2px solid #d1d5db; padding-top: 20px; }
+.refineIdea { min-width: 0; scroll-margin-top: 24px; border: 1px solid #deded5; background: white; border-radius: 24px; padding: 24px; margin-bottom: 24px; }
+.refineWriting { min-width: 0; scroll-margin-top: 24px; border-top: 3px solid #ffdd00; padding-top: 20px; }
+@media (max-width: 650px) { .columns { gap: 20px; } .refineIdea { padding: 18px; } }
 @media (min-width: 1100px) { .columns { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px; } .form { position: sticky; top: 20px; } .jumps { display: none; } }

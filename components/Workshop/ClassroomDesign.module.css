@@ -1,0 +1,128 @@
+/* FIT's existing public logo uses #ffdd00; neutral tokens come from globals.css.
+   Warm surfaces are tints of that yellow. Everything is scoped to class screens. */
+.shell {
+    --class-ink: var(--textColor, #111111);
+    --class-yellow: #ffdd00;
+    --class-paper: #fffdf5;
+    --class-line: #deded5;
+    --class-muted: #595a52;
+    color: var(--class-ink);
+    background: var(--class-paper);
+    border: 1px solid #eee9d8;
+    border-radius: 32px;
+    max-width: 1280px;
+    margin: 24px auto;
+    padding: clamp(18px, 3.5vw, 44px);
+    font-weight: 400;
+    line-height: 1.65;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.shell h1, .shell h2, .shell h3, .shell h4 { color: var(--class-ink); line-height: 1.25; }
+.shell h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 750; letter-spacing: -.045em; }
+.shell h2 { font-size: clamp(24px, 2.4vw, 30px); font-weight: 700; }
+.shell h3 { font-weight: 700; }
+.brand { display: flex; align-items: center; gap: 10px; font-size: 10px; font-weight: 750; letter-spacing: .13em; line-height: 1.5; color: #111; }
+.brand img { width: 32px; height: 32px; flex-shrink: 0; }
+.brand span span { display: block; font-size: 12px; font-weight: 500; letter-spacing: 0; }
+.hero { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 26px 30px; margin: 22px 0; border: 1.5px solid #111; border-radius: 24px; background: var(--class-yellow); box-shadow: 0 5px 0 #111; }
+.hero > div { max-width: 800px; min-width: 0; }
+.hero p { max-width: 62ch; margin-top: 12px; }
+.pal { width: clamp(100px, 15vw, 160px); min-width: 100px; flex-shrink: 0; color: #111; }
+.eyebrow { font-size: 12px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
+.intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, .8fr); gap: 48px; align-items: center; margin: 30px 0 10px; }
+.introCopy h1 { max-width: 12ch; }
+.introCopy .pal { width: 150px; display: block; margin-top: 24px; }
+.entryCard { background: white; padding: 30px; border: 1.5px solid #111; border-radius: 24px; box-shadow: 5px 5px 0 #ffdd00; }
+.guidance { color: var(--class-muted); font-size: 13px; line-height: 1.65; max-width: 80ch; margin: 14px 0; }
+.studentHeader { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-top: 24px; }
+.studentHeader h1 { font-size: clamp(26px, 3.4vw, 38px); }
+.studentName { margin-top: 5px; font-size: 15px; color: var(--class-muted); }
+.activityNav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 8px; border: 1px solid var(--class-line); background: white; border-radius: 22px; margin: 24px 0; }
+.shell .activityButton { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 58px; padding: 12px; border: 1.5px solid transparent; border-radius: 15px; background: transparent; color: #111; font-size: 16px; font-weight: 650; cursor: pointer; transition: background-color .15s, transform .15s, box-shadow .15s; }
+.shell .activityButton[aria-pressed="true"] { color: #111; background: var(--class-yellow); border-color: #111; box-shadow: 0 3px 0 #111; }
+.shell .activityButton:not(:disabled):hover { background: #fff5ad; transform: translateY(-1px); }
+.shell .activityButton:disabled { opacity: .5; cursor: not-allowed; }
+.activityButton svg { flex-shrink: 0; }
+.sectionHeading { display: flex; align-items: flex-start; gap: 14px; margin: 30px 0 16px; }
+.sectionHeading > svg { flex-shrink: 0; width: 44px; height: 44px; padding: 10px; border-radius: 14px; background: var(--class-yellow); border: 1px solid #111; }
+.sectionHeading p { margin-top: 8px; color: var(--class-muted); }
+.panel { background: white; border: 1px solid var(--class-line); border-radius: 24px; padding: clamp(18px, 2.2vw, 28px); }
+.writing { border: 1.5px solid #111; box-shadow: 4px 4px 0 #ffe975; }
+.shell .panel h3 { color: #111; }
+.ideaLabel { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; background: #fff3a0; border-radius: 99px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+.illustration { border: 1px solid var(--class-line); border-radius: 18px; overflow: hidden; background: white; }
+.illustration img { display: block; }
+.illustration figcaption { padding: 12px 16px; color: var(--class-muted); background: #fafaf7; border-top: 1px solid var(--class-line); }
+.shell :global(.formInput), .shell :global(.formSelect) { font-size: 16px; border: 1.5px solid #bdbfb2; border-radius: 12px; padding: 12px 14px; min-height: 48px; margin-top: 7px; background: white; color: #111; line-height: 1.5; box-shadow: none; }
+.shell textarea { resize: vertical; }
+.shell label { font-weight: 650; }
+.shell label > span { font-weight: 400; color: var(--class-muted); }
+.shell :global(.formBlackButton) { min-height: 48px; border: 1.5px solid #111; border-radius: 14px; padding: 12px 22px; font-weight: 700; font-size: 15px; gap: 8px; background: #111; color: white; transition: transform .15s, box-shadow .15s; }
+.shell :global(.formWhiteButton) { min-height: 44px; border: 1.5px solid #c0c1b8; border-radius: 12px; padding: 10px 16px; font-size: 14px; font-weight: 600; gap: 8px; background: white; color: #111; transition: background-color .15s, transform .15s; }
+.shell :global(.formWhiteButton)[aria-pressed="true"] { border-color: #111; background: #fff1a1; color: #111; }
+.shell :global(.formBlackButton):not(:disabled):hover { box-shadow: 0 4px 0 #ffdd00; transform: translateY(-2px); }
+.shell :global(.formWhiteButton):not(:disabled):hover { background: #fff9d8; border-color: #111; }
+.shell :is(button, a, input, select, textarea, summary):focus-visible { outline: 3px solid #111; outline-offset: 4px; box-shadow: 0 0 0 7px #ffdd00; }
+.shell :is(button, a):active { transform: translateY(1px); }
+.shell button { min-height: 44px; }
+.shell button:disabled { cursor: not-allowed; }
+.shell button[type="submit"] { width: 100%; }
+.shell :global(.underline) { text-underline-offset: 4px; }
+.shell summary { min-height: 44px; padding: 8px 2px; cursor: pointer; }
+.shell :global(.border.rounded-xl) { border-color: var(--class-line); border-radius: 20px; background: white; }
+.shell :global(.border.rounded-lg) { border-color: var(--class-line); border-radius: 14px; }
+.shell :global(.formInput):disabled { color: #67696b; background: #f3f3ee; }
+.shell :global(.formWhiteButton):disabled, .shell :global(.formBlackButton):disabled { opacity: .5; }
+.draftTools { border: 1px dashed #c9cabf; border-radius: 16px; padding: 14px; background: #fafaf7; margin-top: 18px; }
+.draftTools :global(.formWhiteButton) { min-height: 44px; padding: 7px 14px; }
+.status { background: #fff5b8; border-left: 4px solid #111; border-radius: 10px; padding: 12px 16px; margin-top: 16px; }
+.receipt { display: flex; align-items: center; gap: 10px; font-weight: 700; padding: 14px; border-radius: 14px; background: #fff5b8; margin-top: 16px; animation: receiptIn .18s ease-out; }
+.receipt svg { background: #111; color: #ffdd00; padding: 4px; border-radius: 50%; width: 28px; height: 28px; }
+.groupGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; margin-top: 28px; }
+.groupCard { display: block; min-width: 0; overflow: hidden; border: 1.5px solid #111; border-radius: 22px; background: white; transition: transform .16s, box-shadow .16s; }
+.groupCard:hover { transform: translateY(-3px); box-shadow: 4px 5px 0 #ffdd00; }
+.groupTitle { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--class-line); padding: 18px 20px; }
+.groupTitle h2 { font-size: 22px; }
+.groupTitle svg { width: 32px; height: 32px; border-radius: 50%; padding: 6px; background: #ffdd00; }
+.groupPictures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 16px; }
+.groupPictures img { border-radius: 10px; }
+.groupPictures figcaption { font-size: 13px; line-height: 1.45; margin-top: 10px; }
+.groupPictures strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; color: #595a52; }
+.groupFooter { padding: 14px 20px; background: #fafaf5; font-size: 13px; font-weight: 600; border-top: 1px solid var(--class-line); }
+.teacherHeader { margin: 24px 0; border-bottom: 2px solid #ffdd00; padding-bottom: 22px; }
+.teacherHeader h1 { font-size: clamp(28px, 3vw, 38px); }
+.groupOverview { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+.groupTile { display: block; text-align: left; padding: 16px; border: 1px solid var(--class-line); border-radius: 18px; background: white; cursor: pointer; line-height: 1.65; transition: border-color .15s, box-shadow .15s; }
+.groupTile:hover { border-color: #111; box-shadow: 0 3px 0 #ffdd00; }
+.groupTile strong { font-size: 17px; display: block; margin-bottom: 8px; }
+.groupTile p { font-size: 12px; color: var(--class-muted); }
+.groupTile[aria-pressed="true"] { background: #fff3aa; border-color: #111; }
+.teacherWork { margin-top: 32px; padding: 26px; background: white; border: 1px solid var(--class-line); border-radius: 24px; }
+.filterPanel { background: #fafaf5; border: 1px solid var(--class-line); border-radius: 18px; padding: 18px; margin-top: 18px; }
+.shell .teacherGroupHeading { background: #fff5ba; min-height: 56px; color: #111; }
+@keyframes receiptIn { from { opacity: .65; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 1000px) { .groupGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .groupOverview { grid-template-columns: repeat(3, minmax(0, 1fr)); } .intro { gap: 24px; } }
+@media (max-width: 650px) {
+    .shell { border-radius: 20px; margin: 10px 8px; padding: 18px 14px; }
+    .hero { padding: 22px 18px; gap: 8px; }
+    .hero .pal { width: 84px; min-width: 68px; }
+    .intro { grid-template-columns: 1fr; gap: 18px; margin-top: 24px; }
+    .introCopy { position: relative; padding-right: 85px; }
+    .introCopy h1 { max-width: none; }
+    .introCopy .pal { position: absolute; right: -8px; top: 12px; width: 85px; min-width: 85px; margin: 0; }
+    .entryCard { padding: 22px 18px; }
+    .activityNav { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 8px; }
+    .shell .activityButton { min-height: 50px; font-size: 14px; justify-content: flex-start; }
+    .groupGrid { grid-template-columns: 1fr; gap: 18px; }
+    .groupOverview { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .groupTile { padding: 12px; }
+    .teacherWork { padding: 18px 12px; }
+    .teacherHeader h1 { font-size: 28px; }
+    .sectionHeading { gap: 10px; }
+    .sectionHeading h2 { font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .shell *, .shell *::before, .shell *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    .shell :is(button, a):hover, .shell :is(button, a):active { transform: none; }
+}

@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import PupilIdeaCopy from './PupilIdeaCopy'
 import styles from './GroupProjectReader.module.css'
+import design from './ClassroomDesign.module.css'
+import { ClassBrand } from './ClassroomDecor'
 
 export default function GroupProjectReader({ groups }) {
     const [index, setIndex] = useState(0), viewport = useRef(null)
@@ -17,9 +19,9 @@ export default function GroupProjectReader({ groups }) {
         window.addEventListener('keydown', key)
         return () => window.removeEventListener('keydown', key)
     }, [last])
-    return <main className={styles.root} aria-label="Group project reader">
+    return <main className={design.shell + ' ' + styles.root} aria-label="Group project reader">
         <header className={styles.toolbar}>
-            <div><h1 className="text-xl font-semibold">Group projects</h1><p className="text-sm">Scroll down for both ideas. Use left and right arrows to change groups.</p></div>
+            <div><ClassBrand teacher /><h1 className="text-xl font-semibold mt-3">Group projects</h1><p className="text-sm">Scroll down for both ideas. Use left and right arrows to change groups.</p></div>
             <nav className={styles.controls} aria-label="Group navigation">
                 <button type="button" className="formWhiteButton" disabled={index === 0} onClick={() => setIndex(value => Math.max(0, value - 1))}>Previous group</button>
                 <label className="text-sm">Group<select className="formInput block" value={index} onChange={event => setIndex(Number(event.target.value))}>{groups.map((item, position) => <option key={item.id} value={position}>Group {item.number}</option>)}</select></label>
