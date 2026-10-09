@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { getDefaultVariantSelections } from '@/lib/seo/product';
 import { productVariantLabel } from '@/lib/productVariantLabel';
+import { defaultCartDelivery } from '@/lib/cartDelivery';
 
 export default function ShopAddToCart({ product }) {
     const [variants, setVariants] = useState(() => getDefaultVariantSelections(product));
@@ -21,7 +22,7 @@ export default function ShopAddToCart({ product }) {
         setBusy(true); setMessage(''); setAdded(false);
         try {
             await addShopItem({ productId: product._id, quantity: 1,
-                selectedVariants: variants, chosenDeliveryType: product.delivery?.deliveryTypes?.[0]?.type || 'selfCollect' });
+                selectedVariants: variants, chosenDeliveryType: defaultCartDelivery(product) });
             setAdded(true);
         } catch (error) { setMessage(error.message || 'Unable to reach the shop. Please try again.'); }
         finally { lock.current = false; setBusy(false); }

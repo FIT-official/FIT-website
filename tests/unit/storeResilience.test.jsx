@@ -74,6 +74,27 @@ afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 afterAll(() => { if (m.originalKey === undefined) delete process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY; else process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = m.originalKey; });
 
 describe('Store network recovery', () => {
+    it.each([false, true])('renders readable cart options and summary with delivery metadata: %s', async configured => {
+        let release;
+        const deliveryTypes = [{ type: 'express-courier', price: 30 }, { type: 'standard-shipping', price: 6.2 }, { type: 'pick-up', price: 0 }];
+        global.fetch.mockImplementation((url, options) => {
+            if (url === '/api/delivery-types') return new Promise(resolve => { release = () => resolve(response({ deliveryTypes: configured ? [{ name: 'express-courier', displayName: 'Tracked express' }] : [] })); });
+            if (url.startsWith('/api/product?ids')) return Promise.resolve(response({ products: [{ ...product, delivery: { deliveryTypes } }] }));
+            if (url === '/api/user/cart') return Promise.resolve(response({ cart: [{ ...cart[0], chosenDeliveryType: 'express-courier' }] }));
+            if (url === '/api/checkout/breakdown') return Promise.resolve(response({ cartBreakdown: [{ ...breakdown[0], chosenDeliveryType: 'express-courier', deliveryFee: 30 }] }));
+            return fetchRoute(url, options);
+        });
+        render(<Cart />);
+        expect(await screen.findByText('Express courier for Lanbo PLA x2')).toBeInTheDocument();
+        expect(screen.getByRole('combobox', { name: 'Change delivery type' })).toHaveValue('express-courier');
+        await act(async () => release());
+        expect(screen.getByRole('option', { name: configured ? 'Tracked express' : 'Express courier' })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: 'Standard delivery' })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: 'Self pick-up' })).toBeInTheDocument();
+        expect(screen.getByText(`${configured ? 'Tracked express' : 'Express courier'} for Lanbo PLA x2`)).toBeInTheDocument();
+        expect(screen.getByRole('combobox', { name: 'Change delivery type' })).toHaveValue('express-courier');
+        expect(global.fetch.mock.calls.some(([, init]) => init?.method === 'PUT')).toBe(false);
+    });
     it('loads a guest cart even while the Clerk client is unavailable', async () => {
         render(<Cart />);
         expect(await screen.findByText('Lanbo PLA')).toBeInTheDocument();
