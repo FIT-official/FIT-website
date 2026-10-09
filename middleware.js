@@ -1,5 +1,7 @@
 import { clerkMiddleware, clerkClient, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import { dashboardEnabled, fixtureMode } from '@/lib/creatorDashboard/flags'
+import { scopeFromUser } from '@/lib/auth/scope'
 import { isUnlistedBlogPath } from '@/lib/blog/unlistedRobots'
 import { subscriptionIntentTarget, subscriptionPriceId, withSubscriptionIntent } from '@/lib/subscriptionIntent'
 
@@ -11,6 +13,20 @@ const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)'])
 const isSsoCallback = createRouteMatcher(['/sign-up/sso-callback(.*)', '/sign-in/sso-callback(.*)'])
 
 async function handleRequest(auth, req) {
+    const path = new URL(req.url).pathname
+    const newDashboard = path.startsWith('/dashboard/creator') || path.startsWith('/admin/creator-dashboard') || path.startsWith('/api/creator-dashboard') || path === '/api/orders' || path.startsWith('/track/')
+    if (newDashboard) {
+        if (!dashboardEnabled()) return new NextResponse('Not found', { status: 404 })
+        if (fixtureMode() && !path.startsWith('/api/')) return NextResponse.next()
+        if (!path.startsWith('/track/') && !path.startsWith('/api/')) {
+            const session = await auth()
+            if (!session.userId) { await auth.protect(); return new NextResponse('Unauthorized', { status: 401 }) }
+            const user = await (await clerkClient()).users.getUser(session.userId)
+            const scope = scopeFromUser(session.userId, user)
+            const roles = path.startsWith('/admin/') ? ['owner'] : ['owner', 'creator']
+            if (!roles.includes(scope.role)) return new NextResponse('Forbidden', { status: 403 })
+        }
+    }
     // API handlers enforce their own authentication/signatures. A browser
     // onboarding redirect must never replace JSON or consume a Stripe webhook.
     if (isApiRoute(req)) return NextResponse.next()
