@@ -80,6 +80,8 @@
 .receipt { display: flex; align-items: center; gap: 10px; font-weight: 700; padding: 14px; border-radius: 14px; background: #fff5b8; margin-top: 16px; animation: receiptIn .18s ease-out; }
 .receipt svg { background: #111; color: #ffdd00; padding: 4px; border-radius: 50%; width: 28px; height: 28px; }
 .submissionActions { position: sticky; bottom: max(12px, env(safe-area-inset-bottom)); z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, .7fr); align-items: center; gap: 16px; margin-top: 24px; padding: 18px; border: 2px solid #111; border-radius: 18px; background: #ffdd00; color: #111; box-shadow: 0 4px 0 #111; }
+/* Clip the class writing page without making the site frame a scroll container. */
+:global([data-fit-page-frame]):has(.shell :global([data-submit-actions])) { overflow: clip; }
 .submissionActions strong { display: block; font-size: 18px; }
 .submissionActions.receipt { display: flex; }
 .submissionHelp { margin-top: 4px; font-size: 14px; font-weight: 400; line-height: 1.5; }
