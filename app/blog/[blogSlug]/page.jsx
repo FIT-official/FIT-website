@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { cache } from 'react'
 import { auth } from '@clerk/nextjs/server'
 import { jsonLdString } from '@/lib/jsonLd'
 import { connectToDatabase } from '@/lib/db'
@@ -26,19 +27,24 @@ async function viewerIsAdmin() {
     }
 }
 
-export default async function BlogPage({ params }) {
-    const { blogSlug } = await params
+const getVisiblePost = cache(async (blogSlug) => {
     await connectToDatabase()
     const post = programmePostCopy(await BlogPost.findOne({ slug: blogSlug }).lean())
     if (!post) notFound()
 
     const status = effectiveStatus(post)
-    const isPublished = status === 'published'
     let preview = false
-    if (!isPublished && status !== 'unlisted') {
+    if (status !== 'published' && status !== 'unlisted') {
         if (!(await viewerIsAdmin())) notFound()
         preview = true
     }
+    return { post, preview }
+})
+
+export default async function BlogPage({ params }) {
+    const { blogSlug } = await params
+    const { post, preview } = await getVisiblePost(blogSlug)
+    const isPublished = effectiveStatus(post) === 'published'
 
     const contentHtml = programmeHtmlCopy(omitRejectedPhoto(post.contentFormat === 'tiptap'
         ? renderTiptapHtml(post.contentJson) : renderPublicMarkdown(post.content)), blogSlug)
@@ -70,7 +76,6 @@ export default async function BlogPage({ params }) {
 
 export async function generateMetadata({ params }) {
     const { blogSlug } = await params
-    await connectToDatabase()
-    const post = await BlogPost.findOne({ slug: blogSlug, $or: [statusQuery('published'), { status: 'unlisted' }] }).lean()
-    return blogMetadata(programmePostCopy(post))
+    const { post } = await getVisiblePost(blogSlug)
+    return blogMetadata(post)
 }

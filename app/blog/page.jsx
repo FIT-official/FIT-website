@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { programmePostCopy } from '@/lib/blog/programmeCopy'
 import { workshopPost } from '@/lib/blog/designThinkingWorkshop'
+import { cache } from 'react'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,16 +18,7 @@ const pageNumber = value => Number.isSafeInteger(Number(value)) && Number(value)
 const description = 'Read guides to 3D printing, printer care and electronics, with project ideas and school workshop stories from Fix It Today in Singapore.'
 const pagePath = page => page > 1 ? `/blog?page=${page}` : '/blog'
 
-export async function generateMetadata({ searchParams } = {}) {
-    const page = pageNumber((await searchParams)?.page)
-    return buildPageMetadata({
-        title: `3D Printing, Electronics & STEM Guides${page > 1 ? ` | Page ${page}` : ''} | Fix It Today`,
-        description, path: pagePath(page),
-    })
-}
-
-export default async function BlogLayout({ searchParams } = {}) {
-    const page = pageNumber((await searchParams)?.page)
+const getBlogPage = cache(async (page) => {
     const pageSize = 200
     await connectToDatabase()
     const filter = statusQuery('published')
@@ -36,6 +28,21 @@ export default async function BlogLayout({ searchParams } = {}) {
         .select('title slug excerpt heroImage tags categories featured publishDate createdAt readingTimeMinutes')
         .sort({ publishDate: -1, createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize).lean()
     if (page > 1 && !posts.length) notFound()
+    return { posts, total, pageSize }
+})
+
+export async function generateMetadata({ searchParams } = {}) {
+    const page = pageNumber((await searchParams)?.page)
+    if (page > 1) await getBlogPage(page)
+    return buildPageMetadata({
+        title: `3D Printing, Electronics & STEM Guides${page > 1 ? ` | Page ${page}` : ''} | Fix It Today`,
+        description, path: pagePath(page),
+    })
+}
+
+export default async function BlogLayout({ searchParams } = {}) {
+    const page = pageNumber((await searchParams)?.page)
+    const { posts, total, pageSize } = await getBlogPage(page)
     const listedPosts = page === 1 ? [workshopPost, ...posts.filter(post => post.slug !== workshopPost.slug)] : posts
     const initialPosts = JSON.parse(JSON.stringify(listedPosts)).map(programmePostCopy).map(post => ({
         ...post,

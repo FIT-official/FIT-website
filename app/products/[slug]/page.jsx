@@ -41,7 +41,9 @@ async function getGlobalDiscountRules() {
 export async function generateMetadata({ params }) {
     const { slug } = await params
     if (slug === 'custom-print-request') return { title: 'Request a 3D print | Fix It Today' }
-    return productMetadata(await getProduct(slug))
+    const product = await getProduct(slug)
+    if (!product) notFound()
+    return productMetadata(product)
 }
 
 export default async function ProductPageLayout({ params }) {

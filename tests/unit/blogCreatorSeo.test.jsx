@@ -83,7 +83,7 @@ describe('public blog search content', () => {
         const { default: BlogPage, generateMetadata } = await import('@/app/blog/[blogSlug]/page')
         const params = Promise.resolve({ blogSlug: 'confidential' })
         await expect(BlogPage({ params })).rejects.toThrow('NEXT_NOT_FOUND')
-        expect((await generateMetadata({ params })).title).toContain('unavailable')
+        await expect(generateMetadata({ params })).rejects.toThrow('NEXT_NOT_FOUND')
         state.viewer = 'admin'; state.admin = true
         expect(renderToStaticMarkup(await BlogPage({ params }))).toContain('Secret body')
     })
@@ -124,6 +124,7 @@ describe('public blog search content', () => {
         expect((await generateMetadata({ searchParams: Promise.resolve({ page: 'Infinity' }) })).alternates.canonical).toBe('https://www.fixitoday.com/blog')
         for (const page of ['2', '999', String(Number.MAX_SAFE_INTEGER)]) {
             await expect(Blog({ searchParams: Promise.resolve({ page }) })).rejects.toThrow('NEXT_NOT_FOUND')
+            await expect(generateMetadata({ searchParams: Promise.resolve({ page }) })).rejects.toThrow('NEXT_NOT_FOUND')
         }
     })
 
@@ -201,16 +202,19 @@ describe('public creator search content', () => {
         expect((await generateMetadata({ searchParams: Promise.resolve({ page: 'Infinity' }) })).alternates.canonical).toBe('https://www.fixitoday.com/creators')
         for (const page of ['2', '999', String(Number.MAX_SAFE_INTEGER)]) {
             await expect(CreatorsPage({ searchParams: Promise.resolve({ page }) })).rejects.toThrow('NEXT_NOT_FOUND')
+            await expect(generateMetadata({ searchParams: Promise.resolve({ page }) })).rejects.toThrow('NEXT_NOT_FOUND')
         }
     })
 
     it('returns not-found for missing and unpublished shops while keeping owner and admin previews without public schema', async () => {
         const { default: CreatorPage, generateMetadata } = await import('@/app/creators/[id]/page')
         await expect(CreatorPage({ params: Promise.resolve({ id: 'missing' }) })).rejects.toThrow('NEXT_NOT_FOUND')
+        await expect(generateMetadata({ params: Promise.resolve({ id: 'missing' }) })).rejects.toThrow('NEXT_NOT_FOUND')
         state.creator = { userId: 'user_ada', displayName: 'Ada Prints', shop: { published: false } }
         await expect(CreatorPage({ params: Promise.resolve({ id: 'Ada Prints' }) })).rejects.toThrow('NEXT_NOT_FOUND')
-        expect((await generateMetadata({ params: Promise.resolve({ id: 'Ada Prints' }) })).robots.index).toBe(false)
+        await expect(generateMetadata({ params: Promise.resolve({ id: 'Ada Prints' }) })).rejects.toThrow('NEXT_NOT_FOUND')
         state.viewer = 'user_ada'
+        expect((await generateMetadata({ params: Promise.resolve({ id: 'Ada Prints' }) })).robots.index).toBe(false)
         expect(renderToStaticMarkup(await CreatorPage({ params: Promise.resolve({ id: 'Ada Prints' }) }))).not.toContain('application/ld+json')
         state.viewer = 'admin'; state.admin = true
         expect(renderToStaticMarkup(await CreatorPage({ params: Promise.resolve({ id: 'Ada Prints' }) }))).not.toContain('application/ld+json')

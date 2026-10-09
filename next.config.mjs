@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    // Resolve metadata visibility checks before Suspense can send HTTP 200.
+    htmlLimitedBots: /.*/,
     // Silence Next.js 16 warning about having a webpack config
     // without a Turbopack config. We don't need any special
     // Turbopack settings right now, so an empty object is fine.

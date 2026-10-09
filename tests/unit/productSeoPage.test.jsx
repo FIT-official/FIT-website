@@ -76,8 +76,8 @@ describe('product server rendering', () => {
 
     it('returns a true not-found page for an absent product', async () => {
         Product.findOne.mockReturnValue({ select: vi.fn(() => ({ lean: vi.fn().mockResolvedValue(null) })) })
-        expect((await generateMetadata({ params })).robots.index).toBe(false)
         await expect(ProductPageLayout({ params })).rejects.toThrow('NEXT_NOT_FOUND')
+        await expect(generateMetadata({ params })).rejects.toThrow('NEXT_NOT_FOUND')
     })
 
     it('keeps hidden deep links available without indexing, schema or a server-rendered seed', async () => {
