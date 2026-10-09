@@ -8,9 +8,9 @@ describe('plain draft and teacher history', () => {
     it('previews labelled answers without code or metadata and restores the exact snapshot', () => {
         const content = { idea: '1', whatWorks: 'Easy to hold', question: 'Will it stay dry?', improvement: 'Add a lid', receipt: 'PRIVATE ID', expectedVersion: 9 }, controls = { remote: { snapshots: [{ version: 3, savedAt: '2026-10-09T01:00:00Z', content }] }, compare: vi.fn(), rebase: vi.fn(), retry: vi.fn(), undo: vi.fn(), redo: vi.fn() }
         render(<DraftHistory controls={controls} status="Autosaved draft v3. Not submitted; click Submit when finished." />)
-        expect(screen.getByText('Saved')).toBeInTheDocument(); fireEvent.click(screen.getByText('Earlier drafts')); fireEvent.change(screen.getByLabelText('Choose an earlier draft'), { target: { value: '3' } })
+        expect(screen.getByText('Draft saved — not submitted')).toBeInTheDocument(); fireEvent.click(screen.getByText('Earlier drafts')); fireEvent.change(screen.getByLabelText('Choose an earlier draft'), { target: { value: '3' } })
         expect(screen.getByText('Easy to hold')).toBeInTheDocument(); expect(screen.getByText('What works well, and why?')).toBeInTheDocument(); expect(document.querySelector('pre')).toBe(null); expect(screen.queryByText(/PRIVATE ID|expectedVersion|v3/)).toBe(null)
-        fireEvent.click(screen.getByRole('button', { name: 'Restore draft' })); expect(controls.rebase).toHaveBeenCalledWith(content); fireEvent.click(screen.getByRole('button', { name: 'Save' })); expect(controls.retry).toHaveBeenCalledOnce()
+        fireEvent.click(screen.getByRole('button', { name: 'Restore draft' })); expect(controls.rebase).toHaveBeenCalledWith(content); fireEvent.click(screen.getByRole('button', { name: 'Save draft' })); expect(controls.retry).toHaveBeenCalledOnce()
     })
     it('handles empty and legacy refinement drafts without relabelling the earlier answer', () => {
         const { rerender } = render(<DraftPreview content={{ change: '', reason: '', test: '' }} />); expect(screen.getByText('No answers in this draft.')).toBeInTheDocument()
@@ -18,8 +18,8 @@ describe('plain draft and teacher history', () => {
         expect(screen.getByText('Earlier answer: Which feedback are you using?')).toBeInTheDocument(); expect(screen.getByText('What would you change to improve this idea?')).toBeInTheDocument()
     })
     it('never calls a failed, pending or restored draft saved', () => {
-        for (const status of ['Autosave waiting. Local text kept; retrying the same request.', 'Network failed', 'Draft changes waiting to save.', 'Draft restored using compared saved version. Not submitted.']) expect(draftStatus(status)).not.toBe('Saved')
-        expect(draftStatus('Network failed')).toMatch(/Couldn.t save/); expect(draftStatus('Autosaved draft v9.')).toBe('Saved')
+        for (const status of ['Autosave waiting. Local text kept; retrying the same request.', 'Network failed', 'Draft changes waiting to save.', 'Draft restored using compared saved version. Not submitted.']) expect(draftStatus(status)).not.toBe('Draft saved — not submitted')
+        expect(draftStatus('Network failed')).toMatch(/Couldn.t save/); expect(draftStatus('Autosaved draft v9.')).toBe('Draft saved — not submitted')
     })
     it('shows readable names, groups and before/after history without serialised objects', () => {
         render(<WorkshopAudit events={[{ action: 'feedback', actor: 'PRIVATE TEACHER ID', at: '2026-10-09T01:00:00Z', before: { studentName: 'Aisha', visitingGroup: 'g2', whatWorks: 'Old answer', payloadHash: 'PRIVATE HASH' }, after: { studentName: 'Aisha', visitingGroup: 'g2', whatWorks: 'New answer' } }]} />)
