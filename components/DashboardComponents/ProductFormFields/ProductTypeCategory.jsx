@@ -1,19 +1,30 @@
 import React from 'react'
 import { DashSelect } from './dashFormUi'
 
-export default function ProductTypeCategory({ form, setForm, isAdmin, categories, subcategories }) {
+// Keep a stored classification visible even when it is no longer offered for
+// new products. Never infer a material from the product name or choose another
+// category's first option just to make an existing product editable.
+function optionsWithCurrent(options = [], current) {
+    const choices = options.map(option => ({ value: option.displayName, label: option.displayName }))
+    if (current && !choices.some(option => option.value === current)) {
+        choices.push({ value: current, label: `${current} (current)` })
+    }
+    return choices
+}
+
+export default function ProductTypeCategory({ form, setForm, isAdmin, categories, subcategories, originalProduct = null }) {
+    const sameType = !!originalProduct && form.productType === originalProduct.productType
+    const sameCategory = sameType && (form.categoryId || '') === (originalProduct.categoryId || '')
+    const keepBlankCategory = sameType && !originalProduct.categoryId
+    const keepBlankSubcategory = sameCategory && !originalProduct.subcategoryId
+
     return (
         <>
             <DashSelect
                 onChangeFunction={e => {
                     const val = e.target.value;
-                    if (val === "shop" && !isAdmin) return; // Prevent non-admin from selecting shop
-                    setForm(f => ({
-                        ...f,
-                        productType: val,
-                        categoryId: "",
-                        subcategoryId: ""
-                    }));
+                    if (val === "shop" && !isAdmin) return;
+                    setForm(f => ({ ...f, productType: val, categoryId: "", subcategoryId: "" }));
                 }}
                 value={form.productType}
                 name="productType"
@@ -25,33 +36,26 @@ export default function ProductTypeCategory({ form, setForm, isAdmin, categories
             />
 
             <DashSelect
-                onChangeFunction={e =>
-                    setForm(f => ({
-                        ...f,
-                        categoryId: e.target.value,
-                        subcategoryId: ""
-                    }))}
-                value={form.categoryId}
+                onChangeFunction={e => setForm(f => ({ ...f, categoryId: e.target.value, subcategoryId: "" }))}
+                value={form.categoryId || ""}
                 name="category"
                 label="Category"
+                required={!keepBlankCategory}
                 options={[
-                    { value: "", label: "Select a category" },
-                    ...categories.map((cat) => ({ value: cat.displayName, label: cat.displayName }))
+                    { value: "", label: keepBlankCategory ? "No category (keep existing)" : "Select a category" },
+                    ...optionsWithCurrent(categories, sameType ? originalProduct.categoryId : null)
                 ]}
             />
 
             <DashSelect
-                onChangeFunction={e =>
-                    setForm(f => ({
-                        ...f,
-                        subcategoryId: e.target.value
-                    }))}
-                value={form.subcategoryId}
+                onChangeFunction={e => setForm(f => ({ ...f, subcategoryId: e.target.value }))}
+                value={form.subcategoryId || ""}
                 name="subcategory"
                 label="Subcategory"
+                required={!keepBlankSubcategory}
                 options={[
-                    { value: "", label: "Select a subcategory" },
-                    ...(subcategories || []).map((sub) => ({ value: sub.displayName, label: sub.displayName }))
+                    { value: "", label: keepBlankSubcategory ? "No subcategory (keep existing)" : "Select a subcategory" },
+                    ...optionsWithCurrent(subcategories, sameCategory ? originalProduct.subcategoryId : null)
                 ]}
             />
         </>

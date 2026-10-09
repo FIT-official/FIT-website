@@ -52,7 +52,7 @@ export function InfoStrip({ tone = 'info', title, children, className = '' }) {
 }
 
 /** Token-styled select — same contract as the legacy SelectField. */
-export function DashSelect({ onChangeFunction, value, name, label, options, className = '' }) {
+export function DashSelect({ onChangeFunction, value, name, label, options, className = '', required = true }) {
     return (
         <div className={`flex flex-col gap-1.5 w-full ${className}`}>
             {label && (
@@ -65,7 +65,7 @@ export function DashSelect({ onChangeFunction, value, name, label, options, clas
                     value={value}
                     onChange={onChangeFunction}
                     className={`${inputCls()} appearance-none pr-8 cursor-pointer`}
-                    required
+                    required={required}
                 >
                     {options.map((option, index) => (
                         <option key={index} value={option.value}>

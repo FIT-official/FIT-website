@@ -127,6 +127,8 @@ export function buildProductPayload(form, user, uploadedImages, uploadedModels, 
         variantTypes: (form.variantTypes || []).map(vt => ({
             ...vt,
             options: (vt.options || []).map(opt => ({
+                // Retain the option identity used by stock, orders and colour previews.
+                ...(opt._id ? { _id: opt._id } : {}),
                 name: opt.name,
                 additionalFee: opt.additionalFee || 0,
                 stock: opt.stock,

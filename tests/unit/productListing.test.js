@@ -191,3 +191,25 @@ it('reads committed inventory on each product request and forbids HTTP caching',
     expect((await response.json()).products[0].stock).toBe(stock)
   }
 })
+
+
+describe('PUT /api/product legacy material editing', () => {
+    it.each([null, '', 'PLA', 'PETG', 'TPU', 'PVA', 'ABS', 'ASA', 'Specialty', 'PA-CF', 'PC'])('retains an existing %s classification with server validation enabled', async subcategoryId => {
+        state.role = 'admin'
+        state.prevProduct = { _id: 'p1', creatorUserId: 'user_other', listing: 'fit', images: ['k1'], paidAssets: [], categoryId: 'Filament', subcategoryId }
+        const { PUT } = await import('@/app/api/product/route')
+        const Product = (await import('@/models/Product')).default
+        const res = await PUT(json('http://t/api/product?productId=p1', 'PUT', productBody({ productType: 'shop', categoryId: 'Filament', subcategoryId })))
+        expect(res.status).toBe(200)
+        expect(state.updated).toMatchObject({ categoryId: 'Filament', subcategoryId, creatorUserId: 'user_other', listing: 'fit' })
+        expect(Product.findByIdAndUpdate).toHaveBeenCalledWith('p1', expect.any(Object), { new: true, runValidators: true })
+    })
+    it('does not waive required product details for a legacy blank classification', async () => {
+        state.role = 'admin'
+        state.prevProduct = { _id: 'p1', creatorUserId: 'user_other', images: ['k1'], paidAssets: [] }
+        const { PUT } = await import('@/app/api/product/route')
+        const res = await PUT(json('http://t/api/product?productId=p1', 'PUT', productBody({ name: '', categoryId: 'Filament', subcategoryId: null })))
+        expect(res.status).toBe(400)
+        expect(state.updated).toBeNull()
+    })
+})

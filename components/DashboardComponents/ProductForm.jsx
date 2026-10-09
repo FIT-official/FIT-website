@@ -28,6 +28,7 @@ import VariantTypesField from './ProductFormFields/VariantTypesField';
 import DiscountsField from "./ProductFormFields/DiscountsField";
 import { inputCls, labelCls, quietBtnCls, badTextBtnCls } from './ProductFormFields/dashFormUi';
 import { useAdminSettings } from '@/utils/AdminSettingsContext';
+import { SHOP_CATEGORIES, PRINT_CATEGORIES, SHOP_SUBCATEGORIES, PRINT_SUBCATEGORIES } from '@/lib/categories';
 import {
     mapProductToForm,
     buildProductPayload,
@@ -247,8 +248,8 @@ function ProductForm({ mode = "Create", product = null }) {
             // Extract active subcategories for the currently selected category
             // We'll update this when category changes
             if (activeCats.length > 0) {
-                const currentCat = activeCats.find(c => c.displayName === form.categoryId) || activeCats[0];
-                const activeSubs = (currentCat.subcategories || []).filter(sub => sub.isActive);
+                const currentCat = activeCats.find(c => c.displayName === form.categoryId);
+                const activeSubs = (currentCat?.subcategories || []).filter(sub => sub.isActive);
                 setAdminSubcategories(activeSubs);
             } else {
                 setAdminSubcategories([]);
@@ -272,9 +273,8 @@ function ProductForm({ mode = "Create", product = null }) {
             }));
 
             setAdminCategories(legacyCats);
-            if (legacyCats.length > 0) {
-                setAdminSubcategories(legacyCats[0].subcategories || []);
-            }
+            const currentCat = legacyCats.find(c => c.displayName === form.categoryId);
+            setAdminSubcategories(currentCat?.subcategories || []);
         }
     }, [adminSettings, adminSettingsLoading, adminSettingsError, form.productType, form.categoryId]);
 
@@ -286,10 +286,7 @@ function ProductForm({ mode = "Create", product = null }) {
     useEffect(() => {
         if (adminCategories.length > 0 && form.categoryId) {
             const selectedCat = adminCategories.find(c => c.displayName === form.categoryId);
-            if (selectedCat) {
-                const activeSubs = (selectedCat.subcategories || []).filter(sub => sub.isActive);
-                setAdminSubcategories(activeSubs);
-            }
+            setAdminSubcategories((selectedCat?.subcategories || []).filter(sub => sub.isActive));
         }
     }, [form.categoryId, adminCategories]);
 
@@ -861,6 +858,7 @@ function ProductForm({ mode = "Create", product = null }) {
                         <FormSection id="basics" title="Basics" first anchorRef={(el) => { sectionRefs.current.basics = el }}>
                             <BasicInfo form={form} handleChange={handleChange} missingFields={missingFields} />
                             <ProductTypeCategory
+                                originalProduct={isEditMode ? product : null}
                                 form={form}
                                 setForm={setForm}
                                 isAdmin={isAdmin}

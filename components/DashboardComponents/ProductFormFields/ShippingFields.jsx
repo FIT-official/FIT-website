@@ -45,7 +45,7 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
                 defaultPrice: dt.price ?? null
             }
         })
-        seededRef.current = true
+        seededRef.current = selected
         setSelectedDeliveryTypes(selected)
         setInitialized(true)
     }, [form.delivery?.deliveryTypes, initialized])
@@ -93,7 +93,9 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
         // descriptions) even though the user changed nothing — skip exactly
         // that one run so an untouched form round-trips byte-identical.
         if (seededRef.current) {
-            seededRef.current = false
+            // The initial effect can run before the queued selection update.
+            // Keep the seed marker until that exact selection has rendered.
+            if (seededRef.current === selectedDeliveryTypes) seededRef.current = false
             return
         }
         const deliveryTypes = Object.entries(selectedDeliveryTypes)
