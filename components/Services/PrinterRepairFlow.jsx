@@ -27,6 +27,17 @@ function safeReceipt(body) {
   if (typeof record?.requestId !== 'string' || !/^[0-9a-f-]{36}$/i.test(record.requestId) || !['assessment_requested', 'withdrawn'].includes(record.status) || !validateRepairBrief(record.brief).ok || !Number.isInteger(record.photoCount) || record.photoCount < 0 || record.photoCount > 3) throw new Error('The saved request could not be verified. Check its status before trying again.')
   return body.request
 }
+const signInDraftKey = 'fit.printer-repair.sign-in-draft'
+function takeSignInDraft() {
+  try {
+    const raw = sessionStorage.getItem(signInDraftKey); sessionStorage.removeItem(signInDraftKey)
+    const saved = JSON.parse(raw)
+    if (!saved || !Number.isFinite(saved.savedAt) || saved.savedAt > Date.now() || Date.now() - saved.savedAt > 30 * 60 * 1000) return null
+    if (!saved.brief || Object.keys(saved.brief).some(key => !Object.hasOwn(EMPTY_REPAIR_BRIEF, key)) || Object.values(saved.brief).some(value => typeof value !== 'string' || value.length > 2000)) return null
+    if (!validateRepairBrief(saved.brief, { step: 0 }).ok || !validateRepairBrief(saved.brief, { step: 1 }).ok) return null
+    return { brief: validateRepairBrief(saved.brief).value, hadPhotos: saved.hadPhotos === true }
+  } catch { return null }
+}
 const pendingKey = userId => `fit.printer-repair.pending.${userId}`
 function savePending(userId, payload) { try { sessionStorage.setItem(pendingKey(userId), JSON.stringify(payload)) } catch { /* Keep the same attempt in memory if browser storage is unavailable. */ } }
 function clearPending(userId) { try { sessionStorage.removeItem(pendingKey(userId)) } catch { /* Browser storage is optional. */ } }
@@ -44,6 +55,7 @@ export default function PrinterRepairFlow() {
   const [busy, setBusy] = useState(''), [message, setMessage] = useState('')
   const [pending, setPending] = useState(null), [receipt, setReceipt] = useState(null)
   const [savedReference, setSavedReference] = useState(false)
+  const [signInReturnUrl, setSignInReturnUrl] = useState('/printer-repair')
   const [discarding, setDiscarding] = useState(false), [withdrawing, setWithdrawing] = useState(false)
   const heading = useRef(null), errorSummary = useRef(null), files = useRef([])
   const uploaded = useRef(new Map()), active = useRef(null), sending = useRef(false)
@@ -53,7 +65,9 @@ export default function PrinterRepairFlow() {
   const locked = Boolean(pending || busy)
 
   useEffect(() => {
-    setSavedReference(new URL(window.location.href).searchParams.has('request'))
+    const reference = new URL(window.location.href).searchParams.get('request')
+    setSavedReference(Boolean(reference))
+    setSignInReturnUrl(reference && /^[0-9a-f-]{36}$/i.test(reference) ? `/printer-repair?request=${encodeURIComponent(reference)}` : '/printer-repair')
     const controller = new AbortController(), lifecycle = photoGeneration
     boundedFetch('/api/printer-repair/config', { signal: controller.signal }).then(body => {
       setUploadsAvailable(body.uploadsAvailable === true); setRequestsAvailable(body.requestsAvailable !== false)
@@ -75,8 +89,12 @@ export default function PrinterRepairFlow() {
       setBrief(validateRepairSubmission(saved).value.brief); setPending(saved); setStep(2)
       setMessage('A previous send has not been checked yet. Check its status or retry the same request.')
     } else {
-      setBrief(current => ({ ...current, contactName: current.contactName || user.fullName || '', email: current.email || user.primaryEmailAddress?.emailAddress || '' }))
       const requestId = new URL(window.location.href).searchParams.get('request')
+      const signInDraft = !requestId ? takeSignInDraft() : null
+      if (signInDraft) {
+        setBrief({ ...signInDraft.brief, contactName: signInDraft.brief.contactName || user.fullName || '', email: signInDraft.brief.email || user.primaryEmailAddress?.emailAddress || '' }); setStep(2)
+        setMessage(signInDraft.hadPhotos && !files.current.length ? 'Your draft is restored. Please choose your photos again before sending.' : 'Your draft is restored. Review it before sending; nothing has been submitted.')
+      } else setBrief(current => ({ ...current, contactName: current.contactName || user.fullName || '', email: current.email || user.primaryEmailAddress?.emailAddress || '' }))
       if (requestId && /^[0-9a-f-]{36}$/i.test(requestId)) {
         const actorId = user.id
         setBusy('checking')
@@ -91,6 +109,10 @@ export default function PrinterRepairFlow() {
     }
   }, [receipt])
 
+  function keepDraftForSignIn() {
+    try { sessionStorage.setItem(signInDraftKey, JSON.stringify({ brief, hadPhotos: photos.length > 0, savedAt: Date.now() })) }
+    catch { setMessage('Your browser cannot preserve the draft across sign-in. Keep a copy of your details before continuing.') }
+  }
   function edit(field, value) {
     if (['brandChoice', 'brandOther', 'modelChoice', 'model', 'feeder', 'issue'].includes(field)) {
       const result = reconcileRepairSelection(brief, field, value)
@@ -140,6 +162,7 @@ export default function PrinterRepairFlow() {
     uploaded.current.delete(id); setPhotos(current => current.filter(item => item.id !== id)); setPhotoError('')
   }
   function discard() {
+    try { sessionStorage.removeItem(signInDraftKey) } catch { /* Browser storage is optional. */ }
     photoGeneration.current++; setPhotoBusy(false); setSelectionNotice(''); photos.forEach(photo => URL.revokeObjectURL(photo.preview)); setPhotos([]); uploaded.current.clear()
     setBrief({ ...EMPTY_REPAIR_BRIEF }); setErrors({}); setStep(0); setMessage('Draft cleared. Nothing was sent.'); setDiscarding(false)
     requestAnimationFrame(() => heading.current?.focus())
@@ -246,7 +269,7 @@ export default function PrinterRepairFlow() {
         {receipt.status !== 'withdrawn' && (!withdrawing ? <button className={styles.secondary} onClick={() => setWithdrawing(true)}>Withdraw request</button> : <div className={styles.confirm}><p>Withdraw this assessment request?</p><div className={styles.actions}><button disabled={Boolean(busy) || !isSignedIn} className={styles.primary} onClick={withdraw}>{busy ? 'Withdrawing…' : 'Yes, withdraw request'}</button><button disabled={Boolean(busy)} className={styles.secondary} onClick={() => setWithdrawing(false)}>Keep request</button></div></div>)}
         {message && <p role="alert" className={styles.error}>{message}</p>}
       </div> : <form onSubmit={submit} noValidate>
-        {savedReference && isLoaded && !isSignedIn && <div className={styles.signIn}><p>Sign in to view this assessment request.</p><SignInButton mode="modal"><button type="button" className={styles.secondary}>Sign in to view request</button></SignInButton></div>}
+        {savedReference && isLoaded && !isSignedIn && <div className={styles.signIn}><p>Sign in to view this assessment request.</p><SignInButton mode="modal" forceRedirectUrl={signInReturnUrl} signUpForceRedirectUrl={signInReturnUrl}><button type="button" className={styles.secondary}>Sign in to view request</button></SignInButton></div>}
         <p className={styles.stepCount}>Step {step + 1} of 3</p><ol className={styles.steps} aria-label="Request steps">{STEPS.map((title, index) => <li key={title} aria-current={index === step ? 'step' : undefined}><p>{title}</p></li>)}</ol>
         <h2 className={styles.stepHeading} ref={heading} tabIndex={-1}>{STEPS[step]}</h2>
         {Object.values(errors).some(Boolean) && <div className={styles.errorSummary} ref={errorSummary} tabIndex={-1} role="alert"><p>Check these details</p><ul>{Object.entries(errors).filter(([, error]) => error).map(([name, error]) => <li key={name}><a href={`#repair-${name}`} onClick={event => { event.preventDefault(); document.getElementById(`repair-${name}`)?.focus() }}>{error}</a></li>)}</ul></div>}
@@ -270,7 +293,7 @@ export default function PrinterRepairFlow() {
           {field('preferredDate', 'Preferred assessment date', { type: 'date', hint: 'A preference only. FIT will discuss availability; no slot is reserved.' })}{field('handover', 'Handover arrangement', { required: true, select: [['discuss_with_fit', 'Discuss with FIT']], hint: 'Agree the location and method with FIT before bringing or sending a printer.' })}
           <div className={styles.review}><h3>Check your request</h3><dl className={styles.summary}><div><dt>Printer</dt><dd>{brief.brand} {brief.model}</dd></div><div><dt>Issue</dt><dd>{issueLabel}</dd></div><div><dt>Symptoms</dt><dd className={styles.multiline}>{brief.details}</dd></div>{brief.errorCode && <div><dt>Error message</dt><dd>{brief.errorCode}</dd></div>}{brief.troubleshooting && <div><dt>Already tried</dt><dd className={styles.multiline}>{brief.troubleshooting}</dd></div>}<div><dt>Photos</dt><dd>{pending ? pending.photoAssetIds.length : photos.length}</dd></div></dl>{photos.length > 0 && <div className={styles.reviewPhotos}>{photos.map(photo => <div key={photo.id} className={styles.thumbnail} style={{ backgroundImage: `url("${photo.preview}")` }} role="img" aria-label={`Review photo ${photo.file.name}`} />)}<button type="button" className={styles.secondary} disabled={locked} onClick={() => { setStep(1); requestAnimationFrame(() => heading.current?.focus()) }}>Edit photos</button></div>}</div>
           <p className={styles.hint}>We will use your contact details to respond to this request. Photos are uploaded privately after you choose to send. <a href="/privacy">Read our privacy policy</a>.</p>
-          {!isLoaded ? <p role="status">Loading your account…</p> : !isSignedIn && <div className={styles.signIn}><p>Sign in to send your request and keep its photos private. Your draft stays here while you sign in.</p><SignInButton mode="modal"><button type="button" className={styles.secondary}>Sign in to continue</button></SignInButton></div>}
+          {!isLoaded ? <p role="status">Loading your account…</p> : !isSignedIn && <div className={styles.signIn}><p>Sign in to send your request and keep its photos private. Your draft stays here while you sign in.</p><SignInButton mode="modal" forceRedirectUrl={signInReturnUrl} signUpForceRedirectUrl={signInReturnUrl}><button type="button" className={styles.secondary} onClick={keepDraftForSignIn}>Sign in to continue</button></SignInButton></div>}
         </div>}
         {message && <p role="alert" className={styles.error}>{message}</p>}
         {pending && <p className={styles.note}>This send needs confirmation. Check its status first, or retry exactly the same details.</p>}

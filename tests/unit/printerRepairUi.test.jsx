@@ -2,8 +2,9 @@ import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+const signInProps = vi.hoisted(() => ({ current: null }))
 const auth = vi.hoisted(() => ({ isLoaded: true, isSignedIn: true, user: { id: 'demo-user' } }))
-vi.mock('@clerk/nextjs', () => ({ useUser: () => auth, SignInButton: ({ children }) => children }))
+vi.mock('@clerk/nextjs', () => ({ useUser: () => auth, SignInButton: props => { signInProps.current = props; return props.children } }))
 import PrinterRepairFlow from '@/components/Services/PrinterRepairFlow'
 import { repairFixture } from '../fixtures/printerRepair'
 const id = '56e1fe9c-33e5-4ae3-8e70-dbc6b0c97b34'
@@ -259,5 +260,38 @@ describe('repair request customer interaction', () => {
     await user.click(screen.getByRole('button', { name: 'Back' })); await user.click(screen.getByRole('button', { name: 'Back' }))
     await user.click(screen.getByRole('button', { name: 'Continue' })); await user.click(screen.getByRole('button', { name: 'Continue' }))
     expect(screen.getByRole('button', { name: 'Send assessment request' })).toBeEnabled(); expect(calls.some(call => call.url === '/api/printer-repair')).toBe(false)
+  })
+})
+
+describe('repair sign-in return and draft recovery', () => {
+  it('overrides global signup onboarding and restores a draft once after a full auth return', async () => {
+    Object.assign(auth, { isSignedIn: false, user: null }); const view = render(<PrinterRepairFlow />)
+    const user = await advance(); await contact(user)
+    await user.click(screen.getByRole('button', { name: 'Sign in to continue' }))
+    expect(signInProps.current.forceRedirectUrl).toBe('/printer-repair')
+    expect(signInProps.current.signUpForceRedirectUrl).toBe('/printer-repair')
+    expect(sessionStorage.getItem('fit.printer-repair.sign-in-draft')).toContain('Demo Customer')
+    view.unmount(); Object.assign(auth, { isSignedIn: true, user: { id: 'new-customer' } }); render(<PrinterRepairFlow />)
+    expect(await screen.findByLabelText('Your name')).toHaveValue('Demo Customer')
+    expect(screen.getByLabelText('Email')).toHaveValue('customer@example.invalid')
+    expect(screen.getByText(repairFixture.brief.details)).toBeVisible()
+    expect(screen.getByRole('alert')).toHaveTextContent('nothing has been submitted')
+    expect(sessionStorage.getItem('fit.printer-repair.sign-in-draft')).toBeNull()
+    expect(calls.some(call => call.options.method === 'POST')).toBe(false)
+  })
+  it('preserves only the saved repair reference through sign-in and signup, never an external redirect', async () => {
+    const spy = vi.spyOn(URLSearchParams.prototype, 'get').mockImplementation(key => key === 'request' ? id : key === 'redirect_url' ? 'https://foreign.invalid' : null)
+    Object.assign(auth, { isSignedIn: false, user: null }); render(<PrinterRepairFlow />)
+    await screen.findByRole('button', { name: 'Sign in to view request' })
+    expect(signInProps.current.forceRedirectUrl).toBe('/printer-repair?request=' + id)
+    expect(signInProps.current.signUpForceRedirectUrl).toBe('/printer-repair?request=' + id)
+    spy.mockRestore()
+  })
+  it.each(['expired', 'malformed'])('discards a %s anonymous draft instead of restoring it', async kind => {
+    sessionStorage.setItem('fit.printer-repair.sign-in-draft', kind === 'malformed' ? '{broken' : JSON.stringify({ savedAt: Date.now()-31*60*1000, brief: repairFixture.brief }))
+    render(<PrinterRepairFlow />)
+    expect(await screen.findByRole('heading', { name: 'Your printer' })).toBeVisible()
+    expect(screen.queryByLabelText('Your name')).not.toBeInTheDocument()
+    expect(sessionStorage.getItem('fit.printer-repair.sign-in-draft')).toBeNull()
   })
 })
