@@ -159,6 +159,21 @@ const CustomPrintRequestSchema = new mongoose.Schema({
     //   - 'manual'  — admin reviewed advanced settings and set the price.
     quoteMode: { type: String, enum: ['instant', 'manual'], default: null },
 
+    // Guided enquiries reuse this queue and cannot be instant-quoted.
+    guidedBrief: { type: new mongoose.Schema({
+        version: Number, purpose: String, category: String, sourceUrl: String,
+        sizeMode: String, size: Number, unit: String, sizeMm: Number,
+        quantity: Number, material: String, colour: String, rights: String,
+        permissionNote: String, notes: String,
+    }, { _id: false }), default: undefined },
+    guidedAssetId: String,
+    guidedFingerprint: String,
+    guidedReview: { type: new mongoose.Schema({
+        status: { type: String, enum: ['pending', 'approved'] },
+        fingerprint: String, exactFile: String, licenceEvidence: String,
+        scopeConfirmed: Boolean, reviewedBy: String, reviewedAt: Date,
+    }, { _id: false }), default: undefined },
+
     // Payment info
     stripeSessionId: { type: String },
     stripePaymentIntentId: { type: String },

@@ -89,3 +89,8 @@ describe('persistInstantQuote', () => {
         expect(result.body.error).toMatch(/changed while its quote/)
     })
 })
+
+it('never turns a guided brief into an instant per-file price',async()=>{
+  const result=await persistInstantQuote({request:request({guidedBrief:{version:1}}),userId:'buyer',appSettings})
+  expect(result.status).toBe(409);expect(state.updates).toHaveLength(0);expect(state.notified).toHaveLength(0)
+})

@@ -1,3 +1,4 @@
+import { guidedPaymentIssue } from '@/lib/customPrint/guidedBrief'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { connectToDatabase } from '@/lib/db'
@@ -83,6 +84,22 @@ export async function PUT(request) {
     return NextResponse.json({ error: 'Request not found' }, { status: 404 })
   }
 
+  if (doc.guidedBrief?.version) {
+    if (doc.paidAt || doc.stripeSessionId || doc.stripePaymentIntentId || !['configured', 'quoted'].includes(doc.status)) {
+      return NextResponse.json({ error: 'This guided request is locked. Resolve any payment before changing it.' }, { status: 409 })
+    }
+    doc.$where = { status: doc.status, ...(doc.updatedAt ? { updatedAt: doc.updatedAt } : {}) }
+    if (action === 'quote') {
+      const review = body.guidedReview
+      if (!review || review.scopeConfirmed !== true || typeof review.exactFile !== 'string' || !review.exactFile.trim() || review.exactFile.length > 500 || typeof review.licenceEvidence !== 'string' || review.licenceEvidence.trim().length < 10 || review.licenceEvidence.length > 2000 || review.fingerprint !== doc.guidedFingerprint) {
+        return NextResponse.json({ error: 'Confirm the exact file and version, paid-print licence evidence, requested size, quantity, material and colour before quoting.' }, { status: 409 })
+      }
+      doc.guidedReview = { status: 'approved', fingerprint: doc.guidedFingerprint, exactFile: review.exactFile.trim(), licenceEvidence: review.licenceEvidence.trim(), scopeConfirmed: true, reviewedBy: userId, reviewedAt: new Date() }
+    } else if (action !== 'cancel' && guidedPaymentIssue(doc)) {
+      return NextResponse.json({ error: guidedPaymentIssue(doc) }, { status: 409 })
+    }
+  }
+
   // Which customer notification this action triggers (resolved after save).
   let notifyEvent = null
 
@@ -92,7 +109,7 @@ export async function PUT(request) {
     if (doc.creatorUserId) {
       return NextResponse.json({ error: 'This request is with a creator print farm; the creator sends the quote.' }, { status: 409 })
     }
-    if (typeof quoteAmount !== 'number' || quoteAmount < 0) {
+    if (typeof quoteAmount !== 'number' || !Number.isFinite(quoteAmount) || quoteAmount < 0) {
       return NextResponse.json({ error: 'quoteAmount must be a non-negative number' }, { status: 400 })
     }
     const cur = currency || doc.currency || 'sgd'
@@ -148,7 +165,10 @@ export async function PUT(request) {
     }
   }
 
-  await doc.save()
+  try { await doc.save() } catch (error) {
+    if (['DocumentNotFoundError', 'VersionError'].includes(error?.name)) return NextResponse.json({ error: 'This request changed. Reload before quoting.' }, { status: 409 })
+    throw error
+  }
 
   // Notify the customer (email + buyer↔vendor chat) for this transition.
   // Best-effort — never fail the admin action on a notification error.

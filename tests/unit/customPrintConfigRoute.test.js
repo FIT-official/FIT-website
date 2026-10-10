@@ -105,3 +105,9 @@ describe('PUT /api/custom-print/config', () => {
         expect((await put({ requestId: 'req-1', mode: 'instant', ...settings('Normal') })).status).toBe(401)
     })
 })
+
+it('blocks guided enquiry configuration changes and instant repricing', async () => {
+  state.existing={...quoted(),guidedBrief:{version:1}}
+  expect((await put({requestId:'req-1',mode:'instant',...settings('Normal')})).status).toBe(409)
+  expect(state.updates).toHaveLength(0);expect(state.emails).toHaveLength(0)
+})

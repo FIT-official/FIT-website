@@ -247,6 +247,9 @@ export async function PUT(req) {
         if (!request) {
             return NextResponse.json({ error: "Request not found" }, { status: 404 });
         }
+        if (request.guidedBrief?.version) {
+            return NextResponse.json({ error: 'This guided enquiry is under staff review. Contact FIT to change its brief.' }, { status: 409 });
+        }
         const originalStatus = request.status;
         // Mongoose merges document.$where into the actual update filter. A
         // concurrent quote, payment or model edit must make this save fail.
@@ -351,6 +354,7 @@ export async function PUT(req) {
         await CustomPrintRequest.deleteMany({
             userId,
             requestId: { $ne: requestId },
+            guidedBrief: { $exists: false },
             $and: [
                 {
                     $or: [

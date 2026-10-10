@@ -1,4 +1,5 @@
 'use client'
+import { guidedSummary } from '@/lib/customPrint/guidedBrief'
 import { useEffect, useState } from 'react'
 import { IoDownloadOutline, IoPrintOutline } from 'react-icons/io5'
 import ShippingFields from '@/components/DashboardComponents/ProductFormFields/ShippingFields'
@@ -119,6 +120,7 @@ export default function RequestPeek({
     const [editing, setEditing] = useState(false)
     const [quoteAmount, setQuoteAmount] = useState('')
     const [note, setNote] = useState('')
+    const [guidedReview, setGuidedReview] = useState({ exactFile: '', licenceEvidence: '', scopeConfirmed: false })
     const [saving, setSaving] = useState(false)
     const [shippingEdit, setShippingEdit] = useState({}) // { [requestId]: {dimensions, delivery} }
 
@@ -126,6 +128,7 @@ export default function RequestPeek({
         setEditing(true)
         setQuoteAmount(typeof r.printFee === 'number' && r.printFee > 0 ? String(r.printFee) : '')
         setNote(r.adminNote || '')
+        setGuidedReview({ exactFile: r.guidedReview?.exactFile || '', licenceEvidence: r.guidedReview?.licenceEvidence || '', scopeConfirmed: false })
         setShippingEdit((edit) => ({
             ...edit,
             [r.requestId]: {
@@ -234,6 +237,7 @@ export default function RequestPeek({
             const body = {
                 requestId,
                 action: 'quote',
+                ...(r.guidedBrief ? { guidedReview: { ...guidedReview, fingerprint: r.guidedFingerprint } } : {}),
                 quoteAmount: Number(quoteAmount || 0),
                 note,
                 dimensions,
@@ -244,7 +248,7 @@ export default function RequestPeek({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             })
-            if (!res.ok) throw new Error('Failed to save quote')
+            if (!res.ok) throw new Error((await res.json()).error || 'Failed to save quote')
             setEditing(false)
             showToast('Quote saved.', 'success')
             await onChanged?.()
@@ -259,7 +263,7 @@ export default function RequestPeek({
         <PeekPanel
             open={open}
             onClose={onClose}
-            title={r.modelFile?.originalName || 'Custom print'}
+            title={r.guidedBrief?.purpose || r.modelFile?.originalName || 'Custom print'}
             actions={
                 <>
                     <button type="button" onClick={openJobSheet} className={quietBtnCls} title="Print job sheet">
@@ -307,6 +311,15 @@ export default function RequestPeek({
                     </DottedRow>
                 )}
             </div>
+
+            {r.guidedBrief && <section className="mt-5 space-y-3 text-sm">
+                <h3 className="font-semibold">Guided enquiry — review before quoting</h3>
+                <dl>{guidedSummary(r.guidedBrief).map(([label,value]) => <div key={label} className="mb-2"><dt className="font-medium">{label}</dt><dd className="break-words">{value}</dd></div>)}</dl>
+                <p>Requested size is a preference, not a scaled file. Confirm the complete batch quantity and paid-print rights for the exact file.</p>
+                {r.guidedAssetId && <button type="button" className={quietBtnCls} onClick={async () => {
+                    try { const response = await fetch(`/api/custom-print/guided?requestId=${encodeURIComponent(r.requestId)}`); const data = await response.json(); if (!response.ok || !data.fileUrl) throw new Error(data.error || 'File unavailable'); const a = document.createElement('a'); a.href = data.fileUrl; a.rel = 'noopener noreferrer'; a.download = data.originalName; a.click() } catch (error) { showToast(error.message, 'error') }
+                }}>Download private reference model</button>}
+            </section>}
 
             {(settings || r.dimensions?.length != null || r.dimensions?.weight != null || r.quote?.total != null) && (
                 <div className="mt-5">
@@ -395,7 +408,7 @@ export default function RequestPeek({
                                     className={inputCls}
                                 />
                             </div>
-                            <button type="button" onClick={autoCalculate} className={`${quietBtnCls} whitespace-nowrap`}>
+                            <button type="button" onClick={autoCalculate} disabled={Boolean(r.guidedBrief)} className={`${quietBtnCls} whitespace-nowrap`}>
                                 Auto-Calculate
                             </button>
                         </div>
@@ -459,6 +472,12 @@ export default function RequestPeek({
                             />
                         </div>
                         <div>
+                            {r.guidedBrief && <fieldset className="mb-4 space-y-3">
+                                <legend className="font-semibold">Required staff review</legend>
+                                <label className="block">Exact model file and version checked<input className={inputCls} maxLength={500} value={guidedReview.exactFile} onChange={e => setGuidedReview({ ...guidedReview, exactFile: e.target.value })} /></label>
+                                <label className="block">Evidence permitting this paid print (licence, source, permission and conditions)<textarea className={inputCls} maxLength={2000} value={guidedReview.licenceEvidence} onChange={e => setGuidedReview({ ...guidedReview, licenceEvidence: e.target.value })} /></label>
+                                <label className="flex items-start gap-2"><input type="checkbox" checked={guidedReview.scopeConfirmed} onChange={e => setGuidedReview({ ...guidedReview, scopeConfirmed: e.target.checked })} />I checked the exact file, paid-print permission, final dimensions/units, all copies, material and colour. This quote covers that complete batch.</label>
+                            </fieldset>}
                             <label htmlFor="peek-quote-note" className="dash-label block mb-1">Admin note (optional)</label>
                             <textarea
                                 id="peek-quote-note"

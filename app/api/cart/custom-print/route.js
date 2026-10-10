@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import User from '@/models/User'
+import { guidedPaymentIssue } from '@/lib/customPrint/guidedBrief'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
 import { authenticate, unauthorizedResponse, UnauthorizedError } from '@/lib/authenticate'
 import { customPrintDisplayPrice } from '@/lib/customPrintDisplayPrice'
@@ -42,7 +43,9 @@ export async function POST(request) {
       }
       return NextResponse.json({ error: `This request is with ${farm}; payment is arranged directly with them.` }, { status: 409 })
     }
-    // Allow adding to cart regardless of status/quote
+    const guidedIssue = guidedPaymentIssue(reqDoc)
+    if (guidedIssue) return NextResponse.json({ error: guidedIssue }, { status: 409 })
+    // Allow legacy requests in the cart while they await their quote
     // Represent the quoted request in the cart with a synthetic productId
     const productId = `custom-print:${reqDoc.requestId}`
     const existing = user.cart.find((item) => item.productId === productId)

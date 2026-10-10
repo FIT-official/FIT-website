@@ -217,3 +217,9 @@ describe('PUT /api/custom-print for a creator job', () => {
         expect(state.existing.customerNote).toBe('update')
     })
 })
+
+it('keeps guided briefs immutable through the legacy customer update route',async()=>{
+  state.existing={requestId:'guided-test',userId:'user_buyer',status:'configured',guidedBrief:{version:1},save:vi.fn()}
+  expect((await put({requestId:'guided-test',customerNote:'try to change brief',guidedReview:{status:'approved'}})).status).toBe(409)
+  expect(state.existing.save).not.toHaveBeenCalled()
+})

@@ -5,6 +5,7 @@ import { connectToDatabase } from '@/lib/db';
 import { cartIdentity, cartOwner } from '@/lib/cartOwner';
 import Product from '@/models/Product';
 import { checkoutIntent, findAttempt, resumeAttempt, createAttempt, adoptLegacyAttempt, cancelAttempt, CheckoutAttemptError } from '@/lib/checkoutAttempt';
+import { guidedPaymentIssue } from '@/lib/customPrint/guidedBrief'
 import CustomPrintRequest from '@/models/CustomPrintRequest';
 import { calculateCartItemBreakdown } from '../calculateBreakdown';
 import { checkoutDiscountRules } from '@/lib/checkoutDiscounts';
@@ -99,6 +100,8 @@ export async function POST(req) {
                 if (!customRequest || !['quoted', 'payment_pending'].includes(customRequest.status) || item.quantity !== 1) {
                     return NextResponse.json({ error: 'This print request is not ready for payment' }, { status: 409 });
                 }
+                const guidedIssue = guidedPaymentIssue(customRequest);
+                if (guidedIssue) return NextResponse.json({ error: guidedIssue }, { status: 409 });
                 // Creator jobs use seller-arranged payments until payouts exist.
                 if (customRequest.creatorUserId) return NextResponse.json({ error: 'Arrange payment with this print provider directly' }, { status: 409 });
                 if (customRequest.quoteMode === 'instant' &&

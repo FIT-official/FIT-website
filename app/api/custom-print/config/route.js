@@ -40,6 +40,7 @@ export async function PUT(req) {
       || existing.stripePaymentIntentId || existing.source === 'product') {
       return NextResponse.json({ error: 'This request is in payment or fulfilment and its print settings are locked' }, { status: 409 })
     }
+    if (existing.guidedBrief?.version) return NextResponse.json({ error: 'Guided enquiries require staff review of the complete brief.' }, { status: 409 })
     if (existing.creatorUserId) {
       return NextResponse.json({ error: 'Contact your print service to change this request' }, { status: 409 })
     }

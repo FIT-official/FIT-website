@@ -525,3 +525,15 @@ describe('Checkout session purchase contract', () => {
         expect((await POST()).status).toBe(409); expect(m.createSession).not.toHaveBeenCalled();
     });
 });
+
+it('refuses a guided enquiry at the final payment boundary without exact-file review',async()=>{
+  user.cart[0]={_id:'cart1',productId:'custom-print:guided-test',quantity:1,chosenDeliveryType:'shipping'}
+  m.request.mockResolvedValue({requestId:'guided-test',userId:'buyer',status:'quoted',guidedBrief:{version:1},guidedFingerprint:'fp',guidedReview:{status:'pending'},basePrice:20,printFee:5})
+  const response=await POST();expect(response.status).toBe(409);expect((await response.json()).error).toMatch(/paid-print permission/);expect(m.createSession).not.toHaveBeenCalled()
+})
+it('preserves the reviewed whole-batch brief and remarks in the immutable payment fixture',async()=>{
+  user.cart[0]={_id:'cart1',productId:'custom-print:guided-test',quantity:1,chosenDeliveryType:'shipping'}
+  m.request.mockResolvedValue({requestId:'guided-test',userId:'buyer',status:'quoted',quoteMode:'manual',basePrice:20,printFee:5,delivery:{deliveryTypes:[{type:'shipping',price:5}]},guidedBrief:{version:1,purpose:'Desk box',quantity:3,sizeMode:'longest',size:10,unit:'cm',sizeMm:100,material:'pla',colour:'Blue',rights:'unknown'},guidedFingerprint:'fp',guidedReview:{status:'approved',fingerprint:'fp',exactFile:'part-v2.stl',licenceEvidence:'Permission for this paid print service',scopeConfirmed:true,reviewedBy:'staff'}})
+  expect((await POST()).status).toBe(200);const item=m.saveSnapshot.mock.calls[0][0].items[0]
+  expect(item.customRequest.guidedBrief.quantity).toBe(3);expect(item.orderNote).toMatch(/Quantity: 3/);expect(item.totalAmount).toBe(3000)
+})

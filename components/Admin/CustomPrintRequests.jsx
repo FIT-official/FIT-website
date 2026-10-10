@@ -92,6 +92,7 @@ export default function CustomPrintRequests() {
         if (!search) return scoped
         const q = search.toLowerCase()
         return scoped.filter((r) => (
+            (r.guidedBrief?.purpose || '').toLowerCase().includes(q) ||
             (r.modelFile?.originalName || '').toLowerCase().includes(q) ||
             (r.userEmail || '').toLowerCase().includes(q) ||
             (r.requestId || '').toLowerCase().includes(q) ||
@@ -155,7 +156,9 @@ export default function CustomPrintRequests() {
             User: r.userEmail,
             Creator: r.creatorDisplayName || '',
             Status: r.status,
-            ModelName: r.modelFile?.originalName || '',
+            ModelName: r.guidedBrief?.purpose || r.modelFile?.originalName || '',
+            GuidedBrief: r.guidedBrief ? JSON.stringify(r.guidedBrief) : '',
+            GuidedReview: r.guidedReview ? JSON.stringify(r.guidedReview) : '',
             ModelSize: r.modelFile?.fileSize || '',
             PrintConfig: r.printConfiguration ? JSON.stringify(r.printConfiguration) : '',
             CreatedAt: r.createdAt ? new Date(r.createdAt).toLocaleString() : '',
@@ -324,7 +327,7 @@ export default function CustomPrintRequests() {
                                         <div className="flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
                                             <div className="min-w-0">
                                                 <p className="text-[13px] font-semibold truncate">
-                                                    {r.modelFile?.originalName || 'Custom print'}
+                                                    {r.guidedBrief?.purpose || r.modelFile?.originalName || 'Custom print'}
                                                 </p>
                                                 <p className="text-[13px] dash-soft truncate">{r.userEmail}</p>
                                                 {r.creatorUserId && (

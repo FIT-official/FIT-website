@@ -12,6 +12,7 @@ import AccountShell from '@/components/Account/AccountShell'
 import { printRequestTone, printStatusLabel, money } from '@/components/Account/accountUi'
 import { useToast } from '@/components/General/ToastProvider'
 import { DashCard, DottedRow, EmptyState, StatusPill, Tag, Timeline, SkeletonTile } from '@/components/dashboard-ui'
+import { guidedSummary, guidedPaymentIssue } from '@/lib/customPrint/guidedBrief'
 import { customPrintDisplayPrice } from '@/lib/customPrintDisplayPrice'
 import { estimateLines, hasEstimate } from '@/lib/customPrint/estimateLines'
 
@@ -114,7 +115,7 @@ export default function AccountPrintRequestsPage() {
                         // TODO(phase5-connect): creator jobs become payable in-cart once
                         // Stripe Connect lands; until then payment is arranged off-platform.
                         const canAddToCart =
-                            !creatorJob && (r.status === 'quoted' || r.status === 'payment_pending') && quoted > 0
+                            !creatorJob && !guidedPaymentIssue(r) && (r.status === 'quoted' || r.status === 'payment_pending') && quoted > 0
                         // Instant-quote lines only; a manual quote's price is
                         // basePrice + printFee even if an old quote object lingers.
                         const quoteLines = priced.source === 'instant' ? (r.quote?.lines || []) : []
@@ -129,7 +130,7 @@ export default function AccountPrintRequestsPage() {
                                 <div className="flex flex-col gap-4">
                                     <div className="flex flex-wrap items-center justify-between gap-2">
                                         <p className="dash-section min-w-0 truncate">
-                                            {r.modelFile?.originalName || 'Custom print'}
+                                            {r.guidedBrief?.purpose || r.modelFile?.originalName || 'Custom print'}
                                         </p>
                                         <span className="flex items-center gap-2">
                                             {creatorJob && (
@@ -143,6 +144,11 @@ export default function AccountPrintRequestsPage() {
 
                                     {/* Request ids are admin-facing only; the model name identifies
                                         the job for the customer. */}
+
+                                    {r.guidedBrief && <details className="text-sm"><summary className="cursor-pointer font-medium">View enquiry details</summary>
+                                        <dl className="mt-3 space-y-2">{guidedSummary(r.guidedBrief).map(([label,value]) => <div key={label}><dt className="font-medium">{label}</dt><dd className="break-words">{value}</dd></div>)}</dl>
+                                        <p className="mt-3">We review the model and confirm printability before quoting. Contact FIT to change these preferences. A quote covers the whole requested batch.</p>
+                                    </details>}
 
                                     {estimate && (
                                         <section className="max-w-md" aria-label={`Estimate from ${farmName}`}>
@@ -227,12 +233,12 @@ export default function AccountPrintRequestsPage() {
                                     )}
 
                                     <div className="flex flex-wrap items-center gap-2 pt-1">
-                                        <Link
+                                        {!r.guidedBrief && <Link
                                             href={`/prints/request?requestId=${encodeURIComponent(r.requestId)}`}
                                             className="dash-hoverable inline-flex items-center rounded-full border border-[var(--dash-line)] bg-[var(--dash-card)] px-3.5 py-1.5 text-[12px] font-medium dash-soft hover:text-[var(--dash-ink)] hover:bg-[var(--dash-canvas)]"
                                         >
                                             Open request
-                                        </Link>
+                                        </Link>}
                                         {canAddToCart && (
                                             <Link
                                                 href={`/cart?addCustomRequest=${encodeURIComponent(r.requestId)}`}

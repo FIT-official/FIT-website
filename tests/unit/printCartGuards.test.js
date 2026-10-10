@@ -48,3 +48,30 @@ describe('admin quote action', () => {
         expect(doc.status).toBe('configured')
     })
 })
+
+describe('guided enquiry internal review',()=>{
+  const guided=()=>({requestId:'guided-test',status:'configured',basePrice:10,guidedBrief:{version:1},guidedFingerprint:'fp',statusHistory:[],save:vi.fn(),toObject(){return {...this}}})
+  it.each(['quote','status'])('rejects %s before exact-file and permission review',async action=>{
+    state.request=guided();const response=await adminPUT(req({requestId:'guided-test',action,status:'paid',quoteAmount:20},'PUT'))
+    expect(response.status).toBe(409);expect(state.request.save).not.toHaveBeenCalled()
+  })
+  it('requires staff privileges even when the client forges an approved review',async()=>{
+    state.admin=false;state.request=guided();expect((await adminPUT(req({requestId:'guided-test',action:'quote',quoteAmount:20,guidedReview:{status:'approved'}},'PUT'))).status).toBe(403)
+    expect(state.request.save).not.toHaveBeenCalled()
+  })
+  it('binds the approval to the complete immutable brief and staff identity',async()=>{
+    state.request=guided();const response=await adminPUT(req({requestId:'guided-test',action:'quote',quoteAmount:20,guidedReview:{fingerprint:'fp',exactFile:'box-v2.stl sha256:fixture',licenceEvidence:'Written permission for this paid printing job, checked against file',scopeConfirmed:true,reviewedBy:'forged'}},'PUT'))
+    expect(response.status).toBe(200);expect(state.request.guidedReview).toMatchObject({status:'approved',fingerprint:'fp',reviewedBy:'user_1'});expect(state.request.quoteMode).toBe('manual')
+  })
+  it('refuses a stale brief fingerprint and a payment already in progress',async()=>{
+    state.request=guided();const input={requestId:'guided-test',action:'quote',quoteAmount:20,guidedReview:{fingerprint:'old',exactFile:'model.stl',licenceEvidence:'Permission confirmed for printing',scopeConfirmed:true}}
+    expect((await adminPUT(req(input,'PUT'))).status).toBe(409);state.request.stripeSessionId='session-fixture';input.guidedReview.fingerprint='fp'
+    expect((await adminPUT(req(input,'PUT'))).status).toBe(409);expect(state.request.save).not.toHaveBeenCalled()
+  })
+})
+it('rejects an unreviewed guided request at the cart entry point', async () => {
+    const { POST } = await import('@/app/api/cart/custom-print/route')
+    state.request={requestId:'guided-test',userId:'user_1',status:'quoted',guidedBrief:{version:1},guidedReview:{status:'pending'}}
+    expect((await POST(req({requestId:'guided-test'}))).status).toBe(409)
+    expect(state.user.save).not.toHaveBeenCalled();expect(state.user.cart).toEqual([])
+})
