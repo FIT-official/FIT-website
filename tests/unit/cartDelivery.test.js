@@ -27,14 +27,15 @@ it('preserves explicit courier and pickup choices while options load or reorder'
     }
 })
 
-it('uses the existing paid fallback and lets server eligibility waive standard delivery', () => {
+it('uses the existing paid fallback without an order-value waiver', () => {
     const p = structuredClone(product)
     p.delivery.deliveryTypes[0].customPrice = 0
     expect(defaultCartDelivery(p)).toBe('standard-shipping')
     p.shippingCosts = { confirmed: true, unitCost: 1, packingCost: 1, deliveryCost: 2 }
     const breakdown = { chosenDeliveryType: defaultCartDelivery(p), price: 21.9, quantity: 1, currency: 'SGD', deliveryFee: 6.2 }
-    expect(applyShopShipping([{ product: p, breakdown }], { country: 'SG' })).toBe(true)
-    expect(breakdown).toMatchObject({ deliveryFee: 0, total: 21.9 })
+    expect(applyShopShipping([{ product: p, breakdown }], { country: 'SG' })).toBe(false)
+    expect(breakdown.deliveryFee).toBe(6.2)
+    expect(breakdown.total).toBeCloseTo(28.1, 2)
 })
 
 it('uses configured display names and readable fallbacks', () => {

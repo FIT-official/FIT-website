@@ -35,7 +35,7 @@ export default function HomeContent({ sections = {}, heroContent, products = [],
     return <main className={styles.home}>
         {on('hero') ? <Hero content={heroContent} facts={facts} /> : <h1 className="sr-only">Print, fix and build in Singapore</h1>}
         {on('trust') && <section className={styles.trust} aria-label="Services and delivery">
-            <ul><li>3D printer repair</li><li>{facts.selfCollection}</li><li>{facts.deliveryOffer}</li><li>Bulk pricing for schools</li></ul>
+            <ul><li>3D printer repair</li><li>{facts.selfCollection}</li><li>Bulk pricing for schools</li></ul>
             <GoogleRating facts={facts} />
         </section>}
         {on('clientLogos') && <ClientLogos facts={facts} />}

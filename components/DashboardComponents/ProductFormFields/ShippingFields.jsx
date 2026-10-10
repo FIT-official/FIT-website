@@ -416,7 +416,7 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
                                                                     : 'Set your delivery price for this option'}
                                                         </p>
                                                         {form.productType === 'shop' && deliveryType.name === 'standard-shipping' && (
-                                                            <p className="text-[13px] text-[var(--dash-ink-soft)] leading-relaxed">A zero rate uses S$6.20 unless the order qualifies for free delivery. Confirm product costs in Pricing to enable the eligibility check.</p>
+                                                            <p className="text-[13px] text-[var(--dash-ink-soft)] leading-relaxed">A zero shop delivery rate uses the existing S$6.20 fallback. Positive delivery rates and collection prices are unchanged.</p>
                                                         )}
                                                     </div>
                                                 )}
@@ -429,7 +429,7 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
                                                     <textarea
                                                         value={selectedDeliveryTypes[deliveryType.name]?.customDescription ?? ''}
                                                         onChange={(e) => updateCustomDescription(deliveryType.name, e.target.value)}
-                                                        placeholder="E.g., Pickup at 123 Main St, Mon-Fri 9AM-5PM&#10;Estimated delivery: tracked, next working day&#10;Free delivery for orders over $50"
+                                                        placeholder="E.g., Pickup at 123 Main St, Mon-Fri 9AM-5PM&#10;Estimated delivery: tracked, next working day"
                                                         className={`${inputCls()} resize-none leading-relaxed`}
                                                         rows={3}
                                                     />

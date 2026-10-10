@@ -246,7 +246,7 @@ export default function DeliveryTypeFormSheet({ open, onClose, editing, formData
                             help: 'Adds this much for every gram of weight',
                         })}
                         <p className="text-[13px] dash-soft">
-                            Set all three to 0 for free delivery. Leave them empty to let creators set their own price.
+                            Leave these fields empty to let creators set their own price. Zero configured rates remain subject to the existing shop delivery fallback.
                         </p>
                     </div>
                 )}
@@ -263,11 +263,6 @@ export default function DeliveryTypeFormSheet({ open, onClose, editing, formData
                             placeholder: '50.00',
                             step: '0.01',
                             help: 'The price never goes above this',
-                        })}
-                        {numberField('Free Shipping Threshold ($)', 'freeShippingThreshold', {
-                            placeholder: '100.00',
-                            step: '0.01',
-                            help: 'Orders worth more than this ship free. Leave empty to skip',
                         })}
                     </div>
                 )}

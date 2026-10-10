@@ -57,7 +57,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('Checkout session purchase contract', () => {
-    it.each([true, false])('uses the same profit decision in the cart and Stripe (known costs: %s)', async known => {
+    it.each([true, false])('charges the same existing paid fallback in the cart and Stripe (known costs: %s)', async known => {
         product.productType = 'shop';
         product.basePrice.presentmentAmount = 30;
         product.delivery.deliveryTypes = [{ type: 'standard-shipping', price: 0 }];
@@ -68,17 +68,17 @@ describe('Checkout session purchase contract', () => {
         const cartResponse = await getBreakdown();
         expect(cartResponse.status).toBe(200);
         const { cartBreakdown } = await cartResponse.json();
-        expect(cartBreakdown[0].deliveryFee).toBe(known ? 0 : 6.2);
+        expect(cartBreakdown[0].deliveryFee).toBe(6.2);
         expect(JSON.stringify(cartBreakdown)).not.toContain('unitCost');
         const response = await POST();
         expect(response.status).toBe(200);
         const checkout = m.saveSnapshot.mock.calls[0][0];
-        expect(checkout.items[0].deliveryAmount).toBe(known ? 0 : 620);
+        expect(checkout.items[0].deliveryAmount).toBe(620);
         expect(checkout.totalAmount).toBe(Math.round(cartBreakdown[0].total * 100));
         const stripeTotal = m.createSession.mock.calls[0][0].line_items.reduce((sum, item) => sum + item.price_data.unit_amount * item.quantity, 0);
         expect(stripeTotal).toBe(checkout.totalAmount);
     });
-    it('applies active global discounts before checking the threshold at both endpoints', async () => {
+    it('preserves active global discounts without waiving delivery at either endpoint', async () => {
         product.productType = 'shop';
         product.basePrice.presentmentAmount = 25;
         product.shippingCosts = { unitCost: 1, packingCost: 0, deliveryCost: 2, confirmed: true };
@@ -90,6 +90,31 @@ describe('Checkout session purchase contract', () => {
         expect(cartBreakdown[0]).toMatchObject({ price: 20, deliveryFee: 6.2, freeDeliveryApplied: false });
         expect((await POST()).status).toBe(200);
         expect(m.saveSnapshot.mock.calls[0][0].totalAmount).toBe(2620);
+    });
+    it.each([2, 6.2, 30])('preserves the configured %s delivery rate above the former threshold, ignoring client flags', async fee => {
+        product.productType = 'shop';
+        product.basePrice.presentmentAmount = 100;
+        product.shippingCosts = { unitCost: 0, packingCost: 0, deliveryCost: 0, confirmed: true };
+        product.delivery.deliveryTypes = [{ type: 'standard-shipping', price: fee }];
+        Object.assign(user.cart[0], { quantity: 2, chosenDeliveryType: 'standard-shipping', deliveryFee: 0, freeDeliveryApplied: true });
+        const { cartBreakdown } = await (await getBreakdown()).json();
+        expect(cartBreakdown[0]).toMatchObject({ deliveryFee: fee, total: 200 + fee, freeDeliveryApplied: false });
+        expect((await POST()).status).toBe(200);
+        const checkout = m.saveSnapshot.mock.calls[0][0];
+        expect(checkout.items[0].deliveryAmount).toBe(Math.round(fee * 100));
+        expect(checkout.totalAmount).toBe(Math.round((200 + fee) * 100));
+        const stripeTotal = m.createSession.mock.calls[0][0].line_items.reduce((sum, item) => sum + item.price_data.unit_amount * item.quantity, 0);
+        expect(stripeTotal).toBe(checkout.totalAmount);
+    });
+    it('preserves zero-price collection in the cart and payment snapshot', async () => {
+        product.productType = 'shop';
+        product.basePrice.presentmentAmount = 100;
+        product.delivery.deliveryTypes = [{ type: 'selfCollect', price: 0 }];
+        Object.assign(user.cart[0], { quantity: 1, chosenDeliveryType: 'selfCollect' });
+        const { cartBreakdown } = await (await getBreakdown()).json();
+        expect(cartBreakdown[0]).toMatchObject({ deliveryFee: 0, total: 100 });
+        expect((await POST()).status).toBe(200);
+        expect(m.saveSnapshot.mock.calls[0][0]).toMatchObject({ totalAmount: 10000, items: [expect.objectContaining({ deliveryAmount: 0 })] });
     });
     it('does not start a payment for an item that now requires a quote', async () => {
         product.quoteOnly = true;

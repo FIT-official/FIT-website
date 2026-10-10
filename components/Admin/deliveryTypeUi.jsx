@@ -73,12 +73,11 @@ export function formulaLine(bp) {
     return parts.join(' + ')
 }
 
-/** Small bounded chips: min / max / free-over. */
+/** Small bounded chips: minimum and maximum configured prices. */
 export function boundChips(bp) {
     const chips = []
     if (hasValue(bp?.minPrice)) chips.push(`min ${fmtMoney(bp.minPrice)}`)
     if (hasValue(bp?.maxPrice)) chips.push(`max ${fmtMoney(bp.maxPrice)}`)
-    if (hasValue(bp?.freeShippingThreshold)) chips.push(`free over ${fmtMoney(bp.freeShippingThreshold)}`)
     return chips
 }
 
@@ -86,7 +85,7 @@ export function boundChips(bp) {
 export function pricingSentence(bp) {
     const mode = pricingMode(bp)
     if (mode === 'creator') return 'Creators set their own delivery price for this option.'
-    if (mode === 'free') return 'Free delivery. Nothing is added at checkout.'
+    if (mode === 'free') return 'Zero configured rate. Shop delivery may use the existing fallback.'
     let s = `Charges ${fmtMoney(bp.basePrice)} base`
     const terms = []
     if (Number(bp.volumeFactor) > 0) terms.push(`${fmtRate(bp.volumeFactor)} per cubic cm`)
@@ -97,7 +96,6 @@ export function pricingSentence(bp) {
     if (hasMin && hasMax) s += `, never less than ${fmtMoney(bp.minPrice)} or more than ${fmtMoney(bp.maxPrice)}`
     else if (hasMin) s += `, never less than ${fmtMoney(bp.minPrice)}`
     else if (hasMax) s += `, never more than ${fmtMoney(bp.maxPrice)}`
-    if (hasValue(bp.freeShippingThreshold)) s += `, free over ${fmtMoney(bp.freeShippingThreshold)}`
     return `${s}.`
 }
 
