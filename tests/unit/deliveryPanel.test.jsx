@@ -234,7 +234,7 @@ describe('DeliveryTypeManagement — stepped edit sheet', () => {
             expect(Object.keys(body)).toEqual(['type', 'id', 'data'])
             expect(body.type).toBe('delivery-type')
             expect(body.id).toBe('abc123')
-            expect(body.data.basePricing.freeShippingThreshold).toBe(80) // preserve stored settings; no data migration
+            expect(body.data.basePricing).not.toHaveProperty('freeShippingThreshold') // obsolete setting is not editable
             expect(Object.keys(body.data)).toEqual([
                 'displayName',
                 'description',
@@ -318,7 +318,6 @@ describe('DeliveryTypeManagement — stepped create flow', () => {
                         weightFactor: '0.005',
                         minPrice: '9.9',
                         maxPrice: '60',
-                        freeShippingThreshold: '',
                     },
                     isActive: true,
                 },

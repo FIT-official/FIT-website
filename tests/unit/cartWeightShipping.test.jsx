@@ -42,7 +42,7 @@ it.each(Object.keys(fixtureCases))('shows the computed option and summary for %s
     data = shippingFixture(key);
     render(<Cart />);
     const delivery = await screen.findByTestId('summary-delivery');
-    const price = `SGD ${(fixtureCases[key].expectedShippingCents / 100).toFixed(2)}`;
+    const price = fixtureCases[key].expectedShippingCents === 0 ? 'Free' : `SGD ${(fixtureCases[key].expectedShippingCents / 100).toFixed(2)}`;
     expect(within(delivery).getByText(price)).toBeInTheDocument();
     expect(screen.getAllByRole('option', { name: new RegExp(`Standard delivery.*${price.replace('.', '\\.')}`) }).length).toBe(data.cart.length);
     expect(screen.queryByText(/No tracking/)).not.toBeInTheDocument();

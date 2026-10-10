@@ -26,6 +26,7 @@ try {
             const page = await context.newPage();
             const errors = [];
             page.on('pageerror', error => errors.push(error.message));
+            page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
             const response = await page.goto(base, { waitUntil: 'networkidle', timeout: 60000 });
             if (response.status() !== 200) throw new Error(`Preview returned ${response.status()}`);
             const summary = page.getByTestId('cart-summary');
@@ -33,7 +34,7 @@ try {
             await delivery.waitFor({ timeout: 45000 });
             const summaryText = await summary.innerText();
             const deliveryText = await delivery.innerText();
-            const expected = `SGD ${(config.expectedShippingCents / 100).toFixed(2)}`;
+            const expected = config.expectedShippingCents === 0 ? 'Free' : `SGD ${(config.expectedShippingCents / 100).toFixed(2)}`;
             if (!deliveryText.includes(expected)) throw new Error(`${scenario}: ${deliveryText} lacks ${expected}`);
             if (!await page.getByText('This is your guest cart.', { exact: false }).isVisible()) throw new Error('Guest cart did not render');
             if (errors.length) throw new Error(errors.join('\n'));
@@ -44,6 +45,9 @@ try {
             await summary.screenshot({ path: resolve(output, `${prefix}-summary.png`) });
             const api = await context.request.get(`${base}/api/checkout/breakdown`);
             const { cartBreakdown } = await api.json();
+            const deliveryCents = Math.round(cartBreakdown.reduce((sum, line) => sum + line.deliveryFee, 0) * 100);
+            const totalCents = Math.round(cartBreakdown.reduce((sum, line) => sum + line.total, 0) * 100);
+            if (deliveryCents !== config.expectedShippingCents || !summaryText.includes(`SGD ${(totalCents / 100).toFixed(2)}`)) throw new Error(`${scenario}: API/summary totals differ`);
             const { cart, products } = shippingFixture(scenario);
             manifest.captures.push({ scenario, viewport, expectedShippingCents: config.expectedShippingCents,
                 items: cart.map((item, i) => ({ slug: products[i].slug, priceSGD: products[i].basePrice.presentmentAmount, quantity: item.quantity })),

@@ -5,8 +5,11 @@ import Product from "@/models/Product";
 import CustomPrintRequest from "@/models/CustomPrintRequest";
 import { sanitizeString } from "@/utils/validate";
 import { resolveDeliveryFee } from "@/lib/quoting/deliveryTypeResolver";
-import { usesWeightShipping } from '@/lib/shopShipping';
-import { standardShippingTier, DELIVERY_QUOTE_MESSAGE } from '@/lib/shipping/weightTiers';
+import { applyShopShipping } from '@/lib/shopShipping';
+import { DELIVERY_QUOTE_MESSAGE } from '@/lib/shipping/weightTiers';
+import { checkoutDiscountRules } from '@/lib/checkoutDiscounts';
+import { calculateCartItemBreakdown } from '@/app/api/checkout/calculateBreakdown';
+import { customPrintChargeBreakdown } from '@/lib/customPrintDisplayPrice';
 
 export async function PUT(req) {
     try {
@@ -85,17 +88,37 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Unknown delivery type" }, { status: 400 });
         }
 
-        if (chosenDeliveryType === 'standard-shipping' && usesWeightShipping(product)) {
-            const parcel = [];
+        let cartBreakdown;
+        if (chosenDeliveryType === 'standard-shipping') {
+            const shippingLines = [];
+            const extraDiscountRules = await checkoutDiscountRules();
             for (const line of user.cart) {
-                if (String(line.productId).startsWith('custom-print:')) continue;
-                if (line !== cartItem && line.chosenDeliveryType !== 'standard-shipping') continue;
-                const lineProduct = line.productId === productId ? product : await Product.findById(line.productId).lean();
-                if (usesWeightShipping(lineProduct)) parcel.push({ product: lineProduct, quantity: line.quantity });
+                const type = line === cartItem ? chosenDeliveryType : line.chosenDeliveryType;
+                const customRequest = String(line.productId).startsWith('custom-print:');
+                if (customRequest) {
+                    const requestId = line.customPrintRequestId || line.requestId || line.productId.split(':')[1];
+                    const request = await CustomPrintRequest.findOne({ requestId, userId }).lean();
+                    const fixed = ['quoted', 'payment_pending', 'paid', 'printing', 'printed', 'shipped', 'delivered'].includes(request?.status);
+                    const charge = fixed ? customPrintChargeBreakdown(request, type) : { amount: 0, deliveryFee: 0, currency: 'SGD', chosenDeliveryType: type };
+                    shippingLines.push({ product: {}, customRequest: true, breakdown: {
+                        productId: line.productId, quantity: 1, price: charge.amount, currency: charge.currency,
+                        chosenDeliveryType: charge.chosenDeliveryType, deliveryFee: charge.deliveryFee,
+                    } });
+                } else {
+                    const lineProduct = line.productId === productId ? product : await Product.findById(line.productId).lean();
+                    if (!lineProduct) return NextResponse.json({ error: 'An item is no longer available.' }, { status: 409 });
+                    const breakdown = await calculateCartItemBreakdown({
+                        item: { quantity: line.quantity, selectedVariants: line.selectedVariants, chosenDeliveryType: type },
+                        product: lineProduct, extraDiscountRules,
+                    });
+                    shippingLines.push({ product: lineProduct, breakdown });
+                }
             }
-            // The value threshold changes letterbox vs Speedpost, never whether
-            // a parcel is blocked. Recheck the proposed whole standard parcel.
-            if (standardShippingTier(parcel, 0).blocked) {
+            // Reprice the proposed whole cart BEFORE saving. Browser amounts
+            // are ignored; the same discounted subtotal drives cart and Stripe.
+            applyShopShipping(shippingLines);
+            cartBreakdown = shippingLines.map(line => line.breakdown);
+            if (cartBreakdown.some(line => line.shippingBlocked)) {
                 return NextResponse.json({ error: DELIVERY_QUOTE_MESSAGE, code: 'shipping_quote_required' }, { status: 409 });
             }
         }
@@ -103,7 +126,7 @@ export async function PUT(req) {
         cartItem.chosenDeliveryType = chosenDeliveryType;
         await user.save();
 
-        return NextResponse.json({ success: true, cart: user.cart }, { status: 200 });
+        return NextResponse.json({ success: true, cart: user.cart, ...(cartBreakdown && { cartBreakdown }) }, { status: 200 });
     } catch (err) {
         console.error(err);
         return NextResponse.json({ error: "Server error" }, { status: 500 });

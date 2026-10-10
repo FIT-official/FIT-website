@@ -27,7 +27,7 @@ it('preserves explicit courier and pickup choices while options load or reorder'
     }
 })
 
-it('uses the existing paid fallback without an order-value waiver', () => {
+it('uses the paid fallback below the free-delivery threshold', () => {
     const p = structuredClone(product)
     p.delivery.deliveryTypes[0].customPrice = 0
     expect(defaultCartDelivery(p)).toBe('standard-shipping')

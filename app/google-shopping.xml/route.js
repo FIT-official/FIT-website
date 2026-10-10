@@ -16,7 +16,7 @@ export async function GET() {
                 quoteOnly: { $ne: true },
                 slug: { $nin: [...NON_PUBLIC_PRODUCT_SLUGS, 'custom-print-request'] },
                 $or: [{ listing: 'fit' }, { listing: { $exists: false } }],
-            }).select('_id name description images slug productType categoryId category listing hidden flaggedForModeration quoteOnly delivery.deliveryTypes.type delivery.deliveryTypes.price delivery.deliveryTypes.customPrice basePrice variantTypes stock infiniteStock discount discounts shippingCosts shippingWeightG shippingDims shippingDataFlag').lean(),
+            }).select('_id name description images slug productType categoryId category listing hidden flaggedForModeration quoteOnly delivery.deliveryTypes.type delivery.deliveryTypes.price delivery.deliveryTypes.customPrice basePrice variantTypes stock infiniteStock discount discounts shippingWeightG shippingDims shippingDataFlag').lean(),
             Event.find({ isActive: true, isGlobal: true, startDate: { $lte: now }, endDate: { $gte: now } })
                 .select('percentage minimumPrice startDate endDate').lean(),
         ])

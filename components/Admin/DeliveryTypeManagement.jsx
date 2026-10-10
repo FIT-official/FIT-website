@@ -17,8 +17,7 @@ const BLANK_FORM = {
         volumeFactor: '',
         weightFactor: '',
         minPrice: '',
-        maxPrice: '',
-        freeShippingThreshold: ''
+        maxPrice: ''
     },
     isActive: true
 }
@@ -79,7 +78,6 @@ export default function DeliveryTypeManagement() {
                 weightFactor: dt.basePricing?.weightFactor ?? '',
                 minPrice: dt.basePricing?.minPrice ?? '',
                 maxPrice: dt.basePricing?.maxPrice ?? '',
-                freeShippingThreshold: dt.basePricing?.freeShippingThreshold ?? '',
             },
             isActive: dt.isActive,
         })

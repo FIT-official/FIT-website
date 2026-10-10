@@ -57,6 +57,19 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('Checkout session purchase contract', () => {
+    it.each([[205, 200, 620], [205.01, 200.01, 0]])('checks the S$200 boundary after a S$5 discount on %s in breakdown and Stripe', async (base, price, deliveryAmount) => {
+        Object.assign(product, { productType: 'shop', slug: 'hcsr04-ultrasonic-sensor', paidAssets: [],
+            basePrice: { presentmentAmount: base, presentmentCurrency: 'SGD' },
+            discounts: [{ percentage: 5 / base * 100 }],
+            delivery: { deliveryTypes: [{ type: 'standard-shipping', price: 999 }] } });
+        Object.assign(user.cart[0], { quantity: 1, chosenDeliveryType: 'standard-shipping', price: 9999, deliveryFee: 0, freeDeliveryApplied: true });
+        const { cartBreakdown } = await (await getBreakdown()).json();
+        expect(cartBreakdown[0]).toMatchObject({ price, deliveryFee: deliveryAmount / 100, freeDeliveryApplied: deliveryAmount === 0 });
+        expect((await POST()).status).toBe(200);
+        const totalAmount = Math.round(price * 100) + deliveryAmount;
+        expect(m.saveSnapshot.mock.calls[0][0]).toMatchObject({ totalAmount, items: [expect.objectContaining({ deliveryAmount })] });
+        expect(m.createSession.mock.calls[0][0].line_items.reduce((sum, item) => sum + item.price_data.unit_amount * item.quantity, 0)).toBe(totalAmount);
+    });
     it.each([0, 0.01, -100, 999])('ignores client shipping %s and charges one combined server tier in breakdown and Stripe', async clientFee => {
         Object.assign(product, { productType: 'shop', slug: 'hcsr04-ultrasonic-sensor', paidAssets: [],
             basePrice: { presentmentAmount: 1.65, presentmentCurrency: 'SGD' },
@@ -86,6 +99,7 @@ describe('Checkout session purchase contract', () => {
         expect(m.saveSnapshot.mock.calls[0][0].items[0].deliveryAmount).toBe(620);
     });
     it('returns a blocked breakdown and rejects payment for an overweight standard parcel; pickup works', async () => {
+        product.basePrice.presentmentAmount = 250;
         Object.assign(product, { productType: 'shop', shippingWeightG: 31000, shippingDims: { L: 100, W: 100, H: 100 },
             delivery: { deliveryTypes: [{ type: 'standard-shipping', price: 6.2 }, { type: 'pick-up', price: 0 }] } });
         Object.assign(user.cart[0], { quantity: 1, chosenDeliveryType: 'standard-shipping' });
@@ -100,7 +114,7 @@ describe('Checkout session purchase contract', () => {
         expect((await POST()).status).toBe(200);
         expect(m.saveSnapshot.mock.calls[0][0].items[0].deliveryAmount).toBe(0);
     });
-    it.each([true, false])('uses the same profit decision in the cart and Stripe (known costs: %s)', async known => {
+    it.each([true, false])('charges the table rate in the cart and Stripe (known costs: %s)', async known => {
         product.productType = 'shop';
         product.basePrice.presentmentAmount = 30;
         product.delivery.deliveryTypes = [{ type: 'standard-shipping', price: 0 }];
@@ -134,18 +148,18 @@ describe('Checkout session purchase contract', () => {
         expect((await POST()).status).toBe(200);
         expect(m.saveSnapshot.mock.calls[0][0].totalAmount).toBe(2620);
     });
-    it.each([2, 6.2, 30])('preserves the configured %s delivery rate above the former threshold, ignoring client flags', async fee => {
+    it.each([2, 6.2, 30])('ignores the configured Standard rate %s and client flags at S$200', async fee => {
         product.productType = 'shop';
         product.basePrice.presentmentAmount = 100;
         product.shippingCosts = { unitCost: 0, packingCost: 0, deliveryCost: 0, confirmed: true };
         product.delivery.deliveryTypes = [{ type: 'standard-shipping', price: fee }];
         Object.assign(user.cart[0], { quantity: 2, chosenDeliveryType: 'standard-shipping', deliveryFee: 0, freeDeliveryApplied: true });
         const { cartBreakdown } = await (await getBreakdown()).json();
-        expect(cartBreakdown[0]).toMatchObject({ deliveryFee: fee, total: 200 + fee, freeDeliveryApplied: false });
+        expect(cartBreakdown[0]).toMatchObject({ deliveryFee: 6.2, total: 206.2, freeDeliveryApplied: false });
         expect((await POST()).status).toBe(200);
         const checkout = m.saveSnapshot.mock.calls[0][0];
-        expect(checkout.items[0].deliveryAmount).toBe(Math.round(fee * 100));
-        expect(checkout.totalAmount).toBe(Math.round((200 + fee) * 100));
+        expect(checkout.items[0].deliveryAmount).toBe(620);
+        expect(checkout.totalAmount).toBe(20620);
         const stripeTotal = m.createSession.mock.calls[0][0].line_items.reduce((sum, item) => sum + item.price_data.unit_amount * item.quantity, 0);
         expect(stripeTotal).toBe(checkout.totalAmount);
     });

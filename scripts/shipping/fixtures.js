@@ -1,5 +1,5 @@
 // Public names and base prices copied from PRODUCT_WEIGHTS.csv (2026-10-10).
-// No private costs or account data: free-delivery eligibility remains unknown.
+// Synthetic guest carts; no private costs or account data.
 export const fixtureProducts = {
     sensor: { slug: 'hcsr04-ultrasonic-sensor', name: 'HCSR04 Ultrasonic Sensor', price: 1.65 },
     filament: { slug: 'bambu-lab-3d-printing-filament-1kg-pla-basic', name: 'Bambu Lab 3D Printing Filament 1kg PLA Basic', price: 21.9 },
@@ -11,6 +11,7 @@ export const fixtureCases = {
     filament: { lines: [['filament', 1]], expectedShippingCents: 620 },
     mixed: { lines: [['sensor', 1], ['filament', 1]], expectedShippingCents: 620 },
     'over-30': { lines: [['led', 2]], expectedShippingCents: 620 },
+    'over-200': { lines: [['led', 10]], expectedShippingCents: 0 },
 };
 
 export function shippingFixture(key) {

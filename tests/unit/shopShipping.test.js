@@ -10,24 +10,24 @@ function line(price = 30, overrides = {}) {
 }
 
 describe('paid shop delivery', () => {
-    it.each([19.99, 20, 20.01, 30, 1000])('does not waive delivery at order value %s, even with confirmed zero costs', price => {
+    it.each([19.99, 20, 20.01, 25, 30, 200])('does not waive delivery at order value %s, even with confirmed zero costs', price => {
         const item = line(price, { freeDeliveryApplied: true })
         item.product.shippingCosts = { unitCost: 0, packingCost: 0, deliveryCost: 0, confirmed: true }
         expect(applyShopShipping([item], address)).toBe(false)
         expect(item.breakdown).toMatchObject({ deliveryFee: 6.2, total: price + 6.2, freeDeliveryApplied: false })
     })
-    it.each([2, 6.2, 30])('preserves a positive configured delivery rate of %s', deliveryFee => {
-        const item = line(100, { quantity: 3, deliveryFee })
+    it.each([2, 6.2, 30])('preserves a positive configured Express rate of %s', deliveryFee => {
+        const item = line(100, { quantity: 3, deliveryFee, chosenDeliveryType: 'express-courier' })
         expect(applyShopShipping([item], address)).toBe(false)
         expect(item.breakdown).toMatchObject({ deliveryFee, total: 300 + deliveryFee })
     })
-    it('retains existing fee calculation for combined and split lines', () => {
+    it('charges Standard once for combined and split lines', () => {
         const combined = line(15, { quantity: 2 })
         const split = [line(15), line(15)]
         applyShopShipping([combined], address)
         applyShopShipping(split, address)
         expect(combined.breakdown.total).toBe(36.2)
-        expect(split.map(item => item.breakdown.total)).toEqual([21.2, 21.2])
+        expect(split.map(item => item.breakdown.total)).toEqual([21.2, 15])
     })
     it('retains the existing zero-rate fallback regardless of private costs or country', () => {
         for (const costs of [undefined, {}, { confirmed: true }, { unitCost: 0, packingCost: 0, deliveryCost: 0, confirmed: true }]) {

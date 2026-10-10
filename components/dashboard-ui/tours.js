@@ -15,7 +15,7 @@ export const TOURS = {
         {
             selector: '[data-tour="delivery-new"]',
             title: 'Add your own',
-            body: 'Each new type can be free, priced by a formula (base + volume + weight), or left blank so creators set their own price per product.',
+            body: 'Each new type can have a zero configured rate, a formula (base + volume + weight), or a price set by the creator per product. FIT Standard delivery uses the cart shipping rules.',
         },
         {
             selector: '[data-tour="delivery-toggle"]',

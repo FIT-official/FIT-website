@@ -6,7 +6,7 @@ import styles from './home.module.css'
 export function homeFaqs(facts) {
     return [
         facts.printFileTypes?.length && { question: 'Which files can I send for a print quote?', answer: `The print request form accepts ${facts.printFileTypes.join(', ')} files. Upload your model at the start of your request.` },
-        facts.deliveryOptions?.length && { question: 'Can I choose delivery or self-collection?', answer: `Delivery options are ${facts.deliveryOptions.join(', ')}.` },
+        facts.deliveryOptions?.length && { question: 'Can I choose delivery or self-collection?', answer: `Delivery options are ${facts.deliveryOptions.join(', ')}.${facts.deliveryOffer ? ` ${facts.deliveryOffer}` : ''}` },
         facts.bulkQuotePath && { question: 'How do I get a bulk filament quote?', answer: 'Use the bulk filament enquiry form to select materials, colours and quantities. FIT confirms the final quotation.' },
         facts.cardPayments === true && { question: 'Can I pay by card?', answer: 'Card payment is available at checkout through Stripe.' },
     ].filter(Boolean)

@@ -105,7 +105,7 @@ describe('shipping catalogue and overrides', () => {
     });
 });
 
-describe('combined standard shipping and existing free policy', () => {
+describe('combined standard shipping', () => {
     function line(key, price, quantity = 1, type = 'standard-shipping') {
         return { product: { slug: key, productType: 'shop', listing: 'fit' }, breakdown: {
             quantity, price, chosenDeliveryType: type, deliveryFee: type === 'express-courier' ? 30 : 0, currency: 'SGD',
@@ -118,34 +118,34 @@ describe('combined standard shipping and existing free policy', () => {
         expect(lines[1].breakdown.standardShippingIncluded).toBe(true);
         expect(lines.reduce((sum, l) => sum + l.breakdown.total, 0)).toBeCloseTo(29.75);
     });
-    it('waives the tier only when the unchanged confirmed-cost policy passes', () => {
-        const item = line('2pin-white-led', 22);
+    it('charges the table rate for a high-margin S$25 order', () => {
+        const item = line('2pin-white-led', 25);
         expect(applyShopShipping([item], { country: 'SG' })).toBe(false);
         expect(item.breakdown.deliveryFee).toBe(2);
         item.product.shippingCosts = { confirmed: true, unitCost: 1, packingCost: 1, deliveryCost: 2 };
-        expect(applyShopShipping([item], { country: 'SG' })).toBe(true);
-        expect(item.breakdown).toMatchObject({ deliveryFee: 0, total: 22, freeDeliveryApplied: true, standardShipping: { priceCents: 200 } });
+        expect(applyShopShipping([item], { country: 'SG' })).toBe(false);
+        expect(item.breakdown).toMatchObject({ deliveryFee: 2, total: 27, freeDeliveryApplied: false, standardShipping: { priceCents: 200 } });
     });
     it('does not waive a blocked shipment, but pickup remains available', () => {
-        const item = line('overweight', 200);
+        const item = line('overweight', 201);
         Object.assign(item.product, product({ shippingWeightG: 31000 }), { shippingCosts: { confirmed: true, unitCost: 1, packingCost: 1, deliveryCost: 2 } });
         expect(applyShopShipping([item], { country: 'SG' })).toBe(false);
         expect(item.breakdown).toMatchObject({ shippingBlocked: true, deliveryFee: null, total: null });
         item.breakdown.chosenDeliveryType = 'pick-up';
         item.breakdown.deliveryFee = 0;
         applyShopShipping([item], { country: 'SG' });
-        expect(item.breakdown).toMatchObject({ shippingBlocked: false, deliveryFee: 0, total: 200 });
+        expect(item.breakdown).toMatchObject({ shippingBlocked: false, deliveryFee: 0, total: 201 });
     });
-    it('leaves Express, pickup, custom printing and creator shipping charges alone', () => {
+    it('waives only Standard charges in a mixed order over S$200', () => {
         const lines = [line('hcsr04-ultrasonic-sensor', 1.65), line('overweight', 5, 99, 'pick-up'), line('overweight', 5, 99, 'express-courier')];
         const print = { ...line('print', 10), customRequest: true };
         print.breakdown.deliveryFee = 9;
         const creator = line('creator', 10);
         creator.product.listing = 'creator'; creator.breakdown.deliveryFee = 8;
         applyShopShipping([...lines, print, creator], null);
-        expect(lines.map(l => l.breakdown.deliveryFee)).toEqual([6.2, 0, 30]);
-        expect(print.breakdown.deliveryFee).toBe(9);
-        expect(creator.breakdown.deliveryFee).toBe(8);
+        expect(lines.map(l => l.breakdown.deliveryFee)).toEqual([0, 0, 30]);
+        expect(print.breakdown.deliveryFee).toBe(0);
+        expect(creator.breakdown.deliveryFee).toBe(0);
         expect(print.breakdown.standardShipping).toBeUndefined();
     });
 });

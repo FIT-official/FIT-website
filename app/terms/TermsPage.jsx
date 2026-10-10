@@ -85,6 +85,7 @@ function TermsPage() {
                     <ul className="list-disc ml-6">
                         <li><b>GST:</b> All transactions subject to Singapore GST unless exempt. GST calculated/applied at checkout as required by law.</li>
                         <li><b>Additional Fees:</b> Delivery, handling, and processing fees may apply. All charges outlined before purchase confirmation.</li>
+                        <li><b>Standard Delivery:</b> Free delivery on orders over S$200. The order subtotal after discounts must exceed S$200.00. This applies to Letterbox, Speedpost and bulky delivery. Express Courier keeps its price. Orders over 30 kg or above bulky limits: Contact us for a delivery quote.</li>
                     </ul>
 
                     <h4 className="font-semibold mt-2">Payment Security</h4>

@@ -11,6 +11,16 @@ const product = {
 }
 
 describe('Merchant Center catalogue', () => {
+    it.each([[205, 200, '6.20 SGD'], [205.01, 200.01, '0.00 SGD']])('uses the discounted single-item S$200 boundary for price %s in XML', (base, price, shipping) => {
+        const item = { ...product, slug: 'hcsr04-ultrasonic-sensor', name: 'Sensor', categoryId: 'Electronics', variantTypes: [],
+            basePrice: { presentmentAmount: base, presentmentCurrency: 'SGD' }, discounts: [{ percentage: 5 / base * 100 }] };
+        expect(merchantProduct(item)).toMatchObject({ price: `${price.toFixed(2)} SGD`, shipping: { price: shipping } });
+        const output = buildMerchantFeed([item]);
+        const document = new DOMParser().parseFromString(output, 'application/xml');
+        expect(document.querySelector('parsererror')).toBeNull();
+        expect(document.getElementsByTagName('g:shipping')[0].getElementsByTagName('g:price')[0].textContent).toBe(shipping);
+        expect(output).not.toMatch(/S\$20(?!\d)/);
+    });
     it('matches the default variant and blocks unapproved filament event discounts', () => {
         expect(merchantProduct(product, [{ percentage: 20 }])).toMatchObject({
             id: 'filament1', title: 'PLA & PETG - Blue', price: '25.00 SGD', availability: 'in_stock',
@@ -64,7 +74,7 @@ describe('Merchant Center catalogue', () => {
         expect(buildMerchantFeed([blocked])).not.toContain('<item>')
     })
 
-    it('advertises free shipping only when the single-item order passes the private cost check', () => {
+    it('charges the table rate for a S$25 item regardless of private costs', () => {
         const stocked = { ...product, shippingCosts: { unitCost: 1, packingCost: 1, deliveryCost: 6.2, confirmed: true } }
         expect(merchantProduct(stocked).shipping.price).toBe('6.20 SGD')
         // Unapproved filament promotions cannot change the order value.

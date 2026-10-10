@@ -416,7 +416,7 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
                                                                     : 'Set your delivery price for this option'}
                                                         </p>
                                                         {form.productType === 'shop' && deliveryType.name === 'standard-shipping' && (
-                                                            <p className="text-[13px] text-[var(--dash-ink-soft)] leading-relaxed">A zero shop delivery rate uses the existing S$6.20 fallback. Positive delivery rates and collection prices are unchanged.</p>
+                                                            <p className="text-[13px] text-[var(--dash-ink-soft)] leading-relaxed">FIT Standard delivery uses the packed weight and size of the cart. Free delivery on orders over S$200.</p>
                                                         )}
                                                     </div>
                                                 )}

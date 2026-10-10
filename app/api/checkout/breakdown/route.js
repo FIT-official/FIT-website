@@ -20,7 +20,7 @@ const FIXED_PRICE_STATUSES = [
 ];
 
 async function fetchProduct(productId) {
-    return Product.findById(productId).select('+shippingCosts').lean();
+    return Product.findById(productId).select('-shippingCosts').lean();
 }
 
 export async function GET(req) {
