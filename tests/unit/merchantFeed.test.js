@@ -36,17 +36,32 @@ describe('Merchant Center catalogue', () => {
         expect(merchantProduct({ ...product, listing: undefined })).not.toBeNull()
     })
 
-    it('keeps item-specific shipping overrides and the five-working-day estimate', () => {
+    it('uses weight tiers ahead of configured Standard prices and keeps the delivery estimate', () => {
         expect(merchantProduct(product).shipping).toEqual({
             country: 'SG', service: 'Standard delivery', price: '6.20 SGD',
             min_handling_time: 2, max_handling_time: 2, min_transit_time: 3, max_transit_time: 3,
         })
         expect(merchantProduct({ ...product, delivery: { deliveryTypes: [
             { type: 'standard-shipping', price: 6.2, customPrice: 2 },
-        ] } }).shipping.price).toBe('2.00 SGD')
+        ] } }).shipping.price).toBe('6.20 SGD')
         expect(merchantProduct({ ...product, delivery: { deliveryTypes: [
             { type: 'standard-shipping', price: 0 },
         ] } }).shipping.price).toBe('6.20 SGD')
+    })
+
+    it('advertises the same letterbox and bulky tiers as checkout, with database measurements taking precedence', () => {
+        const sensor = { ...product, slug: 'hcsr04-ultrasonic-sensor', name: 'Sensor', variantTypes: [],
+            basePrice: { presentmentAmount: 1.65, presentmentCurrency: 'SGD' } }
+        expect(merchantProduct(sensor).shipping.price).toBe('2.00 SGD')
+        expect(merchantProduct({ ...sensor, shippingWeightG: 1951 }).shipping.price).toBe('6.20 SGD')
+        expect(merchantProduct({ ...sensor, shippingDims: { L: 700, W: 400, H: 300 } }).shipping.price).toBe('12.30 SGD')
+    })
+
+    it('excludes blocked parcels from the feed without affecting other products', () => {
+        const blocked = { ...product, shippingWeightG: 31000 }
+        expect(merchantProduct(blocked)).toBeNull()
+        expect(buildMerchantFeed([blocked, { ...product, _id: 'available' }])).toContain('<g:id>available</g:id>')
+        expect(buildMerchantFeed([blocked])).not.toContain('<item>')
     })
 
     it('advertises free shipping only when the single-item order passes the private cost check', () => {

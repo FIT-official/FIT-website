@@ -1,6 +1,7 @@
 import { getDiscountedPrice } from '@/utils/discount';
 import { resolveDeliveryFee } from '@/lib/quoting/deliveryTypeResolver';
-import { paidShopDeliveryFee } from '@/lib/shopShipping';
+import { paidShopDeliveryFee, usesWeightShipping } from '@/lib/shopShipping';
+import { standardShippingTier } from '@/lib/shipping/weightTiers';
 
 export async function calculateCartItemBreakdown({ item, product, address, extraDiscountRules = [] }) {
     const quantity = item.quantity || 1;
@@ -72,7 +73,14 @@ export async function calculateCartItemBreakdown({ item, product, address, extra
     if (!deliveryResolution.ok) {
         throw new Error(`Unknown delivery type "${item.chosenDeliveryType}" for product ${product._id}`);
     }
-    const deliveryFee = paidShopDeliveryFee(product, item.chosenDeliveryType, deliveryResolution.fee);
+    // This initial single-line quote is replaced by the combined shipment in
+    // applyShopShipping at BOTH breakdown and payment creation. Client fees,
+    // weights, dimensions and prices are never consulted.
+    const tier = usesWeightShipping(product) && item.chosenDeliveryType === 'standard-shipping'
+        ? standardShippingTier([{ product, quantity }], Math.round(finalPrice * 100) * quantity)
+        : null;
+    const deliveryFee = tier ? (tier.blocked ? null : tier.priceCents / 100)
+        : paidShopDeliveryFee(product, item.chosenDeliveryType, deliveryResolution.fee);
 
     const total = (finalPrice * quantity) + deliveryFee;
 

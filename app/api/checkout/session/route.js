@@ -9,6 +9,7 @@ import CustomPrintRequest from '@/models/CustomPrintRequest';
 import { calculateCartItemBreakdown } from '../calculateBreakdown';
 import { checkoutDiscountRules } from '@/lib/checkoutDiscounts';
 import { applyShopShipping } from '@/lib/shopShipping';
+import { DELIVERY_QUOTE_MESSAGE } from '@/lib/shipping/weightTiers';
 import { customPrintChargeBreakdown } from '@/lib/customPrintDisplayPrice';
 import { buildProductPrintRequestInput, colourNameFromVariants } from '@/lib/customPrint/productRequest';
 import { buildCheckoutItem, checkoutPlain } from '@/lib/checkoutSnapshot';
@@ -175,6 +176,9 @@ export async function POST(req) {
             pendingItems.push({ item, product, breakdown, customRequest, productPrintInput });
         }
         applyShopShipping(pendingItems, address);
+        if (pendingItems.some(({ breakdown }) => breakdown.shippingBlocked)) {
+            return NextResponse.json({ error: DELIVERY_QUOTE_MESSAGE, code: 'shipping_quote_required' }, { status: 409 });
+        }
         for (const pending of pendingItems) {
             const snapshot = buildCheckoutItem(pending);
             items.push(snapshot);

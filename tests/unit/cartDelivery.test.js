@@ -41,3 +41,13 @@ it('uses configured display names and readable fallbacks', () => {
     expect(cartDeliveryLabel('standard-shipping', { 'standard-shipping': { displayName: 'Local delivery' } })).toBe('Local delivery')
     expect(product.delivery.deliveryTypes.map(o => cartDeliveryLabel(o.type))).toEqual(['Express courier', 'Standard delivery', 'Self pick-up'])
 })
+
+it('compares the computed standard tier with other payable options and excludes blocked standard', () => {
+    const small = { ...product, slug: 'hcsr04-ultrasonic-sensor', basePrice: { presentmentAmount: 1.65 },
+        delivery: { deliveryTypes: [{ type: 'express-courier', price: 3 }, { type: 'standard-shipping', price: 6.2 }, { type: 'pick-up', price: 0 }] } }
+    expect(defaultCartDelivery(small)).toBe('standard-shipping')
+    small.shippingWeightG = 31000
+    expect(defaultCartDelivery(small)).toBe('express-courier')
+    small.delivery.deliveryTypes.shift()
+    expect(defaultCartDelivery(small)).toBe('pick-up')
+})

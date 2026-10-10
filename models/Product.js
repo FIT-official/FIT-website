@@ -136,6 +136,18 @@ const ProductSchema = new mongoose.Schema(
             select: false,
             default: undefined,
         },
+        // Optional measured shipping data (g/mm). No defaults or data migration;
+        // the shipping resolver falls back to the versioned catalogue estimates.
+        shippingWeightG: { type: Number, min: 0, required: false },
+        shippingDims: {
+            type: new mongoose.Schema({
+                L: { type: Number, min: 0 },
+                W: { type: Number, min: 0 },
+                H: { type: Number, min: 0 },
+            }, { _id: false }),
+            default: undefined,
+        },
+        shippingDataFlag: { type: String, enum: ['ESTIMATED', 'MISSING'], required: false },
         productType: { type: String, enum: ["print", "shop"], required: true, default: "shop" },
 
         // Print-delivery products (productType: "print"): the vendor's FIXED

@@ -42,6 +42,12 @@ async function fetchDeliveryTypesMeta() {
 
 function Cart() {
     const { user, isLoaded } = useUser();
+    return <CartContent user={user} isLoaded={isLoaded} />;
+}
+
+// The same cart can be rendered by the isolated local shipping harness without
+// loading an authentication provider. Production always uses Cart above.
+export function CartContent({ user, isLoaded = true }) {
     const [cart, setCart] = useState([]);
     const [error, setError] = useState('');
     const [checkoutBusy, setCheckoutBusy] = useState(false);
@@ -542,10 +548,13 @@ function Cart() {
     // every line must hold a delivery option its product/request still offers.
     const addressBlocked = Boolean(user) && needsDeliveryAddress && addressMissing;
     const mismatchReason = deliveryMismatchReason(cartBreakdown);
+    const shippingBlocked = cartBreakdown.some(item => item.shippingBlocked);
     const checkoutBlockedReason = cart.length === 0
         ? null
         : hasPendingCustomPrint
             ? 'Finish your custom print request to check out.'
+            : shippingBlocked
+                ? 'Contact us for a delivery quote'
             : mismatchReason
                 ? mismatchReason
                 : addressBlocked
@@ -827,21 +836,27 @@ function Cart() {
                                                 </div>
 
                                                 {/* delivery */}
-                                                <div className='flex items-center md:justify-center'>
+                                                <div className='flex flex-col items-start md:justify-center min-w-0'>
                                                     <select
                                                         value={cartItem.chosenDeliveryType}
                                                         onChange={e => handleDeliveryChange(cartItem, e.target.value)}
                                                         className="py-1 px-2 rounded border border-borderColor bg-background md:text-xs text-lightColor focus:outline-none appearance-none transition-all cursor-pointer"
-                                                        style={{ minWidth: 80, maxWidth: 120 }}
+                                                        style={{ width: '100%', maxWidth: 260 }}
                                                         aria-label="Change delivery type"
                                                         disabled={loading}
                                                     >
-                                                        {(product.delivery?.deliveryTypes || []).map(dt => (
-                                                            <option key={dt.type} value={dt.type}>
+                                                        {(product.delivery?.deliveryTypes || []).map(dt => {
+                                                            const standard = dt.type === 'standard-shipping' ? breakdownItem?.standardShipping : null;
+                                                            return <option key={dt.type} value={dt.type} disabled={standard?.blocked}>
                                                                 {cartDeliveryLabel(dt.type, deliveryTypesMeta, dt)}
-                                                            </option>
-                                                        ))}
+                                                                {standard ? standard.blocked ? ' — Contact us for a delivery quote'
+                                                                    : ` — ${breakdownItem.freeDeliveryApplied ? 'Free' : `SGD ${(standard.priceCents / 100).toFixed(2)}`}` : ''}
+                                                            </option>;
+                                                        })}
                                                     </select>
+                                                    {cartItem.chosenDeliveryType === 'standard-shipping' && breakdownItem?.standardShipping && (
+                                                        <p className="text-xs text-lightColor mt-1">{breakdownItem.standardShipping.description}</p>
+                                                    )}
                                                 </div>
 
                                                 {/* quantity */}
@@ -1063,7 +1078,7 @@ function Cart() {
                 </div>
 
                 <div className='flex w-full justify-end mt-8'>
-                    <div className='flex flex-col border border-borderColor rounded p-4 w-full md:w-fit min-w-1/2'>
+                    <div data-testid="cart-summary" className='flex flex-col border border-borderColor rounded p-4 w-full md:w-fit min-w-1/2'>
                         <h2 className="font-semibold text-lg mb-4">Cart Summary</h2>
                         {/* Block checkout if any custom print is pending. A request the
                             customer has finished (configured, awaiting a quote) is shown
@@ -1114,7 +1129,7 @@ function Cart() {
                             (() => {
                                 // Subtotal: sum of all final prices (base + variants - discount) × quantity
                                 const subtotal = cartBreakdown.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
-                                // Delivery fees: sum of all deliveryFee * quantity (per item)
+                                // Standard shop shipment is allocated once; other fees retain their own lines.
                                 const totalDeliveryFee = cartBreakdown.reduce((sum, item) => sum + (item.deliveryFee || 0), 0);
                                 // Grand total: subtotal + totalDeliveryFee
                                 const grandTotal = subtotal + totalDeliveryFee;
@@ -1135,23 +1150,25 @@ function Cart() {
                                         </div>
                                         {/* Delivery fees per item */}
                                         {cartBreakdown.map((item, idx) => {
+                                            if (item.standardShippingIncluded) return null;
                                             // Fetch delivery type meta from AppSettings
                                             const deliveryMeta = deliveryTypesMeta[item.chosenDeliveryType] || null;
                                             return (
-                                                <div key={idx} className="flex flex-col gap-1 py-2 border-b border-borderColor last:border-b-0">
-                                                    <div className="flex justify-between font-normal text-lightColor gap-20">
+                                                <div key={idx} data-testid="summary-delivery" className="flex flex-col gap-1 py-2 border-b border-borderColor last:border-b-0">
+                                                    <div className="flex justify-between font-normal text-lightColor gap-4 md:gap-20">
                                                         <span>
-                                                            {cartDeliveryLabel(item.chosenDeliveryType, deliveryTypesMeta)} for {item.name}
-                                                            {item.quantity > 1 ? ` x${item.quantity}` : ""}
+                                                            {item.deliveryLabel ? `Standard delivery · ${item.deliveryLabel}` : `${cartDeliveryLabel(item.chosenDeliveryType, deliveryTypesMeta)} for ${item.name}${item.quantity > 1 ? ` x${item.quantity}` : ''}`}
                                                         </span>
                                                         <span className='font-medium text-textColor text-right'>
-                                                            {item.freeDeliveryApplied ? 'Free' : `${currency} ${(item.deliveryFee || 0).toFixed(2)}`}
+                                                            {item.shippingBlocked ? 'Contact us for a delivery quote' : item.freeDeliveryApplied ? 'Free' : `${currency} ${(item.deliveryFee || 0).toFixed(2)}`}
                                                         </span>
                                                     </div>
                                                     {item.warning && (
                                                         <span className="text-[11px] text-yellow-700">{item.warning}</span>
                                                     )}
-                                                    {deliveryMeta && (
+                                                    {item.deliveryDescription ? (
+                                                        <p className="text-[11px] text-lightColor">{item.deliveryDescription}</p>
+                                                    ) : deliveryMeta && (
                                                         <div className="flex flex-col text-[11px] text-lightColor ml-1 mt-0.5">
                                                             <span><b>Type:</b> {cartDeliveryLabel(item.chosenDeliveryType, deliveryTypesMeta)}</span>
                                                             {deliveryMeta.description && <span><b>About:</b> {deliveryMeta.description}</span>}
@@ -1164,7 +1181,7 @@ function Cart() {
                                         <p className="py-2 text-lightColor">Free standard delivery is available on eligible Singapore orders over S$20 after discounts. Your delivery charge is shown above.</p>
                                         <div className='py-2 flex justify-between font-bold mt-2 w-full whitespace-nowrap'>
                                             <span>Grand Total</span>
-                                            <span className='text-right'>{`${currency} ${grandTotal.toFixed(2)}`}</span>
+                                            <span className='text-right'>{shippingBlocked ? 'Quote required' : `${currency} ${grandTotal.toFixed(2)}`}</span>
                                         </div>
                                     </div>
                                 );

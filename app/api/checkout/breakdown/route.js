@@ -157,6 +157,7 @@ export async function GET(req) {
         // can prefill what the customer already saved.
         return NextResponse.json({
             cartBreakdown,
+            shippingBlocked: cartBreakdown.some(line => line.shippingBlocked),
             addressMissing,
             needsDeliveryAddress,
             address: address ? pickAddressFields(address) : null,

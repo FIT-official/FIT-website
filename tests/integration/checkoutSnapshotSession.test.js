@@ -57,6 +57,49 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('Checkout session purchase contract', () => {
+    it.each([0, 0.01, -100, 999])('ignores client shipping %s and charges one combined server tier in breakdown and Stripe', async clientFee => {
+        Object.assign(product, { productType: 'shop', slug: 'hcsr04-ultrasonic-sensor', paidAssets: [],
+            basePrice: { presentmentAmount: 1.65, presentmentCurrency: 'SGD' },
+            delivery: { deliveryTypes: [{ type: 'standard-shipping', price: 999 }] } });
+        const filament = { ...product, _id: 'p2', slug: 'bambu-lab-3d-printing-filament-1kg-pla-basic',
+            basePrice: { presentmentAmount: 21.9, presentmentCurrency: 'SGD' } };
+        m.product.mockImplementation(async id => id === 'p2' ? filament : product);
+        user.cart = ['p1', 'p2'].map(productId => ({ _id: `cart-${productId}`, productId, quantity: 1, selectedVariants: {}, chosenDeliveryType: 'standard-shipping',
+            deliveryFee: clientFee, shippingAmount: clientFee, price: 0, shippingWeightG: 1, shippingDims: { L: 1, W: 1, H: 1 } }));
+        const { cartBreakdown } = await (await getBreakdown()).json();
+        expect(cartBreakdown.map(line => line.deliveryFee)).toEqual([6.2, 0]);
+        const request = { headers: new Headers(), json: vi.fn(async () => ({ shippingAmount: clientFee, deliveryFee: clientFee })) };
+        expect((await POST(request)).status).toBe(200);
+        const params = m.createSession.mock.calls[0][0];
+        expect(params.line_items.reduce((sum, item) => sum + item.price_data.unit_amount * item.quantity, 0)).toBe(2975);
+        expect(m.saveSnapshot.mock.calls[0][0].items.map(item => item.deliveryAmount)).toEqual([620, 0]);
+        expect(request.json).not.toHaveBeenCalled();
+    });
+    it('uses the letterbox tier at both endpoints and recalculates a changed quantity', async () => {
+        Object.assign(product, { productType: 'shop', slug: 'hcsr04-ultrasonic-sensor', paidAssets: [],
+            basePrice: { presentmentAmount: 1.65, presentmentCurrency: 'SGD' },
+            delivery: { deliveryTypes: [{ type: 'standard-shipping', price: 6.2 }] } });
+        Object.assign(user.cart[0], { quantity: 1, chosenDeliveryType: 'standard-shipping' });
+        expect((await (await getBreakdown()).json()).cartBreakdown[0].deliveryFee).toBe(2);
+        user.cart[0].quantity = 16; // Stack is 320 mm; with padding it exceeds 324 mm even when rotated.
+        expect((await POST()).status).toBe(200);
+        expect(m.saveSnapshot.mock.calls[0][0].items[0].deliveryAmount).toBe(620);
+    });
+    it('returns a blocked breakdown and rejects payment for an overweight standard parcel; pickup works', async () => {
+        Object.assign(product, { productType: 'shop', shippingWeightG: 31000, shippingDims: { L: 100, W: 100, H: 100 },
+            delivery: { deliveryTypes: [{ type: 'standard-shipping', price: 6.2 }, { type: 'pick-up', price: 0 }] } });
+        Object.assign(user.cart[0], { quantity: 1, chosenDeliveryType: 'standard-shipping' });
+        const data = await (await getBreakdown()).json();
+        expect(data).toMatchObject({ shippingBlocked: true, cartBreakdown: [{ shippingBlocked: true, deliveryFee: null, total: null }] });
+        const response = await POST();
+        expect(response.status).toBe(409);
+        expect(await response.json()).toMatchObject({ error: 'Contact us for a delivery quote', code: 'shipping_quote_required' });
+        expect(m.createSession).not.toHaveBeenCalled();
+        expect(m.saveSnapshot).not.toHaveBeenCalled();
+        user.cart[0].chosenDeliveryType = 'pick-up';
+        expect((await POST()).status).toBe(200);
+        expect(m.saveSnapshot.mock.calls[0][0].items[0].deliveryAmount).toBe(0);
+    });
     it.each([true, false])('uses the same profit decision in the cart and Stripe (known costs: %s)', async known => {
         product.productType = 'shop';
         product.basePrice.presentmentAmount = 30;

@@ -12,7 +12,7 @@ const compat = new FlatCompat({
 const eslintConfig = [
   // Flat config only lints .js by default — opt .jsx in explicitly.
   { files: ["**/*.{js,jsx,mjs}"] },
-  { ignores: [".next/", "node_modules/", "coverage/", "public/", "archive/"] },
+  { ignores: ["**/.next/", "node_modules/", "coverage/", "**/public/", "archive/"] },
   ...compat.extends("next/core-web-vitals"),
 ];
 

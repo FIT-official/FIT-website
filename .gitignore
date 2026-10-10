@@ -17,6 +17,8 @@
 
 # next.js
 /.next/
+/scripts/shipping/preview/.next/
+/scripts/shipping/preview/public/
 /out/
 
 # production

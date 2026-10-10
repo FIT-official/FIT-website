@@ -5,6 +5,8 @@ import Product from "@/models/Product";
 import CustomPrintRequest from "@/models/CustomPrintRequest";
 import { sanitizeString } from "@/utils/validate";
 import { resolveDeliveryFee } from "@/lib/quoting/deliveryTypeResolver";
+import { usesWeightShipping } from '@/lib/shopShipping';
+import { standardShippingTier, DELIVERY_QUOTE_MESSAGE } from '@/lib/shipping/weightTiers';
 
 export async function PUT(req) {
     try {
@@ -69,17 +71,33 @@ export async function PUT(req) {
         // reach checkout, where it would otherwise silently price at 0 (see
         // lib/quoting/deliveryTypeResolver.js).
         let availableDeliveryTypes = [];
+        let product;
         if (isCustomPrint) {
             const requestId = productId.split(':')[1];
             const customPrintRequest = await CustomPrintRequest.findOne({ requestId, userId }).lean();
             availableDeliveryTypes = customPrintRequest?.delivery?.deliveryTypes || [];
         } else {
-            const product = await Product.findById(productId).lean();
+            product = await Product.findById(productId).lean();
             availableDeliveryTypes = product?.delivery?.deliveryTypes || [];
         }
         const deliveryResolution = resolveDeliveryFee(availableDeliveryTypes, chosenDeliveryType, { key: 'type' });
         if (!deliveryResolution.ok) {
             return NextResponse.json({ error: "Unknown delivery type" }, { status: 400 });
+        }
+
+        if (chosenDeliveryType === 'standard-shipping' && usesWeightShipping(product)) {
+            const parcel = [];
+            for (const line of user.cart) {
+                if (String(line.productId).startsWith('custom-print:')) continue;
+                if (line !== cartItem && line.chosenDeliveryType !== 'standard-shipping') continue;
+                const lineProduct = line.productId === productId ? product : await Product.findById(line.productId).lean();
+                if (usesWeightShipping(lineProduct)) parcel.push({ product: lineProduct, quantity: line.quantity });
+            }
+            // The value threshold changes letterbox vs Speedpost, never whether
+            // a parcel is blocked. Recheck the proposed whole standard parcel.
+            if (standardShippingTier(parcel, 0).blocked) {
+                return NextResponse.json({ error: DELIVERY_QUOTE_MESSAGE, code: 'shipping_quote_required' }, { status: 409 });
+            }
         }
 
         cartItem.chosenDeliveryType = chosenDeliveryType;

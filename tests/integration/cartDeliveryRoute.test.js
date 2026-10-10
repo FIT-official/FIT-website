@@ -35,6 +35,19 @@ function leanQuery(result) {
 }
 
 describe('PUT /api/user/cart/delivery', () => {
+  it('refuses a standard selection when the proposed combined parcel is over 30 kg', async () => {
+    const cartItem = { productId: 'p1', quantity: 1, chosenDeliveryType: 'pick-up' };
+    const user = makeUser([cartItem, { productId: 'p2', quantity: 1, chosenDeliveryType: 'standard-shipping' }]);
+    User.findOne.mockResolvedValue(user);
+    Product.findById.mockReturnValue(leanQuery({ productType: 'shop', listing: 'fit', shippingWeightG: 16000,
+      shippingDims: { L: 100, W: 100, H: 100 }, delivery: { deliveryTypes: [{ type: 'standard-shipping', price: 6.2 }, { type: 'pick-up', price: 0 }] } }));
+    const response = await put({ productId: 'p1', chosenDeliveryType: 'standard-shipping' });
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ error: 'Contact us for a delivery quote' });
+    expect(user.save).not.toHaveBeenCalled();
+    expect(cartItem.chosenDeliveryType).toBe('pick-up');
+    expect((await put({ productId: 'p1', chosenDeliveryType: 'pick-up' })).status).toBe(200);
+  });
   it('rejects an unknown chosenDeliveryType and leaves the cart item unchanged', async () => {
     const cartItem = { productId: 'p1', variantId: null, selectedVariants: {}, chosenDeliveryType: 'standard' }
     const user = makeUser([cartItem])
