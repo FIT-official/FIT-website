@@ -85,7 +85,6 @@ function TermsPage() {
                     <ul className="list-disc ml-6">
                         <li><b>GST:</b> All transactions subject to Singapore GST unless exempt. GST calculated/applied at checkout as required by law.</li>
                         <li><b>Additional Fees:</b> Delivery, handling, and processing fees may apply. All charges outlined before purchase confirmation.</li>
-                        <li><b>Standard Delivery:</b> Free standard delivery is available on eligible Singapore orders over S$20 after discounts. Eligibility depends on the items and quantities ordered; spending over S$20 alone does not guarantee free delivery. Express services, custom work and mixed delivery methods are excluded. The cart shows the delivery charge before payment.</li>
                     </ul>
 
                     <h4 className="font-semibold mt-2">Payment Security</h4>

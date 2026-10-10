@@ -24,6 +24,11 @@ const renderHtml = component => renderToStaticMarkup(component)
 const product = (i, image = `/images/filament/bambu/photo-${i}.webp`) => ({ name: `Filament ${i}`, slug: `filament-${i}`, productType: 'shop', images: [image] })
 
 describe('confirmed facts only', () => {
+    it('does not advertise the withdrawn shipping offer in homepage content or schema', () => {
+        const html = renderHtml(<HomeContent />)
+        expect(html).not.toMatch(/free (?:standard )?delivery|over S\$20|<li><\/li>/i)
+        expect(html).toContain('Bulk pricing for schools')
+    })
     it.each([VisitDetails, VisitPickup, LocalBusinessSchema, GoogleRating, Reviews, ClientLogos, WhatsAppButton])('%s renders nothing for the pending owner facts', Component => {
         expect(renderHtml(<Component />)).toBe('')
     })
@@ -72,7 +77,7 @@ describe('confirmed facts only', () => {
             expect(node.querySelector('summary').textContent).toBe(schema.mainEntity[index].name)
             expect(node.querySelector('p').textContent).toBe(schema.mainEntity[index].acceptedAnswer.text)
         })
-        expect(container.textContent).not.toMatch(/turnaround|GST|purchase order|next-day|24–48/)
+        expect(container.textContent).not.toMatch(/turnaround|GST|purchase order|next-day|24–48|free standard delivery/i)
     })
 })
 

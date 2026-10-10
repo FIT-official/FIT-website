@@ -35,7 +35,7 @@ export default function HomeContent({ sections = {}, heroContent, products = [],
     return <main className={styles.home}>
         {on('hero') ? <Hero content={heroContent} facts={facts} /> : <h1 className="sr-only">Print, fix and build in Singapore</h1>}
         {on('trust') && <section className={styles.trust} aria-label="Services and delivery">
-            <ul><li>3D printer repair</li><li>{facts.selfCollection}</li><li>{facts.deliveryOffer}</li><li>Bulk pricing for schools</li></ul>
+            <ul><li>3D printer repair</li><li>{facts.selfCollection}</li><li>Bulk pricing for schools</li></ul>
             <GoogleRating facts={facts} />
         </section>}
         {on('clientLogos') && <ClientLogos facts={facts} />}
@@ -51,7 +51,6 @@ export default function HomeContent({ sections = {}, heroContent, products = [],
             <div className={styles.bulkCopy}><p className={styles.eyebrow}>Stock up for your next project</p><h2 id="home-bulk">Schools & makerspaces: bulk filament</h2>
                 <p>Plan an order of Lanbo PLA, Lanbo PETG or Marble & Wood PLA. See quantity pricing, then choose your colours in the bulk form.</p>
                 <Link href="/shop/bulk-filament" className={styles.button}>Get a bulk quote <span aria-hidden="true">↗</span></Link>
-                <p className={styles.finePrint}>Bambu Lab filaments at list price — all 12 available in the bulk form.</p>
             </div><BulkCalculator />
         </section>}
         {on('shop') && <ShopPicks products={products} />}

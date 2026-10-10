@@ -66,9 +66,9 @@ describe('Merchant Center catalogue', () => {
 
     it('advertises free shipping only when the single-item order passes the private cost check', () => {
         const stocked = { ...product, shippingCosts: { unitCost: 1, packingCost: 1, deliveryCost: 6.2, confirmed: true } }
-        expect(merchantProduct(stocked).shipping.price).toBe('0.00 SGD')
+        expect(merchantProduct(stocked).shipping.price).toBe('6.20 SGD')
         // Unapproved filament promotions cannot change the order value.
-        expect(merchantProduct(stocked, [{ percentage: 20 }]).shipping.price).toBe('0.00 SGD')
+        expect(merchantProduct(stocked, [{ percentage: 20 }]).shipping.price).toBe('6.20 SGD')
         // Existing global promotions still affect unrelated shop products.
         expect(merchantProduct({ ...stocked, slug: 'sensor', name: 'Sensor', categoryId: 'Electronics' }, [{ percentage: 20 }]).shipping.price).toBe('6.20 SGD')
         expect(buildMerchantFeed([stocked])).not.toMatch(/shippingCosts|unitCost|packingCost|confirmed/)

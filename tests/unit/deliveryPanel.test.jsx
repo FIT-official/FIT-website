@@ -32,7 +32,7 @@ const deliveryTypes = [
             weightFactor: 0.01,
             minPrice: 2,
             maxPrice: 50,
-            freeShippingThreshold: '',
+            freeShippingThreshold: 80,
         },
     },
     {
@@ -87,11 +87,11 @@ describe('DeliveryTypeManagement — list cards', () => {
         expect(within(courier).getByText('$5.00 base + $0.001/cm³ + $0.01/g')).toBeInTheDocument()
         expect(within(courier).getByText('min $2.00')).toBeInTheDocument()
         expect(within(courier).getByText('max $50.00')).toBeInTheDocument()
-        expect(within(courier).queryByText(/free over/)).toBeNull() // no threshold set
+        expect(within(courier).queryByText(/free over/)).toBeNull() // stored legacy threshold does not advertise an offer
 
         const express = cardOf('Express Post')
         expect(within(express).getByText('$9.90 base + $0.01/cm³ + $0.005/g')).toBeInTheDocument()
-        expect(within(express).getByText('free over $150.00')).toBeInTheDocument()
+        expect(within(express).queryByText(/free over/)).toBeNull() // legacy threshold is not an offer
 
         // Creator-defined pricing reads as a sentence.
         expect(
@@ -199,7 +199,7 @@ describe('DeliveryTypeManagement — stepped edit sheet', () => {
         fireEvent.click(within(dialog).getByRole('button', { name: 'Next' }))
         expect(within(dialog).getByLabelText('Minimum Price ($)')).toHaveValue(2)
         expect(within(dialog).getByLabelText('Maximum Price ($)')).toHaveValue(50)
-        expect(within(dialog).getByLabelText('Free Shipping Threshold ($)')).toHaveValue(null)
+        expect(within(dialog).queryByLabelText('Free Shipping Threshold ($)')).toBeNull()
 
         // Step 4: human-readable review + live example calculations.
         fireEvent.click(within(dialog).getByRole('button', { name: 'Next' }))
@@ -234,6 +234,7 @@ describe('DeliveryTypeManagement — stepped edit sheet', () => {
             expect(Object.keys(body)).toEqual(['type', 'id', 'data'])
             expect(body.type).toBe('delivery-type')
             expect(body.id).toBe('abc123')
+            expect(body.data.basePricing.freeShippingThreshold).toBe(80) // preserve stored settings; no data migration
             expect(Object.keys(body.data)).toEqual([
                 'displayName',
                 'description',
@@ -288,13 +289,13 @@ describe('DeliveryTypeManagement — stepped create flow', () => {
         // Step 3: bounds.
         fireEvent.change(within(dialog).getByLabelText('Minimum Price ($)'), { target: { value: '9.9' } })
         fireEvent.change(within(dialog).getByLabelText('Maximum Price ($)'), { target: { value: '60' } })
-        fireEvent.change(within(dialog).getByLabelText('Free Shipping Threshold ($)'), { target: { value: '150' } })
+        expect(within(dialog).queryByLabelText('Free Shipping Threshold ($)')).toBeNull()
         fireEvent.click(within(dialog).getByRole('button', { name: 'Next' }))
 
         // Step 4: the summary sentence reads the whole configuration back.
         expect(
             within(dialog).getByText(
-                'Charges $9.90 base plus $0.01 per cubic cm and $0.005 per gram, never less than $9.90 or more than $60.00, free over $150.00.'
+                'Charges $9.90 base plus $0.01 per cubic cm and $0.005 per gram, never less than $9.90 or more than $60.00.'
             )
         ).toBeInTheDocument()
         expect(within(dialog).getByText('Premium Delivery')).toBeInTheDocument()
@@ -317,7 +318,7 @@ describe('DeliveryTypeManagement — stepped create flow', () => {
                         weightFactor: '0.005',
                         minPrice: '9.9',
                         maxPrice: '60',
-                        freeShippingThreshold: '150',
+                        freeShippingThreshold: '',
                     },
                     isActive: true,
                 },
