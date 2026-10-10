@@ -1178,7 +1178,7 @@ export function CartContent({ user, isLoaded = true }) {
                                             );
                                         })}
                                         {/* Grand Total */}
-                                        <p className="py-2 text-lightColor">Free delivery on orders over S$200.</p>
+                                        <p className="py-2 text-lightColor">Delivery charges are calculated at checkout. Order value does not waive delivery charges.</p>
                                         <div className='py-2 flex justify-between font-bold mt-2 w-full whitespace-nowrap'>
                                             <span>Grand Total</span>
                                             <span className='text-right'>{shippingBlocked ? 'Quote required' : `${currency} ${grandTotal.toFixed(2)}`}</span>

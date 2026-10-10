@@ -24,9 +24,9 @@ const renderHtml = component => renderToStaticMarkup(component)
 const product = (i, image = `/images/filament/bambu/photo-${i}.webp`) => ({ name: `Filament ${i}`, slug: `filament-${i}`, productType: 'shop', images: [image] })
 
 describe('confirmed facts only', () => {
-    it('advertises the current shipping offer in homepage content and schema', () => {
+    it('omits the removed shipping offer from homepage content and schema', () => {
         const html = renderHtml(<HomeContent />)
-        expect(html).toContain('Free delivery on orders over S$200.')
+        expect(html).not.toContain('Free delivery on orders over S$200.')
         expect(html).not.toMatch(/over S\$20(?!\d)|<li><\/li>/i)
         expect(html).toContain('Bulk pricing for schools')
     })

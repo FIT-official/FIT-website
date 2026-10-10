@@ -60,10 +60,10 @@ describe('PUT /api/user/cart/delivery', () => {
     const response = await put({ productId: 'p1', chosenDeliveryType: 'standard-shipping', subtotalCents: 1 });
     expect(response.status).toBe(200);
     const { cartBreakdown } = await response.json();
-    expect(cartBreakdown.map(line => line.deliveryFee)).toEqual([0, 0, 30]);
-    expect(cartBreakdown.map(line => line.freeDeliveryApplied)).toEqual([true, true, false]);
+    expect(cartBreakdown.map(line => line.deliveryFee)).toEqual([6.2, 0, 30]);
+    expect(cartBreakdown.map(line => line.freeDeliveryApplied)).toEqual([false, false, false]);
   });
-  it.each([[205, 200, 6.2], [205.01, 200.01, 0]])('reprices the full cart after a S$5 discount on %s and ignores browser amounts', async (base, price, fee) => {
+  it.each([[205, 200, 6.2], [205.01, 200.01, 6.2]])('reprices the full cart after a S$5 discount on %s and ignores browser amounts', async (base, price, fee) => {
     const cartItem = { productId: 'p1', quantity: 1, chosenDeliveryType: 'pick-up', price: 9999, deliveryFee: 0 };
     const user = makeUser([cartItem]);
     User.findOne.mockResolvedValue(user);

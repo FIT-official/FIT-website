@@ -416,7 +416,7 @@ export default function ShippingFields({ form, handleChange, setForm, hideDimens
                                                                     : 'Set your delivery price for this option'}
                                                         </p>
                                                         {form.productType === 'shop' && deliveryType.name === 'standard-shipping' && (
-                                                            <p className="text-[13px] text-[var(--dash-ink-soft)] leading-relaxed">FIT Standard delivery uses the packed weight and size of the cart. Free delivery on orders over S$200.</p>
+                                                            <p className="text-[13px] text-[var(--dash-ink-soft)] leading-relaxed">FIT Standard delivery uses the packed weight and size of the cart. Order value does not waive delivery charges.</p>
                                                         )}
                                                     </div>
                                                 )}

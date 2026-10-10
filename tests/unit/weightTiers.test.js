@@ -171,16 +171,16 @@ describe('combined standard shipping', () => {
         applyShopShipping([item], { country: 'SG' });
         expect(item.breakdown).toMatchObject({ shippingBlocked: false, deliveryFee: 0, total: 201 });
     });
-    it('waives only Standard charges in a mixed order over S$200', () => {
+    it('preserves paid Standard and creator/custom fees in a mixed order over S$200', () => {
         const lines = [line('hcsr04-ultrasonic-sensor', 1.65), line('overweight', 5, 99, 'pick-up'), line('overweight', 5, 99, 'express-courier')];
         const print = { ...line('print', 10), customRequest: true };
         print.breakdown.deliveryFee = 9;
         const creator = line('creator', 10);
         creator.product.listing = 'creator'; creator.breakdown.deliveryFee = 8;
         applyShopShipping([...lines, print, creator], null);
-        expect(lines.map(l => l.breakdown.deliveryFee)).toEqual([0, 0, 30]);
-        expect(print.breakdown.deliveryFee).toBe(0);
-        expect(creator.breakdown.deliveryFee).toBe(0);
+        expect(lines.map(l => l.breakdown.deliveryFee)).toEqual([6.2, 0, 30]);
+        expect(print.breakdown.deliveryFee).toBe(9);
+        expect(creator.breakdown.deliveryFee).toBe(8);
         expect(print.breakdown.standardShipping).toBeUndefined();
     });
 });

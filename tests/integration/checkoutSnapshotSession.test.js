@@ -80,7 +80,7 @@ describe('Checkout session purchase contract', () => {
         expect(m.saveSnapshot.mock.calls[0][0].items.map(item => item.deliveryAmount)).toEqual(goodsSlug ? [0, deliveryAmount] : [0]);
         expect(m.createSession.mock.calls[0][0].line_items.reduce((sum, item) => sum + item.price_data.unit_amount * item.quantity, 0)).toBe(totalAmount);
     });
-    it.each([[205, 200, 620], [205.01, 200.01, 0]])('checks the S$200 boundary after a S$5 discount on %s in breakdown and Stripe', async (base, price, deliveryAmount) => {
+    it.each([[205, 200, 620], [205.01, 200.01, 620]])('keeps delivery paid across the former S$200 boundary after a S$5 discount on %s in breakdown and Stripe', async (base, price, deliveryAmount) => {
         Object.assign(product, { productType: 'shop', slug: 'hcsr04-ultrasonic-sensor', paidAssets: [],
             basePrice: { presentmentAmount: base, presentmentCurrency: 'SGD' },
             discounts: [{ percentage: 5 / base * 100 }],

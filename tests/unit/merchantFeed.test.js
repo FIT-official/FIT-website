@@ -11,7 +11,7 @@ const product = {
 }
 
 describe('Merchant Center catalogue', () => {
-    it.each([[205, 200, '6.20 SGD'], [205.01, 200.01, '0.00 SGD']])('uses the discounted single-item S$200 boundary for price %s in XML', (base, price, shipping) => {
+    it.each([[205, 200, '6.20 SGD'], [205.01, 200.01, '6.20 SGD']])('preserves paid shipping after discounts for price %s in XML', (base, price, shipping) => {
         const item = { ...product, slug: 'hcsr04-ultrasonic-sensor', name: 'Sensor', categoryId: 'Electronics', variantTypes: [],
             basePrice: { presentmentAmount: base, presentmentCurrency: 'SGD' }, discounts: [{ percentage: 5 / base * 100 }] };
         expect(merchantProduct(item)).toMatchObject({ price: `${price.toFixed(2)} SGD`, shipping: { price: shipping } });

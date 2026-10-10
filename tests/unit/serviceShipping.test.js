@@ -60,7 +60,7 @@ describe('non-shippable services', () => {
         expect(lines.map(item => item.breakdown.deliveryFee)).toEqual([0, 2]);
         expect(lines[0].breakdown.shippingBlocked).toBe(false);
     });
-    it.each([[203.35, 20000, 2], [203.36, 20001, 0]])('counts the discounted service price at the S$200 boundary (%s before discount)', async (base, cents, fee) => {
+    it.each([[203.35, 20000, 2], [203.36, 20001, 2]])('keeps the parcel paid when a discounted service crosses the old S$200 boundary (%s before discount)', async (base, cents, fee) => {
         const discounted = { ...service, basePrice: { ...service.basePrice, presentmentAmount: base }, discounts: [{ percentage: 5 / base * 100 }] };
         const lines = [await line(discounted), await line(goods('hcsr04-ultrasonic-sensor', 1.65))];
         expect(lines[0].breakdown.price).toBeCloseTo(base - 5);
