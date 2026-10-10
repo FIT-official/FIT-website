@@ -48,6 +48,48 @@ const reviewed = [
         "key": "images/1789460354194-2dhv95m1a42.jpg",
         "price": 35.2,
         "stock": 1
+    },
+    {
+        "id": "6a3eb1c9c4030262e203faa2",
+        "name": "433MHz Wireless Remote (4-Button ABCD)",
+        "key": "images/1789394309086-8cz0iqwphaa.jpg",
+        "price": 5.5,
+        "stock": 1
+    },
+    {
+        "id": "6a3eb3f8c9764357c63caabe",
+        "name": "USB to UART Converter (CP2102/CH340)",
+        "key": "images/1789394461067-q7prcwax6.jpg",
+        "price": 3.9,
+        "stock": 1
+    },
+    {
+        "id": "6aa8eb10a1ca543d895a4953",
+        "name": "18650 Battery",
+        "key": "images/1789458805845-67yykj9vmna.jpg",
+        "price": 6.85,
+        "stock": 1
+    },
+    {
+        "id": "6aa8ecd0a1a0725a1406b58e",
+        "name": "DC Step Up Booster",
+        "key": "images/1789459520186-rif1imvawdo.jpg",
+        "price": 9.8,
+        "stock": 1
+    },
+    {
+        "id": "6aa8ecf2a1a0725a1406b59b",
+        "name": "Boost Buck Converter",
+        "key": "images/1789459543933-ms49qcpossh.jpg",
+        "price": 3,
+        "stock": 2
+    },
+    {
+        "id": "6aa8ed0c28bf036c1de9f843",
+        "name": "Stepper Motor Expansion Board",
+        "key": "images/1789459585213-auhlxi7318g.jpg",
+        "price": 6,
+        "stock": 1
     }
 ]
 
