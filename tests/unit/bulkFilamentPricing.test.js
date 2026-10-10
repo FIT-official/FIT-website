@@ -43,9 +43,9 @@ describe('bulk filament pricing', () => {
     expect(lines.find(l=>l.material==='PETG').unitCents).toBe(1390)
     expect(priced([['PETG','Black',10]])[0].unitCents).toBe(1340)
   })
-  it('counts split lines once each while retaining stock limits', () => {
+  it('counts split lines once each while retaining the shared enquiry limit', () => {
     expect(priced([['PLA','Black',5],['PLA','Black',5]]).map(l=>l.lineCents)).toEqual([6950,6950])
-    expect(()=>priced([['PLA','Black',5],['PLA','Black',21]])).toThrow('1 to 14')
+    expect(()=>priced([['PLA','Black',5],['PLA','Black',30]])).toThrow('1 to 4')
   })
   it('rejects invalid and excessive quantities instead of creating unquoted lines', () => {
     for(const q of ['',0,-1,1.5,Infinity,Number.MAX_SAFE_INTEGER]) expect(()=>priced([['PLA','Black',q]])).toThrow()

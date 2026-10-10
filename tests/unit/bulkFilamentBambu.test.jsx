@@ -59,16 +59,16 @@ it('does not infer spool stock from a Sheet row without a spool identity', () =>
   expect(p.stockSource).toBe('snapshot')
 })
 
-it('rejects above-colour stock and cumulative shared spool and product limits', () => {
+it('rejects above-allowance colour, shared spool and product totals', () => {
   for (const limit of ['colour', 'spool', 'product']) {
     const c = catalogue(), p = basic(c), b = fixtureInput(c)
-    b.lines = [bambuLine(p, 4), bambuLine(p, 4)]
+    b.lines = [bambuLine(p, 14), bambuLine(p, 14)]
     const spool = p.types.find(t => t.label === 'Spool')
     b.lines.forEach(line => { line.options.find(o => o.typeId === spool.id).optionId = spool.options.find(o => o.name === 'With Spool').id })
     if (limit === 'colour') p.types[0].options[0].stock = 7
     if (limit === 'spool') spool.options.find(o => o.name === 'With Spool').stock = 7
     if (limit === 'product') p.stock = 7
-    expect(() => prepareBulkLines(parseBulkInput(b), c)).toThrow(/stock|choose 1 to 7/)
+    expect(() => prepareBulkLines(parseBulkInput(b), c)).toThrow(/choose 1 to 13/)
   }
 })
 
@@ -110,7 +110,7 @@ it('shows the separate group, list-price line, stock maximum and unavailable col
   fireEvent.change(screen.getByLabelText('Product / material'), { target: { value: p.id } })
   expect(screen.getByRole('option', { name: /Silver.*Unavailable/ })).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: 'Add colour to enquiry' }))
-  expect(screen.getByLabelText('Quantity line 1')).toHaveAttribute('max', '17')
+  expect(screen.getByLabelText('Quantity line 1')).toHaveAttribute('max', '37')
   const line = screen.getByRole('region', { name: 'Request line 1' })
   expect(line).toHaveTextContent(BAMBU_PRICE_NOTICE)
   expect(line).toHaveTextContent('$25.90 / roll x 1 = $25.90')
@@ -122,7 +122,7 @@ it('shows the separate group, list-price line, stock maximum and unavailable col
   expect(screen.getByRole('region', { name: 'Request line 2' })).toHaveTextContent('PLA band <10 (9 rolls combined)')
   expect(screen.getByRole('region', { name: 'Request line 2' })).toHaveTextContent('$14.90 / roll x 9 = $134.10')
   expect(line).toHaveTextContent('$25.90 / roll x 5 = $129.50')
-  fireEvent.change(screen.getByLabelText('Quantity line 1'), { target: { value: '18' } })
+  fireEvent.change(screen.getByLabelText('Quantity line 1'), { target: { value: '38' } })
   expect(screen.getByText(/Estimate unavailable/)).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Send request to FIT' })).toBeDisabled()
 })

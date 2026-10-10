@@ -3308,6 +3308,9 @@
       ],
       "notes": [
         "PVA 66400 is Clear, not White. Preserve RGBA alpha (80 hex); do not flatten to opaque white. Resolve inventory label before preview."
+      ],
+      "slugAliases": [
+        "bambu-lab-3d-printing-filament-05kg-pva-support"
       ]
     },
     {
@@ -3368,6 +3371,48 @@
         "status": "missing_verified_asset",
         "label": "FIT Dark Wood",
         "reason": "No verified FIT Dark Wood product photo is available. A flat swatch would not show this filament's texture reliably."
+      }
+    }
+  ],
+  "sheetEntries": [
+    {
+      "brand": "Lanbo",
+      "material": "PETG",
+      "colour": "White",
+      "barcode": "331",
+      "preview": {
+        "kind": "unavailable",
+        "status": "source_material_conflict",
+        "label": "PETG White",
+        "reason": "The manufacturer PETG White page shows a spool labelled PLA. An exact PETG photo has not been verified.",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1175.html"
+      },
+      "imageEvidence": {
+        "manufacturerTitle": "PETG White 1KG",
+        "imageUrl": "https://www.tyzh.com/static/upload/image/20260826/1787711527946046.jpg",
+        "sha256": "65d0e7e467b670a4dccd5887ec2f278d67dd45a5aba86361134146a21b7455b7",
+        "retrievedAt": "2026-10-09T23:50:44.167402+00:00",
+        "decision": "Not served: visible spool label says PLA despite PETG page title."
+      }
+    },
+    {
+      "brand": "Lanbo",
+      "material": "PETG",
+      "colour": "Coffee",
+      "barcode": "443",
+      "preview": {
+        "kind": "unavailable",
+        "status": "source_material_conflict",
+        "label": "PETG Coffee",
+        "reason": "The manufacturer PETG Coffee page shows a spool labelled PLA. An exact PETG photo has not been verified.",
+        "sourceUrl": "https://www.tyzh.com/?list_66/1186.html"
+      },
+      "imageEvidence": {
+        "manufacturerTitle": "PETG Coffee 1KG",
+        "imageUrl": "https://www.tyzh.com/static/upload/image/20260826/1787711922704430.jpg",
+        "sha256": "2d5c44b740eaac6cdc8502b87e015f3a12392f095fee655252cec66d34778461",
+        "retrievedAt": "2026-10-09T23:50:44.293959+00:00",
+        "decision": "Not served: visible spool label says PLA despite PETG page title."
       }
     }
   ]

@@ -25,16 +25,16 @@ it('shares one PLA tier across plain PLA, FIT Marble and Lanbo Marble while PETG
   expect(rows.find(l => l.material === 'PETG')).toMatchObject({ tierRolls: 9, unitCents: 1390 })
 })
 
-it.each([['Grey Marble',20],['Marble',15],['Beige Marble',10]])('allows eight through Sheet stock for FIT %s, capped only at %i', (colour, stock) => {
+it.each([['Grey Marble',20],['Marble',15],['Beige Marble',10]])('allows FIT %s through its recorded %i plus 20 enquiry limit', (colour, stock) => {
   const c = fixtureCatalogue(BULK_STOCK_SNAPSHOT.rows), input = fixtureInput(c)
-  for (let quantity = 8; quantity <= stock; quantity++) {
+  for (let quantity = 8; quantity <= stock + 20; quantity++) {
     input.lines = [fixtureLine(c,'FIT','PLA',colour,quantity)]
     expect(prepareBulkLines(parseBulkInput(input),c)[0]).toMatchObject({ quantity, ladder: 'SPECIALTY_PLA' })
   }
-  input.lines[0].quantity = stock + 1
-  expect(() => prepareBulkLines(parseBulkInput(input),c)).toThrow(`1 to ${stock}`)
-  input.lines = [fixtureLine(c,'FIT','PLA',colour,stock), fixtureLine(c,'FIT','PLA',colour,1)]
-  expect(() => prepareBulkLines(parseBulkInput(input),c)).toThrow(`1 to ${stock}`)
+  input.lines[0].quantity = stock + 21
+  expect(() => prepareBulkLines(parseBulkInput(input),c)).toThrow(/enquiry allowance/)
+  input.lines = [fixtureLine(c,'FIT','PLA',colour,stock + 20), fixtureLine(c,'FIT','PLA',colour,1)]
+  expect(() => prepareBulkLines(parseBulkInput(input),c)).toThrow(/enquiry allowance/)
 })
 const boundaries = [1,9,10,19,20,49,50,99,100,101]
 for (const [ladder, expected] of Object.entries({
@@ -76,15 +76,15 @@ it('pools Lanbo Marble, Wood, FIT Marble and plain PLA independently of the PETG
   expect(lines.find(line => line.material === 'PETG')).toMatchObject({ tierRolls: 10, band: '10–19', unitCents: 1340 })
   expect(lines.reduce((sum, line) => sum + line.lineCents, 0)).toBe(46500)
 })
-it.each([['PLA','Marble',7,8],['PETG','Black',12,13]])('caps %s %s at %i', (material,colour,cap,over)=>{
+it.each([['PLA','Marble',27,28],['PETG','Black',32,33]])('caps %s %s at %i', (material,colour,cap,over)=>{
   const c=fixtureCatalogue(), b=fixtureInput(c)
   b.lines=[fixtureLine(c,'Lanbo',material,colour,cap)]
   expect(prepareBulkLines(parseBulkInput(b),c)[0].quantity).toBe(cap)
   b.lines[0].quantity=over; expect(()=>prepareBulkLines(parseBulkInput(b),c)).toThrow(`1 to ${cap}`)
 })
 it('aggregates duplicate colours to prevent bypassing a cap',()=>{
-  const c=fixtureCatalogue(),b=fixtureInput(c); b.lines=[fixtureLine(c,'Lanbo','PLA','Marble',4),fixtureLine(c,'Lanbo','PLA','Marble',4)]
-  expect(()=>prepareBulkLines(parseBulkInput(b),c)).toThrow('1 to 7')
+  const c=fixtureCatalogue(),b=fixtureInput(c); b.lines=[fixtureLine(c,'Lanbo','PLA','Marble',14),fixtureLine(c,'Lanbo','PLA','Marble',14)]
+  expect(()=>prepareBulkLines(parseBulkInput(b),c)).toThrow('1 to 13')
 })
 it.each([0,-1,1.5,'4',null,Infinity,1000001])('rejects invalid quantities %s',quantity=>{
   const b=fixtureInput(); b.lines[0].quantity=quantity; expect(()=>parseBulkInput(b)).toThrow()

@@ -39,9 +39,9 @@ it('maps the single ASA Grey row to min(45, 25) and keeps White separate', () =>
   const c = catalogue(), p = product(c)
   expect(bulkSelectionStock(p, selection(p))).toBe(25)
   expect(bulkSelectionStock(p, selection(p, 'White (45100)'))).toBe(11)
-  expect(prepare(c, [line(p, 25)])[0].quantity).toBe(25)
-  expect(() => prepare(c, [line(p, 26)])).toThrow('choose 1 to 25')
-  expect(() => prepare(c, [line(p, 13), line(p, 13)])).toThrow('choose 1 to 25')
+  expect(prepare(c, [line(p, 45)])[0].quantity).toBe(45)
+  expect(() => prepare(c, [line(p, 46)])).toThrow('choose 1 to 45')
+  expect(() => prepare(c, [line(p, 23), line(p, 23)])).toThrow('choose 1 to 22')
 })
 
 it.each([true, false])('fails closed for duplicate identity rows even with the same barcode: %s', sameBarcode => {
@@ -59,10 +59,10 @@ it('maps With/Without Spool independently and shares the lower colour cap across
   expect(bulkSelectionStock(p, selection(p, 'Black (10101)', 'Without Spool'))).toBe(31)
   expect(bulkSelectionStock(p, selection(p, 'Gray (10103)', 'With Spool'))).toBe(3)
   expect(bulkSelectionStock(p, selection(p, 'Gray (10103)', 'Without Spool'))).toBe(6)
-  expect(prepare(c, [line(p, 3, 'Gray (10103)', 'With Spool'), line(p, 5, 'Gray (10103)')])).toHaveLength(2)
-  expect(() => prepare(c, [line(p, 3, 'Gray (10103)', 'With Spool'), line(p, 6, 'Gray (10103)')])).toThrow('choose 1 to 8')
+  expect(prepare(c, [line(p, 23, 'Gray (10103)', 'With Spool'), line(p, 5, 'Gray (10103)')])).toHaveLength(2)
+  expect(() => prepare(c, [line(p, 23, 'Gray (10103)', 'With Spool'), line(p, 6, 'Gray (10103)')])).toThrow(/enquiry allowance/)
   expect(bulkSelectionStock(p, selection(p, 'Gray (10103)'), [line(p, 3, 'Gray (10103)', 'With Spool')])).toBe(5)
-  expect(() => prepare(c, [line(p, 4, 'Gray (10103)', 'With Spool')])).toThrow('selected spool option has 3 rolls')
+  expect(() => prepare(c, [line(p, 24, 'Gray (10103)', 'With Spool')])).toThrow('choose 1 to 23')
 })
 
 it('rejects duplicate spool identities without disabling the distinct refill identity', () => {
@@ -104,7 +104,7 @@ it('enforces both source caps in client and server even if the displayed stock f
   const c = catalogue(), p = product(c), colour = p.types[0].options.find(o => o.name === 'Grey (45102)')
   colour.stock = 100
   expect(bulkSelectionStock(p, selection(p))).toBe(25)
-  expect(() => prepare(c, [line(p, 26)])).toThrow('choose 1 to 25')
+  expect(() => prepare(c, [line(p, 46)])).toThrow('choose 1 to 45')
   delete colour.shopStock
   expect(bulkSelectionStock(p, selection(p))).toBe(0)
   expect(() => prepare(c, [line(p, 1)])).toThrow('choose 1 to 0')
@@ -126,8 +126,8 @@ it('renders ASA Grey at 25 and blocks an over-limit client selection', async () 
   fireEvent.change(screen.getByLabelText('Colour'), { target: { value: selection(p)[p.colourTypeId] } })
   expect(screen.getByText('25 recorded stock limit for this selection')).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: 'Add colour to enquiry' }))
-  expect(screen.getByLabelText('Quantity line 1')).toHaveAttribute('max', '25')
-  fireEvent.change(screen.getByLabelText('Quantity line 1'), { target: { value: '26' } })
+  expect(screen.getByLabelText('Quantity line 1')).toHaveAttribute('max', '45')
+  fireEvent.change(screen.getByLabelText('Quantity line 1'), { target: { value: '46' } })
   expect(screen.getByRole('button', { name: 'Send request to FIT' })).toBeDisabled()
   expect(screen.getByText(/Estimate unavailable/)).toBeInTheDocument()
 })
