@@ -9,6 +9,15 @@ afterEach(() => { cleanup(); vi.unstubAllEnvs() })
 
 describe('product image sources', () => {
     it.each([
+        'images/1789459046895-zt8j010bzg.jpg',
+        '/api/proxy?key=images%2F1789459046895-zt8j010bzg.jpg',
+        'https://www.fixitoday.com/api/proxy?key=images%2F1789459046895-zt8j010bzg.jpg',
+        'https://fixittoday.s3.amazonaws.com/images/1789459046895-zt8j010bzg.jpg',
+    ])('never renders the rejected clock-board photo: %s', src => {
+        render(<ProductImage src={src} alt="0.28inch Digital 7 Segment Display" width={400} height={400} />)
+        expect(screen.getByRole('img')).toHaveAttribute('src', '/product-images/photo-pending.svg')
+    })
+    it.each([
         ['images/a b.jpg', '/api/proxy?key=images%2Fa%20b.jpg'],
         ['/product-images/part.png', '/product-images/part.png'],
         ['/product-images/part.png?version=1', '/product-images/part.png?version=1'],
