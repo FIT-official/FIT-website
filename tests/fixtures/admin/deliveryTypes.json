@@ -5,7 +5,7 @@
     "form": {
       "name": "standard-shipping",
       "displayName": "Standard Shipping",
-      "description": "3–5 business days within region. No tracking.",
+      "description": "Tracked, next working day (SingPost Speedpost)",
       "applicableToProductTypes": ["shop", "print"],
       "basePricing": {
         "basePrice": "4.90",
