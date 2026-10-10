@@ -32,6 +32,8 @@ const PRIMARY = [
     { key: 'prints', label: 'Prints' },
     { key: 'services', label: 'Services', href: '/research-fabrication', paths: ['/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair'] },
     { key: 'school-programmes', label: 'Programmes', href: '/school-programmes' },
+    { key: 'maker-tools', label: 'Maker Tools', href: '/maker-tools' },
+    { key: 'community', label: 'Community', href: '/community' },
     { key: 'creators', label: 'Creators', href: '/creators' },
     { key: 'about', label: 'About', href: '/about' },
 ]
@@ -213,7 +215,7 @@ function Navbar() {
                         <Logo width={28} height={28} />
                     </Link>
 
-                    <ul className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 flex-row items-center gap-7 lg:flex">
+                    <ul className="hidden min-w-0 flex-row items-center gap-3 xl:gap-5 lg:flex">
                         {PRIMARY.map((item) => (
                             <li key={item.key} className="relative flex">
                                 {item.href ? (

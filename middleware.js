@@ -10,9 +10,10 @@ import { fixtureResponse } from '@/lib/creatorDashboard/preview/middleware'
 const isPrivateRoute = createRouteMatcher(['/dashboard(.*)', '/account(.*)', '/admin(.*)', '/onboarding'])
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
 const isStoreRoute = createRouteMatcher(['/shop(.*)', '/products(.*)', '/cart(.*)', '/checkout(.*)'])
-const isServicePage = createRouteMatcher(['/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair'])
+const isServicePage = createRouteMatcher(['/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair', '/maker-tools', '/guides/3d-printing-problems', '/guides/3d-printing-problems/', '/community', '/community/(.*)'])
 const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)'])
 const isSsoCallback = createRouteMatcher(['/sign-up/sso-callback(.*)', '/sign-in/sso-callback(.*)'])
+const isMakerPlayground = createRouteMatcher(['/maker-tools/playground', '/maker-tools/playground/'])
 
 async function handleRequest(auth, req) {
     const path = new URL(req.url).pathname
@@ -37,6 +38,8 @@ async function handleRequest(auth, req) {
     if (isApiRoute(req)) return NextResponse.next()
     const maintenance = await maintenanceResponse(auth, req)
     if (maintenance) return maintenance
+    // Public learning pages still respect the shared maintenance gate.
+    if (isMakerPlayground(req)) return NextResponse.next()
     // Clerk must finish OAuth account linking/session activation before any
     // onboarding or authenticated-signin redirect can run.
     if (isSsoCallback(req)) return NextResponse.next()

@@ -6,7 +6,7 @@ import { bulkEmailCopy } from '@/lib/bulkEmailCopy'
 import { BAMBU_PRICE_NOTICE, bulkListUnitCents, BULK_BANDS, BULK_LADDERS, BULK_PRICE_NOTICE, BULK_CONSENT, bulkTier, priceBulkLines } from '@/lib/bulkFilamentConfig'
 import { filamentOptionLabel } from '@/lib/filamentLabels'
 import { useInventoryRefresh } from '@/utils/useInventoryRefresh'
-import { bulkSelectionStock } from '@/lib/bulkFilamentSelection'
+import { bulkSelectionStock, bulkSelectionLimit, BULK_EXTRA_REQUEST_ROLLS } from '@/lib/bulkFilamentSelection'
 const STORAGE_KEY = 'fit-bulk-filament-pending-v2'
 const inputClass = 'w-full min-w-0 min-h-11 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-950 focus:outline-2 focus:outline-offset-2 focus:outline-emerald-700 disabled:bg-slate-100'
 const buttonClass = 'min-h-11 rounded-xl bg-emerald-800 px-5 py-3 font-medium text-white disabled:opacity-50'
@@ -22,7 +22,7 @@ function ColourOptions({ product, type }) {
 function selection(product, options) {
   const selected = product?.types.map(t => t.options.find(o => o.id === options[t.id])) || []
   const ladder = selected.find(o => o?.ladder)?.ladder
-  return { stock: bulkSelectionStock(product, options), ladder, listUnitCents: bulkListUnitCents(product, options), colour: selected.find(o => product?.types.find(t => t.id === product.colourTypeId)?.options.includes(o)) }
+  return { stock: bulkSelectionStock(product, options), limit: bulkSelectionLimit(product, options), ladder, listUnitCents: bulkListUnitCents(product, options), colour: selected.find(o => product?.types.find(t => t.id === product.colourTypeId)?.options.includes(o)) }
 }
 export default function BulkFilamentForm() {
   const [catalogue, setCatalogue] = useState([]), [checkedAt, setCheckedAt] = useState(''), [stockSource, setStockSource] = useState('')
@@ -71,7 +71,7 @@ export default function BulkFilamentForm() {
     setProductId(id); setOptions(Object.fromEntries((p?.types || []).map(t => [t.id, t.options[0].id])))
   }
   function addLine() {
-    if (!product || !chosen.stock) return
+    if (!product || !chosen.limit) return
     const selected = product.types.map(t => ({ typeId: t.id, optionId: options[t.id] }))
     if (lines.some(l => l.productId === product.id && selected.every(o => l.options.some(s => s.typeId === o.typeId && s.optionId === o.optionId)))) {
       setError('That selection is already in your request. Edit its quantities below.'); return
@@ -105,7 +105,7 @@ export default function BulkFilamentForm() {
   })
   function lineStock(line, index) {
     const p = catalogue.find(p => p.id === line.productId)
-    return bulkSelectionStock(p, Object.fromEntries(line.options.map(o => [o.typeId, o.optionId])), lines, index)
+    return bulkSelectionLimit(p, Object.fromEntries(line.options.map(o => [o.typeId, o.optionId])), lines, index)
   }
   const quantityErrors = lines.map((line, index) => {
     const maximum = lineStock(line, index)
@@ -204,15 +204,15 @@ export default function BulkFilamentForm() {
                   <span className="min-w-0 break-words text-sm"><strong className="block">{o.preview?.label || o.name}</strong><span className="mt-1 block text-slate-600">{o.stock} recorded remaining</span>{o.ladder === 'SPECIALTY_PLA' && <span className="block text-amber-900">Premium — Marble &amp; Wood PLA</span>}</span>
                 </label>)}
               </div>
-              <p className="mt-2 text-xs text-slate-600">Bambu photos show official printed samples. Spool or refill packaging follows your selection. Swatches are colour references only.</p>
+              <p className="mt-2 text-xs text-slate-600">{product.brand === 'Bambu Lab' ? 'Bambu photos show official printed samples. Spool or refill packaging follows your selection. Swatches are colour references only.' : 'Manufacturer product photos appear beside matching colours. Unverified previews remain labelled unavailable.'}</p>
             </details>
             <div className="mt-4 flex items-center gap-3"><FilamentColourPreview responsive preview={chosen.colour?.preview} name={chosen.colour?.name || 'Selected colour'}/><p className="text-xs text-slate-600">{chosen.colour?.preview?.reason || 'Screen colours are approximate. Finish, lighting and batch affect appearance.'}</p></div>
             {chosen.ladder === 'SPECIALTY_PLA' && <p className="mt-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-950">Premium · {BULK_LADDERS[chosen.ladder].label}</p>}
             <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
               <p><strong>{chosen.stock == null ? 'Stock unverified' : chosen.stock + ' recorded stock limit for this selection'}</strong><br/><span className="text-sm text-slate-600">{chosen.ladder === 'BAMBU_LIST' ? <>List price: {money({ amount: chosen.listUnitCents / 100, currency: 'SGD' })} per roll</> : chosen.ladder && <>Under 10 rolls: {money({ amount: bulkTier(chosen.ladder,1).unitCents / 100, currency: 'SGD' })} per 1kg roll</>}</span></p>
-              <button type="button" onClick={addLine} disabled={!chosen.stock} className={buttonClass + ' w-full sm:w-auto'}>Add colour to enquiry</button>
+              <button type="button" onClick={addLine} disabled={!chosen.limit} className={buttonClass + ' w-full sm:w-auto'}>Add colour to enquiry</button>
             </div></>}
-          <p className="mt-4 text-xs text-slate-600">Quantities must stay within available stock for each colour. No stock is reserved by this enquiry.</p>
+          <p className="mt-4 text-xs text-slate-600">Request up to {BULK_EXTRA_REQUEST_ROLLS} rolls above recorded stock using the same quantity field. Shared colour and spool limits apply. Additional rolls need FIT confirmation; no stock is reserved.</p>
         </div>
         <div className="mt-7 flex flex-wrap items-center justify-between gap-2"><h2>Selected colours</h2><span className="text-sm text-slate-500">{lines.length} / 50 selections</span></div>
         <p className="mt-2 text-sm text-slate-600">Set one quantity for each colour. You can edit or remove any selection before sending.</p>
@@ -226,11 +226,12 @@ export default function BulkFilamentForm() {
               <p className="mt-1 text-sm">{p?.types.map(t => t.label + ': ' + filamentOptionLabel(t.label, t.options.find(o => o.id === selectedOptions[t.id])?.name || 'Unavailable')).join(' · ')}</p>
               {info.ladder === 'SPECIALTY_PLA' && <p className="mt-2 text-sm font-semibold text-amber-900">Premium · {BULK_LADDERS[info.ladder].label}</p>}
               {p?.types.filter(t => /^spool$/i.test(t.label)).map(t => { const o = t.options.find(o => o.id === selectedOptions[t.id]); return <p key={t.id} className="mt-1 text-sm font-medium">{filamentOptionLabel(t.label,o?.name || 'Unavailable')}: {info.stock == null ? 'remaining stock unverified' : info.stock + ' rolls for this colour'}</p> })}
-              <p className="mt-2 text-sm text-slate-600">Available stock: {info.stock ?? 'unverified'} rolls</p></div></div>
+              <p className="mt-2 text-sm text-slate-600">Recorded stock: {info.stock ?? 'unverified'} rolls</p></div></div>
               <button type="button" aria-label={'Remove line ' + (index + 1)} className="min-h-11 shrink-0 px-2 text-sm underline" onClick={() => setLines(lines.filter((_,i) => i !== index))}>Remove</button></div>
             <div className="mt-4 max-w-sm">
               <label className="block text-sm font-medium">Qty (rolls)<input aria-label={'Quantity line ' + (index + 1)} className={inputClass + ' mt-2'} type="number" min="1" max={lineStock(line, index)} aria-invalid={!!quantityErrors[index]} aria-describedby={quantityErrors[index] ? `quantity-error-${index}` : undefined} step="1" required value={line.quantity} onChange={e => editLine(index,'quantity',e.target.value === '' ? '' : Number(e.target.value))}/></label>
             </div>
+            <p className="mt-2 text-xs text-slate-600">Enquiry limit: {lineStock(line, index)} rolls. Quantities above recorded stock are availability requests, not confirmed stock.</p>
             {quantityErrors[index] && <p id={`quantity-error-${index}`} role="alert" className="mt-2 text-sm font-medium text-red-700">{quantityErrors[index]}</p>}
             {prices[index] && <p className="mt-3 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-950">{prices[index].ladder === 'BAMBU_LIST' ? BAMBU_PRICE_NOTICE : <>{BULK_LADDERS[prices[index].ladder].label} | {p.material} band {prices[index].band} ({prices[index].tierRolls} rolls combined)</>}<br/><strong>{money({ amount: prices[index].unitCents / 100, currency: 'SGD' })} / roll x {line.quantity} = {money({ amount: prices[index].lineCents / 100, currency: 'SGD' })}</strong><br/>{prices[index].priceNotice || BULK_PRICE_NOTICE}</p>}
             <label className="mt-4 block text-sm">Item remarks<input className={inputClass + ' mt-2'} maxLength={500} value={line.remarks} onChange={e => editLine(index,'remarks',e.target.value)} placeholder="Any details FIT should check for this selection"/></label>

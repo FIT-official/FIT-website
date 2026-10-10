@@ -93,3 +93,21 @@ it('labels official sample images without suggesting the supplied spool packagin
   render(<FilamentColourPreview preview={preview} name="Mint Lime"/>)
   expect(new URL(screen.getByRole('img',{name:'PLA Basic Gradient Mint Lime (10904) manufacturer official printed sample'}).getAttribute('src'),'http://localhost:3000').pathname).toBe(preview.src)
 })
+
+it.each([['White','331'],['Coffee','443']])('keeps conflicting Lanbo PETG %s photos unavailable for the exact Sheet identity', (colour, barcode) => {
+  const identity = { brand:'Lanbo', material:'PETG', colour, barcode }
+  const preview = bulkSheetColourPreview(identity)
+  expect(preview).toMatchObject({ kind:'unavailable', status:'source_material_conflict' })
+  expect(preview.reason).toContain('labelled PLA')
+  expect(preview).not.toHaveProperty('src')
+  for (const changed of [{ brand:'FIT' }, { material:'PLA' }, { colour:colour+' Gold' }, { barcode:'different' }]) {
+    expect(bulkSheetColourPreview({ ...identity, ...changed })?.status).not.toBe('source_material_conflict')
+  }
+})
+it('preserves the PVA name/code conflict after its reviewed pack-size slug correction', () => {
+  const entry = evidence.entries.find(e => e.originalName === 'White (66400)')
+  const option = { id:entry.optionId, name:entry.originalName }
+  expect(bulkColourPreview({ id:entry.productId, slug:'bambu-lab-3d-printing-filament-05kg-pva-support' }, option)).toEqual(entry.preview)
+  expect(entry.preview).toMatchObject({ kind:'unavailable', status:'name_code_conflict' })
+  expect(bulkColourPreview({ id:entry.productId, slug:'unreviewed-pva' }, option)).toBeNull()
+})

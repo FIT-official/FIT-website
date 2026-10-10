@@ -1,0 +1,41 @@
+.shell { max-width: 1080px; margin: 0 auto; padding: 110px 28px 70px; color: #172a2b; }
+.breadcrumb { display: flex; flex-wrap: wrap; gap: 10px; font-size: .9rem; margin-bottom: 32px; }
+.shell a, .admin a { text-decoration: underline; text-underline-offset: 4px; }
+.hero { padding: 30px 0 36px; max-width: 760px; }
+.eyebrow { font-size: .78rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: #3c6563; }
+.hero h1, .thread h1 { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.1; font-weight: 650; margin: 12px 0 20px; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.hero > p:not(.eyebrow) { font-size: 1.12rem; color: #425b5a; line-height: 1.6; }
+.shell h2, .admin h2 { font-size: 1.35rem; font-weight: 650; margin: 0 0 12px; overflow-wrap: anywhere; }
+.shell h3, .admin h3 { font-weight: 650; }
+.shell p, .admin p { line-height: 1.65; margin-bottom: 12px; }
+.shell button, .admin button { min-height: 44px; padding: 10px 18px; border: 1px solid #183e3b; background: #183e3b; color: white; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }
+.shell button:disabled, .admin button:disabled { opacity: .55; cursor: not-allowed; }
+.shell button.secondary, .admin button.secondary { color: #183e3b; background: white; border-color: #b5c5c2; }
+.shell button[aria-pressed=true] { background: #dcece8; border-color: #183e3b; }
+.shell button.textButton { color: #365b58; background: transparent; padding-left: 0; text-decoration: underline; border-color: transparent; font-weight: 400; }
+.shell :is(button, a, input, select, textarea, summary):focus-visible, .admin :is(button, a, input, select, textarea, summary):focus-visible { outline: 3px solid #b16619; outline-offset: 3px; }
+.actions, .toolbar, .tabs { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.actions { margin: 20px 0; }
+.toolbar { justify-content: space-between; margin: 28px 0 22px; }
+.guidelines, .notice { border: 1px solid #b5c5c2; border-radius: 10px; background: #f1f7f5; padding: 18px 22px; }
+.guidelines summary, .admin summary { cursor: pointer; min-height: 32px; font-weight: 600; }
+.guidelines ul, .admin ol { padding-left: 24px; list-style: disc; line-height: 1.65; }
+.card { border: 1px solid #c8d5d2; border-radius: 12px; padding: 24px; margin: 18px 0; background: white; min-width: 0; }
+.meta, .help { font-size: .9rem; color: #435c5a; }
+.body { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+.empty { padding: 36px 24px; border: 1px dashed #9eafac; border-radius: 12px; background: #f8faf9; }
+.editor { padding: 26px; border: 1px solid #8da9a3; border-radius: 12px; margin: 24px 0; background: #f8faf9; }
+.shell label, .admin label { display: flex; flex-direction: column; gap: 7px; font-size: .94rem; font-weight: 600; margin: 15px 0; }
+.shell :is(input, select, textarea), .admin :is(input, select, textarea) { border: 1px solid #829b95; border-radius: 6px; padding: 11px 12px; color: #172a2b; background: white; min-height: 44px; width: 100%; max-width: 100%; font: inherit; font-weight: 400; }
+.shell textarea, .admin textarea { resize: vertical; }
+.formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.editor .checkbox { display: flex; flex-direction: row; align-items: flex-start; gap: 12px; line-height: 1.6; font-weight: 400; }
+.checkbox input { width: 20px; min-width: 20px; height: 20px; min-height: 20px; margin-top: 4px; accent-color: #183e3b; }
+.editor .honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.error { color: #8b2020; border-left: 3px solid #ad3232; padding: 10px 15px; background: #fff5f3; }
+.thread { border-bottom: 1px solid #c8d5d2; padding: 20px 0 30px; margin-bottom: 32px; }
+.report { margin-top: 12px; }
+.report form { border: 1px solid #c8d5d2; padding: 18px; border-radius: 8px; }
+.admin { max-width: 1000px; color: #172a2b; }
+.admin > h1 { font-size: 1.8rem; font-weight: 650; margin-bottom: 16px; }
+@media (max-width: 600px) { .shell { padding: 85px 18px 50px; } .card, .editor { padding: 18px; } .hero { padding-top: 10px; } .formRow { grid-template-columns: 1fr; gap: 0; } .toolbar { align-items: stretch; } .toolbar > label { width: 100%; } .tabs { gap: 8px; } .shell button, .admin button { font-size: .9rem; padding: 10px 13px; } }

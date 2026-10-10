@@ -26,7 +26,7 @@ it('shows configured ladders, optional phone and required consent',async()=>{
   render(<BulkFilamentForm/>);await choose()
   expect(screen.getByLabelText('Phone (optional)')).not.toBeRequired()
   expect(screen.getByLabelText(BULK_CONSENT)).toBeRequired()
-  expect(screen.getByLabelText('Quantity line 1')).toHaveAttribute('max','14')
+  expect(screen.getByLabelText('Quantity line 1')).toHaveAttribute('max','34')
   expect(screen.getByText(/Inventory snapshot:/)).toBeInTheDocument()
   expect(screen.queryByText(/extra rolls/i)).not.toBeInTheDocument()
 })
@@ -45,14 +45,14 @@ it.each(['Marble', 'Wood Colour'])('groups and labels %s as premium and shows th
   expect(screen.getByRole('region', { name: 'Request line 2' })).toHaveTextContent('$13.90 / roll x 7 = $97.30')
   expect(screen.getByText(/Indicative total:/)).toHaveTextContent('$154.00')
 })
-it.each(['8', '', '0', '-1', '1.5'])('suppresses all pooled estimates for invalid Marble quantity %s and restores them after correction', async quantity => {
+it.each(['28', '', '0', '-1', '1.5'])('suppresses all pooled estimates for invalid Marble quantity %s and restores them after correction', async quantity => {
   render(<BulkFilamentForm />); await choose('Marble'); await choose('Black')
   fireEvent.change(screen.getByLabelText('Quantity line 2'), { target: { value: '7' } })
   const input = screen.getByLabelText('Quantity line 1')
-  expect(input).toHaveAttribute('max', '7')
+  expect(input).toHaveAttribute('max', '27')
   fireEvent.change(input, { target: { value: quantity } })
   expect(input).toHaveAttribute('aria-invalid', 'true')
-  expect(screen.getByRole('alert')).toHaveTextContent('Choose 1 to 7 rolls')
+  expect(screen.getByRole('alert')).toHaveTextContent('Choose 1 to 27 rolls')
   expect(screen.queryByText(/Indicative total:/)).not.toBeInTheDocument()
   expect(screen.queryByText(/rolls combined/)).not.toBeInTheDocument()
   expect(screen.queryByText(/\/ roll x/)).not.toBeInTheDocument()
@@ -74,7 +74,7 @@ it('updates every PLA line when Marble crosses the mixed-colour tier; PETG is se
   expect(regions[2]).toHaveTextContent('<10 (9 rolls combined)');expect(regions[2]).toHaveTextContent('125.10')
   expect(screen.getByText(/Indicative total:/)).toHaveTextContent('284.10')
 })
-it.each([['Marble','PLA','8','7'],['Black','PETG','13','12']])('shows a cap error for %s %s',async(colour,material,quantity,cap)=>{
+it.each([['Marble','PLA','28','27'],['Black','PETG','33','32']])('shows a cap error for %s %s',async(colour,material,quantity,cap)=>{
   render(<BulkFilamentForm/>);await choose(colour,material)
   fireEvent.change(screen.getByLabelText('Quantity line 1'),{target:{value:quantity}})
   expect(screen.getByRole('alert')).toHaveTextContent(`Choose 1 to ${cap} rolls`)
@@ -90,7 +90,7 @@ it('keeps quantities and requires review after refreshed inventory changes',asyn
   fetch.mockResolvedValue(response({products:changed,stockSource:'sheet',checkedAt:'2026-10-09'}));fireEvent.focus(window)
   await screen.findByRole('button',{name:'I have reviewed the refreshed inventory'})
   expect(screen.getByLabelText('Quantity line 1')).toHaveValue(6)
-  expect(screen.getByLabelText('Quantity line 1')).toHaveAttribute('max','3')
+  expect(screen.getByLabelText('Quantity line 1')).toHaveAttribute('max','23')
   expect(screen.getByRole('button',{name:'Send request to FIT'})).toBeDisabled()
 })
 it('submits without a phone and retries the exact payload after uncertain delivery',async()=>{
@@ -170,7 +170,7 @@ it.each([0,2,10])('refreshes changed stock %s on focus while preserving two colo
   await screen.findByRole('button',{name:'I have reviewed the refreshed inventory'})
   expect(screen.getByLabelText('Quantity line 1')).toHaveValue(14)
   expect(screen.getByLabelText('Quantity line 2')).toHaveValue(3)
-  expect(screen.getByLabelText('Quantity line 1')).toHaveAttribute('max',String(stock))
+  expect(screen.getByLabelText('Quantity line 1')).toHaveAttribute('max',String(stock + 20))
   expect(screen.getByRole('button',{name:'Send request to FIT'})).toBeDisabled()
   expect(fetch.mock.calls.at(-1)[1]).toEqual({cache:'no-store'})
 })

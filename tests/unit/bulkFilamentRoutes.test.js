@@ -38,12 +38,12 @@ describe('bulk API security and responses',()=>{
     expect(mock.store.insertOne).toHaveBeenCalledOnce()
     expect(mock.store.insertOne.mock.calls[0][0]).toMatchObject({ totalCents: 2190, lines: [expect.objectContaining({ unitCents: 2190, lineCents: 2190, ladder: 'BAMBU_LIST' })] })
   })
-  it('rejects eight Lanbo Marble rolls before persistence or owner notification', async () => {
+  it('rejects 28 Lanbo Marble rolls before persistence or owner notification', async () => {
     const catalogue = fixtureCatalogue(), input = fixtureInput(catalogue)
-    input.lines = [fixtureLine(catalogue, 'Lanbo', 'PLA', 'Marble', 8)]
+    input.lines = [fixtureLine(catalogue, 'Lanbo', 'PLA', 'Marble', 28)]
     const result = await POST(request(input))
     expect(result.status).toBe(409)
-    expect((await result.json()).error).toContain('choose 1 to 7 rolls')
+    expect((await result.json()).error).toContain('choose 1 to 27 rolls')
     expect(mock.store.insertOne).not.toHaveBeenCalled()
     expect(mock.notify).not.toHaveBeenCalled()
   })

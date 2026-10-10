@@ -38,7 +38,7 @@ beforeEach(async () => {
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); vi.unstubAllEnvs() })
 
 describe('maintenance routing', () => {
-    it.each(['/', '/shop', '/products/part', '/blog/post', '/creators/Ada'])('rewrites %s with a real 503 and retry/cache/robots headers', async path => {
+    it.each(['/', '/shop', '/products/part', '/blog/post', '/creators/Ada', '/maker-tools', '/maker-tools/playground', '/maker-tools/playground/', '/community', '/community/project', '/guides/3d-printing-problems'])('rewrites %s with a real 503 and retry/cache/robots headers', async path => {
         expect(new RegExp(`^${matcher.matcher[0]}$`).test(path)).toBe(true)
         const response = await middleware(auth, request(path))
         expect(response.status).toBe(503)
