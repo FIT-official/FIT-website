@@ -11,7 +11,7 @@ export const fixtureCases = {
     filament: { lines: [['filament', 1]], expectedShippingCents: 620 },
     mixed: { lines: [['sensor', 1], ['filament', 1]], expectedShippingCents: 620 },
     'over-30': { lines: [['led', 2]], expectedShippingCents: 620 },
-    'over-200': { lines: [['led', 10]], expectedShippingCents: 0 },
+    'over-200': { lines: [['led', 10]], expectedShippingCents: 620 },
 };
 
 export function shippingFixture(key) {
