@@ -91,7 +91,7 @@ export default function GuidedPrintRequest() {
     finally { sending.current = false; setBusy(false) }
   }
   const checked = validateGuidedBrief(pending?.brief || brief)
-  const previewColour = colours.find(item => item.name === brief.colour && item.filament === brief.material)?.hex || '#e5e7eb'
+  const previewColour = colours.find(item => item.name === brief.colour && item.filament === brief.material)?.hex || '#9ca3af'
   if (result) return <main className="mx-auto max-w-2xl px-4 py-12"><h1 className="text-3xl font-semibold">Your print enquiry is saved</h1><p className="my-4">We’ll review the model and confirm printability, size, material and quantity before quoting. This is not an order or payment.</p><p className="break-all text-sm">Reference: {result.requestId}</p><Link className="mt-5 inline-block underline" href="/account/prints">View your print requests</Link></main>
   return <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-8"><div className="mx-auto max-w-6xl">
     <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Fix It Today · 3D printing</p>
@@ -114,7 +114,7 @@ export default function GuidedPrintRequest() {
           <p className="mt-2 text-xs text-slate-600">STL, OBJ or 3MF · up to 3 MB in this enquiry. STEP and G-code are not supported here. Files are uploaded only when you send the enquiry.</p>
           {storage !== 'ready' && <p role="status" className="mt-3 text-sm text-amber-900">{storage === 'loading' ? 'Checking private uploads…' : 'Private uploads are unavailable. You can still send a link or description.'}</p>}
           {file && <div className="mt-3 text-sm"><span className="break-all">{file.name}</span> <button type="button" className="underline" onClick={() => chooseFile(null)}>Remove file</button></div>}
-          {scene && <div className="mt-4 aspect-square max-h-80 overflow-hidden rounded-lg border"><Viewer scene={scene} fileName={file?.name} meshColors={{ default: previewColour }} autoRotate /></div>}
+          {scene && <div className="mt-4 h-[420px] overflow-hidden rounded-lg border"><Viewer scene={scene} fileName={file?.name} meshColors={{ default: previewColour }} controlsPlacement="above" autoRotate /></div>}
           {metrics?.dimensionsCm && <p className="mt-2 text-sm">Preview at assumed mm units: {['length','width','height'].map(axis => (metrics.dimensionsCm[axis] * 10).toFixed(1)).join(' × ')} mm.</p>}
           {fileNote && <p className="mt-2 text-sm text-slate-600">{fileNote}</p>}
         </Step>

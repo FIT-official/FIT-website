@@ -78,7 +78,7 @@ export default function PrintStudio({ scene, fileName = '', upAxis = 'auto', mes
     layerHeight = 0.2, showLayers = true, materialType = 'plastic', wireframe = false,
     modelScale = 1, rotationX = 0, rotationY = 0, rotationZ = 0,
     autoRotate = false, intensity = 1, background = '#f4f3ef', resetKey,
-    showControls = true, loading = false, error = null, onReady }) {
+    showControls = true, controlsPlacement = 'overlay', loading = false, error = null, onReady }) {
     const [view, setView] = useState({ name: 'isometric', revision: 0 });
     const [layersEnabled, setLayersEnabled] = useState(showLayers);
     useEffect(() => setLayersEnabled(showLayers), [showLayers]);
@@ -95,34 +95,42 @@ export default function PrintStudio({ scene, fileName = '', upAxis = 'auto', mes
     const issue = error || prepared.error;
     const chooseView = name => setView(current => ({ name, revision: current.revision + 1 }));
     const dimensions = model?.dimensionsMm;
-    return <div className="relative h-full min-h-[320px] w-full overflow-hidden rounded-2xl" style={{ background }} data-testid="print-studio">
-        {issue ? <div role="alert" className="absolute inset-0 flex items-center justify-center p-8 text-center text-sm text-slate-600">{issue}</div>
-            : !model ? <div role="status" className="absolute inset-0 flex items-center justify-center p-8 text-center text-sm text-slate-500">
-                {loading ? 'Loading model…' : 'Upload a model to preview your printed part.'}
-            </div> : <PreviewBoundary key={scene.uuid}>
-                <Canvas shadows dpr={[1, 2]} camera={{ fov: 38, position: [100, 80, 100] }}
-                    gl={{ antialias: true, preserveDrawingBuffer: true, toneMapping: THREE.ACESFilmicToneMapping }}
-                    fallback={<div role="alert">Your browser does not support the 3D preview.</div>}>
-                    <StudioScene model={model} view={view} resetKey={resetKey} autoRotate={autoRotate}
-                        intensity={intensity} background={background} onReady={onReady} />
-                </Canvas>
-            </PreviewBoundary>}
-        {model && !issue && <>
-            {showControls && <div className="absolute left-4 top-4 flex flex-wrap gap-1 rounded-xl border border-black/10 bg-white/90 p-1 shadow-sm" aria-label="Model view controls">
-                {[['isometric', '3D'], ['front', 'Front'], ['top', 'Top']].map(([name, label]) => <button key={name} type="button"
-                    aria-pressed={view.name === name} onClick={() => chooseView(name)}
-                    className={`rounded-lg px-3 py-2 text-xs font-medium ${view.name === name ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>{label}</button>)}
-                <button type="button" onClick={() => chooseView('isometric')} className="rounded-lg px-3 py-2 text-xs text-slate-600 hover:bg-slate-100">Reset view</button>
-                {materialType !== 'resin' && <button type="button" aria-pressed={layersEnabled} onClick={() => setLayersEnabled(value => !value)}
-                    className={`rounded-lg px-3 py-2 text-xs ${layersEnabled ? 'bg-slate-100 text-slate-800' : 'text-slate-500'}`}>Layer texture</button>}
-            </div>}
-            <div className="pointer-events-none absolute bottom-4 left-4 right-4 flex flex-wrap items-end justify-between gap-2 text-[11px] text-slate-500">
+    const controlsAbove = controlsPlacement === 'above';
+    const controls = model && !issue && showControls ? <div
+        className={controlsAbove
+            ? 'flex shrink-0 flex-wrap gap-1 border-b border-black/10 bg-white p-3'
+            : 'absolute left-4 top-4 flex flex-wrap gap-1 rounded-xl border border-black/10 bg-white/90 p-1 shadow-sm'}
+        aria-label="Model view controls">
+        {[['isometric', '3D'], ['front', 'Front'], ['top', 'Top']].map(([name, label]) => <button key={name} type="button"
+            aria-pressed={view.name === name} onClick={() => chooseView(name)}
+            className={`rounded-lg px-3 py-2 text-xs font-medium ${view.name === name ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>{label}</button>)}
+        <button type="button" onClick={() => chooseView('isometric')} className="rounded-lg px-3 py-2 text-xs text-slate-600 hover:bg-slate-100">Reset view</button>
+        {materialType !== 'resin' && <button type="button" aria-pressed={layersEnabled} onClick={() => setLayersEnabled(value => !value)}
+            className={`rounded-lg px-3 py-2 text-xs ${layersEnabled ? 'bg-slate-100 text-slate-800' : 'text-slate-500'}`}>Layer texture</button>}
+    </div> : null;
+    return <div className={`relative h-full min-h-[320px] w-full overflow-hidden rounded-2xl ${controlsAbove ? 'flex flex-col' : ''}`}
+        style={{ background }} data-testid="print-studio">
+        {controlsAbove && controls}
+        <div className={controlsAbove ? 'relative min-h-[240px] flex-1' : 'relative h-full min-h-[320px]'}>
+            {issue ? <div role="alert" className="absolute inset-0 flex items-center justify-center p-8 text-center text-sm text-slate-600">{issue}</div>
+                : !model ? <div role="status" className="absolute inset-0 flex items-center justify-center p-8 text-center text-sm text-slate-500">
+                    {loading ? 'Loading model.' : 'Upload a model to preview your printed part.'}
+                </div> : <PreviewBoundary key={scene.uuid}>
+                    <Canvas shadows dpr={[1, 2]} camera={{ fov: 38, position: [100, 80, 100] }}
+                        gl={{ antialias: true, preserveDrawingBuffer: true, toneMapping: THREE.ACESFilmicToneMapping }}
+                        fallback={<div role="alert">Your browser does not support the 3D preview.</div>}>
+                        <StudioScene model={model} view={view} resetKey={resetKey} autoRotate={autoRotate}
+                            intensity={intensity} background={background} onReady={onReady} />
+                    </Canvas>
+                </PreviewBoundary>}
+            {!controlsAbove && controls}
+            {model && !issue && <div className="pointer-events-none absolute bottom-4 left-4 right-4 flex flex-wrap items-end justify-between gap-2 text-[11px] text-slate-500">
                 <div className="rounded-lg bg-white/80 px-3 py-2"><span className="font-medium text-slate-600">
                     {[dimensions.width, dimensions.depth, dimensions.height].map(value => value.toLocaleString(undefined, { maximumFractionDigits: 1 })).join(' × ')} mm
                 </span><span className="ml-2">W × D × H</span></div>
                 <div className="rounded-lg bg-white/80 px-3 py-2">{layersEnabled && materialType !== 'resin'
                     ? `${layerHeight} mm layer texture` : 'Drag to orbit · scroll to zoom'}</div>
-            </div>
-        </>}
+            </div>}
+        </div>
     </div>;
 }
