@@ -11,7 +11,7 @@ vi.mock('@clerk/nextjs/server', () => ({
     createRouteMatcher: patterns => req => patterns.some(pattern => new RegExp(`^${pattern}$`).test(new URL(req.url).pathname)),
     clerkClient: async () => ({ users: { getUser: async () => ({ publicMetadata: { onboardingComplete: false } }) } }),
 }))
-import middleware from '@/middleware'
+import { authenticatedMiddleware as middleware } from '@/middleware'
 
 beforeEach(() => { vi.stubGlobal('crypto', webcrypto); vi.stubEnv('UNLISTED_BLOG_SLUGS', '') })
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs() })
@@ -50,10 +50,10 @@ describe('unlisted blog response headers', () => {
         expect(response?.headers.get('X-Robots-Tag')).toBeUndefined()
     })
     it('keeps CSP and appends only valid env header rules', async () => {
-        expect(await config.headers()).toHaveLength(1)
+        expect(await config.headers()).toHaveLength(2)
         vi.stubEnv('UNLISTED_BLOG_SLUGS', ' , link-guide , second-guide, bad/:path*, ')
         const headers = await config.headers()
-        expect(headers.filter(rule => rule.source.startsWith('/blog/'))).toEqual(['link-guide', 'second-guide'].map(slug => ({
+        expect(headers.filter(rule => rule.source.startsWith('/blog/') && rule.source !== '/blog/drafts/:path*')).toEqual(['link-guide', 'second-guide'].map(slug => ({
             source: `/blog/${slug}`, headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
         })))
         expect(headers.find(rule => rule.source === '/(.*)').headers[0].key).toBe('Content-Security-Policy')

@@ -6,6 +6,11 @@ const nextConfig = {
         NEXT_PUBLIC_PRODUCT_IMAGE_PATHS: JSON.stringify(publicProductImages()),
     },
     poweredByHeader: false,
+    // Include repo-only articles in the two serverless draft route bundles.
+    outputFileTracingIncludes: {
+        '/blog/drafts': ['./content/blog-drafts/*.md'],
+        '/blog/drafts/*': ['./content/blog-drafts/*.md'],
+    },
     // Keep metadata blocking for browsers and crawlers. Route content must also
     // stay outside layout Suspense boundaries so notFound can set HTTP 404.
     htmlLimitedBots: /.*/,
@@ -101,6 +106,10 @@ const nextConfig = {
             .map(slug => ({ source: `/blog/${slug}`, headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] }));
         return [
             ...unlistedHeaders,
+            {
+                source: '/blog/drafts/:path*',
+                headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+            },
             {
                 source: "/(.*)",
                 headers: [

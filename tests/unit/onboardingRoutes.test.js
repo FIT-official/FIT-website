@@ -8,7 +8,7 @@ vi.mock('@clerk/nextjs/server', () => ({
 }))
 vi.mock('next/navigation', () => ({ redirect: (url) => { throw new Error(`REDIRECT:${url}`) } }))
 vi.mock('@/app/onboarding/Onboarding', () => ({ default: () => null }))
-import middleware from '@/middleware'
+import { authenticatedMiddleware as middleware } from '@/middleware'
 import OnboardingLayout from '@/app/onboarding/layout'
 import OnboardingPage from '@/app/onboarding/page'
 

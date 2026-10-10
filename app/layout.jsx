@@ -17,6 +17,8 @@ import AnalyticsConsentProvider from "@/components/General/AnalyticsConsentProvi
 import GoogleMeasurementProvider from "@/components/General/GoogleMeasurementProvider";
 import PresentationBoundary from '@/components/Workshop/PresentationBoundary';
 import { SITE_URL, absoluteUrl } from '@/lib/seo/site';
+import { headers } from 'next/headers';
+import { DRAFT_SHELL_HEADER } from '@/lib/blog/draftAccess';
 
 const inter = Inter({
   variable: "--font-inter",
@@ -63,7 +65,12 @@ export const metadata = {
   robots: { index: true, follow: true, googleBot: { 'max-image-preview': 'large' } },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Middleware owns this marker. Drafts must not mount Clerk, analytics, chat,
+  // maintenance or the public navigation's database-backed API consumers.
+  if ((await headers()).get(DRAFT_SHELL_HEADER) === '1') {
+    return <html lang="en"><body className="antialiased">{children}</body></html>;
+  }
   return (
     <ClerkProvider>
       <html lang="en">

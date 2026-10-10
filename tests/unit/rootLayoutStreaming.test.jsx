@@ -1,10 +1,11 @@
 // @vitest-environment node
 import React from 'react'
 import { PassThrough } from 'node:stream'
-import { renderToPipeableStream } from 'react-dom/server'
+import { renderToPipeableStream, renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('next/font/google', () => ({ Inter: () => ({ variable: 'inter' }) }))
+vi.mock('next/headers', () => ({ headers: async () => new Headers() }))
 vi.mock('@clerk/nextjs', () => ({ ClerkProvider: ({ children }) => children }))
 vi.mock('@/components/General/Navbar', () => ({ default: () => <nav>Navigation</nav> }))
 vi.mock('@/components/General/Footer', () => ({ default: () => <footer>Footer</footer> }))
@@ -21,6 +22,19 @@ vi.mock('@/components/Workshop/PresentationBoundary', () => ({ default: ({ child
 import RootLayout from '@/app/layout'
 
 describe('route checks before the HTTP shell', () => {
+    it('renders the draft shell without service providers or navigation', async () => {
+        const provider = await import('@clerk/nextjs')
+        const spy = vi.spyOn(provider, 'ClerkProvider')
+        const headerSpy = vi.spyOn(await import('next/headers'), 'headers').mockResolvedValueOnce(new Headers({ 'x-fit-blog-draft-shell': '1' }))
+        try {
+            const tree = await RootLayout({ children: <main>Draft article</main> })
+            expect(renderToStaticMarkup(tree)).toBe('<html lang="en"><head></head><body class="antialiased"><main>Draft article</main></body></html>')
+            expect(spy).not.toHaveBeenCalled()
+        } finally {
+            headerSpy.mockRestore()
+            spy.mockRestore()
+        }
+    })
     it.each([true, false])('waits for a delayed existence decision (exists=%s)', async exists => {
         let release
         let settled = false
@@ -38,7 +52,7 @@ describe('route checks before the HTTP shell', () => {
         output.on('data', chunk => { html += chunk })
         let finish
         const done = new Promise(resolve => { finish = resolve })
-        const stream = renderToPipeableStream(<RootLayout><Route /></RootLayout>, {
+        const stream = renderToPipeableStream(await RootLayout({ children: <Route /> }), {
             onShellReady() { shellReady(); stream.pipe(output) },
             onShellError(error) { shellError(error); finish() },
             onError() {},

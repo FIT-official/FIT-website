@@ -5,7 +5,7 @@ vi.mock('@clerk/nextjs/server', () => ({
   createRouteMatcher: patterns => req => patterns.some(pattern => new RegExp(`^${pattern}$`).test(new URL(req.url).pathname)),
   clerkClient: async () => ({ users: { getUser: mocks.getUser } }),
 }))
-import middleware from '@/middleware'
+import { authenticatedMiddleware as middleware } from '@/middleware'
 beforeEach(() => vi.clearAllMocks())
 it.each(['/maker-tools/playground', '/maker-tools/playground/', '/maker-tools/playground?lesson=blink'])('keeps the exact local editor public for signed-in or anonymous visitors: %s', async path => {
   const auth = vi.fn().mockRejectedValue(new Error('Account lookup must not happen'))

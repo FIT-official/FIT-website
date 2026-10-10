@@ -7,7 +7,7 @@ vi.mock('@clerk/nextjs/server', async () => {
   return { ...actual, clerkMiddleware: handler => handler,
     clerkClient: async () => ({ users: { getUser: state.getUser } }) }
 })
-import middleware from '@/middleware'
+import { authenticatedMiddleware as middleware } from '@/middleware'
 import { SITEMAP_PUBLIC_PATHS } from '@/lib/seo/sitemap'
 beforeEach(() => { vi.clearAllMocks(); state.getUser.mockResolvedValue({ publicMetadata: {} }) })
 it.each(['/maker-tools', '/maker-tools/playground', '/maker-tools/playground/', '/guides/3d-printing-problems', '/guides/3d-printing-problems/', '/community', '/community/', '/community/project-a', '/community/project-a/comments'])('leaves exact public destination %s available without account lookup', async pathname => {

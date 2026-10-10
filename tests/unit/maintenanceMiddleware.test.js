@@ -32,7 +32,7 @@ beforeEach(async () => {
     auth = vi.fn().mockResolvedValue({ userId: null })
     auth.protect = vi.fn()
     const middlewareModule = await import('@/middleware')
-    middleware = middlewareModule.default
+    middleware = middlewareModule.authenticatedMiddleware
     matcher = middlewareModule.config
 })
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); vi.unstubAllEnvs() })

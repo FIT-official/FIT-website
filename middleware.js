@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { isUnlistedBlogPath } from '@/lib/blog/unlistedRobots'
 import { subscriptionIntentTarget, subscriptionPriceId, withSubscriptionIntent } from '@/lib/subscriptionIntent'
 import { maintenanceResponse } from '@/lib/maintenance/middleware'
+import { DRAFT_SHELL_HEADER, isDraftPath, isDraftPreview } from '@/lib/blog/draftAccess'
 
 const isPrivateRoute = createRouteMatcher(['/dashboard(.*)', '/account(.*)', '/admin(.*)', '/onboarding'])
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
@@ -13,6 +14,9 @@ const isSsoCallback = createRouteMatcher(['/sign-up/sso-callback(.*)', '/sign-in
 const isMakerPlayground = createRouteMatcher(['/maker-tools/playground', '/maker-tools/playground/'])
 
 async function handleRequest(auth, req) {
+    // The page performs its own admin check outside preview. Drafts never
+    // consult maintenance, onboarding or any database-backed public service.
+    if (isDraftPath(new URL(req.url).pathname)) return NextResponse.next()
     // API handlers enforce their own authentication/signatures. A browser
     // onboarding redirect must never replace JSON or consume a Stripe webhook.
     if (isApiRoute(req)) return NextResponse.next()
@@ -78,7 +82,7 @@ async function handleRequest(auth, req) {
     }
 }
 
-export default clerkMiddleware(async (auth, req) => {
+export const authenticatedMiddleware = clerkMiddleware(async (auth, req) => {
     const response = await handleRequest(auth, req)
     if (await isUnlistedBlogPath(new URL(req.url).pathname)) {
         const result = response || NextResponse.next()
@@ -87,6 +91,31 @@ export default clerkMiddleware(async (auth, req) => {
     }
     return response
 })
+
+export default async function middleware(req, event) {
+    const draft = isDraftPath(new URL(req.url).pathname)
+    const response = draft && isDraftPreview()
+        ? NextResponse.next()
+        : (await authenticatedMiddleware(req, event)) || NextResponse.next()
+    // Always overwrite the incoming marker, including on ordinary routes.
+    // Preserve Clerk's own request-header overrides when adding this one.
+    const overrides = response.headers.get('x-middleware-override-headers')
+    if (!overrides) {
+        const forwarded = NextResponse.next({ request: { headers: new Headers(req.headers) } })
+        forwarded.headers.forEach((value, key) => {
+            if (key.startsWith('x-middleware-request-') || key === 'x-middleware-override-headers') response.headers.set(key, value)
+        })
+    }
+    const names = new Set((response.headers.get('x-middleware-override-headers') || '').split(',').map(name => name.trim()).filter(Boolean))
+    names.add(DRAFT_SHELL_HEADER)
+    response.headers.set('x-middleware-override-headers', [...names].join(','))
+    response.headers.set(`x-middleware-request-${DRAFT_SHELL_HEADER}`, draft ? '1' : '0')
+    if (draft) {
+        response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+        response.headers.set('Cache-Control', 'private, no-store')
+    }
+    return response
+}
 
 export const config = {
     matcher: [

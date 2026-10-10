@@ -36,7 +36,7 @@ import { POST as cancel } from '@/app/api/user/subscription/cancel/route';
 import { GET as read } from '@/app/api/user/subscription/route';
 import { GET as info } from '@/app/api/subscription/info/route';
 import { updateRoleFromStripe } from '@/app/onboarding/_actions';
-import middleware from '@/middleware';
+import { authenticatedMiddleware as middleware } from '@/middleware';
 
 let user;
 const price = (id = 'price_standard', extra = {}) => ({
