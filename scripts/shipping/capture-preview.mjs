@@ -8,7 +8,7 @@ mkdirSync(output, { recursive: true });
 const base = 'http://127.0.0.1:3112';
 const browser = await chromium.launch({ headless: true, args: ['--disable-background-networking', '--disable-component-update', '--no-first-run'] });
 const manifest = { generatedAt: new Date().toISOString(), base, component: 'app/cart/Cart.jsx (CartContent)',
-    pricing: 'calculateCartItemBreakdown + applyShopShipping + weightTiers', source: 'PRODUCT_WEIGHTS.csv',
+    pricing: 'calculateCartItemBreakdown + applyShopShipping + weightTiers', source: 'PRODUCT_WEIGHTS_2026-10-10.csv', weights: 'product-weights.v2.json',
     fixtureNotes: 'Guest carts; no saved address or confirmed private costs. Product images use the existing Photo pending placeholder. No production services.', captures: [] };
 try {
     for (const [scenario, config] of Object.entries(fixtureCases)) {

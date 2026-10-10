@@ -57,6 +57,29 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('Checkout session purchase contract', () => {
+    it.each([
+        [null, 0, 3000], ['hcsr04-ultrasonic-sensor', 200, 3365],
+        ['bambu-lab-3d-printing-filament-1kg-pla-basic', 620, 5810],
+    ])('keeps a repair service outside the parcel in breakdown and Stripe with %s', async (goodsSlug, deliveryAmount, totalAmount) => {
+        Object.assign(product, { productType: 'shop', slug: '3d-printer-repair-maintenance', paidAssets: [],
+            basePrice: { presentmentAmount: 30, presentmentCurrency: 'SGD' },
+            delivery: { deliveryTypes: [{ type: 'pick-up', price: 0 }] } });
+        user.cart = [{ _id: 'repair', productId: 'p1', quantity: 1, chosenDeliveryType: 'pick-up', selectedVariants: {} }];
+        if (goodsSlug) {
+            const goods = { ...product, _id: 'p2', slug: goodsSlug,
+                basePrice: { presentmentAmount: goodsSlug === 'hcsr04-ultrasonic-sensor' ? 1.65 : 21.9, presentmentCurrency: 'SGD' },
+                delivery: { deliveryTypes: [{ type: 'standard-shipping', price: 6.2 }] } };
+            m.product.mockImplementation(async id => id === 'p2' ? goods : product);
+            user.cart.push({ _id: 'goods', productId: 'p2', quantity: 1, chosenDeliveryType: 'standard-shipping', selectedVariants: {} });
+        }
+        const { cartBreakdown } = await (await getBreakdown()).json();
+        expect(cartBreakdown.map(item => item.deliveryFee)).toEqual(goodsSlug ? [0, deliveryAmount / 100] : [0]);
+        expect(cartBreakdown[0].standardShipping).toBeUndefined();
+        expect((await POST()).status).toBe(200);
+        expect(m.saveSnapshot.mock.calls[0][0].totalAmount).toBe(totalAmount);
+        expect(m.saveSnapshot.mock.calls[0][0].items.map(item => item.deliveryAmount)).toEqual(goodsSlug ? [0, deliveryAmount] : [0]);
+        expect(m.createSession.mock.calls[0][0].line_items.reduce((sum, item) => sum + item.price_data.unit_amount * item.quantity, 0)).toBe(totalAmount);
+    });
     it.each([[205, 200, 620], [205.01, 200.01, 0]])('checks the S$200 boundary after a S$5 discount on %s in breakdown and Stripe', async (base, price, deliveryAmount) => {
         Object.assign(product, { productType: 'shop', slug: 'hcsr04-ultrasonic-sensor', paidAssets: [],
             basePrice: { presentmentAmount: base, presentmentCurrency: 'SGD' },
@@ -94,7 +117,7 @@ describe('Checkout session purchase contract', () => {
             delivery: { deliveryTypes: [{ type: 'standard-shipping', price: 6.2 }] } });
         Object.assign(user.cart[0], { quantity: 1, chosenDeliveryType: 'standard-shipping' });
         expect((await (await getBreakdown()).json()).cartBreakdown[0].deliveryFee).toBe(2);
-        user.cart[0].quantity = 16; // Stack is 320 mm; with padding it exceeds 324 mm even when rotated.
+        user.cart[0].quantity = 16; // Stack is 480 mm; with padding it exceeds 324 mm even when rotated.
         expect((await POST()).status).toBe(200);
         expect(m.saveSnapshot.mock.calls[0][0].items[0].deliveryAmount).toBe(620);
     });

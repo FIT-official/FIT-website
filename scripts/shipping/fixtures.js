@@ -1,4 +1,4 @@
-// Public names and base prices copied from PRODUCT_WEIGHTS.csv (2026-10-10).
+// Public names and base prices from PRODUCT_WEIGHTS_2026-10-10.csv.
 // Synthetic guest carts; no private costs or account data.
 export const fixtureProducts = {
     sensor: { slug: 'hcsr04-ultrasonic-sensor', name: 'HCSR04 Ultrasonic Sensor', price: 1.65 },

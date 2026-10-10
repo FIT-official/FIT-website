@@ -74,6 +74,14 @@ describe('Merchant Center catalogue', () => {
         expect(buildMerchantFeed([blocked])).not.toContain('<item>')
     })
 
+    it('uses the Bambu v2 parcel and excludes services even with a configured Standard option', () => {
+        const spool = { ...product, slug: 'bambu-lab-3d-printing-filament-1kg-pla-basic', variantTypes: [],
+            basePrice: { presentmentAmount: 21.9, presentmentCurrency: 'SGD' } }
+        expect(merchantProduct(spool).shipping.price).toBe('6.20 SGD')
+        expect(merchantProduct({ ...product, slug: '3d-printer-repair-maintenance' })).toBeNull()
+        expect(merchantProduct({ ...product, categoryId: 'SERVICE' })).toBeNull()
+    })
+
     it('charges the table rate for a S$25 item regardless of private costs', () => {
         const stocked = { ...product, shippingCosts: { unitCost: 1, packingCost: 1, deliveryCost: 6.2, confirmed: true } }
         expect(merchantProduct(stocked).shipping.price).toBe('6.20 SGD')

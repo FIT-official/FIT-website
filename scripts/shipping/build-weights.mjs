@@ -28,9 +28,22 @@ export function parseCsv(text) {
 /** Keep unknown measurements null; never infer a weight from a price or name. */
 export function buildWeights(csv, source = 'PRODUCT_WEIGHTS.csv') {
     const products = {};
-    for (const row of parseCsv(csv)) {
+    for (const original of parseCsv(csv)) {
+        // The packed-weight CSV keeps confidence separate and has no flag.
+        // Preserve its authoritative v2 mapping: all physical rows ESTIMATED,
+        // the non-shippable service MISSING, confidence embedded in notes.
+        const packed = Object.hasOwn(original, 'est_packed_weight_g');
+        const service = /\bnon-shippable\b/i.test(original.notes || '');
+        if (packed && !['high', 'med', 'low'].includes(original.confidence)) throw new Error('Invalid confidence');
+        const row = packed ? {
+            ...original, url: original.product_url, weight_g: original.est_packed_weight_g,
+            flag: service ? 'MISSING' : 'ESTIMATED',
+            source: service ? 'none (service)' : original.source_url || 'estimate',
+            notes: `[confidence:${original.confidence}] packed as-shipped; ${original.notes}`,
+        } : original;
         const slug = new URL(row.url).pathname.split('/').filter(Boolean).at(-1);
         if (!/^[a-z0-9-]+$/.test(slug) || products[slug]) throw new Error(`Invalid or duplicate slug: ${slug}`);
+        if (packed && original.slug !== slug) throw new Error(`Slug/URL mismatch: ${slug}`);
         if (!['ESTIMATED', 'MISSING'].includes(row.flag)) throw new Error(`Invalid flag: ${slug}`);
         const entry = {};
         for (const key of ['weight_g', 'L_mm', 'W_mm', 'H_mm']) {
@@ -46,8 +59,8 @@ export function buildWeights(csv, source = 'PRODUCT_WEIGHTS.csv') {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
     const input = process.argv[2];
-    if (!input) throw new Error('Usage: node scripts/shipping/build-weights.mjs PRODUCT_WEIGHTS.csv [output.json]');
-    const output = resolve(process.argv[3] || 'data/shipping/product-weights.v1.json');
+    if (!input) throw new Error('Usage: node scripts/shipping/build-weights.mjs PRODUCT_WEIGHTS_2026-10-10.csv [output.json]');
+    const output = resolve(process.argv[3] || 'data/shipping/product-weights.v2.json');
     const data = buildWeights(readFileSync(input, 'utf8'), input);
     mkdirSync(dirname(output), { recursive: true });
     writeFileSync(output, JSON.stringify(data, null, 2) + '\n');

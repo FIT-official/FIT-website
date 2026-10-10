@@ -1,0 +1,1806 @@
+{
+  "version": 1,
+  "generatedFrom": "PRODUCT_WEIGHTS_2026-10-10.csv",
+  "products": {
+    "028inch-digital-7-segment-display": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "03-3l-water-flow-sensor": {
+      "weight_g": 40,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 35,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "1-channel-5v-relay-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "10-ohm-resistor": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "10k-ohms-potentiometer": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "12v-10a-acdc-adapter": {
+      "weight_g": 900,
+      "L_mm": 200,
+      "W_mm": 90,
+      "H_mm": 80,
+      "flag": "ESTIMATED",
+      "source": "https://powersupply-adapter.supplier.components-electronic.com/pz6a55ba0-12-volt-10-amp-desktop-computer-power-supply-with-2-years-warranty.html",
+      "notes": "[confidence:med] packed as-shipped; 12V 10A desktop PSU: gross 0.9 kg, package 20x9x8 cm. H 80 means Speedpost"
+    },
+    "12v-4a-acdc-adapter": {
+      "weight_g": 250,
+      "L_mm": 130,
+      "W_mm": 60,
+      "H_mm": 45,
+      "flag": "ESTIMATED",
+      "source": "https://www.waweis.com/led-adapter/56730390.html",
+      "notes": "[confidence:med] packed as-shipped; Unit 108x46x31 mm, 166 g; + cord/box allowance"
+    },
+    "12v-dc-to-5v33v-converter": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "15v-x4-battery-holder": {
+      "weight_g": 20,
+      "L_mm": 70,
+      "W_mm": 65,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "16-x-2-lcd-display": {
+      "weight_g": 30,
+      "L_mm": 85,
+      "W_mm": 40,
+      "H_mm": 15,
+      "flag": "ESTIMATED",
+      "source": "https://makers-hut.com/product/lcd1602-blue-screen-display-module-16x2-character-lcd-1602/",
+      "notes": "[confidence:med] packed as-shipped; Makers Hut LCD1602 30 g"
+    },
+    "18650-battery": {
+      "weight_g": 50,
+      "L_mm": 70,
+      "W_mm": 20,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "https://www.tme.eu/Document/d5041798b41b6ad5e98cd9d1377d272d/INR18650-25R.pdf",
+      "notes": "[confidence:med] packed as-shipped; 18650 cell max 45 g (Samsung 25R spec), 18.4x65 mm; + wrap"
+    },
+    "18650-x1-battery-holder-with-usb": {
+      "weight_g": 25,
+      "L_mm": 80,
+      "W_mm": 30,
+      "H_mm": 25,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "18650-x3-battery-holder": {
+      "weight_g": 30,
+      "L_mm": 80,
+      "W_mm": 70,
+      "H_mm": 22,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "1kg-marble-pla-3d-printing-filament-fit": {
+      "weight_g": 1100,
+      "L_mm": 200,
+      "W_mm": 200,
+      "H_mm": 65,
+      "flag": "ESTIMATED",
+      "source": "https://www.denakan.com/product/black-lanbo-pla-filament-1-75mm-1kg/",
+      "notes": "[confidence:low] packed as-shipped; FIT-brand roll; supplier/box unknown; based on Lanbo 1 kg package"
+    },
+    "1kg-marble-pla-3d-printing-filament-lanbo": {
+      "weight_g": 1050,
+      "L_mm": 200,
+      "W_mm": 200,
+      "H_mm": 60,
+      "flag": "ESTIMATED",
+      "source": "https://www.denakan.com/product/black-lanbo-pla-filament-1-75mm-1kg/",
+      "notes": "[confidence:med] packed as-shipped; Lanbo PLA package spec applied (same 1 kg spool/box)"
+    },
+    "1kg-petg-3d-printing-filament-lanbo": {
+      "weight_g": 1050,
+      "L_mm": 200,
+      "W_mm": 200,
+      "H_mm": 60,
+      "flag": "ESTIMATED",
+      "source": "https://www.denakan.com/product/black-lanbo-pla-filament-1-75mm-1kg/",
+      "notes": "[confidence:med] packed as-shipped; Lanbo PLA package spec applied to Lanbo PETG (same 1 kg spool/box)"
+    },
+    "1kg-pla-3d-printing-filament-lanbo": {
+      "weight_g": 1050,
+      "L_mm": 200,
+      "W_mm": 200,
+      "H_mm": 60,
+      "flag": "ESTIMATED",
+      "source": "https://www.denakan.com/product/black-lanbo-pla-filament-1-75mm-1kg/",
+      "notes": "[confidence:med] packed as-shipped; Denakan: gross 1.05 kg, package 20x20x6 cm (spool 200 dia x 65 H). Box H + mailer 70 > 65, so Speedpost"
+    },
+    "1kg-wood-pla-3d-printing-filament-fit": {
+      "weight_g": 1100,
+      "L_mm": 200,
+      "W_mm": 200,
+      "H_mm": 65,
+      "flag": "ESTIMATED",
+      "source": "https://www.denakan.com/product/black-lanbo-pla-filament-1-75mm-1kg/",
+      "notes": "[confidence:low] packed as-shipped; FIT-brand roll; supplier/box unknown; based on Lanbo 1 kg package"
+    },
+    "1kg-wood-pla-3d-printing-filament-lanbo": {
+      "weight_g": 1050,
+      "L_mm": 200,
+      "W_mm": 200,
+      "H_mm": 60,
+      "flag": "ESTIMATED",
+      "source": "https://www.denakan.com/product/black-lanbo-pla-filament-1-75mm-1kg/",
+      "notes": "[confidence:med] packed as-shipped; Lanbo PLA package spec applied (same 1 kg spool/box)"
+    },
+    "1m-usb-to-usb-micro-cable": {
+      "weight_g": 30,
+      "L_mm": 120,
+      "W_mm": 80,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "230mm-x-280mm-cw100": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw100",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw1000": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw1000",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw120": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw120",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw1200": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw1200",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw150": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw150",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw1500": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw1500",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw180": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw180",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw2000": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw2000",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw240": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw240",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw280": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw280",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw320": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw320",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw400": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw400",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw60": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw60",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw600": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw600",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw80": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw80",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "230mm-x-280mm-cw800": {
+      "weight_g": 15,
+      "L_mm": 280,
+      "W_mm": 230,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/230mm-x-280mm-cw800",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing title (230x280 mm sheet); weight est. 230+10 > 229, so Speedpost unless folded to 115x280"
+    },
+    "254mm-dupant-connector-kit": {
+      "weight_g": 150,
+      "L_mm": 150,
+      "W_mm": 100,
+      "H_mm": 30,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Boxed crimp kit (no specific source; similar-item estimate)"
+    },
+    "254mm-dupant-male-header": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "254mm-dupont-female-header-40p": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "254mm-dupont-male-header-long": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "2pin-white-led": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "2s-3a-li-ion-lithium-battery": {
+      "weight_g": 100,
+      "L_mm": 75,
+      "W_mm": 40,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; 2-cell pack (no specific source; similar-item estimate)"
+    },
+    "30cm-usb-to-type-c-cable": {
+      "weight_g": 20,
+      "L_mm": 120,
+      "W_mm": 60,
+      "H_mm": 15,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "37-in-1-sensor-kit": {
+      "weight_g": 500,
+      "L_mm": 290,
+      "W_mm": 190,
+      "H_mm": 50,
+      "flag": "ESTIMATED",
+      "source": "https://www.cestore-mm.com/product/37-in-sensor-kit/",
+      "notes": "[confidence:med] packed as-shipped; CE Store: shipment 0.5 kg, 29x19x5 cm (product 372 g)"
+    },
+    "3d-printer-repair-maintenance": {
+      "weight_g": null,
+      "L_mm": null,
+      "W_mm": null,
+      "H_mm": null,
+      "flag": "MISSING",
+      "source": "none (service)",
+      "notes": "[confidence:high] packed as-shipped; Non-shippable service (bench/on-site). N/A"
+    },
+    "3d-printing-filament-dehydrator-4-level-220v-350w": {
+      "weight_g": 2600,
+      "L_mm": 300,
+      "W_mm": 300,
+      "H_mm": 280,
+      "flag": "ESTIMATED",
+      "source": "https://www.amazon.com/dp/B08Y9174SN",
+      "notes": "[confidence:low] packed as-shipped; Similar 350 W tiered dryer, product 1980 g, 275x275x250 mm. +~600 g/+25 mm retail box allowance"
+    },
+    "3d-printing-pen-2": {
+      "weight_g": 340,
+      "L_mm": 230,
+      "W_mm": 180,
+      "H_mm": 70,
+      "flag": "ESTIMATED",
+      "source": "https://www.bellection.com/product/3d-printing-pen-for-kids-2nd-gen/",
+      "notes": "[confidence:low] packed as-shipped; Similar gift-box 3D pen kit 0.34 kg, 230x180x70 mm. H 70 means Speedpost; a slimmer box would get letterbox"
+    },
+    "4-digit-led-digital-display": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "4-pin-push-button": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "433mhz-wireless-remote-4-button-abcd": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "48mm-x-50m-silver-duct-tape": {
+      "weight_g": 410,
+      "L_mm": 110,
+      "W_mm": 110,
+      "H_mm": 50,
+      "flag": "ESTIMATED",
+      "source": "https://www.sealey.co.uk/duct-tape-48mm-x-50m-silver-dts/",
+      "notes": "[confidence:med] packed as-shipped; Sealey 48mm x 50m: 0.40 kg; +10 g wrap"
+    },
+    "4pin-push-button-10pcs": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "4x4-matrix-membrane-keypad": {
+      "weight_g": 15,
+      "L_mm": 90,
+      "W_mm": 70,
+      "H_mm": 5,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "4x4-push-button-matrix-module": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "5v-2-phase-4-line-stepper-motor": {
+      "weight_g": 40,
+      "L_mm": 60,
+      "W_mm": 45,
+      "H_mm": 25,
+      "flag": "ESTIMATED",
+      "source": "https://www.phippselectronics.com/product/28byj-48-stepper-motor-with-uln2003-7-input-motor-driver-board/",
+      "notes": "[confidence:low] packed as-shipped; Motor only; based on 28BYJ-48+driver 50 g"
+    },
+    "5v-dc-brushless-fan": {
+      "weight_g": 15,
+      "L_mm": 40,
+      "W_mm": 40,
+      "H_mm": 12,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "5v-stepper-motor": {
+      "weight_g": 40,
+      "L_mm": 60,
+      "W_mm": 45,
+      "H_mm": 25,
+      "flag": "ESTIMATED",
+      "source": "https://www.phippselectronics.com/product/28byj-48-stepper-motor-with-uln2003-7-input-motor-driver-board/",
+      "notes": "[confidence:low] packed as-shipped; Motor only; based on 28BYJ-48+driver 50 g"
+    },
+    "6-pin-female-header": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "65mm-plastic-wheels": {
+      "weight_g": 30,
+      "L_mm": 70,
+      "W_mm": 70,
+      "H_mm": 30,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "6v-heat-block": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "7-segment-display-3-digits": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "70mm-x-50mm-prototype-pcb": {
+      "weight_g": 8,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/70mm-x-50mm-prototype-pcb",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing; weight est. Dims from listing title"
+    },
+    "8x-relay-module": {
+      "weight_g": 80,
+      "L_mm": 140,
+      "W_mm": 60,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "90mm-x-70mm-prototype-pcb": {
+      "weight_g": 12,
+      "L_mm": 90,
+      "W_mm": 70,
+      "H_mm": 2,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/90mm-x-70mm-prototype-pcb",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing; weight est. Dims from listing title"
+    },
+    "9v-battery-clip": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "9v-battery-holder": {
+      "weight_g": 20,
+      "L_mm": 70,
+      "W_mm": 40,
+      "H_mm": 25,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "acdc-to-dc-converter-30v-max": {
+      "weight_g": 30,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 25,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "acrylic-cardboard-box-for-storage": {
+      "weight_g": 150,
+      "L_mm": 200,
+      "W_mm": 150,
+      "H_mm": 60,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Box size/material unknown"
+    },
+    "acs712-hall-current-sensor-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "adc-converter": {
+      "weight_g": 20,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 15,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "ads1115-16-bit-adc-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "arduino-bluetooth-module-hc-06": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "arduino-motor-driver": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "arduino-uno-r3-compatible": {
+      "weight_g": 35,
+      "L_mm": 80,
+      "W_mm": 60,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "https://store.arduino.cc/products/arduino-uno-rev3",
+      "notes": "[confidence:med] packed as-shipped; Official UNO R3 board 25 g, 68.6x53.4 mm; compatible + anti-static bag"
+    },
+    "assorted-capacitors-104-474": {
+      "weight_g": 80,
+      "L_mm": 130,
+      "W_mm": 70,
+      "H_mm": 25,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Boxed assortment (no specific source; similar-item estimate)"
+    },
+    "assorted-capacitors-300pcs": {
+      "weight_g": 80,
+      "L_mm": 130,
+      "W_mm": 70,
+      "H_mm": 25,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Boxed assortment (no specific source; similar-item estimate)"
+    },
+    "bambu-lab-3d-printing-filament-05kg-pva-support": {
+      "weight_g": 916,
+      "L_mm": 228,
+      "W_mm": 203,
+      "H_mm": 70,
+      "flag": "ESTIMATED",
+      "source": "https://www.digitec.ch/en/s1/product/bambu-lab-pva-support-05kg-pva-175-mm-500-g-3d-printer-filament-46966327",
+      "notes": "[confidence:med] packed as-shipped; digitec package 916 g, 22.8x20.3x7 cm"
+    },
+    "bambu-lab-3d-printing-filament-1kg-abs": {
+      "weight_g": 1350,
+      "L_mm": 208,
+      "W_mm": 206,
+      "H_mm": 71,
+      "flag": "ESTIMATED",
+      "source": "https://www.bhphotovideo.com/c/product/1940032-REG/bambu_lab_a00_k00_1_75_1000_spl_us_pla_basic_black.html",
+      "notes": "[confidence:med] packed as-shipped; Same Bambu 1 kg box as PLA Basic (B&H 1349 g, 208x206x71 mm)"
+    },
+    "bambu-lab-3d-printing-filament-1kg-asa": {
+      "weight_g": 1350,
+      "L_mm": 208,
+      "W_mm": 206,
+      "H_mm": 71,
+      "flag": "ESTIMATED",
+      "source": "https://www.bhphotovideo.com/c/product/1940032-REG/bambu_lab_a00_k00_1_75_1000_spl_us_pla_basic_black.html",
+      "notes": "[confidence:med] packed as-shipped; Same Bambu 1 kg box as PLA Basic (B&H 1349 g, 208x206x71 mm)"
+    },
+    "bambu-lab-3d-printing-filament-1kg-petg-basic": {
+      "weight_g": 1350,
+      "L_mm": 208,
+      "W_mm": 206,
+      "H_mm": 71,
+      "flag": "ESTIMATED",
+      "source": "https://www.bhphotovideo.com/c/product/1940032-REG/bambu_lab_a00_k00_1_75_1000_spl_us_pla_basic_black.html",
+      "notes": "[confidence:med] packed as-shipped; Same Bambu 1 kg box as PLA Basic (B&H 1349 g, 208x206x71 mm)"
+    },
+    "bambu-lab-3d-printing-filament-1kg-pla-basic": {
+      "weight_g": 1350,
+      "L_mm": 208,
+      "W_mm": 206,
+      "H_mm": 71,
+      "flag": "ESTIMATED",
+      "source": "https://www.bhphotovideo.com/c/product/1940032-REG/bambu_lab_a00_k00_1_75_1000_spl_us_pla_basic_black.html",
+      "notes": "[confidence:high] packed as-shipped; B&H package data: 2.975 lb (1349 g), box 8.2x8.1x2.8 in (208x206x71 mm). Matches Chairman ref ~1.35 kg / 200x200x67 mm. diycncmart lists 1.35 kg. Refill (no spool) variant is lighter (diycnc gross 1.2 kg) but has the same tier"
+    },
+    "bambu-lab-3d-printing-filament-1kg-pla-basic-gradient": {
+      "weight_g": 1350,
+      "L_mm": 208,
+      "W_mm": 206,
+      "H_mm": 71,
+      "flag": "ESTIMATED",
+      "source": "https://www.bhphotovideo.com/c/product/1940032-REG/bambu_lab_a00_k00_1_75_1000_spl_us_pla_basic_black.html",
+      "notes": "[confidence:med] packed as-shipped; Same Bambu 1 kg box as PLA Basic (B&H 1349 g, 208x206x71 mm)"
+    },
+    "bambu-lab-3d-printing-filament-1kg-pla-glow": {
+      "weight_g": 1350,
+      "L_mm": 208,
+      "W_mm": 206,
+      "H_mm": 71,
+      "flag": "ESTIMATED",
+      "source": "https://www.bhphotovideo.com/c/product/1940032-REG/bambu_lab_a00_k00_1_75_1000_spl_us_pla_basic_black.html",
+      "notes": "[confidence:med] packed as-shipped; Same Bambu 1 kg box as PLA Basic (B&H 1349 g, 208x206x71 mm)"
+    },
+    "bambu-lab-3d-printing-filament-1kg-pla-lite": {
+      "weight_g": 1350,
+      "L_mm": 208,
+      "W_mm": 206,
+      "H_mm": 71,
+      "flag": "ESTIMATED",
+      "source": "https://www.bhphotovideo.com/c/product/1940032-REG/bambu_lab_a00_k00_1_75_1000_spl_us_pla_basic_black.html",
+      "notes": "[confidence:med] packed as-shipped; Same Bambu 1 kg box as PLA Basic (B&H 1349 g, 208x206x71 mm)"
+    },
+    "bambu-lab-3d-printing-filament-1kg-pla-matte": {
+      "weight_g": 1350,
+      "L_mm": 208,
+      "W_mm": 206,
+      "H_mm": 71,
+      "flag": "ESTIMATED",
+      "source": "https://www.bhphotovideo.com/c/product/1940032-REG/bambu_lab_a00_k00_1_75_1000_spl_us_pla_basic_black.html",
+      "notes": "[confidence:med] packed as-shipped; Same Bambu 1 kg box as PLA Basic (B&H 1349 g, 208x206x71 mm)"
+    },
+    "bambu-lab-3d-printing-filament-1kg-pla-silk": {
+      "weight_g": 1350,
+      "L_mm": 208,
+      "W_mm": 206,
+      "H_mm": 71,
+      "flag": "ESTIMATED",
+      "source": "https://www.bhphotovideo.com/c/product/1940032-REG/bambu_lab_a00_k00_1_75_1000_spl_us_pla_basic_black.html",
+      "notes": "[confidence:med] packed as-shipped; Same Bambu 1 kg box as PLA Basic (B&H 1349 g, 208x206x71 mm)"
+    },
+    "bambu-lab-3d-printing-filament-1kg-pla-tough": {
+      "weight_g": 1350,
+      "L_mm": 208,
+      "W_mm": 206,
+      "H_mm": 71,
+      "flag": "ESTIMATED",
+      "source": "https://www.bhphotovideo.com/c/product/1940032-REG/bambu_lab_a00_k00_1_75_1000_spl_us_pla_basic_black.html",
+      "notes": "[confidence:med] packed as-shipped; Same Bambu 1 kg box as PLA Basic (B&H 1349 g, 208x206x71 mm)"
+    },
+    "bambu-lab-3d-printing-filament-1kg-pla-wood": {
+      "weight_g": 1350,
+      "L_mm": 208,
+      "W_mm": 206,
+      "H_mm": 71,
+      "flag": "ESTIMATED",
+      "source": "https://www.bhphotovideo.com/c/product/1940032-REG/bambu_lab_a00_k00_1_75_1000_spl_us_pla_basic_black.html",
+      "notes": "[confidence:med] packed as-shipped; Same Bambu 1 kg box as PLA Basic (B&H 1349 g, 208x206x71 mm)"
+    },
+    "bambu-lithophane-led-backlight": {
+      "weight_g": 80,
+      "L_mm": 120,
+      "W_mm": 120,
+      "H_mm": 30,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "bbc-microbit-v2": {
+      "weight_g": 40,
+      "L_mm": 100,
+      "W_mm": 70,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "https://kitronik.co.uk/products/56109-bbc-micro-bit-v2-board-only-retail-pack",
+      "notes": "[confidence:low] packed as-shipped; Board 52x42x11.7 mm (Kitronik); retail pack size not listed"
+    },
+    "best-tweezers-b-200esd": {
+      "weight_g": 15,
+      "L_mm": 130,
+      "W_mm": 15,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "bh1750-ambient-light-sensor": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "black-blue-170-pcs-in-1-screwdriver-kit": {
+      "weight_g": 810,
+      "L_mm": 170,
+      "W_mm": 113,
+      "H_mm": 62,
+      "flag": "ESTIMATED",
+      "source": "https://www.msy.com.au/product/170-in-1-precision-screwdriver-set-with-154-bits-magnetic-repair-tool-kit-micro-built-in-box-for-electronics-pc-phone-laptop-drones-watch-71405",
+      "notes": "[confidence:low] packed as-shipped; Variant unknown. MSY 170-in-1 case 810 g, 170x113x62 mm (other 170-in-1 cases are 780 g, 265x155x35 mm, and could fit a letterbox). Weigh it"
+    },
+    "black-duct-tape-48mm-x-50m": {
+      "weight_g": 410,
+      "L_mm": 110,
+      "W_mm": 110,
+      "H_mm": 50,
+      "flag": "ESTIMATED",
+      "source": "https://www.sealey.co.uk/duct-tape-48mm-x-50m-silver-dts/",
+      "notes": "[confidence:med] packed as-shipped; Sealey 48mm x 50m: 0.40 kg (silver); black assumed same"
+    },
+    "blue-silicagel": {
+      "weight_g": 250,
+      "L_mm": 200,
+      "W_mm": 150,
+      "H_mm": 30,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Pack size unknown; assumed 250 g bag"
+    },
+    "boost-buck-converter": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "boost-converter": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "breadboard-400-points": {
+      "weight_g": 40,
+      "L_mm": 90,
+      "W_mm": 60,
+      "H_mm": 12,
+      "flag": "ESTIMATED",
+      "source": "https://www.iotcart.in/product/mb102-830-points-solderless-breadboard",
+      "notes": "[confidence:low] packed as-shipped; Half of MB102 reference"
+    },
+    "breadboard-85x55x085cm": {
+      "weight_g": 30,
+      "L_mm": 85,
+      "W_mm": 55,
+      "H_mm": 9,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/breadboard-85x55x085cm",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing; weight est. Dims from listing title 8.5x5.5x0.85 cm"
+    },
+    "buzzer": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "cable-cover": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "car-usb-charger": {
+      "weight_g": 30,
+      "L_mm": 70,
+      "W_mm": 40,
+      "H_mm": 30,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "copper-stripboard-65145cm-254mm": {
+      "weight_g": 25,
+      "L_mm": 145,
+      "W_mm": 65,
+      "H_mm": 3,
+      "flag": "ESTIMATED",
+      "source": "https://www.fixitoday.com/products/copper-stripboard-65145cm-254mm",
+      "notes": "[confidence:med] packed as-shipped; Dims from FIT listing; weight est. Dims from listing: 65 x 145 mm"
+    },
+    "dc-step-up-booster": {
+      "weight_g": 40,
+      "L_mm": 70,
+      "W_mm": 45,
+      "H_mm": 25,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "dht11-temperature-humidity-sensor": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "dht20-temperature-humidity-sensor": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "digital-thermometer-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "ds1302-real-time-clock-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "dual-axis-xy-joystick-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "esp32-c3-supermini": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "esp32-cam-camera-module-ov2640": {
+      "weight_g": 20,
+      "L_mm": 70,
+      "W_mm": 40,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "esp32-wroomdevkit-30pin": {
+      "weight_g": 30,
+      "L_mm": 70,
+      "W_mm": 40,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "https://www.distrelec.ch/en/seeit-esp32-dev-30p-bluetooth-wi-fi-development-board-esp32-dev-30p-seeit-esp32-dev-30p/p/30489812",
+      "notes": "[confidence:med] packed as-shipped; Seeit ESP32-DEV-30P gross 30 g"
+    },
+    "esp8266": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "esp8266-esp-01-wifi-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "esp8266-wemos-d1-mini": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "esp8266-wifi-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "esp8266-wifi-module-esp-01": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "esp8266-wifi-module-esp-12": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "eveready-aa-batteries-x4-pack": {
+      "weight_g": 100,
+      "L_mm": 70,
+      "W_mm": 55,
+      "H_mm": 15,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; 4 x ~23 g AA + card (no specific source; similar-item estimate)"
+    },
+    "f-f-jumper-wire-40-cm": {
+      "weight_g": 50,
+      "L_mm": 210,
+      "W_mm": 60,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "https://www.tntecomp.com/products/20cm-dupont-wire-color-jumper-cable-2-54mm-1p-1p-female-to-female-40-pieces-pack",
+      "notes": "[confidence:low] packed as-shipped; 40-pc 20 cm pack 30 g; 40 cm scaled"
+    },
+    "foam-board": {
+      "weight_g": 100,
+      "L_mm": 420,
+      "W_mm": 297,
+      "H_mm": 5,
+      "flag": "ESTIMATED",
+      "source": "https://www.paperstone.co.uk/artists-graphics-supplies/foamboard/self-adhesive-foamboard-a3-white-5mm-thick-box-of-10/p-60566",
+      "notes": "[confidence:low] packed as-shipped; SIZE NOT ON FIT LISTING. Assumed one A3 5 mm sheet (Paperstone A3 5 mm about 100 g/sheet). If A2/A1 (841 mm), bulky S$12.30. MEASURE"
+    },
+    "gas-sensor": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "grove-moisture-sensor": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "hall-effect-sensor-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "hc-05-bluetooth-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "hcsr04-ultrasonic-sensor": {
+      "weight_g": 80,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 30,
+      "flag": "ESTIMATED",
+      "source": "https://www.sunsky-online.com/p/DIY4002/HC-SR04-Ultrasonic-Sensor-Distance-Measuring-Module-for-PICAXE-Microcontroller-Arduino-UNO.htm",
+      "notes": "[confidence:med] packed as-shipped; Listing package 0.08 kg, 6x4x3 cm"
+    },
+    "hw-479-rgb-led-module": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "i2c-oled-module": {
+      "weight_g": 10,
+      "L_mm": 50,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "infared-sensor-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "integrated-circuit-w-220": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "ir-blocking-sensor": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "laser-dot-diode-module": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "laser-head-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "ldtr-wg0221-max7219-4in1": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "led-5mm-red-green-yellow": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "li-ion-battery-protection-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "li-ion-charger-1s-1a": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "li-ion-charger-protector-126v-20a": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "li-ion-charger-protector-84v-20a": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "light-dependent-resistor-ldr": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "load-test-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "m-f-jumper-wire-40-cm": {
+      "weight_g": 50,
+      "L_mm": 210,
+      "W_mm": 60,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "https://www.tntecomp.com/products/20cm-dupont-wire-color-jumper-cable-2-54mm-1p-1p-female-to-female-40-pieces-pack",
+      "notes": "[confidence:low] packed as-shipped; 40-pc 20 cm pack 30 g; 40 cm scaled"
+    },
+    "m-m-jumper-wire-40-cm": {
+      "weight_g": 50,
+      "L_mm": 210,
+      "W_mm": 60,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "https://www.tntecomp.com/products/20cm-dupont-wire-color-jumper-cable-2-54mm-1p-1p-female-to-female-40-pieces-pack",
+      "notes": "[confidence:low] packed as-shipped; 40-pc 20 cm pack 30 g; 40 cm scaled"
+    },
+    "m8-plastic-float-switch": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "magnetic-buzzer-28vms-90db": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "male-female-jumper-wire-100mm-10cm": {
+      "weight_g": 10,
+      "L_mm": 110,
+      "W_mm": 50,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; 10 cm jumper bundle (no specific source; similar-item estimate)"
+    },
+    "male-male-jumper-wire-100mm-10cm": {
+      "weight_g": 10,
+      "L_mm": 110,
+      "W_mm": 50,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; 10 cm jumper bundle (no specific source; similar-item estimate)"
+    },
+    "max7219-8x8-led": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "mb102-breadboard-820-points": {
+      "weight_g": 97,
+      "L_mm": 175,
+      "W_mm": 60,
+      "H_mm": 12,
+      "flag": "ESTIMATED",
+      "source": "https://www.iotcart.in/product/mb102-830-points-solderless-breadboard",
+      "notes": "[confidence:med] packed as-shipped; MB102 830-pt 85 g, 170x55x10 mm; one supplier lists package 97 g"
+    },
+    "mg90s-servo-motor": {
+      "weight_g": 25,
+      "L_mm": 60,
+      "W_mm": 50,
+      "H_mm": 40,
+      "flag": "ESTIMATED",
+      "source": "https://bspart.com/products/waveshare-sg90-micro-servo",
+      "notes": "[confidence:low] packed as-shipped; Based on SG90 package (MG90S metal gear slightly heavier)"
+    },
+    "mh-rd-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "microbit-expansion-board-v20": {
+      "weight_g": 30,
+      "L_mm": 90,
+      "W_mm": 70,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "mini-lightning-fan-90-deg": {
+      "weight_g": 20,
+      "L_mm": 110,
+      "W_mm": 100,
+      "H_mm": 15,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "mini-usb-fan-90-deg": {
+      "weight_g": 20,
+      "L_mm": 110,
+      "W_mm": 100,
+      "H_mm": 15,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "mini-usb-fan-straight": {
+      "weight_g": 20,
+      "L_mm": 110,
+      "W_mm": 100,
+      "H_mm": 15,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "motor-driver-tb6612fng": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "mpu6050": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "mq135-air-quality-sensor": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "mt3608-step-up-dc": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "n20-micro-gear-dc-motor": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "nfc-chip-sticker-213": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "oled-display-module": {
+      "weight_g": 10,
+      "L_mm": 50,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "rain-water-sensor": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "raspberry-pi-camera-module": {
+      "weight_g": 15,
+      "L_mm": 90,
+      "W_mm": 60,
+      "H_mm": 15,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "raspberry-pi-essential-kit": {
+      "weight_g": 490,
+      "L_mm": 205,
+      "W_mm": 140,
+      "H_mm": 67,
+      "flag": "ESTIMATED",
+      "source": "https://shopcraftycorners.com/products/b0dk4jnkyn",
+      "notes": "[confidence:low] packed as-shipped; Kit contents unknown. Similar official Pi 5 starter kit package 490 g, 205x140x67 mm"
+    },
+    "rc522-module-rfid-reader": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "red-laser-diode-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "resistor-strain-gauge": {
+      "weight_g": 10,
+      "L_mm": 60,
+      "W_mm": 30,
+      "H_mm": 5,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "resistors-kit-2600pcs-220r-1k-10k": {
+      "weight_g": 250,
+      "L_mm": 170,
+      "W_mm": 110,
+      "H_mm": 30,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Boxed assortment (no specific source; similar-item estimate)"
+    },
+    "rgb-led-common-cathode-5mm": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "sata-power-to-6pin-molex": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "servo-arms": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "sg90-servo": {
+      "weight_g": 20,
+      "L_mm": 60,
+      "W_mm": 50,
+      "H_mm": 40,
+      "flag": "ESTIMATED",
+      "source": "https://bspart.com/products/waveshare-sg90-micro-servo",
+      "notes": "[confidence:med] packed as-shipped; Waveshare SG90 package 0.02 kg, 5x4x6 cm"
+    },
+    "sn74hc595n-ic-chip": {
+      "weight_g": 5,
+      "L_mm": 60,
+      "W_mm": 40,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Small component, bagged (no specific source; similar-item estimate)"
+    },
+    "soil-humidity-sensor": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "solar-car": {
+      "weight_g": 150,
+      "L_mm": 150,
+      "W_mm": 100,
+      "H_mm": 50,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Kit box size unknown"
+    },
+    "solar-panel": {
+      "weight_g": 35,
+      "L_mm": 120,
+      "W_mm": 70,
+      "H_mm": 10,
+      "flag": "ESTIMATED",
+      "source": "https://scccltd.com/products/solar-panel-6v-1w-110-x-60mm",
+      "notes": "[confidence:low] packed as-shipped; Panel size unknown; based on 6V 1W 110x60 mm mini panel (22 g) + bag"
+    },
+    "solar-panel-controller": {
+      "weight_g": 150,
+      "L_mm": 140,
+      "W_mm": 80,
+      "H_mm": 40,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "soldering-holder": {
+      "weight_g": 150,
+      "L_mm": 120,
+      "W_mm": 80,
+      "H_mm": 60,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Iron stand / holder (no specific source; similar-item estimate)"
+    },
+    "soldering-jumper-wire-24-guage-40m": {
+      "weight_g": 150,
+      "L_mm": 80,
+      "W_mm": 80,
+      "H_mm": 50,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Wire spool (no specific source; similar-item estimate)"
+    },
+    "sound-sensor": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "sparkfun-openpir": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "stepper-motor-dc-speed-controller": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "stepper-motor-expansion-board": {
+      "weight_g": 30,
+      "L_mm": 80,
+      "W_mm": 60,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "stepper-motor-uln2003-driver-board": {
+      "weight_g": 50,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 30,
+      "flag": "ESTIMATED",
+      "source": "https://www.phippselectronics.com/product/28byj-48-stepper-motor-with-uln2003-7-input-motor-driver-board/",
+      "notes": "[confidence:med] packed as-shipped; Phipps 28BYJ-48 + ULN2003 50 g"
+    },
+    "sw-18015d-vibration-sensor": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "tcrt5000": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "tcs3200-color-sensor-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "tds-water-quality-sensor": {
+      "weight_g": 40,
+      "L_mm": 100,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "tft-ili9341-240-x-320-28-inch": {
+      "weight_g": 50,
+      "L_mm": 90,
+      "W_mm": 55,
+      "H_mm": 15,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "toshiba-9v-battery-box-of-10": {
+      "weight_g": 480,
+      "L_mm": 100,
+      "W_mm": 60,
+      "H_mm": 55,
+      "flag": "ESTIMATED",
+      "source": "https://tsb-europe.com/product/high-power-9v/",
+      "notes": "[confidence:med] packed as-shipped; Toshiba 9V cell about 45 g, 17.5x26.5x48.5 mm; x10 + ~30 g box. Borderline height for letterbox (55+10=65)"
+    },
+    "tt-motor-wwire": {
+      "weight_g": 35,
+      "L_mm": 70,
+      "W_mm": 25,
+      "H_mm": 25,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "uln2003-driver-board": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "usb-c-charging-module": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "usb-to-uart-converter-cp2102ch340": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "weight-pressure-sensor": {
+      "weight_g": 30,
+      "L_mm": 90,
+      "W_mm": 20,
+      "H_mm": 15,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "wireless-charger-receiver-module-5v": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    },
+    "wireless-charging-module-ip5": {
+      "weight_g": 30,
+      "L_mm": 80,
+      "W_mm": 70,
+      "H_mm": 15,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Category estimate (no specific source; similar-item estimate)"
+    },
+    "worx-electric-screw-driver-kit": {
+      "weight_g": 762,
+      "L_mm": 280,
+      "W_mm": 150,
+      "H_mm": 120,
+      "flag": "ESTIMATED",
+      "source": "https://hogaki.com/worx-wx242-wx240-7-wx240-wx106-electric-screwdriver-set-intelligent-cordless-drill-screwdriver-usb-charging-power-tool-155705",
+      "notes": "[confidence:med] packed as-shipped; hogaki WX240 package 0.762 kg, 15x12x28 cm; Argos kit weight 0.67 kg"
+    },
+    "xfw-hx711-load-cell-amplifier": {
+      "weight_g": 15,
+      "L_mm": 70,
+      "W_mm": 50,
+      "H_mm": 20,
+      "flag": "ESTIMATED",
+      "source": "estimate",
+      "notes": "[confidence:low] packed as-shipped; Generic small module/sensor, bagged (no specific source; similar-item estimate)"
+    }
+  }
+}

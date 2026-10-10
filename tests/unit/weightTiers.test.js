@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import weights from '@/data/shipping/product-weights.v1.json';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import weights from '@/data/shipping/product-weights.v2.json';
 import { standardShippingTier, productShippingData, DELIVERY_QUOTE_MESSAGE } from '@/lib/shipping/weightTiers';
 import { buildWeights, parseCsv } from '@/scripts/shipping/build-weights.mjs';
 import { applyShopShipping } from '@/lib/shopShipping';
@@ -8,6 +10,8 @@ import Product from '@/models/Product';
 const product = (overrides = {}) => ({ shippingWeightG: 15, shippingDims: { L: 100, W: 80, H: 20 }, shippingDataFlag: 'ESTIMATED', ...overrides });
 const rate = (p = product(), cents = 1000, quantity = 1) => standardShippingTier([{ product: p, quantity }], cents);
 const slug = value => ({ slug: value });
+const csv = readFileSync(resolve('tests/fixtures/shipping/PRODUCT_WEIGHTS_2026-10-10.csv'), 'utf8');
+const catalogue = parseCsv(csv);
 
 describe('packed shipping tiers', () => {
     it.each([[1950, 200], [1951, 620]])('goods weight %s g includes the 50 g mailer', (weight, cents) => {
@@ -36,14 +40,21 @@ describe('packed shipping tiers', () => {
     ])('falls back for incomplete or missing data: %j', overrides => {
         expect(rate(product(overrides))).toMatchObject({ priceCents: 620, reason: 'missing-shipping-data', blocked: false });
     });
-    it.each(Object.entries(weights.products).filter(([, data]) => data.flag === 'MISSING').map(([key]) => [key]))('keeps missing entry %s at S$6.20', key => {
-        expect(rate(slug(key)).priceCents).toBe(620);
+    it.each([
+        ['37-in-1-sensor-kit', 200], ['3d-printer-repair-maintenance', 0],
+        ['3d-printing-filament-dehydrator-4-level-220v-350w', 620], ['3d-printing-pen-2', 620],
+        ['acrylic-cardboard-box-for-storage', 620], ['black-blue-170-pcs-in-1-screwdriver-kit', 620],
+        ['blue-silicagel', 200], ['foam-board', 620], ['raspberry-pi-essential-kit', 620],
+        ['solar-car', 200], ['solar-panel', 200], ['worx-electric-screw-driver-kit', 620],
+    ])('prices formerly missing entry %s from the packed data', (key, cents) => {
+        const item = catalogue.find(row => row.slug === key);
+        expect(rate(slug(key), Math.round(Number(item.price_sgd) * 100)).priceCents).toBe(cents);
     });
     it('prices sandpaper at Speedpost: width 230 + 10 > 229 mm', () => {
         expect(rate(slug('230mm-x-280mm-cw100')).priceCents).toBe(620);
     });
-    it('uses the fallback for Foam Board', () => {
-        expect(rate(slug('foam-board'))).toMatchObject({ priceCents: 620, reason: 'missing-shipping-data' });
+    it('uses the supplied A3 estimate for Foam Board', () => {
+        expect(rate(slug('foam-board'))).toMatchObject({ priceCents: 620, reason: 'standard-limits' });
     });
     it('combines a module and filament into one S$6.20 shipment', () => {
         expect(standardShippingTier([
@@ -68,7 +79,7 @@ describe('packed shipping tiers', () => {
     });
     it('blocks known overweight even with another missing line', () => {
         expect(standardShippingTier([{ product: product({ shippingWeightG: 30000 }), quantity: 1 },
-            { product: slug('foam-board'), quantity: 1 }], 5000)).toMatchObject({ blocked: true, priceCents: null, description: DELIVERY_QUOTE_MESSAGE });
+            { product: slug('unknown-parcel'), quantity: 1 }], 5000)).toMatchObject({ blocked: true, priceCents: null, description: DELIVERY_QUOTE_MESSAGE });
     });
     it.each([0, -1, 1.5, NaN])('blocks invalid quantity %s', quantity => {
         expect(rate(product(), 1000, quantity).blocked).toBe(true);
@@ -79,12 +90,13 @@ describe('shipping catalogue and overrides', () => {
     it('retains 200 entries, all 13 Bambu products and the missing service', () => {
         expect(Object.keys(weights.products)).toHaveLength(200);
         expect(Object.keys(weights.products).filter(key => key.startsWith('bambu-'))).toHaveLength(13);
-        expect(Object.values(weights.products).filter(data => data.flag === 'MISSING')).toHaveLength(12);
+        expect(Object.values(weights.products).filter(data => data.flag === 'MISSING')).toHaveLength(1);
+        expect(Object.values(weights.products).filter(data => data.flag === 'ESTIMATED')).toHaveLength(199);
         expect(weights.products['3d-printer-repair-maintenance']).toMatchObject({ flag: 'MISSING', weight_g: null });
     });
     it('prefers present database fields and falls back field by field', () => {
         const p = { slug: 'hcsr04-ultrasonic-sensor', shippingWeightG: 1951, shippingDims: { H: 40 } };
-        expect(productShippingData(p)).toMatchObject({ weight_g: 1951, L_mm: 70, W_mm: 50, H_mm: 40, flag: 'ESTIMATED' });
+        expect(productShippingData(p)).toMatchObject({ weight_g: 1951, L_mm: 60, W_mm: 40, H_mm: 40, flag: 'ESTIMATED' });
         expect(rate(p).priceCents).toBe(620);
         expect(rate({ ...p, shippingDataFlag: 'MISSING' }).reason).toBe('missing-shipping-data');
         expect(rate({ ...p, shippingWeightG: 0 }).reason).toBe('missing-shipping-data');
@@ -94,6 +106,29 @@ describe('shipping catalogue and overrides', () => {
         expect(doc.shippingWeightG).toBeUndefined();
         expect(doc.shippingDims).toBeUndefined();
         expect(doc.shippingDataFlag).toBeUndefined();
+    });
+    it('reproduces the authoritative v2 file byte for byte from the packed CSV', () => {
+        expect(JSON.stringify(buildWeights(csv, 'PRODUCT_WEIGHTS_2026-10-10.csv'), null, 2) + '\n')
+            .toBe(readFileSync(resolve('data/shipping/product-weights.v2.json'), 'utf8'));
+    });
+    it('prices the 200 single-item catalogue at 156 letterbox, 43 Speedpost and one service', () => {
+        expect(catalogue.map(row => row.slug).sort()).toEqual(Object.keys(weights.products).sort());
+        const counts = { letterbox: 0, speedpost: 0, bulky: 0, quote: 0, none: 0 };
+        for (const row of catalogue) {
+            const tier = rate(slug(row.slug), Math.round(Number(row.price_sgd) * 100));
+            counts[tier.tier]++;
+            expect(tier.priceCents).toBe({ letterbox: 200, speedpost: 620, none: 0 }[tier.tier]);
+        }
+        expect(counts).toEqual({ letterbox: 156, speedpost: 43, bulky: 0, quote: 0, none: 1 });
+    });
+    it('uses 1350 g and 208 x 206 x 71 mm for every Bambu 1kg spool at S$6.20', () => {
+        const spools = catalogue.filter(row => row.slug.startsWith('bambu-') && row.slug.includes('-1kg-'));
+        expect(spools).toHaveLength(11);
+        for (const row of spools) {
+            expect(productShippingData(slug(row.slug))).toMatchObject({ weight_g: 1350, L_mm: 208, W_mm: 206, H_mm: 71 });
+            expect(rate(slug(row.slug), Math.round(Number(row.price_sgd) * 100)).priceCents).toBe(620);
+        }
+        expect(rate(slug('hcsr04-ultrasonic-sensor'), 165).priceCents).toBe(200);
     });
     it('parses CSV quoting and produces deterministic nulls', () => {
         expect(parseCsv('a,b\r\n"two, words","say ""hi"""\r\n')).toEqual([{ a: 'two, words', b: 'say "hi"' }]);

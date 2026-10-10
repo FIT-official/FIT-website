@@ -36,6 +36,21 @@ function leanQuery(result) {
 }
 
 describe('PUT /api/user/cart/delivery', () => {
+  it('excludes repair from the parcel value when switching a sensor to Standard', async () => {
+    const user = makeUser([
+      { productId: 'repair', quantity: 1, chosenDeliveryType: 'pick-up' },
+      { productId: 'sensor', quantity: 1, chosenDeliveryType: 'pick-up' },
+    ]);
+    User.findOne.mockResolvedValue(user);
+    Product.findById.mockImplementation(id => leanQuery({ _id: id, productType: 'shop',
+      slug: id === 'repair' ? '3d-printer-repair-maintenance' : 'hcsr04-ultrasonic-sensor',
+      basePrice: { presentmentAmount: id === 'repair' ? 30 : 1.65, presentmentCurrency: 'SGD' },
+      delivery: { deliveryTypes: id === 'repair' ? [{ type: 'pick-up', price: 0 }] : [{ type: 'standard-shipping', price: 6.2 }, { type: 'pick-up', price: 0 }] } }));
+    const response = await put({ productId: 'sensor', chosenDeliveryType: 'standard-shipping' });
+    expect(response.status).toBe(200);
+    expect((await response.json()).cartBreakdown.map(line => line.deliveryFee)).toEqual([0, 2]);
+    expect(user.save).toHaveBeenCalledOnce();
+  });
   it('counts the entire mixed-method order and returns one combined Standard price', async () => {
     const user = makeUser(['standard-shipping', 'pick-up', 'express-courier'].map((type, i) => ({ productId: `p${i}`, quantity: 1, chosenDeliveryType: type })));
     User.findOne.mockResolvedValue(user);
