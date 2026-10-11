@@ -159,6 +159,8 @@ const UserSchema = new mongoose.Schema({
     creatorBannerUrl: { type: String, default: undefined },
     creatorProducts: { type: [String], default: [] },
     schemaVersion: { type: Number, default: 1 },
+    // Recovery cursor for future order-status notifications; no historical backfill.
+    businessActivityAt: { type: Date, default: undefined, index: true },
 });
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);

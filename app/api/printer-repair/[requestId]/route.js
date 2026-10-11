@@ -1,3 +1,4 @@
+import { observeSource } from '@/lib/business/server'
 import { auth } from '@clerk/nextjs/server'
 import { connectToDatabase } from '@/lib/db'
 import { enforceFabricationRate } from '@/lib/fabrication/serverRateLimit'
@@ -24,6 +25,8 @@ export async function PATCH(request, context) {
     const body = await readJson(request, 1024)
     if (Object.keys(body).length !== 1 || body.action !== 'withdraw') fail('Choose withdraw to close this assessment request.')
     await connectToDatabase()
-    return json({ request: await withdrawRepairRequest((await context.params).requestId, userId) })
+    const result = await withdrawRepairRequest((await context.params).requestId, userId)
+    await observeSource('repair', result.requestId)
+    return json({ request: result })
   } catch (error) { return repairFailure(error, 'withdraw') }
 }

@@ -1,3 +1,4 @@
+import { observeSource } from '@/lib/business/server'
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { connectToDatabase } from "@/lib/db";
@@ -86,6 +87,7 @@ export async function PATCH(req, props) {
         }
         doc.status = transition.status;
         await doc.save();
+        await observeSource('print', doc.requestId);
 
         // Customer notification on quote — best effort, never fails the action.
         if (action === "quote") {

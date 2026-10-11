@@ -1,3 +1,4 @@
+import { observeSource } from '@/lib/business/server'
 import { notifyBulkOwner, bulkEmailStatus } from '@/lib/bulkFilamentEmail'
 import { auth } from '@clerk/nextjs/server'
 import { checkAdminPrivileges } from '@/lib/checkPrivileges'
@@ -34,10 +35,15 @@ export async function PATCH(request) {
         !Number.isSafeInteger(body.revision) || body.revision < 0 || !['new','reviewing','contacted','closed'].includes(body.status) ||
         typeof body.ownerNote !== 'string' || body.ownerNote.length > 2000) bulkFail('Check request status and note.')
     const db = await bulkDb()
+    const previous = await db.collection('bulkFilamentRequests').findOne({ _id: body.requestId, revision: body.revision }, { projection: { status: 1 } })
+    if (!previous) bulkFail('Another administrator updated this request. Refresh before saving.', 409, 'stale_request')
+    const updatedAt = new Date()
     const updated = await db.collection('bulkFilamentRequests').findOneAndUpdate({ _id: body.requestId, revision: body.revision },
-      { $set: { status: body.status, ownerNote: body.ownerNote.trim(), updatedAt: new Date(), updatedBy: userId }, $inc: { revision: 1 } },
+      { $set: { status: body.status, ownerNote: body.ownerNote.trim(), updatedAt, updatedBy: userId }, $inc: { revision: 1 },
+        ...(body.status !== previous.status ? { $push: { businessStatusHistory: { status: body.status, timestamp: updatedAt } } } : {}) },
       { returnDocument: 'after', projection: { fingerprint: 0 } })
     if (!updated) bulkFail('Another administrator updated this request. Refresh before saving.', 409, 'stale_request')
+    await observeSource('bulk', body.requestId)
     return bulkJson({ request: updated })
   } catch (error) { return bulkFailure(error) }
 }

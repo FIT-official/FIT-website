@@ -1,3 +1,4 @@
+import { observeSource } from '@/lib/business/server'
 import PrinterRepairRequest from '@/models/PrinterRepairRequest'
 import { notifyRepairOwner } from '@/lib/printerRepair/ownerEmail'
 import { auth } from '@clerk/nextjs/server'
@@ -19,6 +20,7 @@ export async function POST(request) {
     await connectToDatabase()
     const result = await createRepairRequest(body, userId)
     await notifyRepairOwner(PrinterRepairRequest.collection, result.request.requestId)
+    await observeSource('repair', result.request.requestId)
     return json({ request: result.request }, result.created ? 201 : 200)
   } catch (error) { return repairFailure(error, 'submit') }
 }

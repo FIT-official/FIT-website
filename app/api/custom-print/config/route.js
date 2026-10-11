@@ -1,3 +1,4 @@
+import { observeSource, notificationConfiguration } from '@/lib/business/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { connectToDatabase } from '@/lib/db'
@@ -71,9 +72,10 @@ export async function PUT(req) {
     }, { new: true, runValidators: true })
     if (!customPrintRequest) return NextResponse.json({ error: 'This request changed. Reload it before saving settings.' }, { status: 409 })
 
+    await observeSource('print', requestId)
     if (mode === 'manual') {
       const adminEmail = process.env.ADMIN_EMAIL || process.env.GMAIL_USER
-      if (adminEmail) {
+      if (adminEmail && !notificationConfiguration().enabled) {
         try {
           const { subject, html } = buildManualQuoteAdminEmail({ request: customPrintRequest.toObject() })
           await sendEmail({ to: adminEmail, subject, html })

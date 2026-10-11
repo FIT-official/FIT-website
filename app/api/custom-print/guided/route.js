@@ -1,3 +1,4 @@
+import { observeSource } from '@/lib/business/server'
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { connectToDatabase } from '@/lib/db'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
@@ -20,6 +21,7 @@ export async function POST(request) {
     const client = await clerkClient()
     const user = await client.users.getUser(userId)
     const result = await createGuidedRequest(body, { userId, userEmail: user.emailAddresses?.find(item => item.id === user.primaryEmailAddressId)?.emailAddress || user.emailAddresses?.[0]?.emailAddress || '', userName: [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'Customer' })
+    await observeSource('print', result.requestId)
     // This is a saved enquiry in the existing admin queue, never an order.
     // Do not send customer messages or invoke the legacy auto-quote notifier.
     return json(result, result.created ? 201 : 200)

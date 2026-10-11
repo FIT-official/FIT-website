@@ -1,3 +1,4 @@
+import { observeSource } from '@/lib/business/server'
 import { parseBulkInput, saveBulkRequest } from '@/lib/bulkFilament'
 import { notifyBulkOwner } from '@/lib/bulkFilamentEmail'
 import { bulkDb, bulkJson, bulkFailure, bulkSameOrigin, readBulkJson, loadBulkCatalogue, limitBulkRequest } from '@/lib/bulkFilamentHttp'
@@ -12,6 +13,7 @@ export async function POST(request) {
     const store = db.collection('bulkFilamentRequests')
     const result = await saveBulkRequest(store, input, loadBulkCatalogue)
     const ownerEmailStatus = await notifyBulkOwner(store, result.receipt.requestId)
+    await observeSource('bulk', result.receipt.requestId)
     return bulkJson({ ...result.receipt, ownerEmailStatus, notificationCoverage: ownerEmailStatus === 'accepted' ? 'owner_dashboard_and_email_provider' : 'owner_dashboard_only' }, result.created ? 201 : 200)
   } catch (error) { return bulkFailure(error) }
 }

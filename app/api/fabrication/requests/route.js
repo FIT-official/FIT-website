@@ -1,3 +1,4 @@
+import { observeSource } from '@/lib/business/server'
 import { auth } from '@clerk/nextjs/server'
 import { connectToDatabase } from '@/lib/db'
 import FabricationRequest from '@/models/FabricationRequest'
@@ -16,6 +17,7 @@ export async function POST(request) {
     const body = await readJson(request)
     await connectToDatabase()
     const result = await createFabricationRequest(body, userId)
+    await observeSource('fabrication', result.request.requestId)
     return json({ request: result.request }, result.created ? 201 : 200)
   } catch (error) { return failure(error) }
 }

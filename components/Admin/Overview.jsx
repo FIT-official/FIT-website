@@ -6,6 +6,7 @@ import { IoChevronDownOutline, IoChevronForwardOutline } from 'react-icons/io5'
 import { settle, swapExit } from '@/lib/motion/tokens'
 import { buildSetupChecklist, summarizeRequests } from '@/lib/admin/setupChecklist'
 import AnalyticsPanel from '@/components/Admin/AnalyticsPanel'
+import BusinessReportsPanel from '@/components/Admin/BusinessReportsPanel'
 import {
     DashCard,
     StatTile,
@@ -483,6 +484,7 @@ export default function Overview({ setupData, requests, fetchedAt, onNavigate, o
             {/* Site analytics, demoted (§5.7): tiles + traffic line by default,
                 the rest behind the panel's own "Full analytics" disclosure. */}
             <AnalyticsPanel compact />
+            <BusinessReportsPanel />
 
             <AdminEmailSheet open={emailSheetOpen} onClose={() => setEmailSheetOpen(false)} />
         </div>

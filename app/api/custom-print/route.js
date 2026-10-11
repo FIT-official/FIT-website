@@ -1,3 +1,4 @@
+import { observeSource } from '@/lib/business/server'
 import { NextResponse } from "next/server"
 import { connectToDatabase } from "@/lib/db"
 import CustomPrintRequest from "@/models/CustomPrintRequest"
@@ -208,6 +209,7 @@ export async function GET(req) {
             const didUpgrade = maybeUpgradeStatusToMatchData(request);
             if (didUpgrade) {
                 await request.save();
+        await observeSource('print', request.requestId);
             }
             return NextResponse.json({ request }, { status: 200 });
         }
@@ -339,6 +341,7 @@ export async function PUT(req) {
             });
         }
         await request.save();
+        await observeSource('print', request.requestId);
 
         // Creator-handled job just became ready for a quote: tell the creator.
         // Best-effort, never fails the customer's save.

@@ -65,9 +65,22 @@ describe('bulk API security and responses',()=>{
   })
   it('denies customer owner updates',async()=>{mock.admin.mockResolvedValue(false);expect((await PATCH(request({},'https://fit.test','PATCH'))).status).toBe(403);expect(mock.db).not.toHaveBeenCalled()})
   it('detects concurrent stale admin edits',async()=>{
+    mock.store.findOne.mockResolvedValue({status:'new'})
     mock.store.findOneAndUpdate.mockResolvedValue(null)
     const r=await PATCH(request({requestId:'12345678-1234-4234-8234-123456789abc',revision:0,status:'reviewing',ownerNote:'Check actual rolls'},'https://fit.test','PATCH'))
     expect(r.status).toBe(409);expect(mock.store.findOneAndUpdate.mock.calls[0][0].revision).toBe(0)
+  })
+  it('commits a status transition history with the same revision-checked update',async()=>{
+    mock.store.findOne.mockResolvedValue({status:'new'});mock.store.findOneAndUpdate.mockResolvedValue({status:'reviewing',revision:1})
+    const r=await PATCH(request({requestId:'12345678-1234-4234-8234-123456789abc',revision:0,status:'reviewing',ownerNote:'Synthetic review'},'https://fit.test','PATCH'))
+    expect(r.status).toBe(200)
+    const [filter,update]=mock.store.findOneAndUpdate.mock.calls[0]
+    expect(filter.revision).toBe(0);expect(update.$push.businessStatusHistory).toEqual({status:'reviewing',timestamp:update.$set.updatedAt})
+  })
+  it('does not count a note-only update as another status transition',async()=>{
+    mock.store.findOne.mockResolvedValue({status:'reviewing'});mock.store.findOneAndUpdate.mockResolvedValue({status:'reviewing',revision:2})
+    expect((await PATCH(request({requestId:'12345678-1234-4234-8234-123456789abc',revision:1,status:'reviewing',ownerNote:'Updated note'},'https://fit.test','PATCH'))).status).toBe(200)
+    expect(mock.store.findOneAndUpdate.mock.calls[0][1]).not.toHaveProperty('$push')
   })
 })
 

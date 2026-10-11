@@ -1,3 +1,5 @@
+import { notificationConfiguration } from '@/lib/business/server'
+import { captureChat } from '@/lib/business/server'
 import { NextResponse } from "next/server";
 import { getStreamServerClient } from "@/lib/streamChat";
 import { connectToDatabase } from "@/lib/db";
@@ -30,6 +32,7 @@ async function emailRecipientsOfNewMessage({ members, message }) {
                 const u = await clerk.users.getUser(id);
                 const to = u?.emailAddresses?.[0]?.emailAddress;
                 if (!to) return;
+                if (notificationConfiguration().enabled && to.toLowerCase() === notificationConfiguration().ownerEmail) return;
                 if (!senderName && senderId) {
                     try {
                         const s = await clerk.users.getUser(senderId);
@@ -63,7 +66,7 @@ export async function POST(req) {
 
         try {
             // Verify webhook using Stream server client; this will throw if invalid
-            client.verifyWebhook(body, signature);
+            if (!signature || client.verifyWebhook(body, signature) !== true) throw new Error('Invalid signature');
         } catch (err) {
             console.error("Invalid Stream webhook signature", err);
             return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
@@ -80,7 +83,7 @@ export async function POST(req) {
             const channel = event.channel || {};
             const channelId = channel.id || event.cid?.split(":")[1];
             if (!channelId) {
-                console.warn("Stream webhook missing channel id", event);
+                console.warn("Stream webhook missing channel id");
                 return NextResponse.json({ received: true });
             }
 
@@ -133,6 +136,10 @@ export async function POST(req) {
                 { upsert: true, new: true, setDefaultsOnInsert: true }
             );
 
+            // Capture after verified provider acceptance. A failed durable capture returns
+            // 500 so Stream can retry; owner queue keys prevent duplicate alerts.
+            await captureChat(event);
+
             // Email the other participant(s) on a brand-new message so personal
             // messages aren't missed. Updates don't re-notify.
             if (type === "message.new" && last) {
@@ -142,7 +149,7 @@ export async function POST(req) {
 
         return NextResponse.json({ received: true });
     } catch (err) {
-        console.error("Error handling Stream webhook", err);
+        console.error("Error handling Stream webhook", err?.name);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }

@@ -1,3 +1,4 @@
+import { observeSource } from '@/lib/business/server'
 import { auth } from '@clerk/nextjs/server'
 import { connectToDatabase } from '@/lib/db'
 import FabricationRequest from '@/models/FabricationRequest'
@@ -27,6 +28,8 @@ export async function PATCH(request, props) {
     const { requestId } = await props.params
     const body = await readJson(request, 8192)
     await connectToDatabase()
-    return json({ request: await updateFabricationRequest(requestId, body, userId) })
+    const result = await updateFabricationRequest(requestId, body, userId)
+    await observeSource('fabrication', requestId)
+    return json({ request: result })
   } catch (error) { return failure(error) }
 }

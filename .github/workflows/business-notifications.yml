@@ -1,0 +1,32 @@
+name: FIT owner business reports
+on:
+  schedule:
+    # 00:00 UTC = 08:00 Singapore. Period IDs deduplicate daily/weekly/monthly
+    # messages; other hourly runs recover pending events and safe retries.
+    - cron: '0 * * * *'
+  workflow_dispatch: {}
+concurrency:
+  group: fit-owner-business-reports
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  reports:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Run existing authenticated notification endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          CRON_BASE_URL: ${{ secrets.CRON_BASE_URL }}
+        run: |
+          if [ -z "$CRON_SECRET" ] || [ -z "$CRON_BASE_URL" ]; then
+            echo '::error::Existing scheduler configuration is unavailable'
+            exit 1
+          fi
+          case "$CRON_BASE_URL" in https://www.fixitoday.com|https://www.fixitoday.com/) ;; *) echo '::error::Unexpected production origin'; exit 1;; esac
+          code=$(curl --max-time 70 -sS -o /tmp/business-notifications.json -w '%{http_code}' \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "${CRON_BASE_URL%/}/api/cron/business-notifications")
+          echo "Notification endpoint HTTP $code"
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then exit 1; fi

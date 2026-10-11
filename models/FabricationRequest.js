@@ -17,6 +17,7 @@ const schema = new mongoose.Schema({
   confirmedPrice: { type: Number, min: 0, max: 100000, default: null },
   confirmedCurrency: { type: String, enum: ['sgd'], default: 'sgd' },
   revision: { type: Number, default: 0, min: 0 },
+  businessStatusHistory: { type: [new mongoose.Schema({ status: String, timestamp: Date }, { _id: false })], default: undefined },
 }, { timestamps: true })
 schema.index({ customerUserId: 1, clientRequestId: 1 }, { unique: true })
 schema.index({ creatorUserId: 1, createdAt: -1, requestId: -1 })

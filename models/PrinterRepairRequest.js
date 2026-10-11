@@ -21,6 +21,7 @@ const schema = new mongoose.Schema({
   clientRequestId: { type: String, required: true }, submissionFingerprint: { type: String, required: true },
   status: { type: String, enum: ['assessment_requested', 'withdrawn'], default: 'assessment_requested' },
   notifications: { email: { type: emailSchema, default: undefined } },
+  businessStatusHistory: { type: [new mongoose.Schema({ status: String, timestamp: Date }, { _id: false })], default: undefined },
   brief: { type: briefSchema, required: true, immutable: true }, photoAssetIds: { type: [String], default: [] },
 }, { timestamps: true })
 schema.index({ customerUserId: 1, clientRequestId: 1 }, { unique: true })

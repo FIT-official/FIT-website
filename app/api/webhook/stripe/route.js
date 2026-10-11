@@ -1,3 +1,4 @@
+import { observeSource } from '@/lib/business/server'
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
 import Stripe from 'stripe';
@@ -75,6 +76,7 @@ export async function POST(req) {
         const checkout = await CheckoutSession.findOne({ sessionId: payment.id });
         if (!checkout) return NextResponse.json({ error: 'Checkout session not found' }, { status: 404 });
         if (checkout.status === 'completed') {
+            await observeSource('order', payment.id);
             return NextResponse.json({ received: true, duplicate: true });
         }
         if (isLegacyCheckout(checkout)) {
@@ -189,7 +191,8 @@ export async function POST(req) {
             if (attemptId && user.checkoutIntent === attemptId) user.checkoutIntent = randomUUID();
             await user.save({ session: dbSession });
         });
-        if (duplicate) return NextResponse.json({ received: true, duplicate: true });
+        if (duplicate) { await observeSource('order', payment.id); return NextResponse.json({ received: true, duplicate: true }); }
+        await observeSource('order', payment.id);
 
         // These external side effects run only after commit. They are best-effort;
         // a notification outage never rolls back a captured and fulfilled payment.

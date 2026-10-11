@@ -1,3 +1,4 @@
+import { observeSource } from '@/lib/business/server'
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
@@ -171,6 +172,7 @@ export async function PUT(req) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
+        const businessStatusChanged = Boolean(status && status !== order.status);
         // Update status if provided
         if (status && status !== order.status) {
             order.status = status;
@@ -191,7 +193,9 @@ export async function PUT(req) {
             order.trackingId = trackingId || null;
         }
 
+        if (businessStatusChanged) user.businessActivityAt = new Date();
         await user.save();
+        if (businessStatusChanged) await observeSource('legacy', user.userId);
 
         return NextResponse.json({ success: true, order }, { status: 200 });
     } catch (error) {

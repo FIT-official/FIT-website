@@ -1,3 +1,4 @@
+import { observeSource } from '@/lib/business/server'
 import { guidedPaymentIssue } from '@/lib/customPrint/guidedBrief'
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
@@ -169,6 +170,8 @@ export async function PUT(request) {
     if (['DocumentNotFoundError', 'VersionError'].includes(error?.name)) return NextResponse.json({ error: 'This request changed. Reload before quoting.' }, { status: 409 })
     throw error
   }
+
+  await observeSource('print', doc.requestId)
 
   // Notify the customer (email + buyer↔vendor chat) for this transition.
   // Best-effort — never fail the admin action on a notification error.
