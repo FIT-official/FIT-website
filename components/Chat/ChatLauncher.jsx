@@ -443,8 +443,9 @@ export default function ChatLauncher() {
                 type="button"
                 onClick={handleToggle}
                 aria-expanded={open}
+                title={open ? 'Close chat' : 'Chat with us'}
                 aria-controls={open ? 'fit-chat-panel' : undefined}
-                className="fixed bottom-4 right-4 sm:bottom-6 sm:left-6 sm:right-auto z-50 rounded-full bg-black text-white shadow-2xl p-3 sm:px-5 sm:py-3 flex items-center gap-2.5 text-sm hover:bg-[#111111] transition-all duration-200 hover:scale-105 active:scale-95"
+                className="fixed bottom-4 right-4 sm:bottom-6 sm:left-4 xl:left-6 sm:right-auto z-50 rounded-full bg-black text-white shadow-2xl p-3 2xl:px-5 2xl:py-3 flex items-center gap-2.5 text-sm hover:bg-[#111111] transition-all duration-200 hover:scale-105 active:scale-95"
             >
                 {!open && unreadTotal > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-[9px] px-1.5 py-0.5 min-w-4.5 text-center">
@@ -456,7 +457,7 @@ export default function ChatLauncher() {
                 ) : (
                     <IoChatbubblesOutline size={20} />
                 )}
-                <span className="sr-only sm:not-sr-only font-medium">{open ? 'Close' : 'Chat with us'}</span>
+                <span className="sr-only 2xl:not-sr-only font-medium">{open ? 'Close' : 'Chat with us'}</span>
             </button>
 
             {open && (

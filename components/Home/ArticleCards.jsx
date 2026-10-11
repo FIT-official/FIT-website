@@ -22,7 +22,7 @@ export default function ArticleCards({ posts, newestId }) {
       <div className='flex flex-col w-full gap-10 min-w-0'>
         <div className='flex flex-col md:flex-row md:items-end md:justify-between gap-6'>
           <div className='flex flex-col gap-2'>
-            <h3>From the Blog</h3>
+            <p className="font-semibold text-sm md:text-base tracking-tight text-lightColor">From the Blog</p>
             <h2 className="font-semibold text-3xl md:text-4xl tracking-tight">Featured Articles</h2>
           </div>
           <ButtonLink lnk={'/blog'} text={'Browse All Articles'} />
@@ -58,9 +58,9 @@ export default function ArticleCards({ posts, newestId }) {
                   ) : null}
                 </div>
 
-                <h2 className='text-base md:text-lg font-semibold text-textColor line-clamp-2 break-words group-hover:underline underline-offset-4 decoration-borderColor'>
+                <h3 className='text-base md:text-lg font-semibold text-textColor line-clamp-2 break-words group-hover:underline underline-offset-4 decoration-borderColor'>
                   {post.title}
-                </h2>
+                </h3>
 
                 {post.excerpt && (
                   <p className='text-xs md:text-sm text-lightColor line-clamp-3 break-words'>

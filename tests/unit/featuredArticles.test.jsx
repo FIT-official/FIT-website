@@ -81,3 +81,13 @@ describe('FeaturedArticles', () => {
     expect(container.firstChild).toBeNull()
   })
 })
+
+it('uses a section heading with article titles beneath it, not a heading for the eyebrow', async () => {
+  render(<FeaturedArticles />)
+  await screen.findByText(LONG_TITLE)
+  expect(screen.getByRole('heading', { level: 2, name: 'Featured Articles' })).toBeInTheDocument()
+  expect(screen.queryByRole('heading', { name: 'From the Blog' })).toBeNull()
+  for (const title of [LONG_TITLE, 'Second post', 'Third post']) {
+    expect(screen.getByRole('heading', { level: 3, name: title })).toBeInTheDocument()
+  }
+})

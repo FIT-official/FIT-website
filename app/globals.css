@@ -344,3 +344,23 @@
   padding: 0.05em 0.15em;
   border-radius: 0.2rem;
 }
+
+/* Available before the navigation in keyboard order, without covering the page. */
+.fit-skip-link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
+  transform: translateY(calc(-100% - 2rem));
+  padding: .75rem 1rem;
+  border: 2px solid #111;
+  border-radius: .5rem;
+  background: #fff;
+  color: #111;
+  font-weight: 600;
+}
+.fit-skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}

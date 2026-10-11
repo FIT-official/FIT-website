@@ -1,7 +1,7 @@
 // @vitest-environment node
 import React from 'react'
 import { PassThrough } from 'node:stream'
-import { renderToPipeableStream } from 'react-dom/server'
+import { renderToPipeableStream, renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('next/font/google', () => ({ Inter: () => ({ variable: 'inter' }) }))
@@ -64,4 +64,13 @@ describe('route checks before the HTTP shell', () => {
             output.destroy()
         }
     })
+})
+
+it('puts a skip link before navigation and targets focusable route content without nesting main landmarks', () => {
+    const html = renderToStaticMarkup(<RootLayout><main><h1>Fixture content</h1><a href="/fixture-action">Content action</a></main></RootLayout>)
+    expect(html).toContain('href="#main-content"')
+    expect(html.indexOf('Skip to main content')).toBeLessThan(html.indexOf('<nav>'))
+    expect(html).toMatch(/<div[^>]*id="main-content"[^>]*tabindex="-1"[^>]*><main>/)
+    expect((html.match(/id="main-content"/g) || [])).toHaveLength(1)
+    expect((html.match(/<main>/g) || [])).toHaveLength(1)
 })
