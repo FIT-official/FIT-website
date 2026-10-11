@@ -126,10 +126,10 @@ export default function AccountPrintRequestsPage() {
                         const farmName = r.creatorDisplayName || 'the creator'
 
                         return (
-                            <DashCard key={r.requestId}>
+                            <DashCard key={r.requestId} id={`request-${r.requestId}`}>
                                 <div className="flex flex-col gap-4">
                                     <div className="flex flex-wrap items-center justify-between gap-2">
-                                        <p className="dash-section min-w-0 truncate">
+                                        <p className="dash-section min-w-0 break-words [overflow-wrap:anywhere]">
                                             {r.guidedBrief?.purpose || r.modelFile?.originalName || 'Custom print'}
                                         </p>
                                         <span className="flex items-center gap-2">
@@ -142,8 +142,13 @@ export default function AccountPrintRequestsPage() {
                                         </span>
                                     </div>
 
-                                    {/* Request ids are admin-facing only; the model name identifies
-                                        the job for the customer. */}
+                                    <div className="text-xs dash-soft flex flex-wrap items-center gap-2">
+                                        <span>Reference: <span className="font-mono break-all select-text">{r.requestId}</span></span>
+                                        <button type="button" className="underline min-h-11 px-2" onClick={async () => {
+                                            try { await navigator.clipboard.writeText(r.requestId); showToast('Reference copied', 'success') }
+                                            catch { showToast('Could not copy. Select the reference text to copy it.', 'error') }
+                                        }}>Copy reference</button>
+                                    </div>
 
                                     {r.guidedBrief && <details className="text-sm"><summary className="cursor-pointer font-medium">View enquiry details</summary>
                                         <dl className="mt-3 space-y-2">{guidedSummary(r.guidedBrief).map(([label,value]) => <div key={label}><dt className="font-medium">{label}</dt><dd className="break-words">{value}</dd></div>)}</dl>

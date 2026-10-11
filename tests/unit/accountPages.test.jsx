@@ -617,8 +617,9 @@ describe('Prints page', () => {
         expect(await screen.findByText('benchy.stl')).toBeInTheDocument()
         // Status pill + timeline entry both carry the label.
         expect(screen.getAllByText('Quote received').length).toBeGreaterThanOrEqual(2)
-        // Request ids are admin-facing only and never render for customers.
-        expect(screen.queryByText('REQ-123')).toBeNull()
+        // A small selectable reference lets the customer identify the request.
+        expect(screen.getByText('REQ-123')).toHaveClass('select-text')
+        expect(screen.getByRole('button', { name: 'Copy reference' })).toBeInTheDocument()
         expect(screen.getByText('Base price')).toBeInTheDocument()
         expect(screen.getByText('Print fee')).toBeInTheDocument()
         expect(document.body.textContent).toContain('SGD 15.00')

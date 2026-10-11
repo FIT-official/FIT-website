@@ -2,7 +2,7 @@
 // which store the price on quote.total (basePrice + printFee are 0). The
 // quote breakdown total uses the same customPrintDisplayPrice selector.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, cleanup, within } from '@testing-library/react'
+import { render, screen, cleanup, within, fireEvent, waitFor } from '@testing-library/react'
 import AccountPrintRequestsPage from '@/app/account/prints/page'
 
 vi.mock('@clerk/nextjs', () => ({ useUser: () => ({ user: { id: 'user_1' }, isLoaded: true }) }))
@@ -121,4 +121,15 @@ describe('Account prints: creator print farm estimate', () => {
         await screen.findByText('bracket.stl')
         expect(screen.queryByRole('region', { name: /Estimate from/ })).toBeNull()
     })
+})
+
+it('copies the selectable request reference from the authenticated job card', async () => {
+    const copy = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: copy } })
+    state.requests = [{ requestId: 'req_copy_123', status: 'pending_config', statusHistory: [] }]
+    render(<AccountPrintRequestsPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Copy reference' }))
+    await waitFor(() => expect(copy).toHaveBeenCalledWith('req_copy_123'))
+    expect(document.getElementById('request-req_copy_123')).toBeInTheDocument()
+    expect(screen.getByText('req_copy_123')).toHaveClass('select-text')
 })

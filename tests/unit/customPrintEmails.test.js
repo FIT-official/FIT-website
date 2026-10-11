@@ -31,7 +31,7 @@ const breakdown = {
 describe('custom-print email builders', () => {
   it('awaiting-quote names the customer + request id', () => {
     const { subject, html } = buildAwaitingQuoteEmail({ request })
-    expect(subject).toContain('req-123')
+    expect(subject).not.toContain('req-123')
     expect(html).toContain('Ada')
     expect(html).toContain('req-123')
     // model file name is escaped
@@ -77,7 +77,8 @@ describe('custom-print email builders', () => {
   it('admin new-request + paid include customer + request id', () => {
     expect(buildNewRequestAdminEmail({ request }).html).toContain('req-123')
     const paid = buildPaymentReceivedAdminEmail({ request, breakdown })
-    expect(paid.subject).toContain('req-123')
+    expect(paid.subject).not.toContain('req-123')
+    expect(paid.html).toContain('req-123')
     expect(paid.html).toContain('SGD 35.00')
   })
 })

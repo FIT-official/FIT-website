@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
 import { sendEmail } from '@/lib/email'
+import { preparePrintEmail } from '@/lib/email/printMessage'
 import { buildIdleNudgeEmail } from '@/lib/email/templates/customPrint'
 import {
   selectIdleRequests,
@@ -63,8 +64,9 @@ export async function GET(req) {
   let failed = 0
   for (const request of due) {
     try {
-      const { subject, html } = buildIdleNudgeEmail({ request })
-      await sendEmail({ to: request.userEmail, subject, html })
+      const built = await preparePrintEmail(buildIdleNudgeEmail, { request })
+      if (!built) continue
+      await sendEmail({ to: request.userEmail, ...built })
       await CustomPrintRequest.updateOne(
         { requestId: request.requestId },
         { $set: { idleNudgeSentAt: new Date() } },

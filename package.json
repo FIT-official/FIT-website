@@ -18,6 +18,7 @@
     "tunnel": "scripts/dev-tunnel.sh"
   },
   "dependencies": {
+    "fast-xml-parser": "5.2.5",
     "@aws-sdk/client-s3": "^3.828.0",
     "@aws-sdk/s3-request-presigner": "^3.828.0",
     "@brianmmdev/clerk-webhooks-handler": "^1.0.7",

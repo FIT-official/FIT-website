@@ -32,7 +32,8 @@ it('escapes all HTML data while retaining the original readable plain text', () 
   doc.customer={name:attack,phone:attack,email:attack,organisation:attack};doc.address=attack;doc.notes=attack;doc._id=attack;doc.priceNotice=attack
   doc.lines=[{productName:attack,options:[{type:attack,name:attack}],quantity:1,remarks:attack,band:attack,tierRolls:1,material:attack}]
   const message=bulkOwnerMessage(doc),dom=parse(message.html)
-  expect(dom.querySelectorAll('img,script,iframe,style')).toHaveLength(0)
+  expect(dom.querySelectorAll('img,script,iframe,body style')).toHaveLength(0)
+  expect(dom.querySelectorAll('head style')).toHaveLength(1)
   expect(dom.querySelectorAll('[onerror],[onclick]')).toHaveLength(0)
   expect(dom.body.textContent).toContain(attack);expect(message.html).toContain('&lt;img');expect(message.text).toContain(attack)
 })

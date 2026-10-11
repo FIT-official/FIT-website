@@ -16,7 +16,7 @@ describe('email base template', () => {
 
   it('formats money in major units, 2dp, upper-cased currency', () => {
     expect(money(12.5, 'sgd')).toBe('SGD 12.50')
-    expect(money('nope', 'usd')).toBe('USD 0.00')
+    expect(money('nope', 'usd')).toBe('Not recorded')
   })
 
   it('emailLayout embeds the body and hidden preheader', () => {

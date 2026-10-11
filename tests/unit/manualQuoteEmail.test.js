@@ -20,9 +20,10 @@ const sampleRequest = {
 }
 
 describe('buildManualQuoteAdminEmail', () => {
-  it('returns a subject containing the requestId', () => {
-    const { subject } = buildManualQuoteAdminEmail({ request: sampleRequest })
-    expect(subject).toMatch(/req-123/)
+  it('keeps the reference in the body and uses a readable subject', () => {
+    const { subject, html } = buildManualQuoteAdminEmail({ request: sampleRequest })
+    expect(subject).not.toMatch(/req-123/)
+    expect(html).toMatch(/req-123/)
     expect(subject).toMatch(/manual quote/i)
   })
 
@@ -49,8 +50,8 @@ describe('buildManualQuoteAdminEmail', () => {
 
   it('survives a minimal/empty request', () => {
     const { subject, html } = buildManualQuoteAdminEmail({ request: { requestId: 'x' } })
-    expect(subject).toMatch(/x/)
-    expect(html).toMatch(/no model uploaded/i)
+    expect(subject).toMatch(/manual quote/i)
+    expect(html).toMatch(/Custom print/)
     expect(html).toMatch(/none provided/i)
   })
 })

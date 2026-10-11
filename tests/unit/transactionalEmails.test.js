@@ -27,7 +27,7 @@ describe('transactional email builders (restyled)', () => {
       items: [{ name: 'Widget', quantity: 2, price: 21, currency: 'sgd' }],
     })
     expect(html).toContain('Widget')
-    expect(html).toContain('×2')
+    expect(html).toContain('x 2')
     expect(html).toContain('SGD 42.00')
   })
 

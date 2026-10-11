@@ -65,16 +65,14 @@ describe('buildIdleNudgeEmail', () => {
     const { subject, html } = buildIdleNudgeEmail({
       request: { requestId: 'r9', userName: 'Ada', status: 'quoted', modelFile: { originalName: 'm.stl' } },
     })
-    expect(subject).toMatch(/waiting/i)
+    expect(subject).toMatch(/ready to review/i)
     expect(html).toContain('Ada')
     expect(html).toContain('r9')
     expect(html).toContain('m.stl')
     expect(html.toLowerCase()).toContain('pay') // quoted → review & pay CTA
   })
 
-  it('falls back cleanly for an unknown status', () => {
-    const { html } = buildIdleNudgeEmail({ request: { requestId: 'r0', status: 'weird' } })
-    expect(html).not.toContain('undefined')
-    expect(html).toContain('r0')
+  it('does not send a reminder for an unknown status', () => {
+    expect(buildIdleNudgeEmail({ request: { requestId: 'r0', status: 'weird' } })).toBeNull()
   })
 })

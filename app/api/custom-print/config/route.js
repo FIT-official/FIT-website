@@ -6,6 +6,7 @@ import AppSettings from '@/models/AppSettings'
 import CustomPrintRequest from '@/models/CustomPrintRequest'
 import Product from '@/models/Product'
 import { sendEmail } from '@/lib/email'
+import { preparePrintEmail } from '@/lib/email/printMessage'
 import { buildManualQuoteAdminEmail } from '@/lib/manualQuoteEmail'
 import { notifyCustomPrintEvent } from '@/lib/notifications/customPrint'
 import { getAppSettingsId } from '@/lib/appSettingsId'
@@ -77,8 +78,8 @@ export async function PUT(req) {
       const adminEmail = process.env.ADMIN_EMAIL || process.env.GMAIL_USER
       if (adminEmail && !notificationConfiguration().enabled) {
         try {
-          const { subject, html } = buildManualQuoteAdminEmail({ request: customPrintRequest.toObject() })
-          await sendEmail({ to: adminEmail, subject, html })
+          const built = await preparePrintEmail(buildManualQuoteAdminEmail, { request: customPrintRequest.toObject() })
+          await sendEmail({ to: adminEmail, ...built })
         } catch (error) { console.error('Manual-quote admin notification failed:', error) }
       }
       try {

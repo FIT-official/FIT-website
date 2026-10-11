@@ -198,13 +198,13 @@ export async function POST(req) {
         // a notification outage never rolls back a captured and fulfilled payment.
         for (const { request, item } of notifications) {
             try { await notifyCustomPrintEvent({ event: 'paid', request, product: { creatorUserId: item.creatorUserId },
-                breakdown: { amount: item.unitAmount / 100, deliveryFee: item.deliveryAmount / 100,
-                    total: item.totalAmount / 100, currency: item.currency.toUpperCase(), chosenDeliveryType: item.chosenDeliveryType } });
+                breakdown: { amount: (item.totalAmount - item.deliveryAmount) / 100, deliveryFee: item.deliveryAmount / 100,
+                    total: item.totalAmount / 100, currency: item.currency.toUpperCase(), chosenDeliveryType: item.chosenDeliveryType, quantity: request.source === 'product' ? 1 : item.quantity } });
             } catch (error) { console.error('Paid print notification failed:', error); }
         }
         try {
             const to = checkout.customerEmail || payment.customer_details?.email;
-            if (to) await sendEmail({ to, ...buildOrderConfirmationEmail({ customerName: checkout.customerName || '' }) });
+            if (to) await sendEmail({ to, ...buildOrderConfirmationEmail({ customerName: checkout.customerName || '', checkout: checkoutPlain(checkout), orderRef: payment.id }) });
         } catch (error) { console.error('Order confirmation failed:', error); }
         const creatorSales = {};
         for (const item of checkout.items) {
