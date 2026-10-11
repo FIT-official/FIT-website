@@ -45,8 +45,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
     const offline = useStoreConnection(() => setReloadProduct(v => v + 1));
     const [showAdded, setShowAdded] = useState(false);
     const [isOwnProduct, setIsOwnProduct] = useState(false);
-    const [ownsDigitalProduct, setOwnsDigitalProduct] = useState(false);
-    const [checkingOwnership, setCheckingOwnership] = useState(false);
+    const [ownership, setOwnership] = useState(null);
     const [isPrintAdding, setIsPrintAdding] = useState(false);
     const [showPrintAdded, setShowPrintAdded] = useState(false);
 
@@ -61,7 +60,16 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
     const [globalDiscountRules, setGlobalDiscountRules] = useState(initialGlobalDiscountRules);
 
     // User orders for review eligibility
-    const [userOrders, setUserOrders] = useState([]);
+    const [orderHistory, setOrderHistory] = useState(null);
+    const viewerId = isLoaded && isSignedIn ? user?.id || null : null;
+    const productId = product?._id || null;
+    const hasDigitalDelivery = Boolean(product?.delivery?.deliveryTypes?.some(dt => dt.type === 'digital'));
+    const needsOwnership = Boolean(viewerId && productId && hasDigitalDelivery);
+    const ownershipIsCurrent = ownership?.viewerId === viewerId && ownership?.productId === productId;
+    const ownsDigitalProduct = needsOwnership && ownershipIsCurrent && ownership.owns;
+    const checkingOwnership = needsOwnership && (!ownershipIsCurrent || ownership.status === 'loading');
+    const userOrders = viewerId && orderHistory?.viewerId === viewerId && orderHistory?.productId === productId
+        ? orderHistory.orders : [];
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -127,51 +135,44 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
         fetchGlobalEvents();
     }, []);
 
-    // Fetch user orders for review eligibility
+    // Keep account-specific responses tied to the account and product that
+    // requested them. Late responses must not change a new viewer's controls.
     useEffect(() => {
+        if (!viewerId || !productId) return;
+        let cancelled = false;
         const fetchUserOrders = async () => {
-            if (!isLoaded || !isSignedIn || !user || !product) return;
-
             try {
-                const response = await fetch(`/api/order?userId=${user.id}&productId=${product._id}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserOrders(data.orders || []);
-                }
+                const response = await fetch(`/api/order?userId=${encodeURIComponent(viewerId)}&productId=${encodeURIComponent(productId)}`);
+                if (!response.ok) return;
+                const data = await response.json();
+                if (!cancelled) setOrderHistory({ viewerId, productId, orders: data.orders || [] });
             } catch (error) {
-                console.error('Error fetching user orders:', error);
+                if (!cancelled) console.error('Error fetching user orders:', error);
             }
         };
-
         fetchUserOrders();
-    }, [isLoaded, isSignedIn, user, product]);
+        return () => { cancelled = true; };
+    }, [viewerId, productId]);
 
-    const checkDigitalOwnership = async () => {
-        if (!product || !user || !isLoaded) return;
-
-        const hasDigitalDelivery = product.delivery?.deliveryTypes?.some(dt => dt.type === 'digital');
-        if (!hasDigitalDelivery) {
-            setOwnsDigitalProduct(false);
-            return;
-        }
-
-        setCheckingOwnership(true);
-        try {
-            const params = new URLSearchParams({
-                productId: product._id
-            });
-
-            const res = await fetch(`/api/user/owns-product?${params}`);
-            const data = await res.json();
-
-            setOwnsDigitalProduct(data.owns || false);
-        } catch (error) {
-            console.error('Error checking product ownership:', error);
-            setOwnsDigitalProduct(false);
-        } finally {
-            setCheckingOwnership(false);
-        }
-    };
+    useEffect(() => {
+        if (!needsOwnership) return;
+        let cancelled = false;
+        setOwnership({ viewerId, productId, owns: false, status: 'loading' });
+        const checkDigitalOwnership = async () => {
+            let owns = false;
+            try {
+                const params = new URLSearchParams({ productId });
+                const res = await fetch(`/api/user/owns-product?${params}`);
+                if (res.ok) owns = (await res.json()).owns === true;
+            } catch (error) {
+                if (!cancelled) console.error('Error checking product ownership:', error);
+            } finally {
+                if (!cancelled) setOwnership({ viewerId, productId, owns, status: 'ready' });
+            }
+        };
+        checkDigitalOwnership();
+        return () => { cancelled = true; };
+    }, [viewerId, productId, needsOwnership]);
 
     useEffect(() => {
         setIsOwnProduct(!!user?.id && product?.creatorUserId === user.id);
@@ -208,7 +209,6 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
             }
         }
 
-        checkDigitalOwnership();
     }, [product, user, isLoaded])
 
     const handleAddToCart = async (product) => {
