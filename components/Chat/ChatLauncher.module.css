@@ -1,0 +1,18 @@
+/* Keep chat above optional consent choices without covering those controls. */
+.panel {
+    max-height: calc(100dvh - 7rem);
+}
+@media (max-width: 767px) {
+    .launcher {
+        bottom: calc(1rem + var(--fit-consent-inset, 0px));
+    }
+    .panel {
+        bottom: calc(6rem + var(--fit-consent-inset, 0px));
+        max-height: calc(100dvh - 7rem - var(--fit-consent-inset, 0px));
+    }
+}
+@media (min-width: 640px) and (max-width: 767px) {
+    .launcher {
+        bottom: calc(1.5rem + var(--fit-consent-inset, 0px));
+    }
+}

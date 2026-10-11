@@ -1,15 +1,27 @@
 'use client';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { readAnalyticsConsent, writeAnalyticsConsent } from '@/lib/analyticsConsent';
 
-const Context = createContext({ consent: null, openPreferences: () => {} });
+const Context = createContext({ consent: null, bannerHeight: 0, openPreferences: () => {} });
 export const useAnalyticsConsent = () => useContext(Context);
 
 export default function AnalyticsConsentProvider({ children }) {
     const [consent, setConsent] = useState(null);
     const [loaded, setLoaded] = useState(false);
     const [preferences, setPreferences] = useState(false);
+    const [bannerHeight, setBannerHeight] = useState(0);
+    const bannerRef = useRef(null);
+    const bannerVisible = loaded && (consent === null || preferences);
+    useEffect(() => {
+        if (!bannerVisible) { setBannerHeight(0); return; }
+        const measure = () => setBannerHeight(Math.ceil(bannerRef.current?.getBoundingClientRect().height || 0));
+        measure();
+        const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+        if (bannerRef.current) observer?.observe(bannerRef.current);
+        window.addEventListener('resize', measure);
+        return () => { observer?.disconnect(); window.removeEventListener('resize', measure); };
+    }, [bannerVisible]);
     useEffect(() => {
         const sync = () => {
             try { setConsent(readAnalyticsConsent(window.localStorage)); }
@@ -26,9 +38,9 @@ export default function AnalyticsConsentProvider({ children }) {
         setConsent(saved ? choice : 'declined');
         setPreferences(false);
     }
-    return <Context.Provider value={{ consent, openPreferences: () => setPreferences(true) }}>
+    return <Context.Provider value={{ consent, bannerHeight: bannerVisible ? bannerHeight : 0, openPreferences: () => setPreferences(true) }}>
         {children}
-        {loaded && (consent === null || preferences) && <section aria-label="Analytics cookie choices"
+        {bannerVisible && <section ref={bannerRef} aria-label="Analytics cookie choices"
             className="fixed bottom-4 left-4 right-4 md:left-auto md:max-w-sm z-50 bg-background border border-borderColor rounded-md p-4 shadow-sm">
             <p className="text-sm font-medium mb-2">Optional analytics cookies</p>
             <p className="text-xs text-textColor mb-3">With your permission, Google measures shop purchases and PostHog helps us understand website use. Google receives order ID, value, currency and purchased items, without your email or payment details. <Link href="/privacy" className="underline">Privacy and cookie choices</Link></p>

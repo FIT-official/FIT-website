@@ -4,9 +4,13 @@ import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { IoChatbubblesOutline, IoClose } from 'react-icons/io5';
 import { StreamChat } from 'stream-chat';
+import { useAnalyticsConsent } from '@/components/General/AnalyticsConsentProvider';
+import styles from './ChatLauncher.module.css';
 
 export default function ChatLauncher() {
     const { user, isLoaded } = useUser();
+    const { bannerHeight } = useAnalyticsConsent();
+    const consentInset = { '--fit-consent-inset': bannerHeight ? `${bannerHeight + 16}px` : '0px' };
     const [open, setOpen] = useState(false);
     const [initialised, setInitialised] = useState(false);
     const [error, setError] = useState(null);
@@ -445,7 +449,8 @@ export default function ChatLauncher() {
                 aria-expanded={open}
                 title={open ? 'Close chat' : 'Chat with us'}
                 aria-controls={open ? 'fit-chat-panel' : undefined}
-                className="fixed bottom-4 right-4 sm:bottom-6 sm:left-4 xl:left-6 sm:right-auto z-50 rounded-full bg-black text-white shadow-2xl p-3 2xl:px-5 2xl:py-3 flex items-center gap-2.5 text-sm hover:bg-[#111111] transition-all duration-200 hover:scale-105 active:scale-95"
+                style={consentInset}
+                className={`${styles.launcher} fixed bottom-4 right-4 sm:bottom-6 sm:left-4 xl:left-6 sm:right-auto z-50 rounded-full bg-black text-white shadow-2xl p-3 2xl:px-5 2xl:py-3 flex items-center gap-2.5 text-sm hover:bg-[#111111] transition-all duration-200 hover:scale-105 active:scale-95`}
             >
                 {!open && unreadTotal > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-[9px] px-1.5 py-0.5 min-w-4.5 text-center">
@@ -461,7 +466,7 @@ export default function ChatLauncher() {
             </button>
 
             {open && (
-                <div id="fit-chat-panel" className="fixed bottom-24 left-3 right-3 sm:right-auto sm:left-6 z-40 w-auto sm:w-105 h-[calc(100vh-8rem)] sm:h-150 bg-white dark:bg-background border border-gray-200 dark:border-borderColor rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-4">
+                <div id="fit-chat-panel" style={consentInset} className={`${styles.panel} fixed bottom-24 left-3 right-3 sm:right-auto sm:left-6 z-40 w-auto sm:w-105 h-[calc(100vh-8rem)] sm:h-150 bg-white dark:bg-background border border-gray-200 dark:border-borderColor rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-4`}>
                     <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-borderColor bg-linear-to-r from-gray-50 to-white dark:from-borderColor/20 dark:to-transparent">
                         <div className="flex flex-col gap-0.5">
                             <span className="text-base font-semibold text-gray-900 dark:text-textColor">Messages</span>
