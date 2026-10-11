@@ -38,7 +38,9 @@ it('sends exact canonical preparation details before payment information, with n
   const send = vi.fn(async () => accepted()); expect(await notify({ send })).toBe('accepted')
   const message = send.mock.calls[0][0]
   expect(message.to).toBe(BULK_OWNER_EMAIL); expect(message).not.toHaveProperty('cc'); expect(message).not.toHaveProperty('bcc')
-  expect(message.text.startsWith('Customer: Synthetic QA\nPhone: +65 8000 0000\nCollection:')).toBe(true)
+  expect(message.text.startsWith('ITEMS TO PREPARE / CHECK')).toBe(true)
+  expect(message.text.indexOf('Quantity: 6 rolls')).toBeLessThan(message.text.indexOf('CUSTOMER CONTACT'))
+  expect(message.text).toContain('Customer: Synthetic QA\nPhone: +65 8000 0000')
   expect(message.text).toContain('Quantity: 4 rolls'); expect(message.text).toContain('Quantity: 6 rolls')
   expect(message.text).toContain('Item remarks: Keep labelled')
   expect(message.text).toContain('Indicative filament total: SGD 139.00')
