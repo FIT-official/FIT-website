@@ -25,7 +25,7 @@ export async function POST(request) {
   } catch { return NextResponse.json({ error: 'Choose a valid notification.' }, { status: 400, headers }) }
   try {
     const result = await retryKnownFailure(await businessDb(), body.id)
-    return NextResponse.json(result, { status: ['disabled','not_retryable'].includes(result.status) ? 409 : 200, headers })
+    return NextResponse.json(result, { status: ['disabled','not_retryable','channel_disabled','channel_unavailable'].includes(result.status) ? 409 : 200, headers })
   } catch { return NextResponse.json({ error: 'Retry outcome unavailable. Refresh delivery status before trying again.' }, { status: 503, headers }) }
 }
 

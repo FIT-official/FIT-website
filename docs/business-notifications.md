@@ -1,6 +1,6 @@
 # FIT business reports and owner alerts
 
-This feature is disabled by default. Shipping its source does not activate capture, delivery or scheduled reports. It adds no prices, stock, taxes, payment actions, customer communications, tracking cookies or printer permissions.
+This feature is disabled by default. Telegram has a separate default-off switch, `FIT_TELEGRAM_NOTIFICATIONS_ENABLED`. Owner email can be activated independently while Telegram remains disabled or unconfigured. Disabled/unavailable Telegram does not create new outbox entries, consume retry attempts or block email; existing Telegram records are preserved until the channel is explicitly enabled and configured. Shipping its source does not activate capture, delivery or scheduled reports. It adds no prices, stock, taxes, payment actions, customer communications, tracking cookies or printer permissions.
 
 ## Recorded activity
 
@@ -46,13 +46,13 @@ An optional fourth argument is an ISO UTC anchor, for example `2026-10-11T02:00:
 
 ## Activation and release boundary
 
-Existing production Gmail, Mongo, PostHog and `CRON_SECRET` are reused. The release owner must review and approve the production configuration and secret distribution before enabling:
+Existing production Gmail, Mongo, PostHog and `CRON_SECRET` are reused. Already-requested owner email can be activated without another generic approval. Telegram credential placement is a separate secure user setup; the assistant must not retrieve, print, copy or configure the token, and it must never be pasted in chat:
 
 1. Set `FIT_BUSINESS_NOTIFICATIONS_START_AT` to the agreed activation instant (ISO UTC); do not backdate casually.
-2. Reuse the existing bot credential as server-only `FIT_TELEGRAM_BOT_TOKEN` and bind `FIT_TELEGRAM_CHAT_ID=266599973` only after approving its use by FIT hosting. Do not create a new token or change bot permissions/pairing/webhooks.
-3. Set `FIT_BUSINESS_NOTIFICATIONS_ENABLED=true` only when both delivery channels and identity checks are ready. A wrong/missing Gmail sender or Telegram destination fails closed and records non-delivery.
+2. Set `FIT_BUSINESS_NOTIFICATIONS_ENABLED=true` for the requested owner email/reporting using the existing production Gmail configuration. Leave `FIT_TELEGRAM_NOTIFICATIONS_ENABLED` absent/false. A missing/wrong email sender fails closed.
+3. The user must complete any Telegram credential placement directly through Vercel's protected Production environment setup for `fit-website`, using `FIT_TELEGRAM_BOT_TOKEN` and the previously verified `FIT_TELEGRAM_CHAT_ID`. Do not retrieve/transmit the token for them, add Preview/Development access, create a new token or change bot permissions/pairing/webhooks. Only after secure setup should `FIT_TELEGRAM_NOTIFICATIONS_ENABLED=true` be configured. Identity checks still run before every send.
 4. Merge the hourly `.github/workflows/business-notifications.yml` and verify the existing repository `CRON_SECRET`/`CRON_BASE_URL` match production. The allowed base is `https://www.fixitoday.com`. Neither repository-secret availability nor a new scheduled run is established by a local test.
-5. Smoke the actual authenticated admin session and authorized synthetic live delivery, then inspect due reports. Do not create a real customer order or charge as a test.
+5. Smoke the actual authenticated admin session and inspect delivery status/due reports. The earlier one-time synthetic delivery allowance is complete; do not send another test without explicit authorization. Do not create a real customer order or charge as a test.
 
 Rollback by disabling `FIT_BUSINESS_NOTIFICATIONS_ENABLED`; existing bulk/repair notifications and customer flows continue. Preserve all outbox states. Review uncertain sends before any later manual reconciliation; never bulk-reset them to pending. The previous owner-digest mechanism stays disabled.
 

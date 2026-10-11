@@ -2,15 +2,16 @@
 import { beforeEach, afterEach, expect, it, vi } from 'vitest'
 import { memoryDb } from '../fixtures/businessStore'
 import { paidFixture, guidedFixture } from '../fixtures/ownerDigest'
-const mocks = vi.hoisted(() => ({ connect: vi.fn(), email: vi.fn() }))
+const mocks = vi.hoisted(() => ({ connect: vi.fn(), email: vi.fn(), telegram: vi.fn() }))
 vi.mock('@/lib/db', () => ({ connectToDatabase: mocks.connect }))
 vi.mock('@/lib/email', () => ({ sendEmail: mocks.email }))
+vi.mock('@/lib/business/telegram', () => ({ sendTelegramAlert: mocks.telegram }))
 import { notificationConfiguration, stageEvent, sourceEvents, reconcileSources, prepareSummaries, captureChat, drainNotifications, notificationHealth, businessSender, retryKnownFailure } from '@/lib/business/server'
 const started = '2026-10-10T00:00:00Z', now = new Date('2026-10-11T02:00:00Z')
 const env = { FIT_BUSINESS_NOTIFICATIONS_ENABLED: 'true', FIT_BUSINESS_NOTIFICATIONS_START_AT: started }
 const event = { kind: 'enquiry.submitted', source: 'print', reference: 'synthetic-1', key: 'synthetic-1', occurredAt: started, status: 'configured' }
 let db
-beforeEach(() => { db = memoryDb(); vi.clearAllMocks(); mocks.connect.mockResolvedValue({ connection: { db } }); for (const [k,v] of Object.entries(env)) vi.stubEnv(k,v); vi.stubEnv('STREAM_SUPPORT_USER_ID','owner'); vi.stubEnv('FIT_TELEGRAM_CHAT_ID','266599973') })
+beforeEach(() => { db = memoryDb(); vi.clearAllMocks(); mocks.connect.mockResolvedValue({ connection: { db } }); for (const [k,v] of Object.entries(env)) vi.stubEnv(k,v); vi.stubEnv('STREAM_SUPPORT_USER_ID','owner'); vi.stubEnv('FIT_TELEGRAM_CHAT_ID','266599973'); vi.stubEnv('FIT_TELEGRAM_NOTIFICATIONS_ENABLED','false'); vi.stubEnv('FIT_TELEGRAM_BOT_TOKEN','') })
 afterEach(() => vi.unstubAllEnvs())
 it.each([{}, { FIT_BUSINESS_NOTIFICATIONS_ENABLED: 'true' }, { ...env, FIT_BUSINESS_NOTIFICATIONS_START_AT: 'bad' }, { ...env, FIT_BUSINESS_NOTIFICATIONS_ENABLED: 'false' }])('fails closed without activation (%j)', async config => {
   expect(notificationConfiguration(config).enabled).toBe(false)
@@ -112,13 +113,22 @@ it.each([{user:{id:'owner'}},{user:{id:'other',role:'admin'}},{user:{id:'custome
   expect(db.collection('businessEvents').rows).toHaveLength(1);expect(db.collection('businessNotifications').rows).toHaveLength(0)
   expect(JSON.stringify(db.collection('businessEvents').rows)).not.toContain('PRIVATE BODY')
 })
-it('queues both incoming-chat channels independently without message content',async()=>{
+it.each(['false','true'])('delivers incoming-chat email immediately with Telegram unavailable (flag %s)',async flag=>{
   mocks.email.mockResolvedValue({accepted:['fixittoday.contact@gmail.com'],messageId:'synthetic'})
-  // Missing provider credentials are recorded as not configured, never sent.
-  vi.stubEnv('GMAIL_PASSWORD','');vi.stubEnv('FIT_TELEGRAM_BOT_TOKEN','')
+  vi.stubEnv('GMAIL_USER','fixittoday.contact@gmail.com');vi.stubEnv('GMAIL_PASSWORD','synthetic-not-a-credential')
+  vi.stubEnv('FIT_TELEGRAM_NOTIFICATIONS_ENABLED',flag)
   await captureChat({type:'message.new',message:{id:'message-id',created_at:started,text:'PRIVATE BODY',user:{id:'customer'}}})
+  expect(db.collection('businessNotifications').rows.map(r=>r.channel)).toEqual(['email'])
+  expect(db.collection('businessNotifications').rows[0].status).toBe('accepted')
+  expect(JSON.stringify(db.collection('businessNotifications').rows)).not.toContain('PRIVATE BODY')
+  expect(mocks.email).toHaveBeenCalledTimes(1);expect(mocks.telegram).not.toHaveBeenCalled()
+})
+it('delivers both chat channels only after explicit Telegram enablement and configuration',async()=>{
+  vi.stubEnv('GMAIL_PASSWORD','');vi.stubEnv('FIT_TELEGRAM_NOTIFICATIONS_ENABLED','true');vi.stubEnv('FIT_TELEGRAM_BOT_TOKEN','synthetic-not-a-credential')
+  mocks.telegram.mockResolvedValue({status:'accepted',providerId:'synthetic-telegram'})
+  await captureChat({type:'message.new',message:{id:'message-id',created_at:started,user:{id:'customer'}}})
   expect(db.collection('businessNotifications').rows.map(r=>r.channel).sort()).toEqual(['email','telegram'])
-  expect(JSON.stringify(db.collection('businessNotifications').rows)).not.toContain('PRIVATE BODY');expect(mocks.email).not.toHaveBeenCalled()
+  expect(mocks.telegram).toHaveBeenCalledTimes(1);expect(mocks.email).not.toHaveBeenCalled()
 })
 it('does not alert on chat message edits',async()=>{
   await captureChat({type:'message.updated',message:{id:'m1',created_at:started,user:{id:'customer'}}})
@@ -136,8 +146,40 @@ it('drains saved notifications and reports acceptance separately from read confi
   await drainNotifications(db,{env,now,sender});expect(sender).toHaveBeenCalledTimes(1)
   expect(await notificationHealth(db)).toMatchObject({counts:{accepted:1},acceptedMeans:'Provider accepted, not inbox/read confirmation'})
 })
+
+it('keeps Telegram disabled even with configured credentials until explicitly enabled',async()=>{
+  const config={...env,FIT_TELEGRAM_CHAT_ID:'266599973',FIT_TELEGRAM_BOT_TOKEN:'synthetic-not-a-credential'}
+  expect(notificationConfiguration(config)).toMatchObject({enabled:true,telegramEnabled:false,telegramConfigured:true})
+  const sender=vi.fn(async()=>({status:'accepted'}))
+  await stageEvent(db,event,{env:config,now,sender,telegram:true})
+  expect(sender).toHaveBeenCalledTimes(1);expect(sender.mock.calls[0][0]).toBe('email')
+  expect(await businessSender(config)('telegram',{chatId:'266599973',text:'synthetic'})).toMatchObject({reason:'telegram_disabled'})
+  expect(mocks.telegram).not.toHaveBeenCalled()
+})
+it.each(['false','true'])('preserves unavailable Telegram records and drains email without starvation (flag %s)',async flag=>{
+  const enabled={...env,FIT_TELEGRAM_NOTIFICATIONS_ENABLED:'true',FIT_TELEGRAM_CHAT_ID:'266599973',FIT_TELEGRAM_BOT_TOKEN:'synthetic-not-a-credential'}
+  for(let i=0;i<10;i++)await stageEvent(db,{...event,key:'telegram-'+i},{env:enabled,now,dispatch:false,email:false,telegram:true})
+  const queue=db.collection('businessNotifications'),before=structuredClone(queue.rows)
+  await stageEvent(db,event,{env,now,dispatch:false})
+  const sender=vi.fn(async()=>({status:'accepted'}))
+  expect(await drainNotifications(db,{env:{...env,FIT_TELEGRAM_NOTIFICATIONS_ENABLED:flag},now,sender})).toMatchObject({attempted:1})
+  expect(sender.mock.calls.map(c=>c[0])).toEqual(['email'])
+  expect(queue.rows.filter(r=>r.channel==='telegram')).toEqual(before)
+  expect((await drainNotifications(db,{env:enabled,now,sender})).attempted).toBe(8)
+})
+it.each(['false','true'])('blocks manual Telegram retry while unavailable without changing attempts (flag %s)',async flag=>{
+  const enabled={...env,FIT_TELEGRAM_NOTIFICATIONS_ENABLED:'true',FIT_TELEGRAM_CHAT_ID:'266599973',FIT_TELEGRAM_BOT_TOKEN:'synthetic-not-a-credential'}
+  await stageEvent(db,event,{env:enabled,now,email:false,telegram:true,sender:async()=>({status:'failed',reason:'provider_rejected'})})
+  const prior=structuredClone(db.collection('businessNotifications').rows[0]),sender=vi.fn()
+  const config={...env,FIT_TELEGRAM_NOTIFICATIONS_ENABLED:flag}
+  expect(await retryKnownFailure(db,prior._id,{env:config,now,sender})).toEqual({status:flag==='false'?'channel_disabled':'channel_unavailable'})
+  expect(db.collection('businessNotifications').rows[0]).toEqual(prior);expect(sender).not.toHaveBeenCalled()
+  expect((await notificationHealth(db,now,{env:config})).review[0].canRetry).toBe(false)
+})
+
 it('does not redirect queued Telegram messages to a changed destination',async()=>{
-  expect(await businessSender({...env,FIT_TELEGRAM_CHAT_ID:'other'})('telegram',{chatId:'266599973',text:'synthetic'})).toMatchObject({status:'not_configured'})
+  expect(await businessSender({...env,FIT_TELEGRAM_NOTIFICATIONS_ENABLED:'true',FIT_TELEGRAM_BOT_TOKEN:'synthetic-not-a-credential',FIT_TELEGRAM_CHAT_ID:'1234'})('telegram',{chatId:'266599973',text:'synthetic'})).toMatchObject({status:'not_configured',reason:'telegram_destination_not_bound'})
+  expect(mocks.telegram).not.toHaveBeenCalled()
 })
 it('allows a bounded manual retry for known failure but never uncertain or accepted delivery',async()=>{
   await stageEvent(db,event,{env,now,sender:async()=>({status:'not_configured',reason:'mailer_unavailable'})})
