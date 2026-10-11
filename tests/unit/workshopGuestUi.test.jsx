@@ -58,3 +58,12 @@ describe('name and group entry with confirmed states', () => {
         render(<GuestTeacherClassroom />); const open = await screen.findByRole('button', { name: 'Open student entry' }); fireEvent.click(open); expect(screen.getByText('Saving…')).toBeInTheDocument(); expect(open).toBeDisabled(); expect(screen.queryByText(/^Saved\./)).not.toBeInTheDocument(); await act(async () => { resolve() }); expect(await screen.findByText(/^Saved\./)).toBeInTheDocument(); const close = screen.getByRole('button', { name: 'Close student entry' }); expect(close).toHaveAttribute('aria-pressed', 'true'); fireEvent.click(close); await act(async () => { reject(Error('Save rejected')) }); expect(await screen.findByText('Save rejected Your unsaved edit is kept.')).toBeInTheDocument(); expect(screen.getByRole('button', { name: 'Close student entry' })).toBeInTheDocument()
     })
 })
+
+it('signals failed student refreshes to the shared retry backoff while retaining the draft screen', async () => {
+    h.fetch.mockImplementation(async () => response({ error: 'Class service unavailable. Your draft is kept; please retry.' }, 503))
+    render(<GuestClassroom homeGroup="g2" />)
+    expect(await screen.findByText(/Class service unavailable/)).toBeInTheDocument()
+    let result; await act(async()=>{ result=await h.poll() })
+    expect(result).toBe(false)
+    expect(screen.getByLabelText('Your name')).toBeInTheDocument()
+})

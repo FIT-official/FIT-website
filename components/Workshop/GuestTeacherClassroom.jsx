@@ -11,7 +11,7 @@ import design from './ClassroomDesign.module.css'
 import { ClassBrand } from './ClassroomDecor'
 export default function GuestTeacherClassroom() {
     const [selectedGroup, setSelectedGroup] = useState('all'), [lesson, setLesson] = useState(null), [busy, setBusy] = useState(false), [message, setMessage] = useState('Loading teacher controls…')
-    async function refresh() { try { setLesson(await classroomRequest('/api/admin/workshop/guest')); setMessage('') } catch (error) { setMessage(error.message); if ([401, 403].includes(error.status)) setLesson(null) } }
+    async function refresh() { try { setLesson(await classroomRequest('/api/admin/workshop/guest')); setMessage(''); return true } catch (error) { setMessage(error.message); if ([401, 403].includes(error.status)) setLesson(null); return false } }
     useClassPolling(refresh, 'guest-teacher')
     async function action(input) { if (busy) return false; setBusy(true); setMessage('Saving…'); try { await classroomRequest('/api/admin/workshop/guest', 'PATCH', input); await refresh(); setMessage('Saved. Student screens update after their next refresh.'); return true } catch (error) { await refresh(); setMessage(error.message + ' Your unsaved edit is kept.'); return false } finally { setBusy(false) } }
     if (!lesson) return <main className={design.shell}><ClassBrand teacher /><h1 className="text-3xl">Class teacher controls</h1><p role="status" className="mt-4">{message}</p><Link className="formWhiteButton mt-4" href="/sign-in?redirect_url=%2Fadmin%2Fworkshop">Sign in as the FIT teacher</Link></main>

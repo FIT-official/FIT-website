@@ -31,7 +31,8 @@ export default function GuestClassroom({ homeGroup = null }) {
         } catch (error) {
             if (!mounted.current || id !== sequence.current) return
             setMessage(error.message); setActualHome(error.homeGroup || null)
-            if ([401, 403].includes(error.status)) { setLesson(null); try { const status = await classroomRequest('/api/workshop/guest/session'); if (mounted.current && id === sequence.current) { setEntryOpen(status.entryOpen); if (!status.seat) setMessage(status.entryOpen ? '' : 'Your teacher has not opened entry yet.') } } catch (failure) { if (mounted.current && id === sequence.current) setMessage(failure.message) } }
+            if ([401, 403].includes(error.status)) { setLesson(null); try { const status = await classroomRequest('/api/workshop/guest/session'); if (mounted.current && id === sequence.current) { setEntryOpen(status.entryOpen); if (!status.seat) setMessage(status.entryOpen ? '' : 'Your teacher has not opened entry yet.') } } catch (failure) { if (mounted.current && id === sequence.current) setMessage(failure.message); return false } return true }
+            return false
         }
     }, [homeGroup])
     useClassPolling(refresh, 'guest-classroom:' + (homeGroup || 'entry'))
