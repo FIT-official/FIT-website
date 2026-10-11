@@ -88,3 +88,17 @@ it('never calls SMTP if the claim cannot be persisted', async () => {
   store.findOneAndUpdate.mockRejectedValue(Error('Unavailable'));const send=vi.fn()
   expect(await notify({send})).toBe('uncertain');expect(send).not.toHaveBeenCalled()
 })
+
+it('attaches all selected image bytes before starting SMTP', async () => {
+  doc.photoAssetIds=['synthetic-photo']; const photo={filename:'1-test.jpg',content:Buffer.from([255,216,255,217]),contentType:'image/jpeg',contentDisposition:'attachment'}
+  const send=vi.fn(async()=>accepted()), attachments=vi.fn(async()=>[photo])
+  expect(await notify({send,attachments})).toBe('accepted')
+  expect(send.mock.calls[0][0].attachments).toEqual([photo]); expect(send.mock.calls[0][0].text).toContain('Photos attached: 1')
+})
+it.each(['throw','missing'])('never substitutes links or sends partial mail when photo retrieval fails: %s', async mode => {
+  doc.photoAssetIds=['synthetic-photo']; const send=vi.fn(async()=>accepted())
+  const attachments=async()=>{if(mode==='throw')throw Error('Photo read failed');return []}
+  expect(await notify({send,attachments})).toBe('failed'); expect(send).not.toHaveBeenCalled()
+  expect(doc.notifications.email.reason).toBe('attachments_unavailable')
+  expect(repairEmailSummary(doc).canRetry).toBe(true)
+})

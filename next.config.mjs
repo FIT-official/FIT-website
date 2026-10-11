@@ -6,6 +6,10 @@ const nextConfig = {
         NEXT_PUBLIC_PRODUCT_IMAGE_PATHS: JSON.stringify(publicProductImages()),
     },
     poweredByHeader: false,
+    serverExternalPackages: ['libheif-js'],
+    outputFileTracingIncludes: {
+        '/api/printer-repair/photos': ['./lib/printerRepair/photoDecodeWorker.cjs', './node_modules/libheif-js/**/*'],
+    },
     // Keep metadata blocking for browsers and crawlers. Route content must also
     // stay outside layout Suspense boundaries so notFound can set HTTP 404.
     htmlLimitedBots: /.*/,

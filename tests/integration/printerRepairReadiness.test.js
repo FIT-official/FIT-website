@@ -6,6 +6,7 @@ vi.mock('@/lib/checkPrivileges', () => ({ checkAdminPrivileges: mocks.admin }))
 vi.mock('@/lib/db', () => ({ connectToDatabase: mocks.db }))
 vi.mock('@/lib/fabrication/serverRateLimit', () => ({ enforceFabricationRate: mocks.rate }))
 vi.mock('@/lib/fabrication/serverAssets', () => ({ privateFabricationBucket: mocks.bucket, findOwnedAsset: vi.fn(), shapeFabricationAsset: vi.fn() }))
+vi.mock('@/lib/printerRepair/photos', () => ({ ownedRepairPhoto: vi.fn(), shapeRepairPhoto: vi.fn(), repairPhotoAttachments: vi.fn(async () => []) }))
 vi.mock('@/models/PrinterRepairRequest', () => ({ default: { find: mocks.find } }))
 import { GET as config } from '@/app/api/printer-repair/config/route'
 import { GET as queue } from '@/app/api/admin/printer-repair/route'
@@ -26,12 +27,10 @@ describe('repair readiness and staff queue', () => {
     expect((await response.json()).code).toBe('rate_limit_unavailable')
     expect(mocks.db).not.toHaveBeenCalled(); expect(mocks.find).not.toHaveBeenCalled()
   })
-  it('offers uploads only after existing private storage passes its read-only verification', async () => {
-    vi.stubEnv('FABRICATION_S3_BUCKET_NAME', 'fixture-private')
+  it('uses the existing private database without requiring a separate S3 bucket', async () => {
+    vi.stubEnv('NODE_ENV', 'test'); vi.stubEnv('FABRICATION_S3_BUCKET_NAME', '')
     expect((await (await config()).json()).uploadsAvailable).toBe(true)
-    mocks.bucket.mockRejectedValueOnce(new Error('private policy not verified'))
-    const body = await (await config()).json()
-    expect(body.uploadsAvailable).toBe(false); expect(JSON.stringify(body)).not.toContain('fixture-private')
+    expect(mocks.bucket).not.toHaveBeenCalled()
   })
   it('does not probe absent storage or advertise production submission without its existing configuration', async () => {
     vi.stubEnv('FABRICATION_S3_BUCKET_NAME', ''); vi.stubEnv('NODE_ENV', 'production'); vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', '')
@@ -43,7 +42,7 @@ describe('repair readiness and staff queue', () => {
     vi.stubEnv('MONGODB_URI', 'fixture-database'); vi.stubEnv('CLERK_SECRET_KEY', 'fixture-auth')
     vi.stubEnv('UPSTASH_REDIS_REST_URL', ''); vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', '')
     vi.stubEnv('KV_REST_API_URL', 'https://fixture-kv.upstash.io'); vi.stubEnv('KV_REST_API_TOKEN', 'fixture-secret')
-    expect(await (await config()).json()).toEqual({ uploadsAvailable: false, requestsAvailable: true })
+    expect(await (await config()).json()).toEqual({ uploadsAvailable: true, requestsAvailable: true })
     vi.stubEnv('UPSTASH_REDIS_REST_URL', 'partial-fixture')
     expect((await (await config()).json()).requestsAvailable).toBe(false)
     vi.stubEnv('UPSTASH_REDIS_REST_URL', ''); vi.stubEnv('KV_REST_API_TOKEN', '')

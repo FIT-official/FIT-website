@@ -35,6 +35,7 @@ const PRIMARY = [
     { key: 'maker-tools', label: 'Maker Tools', href: '/maker-tools' },
     { key: 'community', label: 'Community', href: '/community' },
     { key: 'creators', label: 'Creators', href: '/creators' },
+    { key: 'blog', label: 'Blog', href: '/blog' },
     { key: 'about', label: 'About', href: '/about' },
 ]
 
@@ -219,7 +220,7 @@ function Navbar() {
                         {PRIMARY.map((item) => (
                             <li key={item.key} className="relative flex">
                                 {item.href ? (
-                                    <Link href={item.href} onMouseEnter={scheduleClose} className={navItemCls(activeKey === item.key)}>
+                                    <Link href={item.href} aria-current={routeKey === item.key ? 'page' : undefined} onMouseEnter={scheduleClose} className={navItemCls(activeKey === item.key)}>
                                         {item.label}
                                     </Link>
                                 ) : (

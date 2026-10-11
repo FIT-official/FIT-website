@@ -139,10 +139,11 @@ export default function PrinterRepairFlow() {
     try {
       // The server repeats decoding/type/dimension checks before private storage.
       if (typeof createImageBitmap === 'function') for (const file of chosen) {
+        if (/\.hei[cf]$/i.test(file.name)) continue // Converted safely on the server when sent.
         const bitmap = await createImageBitmap(file)
-        const oversized = bitmap.width > 4096 || bitmap.height > 4096
+        const oversized = bitmap.width > 12000 || bitmap.height > 12000 || bitmap.width * bitmap.height > 24000000
         bitmap.close()
-        if (oversized) throw new Error('Choose photos 4096 × 4096 pixels or smaller.')
+        if (oversized) throw new Error('Choose photos up to 24 megapixels.')
       }
       if (generation !== photoGeneration.current) return
       const additions = chosen.map(file => ({ id: crypto.randomUUID(), file, preview: URL.createObjectURL(file) }))
@@ -153,7 +154,7 @@ export default function PrinterRepairFlow() {
         setPhotos(current => current.map(photo => photo.id === replaceId ? additions[0] : photo))
       } else setPhotos(current => [...current, ...additions])
     } catch (error) {
-      if (generation === photoGeneration.current) setPhotoError(error.message.includes('4096') ? error.message : 'That image could not be opened. Choose a JPEG, PNG or WebP photo.')
+      if (generation === photoGeneration.current) setPhotoError(error.message.includes('megapixels') ? error.message : 'That image could not be opened. Choose a JPEG, PNG or WebP photo.')
     } finally { if (generation === photoGeneration.current) setPhotoBusy(false) }
   }
   function removePhoto(id) {
@@ -193,7 +194,7 @@ export default function PrinterRepairFlow() {
           let assetId = uploaded.current.get(photo.id)
           if (!assetId) {
             const form = new FormData(); form.append('file', photo.file)
-            const asset = await boundedFetch('/api/fabrication/assets', { method: 'POST', body: form, signal: controller.signal })
+            const asset = await boundedFetch('/api/printer-repair/photos', { method: 'POST', body: form, signal: controller.signal })
             if (asset.kind !== 'image' || !asset.assetId) throw new Error('That photo could not be verified. Remove it and try again.')
             assetId = asset.assetId; uploaded.current.set(photo.id, assetId)
           }
@@ -241,18 +242,18 @@ export default function PrinterRepairFlow() {
   function photoControls() {
     return <div className={styles.upload}>
       <div className={styles.uploadHeading}><label htmlFor="repair-photos">Photos <span className={styles.optional}>Optional</span></label><span>{photos.length} / {REPAIR_PHOTO_LIMIT}</span></div>
-      <p id="repair-photos-hint">Show the failed print, the printer or the error screen. JPEG, PNG or WebP · up to 3 photos · 3 MB each · maximum 4096 × 4096 pixels.</p>
+      <p id="repair-photos-hint">Show the failed print, the printer or the error screen. JPEG, PNG, WebP or HEIC — up to 3 photos, 3 MB each and 24 megapixels. Photos are resized and attached to the email sent to FIT.</p>
       {uploadsAvailable === null ? <p role="status">Checking photo uploads.</p> : uploadsAvailable ? <div className={styles.uploadActions}>
-        <label className={styles.fileButton}><span>Choose photos</span><input id="repair-photos" type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={locked || photoBusy} onChange={addPhotos} aria-describedby={`repair-photos-hint${photoError ? ' repair-photos-error' : ''}`} aria-invalid={Boolean(photoError)} /></label>
-        <label className={styles.fileButton}><span>Take a photo</span><input aria-label="Take a photo" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" disabled={locked || photoBusy} onChange={addPhotos} aria-describedby="repair-camera-hint" /></label>
+        <label className={styles.fileButton}><span>Choose photos</span><input id="repair-photos" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" multiple disabled={locked || photoBusy} onChange={addPhotos} aria-describedby={`repair-photos-hint${photoError ? ' repair-photos-error' : ''}`} aria-invalid={Boolean(photoError)} /></label>
+        <label className={styles.fileButton}><span>Take a photo</span><input aria-label="Take a photo" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" capture="environment" disabled={locked || photoBusy} onChange={addPhotos} aria-describedby="repair-camera-hint" /></label>
       </div> : <p role="status">Photo uploads are currently unavailable. You can send your request without photos and discuss them with FIT.</p>}
       {uploadsAvailable && <p id="repair-camera-hint" className={styles.hint}>On a phone, Take a photo opens the camera where supported. Photos stay in this draft until you send.</p>}
       {photoBusy && <p role="status">Checking the selected image.</p>}
       {photoError && <p id="repair-photos-error" className={styles.error} role="alert">{photoError}</p>}
       <ul className={styles.photoList}>{photos.map(photo => <li key={photo.id}>
         <div className={styles.thumbnail} style={{ backgroundImage: `url("${photo.preview}")` }} role="img" aria-label={`Preview of ${photo.file.name}`} />
-        <div className={styles.photoDetails}><span>{photo.file.name}</span><small>{(photo.file.size / 1024 / 1024).toFixed(2)} MB</small><div className={styles.photoActions}>
-          <label className={styles.fileButton}><span>Replace</span><input type="file" aria-label={`Replace ${photo.file.name}`} accept="image/jpeg,image/png,image/webp" disabled={locked || photoBusy} onChange={event => addPhotos(event, photo.id)} /></label>
+        <div className={styles.photoDetails}><span>{photo.file.name}</span>{/\.hei[cf]$/i.test(photo.file.name) && <small>HEIC preview may be unavailable here. FIT receives a converted JPEG when you send.</small>}<small>{(photo.file.size / 1024 / 1024).toFixed(2)} MB</small><div className={styles.photoActions}>
+          <label className={styles.fileButton}><span>Replace</span><input type="file" aria-label={`Replace ${photo.file.name}`} accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" disabled={locked || photoBusy} onChange={event => addPhotos(event, photo.id)} /></label>
           <button type="button" className={styles.secondary} disabled={locked || photoBusy} onClick={() => removePhoto(photo.id)} aria-label={`Remove ${photo.file.name}`}>Remove</button>
         </div></div>
       </li>)}</ul>

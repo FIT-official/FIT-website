@@ -1,0 +1,1 @@
+Original synthetic geometric fixtures generated locally with Pillow/pillow-heif. No customer, camera, location or personal data. HEIC/JPEG/PNG/WebP depict coloured shapes; animated WebP has two frames.

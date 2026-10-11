@@ -6557,6 +6557,11 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
+libheif-js@1.23.5:
+  version "1.23.5"
+  resolved "https://registry.yarnpkg.com/libheif-js/-/libheif-js-1.23.5.tgz#6d44e05c7004b98d08ab9bec664d8121056112eb"
+  integrity sha512-umXZPthnWZtF3iG/5mQG+AZ2V6i0UeYpo3z2CkggTEgL8dKmIIwJT6TDuAMuabXa1yTW8uJ1ZAgR+CxNTklYYw==
+
 lie@^3.0.2, lie@~3.3.0:
   version "3.3.0"
   resolved "https://registry.npmjs.org/lie/-/lie-3.3.0.tgz"

@@ -50,7 +50,7 @@ const rowCls = (active) =>
 
 function SheetRow({ href, icon: Icon, label, active = false, badge = null, onNavigate }) {
     return (
-        <Link href={href} onClick={onNavigate} className={rowCls(active)}>
+        <Link href={href} onClick={onNavigate} className={rowCls(active)} aria-current={active ? 'page' : undefined}>
             <Icon size={18} aria-hidden="true" className="shrink-0" />
             <span className="truncate">{label}</span>
             {badge}
@@ -343,6 +343,7 @@ function MobileMenu({ open, onClose, triggerRef, shopCategories = [], printCateg
                             <SheetRow href="/maker-tools" icon={IoConstructOutline} label="Maker Tools" active={pathname === "/maker-tools"} onNavigate={onClose} />
                             <SheetRow href="/community" icon={IoPeopleOutline} label="Community" active={pathname === "/community" || pathname?.startsWith("/community/")} onNavigate={onClose} />
                             <SheetRow href="/creators" icon={IoPeopleOutline} label="Creators" active={pathname?.startsWith('/creators')} onNavigate={onClose} />
+                            <SheetRow href="/blog" icon={IoInformationCircleOutline} label="Blog" active={pathname === "/blog" || pathname?.startsWith("/blog/")} onNavigate={onClose} />
                             <SheetRow href="/about" icon={IoInformationCircleOutline} label="About" active={pathname?.startsWith('/about')} onNavigate={onClose} />
 
                             {signedIn ? (

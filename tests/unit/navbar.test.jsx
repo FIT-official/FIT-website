@@ -22,6 +22,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent, within, waitFor } from '@testing-library/react'
 import Navbar from '@/components/General/Navbar'
 
+let mockPathname = '/'
 let mockUser = null
 
 vi.mock('@clerk/nextjs', () => ({
@@ -33,7 +34,7 @@ vi.mock('@clerk/nextjs', () => ({
 // route-change close effect and shut the menu as soon as it opens.
 const stableSearchParams = { get: () => null, toString: () => '' }
 vi.mock('next/navigation', () => ({
-    usePathname: () => '/',
+    usePathname: () => mockPathname,
     useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
     useSearchParams: () => stableSearchParams,
 }))
@@ -434,4 +435,22 @@ it('exposes Maker Tools and Community destinations in desktop and mobile navigat
     const dialog = await screen.findByRole('dialog')
     expect(within(dialog).getByRole('link', { name: 'Maker Tools' })).toHaveAttribute('href', '/maker-tools')
     expect(within(dialog).getByRole('link', { name: 'Community' })).toHaveAttribute('href', '/community')
+})
+
+describe('Blog navigation', () => {
+    afterEach(() => { mockPathname = '/' })
+    it.each(['/blog', '/blog/example'])('marks Blog active for %s on desktop and mobile', async path => {
+        mockPathname = path; render(<Navbar />)
+        const primary = screen.getByRole('navigation', { name: 'Primary' })
+        expect(within(primary).getByRole('link', { name: 'Blog' })).toHaveAttribute('href', '/blog')
+        expect(within(primary).getByRole('link', { name: 'Blog' })).toHaveAttribute('aria-current', 'page')
+        fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
+        const mobile = screen.getByRole('navigation', { name: 'Mobile' })
+        expect(within(mobile).getByRole('link', { name: 'Blog' })).toHaveAttribute('href', '/blog')
+        expect(within(mobile).getByRole('link', { name: 'Blog' })).toHaveAttribute('aria-current', 'page')
+    })
+    it('does not mark a similarly prefixed route as Blog', () => {
+        mockPathname = '/blog-private'; render(<Navbar />)
+        expect(screen.getByRole('link', { name: 'Blog' })).not.toHaveAttribute('aria-current')
+    })
 })

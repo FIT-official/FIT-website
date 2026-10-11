@@ -7,6 +7,7 @@ vi.mock('@/lib/db', () => ({ connectToDatabase: mocks.connect }))
 vi.mock('@/lib/checkPrivileges', () => ({ checkAdminPrivileges: mocks.admin }))
 vi.mock('@/lib/fabrication/serverRateLimit', () => ({ enforceFabricationRate: mocks.rate }))
 vi.mock('@/lib/fabrication/serverAssets', () => ({ findOwnedAsset: mocks.ownedAsset, shapeFabricationAsset: mocks.shapeAsset, privateFabricationBucket: vi.fn(async () => 'private-test') }))
+vi.mock('@/lib/printerRepair/photos', () => ({ ownedRepairPhoto: mocks.ownedAsset, shapeRepairPhoto: mocks.shapeAsset, repairPhotoAttachments: vi.fn(async () => []) }))
 vi.mock('@/models/PrinterRepairRequest', () => ({ default: { createIndexes: vi.fn(async () => {}), findOne: mocks.find, create: mocks.create, findOneAndUpdate: mocks.update } }))
 import { POST, GET } from '@/app/api/printer-repair/route'
 import { GET as detail, PATCH as withdraw } from '@/app/api/printer-repair/[requestId]/route'
