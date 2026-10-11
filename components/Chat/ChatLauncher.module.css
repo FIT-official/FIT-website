@@ -1,6 +1,7 @@
-/* Keep chat above optional consent choices without covering those controls. */
+/* Reserve the 56px fixed navigation plus a 16px gap above the panel. */
 .panel {
-    max-height: calc(100dvh - 7rem);
+    max-height: calc(100dvh - 10.5rem);
+    container-type: size;
 }
 @media (max-width: 767px) {
     .launcher {
@@ -8,11 +9,17 @@
     }
     .panel {
         bottom: calc(6rem + var(--fit-consent-inset, 0px));
-        max-height: calc(100dvh - 7rem - var(--fit-consent-inset, 0px));
+        max-height: calc(100dvh - 10.5rem - var(--fit-consent-inset, 0px));
     }
 }
 @media (min-width: 640px) and (max-width: 767px) {
     .launcher {
         bottom: calc(1.5rem + var(--fit-consent-inset, 0px));
     }
+}
+
+/* Keep the sign-in message visible when consent leaves a short panel. */
+@container (max-height: 20rem) {
+    .notice { padding: 1rem; }
+    .noticeIcon { display: none; }
 }

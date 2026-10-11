@@ -501,9 +501,9 @@ export default function ChatLauncher() {
                         ) : (
                             <>
                                 {!isSignedIn && (
-                                    <div className="flex-1 flex items-center justify-center p-8">
-                                        <div className="text-center max-w-sm">
-                                            <IoChatbubblesOutline size={48} className="mx-auto mb-4 text-gray-300 dark:text-borderColor" />
+                                    <div className={`${styles.notice} flex-1 flex min-h-0 overflow-y-auto p-8`}>
+                                        <div className="text-center max-w-sm m-auto">
+                                            <IoChatbubblesOutline size={48} className={`${styles.noticeIcon} mx-auto mb-4 text-gray-300 dark:text-borderColor`} />
                                             <p className="text-sm text-gray-700 dark:text-textColor font-medium mb-2">
                                                 Sign in to start chatting
                                             </p>
