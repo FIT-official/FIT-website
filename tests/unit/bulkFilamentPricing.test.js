@@ -37,10 +37,10 @@ describe('bulk filament pricing', () => {
     const rows=fixtureRows().map(row=>({...row,price:7.45,additionalFee:4}))
     expect(priced([['PLA','Black',10]],rows)[0]).toMatchObject({unitCents:1390,lineCents:13900})
   })
-  it('pools PLA colours and specialties, keeps PETG separate and excludes unsupported brands', () => {
+  it('combines canonical Lanbo PLA colours and PETG while retaining material prices', () => {
     const lines=priced([['PLA','Black',4],['PLA','White',6],['PETG','Black',9]])
     expect(lines.filter(l=>l.material==='PLA').map(l=>l.unitCents)).toEqual([1390,1390])
-    expect(lines.find(l=>l.material==='PETG').unitCents).toBe(1390)
+    expect(lines.find(l=>l.material==='PETG').unitCents).toBe(1340)
     expect(priced([['PETG','Black',10]])[0].unitCents).toBe(1340)
   })
   it('counts split lines once each while retaining the shared enquiry limit', () => {

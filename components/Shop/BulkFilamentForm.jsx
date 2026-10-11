@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import FilamentColourPreview from './FilamentColourPreview'
 import { bulkEmailCopy } from '@/lib/bulkEmailCopy'
-import { BAMBU_PRICE_NOTICE, bulkListUnitCents, BULK_BANDS, BULK_LADDERS, BULK_PRICE_NOTICE, BULK_CONSENT, bulkTier, priceBulkLines } from '@/lib/bulkFilamentConfig'
+import { BAMBU_PRICE_NOTICE, bulkPricingContext, bulkListUnitCents, BULK_BANDS, BULK_LADDERS, BULK_PRICE_NOTICE, BULK_CONSENT, bulkTier, priceBulkLines } from '@/lib/bulkFilamentConfig'
 import { filamentOptionLabel } from '@/lib/filamentLabels'
 import { useInventoryRefresh } from '@/utils/useInventoryRefresh'
 import { bulkSelectionStock, bulkSelectionLimit, BULK_EXTRA_REQUEST_ROLLS } from '@/lib/bulkFilamentSelection'
@@ -100,8 +100,9 @@ export default function BulkFilamentForm() {
     setConfirmReview(false); setError('')
   }
   const pricedInputs = lines.map(line => {
-    const info = selection(catalogue.find(p => p.id === line.productId), Object.fromEntries(line.options.map(o => [o.typeId, o.optionId])))
-    return { ...line, ladder: info.ladder, listUnitCents: info.listUnitCents }
+    const product = catalogue.find(p => p.id === line.productId)
+    const info = selection(product, Object.fromEntries(line.options.map(o => [o.typeId, o.optionId])))
+    return { ...line, ...bulkPricingContext(product), ladder: info.ladder, listUnitCents: info.listUnitCents }
   })
   function lineStock(line, index) {
     const p = catalogue.find(p => p.id === line.productId)
@@ -161,7 +162,7 @@ export default function BulkFilamentForm() {
       </div>
     </div>
     <section className="mt-6 rounded-2xl border border-slate-200 p-3 sm:p-5" aria-label="Bulk prices">
-      <h2>Prices per 1kg roll</h2><p className="mt-2 text-sm">Mix Lanbo and FIT colours within PLA or PETG. Plain, Marble and Wood PLA count together; PETG counts separately. Bambu Lab uses list prices and does not count towards these tiers.</p>
+      <h2>Prices per 1kg roll</h2><p className="mt-2 text-sm">Mix Lanbo PLA and PETG colours to reach the same quantity band. Plain, Marble and Wood PLA count with Lanbo PETG; each keeps its own price per 1kg roll. FIT Marble has a separate quantity band. Bambu Lab uses list prices and does not count towards these tiers.</p>
       <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-xs sm:text-sm"><thead><tr><th className="px-1 py-2 sm:p-2">SGD / roll</th>{BULK_BANDS.map(b => <th className="whitespace-nowrap px-1 py-2 sm:p-2" key={b.min}>{b.label}</th>)}</tr></thead><tbody>{Object.values(BULK_LADDERS).map(l => <tr key={l.label} className="border-t border-slate-200"><th className="px-1 py-2 sm:p-2">{l.label}</th>{l.cents.map((c,i) => <td className="px-1 py-2 sm:p-2" key={i}>${(c / 100).toFixed(2)}</td>)}</tr>)}</tbody></table></div><p className="mt-3 text-sm text-slate-600">{BULK_PRICE_NOTICE}</p>
     </section>
     {error && <div role="alert" className="my-5 rounded-xl border border-red-300 bg-red-50 p-4 text-red-900">{error}</div>}
@@ -233,7 +234,7 @@ export default function BulkFilamentForm() {
             </div>
             <p className="mt-2 text-xs text-slate-600">Enquiry limit: {lineStock(line, index)} rolls. Quantities above recorded stock are availability requests, not confirmed stock.</p>
             {quantityErrors[index] && <p id={`quantity-error-${index}`} role="alert" className="mt-2 text-sm font-medium text-red-700">{quantityErrors[index]}</p>}
-            {prices[index] && <p className="mt-3 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-950">{prices[index].ladder === 'BAMBU_LIST' ? BAMBU_PRICE_NOTICE : <>{BULK_LADDERS[prices[index].ladder].label} | {p.material} band {prices[index].band} ({prices[index].tierRolls} rolls combined)</>}<br/><strong>{money({ amount: prices[index].unitCents / 100, currency: 'SGD' })} / roll x {line.quantity} = {money({ amount: prices[index].lineCents / 100, currency: 'SGD' })}</strong><br/>{prices[index].priceNotice || BULK_PRICE_NOTICE}</p>}
+            {prices[index] && <p className="mt-3 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-950">{prices[index].ladder === 'BAMBU_LIST' ? BAMBU_PRICE_NOTICE : <>{BULK_LADDERS[prices[index].ladder].label} | {prices[index].tierGroupLabel || p.material} band {prices[index].band} ({prices[index].tierRolls} rolls combined)</>}<br/><strong>{money({ amount: prices[index].unitCents / 100, currency: 'SGD' })} / roll x {line.quantity} = {money({ amount: prices[index].lineCents / 100, currency: 'SGD' })}</strong><br/>{prices[index].priceNotice || BULK_PRICE_NOTICE}</p>}
             <label className="mt-4 block text-sm">Item remarks<input className={inputClass + ' mt-2'} maxLength={500} value={line.remarks} onChange={e => editLine(index,'remarks',e.target.value)} placeholder="Any details FIT should check for this selection"/></label>
           </section>
         })}

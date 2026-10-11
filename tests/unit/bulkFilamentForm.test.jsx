@@ -63,16 +63,16 @@ it.each(['28', '', '0', '-1', '1.5'])('suppresses all pooled estimates for inval
   expect(screen.getByText(/Indicative total:/)).toHaveTextContent('$154.00')
   expect(screen.queryByText(/Estimate unavailable/)).not.toBeInTheDocument()
 })
-it('updates every PLA line when Marble crosses the mixed-colour tier; PETG is separate',async()=>{
+it('updates every PLA line when Marble crosses the mixed-colour tier; PETG shares the Lanbo band',async()=>{
   render(<BulkFilamentForm/>);await choose()
   fireEvent.change(screen.getByLabelText('Quantity line 1'),{target:{value:'6'}})
   await choose('Marble');fireEvent.change(screen.getByLabelText('Quantity line 2'),{target:{value:'4'}})
   await choose('Black','PETG');fireEvent.change(screen.getByLabelText('Quantity line 3'),{target:{value:'9'}})
   const regions=screen.getAllByRole('region',{name:/Request line/})
-  expect(regions[0]).toHaveTextContent('10–19 (10 rolls combined)');expect(regions[0]).toHaveTextContent('83.40')
+  expect(regions[0]).toHaveTextContent('10–19 (19 rolls combined)');expect(regions[0]).toHaveTextContent('83.40')
   expect(regions[1]).toHaveTextContent('18.90');expect(regions[1]).toHaveTextContent('75.60')
-  expect(regions[2]).toHaveTextContent('<10 (9 rolls combined)');expect(regions[2]).toHaveTextContent('125.10')
-  expect(screen.getByText(/Indicative total:/)).toHaveTextContent('284.10')
+  expect(regions[2]).toHaveTextContent('10–19 (19 rolls combined)');expect(regions[2]).toHaveTextContent('120.60')
+  expect(screen.getByText(/Indicative total:/)).toHaveTextContent('279.60')
 })
 it.each([['Marble','PLA','28','27'],['Black','PETG','33','32']])('shows a cap error for %s %s',async(colour,material,quantity,cap)=>{
   render(<BulkFilamentForm/>);await choose(colour,material)
@@ -116,7 +116,7 @@ it('admin displays the stored tier, unit price, line total and consent',async()=
   render(<BulkFilamentRequests/>);await screen.findByText('Synthetic QA')
   await waitFor(()=>expect(screen.getByText(/Unit price:/)).toHaveTextContent('SGD 14.90'))
   expect(screen.getByText(/Line total:/)).toHaveTextContent('SGD 29.80')
-  expect(screen.getByText(/PLA band/)).toHaveTextContent('<10')
+  expect(screen.getByText(/Lanbo PLA \+ PETG band/)).toHaveTextContent('<10')
   expect(within(screen.getByRole('article')).getByText(/PDPA consent:/)).toHaveTextContent('Accepted')
 })
 

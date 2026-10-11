@@ -11,7 +11,7 @@ export default function BulkCalculator() {
     const [rolls, setRolls] = useState('10')
     const quantity = Number(rolls)
     const valid = rolls.trim() !== '' && Number.isSafeInteger(quantity) && quantity >= 1 && quantity <= 1000000
-    const price = valid ? priceBulkLines([{ ladder: material, quantity }])[0] : null
+    const price = valid ? priceBulkLines([{ ladder: material, material: BULK_LADDERS[material].material, brand: 'Lanbo', unit: 'roll', rollWeightGrams: 1000, quantity }])[0] : null
     return <div className={styles.calculator}>
         <p className={styles.eyebrow}>Estimate your filament order</p>
         <div className={styles.fields}>

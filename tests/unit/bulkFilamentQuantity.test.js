@@ -5,24 +5,24 @@ import { parseBulkInput, prepareBulkLines } from '@/lib/bulkFilament'
 import { fixtureCatalogue, fixtureInput, fixtureLine, fixtureRows } from '../fixtures/bulkFilament'
 import { BULK_STOCK_SNAPSHOT } from '@/lib/bulkFilamentStockSnapshot'
 
-it.each([[1,1990],[10,1890],[20,1830],[50,1790],[100,1750]])('prices FIT Marble at the Marble ladder for %i combined PLA rolls', (total, cents) => {
-  const c = fixtureCatalogue(BULK_STOCK_SNAPSHOT.rows.map(row => row.barcode === '312' ? { ...row, quantity: 100 } : row))
+it.each([[1,1990],[10,1890],[20,1830],[50,1790],[100,1750]])('prices FIT Marble at the Marble ladder for %i FIT-only PLA rolls', (total, cents) => {
+  const c = fixtureCatalogue(BULK_STOCK_SNAPSHOT.rows.map(row => row.brand === 'FIT' ? { ...row, quantity: 200 } : row))
   const input = fixtureInput(c)
-  input.lines = [fixtureLine(c, 'FIT', 'PLA', 'Grey Marble', 1)]
-  if (total > 1) input.lines.push(fixtureLine(c, 'Lanbo', 'PLA', 'Black', total - 1))
+  input.lines = [fixtureLine(c, 'FIT', 'PLA', 'Grey Marble', total)]
   expect(prepareBulkLines(parseBulkInput(input), c).find(l => l.colour === 'Grey Marble')).toMatchObject({ ladder: 'SPECIALTY_PLA', tierRolls: total, unitCents: cents })
 })
 
-it('shares one PLA tier across plain PLA, FIT Marble and Lanbo Marble while PETG stays separate', () => {
+it('shares a Lanbo PLA/PETG tier while FIT remains independent', () => {
   const c = fixtureCatalogue(BULK_STOCK_SNAPSHOT.rows), input = fixtureInput(c)
   input.lines = [fixtureLine(c,'Lanbo','PLA','Black',6), fixtureLine(c,'FIT','PLA','Grey Marble',8), fixtureLine(c,'Lanbo','PLA','Marble',6), fixtureLine(c,'Lanbo','PETG','Black',9)]
   const rows = prepareBulkLines(parseBulkInput(input), c)
   expect(rows.filter(l => l.material === 'PLA')).toHaveLength(3)
-  for (const row of rows.filter(l => l.material === 'PLA')) {
-    expect(row.tierRolls).toBe(20)
+  for (const row of rows.filter(l => l.brand === 'Lanbo' && l.material === 'PLA')) {
+    expect(row.tierRolls).toBe(21)
     expect(row.unitCents).toBe(row.ladder === 'PLA' ? 1330 : 1830)
   }
-  expect(rows.find(l => l.material === 'PETG')).toMatchObject({ tierRolls: 9, unitCents: 1390 })
+  expect(rows.find(l => l.material === 'PETG')).toMatchObject({ tierRolls: 21, unitCents: 1280 })
+  expect(rows.find(l => l.brand === 'FIT')).toMatchObject({ tierRolls: 8, unitCents: 1990 })
 })
 
 it.each([['Grey Marble',20],['Marble',15],['Beige Marble',10]])('allows FIT %s through its recorded %i plus 20 enquiry limit', (colour, stock) => {
@@ -45,13 +45,13 @@ for (const [ladder, expected] of Object.entries({
   expect(bulkTier(ladder,q).unitCents).toBe(cents)
   expect(priceBulkLines([{ladder,quantity:q}])[0].lineCents).toBe(q*cents)
 })
-it('prices six plain PLA and four Marble at the combined ten-roll band; PETG stays separate', () => {
+it('prices six plain PLA and four Marble at the combined ten-roll band; PETG uses the combined Lanbo band', () => {
   const c=fixtureCatalogue(), input=fixtureInput(c)
   input.lines=[fixtureLine(c,'Lanbo','PLA','Black',6),fixtureLine(c,'Lanbo','PLA','Marble',4),fixtureLine(c,'Lanbo','PETG','Black',9)]
   const rows=prepareBulkLines(parseBulkInput(input),c)
-  expect(rows.find(l=>l.ladder==='PLA')).toMatchObject({band:'10–19',tierRolls:10,unitCents:1390,lineCents:8340})
+  expect(rows.find(l=>l.ladder==='PLA')).toMatchObject({band:'10–19',tierRolls:19,unitCents:1390,lineCents:8340})
   expect(rows.find(l=>l.ladder==='SPECIALTY_PLA')).toMatchObject({band:'10–19',unitCents:1890,lineCents:7560})
-  expect(rows.find(l=>l.ladder==='PETG')).toMatchObject({band:'<10',tierRolls:9,unitCents:1390,lineCents:12510})
+  expect(rows.find(l=>l.ladder==='PETG')).toMatchObject({band:'10–19',tierRolls:19,unitCents:1340,lineCents:12060})
 })
 it('includes Wood and keeps Technology Grey on the plain ladder',()=>{
   const c=fixtureCatalogue(), b=fixtureInput(c)
@@ -66,15 +66,15 @@ it.each(['Rosewood', 'MARBLEfinish', 'DarkWood PLA'])('uses the premium ladder f
   input.lines = [fixtureLine(catalogue, 'Lanbo', 'PLA', colour, 3), fixtureLine(catalogue, 'Lanbo', 'PLA', 'Black', 7)]
   expect(prepareBulkLines(parseBulkInput(input), catalogue).find(line => line.colour === colour)).toMatchObject({ ladder: 'SPECIALTY_PLA', tierRolls: 10, unitCents: 1890, lineCents: 5670 })
 })
-it('pools Lanbo Marble, Wood, FIT Marble and plain PLA independently of the PETG tier', () => {
+it('pools all Lanbo PLA/PETG variants without counting FIT Marble', () => {
   const catalogue = fixtureCatalogue(BULK_STOCK_SNAPSHOT.rows), input = fixtureInput(catalogue)
   input.lines = [fixtureLine(catalogue, 'Lanbo', 'PLA', 'Marble', 3), fixtureLine(catalogue, 'Lanbo', 'PLA', 'Wood Colour', 2), fixtureLine(catalogue, 'FIT', 'PLA', 'Grey Marble', 8), fixtureLine(catalogue, 'Lanbo', 'PLA', 'Black', 7), fixtureLine(catalogue, 'Lanbo', 'PETG', 'Black', 10)]
   const lines = prepareBulkLines(parseBulkInput(input), catalogue)
-  for (const line of lines.filter(line => line.material === 'PLA')) {
-    expect(line).toMatchObject({ tierRolls: 20, band: '20–49', unitCents: line.colour === 'Black' ? 1330 : 1830 })
+  for (const line of lines.filter(line => line.brand === 'Lanbo' && line.material === 'PLA')) {
+    expect(line).toMatchObject({ tierRolls: 22, band: '20–49', unitCents: line.colour === 'Black' ? 1330 : 1830 })
   }
-  expect(lines.find(line => line.material === 'PETG')).toMatchObject({ tierRolls: 10, band: '10–19', unitCents: 1340 })
-  expect(lines.reduce((sum, line) => sum + line.lineCents, 0)).toBe(46500)
+  expect(lines.find(line => line.material === 'PETG')).toMatchObject({ tierRolls: 22, band: '20–49', unitCents: 1280 })
+  expect(lines.reduce((sum, line) => sum + line.lineCents, 0)).toBe(47180)
 })
 it.each([['PLA','Marble',27,28],['PETG','Black',32,33]])('caps %s %s at %i', (material,colour,cap,over)=>{
   const c=fixtureCatalogue(), b=fixtureInput(c)

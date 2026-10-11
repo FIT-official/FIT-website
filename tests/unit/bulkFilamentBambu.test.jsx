@@ -119,7 +119,7 @@ it('shows the separate group, list-price line, stock maximum and unavailable col
   fireEvent.change(screen.getByLabelText('Product / material'), { target: { value: lanbo.id } })
   fireEvent.click(screen.getByRole('button', { name: 'Add colour to enquiry' }))
   fireEvent.change(screen.getByLabelText('Quantity line 2'), { target: { value: '9' } })
-  expect(screen.getByRole('region', { name: 'Request line 2' })).toHaveTextContent('PLA band <10 (9 rolls combined)')
+  expect(screen.getByRole('region', { name: 'Request line 2' })).toHaveTextContent('Lanbo PLA + PETG band <10 (9 rolls combined)')
   expect(screen.getByRole('region', { name: 'Request line 2' })).toHaveTextContent('$14.90 / roll x 9 = $134.10')
   expect(line).toHaveTextContent('$25.90 / roll x 5 = $129.50')
   fireEvent.change(screen.getByLabelText('Quantity line 1'), { target: { value: '38' } })

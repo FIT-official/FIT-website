@@ -35,7 +35,7 @@ function RequestCard({ row, onSaved }) {
     <ul className="mt-2 space-y-3">{row.lines.map((line,i) => <li key={i} className="rounded-xl bg-slate-50 p-3 text-sm">
       <strong>{line.productName}</strong><p>{line.options.map(o => o.type + ': ' + filamentOptionLabel(o.type,o.name)).join(' · ')}</p>
       <p className="mt-1 font-medium">Total requested: {line.quantity ?? 'Legacy request: review original record'} rolls</p>
-      <p>{line.ladder === 'BAMBU_LIST' ? line.priceNotice : <>{line.material} band {line.band || 'Not recorded'} · {line.tierRolls ?? 'Not recorded'} rolls combined</>}</p>
+      <p>{line.ladder === 'BAMBU_LIST' ? line.priceNotice : <>{line.tierGroupLabel || line.material} band {line.band || 'Not recorded'} · {line.tierRolls ?? 'Not recorded'} rolls combined</>}</p>
       <p>Unit price: {Number.isInteger(line.unitCents) ? 'SGD ' + (line.unitCents / 100).toFixed(2) : 'Legacy price: review original record'} / roll</p>
       <p>Line total: {Number.isInteger(line.lineCents) ? 'SGD ' + (line.lineCents / 100).toFixed(2) : 'Not recorded'}</p>
       <p>{line.priceNotice || BULK_PRICE_NOTICE}</p>

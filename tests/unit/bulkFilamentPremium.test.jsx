@@ -16,7 +16,7 @@ it.each(['Marble', 'Wood Colour'])('preserves the 3 %s + 7 plain PLA quote throu
   expect(doc.lines.find(line => line.colour === colour)).toMatchObject({ ladder: 'SPECIALTY_PLA', quantity: 3, band: '10–19', tierRolls: 10, unitCents: 1890, lineCents: 5670 })
   expect(doc.lines.find(line => line.colour === 'Black')).toMatchObject({ ladder: 'PLA', quantity: 7, band: '10–19', tierRolls: 10, unitCents: 1390, lineCents: 9730 })
   const message = bulkOwnerMessage(doc)
-  for (const text of ['10 PLA rolls combined', 'SGD 18.90', 'SGD 56.70', 'SGD 13.90', 'SGD 97.30', 'Indicative filament total: SGD 154.00']) {
+  for (const text of ['10 Lanbo PLA + PETG rolls combined', 'SGD 18.90', 'SGD 56.70', 'SGD 13.90', 'SGD 97.30', 'Indicative filament total: SGD 154.00']) {
     expect(message.text).toContain(text)
     expect(message.html).toContain(text)
   }
@@ -24,7 +24,7 @@ it.each(['Marble', 'Wood Colour'])('preserves the 3 %s + 7 plain PLA quote throu
   render(<BulkFilamentRequests />)
   const article = await screen.findByRole('article')
   const premium = within(article).getAllByRole('listitem').find(item => item.textContent.includes('Colour: ' + colour))
-  expect(premium).toHaveTextContent('PLA band 10–19 · 10 rolls combined')
+  expect(premium).toHaveTextContent('Lanbo PLA + PETG band 10–19 · 10 rolls combined')
   expect(premium).toHaveTextContent('Unit price: SGD 18.90 / roll')
   expect(premium).toHaveTextContent('Line total: SGD 56.70')
   expect(article).toHaveTextContent('Unit price: SGD 13.90 / roll')
