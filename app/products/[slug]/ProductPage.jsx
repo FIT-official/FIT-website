@@ -6,6 +6,7 @@ import posthog from 'posthog-js';
 import { useEffect, useRef, useState } from 'react';
 import { GoChevronLeft, GoChevronRight, GoDownload, GoPlus, GoStar, GoStarFill } from 'react-icons/go';
 import ProductImage from '@/components/ProductImage';
+import { productColourPhoto } from '@/lib/productColourPhoto';
 import Link from 'next/link';
 import { HiCubeTransparent } from 'react-icons/hi';
 import { BiPrinter } from 'react-icons/bi';
@@ -32,8 +33,9 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
 
     const [liked, setLiked] = useState(false);
     const [product, setProduct] = useState(initialProduct);
-    const galleryImages = product ? (product.images?.length ? product.images : [null]) : [];
     const [selectedVariantOptions, setSelectedVariantOptions] = useState(() => getDefaultVariantSelections(initialProduct));
+    const colourPhoto = productColourPhoto(product, selectedVariantOptions);
+    const galleryImages = product ? (colourPhoto ? [colourPhoto.src] : product.images?.length ? product.images : [null]) : [];
     const [isAdding, setIsAdding] = useState(false);
     const [cartError, setCartError] = useState('');
     const addLock = useRef(false);
@@ -519,17 +521,20 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                 <div key={idx} className='flex aspect-square h-full'>
                                     <ProductImage
                                         src={image}
-                                        alt={`${product.name}, image ${idx + 1}`}
+                                        alt={colourPhoto?.alt || `${product.name}, image ${idx + 1}`}
                                         priority={idx === 0}
                                         width={600}
                                         height={600}
-                                        className='w-full h-full object-cover'
+                                        className='w-full h-full object-contain'
                                     />
                                 </div>
                             ))}
                         </div>
 
                     </div>
+                    {colourPhoto && <p className="text-sm text-lightColor" data-testid="product-colour-caption">
+                        {colourPhoto.caption} {colourPhoto.sourceUrl && <a className="underline" href={colourPhoto.sourceUrl} target="_blank" rel="noopener noreferrer">Manufacturer reference</a>}
+                    </p>}
                     <div className='flex w-full py-4 gap-4 items-center'>
                         <button
                             onClick={prevTab}
@@ -561,10 +566,10 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                         >
                                             <ProductImage
                                                 src={image}
-                                                alt={`${product.name}, image ${idx + 1}`}
+                                                alt={colourPhoto?.alt || `${product.name}, image ${idx + 1}`}
                                                 width={100}
                                                 height={100}
-                                                className='w-full h-full object-cover'
+                                                className='w-full h-full object-contain'
 
                                             />
                                         </div>

@@ -8,6 +8,8 @@ import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { getDiscountedPrice } from "@/utils/discount";
 import ShopAddToCart from './Cart/ShopAddToCart';
+import { getDefaultVariantSelections } from '@/lib/seo/product';
+import { productColourPhoto } from '@/lib/productColourPhoto';
 
 function ProductCard({ product }) {
     const { user, isSignedIn, isLoaded } = useUser();
@@ -21,6 +23,8 @@ function ProductCard({ product }) {
     );
     const creatorUserId = isPublicSeed ? relationship?.creatorUserId : product.creatorUserId;
     const router = useRouter();
+    const [imageVariants, setImageVariants] = useState(() => getDefaultVariantSelections(product));
+    const colourPhoto = productColourPhoto(product, imageVariants);
 
     useEffect(() => {
         if (!isPublicSeed) {
@@ -131,12 +135,15 @@ function ProductCard({ product }) {
             role="button"
         >
             <ProductImage
-                src={product.images?.[0]}
-                alt={product.name}
+                src={colourPhoto ? colourPhoto.src : product.images?.[0]}
+                alt={colourPhoto?.alt || product.name}
                 width={400}
                 height={400}
-                className="flex w-full object-cover bg-borderColor aspect-square mb-2"
+                className="flex w-full object-contain bg-borderColor aspect-square mb-2"
             />
+            {colourPhoto && <p className="text-xs text-lightColor" data-testid="product-colour-caption">
+                {colourPhoto.caption} {colourPhoto.sourceUrl && <a className="underline" href={colourPhoto.sourceUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>Manufacturer reference</a>}
+            </p>}
             <div className="flex flex-col w-full items-center justify-center relative">
                 <a href={`/products/${encodeURIComponent(product.slug)}`} onClick={e => e.stopPropagation()} className="text-xs uppercase font-normal text-center break-words w-full px-5 hover:underline">{product.name}</a>
 
@@ -200,7 +207,7 @@ function ProductCard({ product }) {
                 )}
 
                 <span className='flex text-xs text-lightColor'>{salesCount} sold</span>
-                {!product.quoteOnly && product.productType === 'shop' && product.listing !== 'creator' && !isItMyProduct(creatorUserId) && <ShopAddToCart product={product} />}
+                {!product.quoteOnly && product.productType === 'shop' && product.listing !== 'creator' && !isItMyProduct(creatorUserId) && <ShopAddToCart product={product} onVariantsChange={setImageVariants} />}
                 {relationshipReady && !isItMyProduct(creatorUserId) && (
                     <button
                         onClick={liked ? handleUnlike : handleLike}

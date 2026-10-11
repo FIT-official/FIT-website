@@ -1,12 +1,29 @@
+// Added thermometer/chip price and stock values are synthetic test fixtures only.
 import { expect, it } from 'vitest'
 import { productImageSrc, PRODUCT_IMAGE_PLACEHOLDER } from '@/lib/productImage'
 import { productJsonLd, productMetadata } from '@/lib/seo/product'
 import { merchantProduct } from '@/lib/seo/merchantFeed'
 import { selectShopPicks } from '@/lib/home/content'
+import filamentPreviews from '@/lib/bulkFilamentPreviews.json'
 
 // Public catalogue evidence captured 10 October 2026; these are synthetic test
 // copies, not writes to the original catalogue or a physical inventory recount.
+// The four Bambu material cases use invented test-only price/stock values.
 const reviewed = [
+{
+    "id": "6a3f6125d3204f05eac2e3cf",
+    "name": "Digital Thermometer Module",
+    "key": "images/1789460375700-km0lgr9mhsm.jpg",
+    "price": 12.34,
+    "stock": 7
+},
+{
+    "id": "6aa8eba4ed93802ad81354be",
+    "name": "SN74HC595N IC Chip",
+    "key": "images/1789459040439-e5pjv4jav9s.jpg",
+    "price": 12.34,
+    "stock": 7
+},
     {
         "id": "6a3eb3b0c9764357c63caa2a",
         "name": "HC-05 Bluetooth Module",
@@ -202,6 +219,34 @@ const reviewed = [
         "key": "images/1789459310913-mi0ql6padv.jpg",
         "price": 1,
         "stock": 85
+    },
+    {
+        "id": "6aa8eacda1ca543d895a48f2",
+        "name": "Bambu Lab 3D Printing Filament 1kg PLA Matte",
+        "key": "images/1789455051997-1j6t7tjs70ji.jpg",
+        "price": 12.34,
+        "stock": 7
+    },
+    {
+        "id": "6aa8ead5a1ca543d895a4909",
+        "name": "Bambu Lab 3D Printing Filament 1kg PLA Lite",
+        "key": "images/1789455059919-4a9ytrjx194.jpg",
+        "price": 12.34,
+        "stock": 7
+    },
+    {
+        "id": "6aa8ead8a1ca543d895a490f",
+        "name": "Bambu Lab 3D Printing Filament 1kg ABS",
+        "key": "images/1789455063681-zipy7w2ysjd.jpg",
+        "price": 12.34,
+        "stock": 7
+    },
+    {
+        "id": "6aa8eae9a1ca543d895a4921",
+        "name": "Bambu Lab 3D Printing Filament 0.5kg PVA Support",
+        "key": "images/1789455080140-jvc81g7sv4i.jpg",
+        "price": 12.34,
+        "stock": 7
     }
 ]
 
@@ -228,4 +273,13 @@ it.each(reviewed)('quarantines $name without changing its commercial record', ({
     const replacement = { ...product, images: ['images/new-verified-' + id + '.jpg'] }
     expect(productImageSrc(replacement.images[0])).not.toBe(PRODUCT_IMAGE_PLACEHOLDER)
     expect(merchantProduct(replacement)).not.toBeNull()
+})
+
+
+it('retains the separately keyed PLA Basic montage and all 47 official variant previews', () => {
+    const basicKey = 'images/1769264467421-vjcrqw093eb.jpg'
+    expect(productImageSrc(basicKey)).toBe('/api/proxy?key=' + encodeURIComponent(basicKey))
+    const previews = filamentPreviews.entries.filter(entry => entry.preview.status === 'verified_official_variant_photo')
+    expect(previews).toHaveLength(47)
+    for (const entry of previews) expect(productImageSrc(entry.preview.src)).toBe(entry.preview.src)
 })

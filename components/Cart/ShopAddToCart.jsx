@@ -7,7 +7,7 @@ import { getDefaultVariantSelections } from '@/lib/seo/product';
 import { productVariantLabel } from '@/lib/productVariantLabel';
 import { defaultCartDelivery } from '@/lib/cartDelivery';
 
-export default function ShopAddToCart({ product }) {
+export default function ShopAddToCart({ product, onVariantsChange }) {
     const [variants, setVariants] = useState(() => getDefaultVariantSelections(product));
     const [busy, setBusy] = useState(false);
     const [message, setMessage] = useState('');
@@ -31,7 +31,7 @@ export default function ShopAddToCart({ product }) {
         <ConnectionNotice offline={offline} />
         {(product.variantTypes || []).map(v => <label key={v.name} className="text-sm">{productVariantLabel(product, v)}
             <select aria-label={`${product.name} ${productVariantLabel(product, v)}`} value={variants[v.name] || ''} disabled={busy}
-                className="border rounded p-2 w-full" onChange={e => { setVariants({ ...variants, [v.name]: e.target.value }); setAdded(false); }}>
+                className="border rounded p-2 w-full" onChange={e => { const next = { ...variants, [v.name]: e.target.value }; setVariants(next); onVariantsChange?.(next); setAdded(false); }}>
                 {v.options.map(o => <option key={o.name} value={o.name}>{o.name}{o.additionalFee > 0 ? ` (+S$${o.additionalFee.toFixed(2)})` : ''}</option>)}
             </select>
         </label>)}
