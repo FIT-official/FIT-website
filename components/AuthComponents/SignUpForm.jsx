@@ -41,7 +41,7 @@ export default function SignUpForm({ setVerifying, priceId }) {
     }
     return <form onSubmit={submit} className="flex w-full max-w-md flex-col gap-4">
         <h1>Create your account</h1>
-        <p className="text-sm text-lightColor">Start free with your own creator page, 3 product listings and 10 print requests each month. No card required.</p>
+        <p className="text-sm text-lightColor">Shop with FIT, track your print requests or set up a free creator storefront. No card required.</p>
         <p className="text-sm">Already registered? <Link href={withSubscriptionIntent('/sign-in', priceId)} className="underline">Sign in</Link></p>
         {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
         <label className="text-sm">Email<EmailField email={email} setEmail={setEmail} required /></label>

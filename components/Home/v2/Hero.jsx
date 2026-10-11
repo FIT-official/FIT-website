@@ -17,7 +17,7 @@ export default function Hero({ content, facts = siteFacts }) {
             <h1 id="home-title">Print, fix and build in Singapore</h1>
             <p className={styles.heroPromise}>3D printing, printer repair and filament — self-collection or delivery across Singapore.</p>
             <div className={styles.heroActions}>
-                <Link href="/prints/request" className={styles.heroPrimary}><span>Get a print quote <span aria-hidden="true">↗</span></span><small>Upload 3MF / STL</small></Link>
+                <Link href="/prints/request" className={styles.heroPrimary}><span>Get a print quote <span aria-hidden="true">↗</span></span>{facts.printFileTypes?.length > 0 && <small>Upload {facts.printFileTypes.join(' / ')}</small>}</Link>
                 <Link href="/printer-repair" className={styles.heroSecondary}>Book a repair <span aria-hidden="true">↗</span></Link>
                 <Link href="/shop?productCategory=Filament" className={styles.heroSecondary}>Shop filament <span aria-hidden="true">↗</span></Link>
             </div>
