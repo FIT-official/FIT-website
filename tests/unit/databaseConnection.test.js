@@ -19,6 +19,10 @@ beforeEach(() => {
     vi.resetModules()
     vi.resetAllMocks()
     vi.stubEnv('MONGODB_URI', uri)
+    vi.stubEnv('VERCEL_ENV', '')
+    vi.stubEnv('VERCEL_DEPLOYMENT_ID', '')
+    vi.stubEnv('VERCEL_GIT_COMMIT_SHA', '')
+    vi.stubEnv('MONGO_POOL_TELEMETRY', 'false')
     delete globalThis.mongoose
     mongoose.connection.readyState = 0
 })
@@ -104,7 +108,7 @@ describe('shared database connection', () => {
         const { connectToDatabase } = await load()
         await connectToDatabase()
         expect(mongoose.connect).toHaveBeenCalledWith(uri, {
-            bufferCommands: false, maxPoolSize: 5, maxConnecting: 5, minPoolSize: 0, maxIdleTimeMS: 60000,
+            appName: 'fit:test:unattributed', bufferCommands: false, maxPoolSize: 5, maxConnecting: 5, minPoolSize: 0, maxIdleTimeMS: 60000,
             serverSelectionTimeoutMS: 8000, connectTimeoutMS: 8000, socketTimeoutMS: 15000,
             monitorCommands: true,
         })
