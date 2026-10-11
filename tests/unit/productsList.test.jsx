@@ -2,7 +2,7 @@
 // rows render (custom-print base product filtered out), the search WORKS,
 // name/numberSold sorts toggle order, and the derived view tabs filter.
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
-import { render, screen, cleanup, fireEvent } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, waitFor, act } from '@testing-library/react'
 import MyProducts from '@/app/dashboard/products/page'
 
 // Entitlements: creator by default (gating cases override entitlementsState).
@@ -10,12 +10,13 @@ const entitlementsState = { loading: false, canAccessDashboard: true, canUseMess
 vi.mock('@/utils/useAccess', () => ({ default: () => ({ isAdmin: false, canAccess: true, loading: false }) }))
 vi.mock('@/utils/useEntitlements', () => ({ default: () => entitlementsState }))
 
+const session = vi.hoisted(() => ({ id: 'user_1' }))
 const push = vi.fn()
 vi.mock('next/navigation', () => ({
     useRouter: () => ({ push }),
 }))
 vi.mock('@clerk/nextjs', () => ({
-    useUser: () => ({ user: { id: 'user_1' }, isLoaded: true }),
+    useUser: () => ({ user: { id: session.id }, isLoaded: true }),
 }))
 
 const PRODUCTS = [
@@ -59,6 +60,7 @@ function rowNames(container) {
 }
 
 beforeEach(() => {
+    session.id = 'user_1'
     global.fetch = vi.fn(() => Promise.resolve({ ok: true, json: async () => ({ products: PRODUCTS }) }))
 })
 
@@ -160,4 +162,50 @@ describe('Creator products list', () => {
         expect(await screen.findByText('Stock Your Shelf')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'New Product' })).toBeInTheDocument()
     })
+})
+
+
+describe('Creator product load recovery', () => {
+    it('does not misrepresent a failed API response as an empty catalogue and offers retry', async () => {
+        global.fetch = vi.fn()
+            .mockResolvedValueOnce({ ok: false, status: 503, json: async () => ({ error: 'Unavailable' }) })
+            .mockResolvedValue({ ok: true, json: async () => ({ products: PRODUCTS }) })
+        render(<MyProducts />)
+        expect(await screen.findByRole('alert')).toHaveTextContent('Your products could not be loaded')
+        expect(screen.queryByText('Stock Your Shelf')).toBeNull()
+        fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+        expect(await screen.findByText('Alpha Widget')).toBeInTheDocument()
+        expect(screen.queryByRole('alert')).toBeNull()
+    })
+
+    it('keeps nested row action keyboard activation from opening the product editor', async () => {
+        render(<MyProducts />)
+        await screen.findByText('Alpha Widget')
+        const action=screen.getAllByRole('button', { name: 'Performance' })[0]
+        fireEvent.keyDown(action,{key:'Enter'})
+        fireEvent.click(action)
+        expect(await screen.findByText('Product Performance Coming Soon')).toBeInTheDocument()
+        expect(push).not.toHaveBeenCalled()
+    })
+})
+
+it.each(['network','invalid-json','invalid-shape'])('creator recovers from %s without losing the retry path',async kind=>{
+ global.fetch=vi.fn().mockImplementationOnce(async()=>{
+  if(kind==='network')throw Error('Network disconnected')
+  return {ok:true,json:async()=>{if(kind==='invalid-json')throw Error('HTML instead of JSON');return {products:null}}}
+ }).mockResolvedValue({ok:true,json:async()=>({products:PRODUCTS})})
+ render(<MyProducts/>);expect(await screen.findByRole('alert')).toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'Try again'}));expect(await screen.findByText('Alpha Widget')).toBeInTheDocument();
+})
+it('does not reload the catalogue when only the Clerk object identity changes',async()=>{
+ const view=render(<MyProducts/>);await screen.findByText('Alpha Widget');view.rerender(<MyProducts/>);
+ expect(global.fetch).toHaveBeenCalledTimes(1);
+})
+it('ignores the previous creator response after the current account changes',async()=>{
+ let finishFirst;global.fetch=vi.fn().mockImplementationOnce(()=>new Promise(resolve=>{finishFirst=resolve})).mockResolvedValue({ok:true,json:async()=>({products:[]})});
+ const view=render(<MyProducts/>);await waitFor(()=>expect(global.fetch).toHaveBeenCalledTimes(1));
+ session.id='user_2';view.rerender(<MyProducts/>);expect(await screen.findByText('Stock Your Shelf')).toBeInTheDocument();
+ await act(async()=>{finishFirst({ok:true,json:async()=>({products:PRODUCTS})});});
+ expect(screen.queryByText('Alpha Widget')).toBeNull();
+ expect(global.fetch.mock.calls[1][0]).toContain('creatorUserId=user_2');
 })

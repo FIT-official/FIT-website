@@ -537,6 +537,8 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                     </p>}
                     <div className='flex w-full py-4 gap-4 items-center'>
                         <button
+                            type="button"
+                            aria-label="Previous image thumbnails"
                             onClick={prevTab}
                             disabled={tabIdx === 0}
                             className='toggleXbutton'
@@ -550,6 +552,9 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                             >
                                 {displayModelUrl && (
                                     <button
+                                        type="button"
+                                        aria-label="Show 3D model"
+                                        aria-pressed={currentTab === 0}
                                         onClick={() => handleTabClick(0)}
                                         className='flex h-25 aspect-square border border-extraLight border-dashed bg-baseColor hover:bg-borderColor/20 text-lightColor transition-all duration-300 ease-in-out items-center rounded-sm justify-center cursor-pointer'
                                     >
@@ -559,8 +564,10 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
 
                                 {
                                     galleryImages.map((image, idx) => (
-                                        <div
+                                        <button type="button"
                                             key={idx}
+                                            aria-label={`Show image ${idx + 1}`}
+                                            aria-pressed={currentTab === idx + (displayModelUrl ? 1 : 0)}
                                             className='flex h-25 aspect-square bg-borderColor cursor-pointer'
                                             onClick={() => handleTabClick(idx + (displayModelUrl ? 1 : 0))}
                                         >
@@ -572,12 +579,14 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                                 className='w-full h-full object-contain'
 
                                             />
-                                        </div>
+                                        </button>
                                     ))
                                 }
                             </div>
                         </div>
                         <button
+                            type="button"
+                            aria-label="Next image thumbnails"
                             onClick={nextTab}
                             disabled={tabIdx >= totalTabs}
                             className='toggleXbutton'

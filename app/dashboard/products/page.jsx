@@ -15,6 +15,7 @@ import { IoCopyOutline, IoStatsChartOutline, IoStorefrontOutline } from 'react-i
 import { ActionIcon, ComingSoon, EmptyState, PeekPanel, SkeletonRow, StatusPill, ViewTabs } from '@/components/dashboard-ui'
 import { currencyPrefix, formatMoney } from '@/components/DashboardComponents/format'
 import { CreatorGate } from '@/components/DashboardComponents/CreatorShell'
+import { storeJson } from '@/lib/storeRequest'
 
 // Tailwind needs literal class strings (no runtime interpolation of variants).
 const HEAD_COLS = 'grid-cols-[40px_minmax(0,1fr)_110px_70px_70px_110px_110px]'
@@ -65,7 +66,11 @@ function MyProducts() {
     const { user } = useUser();
     const router = useRouter();
     const [myProducts, setMyProducts] = useState([]);
-    const [loaded, setLoaded] = useState(false);
+    const [loadedFor, setLoadedFor] = useState(null);
+    const [loadError, setLoadError] = useState('');
+    const [reload, setReload] = useState(0);
+    const userId = user?.id;
+    const loaded = loadedFor === userId && Boolean(userId);
     const [query, setQuery] = useState('');
     const [tab, setTab] = useState('all');
     const [sort, setSort] = useState({ field: 'createdAt', dir: 'desc' });
@@ -73,29 +78,33 @@ function MyProducts() {
     const [peekProduct, setPeekProduct] = useState(null);
 
     useEffect(() => {
-        if (!user) return;
+        let cancelled = false;
+        setLoadedFor(null);
+        setLoadError('');
+        setMyProducts([]);
+        if (!userId) return;
         const fetchProducts = async () => {
-            const res = await fetch(`/api/product?creatorUserId=${user.id}`);
-            const data = await res.json();
-            if (data.products && data.products.length > 0) {
-                // Hide the special Custom 3D Print config product from this list;
-                // it is managed via the dedicated admin tab instead.
+            try {
+                const data = await storeJson(`/api/product?creatorUserId=${encodeURIComponent(userId)}`);
+                if (!Array.isArray(data.products)) throw new Error('Incomplete catalogue');
+                // This configuration product has a dedicated management view.
                 const filtered = data.products.filter(p => {
-                    // Filter by known slug/id/name patterns used for custom print config
                     const slug = p.slug || p.handle || '';
                     const name = p.name || '';
-                    const isCustomPrintSlug = typeof slug === 'string' && slug.includes('custom-print');
-                    const isCustomPrintName = typeof name === 'string' && name.toLowerCase().includes('custom 3d print');
-                    const isCustomPrintId = p._id === 'CP1_CUSTOM_PRINT_CONFIG';
-                    return !(isCustomPrintSlug || isCustomPrintName || isCustomPrintId);
+                    return !(typeof slug === 'string' && slug.includes('custom-print') ||
+                        typeof name === 'string' && name.toLowerCase().includes('custom 3d print') ||
+                        p._id === 'CP1_CUSTOM_PRINT_CONFIG');
                 });
-
-                setMyProducts(filtered);
+                if (!cancelled) setMyProducts(filtered);
+            } catch {
+                if (!cancelled) setLoadError('Your products could not be loaded. Check your connection and try again.');
+            } finally {
+                if (!cancelled) setLoadedFor(userId);
             }
-            setLoaded(true);
         };
         fetchProducts();
-    }, [user]);
+        return () => { cancelled = true; };
+    }, [userId, reload]);
 
     const counts = useMemo(() => ({
         all: myProducts.length,
@@ -179,6 +188,11 @@ function MyProducts() {
                         <SkeletonRow />
                         <SkeletonRow />
                     </div>
+                ) : loadError ? (
+                    <div className="rounded-lg border border-[var(--dash-line)] p-4">
+                        <p role="alert">{loadError}</p>
+                        <button type="button" className="underline mt-3" onClick={() => setReload(value => value + 1)}>Try again</button>
+                    </div>
                 ) : myProducts.length === 0 ? (
                     <div className="bg-[var(--dash-card)] border border-[var(--dash-line)] rounded-[var(--dash-r-card)] shadow-[var(--dash-shadow-card)]">
                         <EmptyState
@@ -222,7 +236,7 @@ function MyProducts() {
                                             tabIndex={0}
                                             onClick={() => router.push(`/dashboard/products/edit/${product._id}`)}
                                             onKeyDown={(e) => {
-                                                if (e.key === 'Enter') router.push(`/dashboard/products/edit/${product._id}`)
+                                                if (e.key === 'Enter' && e.target === e.currentTarget) router.push(`/dashboard/products/edit/${product._id}`)
                                             }}
                                             className={`group dash-hoverable grid ${ROW_COLS} gap-4 items-center w-full text-left px-4 py-2.5 cursor-pointer hover:bg-[var(--dash-canvas)]`}
                                         >

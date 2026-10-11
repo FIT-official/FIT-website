@@ -4,6 +4,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
 import { useUser } from '@clerk/nextjs'
+import userEvent from '@testing-library/user-event'
 
 vi.mock('@clerk/nextjs', () => ({
     useUser: vi.fn(() => ({
@@ -164,4 +165,17 @@ describe('ProductPage purchase buttons', () => {
         expect(screen.queryByText('Add to Cart')).toBeNull()
         expect(screen.queryByText('Order Print')).toBeNull()
     })
+    it('lets a keyboard user choose a gallery image and identify thumbnail navigation', async () => {
+        const user=userEvent.setup();
+        const product={...shopProduct,images:['images/synthetic-first.jpg','images/synthetic-second.jpg']};
+        global.fetch=vi.fn(async()=>({ok:true,json:async()=>({product})}));
+        render(<ProductPage initialProduct={product}/>);
+        const second=screen.getByRole('button',{name:'Show image 2',exact:true});
+        second.focus();await user.keyboard('{Enter}');
+        expect(second).toHaveAttribute('aria-pressed','true');
+        expect(screen.getByRole('button',{name:'Show image 1',exact:true})).toHaveAttribute('aria-pressed','false');
+        expect(screen.getByRole('button',{name:'Previous image thumbnails'})).toBeDisabled();
+        expect(screen.getByRole('button',{name:'Next image thumbnails'})).toBeInTheDocument();
+    })
+
 })
