@@ -23,7 +23,7 @@
     "beforeBalancedFeedbackAddition": false,
     "syntheticConfig": true,
     "network": "loopback only",
-    "seconds": 66.189
+    "seconds": 41.356
   },
   "lint": {
     "errors": 0,
@@ -70,5 +70,6 @@
     "g2-2": "No visible submitted evidence passed the mapping check; drafts/hidden/deleted work remain held.",
     "g4-1": "No peer feedback; the mapped own entry is a placeholder without substantive drawing changes.",
     "g10-2": "Mapped own work allocates a task but specifies no geometry/mechanism change; no peer response."
-  }
+  },
+  "referenceValidation": "Only own entries in the authored illustration registries; inherited keys and arbitrary URLs are rejected."
 }

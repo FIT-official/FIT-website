@@ -82,6 +82,7 @@ describe('additive publication and recoverable edits', () => {
         const store = memoryDb().collection('synthetic-canvases'), document = { ...blankCanvas(), reference: canvasReferenceFor('g10', '1'), objects: [shapeObject('rect', [20, 20], [100, 100], { colour: '#234e48', fill: 'none', size: 4 }, randomUUID())] }
         expect(validCanvas(document)).toBe(true)
         expect(resolveCanvasReference({ key: document.reference.key, version: 999 })).toBeNull()
+        for (const key of ['__proto__', 'constructor', 'toString']) for (const version of [3, 4]) { expect(resolveCanvasReference({ key, version })).toBeNull(); expect(validCanvas({ ...document, reference: { key, version } })).toBe(false) }
         expect(validCanvas({ ...document, reference: { ...document.reference, url: 'https://example.test' } })).toBe(false)
         const input = { action: 'draft', requestId: randomUUID(), expectedVersion: 0, expectedSeat: access.seat, document }
         await writeCanvas(store, access, 'g10', '1', input, { now })
