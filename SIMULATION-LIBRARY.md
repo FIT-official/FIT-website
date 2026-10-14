@@ -1,6 +1,6 @@
 # FIT simulation library
 
-This addition starts from production `5789481df0ecfe506a30aed7b13bcb56cbda115e`. It does not import the held Classes platform or protected-copy candidate `dbc9e1d`, or change class seats, submissions, rosters, APIs, middleware, navigation, credentials or site-wide headers.
+This addition starts from production `5789481df0ecfe506a30aed7b13bcb56cbda115e`. It does not import the held Classes platform or protected-copy candidate `dbc9e1d`, or change class seats, submissions, rosters, classroom APIs, middleware, credentials or site-wide headers. The coordinated desktop/mobile Classes link points directly to the public library.
 
 ## Routes and interaction
 
@@ -9,12 +9,12 @@ This addition starts from production `5789481df0ecfe506a30aed7b13bcb56cbda115e`.
 - `/classes/simulations/feedback`: Feedback Control Lab.
 - `/classes/simulations/base-rates`: Evidence & Base Rates.
 - `/classes/simulations/heat-path`: Heat Path Designer.
-- `/simulations/<activity>/index.html`: standalone, no-account static activity.
-- `/simulations/<activity>/index.html?embed=1`: compact same-origin player.
+- `/simulations/<activity>`: standalone, no-account activity document, behind the existing page gate.
+- `/simulations/<activity>?embed=1`: compact same-origin player.
 
 Each activity includes accessible native controls, reset, numeric/text equivalents, equations, units, assumptions, an investigation and teacher guidance. Thermal and heat activities have run/pause, fixed numerical stepping and a bounded 300-second experiment. Playback pauses when the workbench leaves the viewport or the document is hidden. Sampling starts with the source hidden; inspection has deterministic expected and seeded sample modes. Heat has roving keyboard cell focus and material brushes.
 
-Player code is independently authored and uses no external runtime or API. It imports only local scripts/styles, sends no learner measurements or responses, and reads no class identity or private data. The normal FIT shell retains its existing host/auth/consent behavior. Static hosting may retain access logs; this is not a claim that hosting collects no technical data. Learner answers are discussion prompts, not submitted or stored responses.
+Player code is independently authored and uses no external runtime or learner-submission API. It imports only local scripts/styles, sends no learner measurements or responses, and reads no class identity or private data. The normal FIT shell retains its existing host/auth/consent behavior. Entry documents use uncached extensionless GET routes so the unchanged middleware applies the same maintenance and onboarding rules as the library. The former static HTML copies are removed; there is no alternate public HTML entry that skips the maintenance gate. Hosting may retain access logs; this is not a claim that hosting collects no technical data. Learner answers are discussion prompts, not submitted or stored responses.
 
 ## Embedding boundary
 
@@ -54,4 +54,4 @@ Focused checks: `node node_modules/vitest/vitest.mjs run tests/classroomSimulati
 
 Whole checks follow existing coverage, lint and production-build scripts. The isolated Windows QA runner strips inherited app credentials, blocks outbound network, uses mocked build fonts and synthetic keys only. Those fixtures are outside tracked source and must not be deployed. The generated playground-worker prebuild is absent from this production base and was not imported from the held candidate.
 
-The production Classes parent route does not yet exist; the held Classes platform owns it. Shared Classes/nav integration requires its owner's coordinated release. Do not cherry-pick the broad held branch to make this collection discoverable. Only this additive commit should enter the production release checkout, and production SHA must still match the recorded base or be explicitly reconciled with a fresh source review.
+The production Classes parent route does not yet exist; the held Classes platform owns it. Its owner approved only Classes links in Navbar/MobileMenu to this library. No parent redirect, private hub or audience route is imported. The held schema permits a literal class ID `simulations`, which would conflict with the new static prefix when that private hub is later combined; an authorized roster/ID check is required before the combined release. This isolated production-based release contains no private class route. Only these reviewed commits should enter the production release checkout, and production SHA must still match the recorded base or be explicitly reconciled with a fresh source review.

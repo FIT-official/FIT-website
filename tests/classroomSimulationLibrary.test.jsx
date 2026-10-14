@@ -29,13 +29,13 @@ describe('Simulation discovery and classroom embeds', () => {
   it('has a titled local iframe and honest external-framing boundary', async () => {
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: vi.fn().mockResolvedValue() } })
     render(<Activity activity={activities[0]} />)
-    expect(screen.getByTitle('Interactive activity: Signal Sampling Detective')).toHaveAttribute('src', '/simulations/sampling/index.html?embed=1')
+    expect(screen.getByTitle('Interactive activity: Signal Sampling Detective')).toHaveAttribute('src', '/simulations/sampling?embed=1')
     expect(screen.getByText(/external iframe hosting awaits/i)).toBeVisible()
     fireEvent.click(screen.getByRole('button', { name: 'Copy FIT player snippet' }))
     expect(await screen.findByText('Same-origin player snippet copied.')).toBeVisible()
     const snippet = screen.getByLabelText('Same-origin iframe HTML').value
     expect(snippet).toContain('title="FIT: Signal Sampling Detective"')
-    expect(snippet).toContain('/simulations/sampling/index.html?embed=1')
+    expect(snippet).toContain('/simulations/sampling?embed=1')
     expect(snippet).not.toContain('student')
   })
   it('provides manual copy fallback when the clipboard is unavailable', async () => {

@@ -6,7 +6,7 @@ import styles from './library.module.css'
 export default function Activity({ activity }) {
   const [snippet, setSnippet] = useState('')
   const [copyStatus, setCopyStatus] = useState('')
-  const source = `/simulations/${activity.id}/index.html`
+  const source = `/simulations/${activity.id}`
   async function copyEmbed() {
     const markup = `<iframe src="${window.location.origin}${source}?embed=1" title="FIT: ${activity.title}" width="100%" height="1400" style="border:0;max-width:1200px" loading="lazy" referrerpolicy="no-referrer" allowfullscreen></iframe>`
     setSnippet(markup)

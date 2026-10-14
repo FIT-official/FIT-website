@@ -454,3 +454,31 @@ describe('Blog navigation', () => {
         expect(screen.getByRole('link', { name: 'Blog' })).not.toHaveAttribute('aria-current')
     })
 })
+
+describe('Public Classes simulation entry', () => {
+    afterEach(() => { mockPathname = '/' })
+    it.each([true, false])('keeps Classes visible on desktop and mobile when signed in = %s', async signedIn => {
+        if (!signedIn) mockUser = null
+        render(<Navbar />)
+        const primary = screen.getByRole('navigation', { name: 'Primary' })
+        expect(within(primary).getByRole('link', { name: 'Classes' })).toHaveAttribute('href', '/classes/simulations')
+        fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
+        const sheet = await screen.findByRole('dialog', { name: 'Menu' })
+        const link = within(sheet).getByRole('link', { name: 'Classes' })
+        expect(link).toHaveAttribute('href', '/classes/simulations')
+        fireEvent.click(link)
+        await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Menu' })).toBeNull())
+    })
+    it.each(['/classes/simulations', '/classes/simulations/sampling'])('marks Classes active for %s', async pathname => {
+        mockPathname = pathname; render(<Navbar />)
+        expect(within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { name: 'Classes' })).toHaveAttribute('aria-current', 'page')
+        fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
+        expect(within(await screen.findByRole('dialog', { name: 'Menu' })).getByRole('link', { name: 'Classes' })).toHaveAttribute('aria-current', 'page')
+    })
+    it('does not confuse /classes-extra with the Classes namespace', async () => {
+        mockPathname = '/classes-extra'; render(<Navbar />)
+        expect(within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { name: 'Classes' })).not.toHaveAttribute('aria-current')
+        fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
+        expect(within(await screen.findByRole('dialog', { name: 'Menu' })).getByRole('link', { name: 'Classes' })).not.toHaveAttribute('aria-current')
+    })
+})

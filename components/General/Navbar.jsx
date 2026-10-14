@@ -32,6 +32,7 @@ const PRIMARY = [
     { key: 'prints', label: 'Prints' },
     { key: 'services', label: 'Services', href: '/research-fabrication', paths: ['/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair'] },
     { key: 'school-programmes', label: 'Programmes', href: '/school-programmes' },
+    { key: 'classes', label: 'Classes', href: '/classes/simulations', paths: ['/classes'] },
     { key: 'maker-tools', label: 'Maker Tools', href: '/maker-tools' },
     { key: 'community', label: 'Community', href: '/community' },
     { key: 'creators', label: 'Creators', href: '/creators' },
