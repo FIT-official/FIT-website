@@ -14,7 +14,7 @@ const defaults = {
   sampling: { frequency: 7, sampleRate: 10, phase: 0, amplitude: 1, duration: 2, revealSource: false, revealFold: false },
   feedback: { target: 60, ambient: 20, kp: 0.06, ki: 0.002, delay: 0, loss: 4, maxPower: 240, capacity: 200, mode: 'PI', manual: 0.5, disturbance: false },
   'base-rates': { prevalence: 1, sensitivity: 95, specificity: 95, population: 10000, mode: 'Expected', seed: 42 },
-  'heat-path': { brush: 1, fixedEdges: true },
+  'heat-path': { brush: 1, fixedEdges: true, selectedRow: 7, selectedColumn: 13 },
 };
 let state = { ...defaults[id] }, grid = createHeatGrid(), elapsed = 0, playing = false, frame = 0, lastTime = 0, budget = 0;
 let thermal, inspection, heatHistory = [{ t: 0, ...heatMetrics(grid) }];
@@ -46,7 +46,7 @@ function controls() {
   if (id === 'sampling') html += range('frequency', 'Source frequency', 0, 12, 0.5, 'Hz') + range('sampleRate', 'Sampling rate', 1, 40, 1, 'samples/s') + range('phase', 'Phase', 0, 360, 15, '°') + range('amplitude', 'Amplitude', 0, 2, 0.1, 'V') + range('duration', 'Observation window', 1, 4, 1, 's') + check('revealFold', 'Reveal compatible wave') + check('revealSource', 'Reveal source wave');
   if (id === 'feedback') html += select('mode', 'Controller', ['Manual', 'P', 'PI'].map(x => [x, x])) + range('target', 'Target temperature', 25, 90, 1, '°C') + range('kp', 'Proportional gain Kp', 0, 0.3, 0.01, '1/°C') + range('ki', 'Integral gain Ki (PI)', 0, 0.01, 0.0005, '1/(°C·s)') + range('delay', 'Sensor delay', 0, 30, 1, 's') + range('ambient', 'Outside temperature', 0, 30, 1, '°C') + range('loss', 'Heat loss G', 1, 8, 0.5, 'W/K') + range('capacity', 'Thermal capacity C', 100, 500, 50, 'J/K') + range('maxPower', 'Heater limit', 100, 400, 20, 'W') + range('manual', 'Manual heater duty', 0, 1, 0.05, 'fraction') + check('disturbance', 'Cold air at 150 s (−10 °C)');
   if (id === 'base-rates') html += range('prevalence', 'Defect rate', 0, 100, 0.1, '%') + range('sensitivity', 'Sensitivity: catch defects', 0, 100, 1, '%') + range('specificity', 'Specificity: clear sound parts', 0, 100, 1, '%') + select('population', 'Batch size', [[100, '100'], [1000, '1,000'], [10000, '10,000']]) + select('mode', 'Counts', [['Expected', 'Expected frequencies'], ['Sample', 'Seeded finite sample']]) + range('seed', 'Sample seed', 1, 9999, 1, 'integer') + '<p class="quiet wide">The false-alarm rate is 100% minus specificity. Expected counts may be fractional; sampled counts are integers.</p>';
-  if (id === 'heat-path') html += select('brush', 'Paint material', [[1, 'High conductance · 1 W/K'], [0.2, 'Medium conductance · 0.2 W/K'], [0.02, 'Low conductance · 0.02 W/K'], [0, 'Insulator × · 0 W/K']]) + check('fixedEdges', 'Hold edges at 100 °C / 20 °C') + '<p class="quiet wide">Click a tile to paint. Keyboard: Tab enters the grid, arrows move, Space/Enter paints. Edge reservoirs cannot be painted while fixed. Painting pauses the model and keeps the current temperatures. Reset starts a fresh comparison.</p>';
+  if (id === 'heat-path') html += select('brush', 'Paint material', [[1, 'High conductance · 1 W/K'], [0.2, 'Medium conductance · 0.2 W/K'], [0.02, 'Low conductance · 0.02 W/K'], [0, 'Insulator × · 0 W/K']]) + check('fixedEdges', 'Hold edges at 100 °C / 20 °C') + select('selectedRow', 'Selected tile row', Array.from({ length: 12 }, (_, i) => [i + 1, String(i + 1)])) + select('selectedColumn', 'Selected tile column', Array.from({ length: 16 }, (_, i) => [i + 1, String(i + 1)])) + '<button id="paint-selected" class="button wide">Paint selected tile</button><p class="quiet wide">Use row/column controls for precise touch painting, or click a tile. Keyboard: Tab enters the grid, arrows move, Space/Enter paints. Edge reservoirs cannot be painted while fixed. Painting pauses the model and keeps current temperatures. Reset starts a fresh comparison.</p>';
   $('#controls').innerHTML = html;
   $('#controls').oninput = event => {
     const input = event.target, key = input.dataset.key;
@@ -68,6 +68,11 @@ function controls() {
   };
   $('#controls').onchange = event => {
     if (event.target.type === 'number') event.target.value = state[event.target.dataset.key];
+  };
+  if (id === 'heat-path') $('#paint-selected').onclick = () => {
+    const index = (state.selectedRow - 1) * HEAT_WIDTH + state.selectedColumn - 1;
+    pause(); paintHeatCell(index); render();
+    $('#announcement').textContent = state.fixedEdges && (index % 16 === 0 || index % 16 === 15) ? 'Fixed edge reservoirs cannot be painted.' : `Painted row ${state.selectedRow}, column ${state.selectedColumn}.`;
   };
 }
 
@@ -120,6 +125,14 @@ function renderInspection() {
 
 function heatColor(t) { const f = Math.max(0, Math.min(1, (t - 20) / 80)); return `rgb(${Math.round(222 + 32 * Math.min(1, 2 * f) - 64 * Math.max(0, 2 * f - 1))},${Math.round(242 - 202 * f)},${Math.round(255 - 215 * f)})`; }
 let focusCell = 0;
+function paintHeatCell(index) {
+  focusCell = index;
+  state.selectedRow = Math.floor(index / HEAT_WIDTH) + 1;
+  state.selectedColumn = index % HEAT_WIDTH + 1;
+  $('#selectedRow').value = state.selectedRow;
+  $('#selectedColumn').value = state.selectedColumn;
+  if (!(state.fixedEdges && (index % 16 === 0 || index % 16 === 15))) grid[index].material = state.brush;
+}
 function renderHeat() {
   const metrics = heatMetrics(grid);
   const initialMean = createHeatGrid().reduce((sum, c) => sum + c.temperature, 0) / grid.length;
@@ -131,14 +144,13 @@ function renderHeat() {
   const plate = $('.heat-grid');
   plate.onclick = event => {
     const cell = event.target.closest('[data-cell]'); if (!cell) return;
-    focusCell = Number(cell.dataset.cell); pause();
-    if (!(state.fixedEdges && (focusCell % 16 === 0 || focusCell % 16 === 15))) grid[focusCell].material = state.brush;
+    pause(); paintHeatCell(Number(cell.dataset.cell));
     renderHeat(); $(`[data-cell="${focusCell}"]`).focus();
   };
   plate.onkeydown = event => {
     const cell = event.target.closest('[data-cell]'); if (!cell) return;
     const i = Number(cell.dataset.cell), moves = { ArrowRight: i % 16 < 15 ? i + 1 : i, ArrowLeft: i % 16 > 0 ? i - 1 : i, ArrowDown: Math.min(grid.length - 1, i + 16), ArrowUp: Math.max(0, i - 16) };
-    if (event.key in moves) { event.preventDefault(); cell.tabIndex = -1; focusCell = moves[event.key]; const next = $(`[data-cell="${focusCell}"]`); next.tabIndex = 0; next.focus(); }
+    if (event.key in moves) { event.preventDefault(); pause(); renderToolbar(); cell.tabIndex = -1; focusCell = moves[event.key]; state.selectedRow = Math.floor(focusCell / 16) + 1; state.selectedColumn = focusCell % 16 + 1; $('#selectedRow').value = state.selectedRow; $('#selectedColumn').value = state.selectedColumn; const next = $(`[data-cell="${focusCell}"]`); next.tabIndex = 0; next.focus(); }
   };
 }
 

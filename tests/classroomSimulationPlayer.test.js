@@ -72,4 +72,13 @@ describe('Native activity controls and data equivalents', () => {
     expect(document.getElementById('status').textContent).toContain('conserved')
     expect(document.getElementById('metrics').textContent).toContain('25.00 °C')
   })
+  it('offers precise touch painting without tapping the small heat-grid cells', async () => {
+    await open('heat-path')
+    input('brush', '0'); input('selectedRow', '7'); input('selectedColumn', '13')
+    document.getElementById('paint-selected').click()
+    expect(document.querySelector('[data-cell="108"]')).toHaveClass('insulator')
+    input('selectedColumn', '1'); document.getElementById('paint-selected').click()
+    expect(document.querySelector('[data-cell="96"]')).not.toHaveClass('insulator')
+    expect(document.getElementById('announcement').textContent).toContain('cannot be painted')
+  })
 })
