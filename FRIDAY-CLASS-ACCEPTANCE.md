@@ -15,4 +15,15 @@ Scope: the existing ten-group workshop at `/workshop/g1/classroom` through `/wor
 
 Local checks use synthetic accounts/data only. `scripts/groupCanvas` verifies the canvas and teacher history; `scripts/fridayClass` verifies the combined editing and two-idea feedback flow. Unit tests cover mapped publication hashes, version compatibility, concurrent assignments, own completion/privacy, teacher moderation and stale callbacks. Build uses synthetic configuration and blocks non-loopback networking.
 
+The four retained illustration mappings are deliberate source decisions:
+
+| Pair and original key | Why the drawing is retained | What remains available |
+| --- | --- | --- |
+| G1 Idea 2 — `g1_rolling_bin` | The exported submitted feedback/refinement did not pass the verified assignment join. No additional design change can be attributed confidently. | Complete original reading, original image, problem/solution editors, canvas reference and both feedback tasks. |
+| G2 Idea 2 — `g2_sorting_bin` | No visible submitted evidence passed the mapping check. Draft, hidden and deleted material was not treated as approved feedback. | The same complete original content and editing/feedback tools. |
+| G4 Idea 1 — `g4_wick_pot` | No visible peer response; the mapped own entry was a placeholder rather than a substantive design instruction. | The existing wick-pot concept and all editing/feedback tools. No invented geometry. |
+| G10 Idea 2 — `g10_fire_car` | The mapped own entries allocate a task but do not specify a geometry or mechanism change; no visible peer response adds one. | The original vehicle drawing and explanation, inert tabletop modelling instructions and all editing/feedback tools. |
+
+These are reviewed mappings, not four revised drawings. Unresolved source records remain recoverable in their original store; the release does not move or rewrite them.
+
 Production verification must record the actual deployed Git SHA, confirm every current image hash and group/idea pairing, check text/canvas save and reload through an existing authorized session, inspect both feedback panels on desktop/mobile, and confirm sign-out clears private work. No verification should submit synthetic records into the real classroom.
