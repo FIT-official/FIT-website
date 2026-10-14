@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { backorders, backordersEnabled } from '@/lib/shopBackorders/host';
 import { connectToDatabase } from "@/lib/db";
 import { cartIdentity, cartOwner } from "@/lib/cartOwner";
 import { checkoutDiscountRules } from '@/lib/checkoutDiscounts';
@@ -152,11 +153,14 @@ export async function GET(req) {
 
         applyShopShipping(shippingLines, address);
         const needsDeliveryAddress = cartBreakdown.some(line => line.needsDeliveryAddress);
+        const stockQuote = backordersEnabled() ? await (await backorders()).quote(JSON.parse(JSON.stringify(user?.cart || []))) : null;
+        if (stockQuote) cartBreakdown.forEach((line, index) => { if (stockQuote.lines[index]) line.stockAllocation = stockQuote.lines[index]; });
 
         // The raw (possibly partial) address is returned so the inline form
         // can prefill what the customer already saved.
         return NextResponse.json({
             cartBreakdown,
+            ...(stockQuote ? { stockQuote } : {}),
             shippingBlocked: cartBreakdown.some(line => line.shippingBlocked),
             addressMissing,
             needsDeliveryAddress,

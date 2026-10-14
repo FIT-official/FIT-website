@@ -1,4 +1,6 @@
 'use client'
+import StockAllocation from '@/components/Cart/StockAllocation';
+import CartQuantityEditor from '@/components/Cart/CartQuantityEditor';
 import React, { useEffect, useRef, useState } from 'react'
 import { useUser } from "@clerk/nextjs"
 import posthog from 'posthog-js'
@@ -404,6 +406,16 @@ export function CartContent({ user, isLoaded = true }) {
         }
     };
 
+    const saveExactQuantity = async (cartItem, quantity) => {
+        setLoading(true);
+        try {
+            const response = await storeFetch('/api/user/cart', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cartItemId: cartItem._id, expectedQuantity: cartItem.quantity, quantity }) });
+            const result = await response.json();
+            if (!response.ok) throw Error(result.error || 'Quantity could not be saved. Reload the cart.');
+            setCart(result.cart); await refreshCartBreakdown();
+        } finally { setLoading(false); }
+    };
     const changeQuantity = async (cartItem, delta) => {
         setLoading(true);
         if (delta === 1) {
@@ -859,6 +871,7 @@ export function CartContent({ user, isLoaded = true }) {
                                                     )}
                                                 </div>
 
+                                                <StockAllocation allocation={breakdownItem?.stockAllocation} />
                                                 {/* quantity */}
                                                 <div className='flex items-center md:justify-center text-sm font-medium '>
                                                     <div className='flex flex-row rounded border border-borderColor py-1'>
@@ -871,7 +884,7 @@ export function CartContent({ user, isLoaded = true }) {
                                                             +
                                                         </button>
                                                         <div className=''>
-                                                            {cartItem.chosenDeliveryType === "digital" || cartItem.chosenDeliveryType === "printDelivery" ? 1 : cartItem.quantity}
+                                                            {isCustomPrint || cartItem.chosenDeliveryType === "digital" || cartItem.chosenDeliveryType === "printDelivery" ? 1 : <CartQuantityEditor quantity={cartItem.quantity} disabled={loading} onSave={quantity => saveExactQuantity(cartItem, quantity)} />}
                                                         </div>
                                                         <button
                                                             onClick={() => handleChangeQuantity(cartItem, -1)}

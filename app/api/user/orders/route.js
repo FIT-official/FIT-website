@@ -172,6 +172,10 @@ export async function PUT(req) {
         }
 
         // Update status if provided
+        const remainingBackorder = (order.cartItem?.stockAllocation?.backorderQuantity || 0) - (order.cartItem?.backorderFulfillment?.allocated || 0);
+        if (remainingBackorder > 0 && ['shipped', 'delivered'].includes(status)) {
+            return NextResponse.json({ error: 'Allocate the remaining backordered units before marking the full line shipped or delivered.' }, { status: 409 });
+        }
         if (status && status !== order.status) {
             order.status = status;
 

@@ -122,10 +122,11 @@ describe('Store network recovery', () => {
         Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
         render(<ShopAddToCart product={product} />);
         expect(screen.getByRole('button', { name: 'Add to Cart' })).toBeDisabled();
+        expect(global.fetch).not.toHaveBeenCalled();
         Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
         await act(async () => window.dispatchEvent(new Event('online')));
         expect(screen.getByRole('button', { name: 'Add to Cart' })).toBeEnabled();
-        expect(global.fetch).not.toHaveBeenCalled();
+        expect(global.fetch.mock.calls.every(([url, options]) => url.startsWith('/api/shop/availability') && !options.method)).toBe(true);
     });
     it('bounds both a slow request and a stalled response body', async () => {
         vi.useFakeTimers();

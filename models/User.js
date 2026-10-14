@@ -4,6 +4,9 @@ const CartItemSchema = new mongoose.Schema(
     {
         productId: { type: String, required: true },
         quantity: { type: Number, default: 1 },
+        sourceCartItemId: { type: String },
+        stockAllocation: { type: mongoose.Schema.Types.Mixed },
+        backorderFulfillment: { type: mongoose.Schema.Types.Mixed },
         variantId: { type: String, default: null },
         selectedVariants: {
             type: Map,

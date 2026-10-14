@@ -6,22 +6,25 @@ import Link from 'next/link';
 import { getDefaultVariantSelections } from '@/lib/seo/product';
 import { productVariantLabel } from '@/lib/productVariantLabel';
 import { defaultCartDelivery } from '@/lib/cartDelivery';
+import ShopQuantity from './ShopQuantity';
 
 export default function ShopAddToCart({ product, onVariantsChange }) {
     const [variants, setVariants] = useState(() => getDefaultVariantSelections(product));
     const [busy, setBusy] = useState(false);
     const [message, setMessage] = useState('');
     const [added, setAdded] = useState(false);
+    const [quantity, setQuantity] = useState(1);
+    const [availability, setAvailability] = useState(null);
     const lock = useRef(false);
     const offline = useStoreConnection();
-    const unavailable = !product.infiniteStock && (product.stock === 0 || product.variantTypes?.some(v =>
+    const unavailable = availability?.enabled ? availability.allocation?.blocked : !product.infiniteStock && (product.stock === 0 || product.variantTypes?.some(v =>
         v.options?.find(o => o.name === variants[v.name])?.stock === 0));
     async function add() {
-        if (lock.current) return;
+        if (lock.current || !Number.isSafeInteger(quantity) || quantity < 1 || quantity > 100 || unavailable) return;
         lock.current = true;
         setBusy(true); setMessage(''); setAdded(false);
         try {
-            await addShopItem({ productId: product._id, quantity: 1,
+            await addShopItem({ productId: product._id, quantity,
                 selectedVariants: variants, chosenDeliveryType: defaultCartDelivery(product) });
             setAdded(true);
         } catch (error) { setMessage(error.message || 'Unable to reach the shop. Please try again.'); }
@@ -35,7 +38,8 @@ export default function ShopAddToCart({ product, onVariantsChange }) {
                 {v.options.map(o => <option key={o.name} value={o.name}>{o.name}{o.additionalFee > 0 ? ` (+S$${o.additionalFee.toFixed(2)})` : ''}</option>)}
             </select>
         </label>)}
-        <button type="button" className="formBlackButton justify-center" disabled={busy || unavailable || offline} onClick={add}>
+        <ShopQuantity product={product} variants={variants} quantity={quantity} onChange={value => { setQuantity(value); setAdded(false); }} disabled={busy} onAvailability={setAvailability} />
+        <button type="button" className="formBlackButton justify-center" disabled={busy || unavailable || offline || !Number.isSafeInteger(quantity) || quantity < 1 || quantity > 100} onClick={add}>
             {busy ? 'Adding to cart…' : unavailable ? 'Out of stock' : 'Add to Cart'}
         </button>
         {added && <p role="status">Added to cart. <Link className="underline" href="/cart">View cart</Link></p>}

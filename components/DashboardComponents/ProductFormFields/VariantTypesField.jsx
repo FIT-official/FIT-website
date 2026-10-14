@@ -298,6 +298,11 @@ export default function VariantTypesField({ form, setForm, isDigitalDelivery, on
                                                     <span className="w-3.5 h-3.5 rounded-full border border-[var(--dash-line)]" style={{ backgroundColor: option.hex }} title={option.hex}></span>
                                                 )}
                                                 <span className="text-[13px] font-medium">{option.name}</span>
+                                                {productType === 'shop' && <select aria-label={`${option.name} restocking status`} value={option.restockStatus || 'unknown'}
+                                                    onChange={e => setForm(f => ({ ...f, variantTypes: f.variantTypes.map((type, index) => index === typeIdx
+                                                        ? { ...type, options: type.options.map((value, index) => index === optionIdx ? { ...value, restockStatus: e.target.value } : value) } : type) }))}>
+                                                    <option value="unknown">Restocking unconfirmed</option><option value="expected">Restocking expected</option><option value="not_restocked">Will not be restocked</option>
+                                                </select>}
                                                 {option.additionalFee > 0 && (
                                                     <span className="dash-data text-[var(--dash-ok)]">
                                                         +${option.additionalFee.toFixed(2)}

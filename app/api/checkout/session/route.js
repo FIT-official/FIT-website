@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { backordersEnabled } from '@/lib/shopBackorders/host';
+import { BackorderError, trackedShopLine } from '@/lib/shopBackorders/policy';
 import Stripe from 'stripe';
 import { clerkClient } from '@clerk/nextjs/server';
 import { connectToDatabase } from '@/lib/db';
@@ -148,7 +150,8 @@ export async function POST(req) {
                         return NextResponse.json({ error: 'Online payment for this creator is not available. Contact the seller to arrange your order.' }, { status: 409 });
                     }
                 }
-                if (!product.infiniteStock && !reserveStock(`product:${product._id}`, item.quantity, product.stock)) {
+                const usesAllocation = backordersEnabled() && trackedShopLine(product, item);
+                if (!usesAllocation && !product.infiniteStock && !reserveStock(`product:${product._id}`, item.quantity, product.stock)) {
                     return NextResponse.json({ error: 'The requested quantity is not in stock' }, { status: 409 });
                 }
                 if (product.variantTypes?.some(type => !item.selectedVariants?.[type.name])) {
@@ -159,7 +162,7 @@ export async function POST(req) {
                     if (!selection) {
                         return NextResponse.json({ error: 'A selected product option is no longer available' }, { status: 409 });
                     }
-                    if (!product.infiniteStock && !reserveStock(`variant:${product._id}:${type}:${option}`, item.quantity, selection.stock)) {
+                    if (!usesAllocation && !product.infiniteStock && !reserveStock(`variant:${product._id}:${type}:${option}`, item.quantity, selection.stock)) {
                         return NextResponse.json({ error: 'The selected option is not in stock' }, { status: 409 });
                     }
                 }
@@ -214,11 +217,13 @@ export async function POST(req) {
             ...(customer?.publicMetadata?.stripeCustomerId ? { customer: customer.publicMetadata.stripeCustomerId } : { customer_email: email }),
         };
         const snapshot = { userId, snapshotVersion: 1,
+            ...(backordersEnabled() ? { stockContractVersion: 1 } : {}),
             items, totalAmount, currency: 'sgd', salesData, digitalProductData,
             shippingAddress: address ? checkoutPlain(address) : null, customerEmail: email, customerName: name };
-        return NextResponse.json(await createAttempt(stripe, { attemptId, userId, snapshot, stripeParams }));
+        return NextResponse.json(await createAttempt(stripe, { attemptId, userId, snapshot, stripeParams,
+            token: req?.headers?.get('X-Stock-Quote'), acknowledged: req?.headers?.get('X-Restocking-Acknowledged') }));
     } catch (error) {
-        if (error instanceof CheckoutAttemptError || error instanceof CheckoutTransactionUnavailableError) {
+        if (error instanceof BackorderError || error instanceof CheckoutAttemptError || error instanceof CheckoutTransactionUnavailableError) {
             return NextResponse.json({ error: error.message, code: error.code }, { status: error.status });
         }
         console.error('Checkout creation failed:', error);
@@ -236,7 +241,7 @@ export async function DELETE(req) {
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil', timeout: 10000, maxNetworkRetries: 1 });
         return NextResponse.json(await cancelAttempt(stripe, identity.userId, attemptId));
     } catch (error) {
-        if (error instanceof CheckoutAttemptError) return NextResponse.json({ error: error.message, code: error.code }, { status: error.status });
+        if (error instanceof BackorderError || error instanceof CheckoutAttemptError) return NextResponse.json({ error: error.message, code: error.code }, { status: error.status });
         return NextResponse.json({ error: 'Could not confirm that payment was cancelled. Check payment status before editing.' }, { status: 503 });
     }
 }

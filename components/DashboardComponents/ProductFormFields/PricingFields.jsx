@@ -8,6 +8,12 @@ export default function PricingFields({ form, setForm, allCurrencies, missingFie
 
     return (
         <div className="w-full space-y-4">
+            {form.productType === 'shop' && <label className="block text-sm">Restocking status
+                <select className="border rounded p-2 ml-2" value={form.restockStatus || 'unknown'} onChange={e => setForm(f => ({ ...f, restockStatus: e.target.value }))}>
+                    <option value="unknown">Not yet confirmed</option><option value="expected">Restocking expected</option><option value="not_restocked">Will not be restocked</option>
+                </select>
+                <span className="block">This does not change stock counts or promise a delivery date. A variant marked not restocked overrides this selection.</span>
+            </label>}
             {form.productType === 'shop' && <label className="flex items-start gap-3 text-sm">
                 <input type="checkbox" checked={!!form.quoteOnly}
                     onChange={e => setForm(f => ({ ...f, quoteOnly: e.target.checked }))} />

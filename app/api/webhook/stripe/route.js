@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { backorders } from '@/lib/shopBackorders/host';
 import { randomUUID } from 'node:crypto';
 import Stripe from 'stripe';
 import { connectToDatabase } from '@/lib/db';
@@ -27,13 +28,16 @@ class FulfilmentError extends Error {
 
 // Stock and its sale entry are committed in the same transaction as the order.
 async function recordSaleAndDecrementStock(product, item, userId, dbSession) {
+    const stockQuantity = item.stockAllocation?.onHandQuantity ?? item.quantity;
+    if (!Number.isSafeInteger(stockQuantity) || stockQuantity < 0 || stockQuantity > item.quantity) throw new FulfilmentError('Invalid paid allocation; reconciliation required');
+    if (stockQuantity && product.backorderRevision) await (await backorders()).assertLegacyAvailable(product, { ...item, quantity: stockQuantity }, dbSession);
     const filter = { _id: product._id };
     const increments = {};
     const arrayFilters = [];
     if (!product.infiniteStock) {
         if (product.stock != null) {
-            filter.stock = { $gte: item.quantity };
-            increments.stock = -item.quantity;
+            filter.stock = { $gte: stockQuantity };
+            increments.stock = -stockQuantity;
         }
         for (const [name, selected] of Object.entries(item.selectedVariants || {})) {
             const type = product.variantTypes?.find(v => v.name === name);
@@ -43,8 +47,8 @@ async function recordSaleAndDecrementStock(product, item, userId, dbSession) {
                 const i = arrayFilters.length / 2;
                 filter.$and ||= [];
                 filter.$and.push({ variantTypes: { $elemMatch: { _id: type._id,
-                    options: { $elemMatch: { _id: option._id, stock: { $gte: item.quantity } } } } } });
-                increments[`variantTypes.$[type${i}].options.$[option${i}].stock`] = -item.quantity;
+                    options: { $elemMatch: { _id: option._id, stock: { $gte: stockQuantity } } } } } });
+                increments[`variantTypes.$[type${i}].options.$[option${i}].stock`] = -stockQuantity;
                 arrayFilters.push({ [`type${i}._id`]: type._id }, { [`option${i}._id`]: option._id });
             }
         }
@@ -113,6 +117,7 @@ export async function POST(req) {
             const user = await User.findOne({ userId: claimed.userId }).session(dbSession);
             if (!user) throw new FulfilmentError('Checkout owner no longer exists; payment requires reconciliation', 404);
             const snapshots = checkoutPlain(claimed.items);
+            if (claimed.stockContractVersion === 1) await (await backorders()).consume(claimed, dbSession);
             orderItems = snapshots.map(checkoutOrderItem);
             for (const item of snapshots) {
                 if (item.requestId) {
@@ -158,7 +163,8 @@ export async function POST(req) {
             // Anchor on verified paid order confirmation, not session creation,
             // mutable later inventory or the customer's return-page visit.
             const paidConfirmedAt = new Date();
-            const googleReviewDeliveryEstimate = estimateGoogleReviewDelivery({ checkout: claimed, confirmedAt: paidConfirmedAt });
+            const googleReviewDeliveryEstimate = snapshots.some(i => i.stockAllocation?.backorderQuantity > 0) ? null
+                : estimateGoogleReviewDelivery({ checkout: claimed, confirmedAt: paidConfirmedAt });
             const newOrder = new Order({
                 orderId: `ORD_${payment.id}`, userId: claimed.userId, stripeSessionId: payment.id,
                 stripePaymentIntentId: payment.payment_intent || null, paymentMethod,

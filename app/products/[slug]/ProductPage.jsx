@@ -1,4 +1,5 @@
 'use client'
+import ShopQuantity from '@/components/Cart/ShopQuantity';
 import { productListPrice } from '@/lib/productListPrice';
 import { useUser } from '@clerk/nextjs';
 import { useParams, useRouter } from 'next/navigation';
@@ -36,6 +37,8 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
     const [selectedVariantOptions, setSelectedVariantOptions] = useState(() => getDefaultVariantSelections(initialProduct));
     const colourPhoto = productColourPhoto(product, selectedVariantOptions);
     const galleryImages = product ? (colourPhoto ? [colourPhoto.src] : product.images?.length ? product.images : [null]) : [];
+    const [quantity, setQuantity] = useState(1);
+    const [availability, setAvailability] = useState(null);
     const [isAdding, setIsAdding] = useState(false);
     const [cartError, setCartError] = useState('');
     const addLock = useRef(false);
@@ -275,7 +278,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
 
             const cartItem = {
                 productId: product._id,
-                quantity: 1,
+                quantity: product.productType === 'shop' ? quantity : 1,
                 selectedVariants: isCustomPrint ? {} : selectedVariantOptions,
                 chosenDeliveryType: defaultCartDelivery(product),
                 isCustomPrint: isCustomPrint, // Flag for cart to show upload interface
@@ -349,6 +352,8 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
 
     // Check if current selection is out of stock
     const isOutOfStock = () => {
+        if (product?.productType === 'shop' && (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 100)) return true;
+        if (availability?.enabled) return !!availability.allocation?.blocked;
         if (!product) return false;
         if (product.infiniteStock) return false;
 
@@ -754,6 +759,8 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                         product.slug === 'custom-print-request' ||
                                         (product.delivery?.deliveryTypes || []).some(dt => (dt?.type || dt) === 'digital')
                                     ) ? (
+                                        <>
+                                        {product.productType === 'shop' && <ShopQuantity product={product} variants={selectedVariantOptions} quantity={quantity} onChange={setQuantity} disabled={isAdding} onAvailability={setAvailability} />}
                                         <button
                                             className='formBlackButton gap-2'
                                             onClick={() => handleAddToCart(product)}
@@ -796,7 +803,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                                     <GoPlus size={16} className='inline' />
                                                 </>
                                             )}
-                                        </button>
+                                        </button></>
                                     ) : null}                                    {/* Print Button - only show if product has a 3D model */}
                                     {/* Only show print order button if NOT digital-only product */}
                                     {product.viewableModel && !(

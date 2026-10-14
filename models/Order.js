@@ -5,6 +5,9 @@ const OrderItemSchema = new mongoose.Schema({
     productName: { type: String, required: true },
     productSlug: { type: String, required: true },
     quantity: { type: Number, required: true, min: 1 },
+    sourceCartItemId: { type: String, immutable: true },
+    stockAllocation: { type: mongoose.Schema.Types.Mixed, immutable: true },
+    backorderFulfillment: { type: mongoose.Schema.Types.Mixed },
     // Variant information
     selectedVariants: {
         type: Map,

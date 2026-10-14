@@ -1,5 +1,7 @@
 'use client';
 
+import StockAllocation from '@/components/Cart/StockAllocation';
+import { RESTOCKING_DISCLOSURE } from '@/lib/shopBackorders/policy';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckoutProvider, PaymentElement, useCheckout } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
@@ -129,6 +131,7 @@ const CartBreakdown = ({ cartBreakdown }) => {
                                 ))}
                             </div>
                         )}
+                        <StockAllocation allocation={item.stockAllocation} />
                         {/* Price breakdown */}
                         <div className="text-lightColor">
                             Price: S${item.price.toFixed(2)}
@@ -201,6 +204,7 @@ const CheckOut = () => {
     const [needsGuestContact, setNeedsGuestContact] = useState(false);
     const [guestContact, setGuestContact] = useState({});
     const [review, setReview] = useState(null);
+    const [restockingAccepted, setRestockingAccepted] = useState(false);
     const [empty, setEmpty] = useState(false);
     const [paymentRevision, setPaymentRevision] = useState(0);
     const lock = useRef(false);
@@ -225,7 +229,8 @@ const CheckOut = () => {
                 return;
             }
             const result = await storeJson('/api/checkout/session', { method: 'POST',
-                headers: { 'Content-Type': 'application/json', ...(attemptId ? { 'X-Checkout-Attempt': attemptId } : {}) } }, 25000);
+                headers: { 'Content-Type': 'application/json', ...(attemptId ? { 'X-Checkout-Attempt': attemptId } : {}), ...(options.stockQuote ? { 'X-Stock-Quote': options.stockQuote.token,
+                    ...(restockingAccepted ? { 'X-Restocking-Acknowledged': options.stockQuote.disclosureVersion } : {}) } : {}) } }, 25000);
             rememberCheckoutAttempt(result.attemptId);
             setData(result); setReview(null); setEmpty(false); setPaymentRevision(v => v + 1);
             if (result.alreadyPaid) captureCheckoutEvent('checkout_completed', result.sessionId);
@@ -242,7 +247,11 @@ const CheckOut = () => {
                 } finally { clearTimeout(timer); }
             }
         } catch (err) {
-            if (err.code === 'checkout_address_required') {
+            if (err.code === 'stock_quote_changed' || err.code === 'stock_unavailable') {
+                setData(null); setRestockingAccepted(false);
+                try { setReview({ ...(await storeJson('/api/checkout/breakdown')), stockReview: true, editing: false }); }
+                catch (readError) { setError(readError.message); }
+            } else if (err.code === 'checkout_address_required') {
                 setData(null);
                 try { setReview({ ...(await storeJson('/api/checkout/breakdown')), editing: true }); }
                 catch (readError) { setError(readError.message); }
@@ -278,7 +287,10 @@ const CheckOut = () => {
             {review.editing ? <DeliveryAddressPrompt initialAddress={review.address} title="Delivery address" onAddressSaved={() => load()} /> : <BillingInfo userContact={review.address} />}
             <div className="flex flex-col gap-4">
                 <OrderSummary cartBreakdown={review.cartBreakdown || []} />
-                {!review.editing || (cartNeedsDeliveryAddress(review.cartBreakdown) && !isAddressComplete(review.address)) ? <>
+                {review.stockReview ? <div className="space-y-3">
+                    {review.stockQuote?.requiresAcknowledgement && <label className="flex gap-2 items-start"><input type="checkbox" checked={restockingAccepted} onChange={e => setRestockingAccepted(e.target.checked)} /><span>I have read the restocking notice: {RESTOCKING_DISCLOSURE}</span></label>}
+                    <button className="formBlackButton" disabled={offline || review.stockQuote?.blocked || !review.stockQuote || (review.stockQuote.requiresAcknowledgement && !restockingAccepted)} onClick={() => load({ stockQuote: review.stockQuote })}>Continue to payment</button>
+                </div> : !review.editing || (cartNeedsDeliveryAddress(review.cartBreakdown) && !isAddressComplete(review.address)) ? <>
                     <button disabled className="formBlackButton">Pay Now</button>
                     <p data-testid="pay-blocked-reason">{review.editing ? ADD_ADDRESS_TO_PAY : error}</p>
                 </> : <button className="formBlackButton" onClick={() => load()}>Continue to payment</button>}

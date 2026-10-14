@@ -83,6 +83,7 @@ const VariantOptionSchema = new mongoose.Schema({
     name: { type: String, required: true },
     additionalFee: { type: Number, required: true, default: 0 },
     stock: { type: Number, required: false, min: 0 },
+      restockStatus: { type: String, enum: ['unknown', 'expected', 'not_restocked'] },
     image: { type: String, required: false, default: null },
     // Colour swatch for colour-type variants. For print products this is the
     // admin filament-stock hex; for shop products it's a free-form colour. Used
@@ -112,6 +113,8 @@ const ProductSchema = new mongoose.Schema(
         priceCredits: { type: Number, required: true },
         stock: { type: Number, required: false, min: 0 },
         infiniteStock: { type: Boolean, default: false },
+        restockStatus: { type: String, enum: ['unknown', 'expected', 'not_restocked'] },
+        backorderRevision: { type: Number, default: undefined },
         quoteOnly: { type: Boolean, default: false },
         // Private verified classification for review delivery estimates where
         // numeric stock is not tracked. No default or automatic preorder inference.

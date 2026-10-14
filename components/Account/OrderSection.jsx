@@ -11,6 +11,7 @@
 // discounts, notes, delivery, custom-print tracking). Fetch logic is
 // unchanged: /api/user/orders then /api/product?ids=; thumbnails resolve S3
 // keys through /api/proxy?key= with a quiet letter/icon tile fallback.
+import StockAllocation from '@/components/Cart/StockAllocation';
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
@@ -562,6 +563,7 @@ function OrderSection() {
                                 {peek.order.createdAt ? dayjs(peek.order.createdAt).format('D MMM YYYY, HH:mm') : 'Unknown'}
                             </QuietRow>
                             <QuietRow label="Quantity">{peek.cartItem.quantity}</QuietRow>
+                            <StockAllocation allocation={peek.cartItem.stockAllocation} fulfillment={peek.cartItem.backorderFulfillment} />
                             <QuietRow label="Delivery">
                                 <span className="capitalize">{peek.cartItem.chosenDeliveryType || 'Not specified'}</span>
                             </QuietRow>

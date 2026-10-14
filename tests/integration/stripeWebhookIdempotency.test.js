@@ -68,6 +68,10 @@ vi.mock('@/models/DigitalProductTransaction', () => ({ default: {
 vi.mock('@/lib/email', () => ({ sendEmail: f.sendEmail }));
 vi.mock('@/lib/notifications/customPrint', () => ({ notifyCustomPrintEvent: f.notify }));
 vi.mock('@clerk/nextjs/server', () => ({ clerkClient: async () => ({ users: { getUser: async () => ({ emailAddresses: [] }) } }) }));
+vi.mock('@/lib/shopBackorders/host', () => ({ backorders: async () => ({
+    consume: async () => { if (f.draft.hold !== 'held') throw Error('Allocation missing'); f.draft.hold = 'consumed'; },
+    assertLegacyAvailable: async () => { if (f.draft.stockBlocked) throw Error('Stock held by another buyer'); },
+}) }));
 import { POST } from '@/app/api/webhook/stripe/route';
 
 const req = () => ({ text: async () => '{}', headers: { get: () => 'valid-signature' } });
@@ -264,5 +268,37 @@ describe('Stripe custom printing and stock', () => {
         expect(Object.values(f.state.requests)).toHaveLength(2);
         expect(Object.values(f.state.requests).every(request => request.modelFile.s3Key === 'original-product-model')).toBe(true);
         expect(f.notify.mock.calls.map(([call]) => call.breakdown.total)).toEqual([15, 10]);
+    });
+});
+
+describe('Paid backorder allocation and immutable fulfillment', () => {
+    function split(onHand) {
+        f.state.hold = 'held'; f.state.checkout.stockContractVersion = 1;
+        f.state.checkout.items[0].stockAllocation = { onHandQuantity: onHand, backorderQuantity: 2 - onHand, disclosure: 'Conditional restocking notice', disclosureVersion: 'fit-restocking-v1' };
+        f.state.products.product1.stock = onHand; f.state.products.product1.backorderRevision = 1;
+    }
+    it.each([0, 1, 2])('deducts only %s allocated units, persists the full order and does not repeat on webhook replay', async onHand => {
+        split(onHand);
+        expect((await POST(req())).status).toBe(200);
+        expect(f.state.products.product1.stock).toBe(0);
+        expect(f.state.products.product1.sales[0].quantity).toBe(2);
+        expect(f.state.orders[0].items[0]).toMatchObject({ quantity: 2, sourceCartItemId: 'cart1', stockAllocation: { onHandQuantity: onHand, backorderQuantity: 2-onHand }, backorderFulfillment: { allocated: 0, revision: 0 } });
+        expect(f.state.user.orderHistory[0].cartItem.stockAllocation).toEqual(f.state.orders[0].items[0].stockAllocation);
+        expect((await POST(req())).status).toBe(200);
+        expect(f.state.orders).toHaveLength(1); expect(f.state.products.product1.sales).toHaveLength(1);
+    });
+    it('rolls back consumption with a failed order write and retries once', async () => {
+        split(1); f.failOrder = true;
+        expect((await POST(req())).status).toBe(500); expect(f.state.hold).toBe('held'); expect(f.state.products.product1.stock).toBe(1);
+        expect((await POST(req())).status).toBe(200); expect(f.state.hold).toBe('consumed');
+    });
+    it('does not assign a delivery promise from a conditional restocking range', async () => {
+        split(1); f.state.checkout.shippingAddress = { country: 'SG' };
+        f.state.checkout.items[0].googleReviewAvailability = { state: 'in_stock', policy: REVIEW_DELIVERY_POLICY, source: 'checkout-stock' };
+        await POST(req()); expect(f.state.orders[0].googleReviewDeliveryEstimate).toBeUndefined();
+    });
+    it('stops an older payment from consuming units held for a different buyer', async () => {
+        f.state.products.product1.backorderRevision = 1; f.state.stockBlocked = true;
+        expect((await POST(req())).status).toBe(500); expect(f.state.orders).toEqual([]); expect(f.state.products.product1.stock).toBe(10);
     });
 });

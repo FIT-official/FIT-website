@@ -1,4 +1,5 @@
 'use client'
+import StockAllocation from '@/components/Cart/StockAllocation';
 // Customer order detail on the "Sunlit Paper" language, composed per the
 // reference images (docs/account-ui-reference-images/order-details.png +
 // order-progress.png): a facts strip (Order placed / Delivered / Order ID /
@@ -578,6 +579,7 @@ function OrderPage({ orderId }) {
                                     )}
                                 </div>
                             </div>
+                            <StockAllocation allocation={cartItem.stockAllocation} fulfillment={cartItem.backorderFulfillment} />
                             {product?.slug && !isCustomPrint && (
                                 <div className="dash-print-hidden mt-4 pt-3 border-t border-[var(--dash-line)] flex flex-wrap items-center gap-2">
                                     <Link

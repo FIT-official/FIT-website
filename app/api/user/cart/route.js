@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import Product from "@/models/Product";
+import User from '@/models/User';
+import mongoose from 'mongoose';
 import { checkoutIntent } from "@/lib/checkoutAttempt";
 import { cartIdentity, cartOwner, withCartCookie } from "@/lib/cartOwner";
 
@@ -91,6 +93,28 @@ export async function POST(req) {
         console.error(err);
         return NextResponse.json({ error: "Server error" }, { status: 500 });
     }
+}
+
+export async function PUT(req) {
+    try {
+        const identity = await cartIdentity(req);
+        if (!identity.userId) return NextResponse.json({ error: 'Open your cart first.' }, { status: 401 });
+        if (req.headers.get('origin') !== new URL(req.url).origin) return NextResponse.json({ error: 'Use the FIT cart.' }, { status: 403 });
+        const { cartItemId, quantity, expectedQuantity } = await req.json();
+        if (!/^[a-f0-9]{24}$/i.test(cartItemId || '') || !Number.isSafeInteger(quantity) || quantity < 1 || quantity > 100
+            || !Number.isSafeInteger(expectedQuantity) || expectedQuantity < 1) return NextResponse.json({ error: 'Choose 1 to 100 whole units.' }, { status: 400 });
+        await connectToDatabase();
+        const user = await cartOwner(identity);
+        const item = user?.cart.find(line => String(line._id) === cartItemId);
+        if (!item) return NextResponse.json({ error: 'Cart item no longer exists.' }, { status: 409 });
+        if ((String(item.productId).startsWith('custom-print:') || ['digital', 'printDelivery'].includes(item.chosenDeliveryType)) && quantity !== 1)
+            return NextResponse.json({ error: 'This item has a fixed quantity of one.' }, { status: 400 });
+        const result = await User.updateOne({ userId: identity.userId, cart: { $elemMatch: { _id: new mongoose.Types.ObjectId(cartItemId), quantity: expectedQuantity } } },
+            { $set: { 'cart.$.quantity': quantity } });
+        if (!result.matchedCount) return NextResponse.json({ error: 'Cart quantity changed in another tab. Reload before editing.' }, { status: 409 });
+        const updated = await cartOwner(identity);
+        return NextResponse.json({ success: true, cart: updated.cart }, { headers: { 'Cache-Control': 'no-store' } });
+    } catch { return NextResponse.json({ error: 'Quantity could not be saved.' }, { status: 503 }); }
 }
 
 export async function GET(req) {

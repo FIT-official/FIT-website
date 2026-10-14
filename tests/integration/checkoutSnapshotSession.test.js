@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
+    enabled: false, reserve: vi.fn(), quote: vi.fn(), release: vi.fn(),
     assign: vi.fn(), updateOwner: vi.fn(), auth: vi.fn(), customer: vi.fn(), user: vi.fn(), product: vi.fn(), request: vi.fn(),
     legacy: [], events: [], fulfilled: vi.fn(), attempts: new Map(), retrieve: vi.fn(), createSession: vi.fn(), expire: vi.fn(), saveSnapshot: vi.fn(), isAdmin: vi.fn(), preflight: vi.fn(),
 }));
@@ -26,13 +27,15 @@ vi.mock('@/models/CheckoutAttempt', () => ({ default: {
     },
     updateOne: async ({ _id }, update) => { Object.assign(m.attempts.get(_id), update.$set); },
 } }));
+vi.mock('@/lib/shopBackorders/host', () => ({ backordersEnabled: () => m.enabled, backorders: async () => ({ reserveAttempt: m.reserve, quote: m.quote, release: m.release }) }));
+import { BackorderError, RESTOCKING_VERSION } from '@/lib/shopBackorders/policy';
 import { POST, DELETE } from '@/app/api/checkout/session/route';
 import { GET as getBreakdown } from '@/app/api/checkout/breakdown/route';
 import { CheckoutTransactionUnavailableError } from '@/lib/checkoutTransactionReadiness';
 
 let user, product;
 beforeEach(() => {
-    vi.clearAllMocks();
+    vi.clearAllMocks(); m.enabled = false;
     m.attempts.clear(); m.legacy = []; m.events = []; m.fulfilled.mockResolvedValue(null);
     vi.stubEnv('STRIPE_SESSION_COMPLETE_SIGNING_SECRET', 'whsec_test');
     m.auth.mockResolvedValue({ userId: 'buyer' });
@@ -537,3 +540,43 @@ it('preserves the reviewed whole-batch brief and remarks in the immutable paymen
   expect((await POST()).status).toBe(200);const item=m.saveSnapshot.mock.calls[0][0].items[0]
   expect(item.customRequest.guidedBrief.quantity).toBe(3);expect(item.orderNote).toMatch(/Quantity: 3/);expect(item.totalAmount).toBe(3000)
 })
+describe('Enabled shop allocation checkout boundary', () => {
+    const request = headers => ({ headers: new Headers(headers || {}) });
+    beforeEach(() => {
+        m.enabled = true;
+        Object.assign(product, { productType: 'shop', stock: 1, paidAssets: [], slug: 'hcsr04-ultrasonic-sensor' });
+        m.reserve.mockImplementation(async input => {
+            if (input.token !== 'fresh' || input.acknowledged !== RESTOCKING_VERSION) throw new BackorderError('Review stock.', 'stock_quote_changed');
+            const snapshot = { ...input.snapshot, items: input.snapshot.items.map(item => ({ ...item, stockAllocation: { version: 1, onHandQuantity: 1, backorderQuantity: 1, disclosureVersion: RESTOCKING_VERSION } })) };
+            const attempt = { _id: input.attemptId, userId: input.userId, snapshot, stripeParams: input.stripeParams, createdAt: new Date() };
+            m.attempts.set(attempt._id, attempt); return attempt;
+        });
+    });
+    it('requires fresh quote and disclosure acknowledgement before calling Stripe', async () => {
+        for (const headers of [{}, { 'X-Stock-Quote': 'fresh' }]) {
+            const result = await POST(request(headers));
+            expect(result.status).toBe(409); expect((await result.json()).code).toBe('stock_quote_changed');
+        }
+        expect(m.createSession).not.toHaveBeenCalled(); expect(m.saveSnapshot).not.toHaveBeenCalled();
+    });
+    it('persists and returns the agreed split while charging all ordered units and one delivery', async () => {
+        const result = await POST(request({ 'X-Stock-Quote': 'fresh', 'X-Restocking-Acknowledged': RESTOCKING_VERSION }));
+        expect(result.status).toBe(200);
+        const data = await result.json();
+        expect(data.cartBreakdown[0].stockAllocation).toMatchObject({ onHandQuantity: 1, backorderQuantity: 1 });
+        expect(m.saveSnapshot.mock.calls[0][0]).toMatchObject({ stockContractVersion: 1, items: [expect.objectContaining({ quantity: 2, stockAllocation: expect.objectContaining({ backorderQuantity: 1 }) })] });
+        const params = m.createSession.mock.calls[0][0];
+        expect(params.line_items.reduce((sum, i) => sum + i.price_data.unit_amount * i.quantity, 0)).toBe(m.saveSnapshot.mock.calls[0][0].totalAmount);
+        expect(params.payment_method_types).toEqual(['card', 'paynow']);
+        m.enabled = false;
+        expect((await POST(request())).status).toBe(200);
+        expect(m.createSession).toHaveBeenCalledTimes(1);
+    });
+    it('releases only after the existing provider session is expired, even after disabling new allocations', async () => {
+        await POST(request({ 'X-Stock-Quote': 'fresh', 'X-Restocking-Acknowledged': RESTOCKING_VERSION }));
+        m.enabled = false;
+        m.expire.mockResolvedValue({ id: 'cs_created', status: 'expired', payment_status: 'unpaid' });
+        expect((await DELETE(request({ 'X-Checkout-Attempt': user.checkoutIntent }))).status).toBe(200);
+        expect(m.release).toHaveBeenCalledWith(user.checkoutIntent, 'buyer', expect.objectContaining({ id: 'cs_created', status: 'expired', payment_status: 'unpaid' }));
+    });
+});
