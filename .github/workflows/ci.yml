@@ -23,7 +23,8 @@ jobs:
 
       # Tests + coverage thresholds (see vitest.config.mjs) gate the merge.
       - name: Test (with coverage)
-        run: yarn test:coverage
+        # Match the bounded worker count used by the release validation.
+        run: yarn test:coverage --maxWorkers=2
 
       # Lint is reported but does not block while the legacy codebase is cleaned up.
       - name: Lint (non-blocking)

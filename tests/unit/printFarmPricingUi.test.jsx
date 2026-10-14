@@ -128,7 +128,9 @@ describe('pricing editor', () => {
             { type: 'courier', label: 'Courier', price: 8, description: '', needsAddress: false },
         ])
         await waitFor(() => expect(showToast).toHaveBeenCalledWith('Print service saved and live.', 'success'))
-    })
+    // This combines multiple controlled-field edits and an exact atomic save;
+    // preserve every payload assertion while allowing shared CI CPU contention.
+    }, 15_000)
 
     it('keeps the legacy editor out once pricing exists', async () => {
         render(<PrintServicePage />)

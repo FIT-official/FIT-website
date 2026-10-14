@@ -21,22 +21,23 @@ function expectTwoIdeas(group) {
     for (const question of project.reading.feedbackQuestions) expect(article).toHaveTextContent(question)
 }
 describe('all twenty distinct ideas on authenticated group homes', () => {
-    it('covers twenty unique idea IDs and renders both full ideas on all ten home and inline target routes', async () => {
+    it('covers twenty unique idea IDs across the ten two-idea groups', () => {
         expect(reading.groups).toHaveLength(10)
         expect(reading.groups.every(group => group.ideas.length === 2)).toBe(true)
         expect(new Set(reading.groups.flatMap(group => group.ideas.map(idea => idea.reviewedImageKey))).size).toBe(20)
-        for (let n = 1; n <= 10; n++) {
-            const group = 'g' + n
-            vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, json: async () => lesson(group) })))
-            render(<Classroom homeGroup={group} />)
-            await screen.findByRole('heading', { name: 'Home Group ' + n + ': present, give feedback, refine' })
-            // The authenticated home presents both own ideas before entering the peer review view.
-            fireEvent.click(screen.getByRole('button', { name: 'PRESENT', exact: true }))
-            expectTwoIdeas(group)
-            fireEvent.click(screen.getByRole('button', { name: 'FEEDBACK', exact: true }))
-            expectTwoIdeas(assignedTarget(group))
-            expect(screen.getByRole('heading', { name: 'Home Group ' + n + ': present, give feedback, refine' })).toBeInTheDocument()
-            cleanup(); localStorage.clear()
-        }
+    })
+    // Each group has its own normal timeout and cleanup. Ten complete UI
+    // journeys must not share one five-second test budget on a loaded runner.
+    it.each(Array.from({ length: 10 }, (_, i) => i + 1))('renders both full ideas on group %i home and inline target routes', async n => {
+        const group = 'g' + n
+        vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, json: async () => lesson(group) })))
+        render(<Classroom homeGroup={group} />)
+        await screen.findByRole('heading', { name: 'Home Group ' + n + ': present, give feedback, refine' })
+        // The authenticated home presents both own ideas before entering the peer review view.
+        fireEvent.click(screen.getByRole('button', { name: 'PRESENT', exact: true }))
+        expectTwoIdeas(group)
+        fireEvent.click(screen.getByRole('button', { name: 'FEEDBACK', exact: true }))
+        expectTwoIdeas(assignedTarget(group))
+        expect(screen.getByRole('heading', { name: 'Home Group ' + n + ': present, give feedback, refine' })).toBeInTheDocument()
     })
 })
