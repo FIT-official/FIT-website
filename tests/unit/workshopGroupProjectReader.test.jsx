@@ -28,7 +28,7 @@ describe('private group project reader', () => {
                 expect(idea.copy).toEqual(workshopGroupPage(group.id).ideas[index].pupilCopy)
                 expect(idea.copy).toEqual(workshopClassroomGroupPage(group.id).reading.ideas[index].pupilCopy)
                 expect(idea.copy.core_problem).toBeTruthy(); expect(idea.copy.how_it_works_steps.length).toBeGreaterThan(0); expect(idea.copy.key_points.length).toBeGreaterThan(0)
-                expect(idea.image.src).toMatch(/^\/workshop\/models\/.*reviewed-v2-pdf-derived\.jpeg$/)
+                expect(idea.image.src).toMatch(/^\/workshop\/models\/.*reviewed-(?:v2-pdf-derived|v4-feedback)\.jpeg$/)
                 expect(existsSync('public' + idea.image.src)).toBe(true); expect(idea.image.alt).toBeTruthy()
             })
         }

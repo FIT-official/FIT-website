@@ -12,7 +12,7 @@ const lesson = { seat, group: 'g2', phaseVersion: 1, feedbackOpen: true, refinem
     assignment: { target: 'g3', round: 1, projectVersion: 'sample' }, refinements: [], refinementVersion: 0, refinementEntryVersion: 0 }
 const cases = [
     { kind: 'feedback', label: 'Submit', count: 3, confirmation: 'Your feedback has been submitted.', next: 'Write new feedback', render: l => <GuestFeedbackForm group={workshopGroupPage('g3')} lesson={l} onRefresh={() => {}} /> },
-    { kind: 'refinement', label: 'Submit revised ideas', count: 6, confirmation: 'Both revised ideas have been submitted.', next: 'Prepare another revision', render: l => <GuestRefinementForm lesson={l} onRefresh={() => {}} /> },
+    { kind: 'refinement', label: 'Submit revised ideas', count: 12, confirmation: 'Both revised ideas have been submitted.', next: 'Prepare another revision', render: l => <GuestRefinementForm lesson={l} onRefresh={() => {}} /> },
 ]
 let saves
 beforeEach(() => {

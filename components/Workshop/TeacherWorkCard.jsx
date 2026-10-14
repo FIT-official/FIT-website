@@ -1,10 +1,10 @@
 'use client'
 import { useState } from 'react'
+import { labelsForRefinement } from '@/lib/workshopRefinement'
 import WorkshopAudit from './WorkshopAudit'
 import { groupName } from '@/lib/workshopTeacherView'
 
 const feedbackLabels = { whatWorks: 'What works', question: 'Question', improvement: 'Improvement' }
-const revisionLabels = { feedbackUsed: 'Feedback used', change: 'Proposed change', reason: 'Reason', test: 'Next test' }
 const textStyle = { whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', lineHeight: 1.6 }
 const gridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 230px), 1fr))', gap: '16px' }
 
@@ -17,7 +17,7 @@ function Answers({ labels, answers }) {
 export default function TeacherWorkCard({ row, audit = [], busy, onAction }) {
     const [edit, setEdit] = useState(null), [deleting, setDeleting] = useState(null)
     const refinement = row.kind === 'refinement'
-    const currentRevisionLabels = row.promptVersion === 2 ? { change: 'What would you change to improve this idea?', reason: 'Why would this improve the idea?', test: 'How would you test this change?' } : revisionLabels
+    const currentRevisionLabels = labelsForRefinement(row.promptVersion)
     const version = refinement ? row.entryVersion || 1 : row.version || 1
     const title = refinement ? `Revision ${row.authorVersion || row.version || 1}` : `Feedback for ${groupName(row.target)} · Idea ${row.idea}`
     function startEdit() {

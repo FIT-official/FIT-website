@@ -1,0 +1,731 @@
+{
+  "version": "2026-10-14-feedback-v4",
+  "reviewProjectVersion": "d3325767c6ddb337",
+  "publishedFrom": "verified mapped class feedback; anonymized authored paraphrases",
+  "ideas": {
+    "g1_folding_tray": {
+      "status": "revised",
+      "changes": [
+        "The open area holds items while the tray rests flat on a table.",
+        "There is no separate latch. Empty the tray before folding.",
+        "Loaded carrying needs a separate test; it has not been shown."
+      ],
+      "original": {
+        "src": "/workshop/models/g01-idea1-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Foldable tray: Open the tray flat on a table. Put items in the three round spaces. Empty the tray before folding it.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Will it be carried or stay on a table?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "c5af3d160935e8db8b4067af6ee88eb6b3d5a668bdb42e1cf498926319049425",
+        "decodedRgbSha256": "0b9da9adaa521ff6220f46fb2b790c9f501a8cb026aca13a2cdb0c7fc3ab4bdf",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Make a thin box for the tabletop tray and cylinders for the three spaces.",
+        "Use cylinder holes for recesses, keeping an uncut supporting floor.",
+        "Show the two halves and a hinge space separately; measure clearances before grouping."
+      ],
+      "asset": {
+        "src": "/workshop/models/g01-idea1-reviewed-v4-feedback.jpeg",
+        "alt": "Foldable tray: The open area holds items while the tray rests flat on a table. There is no separate latch. Empty the tray before folding. Loaded carrying needs a separate test; it has not been shown.",
+        "caption": "Feedback revision: The open area holds items while the tray rests flat on a table.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "2fdbb375dcc77de7c8343961a98039c35250a3558f3ce1dd8ea3232ee9629db1",
+        "originalSha256": "c5af3d160935e8db8b4067af6ee88eb6b3d5a668bdb42e1cf498926319049425",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g1_rolling_bin": {
+      "status": "original-retained",
+      "changes": [],
+      "original": {
+        "src": "/workshop/models/g01-idea2-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Mobile bin and companion: Push each bin where it is needed. Use the brakes to park the large bin. Lift out the small bin's inner container.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Where would the bins help, and how will people empty them?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "62df2c8ac08597b7e1e040c17e52e1fb538418df05b45e84e854ca3616271cbc",
+        "decodedRgbSha256": "c38373de6c20e6391bca6453658bb5f97df0ab01b35e87d8a64bc816d8b44d61",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use boxes for the outer bin and removable inner container.",
+        "Use cylinders for wheels and leave wheel clearance.",
+        "Keep a brake as a labelled separate part; check removal space."
+      ],
+      "retentionReason": "Original drawing retained: no verified mapped feedback specifies a substantive drawing change."
+    },
+    "g2_motion_lamp": {
+      "status": "revised",
+      "changes": [
+        "Propose a softer surround and a wider base if the light is kicked.",
+        "Choose the material and measure the base before building.",
+        "Check afternoon use separately; do not assume the sensor works in daylight."
+      ],
+      "original": {
+        "src": "/workshop/models/g02-idea1-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Mushroom nightlight: Set the switch to AUTO. Movement turns on the downward light. The light turns off after a pause.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Does the light reach the floor without glare?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "cca32710bacdec95cc6ca57a1ff3fa4d2baf0cb86b3d981c5e5d33762085613c",
+        "decodedRgbSha256": "0563a734d077460fef75dd2228d844a3fcc11014d0df77d6d6a070230e7bd918",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use a cylinder for the stem and a dome shape for the cap.",
+        "Add a wider base and a separate soft-surround placeholder.",
+        "Label the light and sensor spaces; use measured dimensions and supplied parts."
+      ],
+      "asset": {
+        "src": "/workshop/models/g02-idea1-reviewed-v4-feedback.jpeg",
+        "alt": "Mushroom nightlight: Propose a softer surround and a wider base if the light is kicked. Choose the material and measure the base before building. Check afternoon use separately; do not assume the sensor works in daylight.",
+        "caption": "Feedback revision: Propose a softer surround and a wider base if the light is kicked.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "25a7761aedaf6c8b02be6f993ac23ae26c10a8a1934d53a41f2e83808fb2b984",
+        "originalSha256": "cca32710bacdec95cc6ca57a1ff3fa4d2baf0cb86b3d981c5e5d33762085613c",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g2_sorting_bin": {
+      "status": "original-retained",
+      "changes": [],
+      "original": {
+        "src": "/workshop/models/g02-idea2-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Robot sorting bin: The camera checks one item. The controller chooses a bin. The flap tilts to that bin.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Which items can the camera recognise? What happens when it is unsure?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "7d60a6c3f5154b944da4ffdda2ce0698ac85fb69cea54117b5cd7b30a28257f5",
+        "decodedRgbSha256": "3d44d11cf87ca758a23cb105539a8223289cf1571af1115a75573f5b1600ff28",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Block out the main case with boxes and cylinders from the illustration.",
+        "Keep each moving or electronic part separate and labelled.",
+        "Measure the actual parts with the teacher before holes or printing."
+      ],
+      "retentionReason": "Original drawing retained: no verified mapped feedback specifies a substantive drawing change."
+    },
+    "g3_sound_companion": {
+      "status": "revised",
+      "changes": [
+        "Add a second message control: HELLO and I MISS YOU stay separate.",
+        "Label the paw input, cradle and battery-access flap.",
+        "Keep this cat design; other animal shapes are a separate choice."
+      ],
+      "original": {
+        "src": "/workshop/models/g03-idea1-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Sound and hello companion: Switch the heart on to start the song. Hold the paw to send HELLO. The second micro:bit scrolls HELLO.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Can the other micro:bit receive HELLO from the needed distance?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "6e53acd73f11e1b44920cdab9cc3a8483e1f9ce553387cd214cdfcbb45cc62ff",
+        "decodedRgbSha256": "a53a38a8bbe8781cffe9f54c31be0cd898e9211455b7547e3c64c92a3d3104bc",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use rounded shapes for the cat body and cylinders for paw controls.",
+        "Keep HELLO and I MISS YOU controls as separate labelled parts.",
+        "Block out the removable cradle and battery flap; leave their clearances unknown until measured."
+      ],
+      "asset": {
+        "src": "/workshop/models/g03-idea1-reviewed-v4-feedback.jpeg",
+        "alt": "Sound and hello companion: Add a second message control: HELLO and I MISS YOU stay separate. Label the paw input, cradle and battery-access flap. Keep this cat design; other animal shapes are a separate choice.",
+        "caption": "Feedback revision: Add a second message control: HELLO and I MISS YOU stay separate.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "4bac4d6410ab453fe8c3c3a4925a790904db38e9b0a5ffb4c9362042d6609051",
+        "originalSha256": "6e53acd73f11e1b44920cdab9cc3a8483e1f9ce553387cd214cdfcbb45cc62ff",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g3_parcel_box": {
+      "status": "revised",
+      "changes": [
+        "Add a delivery sign: PLEASE PUT PARCELS HERE.",
+        "The delivery person loads and closes; the householder releases the latch.",
+        "Arrival sound and automatic opening remain separate proposals."
+      ],
+      "original": {
+        "src": "/workshop/models/g03-idea2-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Private parcel box: Place the parcel in the open box. Close the lid by hand. Press the bell to alert someone indoors. Enter the passcode to open the latch.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "How can another parcel arrive after the lid is locked?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "fc8adfa5726fcb5358bd63ed6dae3d71241386153df20de8302dcc9f9d8c1d17",
+        "decodedRgbSha256": "b51b394b1b1c6567a27cdbc1d6a72f39adfe8395731ddddf5b696149f3767b09",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use a box and a smaller box hole for the parcel space, keeping a floor.",
+        "Make the lid and latch separate; add a flat delivery sign.",
+        "Represent keypad and chime as labelled placeholders; do not use real codes."
+      ],
+      "asset": {
+        "src": "/workshop/models/g03-idea2-reviewed-v4-feedback.jpeg",
+        "alt": "Private parcel box: Add a delivery sign: PLEASE PUT PARCELS HERE. The delivery person loads and closes; the householder releases the latch. Arrival sound and automatic opening remain separate proposals.",
+        "caption": "Feedback revision: Add a delivery sign: PLEASE PUT PARCELS HERE.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "55bcdbf44867947ff21e5b666e6cba1a5181d8cfdffe32acb781972791e542e1",
+        "originalSha256": "fc8adfa5726fcb5358bd63ed6dae3d71241386153df20de8302dcc9f9d8c1d17",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g4_wick_pot": {
+      "status": "original-retained",
+      "changes": [],
+      "original": {
+        "src": "/workshop/models/g04-idea1-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Rainwater plant pot: Collect rain and suitable reused water. The probe checks the soil. Dry soil switches the pump on. Moist soil switches it off.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Is the water suitable, and is the soil setting right?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "5d90e4c37cca28bae5519ba5d462838ad30ff4b8676767f881c126141af464b0",
+        "decodedRgbSha256": "e47df86ac7837ffa354383c108867924d64aeb61ec73a5aa42ed97811859ee06",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use boxes and cylinders to match the existing illustration.",
+        "Separate moving parts from fixed supports and label them.",
+        "Measure fit and explain the original mechanism before changing geometry."
+      ],
+      "retentionReason": "Original drawing retained: no verified mapped feedback specifies a substantive drawing change."
+    },
+    "g4_doorbell_band": {
+      "status": "revised",
+      "changes": [
+        "Show the path: doorbell transmitter -> wristband cue -> response.",
+        "Time the cue with a teacher. Keep the original band fastening.",
+        "Overseas use and a camera need a separate communication design."
+      ],
+      "original": {
+        "src": "/workshop/models/g04-idea2-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Doorbell wristband: Someone presses the doorbell. The band receives the signal. The band flashes and vibrates.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Can the wearer feel the vibration and see the light?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "4ea9f674ad15b23b006ee7e0a9eff0483223bdedddc3f07b2fdd919f40205eeb",
+        "decodedRgbSha256": "6add6e6bf0737ec7e28abf66180e952d40e75d9439952188d9262cd7486ba3ea",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use a rounded box for the receiver and a thin strap placeholder.",
+        "Label transmitter, receiver and cue; do not model a new magnet fastening.",
+        "Measure the supplied equipment and band fit before adding holes."
+      ],
+      "asset": {
+        "src": "/workshop/models/g04-idea2-reviewed-v4-feedback.jpeg",
+        "alt": "Doorbell wristband: Show the path: doorbell transmitter -> wristband cue -> response. Time the cue with a teacher. Keep the original band fastening. Overseas use and a camera need a separate communication design.",
+        "caption": "Feedback revision: Show the path: doorbell transmitter -> wristband cue -> response.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "cd81c7b095587fba8ccee94866ea49bd002bd0bae0c3353aa8b889d7d5f2c130",
+        "originalSha256": "4ea9f674ad15b23b006ee7e0a9eff0483223bdedddc3f07b2fdd919f40205eeb",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g5_parcel_alert": {
+      "status": "revised",
+      "changes": [
+        "Add a sound-alert option to the parcel-arrival explanation.",
+        "Test the platform with a light parcel; the threshold is unknown.",
+        "A robot companion is a separate new direction, not this parcel model."
+      ],
+      "original": {
+        "src": "/workshop/models/g05-idea1-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Parcel arrival notice: The parcel pushes the platform down. A switch sends a message indoors. Springs lift the empty platform again.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Does it notice light or off-centre parcels?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "13d40fd016d59470bee3b8f258b0d61f38622ada432f148d16c4e0fec3d5bf53",
+        "decodedRgbSha256": "febe8caa7379729a84ca1de75e03943db3b0a76541878da56bae38ee3627588b",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use two boxes for the parcel platform and base.",
+        "Use cylinders for guides and show the switch as a separate placeholder.",
+        "Label the optional sound cue; keep a companion model in a separate project."
+      ],
+      "asset": {
+        "src": "/workshop/models/g05-idea1-reviewed-v4-feedback.jpeg",
+        "alt": "Parcel arrival notice: Add a sound-alert option to the parcel-arrival explanation. Test the platform with a light parcel; the threshold is unknown. A robot companion is a separate new direction, not this parcel model.",
+        "caption": "Feedback revision: Add a sound-alert option to the parcel-arrival explanation.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "3012017d372041515c4a87c043bd2ca7193083e22509fe54965e74d48aef98b2",
+        "originalSha256": "13d40fd016d59470bee3b8f258b0d61f38622ada432f148d16c4e0fec3d5bf53",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g5_crossing_cuff": {
+      "status": "revised",
+      "changes": [
+        "Mark a proposed reflective-tape area on the crossing cuff.",
+        "Spoken STOP, LOOK, LISTEN is an extra output to review.",
+        "This is a reminder; it does not decide when crossing is safe."
+      ],
+      "original": {
+        "src": "/workshop/models/g05-idea2-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Crossing reminder cuff: Thread the strap through both slots. Wrap it around the wrist and fasten it. Read STOP LOOK LISTEN before crossing.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Would people wear it and read the reminder?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "0f71b427cf72f3683abe25f531367e563da6ea7347c40fc126a14eb16d4475dd",
+        "decodedRgbSha256": "bb2baee78bc9c013d7b09b8b76a6c58d6ed2f8fa563c264a3116bd27ee4408eb",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use a thin curved or segmented band and a rounded control case.",
+        "Add a thin separate strip to represent reflective tape.",
+        "Label STOP, LOOK, LISTEN outputs; measure wrist fit with the teacher."
+      ],
+      "asset": {
+        "src": "/workshop/models/g05-idea2-reviewed-v4-feedback.jpeg",
+        "alt": "Crossing reminder cuff: Mark a proposed reflective-tape area on the crossing cuff. Spoken STOP, LOOK, LISTEN is an extra output to review. This is a reminder; it does not decide when crossing is safe.",
+        "caption": "Feedback revision: Mark a proposed reflective-tape area on the crossing cuff.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "ce0a3bb2531bd600a73cece1c2159f0c3db1712496ba988c89e177610d60760b",
+        "originalSha256": "0f71b427cf72f3683abe25f531367e563da6ea7347c40fc126a14eb16d4475dd",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g6_drone": {
+      "status": "revised",
+      "changes": [
+        "Sketch a four-leg version for narrow spaces.",
+        "Keep the leg and body proportions adjustable until measured.",
+        "Wall adhesion and wet-weather performance have not been demonstrated."
+      ],
+      "original": {
+        "src": "/workshop/models/g06-idea1-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Fire inspection drone: The drone sends normal and heat pictures. Compare both views of the visible fire. The highlight helps the firefighter spot the hot area.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Do the normal and heat views show the same area?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "55d0f39575ce99cad3bccb26b53f0e7b0d44eea3f96d8e891dd26872b868741f",
+        "decodedRgbSha256": "1efb87d94a36bb923fc5a4bd979b1f00e1fc7cc1eca11fa72839e6a1d3ded5f7",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use a small rounded body and four separate leg shapes.",
+        "Keep leg joints separate; check narrow-space clearance on a tabletop.",
+        "Label adhesion equipment as unknown rather than claiming the model climbs."
+      ],
+      "asset": {
+        "src": "/workshop/models/g06-idea1-reviewed-v4-feedback.jpeg",
+        "alt": "Fire inspection drone: Sketch a four-leg version for narrow spaces. Keep the leg and body proportions adjustable until measured. Wall adhesion and wet-weather performance have not been demonstrated.",
+        "caption": "Feedback revision: Sketch a four-leg version for narrow spaces.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "8fe27f2b8b2e1a7dff2c8a72e7f01c4f3f447ee0f468666451223b734206e885",
+        "originalSha256": "55d0f39575ce99cad3bccb26b53f0e7b0d44eea3f96d8e891dd26872b868741f",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g6_detect_alert": {
+      "status": "revised",
+      "changes": [
+        "Sketch a small scout request beside the detector concept.",
+        "Show a teacher-operated control, not an automatic launch.",
+        "Use a harmless tabletop model; no fire or ignition trial."
+      ],
+      "original": {
+        "src": "/workshop/models/g06-idea2-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Stove fire detector and nozzle: Smoke and heat sensors alert the controller. The nozzle aims at the stove zone. Wet chemical is applied to that cooking area.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "A real kitchen needs a suitable system fitted by qualified fire-safety specialists.",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "35daba854a10263b6b9a6943f1fbd364f30202936cc155b75b62e12b9e3dbe88",
+        "decodedRgbSha256": "503096419050eaec3010eaec8e9144c3fc138e4444a59ccf35377c07963848a1",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Block out the detector and a separate small scout model.",
+        "Label an operator control and an inactive request path.",
+        "Check tabletop size and stability only; do not add a launch mechanism."
+      ],
+      "asset": {
+        "src": "/workshop/models/g06-idea2-reviewed-v4-feedback.jpeg",
+        "alt": "Stove fire detector and nozzle: Sketch a small scout request beside the detector concept. Show a teacher-operated control, not an automatic launch. Use a harmless tabletop model; no fire or ignition trial.",
+        "caption": "Feedback revision: Sketch a small scout request beside the detector concept.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "4c406a1866686ca84cf2687e97b517fbd5b1feb91917e99b7314bab323386b94",
+        "originalSha256": "35daba854a10263b6b9a6943f1fbd364f30202936cc155b75b62e12b9e3dbe88",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g7_condition_quiz": {
+      "status": "revised",
+      "changes": [
+        "Add a third answer state: CORRECT, PARTLY, TRY AGAIN.",
+        "Use a printed indicator first; extra lights are a later proposal.",
+        "A score meter is a separate addition, not an automatic mark system."
+      ],
+      "original": {
+        "src": "/workshop/models/g07-idea1-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Which bin quiz: Insert one card and hide the answer. Read the question. Choose A or B. Slide the cover right. Compare your choice with the printed answer.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Does the card use the correct local recycling rules?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "8f4aab0132cba003e509a70127bb60aaacb0a2774804b0d07d5b4df287ca5bca",
+        "decodedRgbSha256": "d8dcd59f96cc35d2dfc8157bd7da11bb577567c5507daacb743da14da4f798f8",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use a box for the quiz body and a separate sliding answer card.",
+        "Add three labelled printed indicator positions: CORRECT, PARTLY, TRY AGAIN.",
+        "Keep the score meter separate and check slide travel with measured clearance."
+      ],
+      "asset": {
+        "src": "/workshop/models/g07-idea1-reviewed-v4-feedback.jpeg",
+        "alt": "Which bin quiz: Add a third answer state: CORRECT, PARTLY, TRY AGAIN. Use a printed indicator first; extra lights are a later proposal. A score meter is a separate addition, not an automatic mark system.",
+        "caption": "Feedback revision: Add a third answer state: CORRECT, PARTLY, TRY AGAIN.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "1bee40bc230820075d174ef571ecf5f4d8b03842b6072d36fce7c2f17675311c",
+        "originalSha256": "8f4aab0132cba003e509a70127bb60aaacb0a2774804b0d07d5b4df287ca5bca",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g7_feedback_bin": {
+      "status": "revised",
+      "changes": [
+        "Add a proposed access flap to retrieve a wrongly placed item.",
+        "Explain the HOLD step before routing an item.",
+        "No shooting mechanism; recognition and access safety need testing."
+      ],
+      "original": {
+        "src": "/workshop/models/g07-idea2-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Camera assisted bin feedback: Place one item on the flap. Check the result and confirm the route. The flap tips towards the chosen bin.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Can someone take an unclear item back safely?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "e0d3d8ef9cdfc8577d1c8c321004bab8aa75b299c5580f286bffbdb6c64abe40",
+        "decodedRgbSha256": "48fbb190de56724f392c1238d67c11aed256c82a347ce8812e6a2c297cf5d87c",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use boxes for HOLD, recycling and general-waste spaces.",
+        "Make the proposed retrieval flap a separate part with a handle.",
+        "Keep camera and recognition controls as labelled placeholders; check access with harmless sample items."
+      ],
+      "asset": {
+        "src": "/workshop/models/g07-idea2-reviewed-v4-feedback.jpeg",
+        "alt": "Camera assisted bin feedback: Add a proposed access flap to retrieve a wrongly placed item. Explain the HOLD step before routing an item. No shooting mechanism; recognition and access safety need testing.",
+        "caption": "Feedback revision: Add a proposed access flap to retrieve a wrongly placed item.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "182165784ee0ad7c75a8811c57e711686a4d17a9d00fc0eaab992cea743f0a90",
+        "originalSha256": "e0d3d8ef9cdfc8577d1c8c321004bab8aa75b299c5580f286bffbdb6c64abe40",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g8_pendant": {
+      "status": "revised",
+      "changes": [
+        "Add a proposed child-lock control to the reachable light controller.",
+        "Explain manual operation and the existing wireless servo path.",
+        "Choose the input and lock behavior with the teacher; timing is unknown."
+      ],
+      "original": {
+        "src": "/workshop/models/g08-idea1-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Reachable light control: Press ON or OFF on the remote. The motor presses the matching rocker end. Swing open the mount to use the switch by hand.",
+        "width": 1660,
+        "height": 948,
+        "caption": "Does it fit this switch and allow normal hand use?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "489992cdfe804fd8cf96c70ed392eca4175a09def4892193c3dbec46931cdfb2",
+        "decodedRgbSha256": "b66c8fe21c41d79ca91ded89018218838b08af24d952b8f22b7446e6a564337a",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use a rounded box for the reachable controller.",
+        "Represent the servo switch bracket as a separate measured part.",
+        "Add a labelled child-lock control; leave electronics and timing as placeholders."
+      ],
+      "asset": {
+        "src": "/workshop/models/g08-idea1-reviewed-v4-feedback.jpeg",
+        "alt": "Reachable light control: Add a proposed child-lock control to the reachable light controller. Explain manual operation and the existing wireless servo path. Choose the input and lock behavior with the teacher; timing is unknown.",
+        "caption": "Feedback revision: Add a proposed child-lock control to the reachable light controller.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "42ebead5b8b25a87839553f19dbcc89378aad4cdc61a903d70ea489af4485ff1",
+        "originalSha256": "489992cdfe804fd8cf96c70ed392eca4175a09def4892193c3dbec46931cdfb2",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g8_cooking_screen": {
+      "status": "revised",
+      "changes": [
+        "Show a proposed press-and-hold child-lock control.",
+        "Explain LOCKED and UNLOCKED as distinct states.",
+        "Review nonvisual use; voice and tactile access are not yet established."
+      ],
+      "original": {
+        "src": "/workshop/models/g08-idea2-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Firestructor cooking guide: Read the recipe step on the screen. Use the timer while you cook. Check the food before moving to the next step.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Are the Check and Finish steps clear after an interruption?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "3e1d82b896b432a0f687405f396d4aec8a9263ed4d240ca6754b5c4731e4629f",
+        "decodedRgbSha256": "8d189bdde3674a9273e334a0edbf14aa5cd9911b6ff3a067cde2f947bd802563",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use a thin box for the cooking-guide screen and a stable support.",
+        "Add a separate labelled child-lock button.",
+        "Show LOCKED and UNLOCKED on sample screens; discuss nonvisual access."
+      ],
+      "asset": {
+        "src": "/workshop/models/g08-idea2-reviewed-v4-feedback.jpeg",
+        "alt": "Firestructor cooking guide: Show a proposed press-and-hold child-lock control. Explain LOCKED and UNLOCKED as distinct states. Review nonvisual use; voice and tactile access are not yet established.",
+        "caption": "Feedback revision: Show a proposed press-and-hold child-lock control.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "669f6447334979e7a747125f88bfbc9e56bf5778302dd744fc29d1d4e7bf6a2b",
+        "originalSha256": "3e1d82b896b432a0f687405f396d4aec8a9263ed4d240ca6754b5c4731e4629f",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g9_phone_bed": {
+      "status": "revised",
+      "changes": [
+        "Label the shutter end stop and leave room for the measured phone.",
+        "Explain cable clearance; the channel does not prove charging.",
+        "A timed-release feature is a separate proposal, not a working lock."
+      ],
+      "original": {
+        "src": "/workshop/models/g09-idea1-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Phone sleep bed: Pull the blanket-patterned cover along the guides. The linked slats close over the phone. Turn the roller to open the cover.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Do the slats roll smoothly and leave space for the cable?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "698be4975581b6d4191df4607b126793169f19a871806e512fffafdc7426bf64",
+        "decodedRgbSha256": "aa3e08e4450d4709a62245554f0ec566d076ecc365d1aa1cf82bdfbc16d26f84",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use a box and box hole for the phone bed with an uncut floor.",
+        "Make the shutter, end stop and cable channel separate.",
+        "Measure the phone first; keep a timer in a separate concept model."
+      ],
+      "asset": {
+        "src": "/workshop/models/g09-idea1-reviewed-v4-feedback.jpeg",
+        "alt": "Phone sleep bed: Label the shutter end stop and leave room for the measured phone. Explain cable clearance; the channel does not prove charging. A timed-release feature is a separate proposal, not a working lock.",
+        "caption": "Feedback revision: Label the shutter end stop and leave room for the measured phone.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "99a15eb97fbb461990520fab4c0714466b19da1cc2cf5f06a5788f2e0fe51633",
+        "originalSha256": "698be4975581b6d4191df4607b126793169f19a871806e512fffafdc7426bf64",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g9_recycling_mascot": {
+      "status": "revised",
+      "changes": [
+        "Show the sticker roll and a teacher-supervised refill step.",
+        "Use a sample sticker to explain the reward choice.",
+        "An empty roll needs refilling; no automatic sticker maker is claimed."
+      ],
+      "original": {
+        "src": "/workshop/models/g09-idea2-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Mystery sticker dispenser: A person confirms the sorting choice. CORRECT gives one mystery sticker. TRY AGAIN leaves the slot empty.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Can people collect one sticker easily without seeing the next one?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "3baff869c813dc601d99ace64cef356a915ee8a5239ddfff2d4e83238709d699",
+        "decodedRgbSha256": "ae54aabcb5139e4195a8dd837cd8c34343bf2c8542db418dc7b6e2d48b56afec",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use a box for the dispenser and a cylinder for the roll.",
+        "Add a slot and a separate refill lid with clearance.",
+        "Show a sample sticker strip; label manual refilling."
+      ],
+      "asset": {
+        "src": "/workshop/models/g09-idea2-reviewed-v4-feedback.jpeg",
+        "alt": "Mystery sticker dispenser: Show the sticker roll and a teacher-supervised refill step. Use a sample sticker to explain the reward choice. An empty roll needs refilling; no automatic sticker maker is claimed.",
+        "caption": "Feedback revision: Show the sticker roll and a teacher-supervised refill step.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "c8895dd7efc3740795154bc8c27381a34770f35a280fbd424f5af8aa9c97672b",
+        "originalSha256": "3baff869c813dc601d99ace64cef356a915ee8a5239ddfff2d4e83238709d699",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g10_caption_display": {
+      "status": "revised",
+      "changes": [
+        "Selected design: captions only. Remove the volume buttons.",
+        "Keep microphone mute, power, tilt and protected cable routing.",
+        "Compare captions with speech and check readability and delay."
+      ],
+      "original": {
+        "src": "/workshop/models/g10-idea1-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Living room caption TV: The microphone picks up speech. Speech-to-text software shows words on the screen. Use the minus and plus buttons for volume.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Which computer and speech-to-text software work well together?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "98220ab4dd166f68221279a96ea3317c07a3ec7055497bffa9da6c2e4de7734a",
+        "decodedRgbSha256": "6175834a0595c13772f2c6af52067b14ac53e21c4dd784c27928e72032b5bc22",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use boxes for the base and screen and cylinders for tilt pivots.",
+        "Add microphone, mute, power and cable-route placeholders.",
+        "Leave out volume buttons in the selected captions-only revision; use measured screen and equipment sizes."
+      ],
+      "decision": "Selected decision, not unanimous feedback: remove volume controls for a captions-only version. Audio output is outside this revision. Keep microphone mute, power and tilt. The earlier version with volume controls is retained.",
+      "solution": "A tabletop captions-only screen with microphone mute, tilt and power controls.",
+      "steps": [
+        "The microphone picks up speech while MIC ON is shown.",
+        "Speech-to-text software shows words on the screen.",
+        "Mute pauses the microphone; power turns the unit off. Adjust the screen tilt for reading."
+      ],
+      "nextTest": "Compare short spoken sentences with the captions. Check readability, mistakes, delay, microphone mute and battery life with the teacher.",
+      "asset": {
+        "src": "/workshop/models/g10-idea1-reviewed-v4-feedback.jpeg",
+        "alt": "Living room caption TV: Selected design: captions only. Remove the volume buttons. Keep microphone mute, power, tilt and protected cable routing. Compare captions with speech and check readability and delay.",
+        "caption": "Feedback revision: Selected design: captions only. Remove the volume buttons.",
+        "width": 1536,
+        "height": 1376,
+        "approved": true,
+        "registryVersion": 4,
+        "provenance": "Additive local revision of the preserved approved illustration; proposals are labelled. No external AI or pupil data submission.",
+        "sha256": "0d0c6f1adc703eb833efb851e3349aff32f04284ac30e8bc6b1a7bf0c59eed43",
+        "originalSha256": "98220ab4dd166f68221279a96ea3317c07a3ec7055497bffa9da6c2e4de7734a",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9"
+      }
+    },
+    "g10_fire_car": {
+      "status": "original-retained",
+      "changes": [],
+      "original": {
+        "src": "/workshop/models/g10-idea2-reviewed-v2-pdf-derived.jpeg",
+        "alt": "Fire response car: Drive using the camera view. Move the two joints to aim the nozzle. Use separate DISCHARGE and STOP controls.",
+        "width": 1536,
+        "height": 1024,
+        "caption": "Can the model reach forward without tipping or pulling the hose?",
+        "approved": true,
+        "provenance": "PDF-derived embedded JPEG; no rendering or recompression; original PNG byte equivalence not claimed",
+        "sourcePdfSha256": "de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9",
+        "sha256": "385467ee1e6b5fcbbef1bc93ee47c098cf9d43b504bb4b44767cf530304a2650",
+        "decodedRgbSha256": "cf4038402f1745458642efbdeeea14c32ba44359d24ced2257c59fe242ec8d42",
+        "registryVersion": 3
+      },
+      "modellingSteps": [
+        "Use a low box chassis, cylinder tank and separate wheels.",
+        "Make the two arm joints and nozzle as separate inert parts.",
+        "Check tabletop balance and hose routing with a non-spraying model."
+      ],
+      "retentionReason": "Original drawing retained: no verified mapped feedback specifies a substantive drawing change."
+    }
+  }
+}

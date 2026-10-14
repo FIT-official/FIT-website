@@ -7,7 +7,7 @@ import DraftHistory from './DraftHistory'
 import design from './ClassroomDesign.module.css'
 import SubmissionActions, { keepFocusedWorkVisible } from './SubmissionActions'
 const labels = { whatWorks: 'What works well, and why?', question: 'What question would you ask the presenters?', improvement: 'What specific improvement do you suggest?' }
-export default function GuestFeedbackForm({ group, lesson, onRefresh, selectedIdea, onIdeaChange }) {
+export default function GuestFeedbackForm({ group, lesson, onRefresh, selectedIdea, onIdeaChange, fixedIdea = false }) {
     const [localIdea, setLocalIdea] = useState('1'), idea = selectedIdea || localIdea, setIdea = onIdeaChange || setLocalIdea
     const round = lesson.assignment.round || 1, roundKey = round === 1 ? '' : ':round:' + round, roundTopic = round === 1 ? '' : 'r' + round + '-'
     const key = 'fit:guest:' + WORKSHOP_SESSION + ':' + lesson.seat + roundKey + ':feedback:' + group.id + ':idea:' + idea
@@ -25,12 +25,12 @@ export default function GuestFeedbackForm({ group, lesson, onRefresh, selectedId
     }
     if (group.id === lesson.group) return <p>Your group does not review itself.</p>
     return <section className={design.panel + ' ' + design.writing + ' ph-mask ph-no-capture mt-5'}>
-        <h3 className="text-2xl font-bold">Write your feedback here</h3>
-        <label className="block mt-3">Choose the idea<select value={idea} className="formInput block w-full" disabled={busy || draft?.pending} onChange={event => { setIdea(event.target.value); setMessage('') }}>{group.ideas.map((value, index) => <option key={value.title} value={String(index + 1)}>Idea {index + 1}: {value.title}</option>)}</select></label>
-        {!draft ? <p>Loading this idea&apos;s draft.</p> : <form aria-label={'Feedback for Group ' + group.number} onSubmit={submit} onFocusCapture={keepFocusedWorkVisible}>
-            <fieldset disabled={busy || draft.pending || Boolean(draft.receipt)}>{Object.entries(labels).map(([field, label]) => <label key={field} className="block mt-4">{label}<span id={group.id + '-' + idea + '-' + field + '-hint'} className="block text-sm mt-2">{prompts[field]}</span><textarea aria-label={label} aria-describedby={group.id + '-' + idea + '-' + field + '-hint'} required maxLength={600} rows={5} value={draft[field]} onChange={event => save({ ...draft, [field]: event.target.value })} className="formInput block w-full" /></label>)}</fieldset>
+        <h3 className="text-2xl font-bold">{fixedIdea ? "Feedback for Idea " + idea : "Write your feedback here"}</h3>
+        {!fixedIdea && <label className="block mt-3">Choose the idea<select value={idea} className="formInput block w-full" disabled={busy || draft?.pending} onChange={event => { setIdea(event.target.value); setMessage('') }}>{group.ideas.map((value, index) => <option key={value.title} value={String(index + 1)}>Idea {index + 1}: {value.title}</option>)}</select></label>}
+        {!draft ? <p>Loading this idea&apos;s draft.</p> : <form aria-label={'Feedback for Group ' + group.number + (fixedIdea ? ' Idea ' + idea : '')} onSubmit={submit} onFocusCapture={keepFocusedWorkVisible}>
+            <fieldset disabled={busy || draft.pending || Boolean(draft.receipt)}>{Object.entries(labels).map(([field, label]) => <label key={field} className="block mt-4">{label}<span id={group.id + '-' + idea + '-' + field + '-hint'} className="block text-sm mt-2">{prompts[field]}</span><textarea aria-label={fixedIdea ? 'Idea ' + idea + ': ' + label : label} aria-describedby={group.id + '-' + idea + '-' + field + '-hint'} required maxLength={600} rows={5} value={draft[field]} onChange={event => save({ ...draft, [field]: event.target.value })} className="formInput block w-full" /></label>)}</fieldset>
             <DraftHistory controls={history} disabled={busy || draft.pending || Boolean(draft.receipt)} status={warning} submitted={Boolean(draft.receipt)} />
-            <SubmissionActions busy={busy} pending={draft.pending} submitted={Boolean(draft.receipt)} label="Submit" confirmation="Your feedback has been submitted."
+            <SubmissionActions busy={busy} pending={draft.pending} submitted={Boolean(draft.receipt)} label={fixedIdea ? 'Submit Idea ' + idea + ' feedback' : 'Submit'} confirmation="Your feedback has been submitted."
                 disabled={busy || !draft.pending && (!allowed || history.conflict)}
                 blockedReason={!lesson.feedbackOpen ? 'Your teacher has paused feedback. You can keep writing.' : !allowed ? 'First submit feedback for Group ' + lesson.assignment.target.slice(1) + '. You can keep your draft.' : history.conflict ? 'Compare your earlier drafts before submitting.' : ''} />
             {draft.receipt && <button type="button" className="formWhiteButton mt-3" onClick={() => { save({ id: crypto.randomUUID(), idea, whatWorks: '', question: '', improvement: '', receipt: null, pending: false, payload: null }); setMessage('') }}>Write new feedback</button>}

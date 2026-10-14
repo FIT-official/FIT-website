@@ -8,12 +8,12 @@ function store() { const rows = new Map(); return { findOne: async q => rows.get
 const models = []
 function model(extra = {}) { const storage = new Map(), config = { key: 'seat-topic', seat: access.seat, topic, enabled: true, create: blank, online: () => true, load: async () => [], save: vi.fn(async () => ({ version: 1 })), storage: { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value) }, onChange: vi.fn(), ...extra }; const result = new DraftController(config); models.push(result); return result }
 afterEach(() => { for (const row of models.splice(0)) row.close(); vi.useRealTimers() })
-describe('bounded individual draft recovery', () => {
-    it('keeps eight snapshots and acknowledges retries beyond the visible history window', async () => {
+describe('individual draft recovery', () => {
+    it('keeps all new snapshots and acknowledges old request retries', async () => {
         const db = store(), requests = []
         for (let i = 0; i < 12; i++) { const payload = { seat: access.seat, topic, requestId: randomUUID(), expectedVersion: i, content: { idea: '1', whatWorks: 'draft ' + i, question: '', improvement: '' } }; requests.push(payload); await saveWorkshopDraft(db, access, payload, now) }
         const record = await db.findOne({ _id: '2026-10-09:' + access.seat + ':' + topic })
-        expect(record.snapshots).toHaveLength(8); expect(record.receipts).toHaveLength(12)
+        expect(record.snapshots).toHaveLength(12); expect(record.receipts).toHaveLength(12)
         expect(await saveWorkshopDraft(db, access, requests[0], now)).toMatchObject({ version: 1, unchanged: true })
         expect(JSON.stringify(draftView(record))).not.toContain('requestId'); expect(JSON.stringify(draftView(record))).not.toContain('hash')
     })

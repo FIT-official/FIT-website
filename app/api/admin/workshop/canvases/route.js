@@ -1,0 +1,7 @@
+import { requireGuestTeacher } from '@/lib/workshopGuestAccess'
+import { guestDb, classJson, classFailure, sameOrigin } from '@/lib/workshopGuestHttp'
+import { readCanvas, writeCanvas, exportCanvas } from '@/lib/workshopCanvasStore'
+import { requireCanvasEnabled, canvasQuery, canvasBody } from '@/lib/workshopCanvasHttp'
+export const runtime = 'nodejs'
+export async function GET(request) { try { requireCanvasEnabled(); const access = await requireGuestTeacher(request), q = canvasQuery(request, true), db = await guestDb(), store = db.collection('workshopGuestLessons'); const response = classJson(q.exporting ? await exportCanvas(store, access, q.group, q.idea) : await readCanvas(store, access, q.group, q.idea, q.revision)); if (q.exporting) response.headers.set('Content-Disposition', `attachment; filename="FIT-drawing-${q.group}-idea${q.idea}.json"`); return response } catch (e) { return classFailure(e) } }
+export async function POST(request) { try { requireCanvasEnabled(); sameOrigin(request); const access = await requireGuestTeacher(request), q = canvasQuery(request, true), input = await canvasBody(request); if (input.action !== 'restore' || q.revision !== undefined || q.exporting) throw Object.assign(Error('Teacher review can restore a saved version as a new draft.'), { status: 400 }); const db = await guestDb(); return classJson(await writeCanvas(db.collection('workshopGuestLessons'), access, q.group, q.idea, input)) } catch (e) { return classFailure(e) } }

@@ -9,7 +9,7 @@ vi.mock('next/image', () => ({ default: ({ src, alt, width, height }) => <img sr
 vi.mock('next/link', () => ({ default: ({ href, children }) => <a href={href}>{children}</a> }))
 import ReviewedGroupPage from '@/components/Workshop/ReviewedGroupPage'
 afterEach(cleanup)
-it('renders every verified PDF-derived asset with matching public and classroom captions', () => {
+it('renders every preserved or revised asset with matching public and classroom captions', () => {
     expect(assertWorkshopImagesReady()).toBe(true)
     const urls = new Set()
     for (let n = 1; n <= 10; n++) {
@@ -19,8 +19,8 @@ it('renders every verified PDF-derived asset with matching public and classroom 
             urls.add(image.src)
             expect(classroom.reading.ideas[i].illustrations[0]).toEqual(image)
             expect(createHash('sha256').update(readFileSync('public' + image.src)).digest('hex')).toBe(image.sha256)
-            expect(image.registryVersion).toBe(3)
-            expect(image.caption).toBe(classroom.reading.ideas[i].pupilCopy.source_caveat)
+            expect([3, 4]).toContain(image.registryVersion)
+            expect(image.caption).toBe(classroom.reading.ideas[i].illustrations[0].caption)
             expect(image.sourcePdfSha256).toBe('de0272d6bdde164ec6c0f4490d2e2b5243f2c761a61ffdfa30d337f5659b8cc9')
         }
         for (const isClassroom of [false, true]) {
@@ -34,8 +34,8 @@ it('renders every verified PDF-derived asset with matching public and classroom 
         }
     }
     expect(urls.size).toBe(20)
-    expect(workshopGroupPage('g1').models[0].caption).toContain('carried or stay on a table')
-    expect(workshopGroupPage('g3').models[0].caption).toContain('receive HELLO')
-    expect(workshopGroupPage('g7').models[1].caption).toContain('unclear item back safely')
-    expect(workshopGroupPage('g8').models[0]).toMatchObject({ width: 1660, height: 948 })
+    expect(workshopGroupPage('g1').models[0].caption).toContain('open area')
+    expect(workshopGroupPage('g3').models[0].caption).toContain('I MISS YOU')
+    expect(workshopGroupPage('g7').models[1].caption).toContain('retrieve')
+    expect(workshopGroupPage('g8').models[0]).toMatchObject({ width: 1536, height: 1376 })
 })

@@ -21,7 +21,8 @@ describe('workshop pupil and teacher state batch', () => {
         const a = guest(), db = store(lesson()), first = feedback(a)
         await expect(submitClassroom(db, a, feedback(a, 'g4'), now)).rejects.toMatchObject({ status: 409 })
         const receipt = await submitClassroom(db, a, first, now); expect(await submitClassroom(db, a, first, now)).toEqual(receipt)
-        await submitClassroom(db, a, feedback(a), now); await submitClassroom(db, a, feedback(a, 'g4'), now)
+        await expect(submitClassroom(db, a, feedback(a, 'g4'), now)).rejects.toMatchObject({ status: 409 })
+        await submitClassroom(db, a, feedback(a, 'g3', { idea: '2' }), now); await submitClassroom(db, a, feedback(a, 'g4'), now)
         const view = classroomView(await readLesson(db), a); expect(view.reviewCompletion).toEqual({ complete: true, extraCount: 1 }); expect(view.feedback).toHaveLength(0); expect((await readLesson(db)).feedback).toHaveLength(3)
     })
     it('keeps round-specific drafts independent and rejects own-group topics', async () => {

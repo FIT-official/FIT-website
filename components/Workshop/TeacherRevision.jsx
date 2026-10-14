@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
-const labels = { feedbackUsed: 'Feedback used', change: 'Change', reason: 'Reason', test: 'Next test' }
+import { labelsForRefinement } from '@/lib/workshopRefinement'
 export default function TeacherRevision({ row, busy, onAction, compact = false }) {
+    const labels = labelsForRefinement(row.promptVersion)
     const [edit, setEdit] = useState(null)
     const version = row.entryVersion || 1
     async function save(event) {

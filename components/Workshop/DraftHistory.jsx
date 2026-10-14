@@ -1,8 +1,9 @@
 'use client'
 import { useState } from 'react'
 import design from './ClassroomDesign.module.css'
-const labels = { whatWorks: 'What works well, and why?', question: 'What question would you ask the presenters?', improvement: 'What specific improvement do you suggest?', feedbackUsed: 'Earlier answer: Which feedback are you using?', change: 'What would you change to improve this idea?', reason: 'Why would this improve the idea?', test: 'How would you test this change?' }
+const labels = { problemStatement: 'Refined problem statement', solutionDescription: 'Description of our solution', illustrationNotes: 'Illustration changes and labels', whatWorks: 'What works well, and why?', question: 'What question would you ask the presenters?', improvement: 'What specific improvement do you suggest?', feedbackUsed: 'Earlier answer: Which feedback are you using?', change: 'What would you change to improve this idea?', reason: 'Why would this improve the idea?', test: 'How would you test this change?' }
 export function draftStatus(status = '', conflict = false) {
+    if (/^Browser storage/.test(status)) return status
     if (conflict) return 'A newer draft is available. Open Earlier drafts to compare.'
     if (/offline/i.test(status)) return 'Offline. Draft kept on this device — not submitted.'
     if (/^Autosaved draft|^Recovered draft/.test(status)) return 'Draft saved — not submitted'
@@ -23,10 +24,12 @@ export default function DraftHistory({ controls, disabled, status, submitted = f
     const rows = controls.remote?.snapshots || [], snapshot = rows.find(row => String(row.version) === selected)
     return <div className={design.draftTools + ' ph-mask ph-no-capture'}>
         <div className="flex flex-wrap items-center gap-3"><button type="button" className="formWhiteButton text-sm" disabled={disabled} onClick={controls.retry}>Save draft</button>{!submitted && <span role="status" aria-live="polite" className="text-sm">{draftStatus(status, controls.conflict)}</span>}</div>
+        {controls.storageError && <p role="alert" className="mt-3">Device storage failed. Keep this page open and copy your writing. A server save is confirmed only when acknowledged.</p>}
         <div className="flex flex-wrap gap-4 mt-3"><button type="button" className="underline text-sm" disabled={disabled || !controls.canUndo} onClick={controls.undo}>Undo</button><button type="button" className="underline text-sm" disabled={disabled || !controls.canRedo} onClick={controls.redo}>Redo</button></div>
         <details className="mt-3" onToggle={event => { if (event.currentTarget.open) controls.compare() }}><summary className="cursor-pointer text-sm">Earlier drafts</summary>
             {rows.length ? <><label className="block mt-3">Choose an earlier draft<select className="formInput block w-full" value={selected} onChange={event => setSelected(event.target.value)}><option value="">Choose a date</option>{rows.map((row, index) => <option key={row.version} value={row.version}>{new Date(row.savedAt).toLocaleString()} · Saved answer {index + 1}</option>)}</select></label>{snapshot && <><DraftPreview content={snapshot.content} /><button type="button" className="formWhiteButton mt-3" disabled={disabled} onClick={() => controls.rebase(snapshot.content)}>Restore draft</button></>}</> : <p className="mt-3">No earlier drafts yet.</p>}
             {controls.conflict && <><p className="mt-3">Compare the saved answers with your writing before choosing.</p><button type="button" className="formWhiteButton mt-3" disabled={disabled} onClick={() => controls.rebase()}>Keep my current answers</button></>}
+            {!!controls.localBranches?.length && <details className="mt-3"><summary>Device recovery copies</summary><p>These copies belong to this class account and activity. Compare before restoring; restoring creates a new server revision.</p>{controls.localBranches.map(row => <details key={row.key} className="mt-3"><summary>{new Date(row.savedAt).toLocaleString()}</summary><DraftPreview content={row.content} /><button type="button" className="formWhiteButton mt-3" disabled={disabled} onClick={() => controls.rebase(row.content)}>Restore this device copy</button></details>)}</details>}
         </details>
     </div>
 }

@@ -1,0 +1,20 @@
+{
+  "status": "scoped candidate; not deployed",
+  "base": "5789481df0ecfe506a30aed7b13bcb56cbda115e",
+  "productionAliasObserved": "www.fixitoday.com",
+  "productionDeploymentObserved": "dpl_3tU6vVc8pjpMYEnqHVhCxv9rfK8B",
+  "productionShaObserved": "5789481df0ecfe506a30aed7b13bcb56cbda115e",
+  "routesInspected": ["app/workshop/[group]/classroom/page.jsx", "app/workshop/[group]/page.jsx"],
+  "latestScopedUnitTests": {"passed": 368, "failed": 0, "syntheticOnly": true},
+  "canvasBrowserChecks": {"passed": 14, "failed": 0, "syntheticLoopbackOnly": true},
+  "build": {"passed": true, "beforeBalancedFeedbackAddition": true, "syntheticConfig": true, "network": "loopback only"},
+  "lint": {"errors": 0, "warning": "native image in synthetic preview; now documented with a scoped lint exception"},
+  "combinedBrowserChecks": {"passed": false, "remaining": "Run against the corrected resettable synthetic fixture. Earlier run timed out on save status; following run encountered prior fixture text. Preview restart was interrupted."},
+  "artwork": {"mappedPairsReviewed": 20, "additiveRevisions": 16, "originalsPreserved": 20, "unchangedPairs": ["g1-2", "g2-2", "g4-1", "g10-2"]},
+  "remaining": ["Combined desktop/mobile browser rerun", "Final build after balanced feedback addition", "Release coordination and scoped publication", "WORKSHOP_CANVAS_ENABLED=true for the approved release", "Existing-session authenticated live verification", "Exact existing CAD/idea/units mapping"],
+  "productionWrites": 0,
+  "securitySettingsChanged": false,
+  "deniedTeacherBrowserActionRetried": false,
+  "libraryUploadRetried": false,
+  "studentRecordsRewritten": false
+}

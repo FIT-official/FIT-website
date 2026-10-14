@@ -1,0 +1,8 @@
+import { requireGuestAccess, verifyGuestHome } from '@/lib/workshopGuestAccess'
+import { guestDb, classJson, classFailure, sameOrigin, limitGuestOperation } from '@/lib/workshopGuestHttp'
+import { readCanvas, writeCanvas } from '@/lib/workshopCanvasStore'
+import { requireCanvasEnabled, canvasQuery, canvasBody } from '@/lib/workshopCanvasHttp'
+import { WORKSHOP_SESSION } from '@/lib/workshopFeedback'
+export const runtime = 'nodejs'
+export async function GET(request) { try { requireCanvasEnabled(); const access = await requireGuestAccess(request); verifyGuestHome(request, access); const q = canvasQuery(request), db = await guestDb(); if (q.group !== access.group) throw Object.assign(Error('Open your own group drawing.'), { status: 403 }); return classJson({ ...(await readCanvas(db.collection('workshopGuestLessons'), access, access.group, q.idea, q.revision)), seat: access.seat }) } catch (e) { return classFailure(e) } }
+export async function POST(request) { try { requireCanvasEnabled(); sameOrigin(request); const access = await requireGuestAccess(request); verifyGuestHome(request, access); const q = canvasQuery(request), input = await canvasBody(request), db = await guestDb(); if (q.group !== access.group || q.revision !== undefined) throw Object.assign(Error('Open your own current group drawing.'), { status: 403 }); await limitGuestOperation(db, 'canvas-' + access.seat, 25); const store = db.collection('workshopGuestLessons'), lesson = await store.findOne({ _id: WORKSHOP_SESSION }, { projection: { refinementOpen: 1 } }); return classJson({ ...(await writeCanvas(store, access, access.group, q.idea, input, { submissionsOpen: Boolean(lesson?.refinementOpen) })), seat: access.seat }) } catch (e) { return classFailure(e) } }
