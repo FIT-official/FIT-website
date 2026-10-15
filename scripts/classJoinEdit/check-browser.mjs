@@ -2,7 +2,7 @@ import { chromium } from 'playwright'
 import fs from 'node:fs/promises'
 import assert from 'node:assert/strict'
 import { fileURLToPath } from 'node:url'
-const origin='http://127.0.0.1:4401',out=fileURLToPath(new URL('../../../join-edit-evidence/browser/',import.meta.url));await fs.mkdir(out,{recursive:true})
+const origin='http://127.0.0.1:44941',out=fileURLToPath(new URL('../../../join-edit-evidence/browser/',import.meta.url));await fs.mkdir(out,{recursive:true})
 const browser=await chromium.launch({headless:true}),checks=[],errors=[],external=[],contexts=[];let page,success=false,failure
 async function context(){const ctx=await browser.newContext({viewport:{width:1440,height:1050},hasTouch:true});contexts.push(ctx);await ctx.route('**/*',route=>{if(new URL(route.request().url()).hostname!=='127.0.0.1'){external.push(route.request().url());return route.abort()};return route.continue()});ctx.on('page',p=>p.on('pageerror',error=>errors.push(error.message)));return ctx}
 const button=(scope,name)=>scope.getByRole('button',{name,exact:true}),canvas=(p,n=1)=>p.getByRole('region',{name:`Idea ${n} group drawing`,exact:true}),board=(p,n=1)=>canvas(p,n).getByTestId('drawing-board'),field=(p,name)=>p.getByRole('textbox',{name,exact:true})

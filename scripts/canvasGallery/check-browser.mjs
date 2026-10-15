@@ -2,7 +2,7 @@ import { chromium } from 'playwright'
 import fs from 'node:fs/promises'
 import assert from 'node:assert/strict'
 import { fileURLToPath } from 'node:url'
-const origin = 'http://127.0.0.1:4391', out = fileURLToPath(new URL('../../../gallery-evidence/browser/', import.meta.url)); await fs.mkdir(out, { recursive: true })
+const origin = 'http://127.0.0.1:44934', out = fileURLToPath(new URL('../../../gallery-evidence/browser/', import.meta.url)); await fs.mkdir(out, { recursive: true })
 const browser = await chromium.launch({ headless: true }), context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, permissions: ['clipboard-read', 'clipboard-write'] }), checks = [], errors = [], writes = [], external = []
 await context.route('**/*', route => { const request = route.request(); if (new URL(request.url()).hostname !== '127.0.0.1') { external.push(request.url()); return route.abort() }; if (request.url().includes('/api/') && request.method() !== 'GET') writes.push(request.method()); return route.continue() })
 context.on('page', page => page.on('pageerror', error => errors.push(error.message)))

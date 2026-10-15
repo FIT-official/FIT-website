@@ -29,8 +29,11 @@ export async function POST(request) {
         if (!input.prepare) newGuest(input.group, input.name)
         const db = await guestDb(), lessons = db.collection('workshopGuestLessons'), state = await readLesson(lessons)
         if (!state.entryOpen) throw new GuestAccessError('Your teacher has not opened class entry yet.', 403)
-        await limitGuestOperation(db, 'entry-global', 200)
-        await limitGuestOperation(db, 'entry-' + guestHash(request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'shared'), 80)
+        // Preparing a private browser token must not consume a pupil's join budget.
+        // Both operations keep the existing per-IP and global request ceilings.
+        const operation = input.prepare === true ? 'entry-prepare' : 'entry'
+        await limitGuestOperation(db, operation + '-global', 200)
+        await limitGuestOperation(db, operation + '-' + guestHash(request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'shared'), 80)
         const sessions = db.collection('workshopGuestSessions'), oldToken = guestToken(request)
         if (input.prepare === true) {
             const prepared = await prepareGuestJoin(sessions, oldToken), response = classJson({ prepared: true })

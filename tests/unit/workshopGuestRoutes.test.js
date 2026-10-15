@@ -12,7 +12,7 @@ vi.mock('@/lib/workshopDatabase', () => ({ workshopDatabase: async () => ({ coll
         const state = h.rows.get('workshopGuestLessons')?.get('2026-10-09')
         return [{ ...structuredClone(row), lesson: state ? [structuredClone(state)] : [] }]
     } })
-    return { collectionName: name, aggregate, findOne: async (q, options) => { h.reads.push({ name, q, options }); return structuredClone([...rows.values()].find(row => matches(row, q)) || null) }, insertOne: async row => { if (rows.has(row._id)) throw Object.assign(Error(), { code: 11000 }); rows.set(row._id, structuredClone(row)) }, deleteOne: async q => ({ deletedCount: matches(rows.get(q._id), q) && rows.delete(q._id) ? 1 : 0 }), updateOne: async (q, update) => { if (name === 'workshopGuestRateLimits') return { modifiedCount: 1 }; const row = [...rows.values()].find(row => matches(row, q)); if (!row) return { modifiedCount: 0 }; Object.assign(row, update.$set); return { modifiedCount: 1 } }, replaceOne: async (q, row) => { if (!matches(rows.get(q._id), q)) return { modifiedCount: 0 }; rows.set(q._id, structuredClone(row)); return { modifiedCount: 1 } }, find: q => ({ limit: () => ({ toArray: async () => [...rows.values()].filter(row => matches(row, q)).map(row => structuredClone(row)) }) }) }
+    return { collectionName: name, aggregate, findOne: async (q, options) => { h.reads.push({ name, q, options }); return structuredClone([...rows.values()].find(row => matches(row, q)) || null) }, insertOne: async row => { if (rows.has(row._id)) throw Object.assign(Error(), { code: 11000 }); rows.set(row._id, structuredClone(row)) }, deleteOne: async q => ({ deletedCount: matches(rows.get(q._id), q) && rows.delete(q._id) ? 1 : 0 }), updateOne: async (q, update) => { if (name === 'workshopGuestRateLimits') { let rate = rows.get(q._id); if (!rate && update.$setOnInsert) { rate = { _id: q._id, ...update.$setOnInsert }; rows.set(q._id, rate); return { modifiedCount: 0 }; } if (rate && q.count?.$lt > rate.count && update.$inc?.count === 1) { rate.count++; return { modifiedCount: 1 }; } return { modifiedCount: 0 }; }; const row = [...rows.values()].find(row => matches(row, q)); if (!row) return { modifiedCount: 0 }; Object.assign(row, update.$set); return { modifiedCount: 1 } }, replaceOne: async (q, row) => { if (!matches(rows.get(q._id), q)) return { modifiedCount: 0 }; rows.set(q._id, structuredClone(row)); return { modifiedCount: 1 } }, find: q => ({ limit: () => ({ toArray: async () => [...rows.values()].filter(row => matches(row, q)).map(row => structuredClone(row)) }) }) }
 } }) }))
 vi.mock('@/lib/authenticate', () => { class UnauthorizedError extends Error { constructor() { super('Teacher sign-in required.'); this.status = 401 } } return { UnauthorizedError, authenticate: async () => { if (!h.signedIn) throw new UnauthorizedError(); return { userId: 'synthetic-teacher' } } } })
 vi.mock('@/lib/checkPrivileges', () => ({ checkAdminPrivileges: async () => h.admin }))
@@ -46,6 +46,23 @@ async function join(name = 'Alex', group = 'g2') {
 beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-09T02:00:00Z')); h.rows.clear(); h.touched = []; h.reads = []; h.admin = false; h.signedIn = false; h.rows.set('workshopGuestLessons', new Map([['2026-10-09', { ...emptyLesson(), entryOpen: true, version: 1 }]])) })
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs() })
 describe('guest routes never reveal legacy class data', () => {
+    it('lets 48 classmates sharing an IP prepare and join without halving the existing entry budget', async () => {
+        const prepared = await Promise.all(Array.from({ length: 48 }, () => sessionPOST(req('/api/workshop/guest/session', 'POST', { prepare: true }))))
+        expect(prepared.every(row => row.status === 200)).toBe(true)
+        const joined = await Promise.all(prepared.map((row, i) => sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'Synthetic Classmate ' + i, group: 'g' + (i % 10 + 1) }, row.headers.get('set-cookie').split(';')[0]))))
+        expect(joined.every(row => row.status === 200)).toBe(true)
+        const identities = await Promise.all(joined.map(row => row.json()))
+        expect(new Set(identities.map(row => row.seat)).size).toBe(48)
+        expect(identities.every((row, i) => row.group === 'g' + (i % 10 + 1))).toBe(true)
+    })
+    it('keeps the 80-per-IP limit on preparation and refuses excess requests without creating identities', async () => {
+        const responses = await Promise.all(Array.from({ length: 81 }, () => sessionPOST(req('/api/workshop/guest/session', 'POST', { prepare: true }))))
+        expect(responses.filter(row => row.status === 200)).toHaveLength(80)
+        expect(responses.filter(row => row.status === 429)).toHaveLength(1)
+        expect(h.rows.get('workshopGuestSessions').size).toBe(80)
+        expect([...h.rows.get('workshopGuestSessions').values()].every(row => row.enabled === false && !row.seat)).toBe(true)
+    })
+
     it('reuses the same private identity for a name part while preserving its full name, work and draft', async () => {
         const a = await join('Alex Tan'), b = await join('Alex Lee')
         const draft = { seat: a.identity.seat, topic: 'feedback-g3-idea1', expectedVersion: 0, requestId: randomUUID(), content: { idea: '1', whatWorks: 'Saved draft', question: '', improvement: '' } }
