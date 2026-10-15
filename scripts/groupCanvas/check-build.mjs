@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process'
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
-const repo = fileURLToPath(new URL('../../', import.meta.url)), out = fileURLToPath(new URL('../../../friday-live-build-evidence/', import.meta.url)); fs.mkdirSync(out, { recursive: true })
+const repo = fileURLToPath(new URL('../../', import.meta.url)), out = fileURLToPath(new URL('../../../friday-current-build-evidence/', import.meta.url)); fs.mkdirSync(out, { recursive: true })
 if (fs.readdirSync(repo).some(n => n.startsWith('.env') && n !== '.env.example')) throw Error('Build refuses local environment files')
 const env = Object.fromEntries(['PATH', 'SystemRoot', 'WINDIR', 'COMSPEC', 'TEMP', 'TMP', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'PROGRAMDATA', 'PATHEXT'].filter(k => process.env[k]).map(k => [k, process.env[k]]))
 const existingReview = 'C:/Users/ww/Documents/Codex/2026-10-09/task/fit-lms-v2-review-20261013'

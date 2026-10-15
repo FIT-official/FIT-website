@@ -1,15 +1,15 @@
 {
-  "status": "verified scoped candidate; awaiting release coordination",
-  "base": "5789481df0ecfe506a30aed7b13bcb56cbda115e",
+  "status": "verified integration on current production; not deployed",
+  "base": "85ff89e8c8b25b0f215543d9c01dc7d69bd57f77",
   "productionAliasObserved": "www.fixitoday.com",
-  "productionDeploymentObserved": "dpl_3tU6vVc8pjpMYEnqHVhCxv9rfK8B",
-  "productionShaObserved": "5789481df0ecfe506a30aed7b13bcb56cbda115e",
+  "productionDeploymentObserved": "dpl_26oDJzzTm14yQLf1gmyV4izvgQTb",
+  "productionShaObserved": "85ff89e8c8b25b0f215543d9c01dc7d69bd57f77",
   "routesInspected": [
     "app/workshop/[group]/classroom/page.jsx",
     "app/workshop/[group]/page.jsx"
   ],
   "latestScopedUnitTests": {
-    "passed": 368,
+    "passed": 378,
     "failed": 0,
     "syntheticOnly": true
   },
@@ -23,7 +23,7 @@
     "beforeBalancedFeedbackAddition": false,
     "syntheticConfig": true,
     "network": "loopback only",
-    "seconds": 41.356
+    "seconds": 87.477
   },
   "lint": {
     "errors": 0,
@@ -71,5 +71,36 @@
     "g4-1": "No peer feedback; the mapped own entry is a placeholder without substantive drawing changes.",
     "g10-2": "Mapped own work allocates a task but specifies no geometry/mechanism change; no peer response."
   },
-  "referenceValidation": "Only own entries in the authored illustration registries; inherited keys and arbitrary URLs are rejected."
+  "referenceValidation": "Only own entries in the authored illustration registries; inherited keys and arbitrary URLs are rejected.",
+  "sourceCandidate": "2751094e3e6380aaa70807a20bf2e4d63f146f48",
+  "fortyHttpClients": {
+    "clients": 40,
+    "clientType": "40 independent Node HTTP agents with production CanvasDraft controllers",
+    "backend": "synthetic in-memory fixture with 40ms request latency; not production Mongo",
+    "checks": [
+      "Forty distinct HTTP clients receive stable balanced peer-group/idea assignments; ties allocate 20/20 without random ordering",
+      "39 online writers plus one offline client preserve every device copy; a lost acknowledgement retries its original receipt without another revision",
+      "Forty online clients including a delayed writer produce one acknowledged revision and 39 explicit comparisons, with exact undo/redo and no silent replacement",
+      "Original class record and original drawing history remain unchanged; earlier device branches remain retained"
+    ],
+    "success": true,
+    "independentClientSocketsAtLeast": 43,
+    "maxConcurrentFixtureWrites": 40,
+    "canvasVersions": 3,
+    "lostAcknowledgementsRetried": 1,
+    "offlineClients": 1,
+    "delayedClients": 1
+  },
+  "currentProductionHasFridayUpgrade": false,
+  "publicVerification": {
+    "groupPages200": true,
+    "revisedG10Asset404": true,
+    "productionFeatureFilesAbsent": [
+      "GroupCanvas.jsx",
+      "GuestBalancedFeedback.jsx",
+      "workshopPublishedRevisions.json",
+      "feedback-assignment/route.js"
+    ]
+  },
+  "releaseOwnerLookup": "unavailable: durable host"
 }

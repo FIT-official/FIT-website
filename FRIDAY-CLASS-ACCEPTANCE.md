@@ -1,6 +1,6 @@
 # Friday class upgrade: one acceptance checklist
 
-Scope: the existing ten-group workshop at `/workshop/g1/classroom` through `/workshop/g10/classroom`, with public idea reading at `/workshop/g1` through `/workshop/g10`. The isolated checkout starts at production `5789481df0ecfe506a30aed7b13bcb56cbda115e`. No Classes library, storefront, authentication, navigation, OAuth, roster or Tinkercad project changes are included.
+Scope: the existing ten-group workshop at `/workshop/g1/classroom` through `/workshop/g10/classroom`, with public idea reading at `/workshop/g1` through `/workshop/g10`. This isolated integration checkout starts at current production `85ff89e8c8b25b0f215543d9c01dc7d69bd57f77` and preserves its shop/CI changes. The original class implementation was based on `5789481df0ecfe506a30aed7b13bcb56cbda115e`. No Classes library, storefront, authentication, navigation, OAuth, roster or Tinkercad project changes are included in the class delta.
 
 | Requirement | Implementation and acceptance evidence | Activation / remaining limit |
 | --- | --- | --- |
@@ -14,6 +14,8 @@ Scope: the existing ten-group workshop at `/workshop/g1/classroom` through `/wor
 | Release and live verification | Only scoped workshop files, the publication overlay, new artwork and synthetic verification files belong to this release. The broad held integration candidate is excluded. | Final release coordination/authorization and real authenticated smoke tests remain separate from local synthetic testing. The previously denied teacher-browser action is not retried or bypassed. |
 
 Local checks use synthetic accounts/data only. `scripts/groupCanvas` verifies the canvas and teacher history; `scripts/fridayClass` verifies the combined editing and two-idea feedback flow. Unit tests cover mapped publication hashes, version compatibility, concurrent assignments, own completion/privacy, teacher moderation and stale callbacks. Build uses synthetic configuration and blocks non-loopback networking.
+
+The forty-client acceptance uses **40 independent Node HTTP agents**, each with the production drawing draft controller and its own device-storage adapter. It verifies stable 20/20 initial assignments, 40 concurrent fixture writes, an offline client, a delayed writer, a lost acknowledgement retried with the same receipt, exact undo/redo states, explicit stale-write comparison and preserved original history. It uses a synthetic in-memory backend with controlled request latency; it is **not** forty browser users or a production Mongo load benchmark. The separate desktop/mobile browser checks cover the actual components. Authenticated live teacher presentation remains unverified; the denied teacher-browser action is not retried.
 
 The four retained illustration mappings are deliberate source decisions:
 
