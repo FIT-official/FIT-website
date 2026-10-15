@@ -589,6 +589,114 @@
           "color": "#265B74"
         }
       ]
+    },
+    {
+      "id": 9,
+      "title": "Improve our drawing with ChatGPT",
+      "blocks": [
+        {
+          "text": "Improve our drawing with ChatGPT",
+          "x": 72,
+          "y": 48,
+          "width": 1136,
+          "height": 82,
+          "fontSizePx": 48,
+          "bold": true,
+          "color": "#202D35"
+        },
+        {
+          "text": "1   Use school-approved, teacher-operated AI.\n\n2   Start with our own idea and actual visible feedback.\n     Review the editable drawing prompt beside the canvas.\n\n3   Remove names, faces, accounts and private details.\n     Keep the original sketch as a separate version.\n\n4   Choose improvements with your teacher.\n     Unmeasured dimensions stay UNKNOWN or PROPOSED.",
+          "x": 72,
+          "y": 164,
+          "width": 1136,
+          "height": 420,
+          "fontSizePx": 32,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "Open ChatGPT drawing & Tinkercad guidance beside the canvas for full copyable prompts.",
+          "x": 72,
+          "y": 624,
+          "width": 1136,
+          "height": 60,
+          "fontSizePx": 24,
+          "bold": true,
+          "color": "#265B74"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Build manually in Tinkercad",
+      "blocks": [
+        {
+          "text": "Build manually in Tinkercad",
+          "x": 72,
+          "y": 48,
+          "width": 1136,
+          "height": 82,
+          "fontSizePx": 48,
+          "bold": true,
+          "color": "#202D35"
+        },
+        {
+          "text": "1   Make and verify a working copy of the original project.\n\n2   Use the Tinkercad guidance prompt beside the canvas.\n     Add known measured dimensions and printer limits.\n\n3   Ask for shapes, sizes, position, alignment, Hole and Group.\n     Check the result after every few steps.\n\n4   ChatGPT gives guidance; you operate Tinkercad.\n     A picture is a reference, not editable CAD or proof of fit.",
+          "x": 72,
+          "y": 164,
+          "width": 1136,
+          "height": 420,
+          "fontSizePx": 32,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "Keep the original project. Check moving clearances and measured fit with your teacher.",
+          "x": 72,
+          "y": 624,
+          "width": 1136,
+          "height": 60,
+          "fontSizePx": 24,
+          "bold": true,
+          "color": "#265B74"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Upload, save, check and submit",
+      "blocks": [
+        {
+          "text": "Upload, save, check and submit",
+          "x": 72,
+          "y": 48,
+          "width": 1136,
+          "height": 82,
+          "fontSizePx": 48,
+          "bold": true,
+          "color": "#202D35"
+        },
+        {
+          "text": "1   Download an actual PNG or JPEG. Convert other formats.\n     Do not just rename a file.\n2   Check your group and idea. Choose Add image.\n3   Preview, then choose Use image in my draft.\n4   Add labels or marks. Choose Save draft.\n5   Wait for Saved to class before reloading to check.\n6   Choose Submit drawing, then confirm once.\n7   Your teacher checks the submitted version in the gallery.",
+          "x": 72,
+          "y": 164,
+          "width": 1136,
+          "height": 420,
+          "fontSizePx": 32,
+          "bold": false,
+          "color": "#202D35"
+        },
+        {
+          "text": "Drawing and written answers are submitted separately. Keep your original files.",
+          "x": 72,
+          "y": 624,
+          "width": 1136,
+          "height": 60,
+          "fontSizePx": 24,
+          "bold": true,
+          "color": "#265B74"
+        }
+      ]
     }
   ]
 }

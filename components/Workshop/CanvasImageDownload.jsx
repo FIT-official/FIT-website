@@ -2,6 +2,7 @@
 import { useRef, useState } from 'react'
 import CanvasDrawing from './CanvasDrawing'
 import { resolveCanvasReference } from '@/lib/workshopPublication'
+import { canvasImageUrl, CANVAS_IMAGE_LIMITS } from '@/lib/workshopCanvasImageRef'
 export default function CanvasImageDownload({ document: drawing, group, idea }) {
     const source = useRef(null), [message, setMessage] = useState(''), [busy, setBusy] = useState(false)
     async function download() {
@@ -10,12 +11,12 @@ export default function CanvasImageDownload({ document: drawing, group, idea }) 
         try {
             // Only our validated SVG elements are rendered. No user-supplied markup or URL is loaded.
             const svg = source.current.querySelector('svg').cloneNode(true); svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); svg.setAttribute('width', '1600'); svg.setAttribute('height', '1000'); svg.removeAttribute('style')
-            const reference = resolveCanvasReference(drawing.reference)
+            const imported = canvasImageUrl(drawing.image), reference = imported ? { src: imported } : resolveCanvasReference(drawing.reference)
             if (reference) {
-                const response = await fetch(reference.src, { credentials: 'omit' })
+                const response = await fetch(reference.src, { credentials: imported ? 'same-origin' : 'omit', cache: 'no-store' })
                 if (!response.ok) throw Error('Reference unavailable')
                 const blob = await response.blob()
-                if (blob.size > 4000000 || !blob.type.startsWith('image/')) throw Error('Reference invalid')
+                if (blob.size > (imported ? CANVAS_IMAGE_LIMITS.previewBytes : 4000000) || (imported ? blob.type !== 'image/png' : !blob.type.startsWith('image/'))) throw Error('Reference invalid')
                 const data = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob) })
                 svg.querySelector('image').setAttribute('href', data)
             }

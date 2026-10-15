@@ -1,7 +1,10 @@
 'use client'
 import { useId } from 'react'
 import { resolveCanvasReference } from '@/lib/workshopPublication'
+import { canvasImageUrl } from '@/lib/workshopCanvasImageRef'
 export function CanvasReference({ document }) {
+    const imported = canvasImageUrl(document.image)
+    if (imported) return <image href={imported} x="0" y="0" width="1600" height="1000" preserveAspectRatio="xMidYMid meet" pointerEvents="none" aria-label="Uploaded design image" />
     const asset = resolveCanvasReference(document.reference)
     return asset ? <image href={asset.src} x="0" y="0" width="1600" height="1000" preserveAspectRatio="xMidYMid meet" pointerEvents="none" aria-label="Fixed illustration reference" /> : null
 }

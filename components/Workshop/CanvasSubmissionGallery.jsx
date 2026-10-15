@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { WORKSHOP_SESSION } from '@/lib/workshopFeedback'
 import { validCanvas } from '@/lib/workshopCanvasModel'
 import { referenceMatchesIdea } from '@/lib/workshopPublication'
+import { canvasImageMatches } from '@/lib/workshopCanvasImageRef'
 import { CanvasPreviewQueue } from '@/lib/workshopCanvasPreviewQueue'
 import CanvasDrawing from './CanvasDrawing'
 import CanvasImageDownload from './CanvasImageDownload'
@@ -15,7 +16,7 @@ const validMeta = item => item && item.session === WORKSHOP_SESSION && /^g(?:[1-
 async function request(url, signal) { const response = await fetch(url, { cache: 'no-store', credentials: 'same-origin', signal }); const value = await response.json(); if (!response.ok) throw Object.assign(Error(value.error || 'Drawing could not load.'), { status: response.status }); return value }
 export async function loadSubmittedDrawing(item, signal) {
     const row = await request(endpoint + '?' + new URLSearchParams({ group: item.group, idea: item.idea, version: String(item.version) }), signal)
-    if (!validMeta(row) || row.id !== item.id || row.submittedAt !== item.submittedAt || !validCanvas(row.document) || !referenceMatchesIdea(row.document.reference, item.group, item.idea)) throw Error('This response does not match the selected submission. Retry to view it.')
+    if (!validMeta(row) || row.id !== item.id || row.submittedAt !== item.submittedAt || !validCanvas(row.document) || !referenceMatchesIdea(row.document.reference, item.group, item.idea) || !canvasImageMatches(row.document.image, item.group, item.idea)) throw Error('This response does not match the selected submission. Retry to view it.')
     return row
 }
 function Card({ item, queue, onOpen }) {
