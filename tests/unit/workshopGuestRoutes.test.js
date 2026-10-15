@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 const h = vi.hoisted(() => ({ rows: new Map(), touched: [], reads: [], admin: false, signedIn: false }))
 vi.mock('@/lib/workshopDatabase', () => ({ workshopDatabase: async () => ({ collection(name) {
     if (!['workshopGuestSessions', 'workshopGuestLessons', 'workshopGuestRateLimits', 'workshopGuestDrafts'].includes(name)) throw Error('Guest attempted a legacy collection: ' + name)
+    const matches = (row, q) => row && Object.entries(q).every(([key, value]) => value instanceof Date ? row[key] instanceof Date && +row[key] === +value : value && typeof value === 'object' ? ('$in' in value ? value.$in.includes(row[key]) : ('$ne' in value ? row[key] !== value.$ne : ('$gt' in value ? row[key] > value.$gt : ('$eq' in value ? +row[key] === +value.$eq : false)))) : row[key] === value)
     h.touched.push(name); if (!h.rows.has(name)) h.rows.set(name, new Map()); const rows = h.rows.get(name)
     const aggregate = pipeline => ({ toArray: async () => {
         h.reads.push({ name, pipeline })
@@ -11,11 +12,12 @@ vi.mock('@/lib/workshopDatabase', () => ({ workshopDatabase: async () => ({ coll
         const state = h.rows.get('workshopGuestLessons')?.get('2026-10-09')
         return [{ ...structuredClone(row), lesson: state ? [structuredClone(state)] : [] }]
     } })
-    return { collectionName: name, aggregate, findOne: async (q, options) => { h.reads.push({ name, q, options }); return rows.has(q._id) ? structuredClone(rows.get(q._id)) : null }, insertOne: async row => { if (rows.has(row._id)) throw Object.assign(Error(), { code: 11000 }); rows.set(row._id, structuredClone(row)) }, deleteOne: async q => ({ deletedCount: rows.delete(q._id) ? 1 : 0 }), updateOne: async (q, update) => { if (name === 'workshopGuestRateLimits') return { modifiedCount: 1 }; const row = rows.get(q._id); if (!row) return { modifiedCount: 0 }; Object.assign(row, update.$set); return { modifiedCount: 1 } }, replaceOne: async (q, row) => { if (rows.get(q._id)?.version !== q.version) return { modifiedCount: 0 }; rows.set(q._id, structuredClone(row)); return { modifiedCount: 1 } }, find: q => ({ limit: () => ({ toArray: async () => [...rows.values()].filter(row => q._id.$in.includes(row._id)).map(row => structuredClone(row)) }) }) }
+    return { collectionName: name, aggregate, findOne: async (q, options) => { h.reads.push({ name, q, options }); return structuredClone([...rows.values()].find(row => matches(row, q)) || null) }, insertOne: async row => { if (rows.has(row._id)) throw Object.assign(Error(), { code: 11000 }); rows.set(row._id, structuredClone(row)) }, deleteOne: async q => ({ deletedCount: matches(rows.get(q._id), q) && rows.delete(q._id) ? 1 : 0 }), updateOne: async (q, update) => { if (name === 'workshopGuestRateLimits') return { modifiedCount: 1 }; const row = [...rows.values()].find(row => matches(row, q)); if (!row) return { modifiedCount: 0 }; Object.assign(row, update.$set); return { modifiedCount: 1 } }, replaceOne: async (q, row) => { if (!matches(rows.get(q._id), q)) return { modifiedCount: 0 }; rows.set(q._id, structuredClone(row)); return { modifiedCount: 1 } }, find: q => ({ limit: () => ({ toArray: async () => [...rows.values()].filter(row => matches(row, q)).map(row => structuredClone(row)) }) }) }
 } }) }))
 vi.mock('@/lib/authenticate', () => { class UnauthorizedError extends Error { constructor() { super('Teacher sign-in required.'); this.status = 401 } } return { UnauthorizedError, authenticate: async () => { if (!h.signedIn) throw new UnauthorizedError(); return { userId: 'synthetic-teacher' } } } })
 vi.mock('@/lib/checkPrivileges', () => ({ checkAdminPrivileges: async () => h.admin }))
 import { GET as sessionGET, POST as sessionPOST, DELETE as sessionDELETE } from '@/app/api/workshop/guest/session/route'
+import { GET as joinsGET, POST as joinsPOST } from '@/app/api/admin/workshop/guest/joins/route'
 import { GET as classroomGET, POST as classroomPOST } from '@/app/api/workshop/guest/classroom/route'
 import { GET as draftsGET, POST as draftsPOST } from '@/app/api/workshop/guest/drafts/route'
 import { PATCH as teacherPATCH, GET as teacherGET } from '@/app/api/admin/workshop/guest/route'
@@ -24,7 +26,23 @@ import { emptyLesson } from '@/lib/workshopGuestClassroomStore'
 const base = 'https://www.fixitoday.com'
 function req(path, method = 'GET', body, cookie = '', origin = base) { return new Request(base + path, { method, headers: { origin, cookie, ...(body ? { 'content-type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) }) }
 function lesson() { return h.rows.get('workshopGuestLessons').get('2026-10-09') }
-async function join(name = 'Alex', group = 'g2') { const r = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name, group })); expect(r.status).toBe(200); return { cookie: r.headers.get('set-cookie').split(';')[0], identity: await r.json() } }
+async function join(name = 'Alex', group = 'g2') {
+    const prepared = await sessionPOST(req('/api/workshop/guest/session', 'POST', { prepare: true })); expect(prepared.status).toBe(200)
+    const cookie = prepared.headers.get('set-cookie').split(';')[0]
+    const r = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name, group }, cookie)); expect(r.status).toBe(200)
+    let identity = await r.json()
+    if (identity.pending) {
+        // Existing scenarios deliberately model distinct same-name classmates.
+        // The newly required teacher confirmation keeps their seats separate.
+        const before = [h.signedIn, h.admin]; h.signedIn = true; h.admin = true
+        const waiting = await joinsGET(req('/api/admin/workshop/guest/joins?group=' + group)).then(r => r.json()), row = waiting.requests.find(row => row.name === identity.name)
+        expect((await joinsPOST(req('/api/admin/workshop/guest/joins', 'POST', { id: row.id, group, version: row.version, stamp: row.stamp, action: 'new', verified: true }))).status).toBe(200)
+        ;[h.signedIn, h.admin] = before
+        const resumed = await sessionGET(req('/api/workshop/guest/session', 'GET', undefined, cookie)).then(r => r.json())
+        identity = { seat: resumed.seat, name: resumed.name, group: resumed.group, selfReported: true }
+    }
+    return { cookie, identity }
+}
 beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-09T02:00:00Z')); h.rows.clear(); h.touched = []; h.reads = []; h.admin = false; h.signedIn = false; h.rows.set('workshopGuestLessons', new Map([['2026-10-09', { ...emptyLesson(), entryOpen: true, version: 1 }]])) })
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs() })
 describe('guest routes never reveal legacy class data', () => {
@@ -68,13 +86,14 @@ describe('guest routes never reveal legacy class data', () => {
         if (state === 'revoked') old.enabled = false
         if (state === 'expired') old.expiresAt = new Date('2026-10-09T01:59:59Z')
         const before = structuredClone(old); h.reads = []
+        const prepared = await sessionPOST(req('/api/workshop/guest/session', 'POST', { prepare: true }, cookie)); cookie = prepared.headers.get('set-cookie').split(';')[0]
         const joined = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'Alex', group: 'g2' }, cookie))
         expect(joined.status).toBe(200)
         const body = await joined.json()
-        expect(body.name).toBe('Alex'); expect(body.seat).not.toBe(a.identity.seat)
+        expect(body.name).toBe('Alex'); expect(body.pending).toBe(true); expect(body).not.toHaveProperty('seat')
         expect(body).not.toHaveProperty('studentLogin'); expect(body).not.toHaveProperty('matches')
         expect(rows.get(old._id)).toEqual(before); expect(rows.size).toBe(2)
-        for (const read of h.reads.filter(row => row.name === 'workshopGuestSessions')) expect(Object.keys(read.q)).toEqual(['_id'])
+        expect(JSON.stringify(body)).not.toContain(a.identity.seat)
     })
     it('does not create a different identity on an unmatched part, wrong group or closed entry', async () => {
         const a = await join('Alex Tan'), before = structuredClone([...h.rows.get('workshopGuestSessions')])
@@ -164,8 +183,9 @@ describe('guest routes never reveal legacy class data', () => {
         if (state === 'revoked') old.enabled = false
         if (state === 'expired') old.expiresAt = new Date('2026-10-09T01:59:59Z')
         const before = structuredClone(old)
+        const prepared = await sessionPOST(req('/api/workshop/guest/session', 'POST', { prepare: true }, cookie)); cookie = prepared.headers.get('set-cookie').split(';')[0]
         const retry = await sessionPOST(req('/api/workshop/guest/session', 'POST', { name: 'ALEX', group: 'g2' }, cookie))
-        expect(retry.status).toBe(200); expect((await retry.json()).seat).not.toBe(a.identity.seat)
+        expect(retry.status).toBe(200); const body = await retry.json(); expect(body.pending).toBe(true); expect(body).not.toHaveProperty('seat')
         expect(rows.get(old._id)).toEqual(before); expect(rows.size).toBe(2)
     })
     it('still requires open teacher entry for a case-insensitive session retry', async () => {

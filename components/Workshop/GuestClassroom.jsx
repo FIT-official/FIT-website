@@ -18,6 +18,7 @@ import { ClassBrand, ClassIcon, IdeaPal } from './ClassroomDecor'
 export const classroomRequest = apiRequest
 export default function GuestClassroom({ homeGroup = null }) {
     const router = useRouter(), [name, setName] = useState(''), [group, setGroup] = useState(homeGroup || 'g1'), [lesson, setLesson] = useState(null), [entryOpen, setEntryOpen] = useState(false), [busy, setBusy] = useState(false), [message, setMessage] = useState('Checking class entry…'), [viewPhase, setViewPhase] = useState(null), [target, setTarget] = useState(null), [targetRound, setTargetRound] = useState(null), [exploreGroup, setExploreGroup] = useState(null), [offline, setOffline] = useState(false), [actualHome, setActualHome] = useState(null)
+    const [pendingJoin, setPendingJoin] = useState(null)
     const lock = useRef(false), current = useRef({ version: null, seat: null }), sequence = useRef(0), mounted = useRef(true)
     const refresh = useCallback(async () => {
         const id = ++sequence.current
@@ -26,11 +27,11 @@ export default function GuestClassroom({ homeGroup = null }) {
             const next = await classroomRequest('/api/workshop/guest/classroom?' + query)
             if (!mounted.current || id !== sequence.current || next.unchanged) return
             if (current.current.seat === next.seat && current.current.version !== null && next.version < current.current.version) return
-            current.current = { version: next.version, seat: next.seat }; setLesson(next); setViewPhase(value => value || next.phase); setActualHome(null); setMessage('')
+            current.current = { version: next.version, seat: next.seat }; setLesson(next); setPendingJoin(null); setViewPhase(value => value || next.phase); setActualHome(null); setMessage('')
         } catch (error) {
             if (!mounted.current || id !== sequence.current) return
             setMessage(error.message); setActualHome(error.homeGroup || null)
-            if ([401, 403].includes(error.status)) { setLesson(null); try { const status = await classroomRequest('/api/workshop/guest/session'); if (mounted.current && id === sequence.current) { setEntryOpen(status.entryOpen); if (!status.seat) setMessage(status.entryOpen ? '' : 'Your teacher has not opened entry yet.') } } catch (failure) { if (mounted.current && id === sequence.current) setMessage(failure.message); return false } return true }
+            if ([401, 403].includes(error.status)) { setLesson(null); try { const status = await classroomRequest('/api/workshop/guest/session'); if (mounted.current && id === sequence.current) { setEntryOpen(status.entryOpen); setPendingJoin(status.pending ? status : null); if (!status.seat) setMessage(status.pending ? status.message : status.entryOpen ? '' : 'Your teacher has not opened entry yet.') } } catch (failure) { if (mounted.current && id === sequence.current) setMessage(failure.message); return false } return true }
             return false
         }
     }, [homeGroup])
@@ -41,16 +42,25 @@ export default function GuestClassroom({ homeGroup = null }) {
     useEffect(() => { setTarget(null); setTargetRound(lesson?.assignment?.round); if (lesson?.seat) { try { const value = localStorage.getItem('fit:guest:reviewTarget:' + lesson.seat + ':' + lesson.assignment.round); if (workshopGroups.some(row => row.id === value && row.id !== lesson.group)) setTarget(value) } catch {} } }, [lesson?.seat, lesson?.group, lesson?.assignment?.round])
     useEffect(() => { if (lesson?.navigationLocked) setViewPhase(lesson.navigationTarget) }, [lesson?.navigationLocked, lesson?.navigationTarget, lesson?.navigationVersion])
     async function enter(event) {
-        event.preventDefault(); if (lock.current) return; lock.current = true; sequence.current++; setBusy(true); setMessage('Entering class…')
-        try { const identity = await classroomRequest('/api/workshop/guest/session', 'POST', { name, group }); const next = await classroomRequest('/api/workshop/guest/classroom?homeGroup=' + identity.group); current.current = { version: next.version, seat: next.seat }; setLesson(next); setViewPhase(next.phase); setMessage(''); try { localStorage.setItem('fit:guest:authSignal', crypto.randomUUID()) } catch {} router.replace('/workshop/' + identity.group + '/classroom') } catch (error) { setMessage(error.message) } finally { lock.current = false; setBusy(false) }
+        event.preventDefault(); if (lock.current) return; lock.current = true; const id = ++sequence.current; setBusy(true); setMessage('Entering class.')
+        try {
+            await classroomRequest('/api/workshop/guest/session', 'POST', { prepare: true })
+            if (!mounted.current || id !== sequence.current) return
+            const identity = await classroomRequest('/api/workshop/guest/session', 'POST', { name, group })
+            if (!mounted.current || id !== sequence.current) return
+            if (identity.pending) { setPendingJoin(identity); setMessage(identity.message); return }
+            const next = await classroomRequest('/api/workshop/guest/classroom?homeGroup=' + identity.group)
+            if (!mounted.current || id !== sequence.current) return
+            current.current = { version: next.version, seat: next.seat }; setLesson(next); setPendingJoin(null); setViewPhase(next.phase); setMessage(''); try { localStorage.setItem('fit:guest:authSignal', crypto.randomUUID()) } catch {} router.replace('/workshop/' + identity.group + '/classroom')
+        } catch (error) { if (mounted.current && id === sequence.current) setMessage(error.message) } finally { lock.current = false; if (mounted.current) setBusy(false) }
     }
-    async function leave() { if (lock.current) return; lock.current = true; setBusy(true); try { await classroomRequest('/api/workshop/guest/session', 'DELETE'); current.current = { version: null, seat: null }; sequence.current++; clearDraftCache(); setLesson(null); setViewPhase(null); setName(''); setMessage('You left this session. Your submitted work stays recorded.'); try { localStorage.setItem('fit:guest:authSignal', crypto.randomUUID()) } catch {} router.replace('/workshop/entry'); await refresh() } catch (error) { setMessage(error.message) } finally { lock.current = false; setBusy(false) } }
+    async function leave() { if (lock.current) return; lock.current = true; setBusy(true); try { await classroomRequest('/api/workshop/guest/session', 'DELETE'); current.current = { version: null, seat: null }; sequence.current++; clearDraftCache(); setLesson(null); setPendingJoin(null); setViewPhase(null); setName(''); setMessage('You left this session. Your submitted work stays recorded.'); try { localStorage.setItem('fit:guest:authSignal', crypto.randomUUID()) } catch {} router.replace('/workshop/entry'); await refresh() } catch (error) { setMessage(error.message) } finally { lock.current = false; setBusy(false) } }
     if (!lesson) return <main className={design.shell + ' ph-no-capture ph-mask'}>
         <ClassBrand />
         <div className={design.intro}>
             <div className={design.introCopy}><p className={design.eyebrow}>Small ideas. Big possibilities.</p><h1>Enter the class</h1><p className="mt-4">Choose your group and enter your name.</p><IdeaPal /></div>
             <section className={design.entryCard} aria-label="Class entry"><h2>Ready to make something?</h2><p className="mt-2">Your group, your ideas, your next step.</p>
-                <form onSubmit={enter} className="mt-5"><label className="block">Your name<input className="formInput block w-full" autoComplete="off" required maxLength={60} value={name} onChange={event => setName(event.target.value)} /></label><label className="block mt-4">Your group<select className="formInput block w-full" value={group} onChange={event => setGroup(event.target.value)}>{workshopGroups.map(row => <option key={row.id} value={row.id}>Group {row.number}</option>)}</select></label><button type="submit" className="formBlackButton mt-5" disabled={busy || !entryOpen}>{busy ? 'Entering…' : 'Enter class'}<ClassIcon kind="ARROW" /></button></form>
+                {pendingJoin ? <section className="border rounded-xl p-4 mt-5" aria-label="Waiting for teacher confirmation"><h3 className="font-bold">Your earlier work is safe</h3><p className="mt-2">Group {pendingJoin.group.slice(1)} · {pendingJoin.name}</p><p className="mt-2">Your teacher will check which class identity is yours. Keep this browser open. No previous identity is opened by name alone.</p><button type="button" className="formWhiteButton mt-4" style={{ minHeight: 44 }} disabled={busy} onClick={refresh}>Check teacher confirmation</button><button type="button" className="formWhiteButton mt-4" style={{ minHeight: 44 }} disabled={busy} onClick={leave}>Cancel waiting request</button></section> : <form onSubmit={enter} className="mt-5"><label className="block">Your name<input style={{ minHeight: 44 }} className="formInput block w-full" autoComplete="off" required maxLength={60} value={name} onChange={event => setName(event.target.value)} /></label><p className="text-sm mt-2">Capital letters and extra spaces do not matter. Use the name you used last week; your teacher can help with a shorter or longer version.</p><label className="block mt-4">Your group<select style={{ minHeight: 44 }} className="formInput block w-full" value={group} onChange={event => setGroup(event.target.value)}>{workshopGroups.map(row => <option key={row.id} value={row.id}>Group {row.number}</option>)}</select></label><button type="submit" style={{ minHeight: 44 }} className="formBlackButton mt-5" disabled={busy || !entryOpen}>{busy ? 'Entering…' : 'Enter class'}<ClassIcon kind="ARROW" /></button></form>}
                 <p role="status" aria-live="polite" className={message ? design.status : ''}>{message}</p>{actualHome && <Link className="formWhiteButton mt-3" href={'/workshop/' + actualHome + '/classroom'}>Continue my Group {actualHome.slice(1)} session</Link>}
             </section>
         </div><GuestReturnHelp />

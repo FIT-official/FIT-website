@@ -9,6 +9,7 @@ import TeacherTinkercad from './TeacherTinkercad'
 import TeacherBackup from './TeacherBackup'
 import TeacherCanvasPanel from './TeacherCanvasPanel'
 import CanvasSubmissionGallery from './CanvasSubmissionGallery'
+import TeacherJoinRequests from './TeacherJoinRequests'
 import design from './ClassroomDesign.module.css'
 import { ClassBrand } from './ClassroomDecor'
 export default function GuestTeacherClassroom() {
@@ -24,6 +25,7 @@ export default function GuestTeacherClassroom() {
         <section className="mt-6" aria-label="Group overview"><h2 className="text-xl font-semibold">Groups at a glance</h2><div className={design.groupOverview}>{lesson.progress.map(row => <button type="button" key={row.group} className={design.groupTile} aria-pressed={selectedGroup === row.group} onClick={() => { setSelectedGroup(row.group); document.getElementById('responses-title')?.scrollIntoView({ block: 'start' }) }}><strong>Group {row.group.slice(1)}</strong><p>{row.joinedSessions ?? 0} joined sessions</p><p>{row.submitted} feedback submitted</p><p>{row.refinementCount || 0} refinements submitted</p><p>{row.received} feedback received</p><p className="font-semibold mt-2">{!row.submitted && !row.refinementCount ? 'No submissions yet' : 'View submissions'}</p></button>)}</div>
         </section>
         <GuestTeacherResponses lesson={lesson} busy={busy} onAction={action} groupFilter={selectedGroup} onGroupChange={setSelectedGroup} />
+        <TeacherJoinRequests />
         <TeacherTinkercad />
         <TeacherBackup />
         {lesson.canvasEnabled && <><TeacherCanvasPanel /><CanvasSubmissionGallery /></>}

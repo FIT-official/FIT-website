@@ -15,7 +15,7 @@ export default function GuestRefineWorkspace({ group, lesson, onRefresh }) {
         <div className={styles.columns}>
             <div className={styles.idea}>
                 {['1', '2'].map(idea => <section key={idea} id={'refine-idea-' + idea} className={styles.refineIdea}>
-                    <GuestIdeaReading group={group} idea={idea} />
+                    <GuestIdeaReading group={group} idea={idea} editable={Boolean(lesson.canvasEnabled)} editorSeat={lesson.seat} />
                     <a className="underline inline-block mt-4" href="#refine-writing">Write your changes</a>
                 </section>)}
             </div>

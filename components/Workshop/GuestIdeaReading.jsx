@@ -1,13 +1,14 @@
 import Image from 'next/image'
 import PupilIdeaCopy from './PupilIdeaCopy'
 import design from './ClassroomDesign.module.css'
-export default function GuestIdeaReading({ group, idea = '1' }) {
+import CanvasEditLink from './CanvasEditLink'
+export default function GuestIdeaReading({ group, idea = '1', editable = false, editorSeat }) {
     const item = group.reading?.ideas[Number(idea) - 1]
     if (!item) return <p>Choose an idea to read.</p>
     return <article className="min-w-0" aria-label={'Group ' + group.number + ' Idea ' + idea}>
         <span className={design.ideaLabel}>Group {group.number} · Idea {idea}</span><h3 className="text-2xl font-bold">Idea {idea}: {item.title}</h3>
-        {(item.illustrations || []).filter(image => image.approved).map(image => <figure key={image.src} className={design.illustration + ' mt-4'}><Image src={image.src} alt={image.alt} width={image.width} height={image.height} className="w-full h-auto" sizes="(min-width: 1100px) 45vw, 90vw" /><figcaption className="text-sm mt-2">{image.caption}</figcaption></figure>)}
-        {item.pupilCopy ? <PupilIdeaCopy copy={item.pupilCopy} /> : <><h4 className="font-bold mt-5">The problem</h4><p className="mt-2 leading-relaxed">{item.problemContext}</p>
+        {(item.illustrations || []).filter(image => image.approved).map(image => <figure style={{ position: 'relative' }} key={image.src} className={design.illustration + ' mt-4'}><Image src={image.src} alt={image.alt} width={image.width} height={image.height} className="w-full h-auto" sizes="(min-width: 1100px) 45vw, 90vw" />{editable && <CanvasEditLink group={group.id} idea={idea} seat={editorSeat} />}<figcaption className="text-sm mt-2">{image.caption}</figcaption></figure>)}
+        {item.pupilCopy ? <PupilIdeaCopy copy={item.pupilCopy} editProblemHref={editable ? '#refinement-idea' + idea + '-problemStatement' : undefined} editSolutionHref={editable ? '#refinement-idea' + idea + '-solutionDescription' : undefined} /> : <><h4 className="font-bold mt-5">The problem</h4><p className="mt-2 leading-relaxed">{item.problemContext}</p>
         <h4 className="font-bold mt-5">The idea</h4><p className="mt-2 leading-relaxed">{item.originalIntent}</p>
         <h4 className="font-bold mt-5">Suggested improvement</h4><p className="mt-2 leading-relaxed">{item.recommendedRefinement}</p>
         <h4 className="font-bold mt-5">How it works</h4><p className="mt-2 leading-relaxed">{item.studentExplanation}</p>

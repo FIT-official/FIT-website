@@ -1,0 +1,28 @@
+# Classroom joining and editing — unpublished
+
+Base: `f4919fff6a0d5c857b17d73c6ab1d4e2baf6b422`, including the separately reviewed gallery commits. No deployment, live database access, OAuth change or new real credential has been performed.
+
+## Identity continuity
+
+Names ignore case and surplus Unicode spacing, tabs and line breaks. Stored display names and old work remain unchanged. The browser's existing private cookie remains the primary identity proof. Existing authenticated name fragments remain scoped to that fixed identity; a longer whole-name variant can reuse it only when the unique strong same-group candidate is that same seat. An active identity cannot switch groups or acquire teacher privileges through name entry.
+
+Without that private proof, whole-name candidates are recognised inside the selected group. Exact names, optional whole surname parts and a two-character Han given name with an optional one-character surname are supported. Arbitrary character fragments, reordered names, inferred nicknames, accent removal and cross-group recovery are not. Candidates are deduplicated by original seat. Matching never opens an old identity by name alone: the browser gets a disabled waiting request and no roster, candidate seat or earlier work.
+
+The existing signed-in teacher sees waiting requests per group. After checking the student in person, they explicitly select the original identity or confirm a different student with a separate identity. This uses the existing `requireGuestTeacher` authentication/admin check, same-origin validation, existing rate-limit collection, and private/no-store responses. A roster fingerprint, pending version and compare-and-set reject stale, cancelled or concurrently resolved requests. Recovery changes only the new waiting-session row to use the original seat/name; old session rows, submissions, drafts, Tinkercad seats/approvals and original artwork remain intact. It neither merges nor deletes identities or work.
+
+When there is no candidate, the existing guest-entry flow creates a fresh student identity. A preparation POST establishes a server-generated random token in the existing HttpOnly/Secure/SameSite cookie; its hashed row gives retries a stable request. A short-lived Mongo lock serialises new joins and teacher resolution within each selected group across server instances. Concurrent same-browser retries use the same seat; different browsers using a matching name wait for teacher checking. Lock records use distinct IDs in the existing lesson collection, are removed after the operation and can be reclaimed after their 60-second lease following an interrupted request. No unique name index, new database collection or migration is required. Existing entry request limits are unchanged: preparation and joining each count toward the same limit (80 requests per shared IP per minute, 200 globally), so a large same-network burst may need to wait/retry. No rate-limit/security setting was increased; review this with the actual class size before release.
+
+## Editing
+
+Edit links next to the displayed problem/solution and the individual answer labels focus the existing versioned draft fields. They do not replace student text. Own-group Refine thumbnails have an Edit image overlay which focuses the existing canvas and adds its fixed approved reference only if that editable draft has no reference. Submitted drawings remain read-only until the student explicitly starts a new revision. Existing references, originals and saved versions are preserved.
+
+Pen, highlighter, shapes, undo/redo, local recovery and stale-writer comparison are reused. The opaque Marker is a wider existing stroke. Dotted lines use a strict optional `lineStyle` enum on the existing bounded drawing objects and the shared preview/PNG renderer. Old solid documents remain valid and unchanged. Unsupported style values cannot introduce SVG attributes or URLs. Deploy the frontend and corresponding validator/renderer together through the normal release process.
+
+## Verification helpers
+
+- `node scripts/classJoinEdit/verify-preservation.mjs`: verifies 54 unchanged protected files, including every slide/instruction source and all 36 original/revised images. Three formerly protected logic files are intentionally changed for this new user request: guest-name normalization, canvas validation and canvas rendering. The earlier gallery-only 57-file verifier is not the verifier for this expanded scope.
+- `node scripts/classJoinEdit/preview.mjs`: starts an owned fresh loopback Mongo database, runs eight real Mongo/route checks and opens `http://127.0.0.1:4401`. Uses only synthetic records and a clearly isolated mocked Clerk/Next response boundary; no application auth code is replaced. The local portable Mongo executable is declared at the top. Stop with Ctrl+C.
+- `node scripts/classJoinEdit/check-browser.mjs`: exercises actual join/teacher/editor components and actual route/store code in that synthetic fixture, with external requests blocked. Evidence is saved outside the worktree in `../join-edit-evidence/browser`.
+- `node scripts/classJoinEdit/check-build.mjs`: synthetic-config production build, mock font response and the existing loopback-only network guard. Never deploy that synthetic build output.
+
+Release owner should review/import this work after the base gallery commits and run the normal signed-in teacher smoke check in the authorised release environment. Production Clerk/OAuth and real student data were not exercised. No deployment is authorised by this handoff.

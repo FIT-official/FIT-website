@@ -23,7 +23,7 @@ describe('name parts verified only against the private-session identity', () => 
         expect(guestNamePartMatches(own, 'g3', 'Alex')).toBe(false)
         for (const invalid of [null, {}, { ...own, guest: false }, { ...own, role: 'teacher' }, { ...own, seat: 'group2student1' }]) expect(guestNamePartMatches(invalid, 'g2', 'Alex')).toBe(false)
     })
-    it.each(['', ' ', '.', '-', "'", '123', '<Alex>', 'a@example.com', '\nAlex', 'Alex\u0000'])('rejects an invalid name fragment %j', part => {
+    it.each(['', ' ', '.', '-', "'", '123', '<Alex>', 'a@example.com', 'Alex\u0000'])('rejects an invalid name fragment %j', part => {
         expect(() => guestNamePartMatches(access('Alex Tan'), 'g2', part)).toThrow()
     })
     it('keeps a shared fragment scoped to each cookie and does not change assigned logins or approvals', () => {
