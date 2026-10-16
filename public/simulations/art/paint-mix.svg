@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#FFF4C7"/>
+<circle cx="200" cy="190" r="118" fill="#FFE68A"/>
+<rect y="256" width="400" height="44" fill="#FFC83D"/>
+<g fill="none" stroke-linecap="round">
+<path d="M136 122C160 130 172 150 182 182M264 122C240 130 228 150 218 182" stroke="#111" stroke-width="20"/>
+<path d="M136 122C160 130 172 150 182 182" stroke="#FFC83D" stroke-width="10"/>
+<path d="M264 122C240 130 228 150 218 182" stroke="#1F66E5" stroke-width="10"/>
+</g>
+<g stroke="#111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+<path d="M0 256H400" fill="none"/>
+<g transform="rotate(50 90 115)"><rect x="55" y="85" width="70" height="60" rx="10" fill="#fff"/><rect x="55" y="106" width="70" height="18" fill="#FF6B3D"/><ellipse cx="90" cy="85" rx="35" ry="11" fill="#FFC83D"/></g>
+<g transform="rotate(-50 310 115)"><rect x="275" y="85" width="70" height="60" rx="10" fill="#fff"/><rect x="275" y="106" width="70" height="18" fill="#2EC4A6"/><ellipse cx="310" cy="85" rx="35" ry="11" fill="#1F66E5"/></g>
+<ellipse cx="322" cy="258" rx="42" ry="8" fill="#3DBE6B"/>
+<path d="M140 182V238a16 16 0 0 0 16 16H244a16 16 0 0 0 16-16V182Z" fill="#fff"/>
+<rect x="140" y="206" width="120" height="26" fill="#6A45F5"/>
+<ellipse cx="200" cy="182" rx="60" ry="16" fill="#3DBE6B"/>
+<path d="M168 182q16-8 32 0t32 0" fill="none" stroke="#B9F2A1" stroke-width="4"/>
+<circle cx="156" cy="160" r="6" fill="#FFC83D"/>
+<circle cx="246" cy="158" r="6" fill="#1F66E5"/>
+<circle cx="200" cy="146" r="7" fill="#3DBE6B"/>
+<g transform="rotate(18 52 210)"><rect x="46" y="150" width="12" height="76" rx="6" fill="#FF6B3D"/><rect x="42" y="224" width="20" height="12" rx="2" fill="#fff"/><path d="M42 236h20l-3 18q-7 9-14 0Z" fill="#3DBE6B"/></g>
+<circle cx="140" cy="44" r="16" fill="#FFC83D"/>
+<path d="M172 44h16M180 36v16" fill="none"/>
+<circle cx="220" cy="44" r="16" fill="#1F66E5"/>
+<path d="M252 38h16M252 50h16" fill="none"/>
+<circle cx="300" cy="44" r="16" fill="#3DBE6B"/>
+</g>
+</svg>

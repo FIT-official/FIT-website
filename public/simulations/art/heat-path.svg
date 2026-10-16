@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#FFE3D6"/>
+<circle cx="120" cy="120" r="110" fill="#FFD0BC"/>
+<rect y="240" width="400" height="60" fill="#FFB59A"/>
+<g stroke="#111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+<path d="M0 240H400" fill="none"/>
+<rect x="36" y="232" width="70" height="16" rx="5" fill="#6A45F5"/>
+<path d="M70 232C40 232 30 206 40 184C48 166 58 156 56 130C76 144 84 162 84 178C90 172 92 164 92 156C106 172 108 194 102 208C96 224 86 232 70 232Z" fill="#FF6B3D"/>
+<path d="M70 232C56 232 50 220 54 208C58 196 66 192 66 178C78 188 84 200 84 212C84 224 78 232 70 232Z" fill="#FFC83D" stroke-width="4"/>
+<path d="M118 176h58v64h-58Z" fill="#E8483A"/>
+<path d="M118 176l12-14h58l-12 14Z" fill="#FF8A7E"/>
+<path d="M176 176l12-14v64l-12 14Z" fill="#B8322A"/>
+<path d="M184 176h58v64h-58Z" fill="#FF6B3D"/>
+<path d="M184 176l12-14h58l-12 14Z" fill="#FF9E7D"/>
+<path d="M242 176l12-14v64l-12 14Z" fill="#D9532C"/>
+<path d="M250 176h58v64h-58Z" fill="#FFC83D"/>
+<path d="M250 176l12-14h58l-12 14Z" fill="#FFE08A"/>
+<path d="M308 176l12-14v64l-12 14Z" fill="#E0A82A"/>
+<path d="M316 176h58v64h-58Z" fill="#7FD4FF"/>
+<path d="M316 176l12-14h58l-12 14Z" fill="#C6ECFF"/>
+<path d="M374 176l12-14v64l-12 14Z" fill="#4DB5E8"/>
+<path d="M116 208H360" fill="none" stroke-width="15"/>
+<path d="M116 208H360" fill="none" stroke="#fff" stroke-width="6"/>
+<path d="M354 192L380 208L354 224Z" fill="#fff" stroke-width="4"/>
+<rect x="352" y="40" width="20" height="96" rx="10" fill="#fff"/>
+<circle cx="362" cy="140" r="17" fill="#E8483A"/>
+<path d="M362 128V84" fill="none" stroke="#E8483A" stroke-width="8"/>
+</g>
+<g fill="none" stroke-width="5" stroke-linecap="round">
+<path d="M146 148c-10-10 10-18 0-28s10-18 0-28" stroke="#E8483A"/>
+<path d="M212 148c-10-10 10-18 0-28s10-18 0-28" stroke="#FF6B3D"/>
+<path d="M278 148c-10-10 10-16 0-24" stroke="#F2A541"/>
+</g>
+<g fill="#fff" stroke="#111" stroke-width="3" stroke-linejoin="round">
+<path d="M330 186l3 6 6 3-6 3-3 6-3-6-6-3 6-3z"/>
+<path d="M300 60l4 8 8 4-8 4-4 8-4-8-8-4 8-4z"/>
+</g>
+<g stroke="#111" stroke-width="3">
+<circle cx="36" cy="40" r="8" fill="#2EC4A6"/>
+<rect x="250" y="266" width="14" height="14" fill="#FFC83D" transform="rotate(20 257 273)"/>
+</g>
+</svg>

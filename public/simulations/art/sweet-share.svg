@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+<defs><g id="c" stroke="#111" stroke-width="4" stroke-linejoin="round"><path d="M-9 0L-21-9V9ZM9 0L21-9V9Z"/><circle r="12"/><path d="M-5-4q5-4 10 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/></g></defs>
+<rect width="400" height="300" fill="#FFD9E7"/>
+<circle cx="350" cy="40" r="80" fill="#FFC2D7"/>
+<circle cx="24" cy="74" r="44" fill="#FFC2D7"/>
+<rect y="246" width="400" height="54" fill="#FF8FB8"/>
+<g stroke="#111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+<path d="M0 246H400" fill="none"/>
+<path d="M40 250V170a50 50 0 0 1 100 0v80Z" fill="#2EC4A6"/>
+<path d="M90 120q-6-24 16-28q2 22-16 28Z" fill="#8BE38A"/>
+<path d="M260 250V150a50 50 0 0 1 100 0v100Z" fill="#6A45F5"/>
+<path d="M310 100V82" fill="none"/>
+<circle cx="310" cy="74" r="9" fill="#FFC83D"/>
+<path d="M174 158q-28 18-38 44M226 158q28 18 40 40" fill="none" stroke-width="4" stroke-dasharray="2 10"/>
+</g>
+<circle cx="75" cy="172" r="6" fill="#111"/><circle cx="105" cy="172" r="6" fill="#111"/>
+<circle cx="63" cy="190" r="7" fill="#FF8FB8"/><circle cx="117" cy="190" r="7" fill="#FF8FB8"/>
+<path d="M80 190q10 10 20 0" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+<g stroke="#111" stroke-width="3"><circle cx="293" cy="152" r="10" fill="#fff"/><circle cx="327" cy="152" r="10" fill="#fff"/></g>
+<circle cx="289" cy="154" r="4.5" fill="#111"/><circle cx="323" cy="154" r="4.5" fill="#111"/>
+<path d="M298 176q12 11 24 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+<use href="#c" x="75" y="212" fill="#1F66E5"/>
+<use href="#c" x="106" y="210" fill="#FF6B3D"/>
+<use href="#c" x="282" y="213" fill="#FFC83D"/>
+<use href="#c" x="310" y="204" fill="#2EC4A6"/>
+<use href="#c" x="338" y="213" fill="#1F66E5"/>
+<g stroke="#111" stroke-width="5" stroke-linejoin="round">
+<path d="M42 222H138A48 32 0 0 1 42 222Z" fill="#FFC83D"/>
+<path d="M258 222H362A52 34 0 0 1 258 222Z" fill="#FF6B3D"/>
+</g>
+<use href="#c" fill="#FF6B3D" transform="translate(200 84) rotate(-20)"/>
+<use href="#c" fill="#FFC83D" transform="translate(164 128) rotate(15)"/>
+<use href="#c" fill="#1F66E5" transform="translate(236 130) rotate(-10)"/>
+<g fill="#fff" stroke="#111" stroke-width="3" stroke-linejoin="round">
+<path d="M256 52l4 8 8 4-8 4-4 8-4-8-8-4 8-4z"/>
+<path d="M140 64l3 6 6 3-6 3-3 6-3-6-6-3 6-3z"/>
+</g>
+</svg>

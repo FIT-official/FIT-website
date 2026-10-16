@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import Library from '../components/ClassroomSimulations/Library'
 import Activity from '../components/ClassroomSimulations/Activity'
 import { getLiveSims } from '../lib/sims/registry'
@@ -12,45 +12,54 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 const activities = getLiveSims()
 
 describe('Simulation discovery and classroom embeds', () => {
-  it('lists all live routes and filters without losing reset recovery', () => {
+  const tiles = () => document.querySelectorAll('main > ul > li:not([hidden])')
+  it('renders a tile per live sim with level badges, stars and art, and no helper copy', () => {
     render(<Library />)
-    expect(screen.getAllByRole('article')).toHaveLength(8)
-    fireEvent.change(screen.getByLabelText('Search activities'), { target: { value: '  aliasing  ' } })
-    expect(screen.getAllByRole('article')).toHaveLength(1)
-    expect(screen.getByRole('link', { name: 'Launch Signal Sampling Detective' })).toHaveAttribute('href', '/class/simulations/sampling')
-    fireEvent.change(screen.getByLabelText('Learning level'), { target: { value: 'Poly' } })
-    expect(screen.queryAllByRole('article')).toHaveLength(0)
-    fireEvent.click(screen.getByRole('button', { name: 'Show all activities' }))
-    expect(screen.getAllByRole('article')).toHaveLength(8)
-  })
-  it('combines subject, level and topic with accessible pressed state', () => {
-    render(<Library />)
-    fireEvent.click(screen.getByRole('button', { name: 'Physics', exact: true }))
-    expect(screen.getByRole('button', { name: 'Physics', exact: true })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getAllByRole('article')).toHaveLength(3)
-    fireEvent.change(screen.getByLabelText('Learning level'), { target: { value: 'Secondary' } })
-    expect(screen.getAllByRole('article')).toHaveLength(1)
-    expect(screen.getByRole('heading', { name: 'Heat Path Designer' })).toBeVisible()
-    fireEvent.change(screen.getByLabelText('Topic'), { target: { value: 'Probability and evidence' } })
-    expect(screen.queryAllByRole('article')).toHaveLength(0)
-    fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }))
-    expect(screen.getAllByRole('article')).toHaveLength(8)
-  })
-  it('keeps subject and level outside the decorative artwork, with class controls on every enabled card', () => {
-    render(<Library addToClassEnabled />)
-    for (const article of screen.getAllByRole('article')) {
-      const activity = activities.find(item => article.textContent.includes(item.title))
-      const artwork = article.querySelector('a[aria-hidden="true"]')
-      const subject = Array.from(article.querySelectorAll('span')).find(span => span.textContent === activity.subject)
-      const level = Array.from(article.querySelectorAll('span')).find(span => span.textContent === (activity.levels?.join(' / ') || activity.level))
-      expect(artwork).not.toContainElement(subject)
-      expect(subject.closest('[aria-hidden="true"]')).toBeNull()
-      expect(level.closest('[aria-hidden="true"]')).toBeNull()
-      expect(article.querySelector('button')).toHaveTextContent('Add to class')
-    }
-    expect(screen.getByText('TRUE FLAGS')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Simulations' })).toBeVisible()
+    expect(tiles()).toHaveLength(8)
+    const tile = screen.getByRole('link', { name: /Signal Sampling Detective/ })
+    expect(tile).toHaveAttribute('href', '/class/simulations/sampling')
+    expect(tile.querySelector('img')).toHaveAttribute('src', '/simulations/art/sampling.svg')
+    expect(within(tile).getByText('JC')).toBeVisible()
+    expect(within(tile).getByRole('img', { name: 'Difficulty: Hard' })).toBeVisible()
+    expect(within(screen.getByRole('link', { name: /Feedback Control Lab/ })).getByText('Poly')).toHaveStyle({ background: '#2EC4A6' })
     expect(screen.queryByText(/awaiting curriculum review|Begin with a prediction|Explore independently/)).toBeNull()
-    expect(screen.getByText("Original FIT simulations.")).toBeVisible()
+    expect(screen.getByText('Original FIT simulations.')).toBeVisible()
+  })
+  it('toggles chips: OR within a row, AND across rows, with aria-pressed, live count and Clear', () => {
+    window.history.replaceState(null, '', '/class/simulations')
+    render(<Library />)
+    const level = name => within(screen.getByRole('group', { name: 'Level' })).getByRole('button', { name })
+    const topic = name => within(screen.getByRole('group', { name: 'Topic' })).getByRole('button', { name })
+    fireEvent.click(level('Primary'))
+    expect(level('Primary')).toHaveAttribute('aria-pressed', 'true')
+    expect(tiles()).toHaveLength(4)
+    fireEvent.click(level('Secondary'))
+    expect(tiles()).toHaveLength(6)
+    fireEvent.click(topic('Ratio'))
+    expect(tiles()).toHaveLength(2)
+    expect(screen.getByText('2 simulations')).toBeInTheDocument()
+    expect(window.location.search).toBe('?level=primary,secondary&topic=ratio')
+    fireEvent.click(within(screen.getByRole('group', { name: 'Difficulty' })).getByRole('button', { name: 'Hard' }))
+    expect(tiles()).toHaveLength(0)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Clear' }).at(-1))
+    expect(tiles()).toHaveLength(8)
+    expect(window.location.search).toBe('')
+    expect(screen.queryAllByRole('button', { pressed: true })).toHaveLength(0)
+  })
+  it('restores the chip state from the URL on load', () => {
+    window.history.replaceState(null, '', '/class/simulations?level=jc,bogus&topic=waves')
+    render(<Library />)
+    expect(within(screen.getByRole('group', { name: 'Level' })).getByRole('button', { name: 'JC' })).toHaveAttribute('aria-pressed', 'true')
+    expect(tiles()).toHaveLength(1)
+    window.history.replaceState(null, '', '/class/simulations')
+  })
+  it('keeps class controls outside the tile link when enabled', () => {
+    render(<Library addToClassEnabled />)
+    for (const item of tiles()) {
+      expect(item.querySelector('a button')).toBeNull()
+      expect(item.querySelector('button')).toHaveTextContent('Add to class')
+    }
   })
   it('mounts the shared shell and copies a minimal-player snippet with visible feedback', async () => {
     const fetch = vi.fn()
@@ -76,7 +85,7 @@ describe('Simulation discovery and classroom embeds', () => {
     const fetch = vi.fn()
     vi.stubGlobal('fetch', fetch)
     render(<Library addToClassEnabled={addToClassEnabled} />)
-    expect(screen.getAllByRole('article')).toHaveLength(8)
+    expect(document.querySelectorAll('main > ul > li:not([hidden])')).toHaveLength(8)
     expect(screen.queryByRole('button', { name: 'Add to class' })).not.toBeInTheDocument()
     expect(screen.queryByText('Workshop class')).not.toBeInTheDocument()
     expect(fetch).not.toHaveBeenCalled()
