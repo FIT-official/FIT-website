@@ -1,3 +1,4 @@
+import { htmlSims } from './htmlSims.js'
 import { LIVE_FAMILY } from '../../public/simulations/families/live.js'
 import { familyRegistry } from '../../public/simulations/families/catalog.js'
 // Curriculum levels are editorial starting points, not syllabus accreditation.
@@ -79,4 +80,5 @@ export const simsRegistry = [
   { id: "linear-sensor-calibration", title: "Sensor Calibrator", level: "Poly", subject: "Maths", topic: "Linear models", syllabusRef: "", concept: "linear-graphs", difficulty: 2, objective: "Build a two-point linear calibration and use it to convert sensor readings to engineering units.", syllabusSource: "Poly, Engineering Mathematics (FIT mapping; e.g. NP N71 Engineering Mathematics 1: analytic geometry)", approach: "Turn raw sensor readings into real units with a two-point calibration line.", activityPrompt: "Build a two-point linear calibration and use it to convert sensor readings to engineering units.", status: LIVE_FAMILY.includes('linear-sensor-calibration') ? 'live' : 'draft' },
   { id: "linear-systems-crossing", title: "Crossing Point", level: "University", subject: "Maths", topic: "Linear algebra", syllabusRef: "", concept: "linear-graphs", difficulty: 3, objective: "Solve 2 × 2 linear systems geometrically and with determinants, and identify singular systems.", syllabusSource: "University, Linear Algebra (FIT mapping)", approach: "Each equation is a line. Find where they cross, and spot when a system has no single solution.", activityPrompt: "Solve 2 × 2 linear systems geometrically and with determinants, and identify singular systems.", status: LIVE_FAMILY.includes('linear-systems-crossing') ? 'live' : 'draft' },
   ...familyRegistry,
+  ...htmlSims.map(({ id, title, level, subject, topic, syllabusRef = '', approach, activityPrompt, status = 'draft' }) => ({ id, title, level, subject, topic, syllabusRef, approach, activityPrompt, status })),
 ]

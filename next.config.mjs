@@ -8,6 +8,7 @@ const nextConfig = {
     poweredByHeader: false,
     serverExternalPackages: ['libheif-js'],
     outputFileTracingIncludes: {
+        '/simulations/[activity]': ['./content/sims/html/**/*'],
         '/api/printer-repair/photos': ['./lib/printerRepair/photoDecodeWorker.cjs', './node_modules/libheif-js/**/*'],
     },
     // Keep metadata blocking for browsers and crawlers. Route content must also

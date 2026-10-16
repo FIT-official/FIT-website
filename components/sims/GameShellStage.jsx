@@ -6,7 +6,7 @@ import styles from './GameShell.module.css'
 export default function GameShellStage({ activity, source, title }) {
   const frame = useRef(null)
   const observer = useRef(null)
-  const [height, setHeight] = useState(780)
+  const [height, setHeight] = useState(activity.height || 780)
   const [loaded, setLoaded] = useState(false)
   useEffect(() => () => observer.current?.disconnect(), [])
   function onLoad() {
