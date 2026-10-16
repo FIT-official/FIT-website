@@ -1,5 +1,5 @@
 :root{--accent:#7c5cff;--bg:#0b1020;--card:#141b33;--card2:#1b2445;--ink:#eef2ff;--mut:#9aa6cf;--line:#2a3560;--ok:#2ee6a6;--no:#ff6b8b;--gold:#ffd166;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;color-scheme:dark}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(1200px 600px at 10% -10%,color-mix(in srgb,var(--accent) 35%,transparent),transparent),radial-gradient(900px 500px at 110% 10%,#1fd1ff22,transparent),var(--bg);color:var(--ink);min-height:100vh}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1200px 600px at 10% -10%,color-mix(in srgb,var(--accent) 35%,transparent),transparent),radial-gradient(900px 500px at 110% 10%,#1fd1ff22,transparent),var(--bg);color:var(--ink)}html{background:var(--bg)}
 button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 .g{max-width:1180px;margin:auto;padding:18px}
 .hud{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:#0e1430cc;border:1px solid var(--line);border-radius:18px;padding:10px 14px;backdrop-filter:blur(8px);position:sticky;top:8px;z-index:3}

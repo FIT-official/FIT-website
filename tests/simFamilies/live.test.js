@@ -21,3 +21,10 @@ describe('concept-family live gating', () => {
     }
   })
 })
+
+describe('embedded family player sizing', () => {
+  it('shell.css never sizes the document from the viewport (host iframe auto-height would grow forever)', async () => {
+    const css = (await import('fs')).readFileSync('public/simulations/families/shell.css', 'utf8')
+    expect(css).not.toMatch(/\d+(\.\d+)?(d|s|l)?vh/)
+  })
+})
