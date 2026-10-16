@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pump Power — FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+main{max-width:1260px;margin:auto;padding:16px 14px 45px}
+h1,h2,h3,p{margin:0}
+h1{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;letter-spacing:-.04em}
+h2{font-size:1.25rem;font-weight:800;margin-bottom:11px}
+h3{font-size:1rem;font-weight:800}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.badge{display:inline-block;background:var(--lvl-poly);color:var(--lvl-poly-on);border:2px solid #111;border-radius:999px;padding:7px 13px;text-transform:uppercase;font-size:12px;font-weight:800;letter-spacing:.05em}
+.hud{display:flex;gap:8px;flex-wrap:wrap;font-weight:800}
+.hud span{border:2px solid #111;border-radius:999px;padding:8px 12px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.panel{border:2px solid #111;background:white;border-radius:24px;padding:18px;min-width:0;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-poly-tint)}
+button{font:inherit;cursor:pointer;border:2px solid #111;border-radius:999px;background:white;color:#111;min-height:48px;padding:10px 15px;font-weight:800;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.check:active{box-shadow:var(--sh-1)}
+.prompt{font-size:1.08rem;font-weight:700;margin:10px 0}
+.pumps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:13px}
+.pump{text-align:left;border-radius:15px;padding:12px 9px;font-size:.86rem;min-height:112px}
+.pump.selected{background:var(--lvl-poly);box-shadow:var(--sh-2)}
+.pump strong,.pump span{display:block}
+.pump strong{font-size:1.08rem}
+.stepper,.actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.stepper strong{border:2px solid #111;border-radius:15px;background:white;padding:11px;min-width:100px;text-align:center}
+label{font-weight:800;display:block;margin-top:15px}
+.readings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:13px 0}
+.readings div{border:2px solid #111;border-radius:14px;padding:11px;background:white}
+.readings small{display:block;color:#555}
+.readings strong{font-size:1.1rem}
+svg{width:100%;height:auto;display:block}
+.feedback{min-height:50px;border:2px solid #111;border-radius:16px;padding:12px;background:white;font-weight:650;margin-top:15px}
+.feedback.good{background:#dff8e8}
+.feedback.bad{background:#ffe8e6}
+.concept{border:2px solid #111;border-radius:16px;background:var(--fit-sunken);padding:12px;margin-top:15px}
+.concept p{font-size:.86rem;margin-top:7px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.85rem;font-weight:700}
+.key{display:inline-block;width:13px;height:13px;border:1px solid #111;margin-right:4px;vertical-align:middle}
+details{border:2px solid #111;border-radius:16px;padding:12px;margin-top:17px}
+summary{font-weight:800;cursor:pointer}
+details p{margin-top:9px}
+.end{text-align:center;padding:45px 15px}
+.stars{font-size:3rem;margin:15px}
+[hidden]{display:none!important}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+@media(max-width:410px){.pump{padding:10px 6px;font-size:.78rem}.pump strong{font-size:.97rem}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div><span class="badge">Polytechnic · Engineering</span><h1>Pump Power</h1></div>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score: 0</span></div>
+</header>
+<div id="game" class="layout">
+<section class="panel stage">
+<h2>Water-lifting contract</h2>
+<p id="prompt" class="prompt"></p>
+<svg id="scene" viewBox="0 0 500 255" role="img" aria-label="Pump lifting water through a labelled head"></svg>
+<div class="readings">
+<div><small>Required water</small><strong id="volume"></strong></div>
+<div><small>Vertical head H</small><strong id="head"></strong></div>
+<div><small>Electricity tariff</small><strong>$0.30/kWh</strong></div>
+<div><small>Maximum run time</small><strong>5.00 h</strong></div>
+</div>
+<h3>Choose a pump</h3>
+<div id="pumps" class="pumps"></div>
+<label>Run time</label>
+<div class="stepper">
+<button id="tm">−1.00 h</button>
+<button id="tfm">−0.25 h</button>
+<strong id="time">0.25 h</strong>
+<button id="tfp">+0.25 h</button>
+<button id="tp">+1.00 h</button>
+</div>
+<div class="readings">
+<div><small>Water delivered</small><strong id="delivered"></strong></div>
+<div><small>Electrical cost</small><strong id="cost"></strong></div>
+<div><small>Useful hydraulic power</small><strong id="useful"></strong></div>
+<div><small>Delivery status</small><strong id="status"></strong></div>
+</div>
+<div class="actions">
+<button id="hint">Hint −50</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" role="status" aria-live="polite">Select a pump and run time to fulfil the contract at minimum cost.</div>
+</section>
+<section class="panel">
+<h2>Energy versus run time</h2>
+<svg id="plot" viewBox="0 0 470 310" role="img" aria-label="Input and useful energy against time in hours"></svg>
+<div class="legend">
+<span><i class="key" style="background:#FF6B3D"></i>Input electricity</span>
+<span><i class="key" style="background:#3DBE6B"></i>Useful hydraulic energy</span>
+</div>
+<div class="concept">
+<h3>Power flow</h3>
+<svg id="flow" viewBox="0 0 430 93" role="img" aria-label="Proportional input useful and wasted power arrows"></svg>
+<p>Higher pump efficiency means less electrical energy wasted per cubic metre lifted.</p>
+</div>
+<details>
+<summary>The physics</summary>
+<p>Useful hydraulic power P = ρgQH.</p>
+<p>ρ = 1000 kg/m³; g = 9.81 m/s²; Q is volume flow rate in m³/s; H is vertical head in m.</p>
+<p>Efficiency η = P(useful) ÷ P(input). Electrical energy E = P(input) × time.</p>
+<p>Running cost = electrical energy (kWh) × $0.30/kWh.</p>
+<p>Model: steady, incompressible flow; constant pump rating and efficiency; no extra pipe losses or standby consumption. Time can be set in 0.25 h increments.</p>
+</details>
+</section>
+</div>
+<section id="end" class="panel end" hidden>
+<h2>Pump optimisation complete!</h2>
+<div class="stars" id="stars"></div>
+<p id="result"></p>
+<button id="again" class="check" style="margin-top:20px">Play again ↻</button>
+</section>
+</main>
+<script>
+"use strict";
+(function(){
+const $=id=>document.getElementById(id),fmt=(n,d=2)=>Number(n).toFixed(d);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rho=1000,g=9.81,tariff=.30;
+let seed=1,run=0,round=0,score=0,tries=0,hinted=false,done=false;
+let c={},selected=0,time=.25,best=null;
+function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function pick(a){return a[Math.floor(rand()*a.length)]}
+function flow(p,H){return p.kw*1000*p.eta/(rho*g*H)*3600}
+function make(){
+let head=pick([8,10,12,15,18,20]);
+let pumps=[
+{name:"Pump A",kw:pick([.5,.75,1]),eta:pick([.60,.65,.70])},
+{name:"Pump B",kw:pick([1,1.5,2]),eta:pick([.70,.75,.80])},
+{name:"Pump C",kw:pick([1.5,2,2.5]),eta:pick([.80,.85,.90])}
+];
+let goalPump=pumps[2],targetHours=pick([.75,1,1.25,1.5,1.75,2]);
+let target=flow(goalPump,head)*targetHours;
+return {head,pumps,target,targetHours};
+}
+function optimum(){
+let options=[];
+c.pumps.forEach((p,i)=>{
+let rate=flow(p,c.head);
+let t=Math.ceil((c.target/rate-1e-10)*4)/4;
+if(t<=5&&t>=.25)options.push({i,t,cost:p.kw*t*tariff});
+});
+options.sort((a,b)=>a.cost-b.cost||a.t-b.t||a.i-b.i);
+return options[0];
+}
+function start(){
+run++;seed=(20261017+run*2003)>>>0;round=0;score=0;
+$("game").hidden=false;$("end").hidden=true;load();
+}
+function load(){
+c=make();best=optimum();selected=0;time=.25;tries=0;hinted=false;done=false;
+$("round").textContent=`Round ${round+1}/6`;
+$("score").textContent=`Score: ${score}`;
+$("head").textContent=c.head+" m";$("volume").textContent=fmt(c.target,2)+" m³";
+$("prompt").textContent="Lift at least "+fmt(c.target,2)+" m³ of water through "+c.head+" m of head. Choose the pump and run time that meet the target at the lowest electrical cost.";
+$("check").disabled=false;$("hint").disabled=false;$("next").hidden=true;
+$("feedback").className="feedback";
+$("feedback").textContent="Evaluate the flow, delivered volume and total electricity cost.";
+$("pumps").innerHTML="";
+c.pumps.forEach((p,i)=>{
+let b=document.createElement("button");
+b.className="pump";b.innerHTML=`<strong>${p.name}</strong><span>${fmt(p.kw)} kW input</span><span>${fmt(p.eta*100,0)}% efficient</span>`;
+b.onclick=()=>{if(!done){selected=i;render()}};
+$("pumps").appendChild(b);
+});
+render();
+}
+function render(){
+let p=c.pumps[selected],rate=flow(p,c.head),volume=rate*time;
+let cost=p.kw*time*tariff;
+$("pumps").querySelectorAll("button").forEach((b,i)=>{b.classList.toggle("selected",i===selected);b.setAttribute("aria-pressed",String(i===selected))});
+$("time").textContent=fmt(time)+" h";
+$("delivered").textContent=fmt(volume,2)+" m³";
+$("cost").textContent="$"+fmt(cost);
+$("useful").textContent=fmt(p.kw*p.eta)+" kW";
+$("status").textContent=volume+1e-8>=c.target?"✓ Target met":"✕ Below target";
+scene(p,rate,volume);plot(p);flowPlot(p);
+}
+function scene(p,rate,volume){
+let H=c.head;
+let s='<rect x="5" y="5" width="490" height="245" rx="22" fill="#fff" stroke="#111" stroke-width="2"/>';
+s+='<rect x="40" y="165" width="140" height="65" rx="9" fill="#E2ECFD" stroke="#111" stroke-width="3"/>';
+s+='<path d="M40 183Q65 172 90 183T140 183T180 183" fill="none" stroke="#1F66E5" stroke-width="3"/>';
+s+='<rect x="205" y="159" width="110" height="70" rx="18" fill="#FF6B3D" stroke="#111" stroke-width="4"/>';
+s+='<circle cx="260" cy="194" r="18" fill="#fff" stroke="#111" stroke-width="3"/>';
+s+='<path d="M260 177L271 204L248 197Z" fill="#FFDD00" stroke="#111" stroke-width="2"/>';
+s+='<path d="M180 195H205M315 193H357V60H438" stroke="#111" stroke-width="9" fill="none" stroke-linejoin="round"/>';
+s+='<path d="M346 121L357 108L368 121" stroke="#111" stroke-width="4" fill="none"/>';
+s+='<rect x="410" y="40" width="65" height="55" rx="8" fill="#E2ECFD" stroke="#111" stroke-width="3"/>';
+s+=`<text x="260" y="246" font-size="13" font-weight="800" text-anchor="middle">${p.name}</text>`;
+s+=`<text x="395" y="126" font-size="13" font-weight="800">H = ${H} m</text>`;
+s+=`<text x="43" y="154" font-size="12" font-weight="800">Water source</text>`;
+s+=`<text x="340" y="23" font-size="12" font-weight="800">Tank: ${fmt(volume,2)} m³</text>`;
+s+=`<path d="M315 151H${315+Math.max(12,85*p.eta)}" stroke="#3DBE6B" stroke-width="${Math.max(4,12*p.eta)}" stroke-linecap="round"/>`;
+$("scene").innerHTML=s;
+$("scene").setAttribute("aria-label",`${p.name} lifts ${fmt(volume,2)} cubic metres over ${H} metres at ${fmt(rate,2)} cubic metres per hour`);
+}
+function plot(p){
+let maxEnergy=Math.max(.5,Math.ceil(p.kw*5*2)/2);
+const X=t=>57+t/5*382,Y=e=>257-e/maxEnergy*205;
+let s='<text x="240" y="20" text-anchor="middle" font-size="16" font-weight="800">Electrical and hydraulic energy</text>';
+s+='<path d="M57 45V257H440" fill="none" stroke="#111" stroke-width="2"/>';
+for(let i=0;i<=5;i++){
+let t=i,E=maxEnergy*i/5;
+s+=`<line x1="${X(t)}" y1="45" x2="${X(t)}" y2="257" stroke="#eee"/>`;
+s+=`<text x="${X(t)}" y="275" font-size="11" text-anchor="middle">${i}</text>`;
+s+=`<line x1="57" y1="${Y(E)}" x2="440" y2="${Y(E)}" stroke="#eee"/>`;
+s+=`<text x="49" y="${Y(E)+4}" font-size="11" text-anchor="end">${fmt(E,1)}</text>`;
+}
+s+='<text x="250" y="304" text-anchor="middle" font-size="12">Time t (h)</text>';
+s+='<text x="13" y="156" transform="rotate(-90 13 156)" text-anchor="middle" font-size="12">Energy E (kWh)</text>';
+for(const [mult,color] of [[p.kw,"#FF6B3D"],[p.kw*p.eta,"#3DBE6B"]]){
+s+=`<path d="M${X(0)} ${Y(0)}L${X(5)} ${Y(5*mult)}" stroke="${color}" stroke-width="4" fill="none"/>`;
+s+=`<circle cx="${X(time)}" cy="${Y(mult*time)}" r="6" fill="${color}" stroke="#111" stroke-width="2"/>`;
+}
+s+=`<line x1="${X(time)}" y1="45" x2="${X(time)}" y2="257" stroke="#111" stroke-dasharray="5 4"/>`;
+s+=`<rect x="236" y="30" width="202" height="28" rx="12" fill="white" stroke="#111"/>`;
+s+=`<text x="337" y="48" text-anchor="middle" font-size="12" font-weight="800">Cost at marker: $${fmt(p.kw*time*tariff)}</text>`;
+$("plot").innerHTML=s;
+$("plot").setAttribute("aria-label",`Input energy ${fmt(p.kw*time,2)} kilowatt-hours; useful energy ${fmt(p.kw*p.eta*time,2)} kilowatt-hours; cost ${fmt(p.kw*time*tariff)} dollars at ${fmt(time)} hours`);
+}
+function flowPlot(p){
+let u=p.kw*p.eta,w=p.kw*(1-p.eta);
+$("flow").innerHTML=`<text x="7" y="17" font-size="12" font-weight="800">Input ${fmt(p.kw)} kW</text>
+<path d="M5 49H95" stroke="#FF6B3D" stroke-width="19"/>
+<path d="M105 38H${105+p.eta*295}" stroke="#3DBE6B" stroke-width="${Math.max(4,19*p.eta)}"/>
+<path d="M105 70H${105+(1-p.eta)*295}" stroke="#FF8FB8" stroke-width="${Math.max(4,19*(1-p.eta))}"/>
+<text x="108" y="27" font-size="11" font-weight="700">Useful ${fmt(u,3)} kW</text>
+<text x="108" y="91" font-size="11" font-weight="700">Losses ${fmt(w,3)} kW</text>`;
+$("flow").setAttribute("aria-label",`Input ${p.kw} kilowatts, useful ${fmt(u,3)} kilowatts, losses ${fmt(w,3)} kilowatts`);
+}
+function changeTime(dt){
+if(done)return;
+time=clamp(Math.round((time+dt)*4)/4,.25,5);render();
+}
+function check(){
+if(done)return;
+tries++;
+let p=c.pumps[selected],vol=flow(p,c.head)*time,cost=p.kw*time*tariff;
+if(vol+1e-8<c.target){
+let shortage=c.target-vol;
+$("feedback").className="feedback bad";
+$("feedback").textContent=`Not enough water: ${fmt(shortage,2)} m³ short. Increase time or choose a higher-flow pump.`;
+return;
+}
+if(cost>best.cost+1e-7){
+$("feedback").className="feedback bad";
+$("feedback").textContent=`Target met, but cost is $${fmt(cost-best.cost)} above the lowest feasible cost. Compare pump efficiencies and run times.`;
+return;
+}
+let earned=hinted?50:tries===1?100:75;
+score+=earned;done=true;
+$("score").textContent="Score: "+score;
+$("feedback").className="feedback good";
+$("feedback").textContent=`★ Optimal solution! +${earned} points. ${p.name} runs for ${fmt(time)} h, delivering ${fmt(vol,2)} m³ for $${fmt(cost)}.`;
+$("check").disabled=true;$("hint").disabled=true;$("next").hidden=false;
+}
+function hint(){
+if(done)return;
+hinted=true;$("hint").disabled=true;
+$("feedback").className="feedback";
+$("feedback").textContent="For each pump, calculate Q = ηP/(ρgH), then round the minimum required running time UP to the next 0.25 h. Compare costs.";
+}
+function finish(){
+$("game").hidden=true;$("end").hidden=false;$("round").textContent="Complete";
+let n=score>=500?3:score>=350?2:score>=200?1:0;
+$("stars").textContent="★".repeat(n)+"☆".repeat(3-n);
+$("result").textContent=`You earned ${score}/600 points. ${n===3?"Outstanding optimisation!":"Replay and improve your engineering decisions."}`;
+}
+$("tm").onclick=()=>changeTime(-1);
+$("tfm").onclick=()=>changeTime(-.25);
+$("tfp").onclick=()=>changeTime(.25);
+$("tp").onclick=()=>changeTime(1);
+$("hint").onclick=hint;$("check").onclick=check;
+$("next").onclick=()=>{if(round===5)finish();else{round++;load()}};
+$("again").onclick=start;
+start();
+})();
+</script>
+</body>
+</html>

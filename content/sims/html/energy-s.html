@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coaster Energy — FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+main{max-width:1320px;margin:auto;padding:16px 14px 48px}
+h1,h2,h3,p{margin:0}
+h1{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;letter-spacing:-.04em}
+h2{font-size:1.24rem;font-weight:800;margin-bottom:10px}
+h3{font-size:1rem;font-weight:800}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:17px}
+.badge{display:inline-block;background:var(--lvl-secondary);color:var(--lvl-secondary-on);border:2px solid #111;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.hud{display:flex;gap:8px;flex-wrap:wrap;font-weight:800}
+.hud span{border:2px solid #111;border-radius:999px;padding:8px 12px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.panel{background:#fff;border:2px solid #111;border-radius:24px;box-shadow:var(--sh-2);padding:18px;min-width:0}
+.stage{background:var(--lvl-secondary-tint)}
+.prompt{font-size:1.1rem;font-weight:700;margin:10px 0 15px}
+button{font:inherit;cursor:pointer;background:white;color:#111;border:2px solid #111;border-radius:999px;min-height:48px;padding:9px 17px;font-weight:800;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.check:active{box-shadow:var(--sh-1)}
+.actions,.stepper{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.stepper button{min-width:50px;font-size:1.05rem}
+.stepper strong{border:2px solid #111;border-radius:14px;background:white;min-width:108px;text-align:center;padding:13px}
+label{display:block;font-weight:800;margin-top:14px}
+input[type=range]{width:100%;accent-color:var(--lvl-secondary);cursor:pointer;min-height:44px}
+svg{display:block;width:100%;height:auto}
+.scene{max-height:315px}
+.chart{margin-top:13px}
+.readings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:15px 0}
+.reading{border:2px solid #111;border-radius:14px;padding:11px;background:white}
+.reading small{display:block;color:#555}
+.reading strong{font-size:1.1rem}
+.feedback{border:2px solid #111;border-radius:15px;padding:12px;margin-top:15px;background:white;min-height:53px;font-weight:650}
+.feedback.good{background:#dff8e8}
+.feedback.bad{background:#ffe8e6}
+.concept{background:var(--fit-sunken);border:2px solid #111;border-radius:16px;padding:12px;margin-top:16px}
+.concept p{font-size:.85rem;margin-top:7px}
+.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:.83rem;font-weight:700;margin-top:4px}
+.key{display:inline-block;width:13px;height:13px;border:1px solid #111;margin-right:4px;vertical-align:middle}
+details{border:2px solid #111;border-radius:15px;padding:12px 14px;margin-top:16px}
+summary{font-weight:800;cursor:pointer}
+details p{margin-top:9px;font-size:.9rem}
+.end{text-align:center;padding:45px 15px}
+.stars{font-size:3rem;margin:16px}
+[hidden]{display:none!important}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header><div><span class="badge">Secondary · O-Level Physics</span><h1>Coaster Energy</h1></div>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score: 0</span></div></header>
+<div id="game" class="layout">
+<section class="panel stage">
+<h2 id="mission">Coaster challenge</h2>
+<p id="prompt" class="prompt"></p>
+<svg id="scene" class="scene" viewBox="0 0 520 285" role="img" aria-label="Roller-coaster track with labelled cart"></svg>
+<div class="readings">
+<div class="reading"><small>Cart mass</small><strong id="mass"></strong></div>
+<div class="reading"><small>Gravitational field strength</small><strong>10 N/kg</strong></div>
+<div class="reading"><small id="targetLabel">Target</small><strong id="target"></strong></div>
+<div class="reading"><small id="extraLabel">Track</small><strong id="extra"></strong></div>
+</div>
+<label>Release height h</label>
+<div class="stepper">
+<button id="hm" aria-label="Decrease height by 0.5 metres">−0.5</button>
+<button id="hfm" aria-label="Decrease height by 0.1 metres">−0.1</button>
+<strong id="height">0.0 m</strong>
+<button id="hfp" aria-label="Increase height by 0.1 metres">+0.1</button>
+<button id="hp" aria-label="Increase height by 0.5 metres">+0.5</button>
+</div>
+<label for="position">Explore cart position: <span id="positionLabel">0.0 m</span></label>
+<input id="position" type="range" min="0" max="10" step="0.1" value="0">
+<div id="effControls" hidden>
+<label>Run efficiency η (useful energy ÷ input energy)</label>
+<div class="stepper">
+<button id="em" aria-label="Decrease efficiency estimate by one percentage point">−1%</button>
+<strong id="effAnswer">50%</strong>
+<button id="ep" aria-label="Increase efficiency estimate by one percentage point">+1%</button>
+</div>
+</div>
+<div class="actions">
+<button id="hint">Hint −50</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" role="status" aria-live="polite">Adjust the release height, then check.</div>
+</section>
+<section class="panel">
+<h2>Live energy dashboard</h2>
+<svg id="bars" class="chart" viewBox="0 0 470 215" role="img" aria-label="Stacked energy bar chart"></svg>
+<div class="legend">
+<span><i class="key" style="background:#2EC4A6"></i>Kinetic Eₖ</span>
+<span><i class="key" style="background:#6A45F5"></i>Potential Eₚ</span>
+<span><i class="key" style="background:#FF8FB8"></i>Thermal</span>
+</div>
+<svg id="curve" class="chart" viewBox="0 0 470 275" role="img" aria-label="Energy in joules against horizontal position in metres"></svg>
+<div class="concept">
+<h3>Conservation of energy</h3>
+<svg id="flow" viewBox="0 0 430 76" role="img" aria-label="Energy transfer strip"></svg>
+<p>Gravitational energy becomes kinetic energy or thermal energy. The total remains constant.</p>
+</div>
+<details>
+<summary>The physics</summary>
+<p>Eₖ = ½mv²; Eₚ = mgh; g = 10 N/kg.</p>
+<p>Work done against friction W = Fd, where F is in N and d in m.</p>
+<p>Conservation: Eₖ + Eₚ + Eₜₕ = initial mgh.</p>
+<p>Efficiency η = useful output energy ÷ input energy × 100%.</p>
+<p>Model: point-mass cart, no rotational energy. Track friction acts only on the stated rough section. Efficiency in rough-track rounds is energy gained in the final climb divided by the initial gravitational energy.</p>
+</details>
+</section>
+</div>
+<section id="end" class="panel end" hidden>
+<h2>Coaster challenge complete!</h2>
+<div class="stars" id="stars"></div>
+<p id="result"></p>
+<button id="again" class="check" style="margin-top:20px">Play again ↻</button>
+</section>
+</main>
+<script>
+"use strict";
+(function(){
+const $=id=>document.getElementById(id),fmt=(n,d=1)=>Number(n).toFixed(d);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+let seed=43217,run=0,round=0,score=0,tries=0,hinted=false,done=false;
+let h=1,etaGuess=50,c={},x=0;
+function random(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function pick(a){return a[Math.floor(random()*a.length)]}
+function create(){
+let type=round%2===0?"A":"B",m=pick([2,3,4,5]);
+if(type==="A"){
+let answer=pick([2,2.5,3,3.5,4,4.5,5,5.5,6]);
+let hill=round===2;
+return {type,m,answer,hill,target:hill?answer:Math.sqrt(20*answer),f:0,d:0,marker:hill?answer:0};
+}
+let marker=pick([1,1.5,2]);
+let d=pick([2,3,4]);
+let extra=pick([1,1.5,2,2.5]);
+let f=m*10*extra/d;
+let answer=marker+extra;
+return {type,m,answer,marker,d,f,hill:true};
+}
+function reset(){
+run++;seed=(20261017+run*911)>>>0;round=0;score=0;$("game").hidden=false;$("end").hidden=true;load();
+}
+function load(){
+c=create();tries=0;hinted=false;done=false;x=0;
+h=c.answer>=2?0.5:5;etaGuess=50;
+if(Math.abs(h-c.answer)<.01)h=0.5;
+$("position").value="0";
+$("effControls").hidden=c.type==="A";
+$("mission").textContent=c.type==="A"?"Smooth-track challenge":"Rough-track challenge";
+$("prompt").textContent=c.type==="A"?
+(c.hill?"Set the release height so the cart just clears the smooth hill with zero speed at its top.":"Set the release height to reach the target speed at the bottom of the smooth track."):
+"Set the release height so the cart crosses the rough section and comes to rest exactly at the top marker. Also calculate its efficiency.";
+$("round").textContent="Round "+(round+1)+"/6";
+$("score").textContent="Score: "+score;
+$("mass").textContent=c.m+" kg";
+$("targetLabel").textContent=c.type==="A"?(c.hill?"Hill height":"Bottom speed"):"Stopping marker";
+$("target").textContent=c.type==="A"?(c.hill?fmt(c.target)+" m":fmt(c.target,2)+" m/s"):fmt(c.marker)+" m";
+$("extraLabel").textContent=c.type==="A"?"Track type":"Rough section";
+$("extra").textContent=c.type==="A"?"Smooth":fmt(c.f,2)+" N × "+c.d+" m";
+$("check").disabled=false;$("hint").disabled=false;$("next").hidden=true;
+$("feedback").className="feedback";
+$("feedback").textContent="Adjust your release height and inspect the live energy graphs.";
+render();
+}
+function changeHeight(delta){
+if(done)return;
+h=clamp(Math.round((h+delta)*10)/10,0,10);
+render();
+}
+function heightAt(pos){
+if(c.type==="A"){
+if(c.hill)return c.target*Math.max(0,(pos-4)/6);
+return 0;
+}
+return c.marker*Math.max(0,(pos-(4+c.d))/(6-c.d));
+}
+function heatAt(pos){
+if(c.type==="A")return 0;
+return c.f*clamp(pos-4,0,c.d);
+}
+function state(pos){
+let initial=c.m*10*h;
+let ep=c.m*10*heightAt(pos);
+let th=Math.min(initial,heatAt(pos));
+let ek=Math.max(0,initial-ep-th);
+return {initial,ep:Math.min(ep,Math.max(0,initial-th)),th,ek};
+}
+function render(){
+$("height").textContent=fmt(h)+" m";
+$("effAnswer").textContent=etaGuess+"%";
+$("positionLabel").textContent=fmt(x)+" m";
+let s=state(x);
+let Y=z=>249-z*29,base=249;
+let path=`M25 ${Y(h)} L205 ${base} L${c.type==="B"?205+200*c.d/6:270} ${base} L495 ${Y(c.type==="A"?(c.hill?c.target:0):c.marker)}`;
+let cartX=25+47*x;
+let cy=x<=4?Y(h)*(1-x/4)+base*x/4:x<=4+(c.type==="B"?c.d:0)?base:base-(base-Y(c.type==="A"?(c.hill?c.target:0):c.marker))*((x-4-(c.type==="B"?c.d:0))/(6-(c.type==="B"?c.d:0)));
+cy=clamp(cy,25,249);
+let g=`<rect x="4" y="5" width="512" height="274" rx="20" fill="#fff" stroke="#111" stroke-width="2"/>`;
+g+=`<path d="${path}" stroke="#111" stroke-width="8" stroke-linejoin="round" fill="none"/>`;
+if(c.type==="B"){
+let a=213,b=213+200*c.d/6;
+g+=`<path d="M${a} 250H${b}" stroke="#FF8FB8" stroke-width="9" stroke-dasharray="10 6"/><text x="${(a+b)/2}" y="271" text-anchor="middle" font-size="12" font-weight="800">Rough ${c.d} m</text>`;
+}
+g+=`<rect x="${cartX-19}" y="${cy-29}" width="38" height="24" rx="7" fill="#FFC83D" stroke="#111" stroke-width="3"/>`;
+g+=`<circle cx="${cartX-10}" cy="${cy-3}" r="6" fill="#111"/><circle cx="${cartX+10}" cy="${cy-3}" r="6" fill="#111"/>`;
+g+=`<text x="${clamp(cartX,58,458)}" y="${Math.max(20,cy-37)}" text-anchor="middle" font-size="13" font-weight="800">Cart ${c.m} kg</text>`;
+g+=`<text x="37" y="26" font-size="13" font-weight="800">Release ${fmt(h)} m</text>`;
+g+=`<text x="365" y="34" font-size="13" font-weight="800">Target ${c.type==="A"&&!c.hill?fmt(c.target,2)+" m/s":fmt(c.type==="A"?c.target:c.marker)+" m"}</text>`;
+g+=`<text x="258" y="279" font-size="12" text-anchor="middle">Track position x (m): 0 to 10</text>`;
+$("scene").innerHTML=g;
+$("scene").setAttribute("aria-label",`Cart of ${c.m} kilograms at position ${fmt(x)} metres, released from ${fmt(h)} metres`);
+bars(s);graph(s);flow(s);
+}
+function bars(s){
+let max=Math.max(20,Math.ceil(s.initial/20)*20);
+const sx=85,wide=340,scale=wide/max;
+let p='<text x="235" y="20" text-anchor="middle" font-size="16" font-weight="800">Energy at the cart (J)</text>';
+for(let i=0;i<=4;i++){
+let val=max*i/4,X=sx+val*scale;
+p+=`<line x1="${X}" y1="52" x2="${X}" y2="156" stroke="#ddd"/><text x="${X}" y="177" font-size="11" text-anchor="middle">${fmt(val,0)}</text>`;
+}
+let segments=[["Eₖ",s.ek,"#2EC4A6"],["Eₚ",s.ep,"#6A45F5"],["Heat",s.th,"#FF8FB8"]];
+let start=sx;
+segments.forEach(([name,val,color])=>{
+let w=Math.max(0,val*scale);
+if(w>0)p+=`<rect x="${start}" y="67" width="${w}" height="64" fill="${color}" stroke="#111" stroke-width="1"/>`;
+if(w>38)p+=`<text x="${start+w/2}" y="103" text-anchor="middle" font-size="12" font-weight="800">${fmt(val,0)}</text>`;
+start+=w;
+});
+p+=`<path d="M${sx} 145H425" stroke="#111" stroke-width="2"/><text x="235" y="198" text-anchor="middle" font-size="12">Energy E (J)</text>`;
+$("bars").innerHTML=p;
+$("bars").setAttribute("aria-label",`Kinetic ${fmt(s.ek)} joules, potential ${fmt(s.ep)} joules, thermal ${fmt(s.th)} joules`);
+}
+function graph(s){
+let max=Math.max(20,Math.ceil(s.initial/20)*20);
+const X=t=>52+t*39,Y=e=>232-clamp(e,0,max)/max*185;
+let p='<text x="235" y="18" text-anchor="middle" font-size="16" font-weight="800">Energy E (J) against x (m)</text>';
+for(let i=0;i<=4;i++){
+let v=max*i/4;
+p+=`<line x1="52" y1="${Y(v)}" x2="447" y2="${Y(v)}" stroke="#ddd"/><text x="45" y="${Y(v)+4}" font-size="11" text-anchor="end">${fmt(v,0)}</text>`;
+}
+for(let i=0;i<=10;i+=2)p+=`<text x="${X(i)}" y="251" text-anchor="middle" font-size="11">${i}</text>`;
+p+='<path d="M52 45V232H447" stroke="#111" stroke-width="2" fill="none"/>';
+p+='<text x="235" y="271" text-anchor="middle" font-size="12">Horizontal position x (m)</text><text x="13" y="141" transform="rotate(-90 13 141)" text-anchor="middle" font-size="12">Energy (J)</text>';
+const series=[["ek","#2EC4A6"],["ep","#6A45F5"],["th","#FF8FB8"]];
+series.forEach(([key,color])=>{
+let d="";
+for(let i=0;i<=100;i++){
+let xx=i/10,e=state(xx)[key];
+d+=(i?"L":"M")+X(xx).toFixed(2)+" "+Y(e).toFixed(2)+" ";
+}
+p+=`<path d="${d}" fill="none" stroke="${color}" stroke-width="3"/>`;
+p+=`<circle cx="${X(x)}" cy="${Y(s[key])}" r="5" fill="${color}" stroke="#111" stroke-width="2"/>`;
+});
+p+=`<line x1="${X(x)}" x2="${X(x)}" y1="45" y2="232" stroke="#111" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+$("curve").innerHTML=p;
+$("curve").setAttribute("aria-label",`Energy against position, player marker at ${fmt(x)} metres`);
+}
+function flow(s){
+let tot=Math.max(s.initial,.01);
+let a=300*s.ek/tot,b=300*s.ep/tot,cw=300*s.th/tot;
+$("flow").innerHTML=`<text x="8" y="14" font-size="12" font-weight="800">Initial ${fmt(s.initial)} J</text>
+<rect x="110" y="28" width="${a}" height="22" fill="#2EC4A6" stroke="#111"/>
+<rect x="${110+a}" y="28" width="${b}" height="22" fill="#6A45F5" stroke="#111"/>
+<rect x="${110+a+b}" y="28" width="${cw}" height="22" fill="#FF8FB8" stroke="#111"/>
+<text x="110" y="68" font-size="11">Eₖ ${fmt(s.ek)} J · Eₚ ${fmt(s.ep)} J · heat ${fmt(s.th)} J</text>`;
+}
+function expectedEfficiency(){return 100*c.marker/c.answer}
+function check(){
+if(done)return;
+tries++;
+if(c.type==="A"){
+let actual=c.hill?Math.max(0,Math.sqrt(20*h)):Math.sqrt(20*h);
+let goal=c.hill?Math.sqrt(20*c.target):c.target;
+let difference=actual-goal;
+if(Math.abs(h-c.answer)<=0.051){win("The starting mgh supplies exactly the required energy.")}
+else fail(c.hill?
+`Energy equivalent speed is ${fmt(Math.abs(difference),2)} m/s ${difference>0?"too high":"too low"} for just clearing the hill.`:
+`Bottom speed is ${fmt(Math.abs(difference),2)} m/s ${difference>0?"too high":"too low"}.`);
+}else{
+let heightError=h-c.answer;
+let etaError=etaGuess-expectedEfficiency();
+if(Math.abs(heightError)<=.051&&Math.abs(etaError)<=.6){
+win(`Friction uses ${fmt(c.f*c.d,1)} J. The final climb receives ${fmt(c.m*10*c.marker,1)} J.`);
+}else{
+let msg=Math.abs(heightError)>.051?
+`The release height is ${fmt(Math.abs(heightError),1)} m ${heightError>0?"too high":"too low"}; the cart ${heightError>0?"overshoots":"falls short of"} the marker.`:
+`Efficiency is ${fmt(Math.abs(etaError),1)} percentage points ${etaError>0?"too high":"too low"}.`;
+fail(msg);
+}
+}
+}
+function win(message){
+let points=hinted?50:tries===1?100:75;
+score+=points;done=true;
+$("score").textContent="Score: "+score;
+$("feedback").className="feedback good";
+$("feedback").textContent="★ Correct! +"+points+" points. "+message;
+$("check").disabled=true;$("hint").disabled=true;$("next").hidden=false;
+}
+function fail(message){$("feedback").className="feedback bad";$("feedback").textContent=message}
+function hint(){
+hinted=true;$("hint").disabled=true;
+$("feedback").className="feedback";
+$("feedback").textContent=c.type==="A"?(c.hill?
+"To just clear the hill: mgh(start) = mgh(hill).":
+"Use mgh = ½mv². The mass cancels."):
+"Use mgh(start) = Fd + mgh(marker). Then efficiency = h(marker) ÷ h(start) × 100%.";
+}
+function finish(){
+$("game").hidden=true;$("end").hidden=false;$("round").textContent="Complete";
+let n=score>=500?3:score>=350?2:score>=200?1:0;
+$("stars").textContent="★".repeat(n)+"☆".repeat(3-n);
+$("result").textContent=`Score: ${score}/600. ${n===3?"Excellent command of energy conservation!":"Replay to improve your calculations."}`;
+}
+$("hm").onclick=()=>changeHeight(-.5);
+$("hfm").onclick=()=>changeHeight(-.1);
+$("hfp").onclick=()=>changeHeight(.1);
+$("hp").onclick=()=>changeHeight(.5);
+$("position").oninput=e=>{x=Number(e.target.value)||0;render()};
+$("em").onclick=()=>{if(!done){etaGuess=clamp(etaGuess-1,0,100);render()}};
+$("ep").onclick=()=>{if(!done){etaGuess=clamp(etaGuess+1,0,100);render()}};
+$("hint").onclick=hint;
+$("check").onclick=check;
+$("next").onclick=()=>{if(round===5)finish();else{round++;load()}};
+$("again").onclick=reset;
+reset();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Energy Chain — FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+button{font:inherit;cursor:pointer;min-height:48px;border:2px solid #111;border-radius:999px;background:white;color:#111;font-weight:700;padding:10px 17px;box-shadow:var(--sh-1);transition:transform .12s,box-shadow .12s}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+button:disabled:active{transform:none}
+h1,h2,h3,p{margin:0}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:-.04em}
+h2{font-size:1.25rem;font-weight:800}
+h3{font-size:1rem;font-weight:800}
+small{color:var(--fit-ink-3)}
+main{max-width:1250px;margin:auto;padding:18px 15px 45px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.badge{background:var(--lvl-primary);color:var(--lvl-primary-on);border:2px solid #111;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:7px 13px}
+.hud{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:800}
+.hud span:not(.badge){border:2px solid #111;padding:7px 12px;border-radius:999px;background:white}
+.layout{display:grid;grid-template-columns:1fr;gap:17px}
+.panel{border:2px solid #111;border-radius:24px;padding:19px;background:#fff;box-shadow:var(--sh-2);min-width:0}
+.stage{background:var(--lvl-primary-tint)}
+.panel>h2{margin-bottom:10px}
+.prompt{font-size:1.12rem;font-weight:700;margin:12px 0}
+.scene{width:100%;display:block;max-height:245px}
+.chain{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0;align-items:center}
+.slot{min-width:95px;min-height:54px;border:2px dashed #111;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:9px;font-weight:800;background:#fff;flex:1 1 100px}
+.slot.filled{border-style:solid;background:#FFDD00}
+.arrow{font-size:1.3rem;font-weight:800}
+.choices{display:flex;flex-wrap:wrap;gap:10px;margin:15px 0}
+.choice{background:white}
+.choice.selected{background:#FFDD00}
+.feedback{border:2px solid #111;border-radius:16px;padding:12px 14px;background:white;font-weight:650;min-height:54px;margin-top:15px}
+.feedback.good{background:#dcf8e7}
+.feedback.bad{background:#ffe8e6}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.check:active{box-shadow:var(--sh-1)}
+.chart{width:100%;height:auto;display:block}
+.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:.86rem;font-weight:700;margin:8px 0}
+.key{display:inline-block;width:13px;height:13px;border:1px solid #111;margin-right:5px;vertical-align:middle}
+.concept{border:2px solid #111;border-radius:16px;background:var(--fit-sunken);padding:12px;margin-top:15px}
+.concept svg{width:100%;height:78px}
+.concept p{font-size:.86rem;margin-top:6px}
+details{border:2px solid #111;border-radius:16px;padding:12px 15px;background:white;margin-top:17px}
+summary{cursor:pointer;font-weight:800;min-height:26px}
+details p{margin:8px 0}
+.end{text-align:center;padding:35px 20px}
+.stars{font-size:3.4rem;letter-spacing:7px;margin:16px 0;color:#111}
+[hidden]{display:none!important}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div><span class="badge">Primary · P4–P6</span><h1>Energy Chain</h1></div>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score: 0</span></div>
+</header>
+<div id="game" class="layout">
+<section class="panel stage">
+<h2 id="device">Energy detective</h2>
+<p id="prompt" class="prompt"></p>
+<svg id="scene" class="scene" viewBox="0 0 470 220" role="img" aria-label="Energy device illustration"></svg>
+<h3 id="chainTitle">Build the energy chain</h3>
+<div id="chain" class="chain"></div>
+<div id="choices" class="choices"></div>
+<div class="actions">
+<button id="undo">↶ Undo</button>
+<button id="hint">Hint −50</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" role="status" aria-live="polite">Choose the energy forms in order.</div>
+</section>
+<section class="panel">
+<h2>Energy tracker</h2>
+<svg id="plot" class="chart" viewBox="0 0 420 270" role="img" aria-label="Bar chart of useful and wasted energy in joules"></svg>
+<div class="legend"><span><i class="key" style="background:#3DBE6B"></i>Useful</span><span><i class="key" style="background:#FF8FB8"></i>Wasted as heat</span></div>
+<div class="concept">
+<h3>Energy-flow strip</h3>
+<svg id="flow" viewBox="0 0 420 78" role="img" aria-label="Proportional energy flow diagram"></svg>
+<p>All 100 J of input energy is changed into other forms. No energy disappears.</p>
+</div>
+<details>
+<summary>The physics</summary>
+<p>Energy can change form, but the total amount stays the same.</p>
+<p>Input energy = useful energy + wasted energy.</p>
+<p>For every device here: 100 J = useful energy + heat energy.</p>
+<p>Some useful energy may become sound, light or movement.</p>
+</details>
+</section>
+</div>
+<section id="end" class="panel end" hidden>
+<h2>Energy detective complete!</h2>
+<div id="stars" class="stars"></div>
+<p id="result"></p>
+<button id="again" class="check" style="margin-top:20px">Play again ↻</button>
+</section>
+</main>
+<script>
+"use strict";
+(function(){
+const $=id=>document.getElementById(id);
+let run=0,index=0,total=0,tries=0,hinted=false,complete=false,picks=[],current;
+const forms=["Chemical","Electrical","Light","Heat","Elastic","Kinetic","Sound","Solar","Gravitational"];
+const devices=[
+{name:"Torch",outs:2,kind:"torch",steps:["Chemical","Electrical","Light","Heat"],useful:75,why:"The battery's chemical energy becomes electrical energy, then light and heat."},
+{name:"Wind-up toy",outs:2,kind:"toy",steps:["Elastic","Kinetic","Sound"],useful:83,why:"The wound spring stores elastic energy. It moves the toy and makes sound."},
+{name:"Solar fan",outs:2,kind:"fan",steps:["Solar","Electrical","Kinetic","Heat"],useful:68,why:"Sunlight becomes electrical energy, then moving air and heat."},
+{name:"Rolling ball",kind:"ball",steps:["Gravitational","Kinetic","Heat"],useful:91,why:"A ball moving downhill loses gravitational potential energy and gains movement energy."},
+{name:"Battery-powered bell",outs:2,kind:"bell",steps:["Chemical","Electrical","Sound","Heat"],useful:58,why:"Chemical energy changes to electrical energy, then sound and heat."},
+{name:"Efficiency challenge",kind:"compare",special:true,useful:90,why:"A device with less wasted heat changes more of its input into useful energy."}
+];
+function shuffled(a,seed){
+const b=a.slice();let s=seed>>>0;
+for(let i=b.length-1;i>0;i--){s=(Math.imul(s,1664525)+1013904223)>>>0;let j=s%(i+1);[b[i],b[j]]=[b[j],b[i]]}
+return b;
+}
+function start(){
+run++;index=0;total=0;$("game").hidden=false;$("end").hidden=true;load();
+}
+function load(){
+tries=0;hinted=false;complete=false;picks=[];
+current=devices[index];
+$("round").textContent="Round "+(index+1)+"/6";
+$("score").textContent="Score: "+total;
+$("device").textContent=current.name;
+$("prompt").textContent=current.special?
+"Which device wastes the least of its 100 J input as heat?":
+"Tap the energy forms in the correct order for this device.";
+$("chainTitle").textContent=current.special?"Choose one device":"Build the energy chain";
+$("next").hidden=true;$("check").disabled=false;$("hint").disabled=false;
+$("feedback").className="feedback";
+$("feedback").textContent=current.special?"Compare the heat lost by each device.":"Choose the energy forms in order.";
+$("scene").innerHTML=scene(current.kind);
+drawChoices();drawChain();drawPlots(current.useful);
+}
+function scene(kind){
+const svgText=(x,y,t,size=16)=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="${size}" font-weight="800" fill="#111">${t}</text>`;
+let s='<rect x="12" y="12" width="446" height="194" rx="23" fill="#fff" stroke="#111" stroke-width="3"/>';
+if(kind==="torch"||kind==="bell"){
+s+='<rect x="105" y="82" width="194" height="52" rx="16" fill="#FFC83D" stroke="#111" stroke-width="4"/><path d="M298 78L347 53V163L298 137Z" fill="#FF8FB8" stroke="#111" stroke-width="4"/>';
+s+=svgText(202,113,"BATTERY");s+=svgText(375,49,kind==="bell"?"Sound":"Light");s+='<path d="M349 86L413 65M349 108L420 108M349 130L413 154" stroke="#111" stroke-width="4"/>';
+}else if(kind==="toy"){
+s+='<rect x="115" y="88" width="225" height="70" rx="20" fill="#FFC83D" stroke="#111" stroke-width="4"/><circle cx="162" cy="162" r="23" fill="#fff" stroke="#111" stroke-width="4"/><circle cx="295" cy="162" r="23" fill="#fff" stroke="#111" stroke-width="4"/><path d="M175 109l18 20 18-20 18 20 18-20" fill="none" stroke="#111" stroke-width="4"/>';
+s+=svgText(235,66,"Wound spring");
+}else if(kind==="fan"){
+s+='<circle cx="240" cy="105" r="24" fill="#FFDD00" stroke="#111" stroke-width="4"/>';
+for(let a=0;a<4;a++)s+=`<ellipse cx="240" cy="54" rx="20" ry="46" transform="rotate(${a*90} 240 105)" fill="#2EC4A6" stroke="#111" stroke-width="3"/>`;
+s+='<circle cx="240" cy="105" r="14" fill="#fff" stroke="#111" stroke-width="3"/><rect x="90" y="77" width="70" height="54" fill="#1F66E5" stroke="#111" stroke-width="4"/>';
+s+=svgText(125,152,"Solar panel");
+}else if(kind==="ball"){
+s+='<path d="M55 72L412 178" stroke="#111" stroke-width="8" stroke-linecap="round"/><circle cx="190" cy="92" r="25" fill="#FF8FB8" stroke="#111" stroke-width="4"/><path d="M235 90L300 115" stroke="#111" stroke-width="4"/>';
+s+=svgText(145,45,"High");s+=svgText(363,145,"Low");
+}else{
+s+='<rect x="45" y="75" width="100" height="70" rx="15" fill="#3DBE6B" stroke="#111" stroke-width="4"/><rect x="185" y="75" width="100" height="70" rx="15" fill="#FFC83D" stroke="#111" stroke-width="4"/><rect x="325" y="75" width="100" height="70" rx="15" fill="#FF8FB8" stroke="#111" stroke-width="4"/>';
+s+=svgText(95,115,"Useful");s+=svgText(235,115,"Energy");s+=svgText(375,115,"Heat");
+}
+s+=svgText(235,190,kind==="compare"?"Choose the smallest heat loss": "Energy changes form");
+$("scene").setAttribute("aria-label",current.name+" diagram showing energy conversion");
+return s;
+}
+function drawChain(){
+if(current.special){$("chain").innerHTML='<div class="slot filled">Compare heat losses below</div>';return}
+$("chain").innerHTML=current.steps.map((v,i)=>`<div class="slot ${picks[i]?"filled":""}">${picks[i]||"Step "+(i+1)}</div>${i<current.steps.length-1?'<span class="arrow" aria-hidden="true">→</span>':""}`).join("");
+}
+function drawChoices(){
+const choices=current.special?
+[{name:"Device A · 30 J heat",heat:30},{name:"Device B · 10 J heat",heat:10},{name:"Device C · 45 J heat",heat:45}]:
+shuffled([...new Set([...current.steps,...shuffled(forms,run*83+index).slice(0,3)])],run*103+index);
+$("choices").innerHTML="";
+choices.forEach(item=>{
+let b=document.createElement("button");
+b.className="choice";
+b.textContent=current.special?item.name:item;
+b.onclick=()=>{
+if(complete)return;
+if(current.special){picks=[item.heat];$("choices").querySelectorAll("button").forEach(x=>x.classList.toggle("selected",x===b));drawPlots(100-item.heat)}
+else if(picks.length<current.steps.length){picks.push(item);drawChain();drawPlots(current.useful)}
+};
+$("choices").appendChild(b);
+});
+}
+function drawPlots(useful){
+useful=Math.max(0,Math.min(100,Number(useful)||0));
+const waste=100-useful;
+const data=[{name:"Useful",v:useful,c:"#3DBE6B"},{name:"Heat",v:waste,c:"#FF8FB8"}];
+let p='<text x="210" y="20" font-size="16" font-weight="800" text-anchor="middle">Energy (J) by form</text>';
+for(let y=0;y<=100;y+=25){
+let py=219-y*1.65;
+p+=`<line x1="62" y1="${py}" x2="402" y2="${py}" stroke="#ddd" stroke-width="1"/><text x="54" y="${py+4}" font-size="12" text-anchor="end">${y}</text>`;
+}
+p+='<path d="M62 53V219H402" stroke="#111" stroke-width="2" fill="none"/>';
+p+='<text x="17" y="145" transform="rotate(-90 17 145)" font-size="13" text-anchor="middle">Energy E (J)</text>';
+data.forEach((d,i)=>{
+let x=110+i*164,h=d.v*1.65;
+p+=`<rect x="${x}" y="${219-h}" width="94" height="${h}" fill="${d.c}" stroke="#111" stroke-width="2"/>`;
+p+=`<text x="${x+47}" y="${Math.max(43,209-h)}" font-size="14" font-weight="800" text-anchor="middle">${d.v} J</text>`;
+p+=`<text x="${x+47}" y="241" font-size="14" font-weight="700" text-anchor="middle">${d.name}</text>`;
+});
+p+='<text x="234" y="264" text-anchor="middle" font-size="12">Energy form</text>';
+$("plot").innerHTML=p;
+$("plot").setAttribute("aria-label",`100 J input: ${useful} J useful and ${waste} J heat`);
+let a=useful*3.0,b=waste*3.0;
+$("flow").innerHTML=`<text x="10" y="13" font-size="12" font-weight="800">Input 100 J</text>
+<path d="M10 37H100" stroke="#111" stroke-width="18"/>
+<path d="M110 37H${110+a}" stroke="#3DBE6B" stroke-width="16"/>
+<path d="M110 60H${110+b}" stroke="#FF8FB8" stroke-width="10"/>
+<text x="113" y="28" font-size="11">Useful ${useful} J</text>
+<text x="113" y="76" font-size="11">Heat ${waste} J</text>`;
+$("flow").setAttribute("aria-label",`Proportional strips: useful ${useful} joules; heat ${waste} joules`);
+}
+function hint(){
+if(complete)return;
+hinted=true;$("hint").disabled=true;
+$("feedback").textContent=current.special?"Look for the smallest number of joules lost as heat.":`Start with ${current.steps[0]}. Follow where the energy goes next.`;
+}
+function check(){
+if(complete)return;
+tries++;
+const outs=current.outs||1,cut=(current.steps||[]).length-outs;
+let ok=current.special?picks[0]===10:picks.length===current.steps.length&&JSON.stringify(picks.slice(0,cut))===JSON.stringify(current.steps.slice(0,cut))&&JSON.stringify(picks.slice(cut).sort())===JSON.stringify(current.steps.slice(cut).sort());
+if(ok){
+let earned=hinted?50:tries===1?100:75;
+total+=earned;complete=true;
+$("score").textContent="Score: "+total;
+$("feedback").className="feedback good";
+$("feedback").textContent="★ Correct! +"+earned+" points. "+current.why;
+$("check").disabled=true;$("hint").disabled=true;$("next").hidden=false;
+if(current.special)drawPlots(90);
+}else{
+$("feedback").className="feedback bad";
+if(current.special)$("feedback").textContent="Not yet. Choose the device with the smallest heat loss.";
+else{
+let at=current.steps.findIndex((v,i)=>picks[i]!==v);
+$("feedback").textContent=picks.length<current.steps.length?
+"Your chain is incomplete. Add every energy form.":
+`Step ${at+1} is incorrect. Think about the energy before and after that step.`;
+}
+}
+}
+function finish(){
+$("game").hidden=true;$("end").hidden=false;
+let n=total>=500?3:total>=350?2:total>=200?1:0;
+$("stars").textContent="★".repeat(n)+"☆".repeat(3-n);
+$("result").textContent=`You scored ${total} out of 600 points. ${n===3?"Amazing energy detective!":"Try again to earn more stars."}`;
+$("round").textContent="Complete";
+}
+$("undo").onclick=()=>{if(!complete){picks.pop();drawChain();if(current.special){drawChoices();drawPlots(current.useful)}}};
+$("hint").onclick=hint;
+$("check").onclick=check;
+$("next").onclick=()=>{if(index===5)finish();else{index++;load()}};
+$("again").onclick=start;
+start();
+})();
+</script>
+</body>
+</html>

@@ -4,6 +4,7 @@
 // Fields: id, title, level, subject, topic, concept, syllabusRef (University: generic label only),
 // approach, activityPrompt, accent, symbol, minutes, tags, height (px, iframe), status ('live'|'draft').
 const circuits = { subject: 'Physics', concept: 'circuits', accent: '#FFC83D', minutes: '10–15', status: 'live' }
+const energy = { subject: 'Physics', concept: 'energy', accent: '#3DBE6B', minutes: '10–15', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -25,4 +26,24 @@ export const htmlSims = [
     syllabusRef: 'University, Electromagnetism',
     approach: 'Tune R in a series RLC circuit for critical, under- and overdamped step responses, then hit a target resonance and Q.',
     activityPrompt: 'Play all rounds, then explain how R sets the damping regime and the Q factor of a series RLC circuit.', tags: ['University', 'Electromagnetism', 'RLC', 'resonance'] },
+  { ...energy, id: 'energy-p', title: 'Energy Chain', level: 'Primary', topic: 'Energy conversion', symbol: '🔦', height: 1000,
+    syllabusRef: 'MOE Primary Science: Energy (forms and uses of energy, energy conversion)',
+    approach: 'Build the energy chain for everyday devices and spot which device wastes the least energy as heat.',
+    activityPrompt: 'Play all rounds, then explain how energy changes form in a torch and why some is always wasted as heat.', tags: ['energy', 'energy conversion', 'useful energy', 'heat'] },
+  { ...energy, id: 'energy-s', title: 'Coaster Energy', level: 'Secondary', topic: 'Kinetic and potential energy', symbol: '🎢', height: 1240,
+    syllabusRef: 'MOE Secondary Physics: Energy, work and power (kinetic and gravitational potential energy, conservation, efficiency)',
+    approach: 'Set the release height so a cart hits a target speed or stops on a marker, using Ek = ½mv², Ep = mgh, friction work and efficiency.',
+    activityPrompt: 'Play all rounds, then explain where the cart’s gravitational potential energy goes on the rough section.', tags: ['energy', 'kinetic energy', 'potential energy', 'efficiency'] },
+  { ...energy, id: 'energy-jc', title: 'Spring Launcher', level: 'JC', topic: 'Work, elastic energy and power', symbol: '🌀', height: 1310,
+    syllabusRef: 'H2 Physics: Work, energy and power (area under F–x, elastic potential energy, efficiency)',
+    approach: 'Use the area under force–compression graphs, including a non-Hookean spring, to launch a block, then find motor power and efficiency.',
+    activityPrompt: 'Play all rounds, then explain why the stored energy is the area under the F–x graph rather than always ½kx².', tags: ['energy', 'work done', 'elastic potential energy', 'power'] },
+  { ...energy, id: 'energy-poly', title: 'Pump Power', level: 'Poly', topic: 'Power, efficiency and energy cost', symbol: '💧', height: 1390,
+    syllabusRef: 'Poly engineering science: power, efficiency and energy cost (generic)',
+    approach: 'Choose a pump and run time to lift a target volume of water at the lowest electricity cost, using P = ρgQH and efficiency.',
+    activityPrompt: 'Play all rounds, then explain why the most efficient pump gives the lowest running cost.', tags: ['energy', 'power', 'efficiency', 'kWh'] },
+  { ...energy, id: 'energy-u', title: 'Carnot Cycle Lab', level: 'University', topic: 'Heat engines and the Carnot cycle', symbol: '🔥', height: 1560,
+    syllabusRef: 'University, Thermodynamics',
+    approach: 'Shape a Carnot cycle to deliver a target net work, then compare it with an Otto-like cycle on P–V and T–S diagrams.',
+    activityPrompt: 'Play all rounds, then explain why no engine between two temperatures beats the Carnot efficiency.', tags: ['University', 'Thermodynamics', 'Carnot cycle', 'heat engines'] },
 ]

@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spring Launcher — FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+main{max-width:1320px;margin:auto;padding:16px 14px 48px}
+h1,h2,h3,p{margin:0}
+h1{font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);letter-spacing:-.04em}
+h2{font-weight:800;font-size:1.25rem;margin-bottom:10px}
+h3{font-weight:800;font-size:1rem}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.badge{display:inline-block;border:2px solid #111;border-radius:999px;background:var(--lvl-jc);color:var(--lvl-jc-on);font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:7px 13px}
+.hud{display:flex;gap:8px;flex-wrap:wrap;font-weight:800}
+.hud span{border:2px solid #111;border-radius:999px;padding:8px 12px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.panel{min-width:0;border:2px solid #111;border-radius:24px;padding:18px;background:white;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-jc-tint)}
+.prompt{font-weight:700;font-size:1.08rem;margin:12px 0}
+button{font:inherit;font-weight:800;border:2px solid #111;background:white;border-radius:999px;min-height:48px;padding:9px 15px;box-shadow:var(--sh-1);cursor:pointer}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+.check{border-width:3px;background:var(--fit-sun);box-shadow:var(--sh-2)}
+.check:active{box-shadow:var(--sh-1)}
+.actions,.stepper{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.stepper strong{border:2px solid #111;border-radius:14px;background:white;padding:12px;min-width:100px;text-align:center}
+.stepper button{min-width:48px}
+label{display:block;margin-top:15px;font-weight:800}
+.info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.info div{border:2px solid #111;background:#fff;border-radius:13px;padding:10px}
+.info small{display:block;color:#555}
+.info strong{font-size:1.05rem}
+svg{width:100%;display:block;height:auto}
+.feedback{border:2px solid #111;background:white;border-radius:15px;padding:12px;margin-top:15px;min-height:52px;font-weight:650}
+.feedback.good{background:#def7e6}
+.feedback.bad{background:#ffe7e5}
+.plot{margin-top:8px}
+.legend{display:flex;flex-wrap:wrap;gap:15px;font-size:.85rem;font-weight:700;margin-top:4px}
+.key{width:13px;height:13px;display:inline-block;border:1px solid #111;margin-right:5px;vertical-align:middle}
+.concept{background:var(--fit-sunken);border:2px solid #111;border-radius:16px;padding:12px;margin-top:17px}
+.concept p{font-size:.85rem;margin-top:6px}
+details{border:2px solid #111;border-radius:16px;padding:12px;margin-top:17px}
+summary{cursor:pointer;font-weight:800}
+details p{margin-top:9px;font-size:.9rem}
+.end{text-align:center;padding:40px 15px}
+.stars{font-size:3rem;margin:18px}
+[hidden]{display:none!important}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div><span class="badge">JC · A-Level H2 Physics</span><h1>Spring Launcher</h1></div>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score: 0</span></div>
+</header>
+<div id="game" class="layout">
+<section class="panel stage">
+<h2 id="mission">Launch lab</h2>
+<p id="prompt" class="prompt"></p>
+<svg id="scene" viewBox="0 0 520 260" role="img" aria-label="Labelled spring launcher"></svg>
+<div class="info">
+<div><small id="label1">Mass</small><strong id="value1"></strong></div>
+<div><small id="label2">Spring stiffness</small><strong id="value2"></strong></div>
+<div><small id="label3">Target</small><strong id="value3"></strong></div>
+<div><small id="label4">Model</small><strong id="value4"></strong></div>
+</div>
+<div id="springControls">
+<label>Spring compression x</label>
+<div class="stepper">
+<button id="xm" aria-label="Decrease compression by 0.02 metres">−0.020</button>
+<button id="xfm" aria-label="Decrease compression by 0.005 metres">−0.005</button>
+<strong id="compression">0.050 m</strong>
+<button id="xfp" aria-label="Increase compression by 0.005 metres">+0.005</button>
+<button id="xp" aria-label="Increase compression by 0.02 metres">+0.020</button>
+</div>
+</div>
+<div id="motorControls" hidden>
+<label>Output power to load</label>
+<div class="stepper">
+<button id="pm">−10 W</button>
+<button id="pfm">−1 W</button>
+<strong id="powerAnswer">100 W</strong>
+<button id="pfp">+1 W</button>
+<button id="pp">+10 W</button>
+</div>
+<label>Motor efficiency</label>
+<div class="stepper">
+<button id="em">−5%</button>
+<button id="efm">−1%</button>
+<strong id="effAnswer">50%</strong>
+<button id="efp">+1%</button>
+<button id="ep">+5%</button>
+</div>
+</div>
+<div class="actions">
+<button id="hint">Hint −50</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite" role="status">Solve the launch challenge.</div>
+</section>
+<section class="panel">
+<h2>Force and motion</h2>
+<svg id="forcePlot" class="plot" viewBox="0 0 470 285" role="img" aria-label="Force against spring compression with shaded energy area"></svg>
+<div class="legend"><span><i class="key" style="background:#6A45F5"></i>Force</span><span><i class="key" style="background:#FF8FB8"></i>Stored-energy area</span></div>
+<svg id="speedPlot" class="plot" viewBox="0 0 470 265" role="img" aria-label="Speed versus time during launch"></svg>
+<div class="concept">
+<h3>Area means work</h3>
+<svg id="concept" viewBox="0 0 430 85" role="img" aria-label="Force displacement area diagram"></svg>
+<p>The area under an F–x graph is work in joules, even when the spring is not Hookean.</p>
+</div>
+<details>
+<summary>The physics</summary>
+<p>Hookean spring: F = kx; Eₑ = ½kx².</p>
+<p>General spring: Eₑ = ∫F(x) dx, the area under its force–displacement graph.</p>
+<p>Work–energy theorem: net work = change in kinetic energy.</p>
+<p>Ideal launch: Eₑ = ½mv², or Eₑ = mgh on a smooth incline.</p>
+<p>Power P = work ÷ time = Fv at constant speed. Efficiency η = useful output power ÷ input power × 100%.</p>
+<p>g = 10 N/kg. Models ignore friction, spring mass and drag. The launch graph is numerically simulated for a spring starting from rest.</p>
+</details>
+</section>
+</div>
+<section id="end" class="panel end" hidden>
+<h2>Launch lab complete!</h2>
+<div class="stars" id="stars"></div>
+<p id="result"></p>
+<button id="again" class="check" style="margin-top:20px">Play again ↻</button>
+</section>
+</main>
+<script>
+"use strict";
+(function(){
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fixed=(v,n=2)=>Number(v).toFixed(n);
+let seed=1,run=0,round=0,score=0,tries=0,hinted=false,done=false;
+let data={},x=.05,power=100,eff=50;
+function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function choice(a){return a[Math.floor(rand()*a.length)]}
+function F(z){
+z=Math.max(0,z);
+if(data.non&&z>.1)return data.k*.1+data.k2*(z-.1);
+return data.k*z;
+}
+function energy(z){
+z=Math.max(0,z);
+if(data.non&&z>.1){
+let q=z-.1;
+return .5*data.k*.1*.1+data.k*.1*q+.5*data.k2*q*q;
+}
+return .5*data.k*z*z;
+}
+function create(){
+if(round<4){
+let non=round===2;
+let k=choice([600,800,1000,1200]);
+let k2=non?choice([200,300,400]):k;
+let m=choice([1,2,2.5,4]);
+let goal=choice(non?[.125,.145,.165,.185]:[.08,.10,.12,.14,.16,.18]);
+let incline=round===1||round===3;
+let d={type:"spring",non,k,k2,m,goal,incline};
+data=d;
+d.target=incline?energy(goal)/(m*10):Math.sqrt(2*energy(goal)/m);
+return d;
+}
+let m=choice([10,12,15,20]);
+let v=choice([.5,1,1.5,2]);
+let eta=choice([50,60,75,80]);
+let output=m*10*v;
+return {type:"motor",m,v,eta,output,input:output/(eta/100)};
+}
+function start(){
+run++;seed=(20261017+run*701)>>>0;round=0;score=0;
+$("game").hidden=false;$("end").hidden=true;load();
+}
+function load(){
+data=create();tries=0;hinted=false;done=false;
+x=data.type==="spring"?.035:0;power=40;eff=35;
+$("round").textContent=`Round ${round+1}/6`;
+$("score").textContent=`Score: ${score}`;
+$("motorControls").hidden=data.type!=="motor";
+$("springControls").hidden=data.type!=="spring";
+$("check").disabled=false;$("hint").disabled=false;$("next").hidden=true;
+$("feedback").className="feedback";
+$("feedback").textContent="Use the information and graphs to find the correct settings.";
+if(data.type==="spring"){
+$("mission").textContent=data.non?"Non-Hookean spring":"Spring energy challenge";
+$("prompt").textContent=data.incline?
+"Set the compression needed for the block to reach the target vertical height on a smooth incline.":
+"Set the compression needed for the block to leave the spring at the target speed.";
+setInfo(["Block mass",data.m+" kg"],["Initial stiffness",data.k+" N/m"],[data.incline?"Target height":"Target exit speed",fixed(data.target,data.incline?4:3)+(data.incline?" m":" m/s")],["Spring law",data.non?"Piecewise F–x":"Hooke's law"]);
+}else{
+$("mission").textContent="Motor lifting challenge";
+$("prompt").textContent="Find the useful output power when the motor lifts the load at constant speed, then calculate efficiency from electrical input power.";
+setInfo(["Load mass",data.m+" kg"],["Lifting speed",fixed(data.v)+" m/s"],["Electrical input",fixed(data.input,1)+" W"],["g","10 N/kg"]);
+}
+render();
+}
+function setInfo(a,b,c,d){[a,b,c,d].forEach((t,i)=>{$("label"+(i+1)).textContent=t[0];$("value"+(i+1)).textContent=t[1]})}
+function changeX(delta){
+if(done)return;
+x=clamp(Math.round((x+delta)*200)/200,0,.25);
+render();
+}
+function axes(title,xlab,ylab,x0=60,y0=239,x1=448,y1=40){
+let s=`<text x="235" y="19" text-anchor="middle" font-weight="800" font-size="15">${title}</text>`;
+s+=`<path d="M${x0} ${y1}V${y0}H${x1}" stroke="#111" stroke-width="2" fill="none"/>`;
+s+=`<text x="255" y="275" font-size="12" text-anchor="middle">${xlab}</text>`;
+s+=`<text x="14" y="142" font-size="12" transform="rotate(-90 14 142)" text-anchor="middle">${ylab}</text>`;
+return s;
+}
+function render(){
+$("compression").textContent=fixed(x,3)+" m";
+$("powerAnswer").textContent=power+" W";
+$("effAnswer").textContent=eff+"%";
+scene();forcePlot();speedPlot();concept();
+}
+function scene(){
+let s='<rect x="5" y="6" width="510" height="245" rx="20" fill="#fff" stroke="#111" stroke-width="2"/>';
+if(data.type==="spring"){
+let bx=180+Math.max(0,(.2-x))*490;
+s+='<path d="M35 196H485" stroke="#111" stroke-width="5"/><path d="M35 85V197" stroke="#111" stroke-width="6"/>';
+let n=8,start=40,end=bx-8;
+let path=`M${start} 170`;
+for(let i=1;i<=n;i++)path+=` L${start+(end-start)*i/n} ${i%2?150:190}`;
+path+=` L${end} 170`;
+s+=`<path d="${path}" fill="none" stroke="#6A45F5" stroke-width="5" stroke-linejoin="round"/>`;
+s+=`<rect x="${bx}" y="122" width="65" height="70" rx="9" fill="#FFC83D" stroke="#111" stroke-width="4"/>`;
+s+=`<text x="${bx+32}" y="158" font-size="13" font-weight="800" text-anchor="middle">${data.m} kg</text>`;
+s+=`<text x="108" y="65" font-size="15" font-weight="800">Spring: ${data.k} N/m</text>`;
+s+=`<text x="140" y="228" font-size="13" font-weight="800">Compression ${fixed(x,3)} m</text>`;
+s+='<path d="M395 98L454 98" stroke="#111" stroke-width="4"/><path d="M442 88L456 98L442 108" stroke="#111" stroke-width="4" fill="none"/>';
+s+=`<text x="421" y="80" font-size="12" text-anchor="middle">Launch →</text>`;
+if(data.incline)s+='<path d="M335 194L485 97" fill="none" stroke="#111" stroke-width="5"/><text x="436" y="129" font-size="12" font-weight="800">Incline</text>';
+}else{
+s+='<rect x="71" y="74" width="122" height="92" rx="20" fill="#6A45F5" stroke="#111" stroke-width="4"/>';
+s+='<text x="132" y="112" text-anchor="middle" fill="#fff" font-size="17" font-weight="800">MOTOR</text>';
+s+='<text x="132" y="136" text-anchor="middle" fill="#fff" font-size="12">Input '+fixed(data.input,1)+' W</text>';
+s+='<circle cx="263" cy="95" r="32" fill="#FFC83D" stroke="#111" stroke-width="4"/>';
+s+='<path d="M195 95H263M263 65V186" stroke="#111" stroke-width="4"/>';
+s+='<rect x="225" y="186" width="76" height="45" rx="7" fill="#2EC4A6" stroke="#111" stroke-width="4"/>';
+s+=`<text x="263" y="214" font-size="13" font-weight="800" text-anchor="middle">${data.m} kg</text>`;
+s+='<path d="M346 190V90L334 106M346 90L358 106" fill="none" stroke="#111" stroke-width="4"/>';
+s+=`<text x="402" y="135" font-size="14" font-weight="800">v = ${fixed(data.v,1)} m/s</text>`;
+}
+$("scene").innerHTML=s;
+$("scene").setAttribute("aria-label",data.type==="spring"?`Spring compressed ${fixed(x,3)} metres against a block of ${data.m} kilograms`:`Motor lifting ${data.m} kilograms at ${data.v} metres per second`);
+}
+function forcePlot(){
+let motor=data.type==="motor";
+let limit=motor?1:.25;
+let maxForce=motor?Math.max(100,data.m*10*1.3):Math.max(40,F(limit)*1.12);
+let X=z=>60+z/limit*388,Y=v=>239-v/maxForce*195;
+let p=axes(motor?"Motor force–displacement":"Spring force F against compression x",motor?"Lift distance x (m)":"Compression x (m)","Force F (N)");
+for(let i=0;i<=4;i++){
+let v=maxForce*i/4;
+p+=`<line x1="60" y1="${Y(v)}" x2="448" y2="${Y(v)}" stroke="#ddd"/><text x="52" y="${Y(v)+4}" font-size="11" text-anchor="end">${fixed(v,0)}</text>`;
+let z=limit*i/4;
+p+=`<text x="${X(z)}" y="255" font-size="11" text-anchor="middle">${fixed(z,motor?2:3)}</text>`;
+}
+let d="",area="",end=motor?1:x;
+for(let i=0;i<=60;i++){
+let z=i/60*limit,f=motor?data.m*10:F(z);
+d+=(i?"L":"M")+X(z)+" "+Y(f)+" ";
+}
+area=`M${X(0)} ${Y(0)} `;
+for(let i=0;i<=60;i++){
+let z=i/60*end,f=motor?data.m*10:F(z);
+area+=`L${X(z)} ${Y(f)} `;
+}
+area+=`L${X(end)} ${Y(0)} Z`;
+p+=`<path d="${area}" fill="#FF8FB8" fill-opacity=".55" stroke="none"/>`;
+p+=`<path d="${d}" fill="none" stroke="#6A45F5" stroke-width="3"/>`;
+p+=`<circle cx="${X(end)}" cy="${Y(motor?data.m*10:F(x))}" r="6" fill="#FFDD00" stroke="#111" stroke-width="2"/>`;
+p+=`<rect x="230" y="32" width="218" height="27" rx="12" fill="white" stroke="#111"/>`;
+p+=`<text x="339" y="50" font-size="13" font-weight="800" text-anchor="middle">Area = ${fixed(motor?data.m*10:energy(x),3)} J</text>`;
+if(data.non)p+='<text x="70" y="37" font-size="11">Slope changes at x = 0.100 m</text>';
+$("forcePlot").innerHTML=p;
+$("forcePlot").setAttribute("aria-label",`Force-displacement plot with work area ${fixed(motor?data.m*10:energy(x),3)} joules`);
+}
+function launchCurve(){
+if(x<=0)return [{t:0,v:0}];
+let pos=x,v=0,t=0,dt=.00008,pts=[{t:0,v:0}];
+for(let i=0;i<150000&&pos>0;i++){
+let a=F(pos)/data.m;
+let moved=v*dt+.5*a*dt*dt;
+let next=Math.max(0,pos-moved);
+let mid=(pos+next)/2;
+let newV=Math.sqrt(Math.max(0,2*(energy(x)-energy(next))/data.m));
+t+=dt;pos=next;v=newV;
+if(i%25===0||pos===0)pts.push({t,v});
+}
+return pts;
+}
+function speedPlot(){
+let pts,maxV,maxT;
+if(data.type==="motor"){
+maxT=2;maxV=Math.max(1,data.v*1.4);
+pts=[{t:0,v:data.v},{t:2,v:data.v}];
+}else{
+pts=launchCurve();
+maxT=Math.max(.05,pts[pts.length-1].t*1.15);
+maxV=Math.max(1,Math.sqrt(2*energy(x)/data.m)*1.2);
+}
+let X=t=>60+Math.min(1,t/maxT)*388,Y=v=>231-Math.min(1,v/maxV)*178;
+let p='<text x="235" y="18" text-anchor="middle" font-weight="800" font-size="15">Speed v against time t</text>';
+p+='<path d="M60 42V231H448" stroke="#111" stroke-width="2" fill="none"/>';
+for(let i=0;i<=4;i++){
+let v=i*maxV/4;
+p+=`<line x1="60" y1="${Y(v)}" x2="448" y2="${Y(v)}" stroke="#ddd"/><text x="52" y="${Y(v)+4}" font-size="11" text-anchor="end">${fixed(v,1)}</text>`;
+p+=`<text x="${X(i*maxT/4)}" y="250" font-size="11" text-anchor="middle">${fixed(i*maxT/4,3)}</text>`;
+}
+p+='<text x="245" y="263" text-anchor="middle" font-size="12">Time t (s)</text>';
+p+='<text x="13" y="135" transform="rotate(-90 13 135)" text-anchor="middle" font-size="12">Speed v (m/s)</text>';
+let d=pts.map((q,i)=>(i?"L":"M")+X(q.t).toFixed(2)+" "+Y(q.v).toFixed(2)).join(" ");
+p+=`<path d="${d}" stroke="#6A45F5" stroke-width="3" fill="none"/>`;
+let last=pts[pts.length-1];
+p+=`<circle cx="${X(last.t)}" cy="${Y(last.v)}" r="6" fill="#FFDD00" stroke="#111" stroke-width="2"/>`;
+$("speedPlot").innerHTML=p;
+$("speedPlot").setAttribute("aria-label",`Speed versus time, final speed ${fixed(last.v,2)} metres per second`);
+}
+function concept(){
+let E=data.type==="motor"?data.output:energy(x);
+$("concept").innerHTML=`<path d="M42 11V72H402" stroke="#111" stroke-width="3" fill="none"/>
+<path d="M42 72L${data.type==="motor"?345:315} 20L${data.type==="motor"?345:315} 72Z" fill="#FF8FB8" stroke="#111" stroke-width="2"/>
+<text x="18" y="25" font-size="13" font-weight="800">F</text>
+<text x="401" y="82" font-size="13" font-weight="800">x</text>
+<text x="230" y="61" font-size="14" font-weight="800">Work = ${fixed(E,2)} J</text>`;
+}
+function hint(){
+if(done)return;
+hinted=true;$("hint").disabled=true;
+$("feedback").className="feedback";
+$("feedback").textContent=data.type==="motor"?
+"At constant speed, the upward force equals mg. Output power is mgv. Compare output with input.":
+data.non?"Split the F–x area into a triangle up to 0.100 m, then a trapezium beyond it.":
+data.incline?"Equate spring energy ½kx² to mgh.":"Equate ½kx² to ½mv².";
+}
+function check(){
+if(done)return;
+tries++;
+if(data.type==="spring"){
+let actual=data.incline?energy(x)/(data.m*10):Math.sqrt(2*energy(x)/data.m);
+let difference=actual-data.target;
+let tolerance=data.incline?.005:.035;
+if(Math.abs(difference)<=tolerance)win("The shaded F–x area supplies the required mechanical energy.");
+else fail(`${data.incline?"Height":"Exit speed"} is ${fixed(Math.abs(difference),data.incline?3:2)} ${data.incline?"m":"m/s"} ${difference>0?"too high":"too low"}.`);
+}else{
+let ep=power-data.output,ee=eff-data.eta;
+if(Math.abs(ep)<=.5&&Math.abs(ee)<=.5)win(`Output power = ${data.m} × 10 × ${data.v} = ${data.output} W; efficiency = ${data.eta}%.`);
+else fail(Math.abs(ep)>.5?`Output power is ${fixed(Math.abs(ep),0)} W ${ep>0?"too high":"too low"}.`:`Efficiency is ${Math.abs(ee)} percentage points ${ee>0?"too high":"too low"}.`);
+}
+}
+function win(message){
+let earned=hinted?50:tries===1?100:75;score+=earned;done=true;
+$("score").textContent="Score: "+score;
+$("feedback").className="feedback good";
+$("feedback").textContent=`★ Correct! +${earned} points. ${message}`;
+$("hint").disabled=true;$("check").disabled=true;$("next").hidden=false;
+}
+function fail(m){$("feedback").className="feedback bad";$("feedback").textContent=m}
+function finish(){
+$("game").hidden=true;$("end").hidden=false;$("round").textContent="Complete";
+let n=score>=500?3:score>=350?2:score>=200?1:0;
+$("stars").textContent="★".repeat(n)+"☆".repeat(3-n);
+$("result").textContent=`Score ${score}/600. ${n===3?"Excellent application of work–energy principles!":"Replay for a higher score."}`;
+}
+for(const [id,delta] of [["xm",-.02],["xfm",-.005],["xfp",.005],["xp",.02]])$(id).onclick=()=>changeX(delta);
+for(const [id,delta] of [["pm",-10],["pfm",-1],["pfp",1],["pp",10]])$(id).onclick=()=>{if(!done){power=clamp(power+delta,0,1000);render()}};
+for(const [id,delta] of [["em",-5],["efm",-1],["efp",1],["ep",5]])$(id).onclick=()=>{if(!done){eff=clamp(eff+delta,0,100);render()}};
+$("hint").onclick=hint;$("check").onclick=check;
+$("next").onclick=()=>{if(round===5)finish();else{round++;load()}};
+$("again").onclick=start;
+start();
+})();
+</script>
+</body>
+</html>

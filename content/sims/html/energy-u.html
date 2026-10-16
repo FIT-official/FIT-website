@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carnot Cycle Lab — FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+main{max-width:1350px;margin:auto;padding:16px 14px 46px}
+h1,h2,h3,p{margin:0}
+h1{font-size:clamp(1.8rem,4vw,2.55rem);font-weight:800;letter-spacing:-.04em}
+h2{font-size:1.25rem;font-weight:800;margin-bottom:10px}
+h3{font-size:1rem;font-weight:800}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.badge{display:inline-block;background:var(--lvl-uni);color:var(--lvl-uni-on);border:2px solid #111;border-radius:999px;padding:7px 13px;text-transform:uppercase;font-size:12px;font-weight:800;letter-spacing:.05em}
+.hud{display:flex;gap:8px;flex-wrap:wrap;font-weight:800}
+.hud span{border:2px solid #111;border-radius:999px;padding:8px 12px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.panel{min-width:0;border:2px solid #111;border-radius:24px;padding:17px;background:white;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-uni-tint)}
+.prompt{font-weight:700;font-size:1.07rem;margin:10px 0 14px}
+button{font:inherit;min-height:48px;cursor:pointer;background:white;color:#111;border:2px solid #111;border-radius:999px;padding:9px 14px;font-weight:800;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.check:active{box-shadow:var(--sh-1)}
+.actions,.stepper{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}
+.stepper button{min-width:49px}
+.stepper strong{min-width:100px;text-align:center;background:white;border:2px solid #111;border-radius:14px;padding:12px}
+label{display:block;font-weight:800;margin-top:13px}
+.readings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:13px 0}
+.readings div{background:white;border:2px solid #111;border-radius:14px;padding:10px}
+.readings small{display:block;color:#555}
+.readings strong{font-size:1.02rem}
+.stateGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:14px 0}
+.stateGrid div{background:white;border:2px solid #111;border-radius:12px;padding:10px;font-size:.9rem}
+.stateGrid strong{display:block}
+.choice{background:white}
+.choice.selected{background:var(--lvl-uni-tint);border-width:3px}
+.feedback{border:2px solid #111;border-radius:15px;background:white;padding:12px;min-height:52px;margin-top:15px;font-weight:650}
+.feedback.good{background:#e1f8e9}
+.feedback.bad{background:#ffe8e5}
+svg{display:block;width:100%;height:auto}
+.chart{margin-top:9px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.83rem;font-weight:700;margin:5px 0}
+.key{display:inline-block;width:13px;height:13px;border:1px solid #111;margin-right:5px;vertical-align:middle}
+.concept{margin-top:15px;background:var(--fit-sunken);border:2px solid #111;border-radius:16px;padding:12px}
+.concept p{font-size:.86rem;margin-top:7px}
+details{border:2px solid #111;border-radius:16px;padding:12px;margin-top:17px}
+summary{cursor:pointer;font-weight:800}
+details p{font-size:.9rem;margin-top:8px}
+.end{text-align:center;padding:40px 15px}
+.stars{font-size:3rem;margin:16px}
+[hidden]{display:none!important}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div><span class="badge">University · Thermodynamics</span><h1>Carnot Cycle Lab</h1></div>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score: 0</span></div>
+</header>
+<div id="game" class="layout">
+<section class="panel stage">
+<h2 id="mission">Ideal heat engine</h2>
+<p id="prompt" class="prompt"></p>
+<svg id="scene" viewBox="0 0 510 205" role="img" aria-label="Heat engine with heat, work and rejected heat arrows"></svg>
+<div class="readings">
+<div><small>Amount of gas n</small><strong id="moles"></strong></div>
+<div><small>Hot reservoir Tₕ</small><strong id="hot"></strong></div>
+<div><small>Cold reservoir T꜀</small><strong id="cold"></strong></div>
+<div><small id="goalLabel">Target work</small><strong id="goal"></strong></div>
+</div>
+<div id="carnotControls">
+<label>State 1 volume V₁</label>
+<div class="stepper">
+<button id="v1m">−0.5 L</button>
+<strong id="v1value">2.0 L</strong>
+<button id="v1p">+0.5 L</button>
+</div>
+<label>Isothermal expansion ratio V₂/V₁</label>
+</div>
+<div id="ottoLabel" hidden>
+<label>Otto-like compression ratio r = Vmax/Vmin</label>
+</div>
+<div class="stepper">
+<button id="rm">−0.50</button>
+<button id="rfm">−0.01</button>
+<strong id="ratio">2.00</strong>
+<button id="rfp">+0.01</button>
+<button id="rp">+0.50</button>
+</div>
+<label id="effLabel">Carnot efficiency estimate</label>
+<div class="stepper">
+<button id="em">−1%</button>
+<button id="efm">−0.1%</button>
+<strong id="effValue">50.0%</strong>
+<button id="efp">+0.1%</button>
+<button id="ep">+1%</button>
+</div>
+<div id="wasteControls" hidden>
+<label>Which engine rejects a larger fraction of its heat input?</label>
+<div class="actions">
+<button id="carnotChoice" class="choice">Carnot</button>
+<button id="ottoChoice" class="choice">Otto-like</button>
+</div>
+</div>
+<div id="states" class="stateGrid"></div>
+<div class="readings">
+<div><small id="workLabel">Net work per cycle</small><strong id="work"></strong></div>
+<div><small id="heatLabel">Heat supplied</small><strong id="heatIn"></strong></div>
+<div><small>Heat rejected</small><strong id="heatOut"></strong></div>
+<div><small id="actualLabel">Actual efficiency</small><strong id="actualEff"></strong></div>
+</div>
+<div class="actions">
+<button id="hint">Hint −50</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" role="status" aria-live="polite">Adjust the cycle parameters to meet the target.</div>
+</section>
+<section class="panel">
+<h2>Live thermodynamic diagrams</h2>
+<svg id="pv" class="chart" viewBox="0 0 480 330" role="img" aria-label="Pressure-volume diagram of the cycle with shaded net work area"></svg>
+<div class="legend">
+<span><i class="key" style="background:#1F66E5"></i>Cycle path</span>
+<span><i class="key" style="background:#FF8FB8"></i>Enclosed work area</span>
+<span><i class="key" style="background:#FFC83D"></i>Current state 1</span>
+</div>
+<svg id="ts" class="chart" viewBox="0 0 480 300" role="img" aria-label="Temperature-entropy diagram with labelled axes"></svg>
+<div class="concept">
+<h3>Engine efficiency comparison</h3>
+<svg id="comparison" viewBox="0 0 430 105" role="img" aria-label="Carnot and Otto-like useful work fractions"></svg>
+<p>The Carnot engine sets the maximum theoretical efficiency for engines operating between the same hot and cold reservoir temperatures.</p>
+</div>
+<details>
+<summary>The physics</summary>
+<p>Ideal gas: pV = nRT, with R = 8.314 J/(mol K).</p>
+<p>Carnot net work: W = nR(Tₕ − T꜀) ln(V₂/V₁).</p>
+<p>Carnot efficiency: η꜀ = 1 − T꜀/Tₕ.</p>
+<p>Carnot heat input: Qₕ = nRTₕ ln(V₂/V₁).</p>
+<p>Otto-like efficiency: ηₒ = 1 − r^(1 − γ); γ = 1.4.</p>
+<p>Otto-like constant-volume heating/cooling: Q = nCᵥΔT; Cᵥ = R/(γ − 1).</p>
+<p>On a P–V diagram, net work equals the signed enclosed area ∮p dV. On a T–S diagram, reversible heat transfer equals ∫T dS.</p>
+<p>Model: reversible ideal-gas cycles, fixed heat capacities, constant γ = 1.4. Volumes are in L on plots and converted to m³ for calculations. Pressures are in kPa. Carnot adiabats use TV^(γ−1) = constant. An Otto-like cycle has idealised isochoric heat transfer and adiabatic compression/expansion, with its minimum and maximum temperatures equal to T꜀ and Tₕ.</p>
+</details>
+</section>
+</div>
+<section id="end" class="panel end" hidden>
+<h2>Thermodynamics lab complete!</h2>
+<div class="stars" id="stars"></div>
+<p id="result"></p>
+<button id="again" class="check" style="margin-top:20px">Play again ↻</button>
+</section>
+</main>
+<script>
+"use strict";
+(function(){
+const $=id=>document.getElementById(id);
+const R=8.314,gamma=1.4,Cv=R/(gamma-1);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=(v,d=2)=>Number.isFinite(v)?v.toFixed(d):"0";
+let seed=1,run=0,round=0,score=0,tries=0,hinted=false,done=false;
+let c={},ratio=2,V1=2,effGuess=50,wasteChoice="";
+function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function pick(a){return a[Math.floor(rand()*a.length)]}
+function carnotEta(){return 1-c.tc/c.th}
+function ottoEta(r){return 1-Math.pow(Math.max(1.01,r),1-gamma)}
+function maxRatio(){return Math.pow(c.th/c.tc,1/(gamma-1))}
+function create(){
+const type=round<3?"A":"B";
+const tc=pick([280,300,320,350]);
+const th=pick([900,1000,1100,1200]);
+const n=pick([1,1.5,2]);
+const goalR=type==="A"?pick([1.8,2,2.2,2.4,2.6,3]):pick([3,3.5,4,4.5,5,5.5,6]);
+const goalV=type==="A"?pick([1.5,2,2.5,3]):2;
+return {type,tc,th,n,goalR,goalV,
+target:type==="A"?n*R*(th-tc)*Math.log(goalR):ottoEta(goalR)};
+}
+function start(){
+run++;seed=(20261017+run*3347)>>>0;round=0;score=0;
+$("game").hidden=false;$("end").hidden=true;load();
+}
+function load(){
+c=create();tries=0;hinted=false;done=false;
+ratio=c.type==="A"?1.2:2;
+V1=c.type==="A"?(c.goalV===2?1:2):2;
+effGuess=40;wasteChoice="";
+$("round").textContent=`Round ${round+1}/6`;
+$("score").textContent=`Score: ${score}`;
+$("carnotControls").hidden=c.type==="B";
+$("ottoLabel").hidden=c.type==="A";
+$("wasteControls").hidden=c.type==="A";
+$("mission").textContent=c.type==="A"?"Carnot work challenge":"Engine efficiency showdown";
+$("prompt").textContent=c.type==="A"?
+"Choose V₁ and the isothermal expansion ratio. The other two state volumes follow from the reversible adiabats. Deliver the target work per cycle, match the specified V₁ and calculate efficiency.":
+"Adjust the Otto-like compression ratio to match the target efficiency. Estimate that efficiency and identify which engine rejects more heat as a fraction of its own heat input.";
+$("moles").textContent=c.n+" mol";
+$("hot").textContent=c.th+" K";
+$("cold").textContent=c.tc+" K";
+$("goalLabel").textContent=c.type==="A"?"Target work; V₁ target":"Target Otto efficiency";
+$("goal").textContent=c.type==="A"?fmt(c.target,1)+" J; "+fmt(c.goalV,1)+" L":fmt(c.target*100,2)+"%";
+$("effLabel").textContent=c.type==="A"?"Carnot efficiency estimate":"Otto-like efficiency estimate";
+$("carnotChoice").classList.remove("selected");
+$("ottoChoice").classList.remove("selected");
+$("check").disabled=false;$("hint").disabled=false;$("next").hidden=true;
+$("feedback").className="feedback";
+$("feedback").textContent="Adjust the cycle parameters and examine both diagrams.";
+render();
+}
+function clampRatio(){
+return c.type==="A"?clamp(ratio,1.01,5):clamp(ratio,1.01,Math.min(10,maxRatio()-.02));
+}
+function changeRatio(d){
+if(done)return;
+ratio=Math.round(clamp(ratio+d,1.01,c.type==="A"?5:Math.min(10,maxRatio()-.02))*100)/100;
+render();
+}
+function changeV(d){
+if(done)return;
+V1=clamp(Math.round((V1+d)*2)/2,.5,5);
+render();
+}
+function changeEff(d){
+if(done)return;
+effGuess=Math.round(clamp(effGuess+d,0,100)*10)/10;
+render();
+}
+function calc(){
+let r=clampRatio();
+if(c.type==="A"){
+let a=Math.pow(c.th/c.tc,1/(gamma-1));
+let V=[V1,V1*r,V1*r*a,V1*a];
+let T=[c.th,c.th,c.tc,c.tc];
+let p=V.map((v,i)=>c.n*R*T[i]/v);
+let Qh=c.n*R*c.th*Math.log(r);
+let Qc=c.n*R*c.tc*Math.log(r);
+let W=Qh-Qc;
+let ds=c.n*R*Math.log(r);
+return {V,T,p,Qh,Qc,W,eta:carnotEta(),ds};
+}
+let Vmax=2*ratio,Vmin=2;
+let T1=c.tc,T2=T1*Math.pow(r,gamma-1);
+let T3=c.th,T4=T3/Math.pow(r,gamma-1);
+let V=[Vmax,Vmin,Vmin,Vmax],T=[T1,T2,T3,T4];
+let p=V.map((v,i)=>c.n*R*T[i]/v);
+let Qh=c.n*Cv*(T3-T2);
+let Qc=c.n*Cv*(T4-T1);
+let W=Qh-Qc;
+let ds=c.n*Cv*Math.log(T3/T2);
+return {V,T,p,Qh,Qc,W,eta:ottoEta(r),ds};
+}
+function render(){
+ratio=clampRatio();
+let d=calc();
+$("ratio").textContent=fmt(ratio);
+$("v1value").textContent=fmt(V1,1)+" L";
+$("effValue").textContent=fmt(effGuess,1)+"%";
+$("workLabel").textContent="Net work per cycle";
+$("heatLabel").textContent="Heat supplied Qₕ";
+$("actualLabel").textContent="Actual efficiency";
+$("work").textContent=fmt(d.W,1)+" J";
+$("heatIn").textContent=fmt(d.Qh,1)+" J";
+$("heatOut").textContent=fmt(d.Qc,1)+" J";
+$("actualEff").textContent=fmt(d.eta*100,2)+"%";
+$("states").innerHTML=d.V.map((v,i)=>`<div><strong>State ${i+1}</strong>${fmt(v,2)} L · ${fmt(d.T[i],1)} K<br>${fmt(d.p[i],1)} kPa</div>`).join("");
+$("carnotChoice").classList.toggle("selected",wasteChoice==="carnot");
+$("ottoChoice").classList.toggle("selected",wasteChoice==="otto");
+drawScene(d);drawPV(d);drawTS(d);drawComparison(d);
+}
+function drawScene(d){
+let eh=d.eta;
+let s='<rect x="5" y="5" width="500" height="195" rx="20" fill="#fff" stroke="#111" stroke-width="2"/>';
+s+='<rect x="173" y="78" width="165" height="69" rx="16" fill="#E2ECFD" stroke="#111" stroke-width="4"/>';
+s+='<text x="255" y="105" text-anchor="middle" font-size="17" font-weight="800">HEAT ENGINE</text>';
+s+=`<text x="255" y="128" text-anchor="middle" font-size="12">${c.type==="A"?"Carnot":"Otto-like"} · ${c.n} mol</text>`;
+let inputWidth=18,workWidth=Math.max(3,18*eh),rejectWidth=Math.max(3,18*(1-eh));
+s+=`<path d="M47 111H168" stroke="#FF6B3D" stroke-width="${inputWidth}" stroke-linecap="round"/>`;
+s+='<path d="M153 99L170 111L153 123" stroke="#111" fill="none" stroke-width="3"/>';
+s+=`<path d="M341 94H465" stroke="#3DBE6B" stroke-width="${workWidth}" stroke-linecap="round"/>`;
+s+='<path d="M449 82L467 94L449 106" stroke="#111" fill="none" stroke-width="3"/>';
+s+=`<path d="M255 150V181" stroke="#FF8FB8" stroke-width="${rejectWidth}" stroke-linecap="round"/>`;
+s+=`<text x="82" y="74" text-anchor="middle" font-size="12" font-weight="800">Qₕ ${fmt(d.Qh,0)} J</text>`;
+s+=`<text x="404" y="60" text-anchor="middle" font-size="12" font-weight="800">W ${fmt(d.W,0)} J</text>`;
+s+=`<text x="350" y="185" text-anchor="middle" font-size="12" font-weight="800">Q꜀ ${fmt(d.Qc,0)} J</text>`;
+s+='<text x="55" y="30" font-size="13" font-weight="800">Hot reservoir</text>';
+s+=`<text x="375" y="30" font-size="13" font-weight="800">${c.th} K → ${c.tc} K</text>`;
+$("scene").innerHTML=s;
+$("scene").setAttribute("aria-label",`Heat engine receives ${fmt(d.Qh,1)} joules, delivers ${fmt(d.W,1)} joules of work, and rejects ${fmt(d.Qc,1)} joules`);
+}
+function pathForPV(d){
+let points=[];
+function add(v,t){points.push({v,p:c.n*R*t/v})}
+if(c.type==="A"){
+let [v1,v2,v3,v4]=d.V;
+for(let i=0;i<=32;i++){
+let t=i/32,v=v1*Math.pow(v2/v1,t);
+add(v,c.th);
+}
+for(let i=1;i<=32;i++){
+let t=i/32,v=v2*Math.pow(v3/v2,t);
+add(v,c.th*Math.pow(v2/v,gamma-1));
+}
+for(let i=1;i<=32;i++){
+let t=i/32,v=v3*Math.pow(v4/v3,t);
+add(v,c.tc);
+}
+for(let i=1;i<=32;i++){
+let t=i/32,v=v4*Math.pow(v1/v4,t);
+add(v,c.tc*Math.pow(v4/v,gamma-1));
+}
+}else{
+let [v1,v2,v3,v4]=d.V;
+for(let i=0;i<=32;i++){
+let t=i/32,v=v1*Math.pow(v2/v1,t);
+add(v,c.tc*Math.pow(v1/v,gamma-1));
+}
+for(let i=1;i<=12;i++){
+let T=d.T[1]+(d.T[2]-d.T[1])*i/12;
+add(v2,T);
+}
+for(let i=1;i<=32;i++){
+let t=i/32,v=v3*Math.pow(v4/v3,t);
+add(v,c.th*Math.pow(v3/v,gamma-1));
+}
+for(let i=1;i<=12;i++){
+let T=d.T[3]+(d.T[0]-d.T[3])*i/12;
+add(v4,T);
+}
+}
+return points;
+}
+function plotAxes(title,xLabel,yLabel,left,bottom,right,top){
+return `<text x="240" y="19" text-anchor="middle" font-size="16" font-weight="800">${title}</text>
+<path d="M${left} ${top}V${bottom}H${right}" fill="none" stroke="#111" stroke-width="2"/>
+<text x="255" y="320" text-anchor="middle" font-size="12">${xLabel}</text>
+<text x="13" y="164" transform="rotate(-90 13 164)" text-anchor="middle" font-size="12">${yLabel}</text>`;
+}
+function drawPV(d){
+let points=pathForPV(d);
+let vMin=Math.min(...points.map(q=>q.v));
+let vMax=Math.max(...points.map(q=>q.v));
+let pMax=Math.max(...points.map(q=>q.p));
+let X=v=>64+(v-vMin)/(vMax-vMin||1)*378;
+let Y=p=>280-p/(pMax*1.12||1)*226;
+let path=points.map((q,i)=>(i?"L":"M")+fmt(X(q.v),2)+" "+fmt(Y(q.p),2)).join(" ")+" Z";
+let s=plotAxes("Pressure–volume cycle","Volume V (L)","Pressure p (kPa)",64,280,444,45);
+for(let i=0;i<=4;i++){
+let p=i*pMax*1.12/4;
+let v=vMin+(vMax-vMin)*i/4;
+s+=`<line x1="64" y1="${Y(p)}" x2="444" y2="${Y(p)}" stroke="#ddd"/>`;
+s+=`<text x="57" y="${Y(p)+4}" font-size="11" text-anchor="end">${fmt(p,0)}</text>`;
+s+=`<text x="${X(v)}" y="297" font-size="11" text-anchor="middle">${fmt(v,1)}</text>`;
+}
+s+=`<path d="${path}" fill="#FF8FB8" fill-opacity=".47" stroke="#1F66E5" stroke-width="3" stroke-linejoin="round"/>`;
+d.V.forEach((v,i)=>{
+let xx=X(v),yy=Y(d.p[i]);
+s+=`<circle cx="${xx}" cy="${yy}" r="5" fill="${i===0?"#FFC83D":"#1F66E5"}" stroke="#111" stroke-width="2"/>`;
+s+=`<text x="${clamp(xx+(i%2?12:-13),73,435)}" y="${clamp(yy+(i===1?-13:19),32,270)}" text-anchor="middle" font-size="12" font-weight="800">${i+1}</text>`;
+});
+s+=`<rect x="201" y="29" width="240" height="27" rx="12" fill="white" stroke="#111"/>`;
+s+=`<text x="321" y="47" text-anchor="middle" font-size="12" font-weight="800">Enclosed work = ${fmt(d.W,1)} J</text>`;
+$("pv").innerHTML=s;
+$("pv").setAttribute("aria-label",`Pressure in kilopascals versus volume in litres; ${c.type==="A"?"Carnot":"Otto-like"} cycle with shaded enclosed work ${fmt(d.W,1)} joules; state 1 marker shown`);
+}
+function entropyPoints(d){
+let points=[],s0=0;
+function add(s,t){points.push({s,t})}
+if(c.type==="A"){
+let ds=d.ds;
+for(let i=0;i<=24;i++)add(ds*i/24,c.th);
+for(let i=1;i<=24;i++)add(ds,c.th+(c.tc-c.th)*i/24);
+for(let i=1;i<=24;i++)add(ds*(1-i/24),c.tc);
+for(let i=1;i<=24;i++)add(0,c.tc+(c.th-c.tc)*i/24);
+}else{
+let ds=d.ds;
+for(let i=0;i<=20;i++){
+let v=d.V[0]*Math.pow(d.V[1]/d.V[0],i/20);
+add(0,c.tc*Math.pow(d.V[0]/v,gamma-1));
+}
+for(let i=1;i<=25;i++){
+let T=d.T[1]*Math.pow(d.T[2]/d.T[1],i/25);
+add(c.n*Cv*Math.log(T/d.T[1]),T);
+}
+for(let i=1;i<=20;i++){
+let v=d.V[2]*Math.pow(d.V[3]/d.V[2],i/20);
+add(ds,c.th*Math.pow(d.V[2]/v,gamma-1));
+}
+for(let i=1;i<=25;i++){
+let T=d.T[3]*Math.pow(d.T[0]/d.T[3],i/25);
+add(ds+c.n*Cv*Math.log(T/d.T[3]),T);
+}
+}
+return points;
+}
+function drawTS(d){
+let points=entropyPoints(d),maxS=Math.max(.01,d.ds*1.2);
+let minT=Math.max(0,c.tc-70),maxT=c.th+70;
+let X=s=>65+s/maxS*375,Y=t=>254-(t-minT)/(maxT-minT)*204;
+let p='<text x="240" y="19" text-anchor="middle" font-size="16" font-weight="800">Temperature–entropy cycle</text>';
+p+='<path d="M65 46V254H444" stroke="#111" stroke-width="2" fill="none"/>';
+for(let i=0;i<=4;i++){
+let s=maxS*i/4,T=minT+(maxT-minT)*i/4;
+p+=`<line x1="65" y1="${Y(T)}" x2="444" y2="${Y(T)}" stroke="#ddd"/>`;
+p+=`<text x="57" y="${Y(T)+4}" font-size="11" text-anchor="end">${fmt(T,0)}</text>`;
+p+=`<text x="${X(s)}" y="274" font-size="11" text-anchor="middle">${fmt(s,1)}</text>`;
+}
+p+='<text x="250" y="298" text-anchor="middle" font-size="12">Entropy change S − S₁ (J/K)</text>';
+p+='<text x="13" y="145" transform="rotate(-90 13 145)" text-anchor="middle" font-size="12">Temperature T (K)</text>';
+let path=points.map((q,i)=>(i?"L":"M")+fmt(X(q.s),2)+" "+fmt(Y(q.t),2)).join(" ")+" Z";
+p+=`<path d="${path}" fill="#FF8FB8" fill-opacity=".30" stroke="#1F66E5" stroke-width="3"/>`;
+let first=points[0];
+p+=`<circle cx="${X(first.s)}" cy="${Y(first.t)}" r="6" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+p+=`<text x="86" y="36" font-size="12" font-weight="800">ΔS = ${fmt(d.ds,2)} J/K</text>`;
+$("ts").innerHTML=p;
+$("ts").setAttribute("aria-label",`Temperature in kelvin versus entropy difference in joules per kelvin; entropy span ${fmt(d.ds,2)} joules per kelvin`);
+}
+function drawComparison(d){
+let ec=carnotEta(),eo=c.type==="B"?d.eta:ottoEta(4);
+const series=[{name:"Carnot",value:ec},{name:"Otto-like",value:eo}];
+let s='';
+series.forEach((q,i)=>{
+let y=12+i*47,workW=q.value*255,lossW=(1-q.value)*255;
+s+=`<text x="5" y="${y+13}" font-size="12" font-weight="800">${q.name}</text>`;
+s+=`<rect x="98" y="${y}" width="${workW}" height="23" fill="#3DBE6B" stroke="#111"/>`;
+s+=`<rect x="${98+workW}" y="${y}" width="${lossW}" height="23" fill="#FF8FB8" stroke="#111"/>`;
+s+=`<text x="360" y="${y+15}" font-size="12" font-weight="800">${fmt(q.value*100,1)}%</text>`;
+});
+s+='<text x="99" y="103" font-size="11">Green: work fraction · Pink: rejected heat fraction</text>';
+$("comparison").innerHTML=s;
+$("comparison").setAttribute("aria-label",`Carnot efficiency ${fmt(ec*100,1)} percent; Otto-like comparison efficiency ${fmt(eo*100,1)} percent`);
+}
+function hint(){
+if(done)return;
+hinted=true;$("hint").disabled=true;
+$("feedback").className="feedback";
+$("feedback").textContent=c.type==="A"?
+"First match the stated V₁. Then use W/[nR(Tₕ−T꜀)] = ln(V₂/V₁). Carnot efficiency depends only on reservoir temperatures.":
+"Use η = 1 − r^(−0.4). The Carnot bound is 1 − T꜀/Tₕ. An Otto-like engine operating between these extremes rejects a greater heat fraction.";
+}
+function check(){
+if(done)return;
+tries++;
+let d=calc();
+if(c.type==="A"){
+let workDiff=d.W-c.target;
+let volumeDiff=V1-c.goalV;
+let effDiff=effGuess-d.eta*100;
+if(Math.abs(workDiff)<=Math.max(1,c.target*.002)&&Math.abs(volumeDiff)<.01&&Math.abs(effDiff)<=.11){
+win("The isothermal volume ratio sets net work; the adiabats determine states 3 and 4.");
+}else{
+let msg=Math.abs(volumeDiff)>.01?
+`State 1 volume is ${fmt(Math.abs(volumeDiff),1)} L ${volumeDiff>0?"too large":"too small"}.`:
+Math.abs(workDiff)>Math.max(1,c.target*.002)?
+`Net work is ${fmt(Math.abs(workDiff),1)} J ${workDiff>0?"too high":"too low"}.`:
+`Efficiency estimate is ${fmt(Math.abs(effDiff),1)} percentage points ${effDiff>0?"too high":"too low"}.`;
+fail(msg);
+}
+}else{
+let err=(d.eta-c.target)*100;
+let effErr=effGuess-d.eta*100;
+if(Math.abs(err)<=.08&&Math.abs(effErr)<=.11&&wasteChoice==="otto"){
+win(`Otto-like efficiency is ${fmt(d.eta*100,2)}%, below the Carnot bound of ${fmt(carnotEta()*100,2)}%.`);
+}else{
+let msg=Math.abs(err)>.08?`Otto-like efficiency is ${fmt(Math.abs(err),2)} percentage points ${err>0?"too high":"too low"}.`:
+Math.abs(effErr)>.11?`Your efficiency estimate is ${fmt(Math.abs(effErr),1)} percentage points ${effErr>0?"too high":"too low"}.`:
+"Compare the rejected-heat fractions: the Otto-like engine wastes more of its heat input.";
+fail(msg);
+}
+}
+}
+function win(message){
+let pts=hinted?50:tries===1?100:75;
+score+=pts;done=true;
+$("score").textContent="Score: "+score;
+$("feedback").className="feedback good";
+$("feedback").textContent=`★ Correct! +${pts} points. ${message}`;
+$("check").disabled=true;$("hint").disabled=true;$("next").hidden=false;
+}
+function fail(message){
+$("feedback").className="feedback bad";
+$("feedback").textContent=message;
+}
+function finish(){
+$("game").hidden=true;$("end").hidden=false;
+$("round").textContent="Complete";
+let stars=score>=500?3:score>=350?2:score>=200?1:0;
+$("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
+$("result").textContent=`Score ${score}/600. ${stars===3?"Excellent thermodynamic reasoning!":"Replay to improve your thermodynamic calculations."}`;
+}
+$("v1m").onclick=()=>changeV(-.5);
+$("v1p").onclick=()=>changeV(.5);
+$("rm").onclick=()=>changeRatio(-.5);
+$("rfm").onclick=()=>changeRatio(-.01);
+$("rfp").onclick=()=>changeRatio(.01);
+$("rp").onclick=()=>changeRatio(.5);
+$("em").onclick=()=>changeEff(-1);
+$("efm").onclick=()=>changeEff(-.1);
+$("efp").onclick=()=>changeEff(.1);
+$("ep").onclick=()=>changeEff(1);
+$("carnotChoice").onclick=()=>{if(!done){wasteChoice="carnot";render()}};
+$("ottoChoice").onclick=()=>{if(!done){wasteChoice="otto";render()}};
+$("hint").onclick=hint;
+$("check").onclick=check;
+$("next").onclick=()=>{if(round===5)finish();else{round++;load()}};
+$("again").onclick=start;
+start();
+})();
+</script>
+</body>
+</html>
