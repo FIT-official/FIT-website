@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Divider Detective | Fix It Today</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+button,input{font:inherit}
+button{border:2px solid #111;border-radius:999px;min-height:44px;min-width:44px;padding:9px 16px;background:white;color:#111;font-weight:800;cursor:pointer;touch-action:manipulation}
+button:hover:not(:disabled){background:var(--lvl-jc-tint)}
+button:active:not(:disabled){transform:translateY(2px)}
+button:disabled{opacity:.45}
+button.selected{background:var(--lvl-jc);color:white}
+button.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2);font-size:17px}
+button.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button.next{background:var(--fit-green);border:3px solid #111}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+header,main{max-width:1170px;margin:auto;padding:18px}
+header{padding-bottom:0}
+h1{font-size:clamp(30px,5vw,44px);font-weight:800;line-height:1.1;margin:12px 0 5px}
+h2{font-size:21px;font-weight:800;margin:0 0 12px}
+h3{font-size:16px;font-weight:800;margin:13px 0 6px}
+p{margin:7px 0}
+.hud,.row,.actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.badge{padding:7px 13px;border:2px solid #111;border-radius:999px;background:var(--lvl-jc);color:var(--lvl-jc-on);font-size:12px;text-transform:uppercase;font-weight:800}
+.pill{padding:7px 12px;border:2px solid #111;border-radius:999px;background:var(--fit-sunken);font-size:13px;font-weight:800}
+.layout{display:grid;grid-template-columns:1fr;gap:18px}
+.card{min-width:0;border:2px solid #111;border-radius:24px;padding:17px;background:white;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-jc-tint);border-radius:32px;box-shadow:var(--sh-3)}
+svg{display:block;width:100%;height:auto}
+.diagram{max-width:530px;margin:auto}
+.readings{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.meter{border:2px solid #111;border-radius:16px;padding:12px;text-align:center;background:white;font-weight:700}
+.meter strong{display:block;font-size:clamp(19px,4vw,27px);font-variant-numeric:tabular-nums}
+.target{background:var(--fit-sun);padding:12px;border:2px solid #111;border-radius:16px;font-weight:800;margin-bottom:12px}
+.stepper{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:9px 0}
+.stepper output{min-width:92px;text-align:center;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-jc);cursor:pointer}
+input[type=number]{border:2px solid #111;border-radius:12px;min-height:46px;max-width:145px;width:100%;padding:8px 10px;font-weight:800;background:white}
+.field{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.field label{font-weight:800;min-width:155px}
+.feedback{min-height:50px;margin:14px 0;background:var(--fit-sunken);border-left:5px solid #111;padding:9px 12px;font-weight:600}
+.feedback.good{background:#e2f8eb;border-color:var(--fit-success)}
+.feedback.bad{background:#fff0ee;border-color:var(--fit-danger)}
+.concept{max-width:350px;margin:16px auto}
+.concept figcaption{font-size:13px;color:var(--fit-ink-2);text-align:center}
+details{border:2px solid #111;border-radius:16px;padding:12px;margin-top:16px;background:white}
+summary{font-weight:800;cursor:pointer;min-height:32px}
+.hidden{display:none!important}
+.end{text-align:center;padding:30px}
+.stars{font-size:48px;color:#ccc}
+.stars .earned{color:#e6a600}
+.current{fill:none;stroke:#6A45F5;stroke-width:4;stroke-dasharray:5 15;animation:move 1s linear infinite}
+@keyframes move{to{stroke-dashoffset:-40}}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+<div class="hud">
+<span class="badge">JC · H1/H2 Physics</span>
+<span class="pill" id="round">Round 1/6</span>
+<span class="pill" id="score">Score 0</span>
+</div>
+<h1>🔎 Divider Detective</h1>
+<p>Investigate a real cell and design a sensor potential divider.</p>
+</header>
+<main>
+<div id="game" class="layout">
+<section class="card stage">
+<h2 id="heading">Cell investigation</h2>
+<div class="target" id="target"></div>
+<svg id="diagram" class="diagram" viewBox="0 0 500 310" role="img" aria-label="Circuit diagram"></svg>
+<div class="readings">
+<div class="meter">Current <strong id="readingI">0.00 A</strong></div>
+<div class="meter" id="vbox">Terminal p.d. <strong id="readingV">0.00 V</strong></div>
+</div>
+<figure class="concept">
+<svg viewBox="0 0 340 120" role="img" aria-label="Cell equation V equals E minus Ir, and divider output equals supply voltage multiplied by bottom resistance divided by total resistance">
+<rect x="10" y="12" width="145" height="94" rx="12" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="82" y="42" text-anchor="middle" font-size="18" font-weight="800">V = E − Ir</text>
+<text x="82" y="66" text-anchor="middle" font-size="12">Intercept = E</text>
+<text x="82" y="86" text-anchor="middle" font-size="12">Gradient = −r</text>
+<rect x="179" y="12" width="151" height="94" rx="12" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="255" y="40" text-anchor="middle" font-size="15" font-weight="800">Vout = Vs ×</text>
+<text x="255" y="61" text-anchor="middle" font-size="15" font-weight="800">Rbottom</text>
+<path d="M210 67H300" stroke="#111" stroke-width="2"/>
+<text x="255" y="86" text-anchor="middle" font-size="14">Rtop + Rbottom</text>
+</svg>
+<figcaption>A loaded cell loses p.d. internally; a divider shares p.d.</figcaption>
+</figure>
+</section>
+<section class="card">
+<h2 id="controlTitle">Investigation controls</h2>
+<div id="controls"></div>
+<div class="actions" style="margin-top:16px">
+<button id="hint">Hint (−25 points)</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" class="next hidden">Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Adjust the circuit and investigate.</div>
+<h2 style="margin-top:20px" id="graphTitle">Live terminal characteristic</h2>
+<svg id="plot" viewBox="0 0 490 335" role="img" aria-label="Terminal voltage plotted against current"></svg>
+<details>
+<summary>The physics</summary>
+<p><strong>Real cell:</strong> E = V + Ir. E and V are measured in volts, I in amperes and internal resistance r in ohms.</p>
+<p>With load R: I = E/(R + r), and V = IR.</p>
+<p>The V–I graph is straight: intercept E; gradient −r (V/A = Ω).</p>
+<p><strong>Potential divider:</strong> Vout = Vs × Rbottom/(Rtop + Rbottom).</p>
+<p>An LDR's resistance decreases as light increases. An NTC thermistor's resistance decreases as temperature increases.</p>
+</details>
+</section>
+</div>
+<section id="end" class="card end hidden">
+<h2>Investigation complete!</h2>
+<div id="stars" class="stars"></div>
+<h2 id="final"></h2>
+<p>You inferred internal resistance and calibrated light and temperature sensors.</p>
+<button id="again" class="check">Play again ↻</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const fmt=(v,d=2)=>Number.isFinite(v)?v.toFixed(d):"0";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const path=(d,c="#111",w=3,extra="")=>`<path d="${d}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+let rounds=[],index=0,score=0,tries=0,hinted=false,done=false;
+let R=10,answerE="",answerR="",fixed=1000,sense=50;
+let samples=[],revealed=false;
+function rng(seed){return()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};}
+function init(){
+const r=rng((Date.now()>>>0)||17);
+rounds=[];
+for(let i=0;i<3;i++){
+rounds.push({type:"cell",E:[4.5,6,9][i],r:[.5,1,1.5,2][Math.floor(r()*4)]});
+}
+for(let i=0;i<3;i++){
+const sensor=i===1?"thermistor":"LDR";
+const target=sensor==="LDR"?[25,50,75][i===0?0:2]:35;
+const sR=sensorResistance(sensor,target);
+const ideal=1000*Math.round(sR/1000);
+rounds.push({type:"divider",sensor,target,ideal,Vs:5});
+}
+index=0;score=0;
+$("end").classList.add("hidden");$("game").classList.remove("hidden");load();
+}
+function sensorResistance(type,x){
+if(type==="LDR")return 10000/(1+x/25);
+return 8000*Math.exp(-.035*(x-20));
+}
+function load(){
+const q=rounds[index];
+tries=0;hinted=false;done=false;revealed=false;
+samples=[];answerE="";answerR="";R=10;fixed=1000;sense=q.type==="divider"?q.target:50;
+$("round").textContent="Round "+(index+1)+"/6";
+$("score").textContent="Score "+score;
+$("heading").textContent=q.type==="cell"?"Find the hidden resistance":"Calibrate the "+(q.sensor==="LDR"?"light":"temperature")+" sensor";
+$("controlTitle").textContent=q.type==="cell"?"Sweep the load":"Potential-divider controls";
+$("graphTitle").textContent=q.type==="cell"?"Live terminal p.d. vs current":"Live sensor calibration";
+$("target").textContent=q.type==="cell"?"Find E and r from measurements. Answers must be within ±3%.":"Make Vout = 2.50 V at "+q.target+(q.sensor==="LDR"?" % light":" °C")+" (±3%).";
+$("check").classList.remove("hidden");$("next").classList.add("hidden");$("hint").disabled=false;
+if(q.type==="cell")record();
+feedback(q.type==="cell"?"Sweep R to collect readings, then enter E and r.":"Adjust the fixed resistor until the output reaches 2.50 V.","");
+render();
+}
+function record(){
+const q=rounds[index];
+if(q.type!=="cell")return;
+const I=q.E/(R+q.r),V=I*R;
+if(!samples.some(p=>Math.abs(p.R-R)<1e-8))samples.push({R,I,V});
+}
+function current(){
+const q=rounds[index];
+return q.type==="cell"?q.E/(R+q.r):q.Vs/(fixed+sensorResistance(q.sensor,sense));
+}
+function voltage(){
+const q=rounds[index];
+return q.type==="cell"?current()*R:q.Vs*sensorResistance(q.sensor,sense)/(fixed+sensorResistance(q.sensor,sense));
+}
+function changeR(d){if(done)return;R=clamp(Math.round((R+d)*2)/2,1,40);record();render();}
+function changeFixed(d){if(done)return;fixed=clamp(fixed+d,100,10000);render();}
+function render(){
+const q=rounds[index];
+if(q.type==="cell"){
+$("controls").innerHTML=`
+<h3>Variable load resistance R</h3>
+<div class="stepper">
+<button id="rminus" aria-label="Decrease load by 1 ohm">−</button>
+<output>${fmt(R,1)} Ω</output>
+<button id="rplus" aria-label="Increase load by 1 ohm">+</button>
+</div>
+<input type="range" id="rslider" min="1" max="40" step=".5" value="${R}" aria-label="Load resistance in ohms">
+<p>Recorded points: <strong>${samples.length}</strong></p>
+<div class="field"><label for="answerE">e.m.f. E (V)</label><input type="number" id="answerE" min="0.01" max="30" step=".01" placeholder="E in V" value="${answerE}"></div>
+<div class="field"><label for="answerR">Internal resistance r (Ω)</label><input type="number" id="answerR" min=".01" max="20" step=".01" placeholder="r in Ω" value="${answerR}"></div>`;
+$("rminus").onclick=()=>changeR(-1);
+$("rplus").onclick=()=>changeR(1);
+$("rslider").oninput=e=>{R=Number(e.target.value);record();render();};
+$("answerE").oninput=e=>answerE=e.target.value;
+$("answerR").oninput=e=>answerR=e.target.value;
+}else{
+const unit=q.sensor==="LDR"?"%":"°C";
+$("controls").innerHTML=`
+<h3>Fixed resistor Rf</h3>
+<div class="stepper">
+<button id="fminus" aria-label="Decrease fixed resistor by 100 ohms">−</button>
+<output>${fmt(fixed,0)} Ω</output>
+<button id="fplus" aria-label="Increase fixed resistor by 100 ohms">+</button>
+</div>
+<div class="row">
+<button id="fineMinus">−10 Ω</button><button id="finePlus">+10 Ω</button>
+</div>
+<input type="range" id="fslider" min="100" max="10000" step="10" value="${fixed}" aria-label="Fixed resistor in ohms">
+<h3>${q.sensor==="LDR"?"Light level":"Temperature"}</h3>
+<input type="range" id="sensorSlider" min="${q.sensor==="LDR"?0:0}" max="${q.sensor==="LDR"?100:80}" step="1" value="${sense}" aria-label="${q.sensor==="LDR"?"Light level percentage":"Temperature in degrees Celsius"}">
+<div class="row"><span class="pill">Sensor: ${fmt(sense,0)} ${unit}</span><button id="setTarget">Use target ${q.target} ${unit}</button></div>
+<p>Sensor resistance: <strong>${fmt(sensorResistance(q.sensor,sense),0)} Ω</strong></p>`;
+$("fminus").onclick=()=>changeFixed(-100);
+$("fplus").onclick=()=>changeFixed(100);
+$("fineMinus").onclick=()=>changeFixed(-10);
+$("finePlus").onclick=()=>changeFixed(10);
+$("fslider").oninput=e=>{fixed=Number(e.target.value);render();};
+$("sensorSlider").oninput=e=>{sense=Number(e.target.value);render();};
+$("setTarget").onclick=()=>{sense=q.target;render();};
+}
+$("readingI").textContent=fmt(current(),3)+" A";
+$("readingV").textContent=fmt(voltage(),3)+" V";
+$("vbox").firstChild.textContent=q.type==="cell"?"Terminal p.d. ":"Divider output ";
+renderDiagram();renderPlot();
+}
+function renderDiagram(){
+const q=rounds[index],i=current();
+let a=`<text x="250" y="23" font-size="16" font-weight="800" text-anchor="middle">${q.type==="cell"?"REAL CELL WITH INTERNAL RESISTANCE":"SENSOR POTENTIAL DIVIDER"}</text>`;
+if(q.type==="cell"){
+a+=path("M105 80H400V246H105V80");
+a+=path("M91 155H119 M98 170H112","#111",4);
+a+=`<text x="28" y="136" font-size="15" font-weight="800">E = ? V</text>`;
+a+=`<rect x="174" y="68" width="73" height="24" fill="#fff" stroke="#111" stroke-width="3"/><text x="211" y="62" text-anchor="middle" font-size="13">r = ? Ω</text>`;
+a+=`<circle cx="290" cy="80" r="19" fill="#fff" stroke="#111" stroke-width="3"/><text x="290" y="86" text-anchor="middle" font-size="20">A</text>`;
+a+=`<rect x="388" y="140" width="24" height="58" fill="#fff" stroke="#111" stroke-width="3"/>`;
+a+=`<text x="426" y="169" font-size="13" font-weight="800">R = ${fmt(R,1)} Ω</text>`;
+a+=path("M400 140V115H342V220H400V198");
+a+=`<circle cx="342" cy="162" r="18" fill="#fff" stroke="#111" stroke-width="3"/><text x="342" y="169" text-anchor="middle" font-size="19">V</text>`;
+a+=`<text x="250" y="285" font-size="13" text-anchor="middle">I = ${fmt(i,3)} A · Terminal V = ${fmt(voltage(),3)} V</text>`;
+a+=`<path class="current" style="animation-duration:${clamp(.8/i,.3,4)}s" d="M117 80H398V245H105V184"/>`;
+}else{
+const sr=sensorResistance(q.sensor,sense);
+a+=path("M90 80H350V250H90V80");
+a+=path("M77 150H103 M83 165H97","#111",4);
+a+=`<text x="26" y="130" font-size="14" font-weight="800">5 V</text>`;
+a+=`<rect x="338" y="92" width="24" height="51" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="370" y="112" font-size="13" font-weight="800">Rf</text>
+<text x="370" y="129" font-size="12">${fmt(fixed,0)} Ω</text>`;
+a+=`<rect x="338" y="188" width="24" height="48" fill="${q.sensor==="LDR"?"#FFDD00":"#FF8FB8"}" stroke="#111" stroke-width="3"/>`;
+if(q.sensor==="LDR"){
+a+=path("M310 182L332 199 M316 172L337 189","#111",2);
+a+=`<path d="M320 199l12 0 -4 -10 M325 190l12 0 -4 -10" stroke="#111" stroke-width="2" fill="none"/>`;
+}else{
+a+=path("M335 207L365 226","#111",3);
+}
+a+=`<text x="375" y="203" font-size="13" font-weight="800">${q.sensor==="LDR"?"LDR":"NTC"}</text>
+<text x="375" y="222" font-size="12">${fmt(sr,0)} Ω</text>`;
+a+=path("M350 165H267V250");
+a+=`<circle cx="267" cy="205" r="19" fill="#fff" stroke="#111" stroke-width="3"/><text x="267" y="212" text-anchor="middle" font-size="19">V</text>`;
+a+=`<text x="175" y="163" font-size="12" font-weight="800">Vout = ${fmt(voltage(),3)} V</text>`;
+a+=`<text x="215" y="292" font-size="13" text-anchor="middle">Sensor: ${fmt(sense,0)} ${q.sensor==="LDR"?"% light":"°C"}</text>`;
+a+=`<path class="current" style="animation-duration:${clamp(.006/i,.3,4)}s" d="M105 80H350V250H90V165"/>`;
+}
+$("diagram").innerHTML=a;
+$("diagram").setAttribute("aria-label",q.type==="cell"?`Cell with hidden e.m.f. and internal resistance, load ${R} ohms, current ${fmt(i,3)} amperes, terminal potential difference ${fmt(voltage(),3)} volts`:`5 volt divider, fixed resistor ${fixed} ohms, ${q.sensor} ${fmt(sensorResistance(q.sensor,sense),0)} ohms, output ${fmt(voltage(),3)} volts`);
+}
+function plotCell(){
+const q=rounds[index],left=67,right=462,top=47,bottom=265;
+const xmax=q.E/q.r*1.1,ymax=q.E*1.12;
+const x=v=>left+clamp(v/xmax,0,1)*(right-left);
+const y=v=>bottom-clamp(v/ymax,0,1)*(bottom-top);
+let a=`<rect width="490" height="335" fill="#fff"/>
+<text x="245" y="21" font-size="15" text-anchor="middle" font-weight="800">Terminal p.d. V against current I</text>`;
+for(let k=0;k<=4;k++){
+let xv=xmax*k/4,yv=ymax*k/4;
+a+=path(`M${x(xv)} ${top}V${bottom}`,"#e4e2db",1)+path(`M${left} ${y(yv)}H${right}`,"#e4e2db",1);
+a+=`<text x="${x(xv)}" y="283" font-size="11" text-anchor="middle">${fmt(xv,2)}</text><text x="${left-8}" y="${y(yv)+4}" font-size="11" text-anchor="end">${fmt(yv,2)}</text>`;
+}
+a+=path(`M${left} ${top}V${bottom}H${right}`);
+a+=`<text x="245" y="320" font-size="13" text-anchor="middle">Current I (A)</text><text x="16" y="156" transform="rotate(-90 16 156)" text-anchor="middle" font-size="13">Terminal p.d. V (V)</text>`;
+for(const p of samples)a+=`<circle cx="${x(p.I)}" cy="${y(p.V)}" r="5" fill="#6A45F5" stroke="#111" stroke-width="1"/>`;
+const pNow={I:current(),V:voltage()};
+a+=`<circle cx="${x(pNow.I)}" cy="${y(pNow.V)}" r="8" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+if(revealed){
+const lineFit=bestFit();
+a+=path(`M${x(0)} ${y(lineFit.E)}L${x(xmax)} ${y(lineFit.E-lineFit.r*xmax)}`,"#1E9E5A",3,'stroke-dasharray="8 5"');
+a+=`<text x="80" y="39" font-size="12">● Sweeps · ● Current · ┄ Best fit</text>`;
+}else a+=`<text x="80" y="39" font-size="12">● Sweep points · ● Current (yellow)</text>`;
+$("plot").innerHTML=a;
+$("plot").setAttribute("aria-label",`Terminal potential difference versus current, ${samples.length} sampled points. Latest point ${fmt(pNow.I,3)} amperes, ${fmt(pNow.V,3)} volts. ${revealed?"Best fit shown.":"Best fit hidden until answer."}`);
+}
+function bestFit(){
+const q=rounds[index],n=samples.length;
+if(n<2)return{E:q.E,r:q.r};
+const sx=samples.reduce((s,p)=>s+p.I,0),sy=samples.reduce((s,p)=>s+p.V,0);
+const sxx=samples.reduce((s,p)=>s+p.I*p.I,0),sxy=samples.reduce((s,p)=>s+p.I*p.V,0);
+const denom=n*sxx-sx*sx;
+if(Math.abs(denom)<1e-10)return{E:q.E,r:q.r};
+const gradient=(n*sxy-sx*sy)/denom,intercept=(sy-gradient*sx)/n;
+return{E:intercept,r:-gradient};
+}
+function plotDivider(){
+const q=rounds[index],left=65,right=462,top=46,bottom=265;
+const max=q.sensor==="LDR"?100:80;
+const x=v=>left+v/max*(right-left);
+const y=v=>bottom-v/5*(bottom-top);
+let a=`<rect width="490" height="335" fill="#fff"/>
+<text x="245" y="21" text-anchor="middle" font-size="15" font-weight="800">Divider output against sensor input</text>`;
+for(let k=0;k<=4;k++){
+const xx=max*k/4,v=5*k/4;
+a+=path(`M${x(xx)} ${top}V${bottom}`,"#e4e2db",1)+path(`M${left} ${y(v)}H${right}`,"#e4e2db",1);
+a+=`<text x="${x(xx)}" y="283" text-anchor="middle" font-size="11">${fmt(xx,0)}</text><text x="${left-9}" y="${y(v)+4}" text-anchor="end" font-size="11">${fmt(v,2)}</text>`;
+}
+a+=path(`M${left} ${top}V${bottom}H${right}`);
+a+=`<text x="245" y="321" font-size="13" text-anchor="middle">${q.sensor==="LDR"?"Light level (%)":"Temperature (°C)"}</text>
+<text x="16" y="155" font-size="13" text-anchor="middle" transform="rotate(-90 16 155)">Output p.d. Vout (V)</text>`;
+let points="";
+for(let k=0;k<=100;k++){
+const z=max*k/100,rs=sensorResistance(q.sensor,z),v=q.Vs*rs/(fixed+rs);
+points+=(k?"L":"M")+x(z)+" "+y(v)+" ";
+}
+a+=`<path d="${points}" fill="none" stroke="#6A45F5" stroke-width="4"/>`;
+a+=path(`M${left} ${y(2.5)}H${right}`,"#D92D20",2,'stroke-dasharray="6 5"');
+a+=path(`M${x(q.target)} ${top}V${bottom}`,"#1E9E5A",2,'stroke-dasharray="5 5"');
+a+=`<circle cx="${x(sense)}" cy="${y(voltage())}" r="7" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+a+=`<text x="75" y="38" font-size="11">━ Output · ┄ 2.50 V · ┄ Target input · ● Now</text>`;
+$("plot").innerHTML=a;
+$("plot").setAttribute("aria-label",`Output versus ${q.sensor==="LDR"?"light level":"temperature"}, target ${q.target}, fixed resistor ${fixed} ohms, output at current sensor setting ${fmt(voltage(),3)} volts.`);
+}
+function renderPlot(){if(rounds[index].type==="cell")plotCell();else plotDivider();}
+function feedback(s,k){$("feedback").className="feedback"+(k?" "+k:"");$("feedback").textContent=s;}
+function check(){
+if(done)return;
+const q=rounds[index];
+let ok=false,wrong="",why="";
+if(q.type==="cell"){
+const e=Number(answerE),r=Number(answerR);
+if(answerE===""||answerR===""||!Number.isFinite(e)||!Number.isFinite(r)||e<=0||r<=0){
+wrong="Enter positive numerical answers for both E and r.";
+}else{
+const de=Math.abs(e-q.E)/q.E,dr=Math.abs(r-q.r)/q.r;
+ok=de<=.03&&dr<=.03;
+wrong="E is "+(e>q.E?"too high":"too low")+" ("+fmt(de*100,1)+"% error); r is "+(r>q.r?"too high":"too low")+" ("+fmt(dr*100,1)+"% error).";
+}
+why="E = "+fmt(q.E,2)+" V; r = "+fmt(q.r,2)+" Ω. The y-intercept gives E and the negative gradient gives r.";
+}else{
+const sr=sensorResistance(q.sensor,q.target);
+const out=q.Vs*sr/(fixed+sr);
+const error=Math.abs(out-2.5)/2.5;
+ok=error<=.03;
+wrong="At the target input, output is "+fmt(out,3)+" V ("+fmt(Math.abs(out-2.5),3)+" V "+(out>2.5?"too high":"too low")+").";
+why="At 2.50 V, the fixed resistance equals the sensor resistance: "+fmt(sr,0)+" Ω.";
+}
+if(ok){
+done=true;revealed=true;
+const gain=hinted?50:tries===0?100:75;
+score+=gain;$("score").textContent="Score "+score;
+feedback("🎉 Correct! +"+gain+" points. "+why,"good");
+$("next").classList.remove("hidden");$("check").classList.add("hidden");$("hint").disabled=true;
+renderPlot();
+}else{tries++;feedback("Not yet. "+wrong,"bad");}
+}
+function hint(){
+if(done||hinted)return;
+hinted=true;$("hint").disabled=true;
+const q=rounds[index];
+feedback("Hint: "+(q.type==="cell"?"Take at least two different readings. Calculate r = −ΔV/ΔI, then E = V + Ir.":"At the switching point, Vout = half the supply. That requires Rfixed = Rsensor.")+" This round is worth 50 points.","");
+}
+function next(){
+if(index===5){finish();return;}
+index++;load();
+}
+function finish(){
+$("game").classList.add("hidden");$("end").classList.remove("hidden");
+const n=score>=540?3:score>=390?2:1;
+$("stars").innerHTML=[0,1,2].map(i=>`<span class="${i<n?"earned":""}">${i<n?"★":"☆"}</span>`).join("");
+$("stars").setAttribute("aria-label",n+" out of 3 stars");
+$("final").textContent=score+" / 600 points";
+}
+$("check").onclick=check;$("hint").onclick=hint;$("next").onclick=next;$("again").onclick=init;
+init();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Series or Parallel? | Fix It Today</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+button,input{font:inherit}
+button{border:2px solid #111;border-radius:999px;background:white;min-height:44px;min-width:44px;padding:9px 15px;font-weight:800;cursor:pointer;touch-action:manipulation}
+button:hover:not(:disabled){background:var(--lvl-secondary-tint)}
+button:active:not(:disabled){transform:translateY(2px)}
+button:disabled{opacity:.45}
+button.selected{background:var(--lvl-secondary)}
+button.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2);font-size:17px}
+button.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button.next{background:var(--fit-green);border:3px solid #111}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+header,main{max-width:1170px;margin:auto;padding:18px}
+header{padding-bottom:0}
+h1{font-size:clamp(30px,5vw,45px);font-weight:800;line-height:1.12;margin:12px 0 6px}
+h2{font-size:21px;font-weight:800;margin:0 0 12px}
+h3{font-size:16px;font-weight:800;margin:16px 0 8px}
+p{margin:8px 0}
+.hud,.row,.actions{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.badge{background:var(--lvl-secondary);color:var(--lvl-secondary-on);text-transform:uppercase;font-size:12px;font-weight:800;border:2px solid #111;border-radius:999px;padding:7px 13px}
+.pill{border:2px solid #111;border-radius:999px;padding:7px 12px;background:var(--fit-sunken);font-size:13px;font-weight:800}
+.layout{display:grid;grid-template-columns:1fr;gap:18px}
+.card{min-width:0;border:2px solid #111;border-radius:24px;padding:17px;background:white;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-secondary-tint);border-radius:32px;box-shadow:var(--sh-3)}
+svg{width:100%;height:auto;display:block}
+.diagram{max-width:590px;margin:8px auto}
+.readings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.meter{background:white;border:2px solid #111;border-radius:16px;padding:12px;font-weight:800;text-align:center}
+.meter strong{display:block;font-size:clamp(20px,3.5vw,28px);font-variant-numeric:tabular-nums}
+.target{background:var(--fit-sun);border:2px solid #111;border-radius:16px;padding:13px;margin:12px 0;font-weight:800}
+.selectrow{display:flex;gap:8px;flex-wrap:wrap}
+.slot{border:2px solid #111;border-radius:18px;padding:12px;margin:9px 0;background:var(--fit-sunken)}
+.slot>span{display:block;font-weight:800;margin-bottom:7px}
+.inputrow{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper output{font-size:20px;font-weight:800;min-width:65px;text-align:center;font-variant-numeric:tabular-nums}
+.feedback{margin:14px 0;min-height:48px;background:var(--fit-sunken);padding:9px 12px;border-left:5px solid #111;font-weight:600}
+.feedback.good{background:#e4f8ec;border-color:var(--fit-success)}
+.feedback.bad{background:#fff0ee;border-color:var(--fit-danger)}
+.concept{max-width:350px;margin:20px auto 0}
+.concept figcaption{font-size:13px;text-align:center;color:var(--fit-ink-2)}
+details{border:2px solid #111;border-radius:16px;padding:13px;margin-top:16px;background:white}
+summary{cursor:pointer;font-weight:800;min-height:32px}
+.hidden{display:none!important}
+.end{text-align:center;padding:30px}
+.stars{font-size:48px;color:#ccc}
+.stars .earned{color:#e6a600}
+.current{fill:none;stroke:#14956e;stroke-width:4;stroke-linecap:round;stroke-dasharray:5 15;animation:move 1s linear infinite}
+@keyframes move{to{stroke-dashoffset:-40}}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+<div class="hud">
+<span class="badge">Secondary · Physics</span>
+<span class="pill" id="round">Round 1/6</span>
+<span class="pill" id="score">Score 0</span>
+</div>
+<h1>⚡ Series or Parallel?</h1>
+<p>Pick your resistors. Hit the current or power target.</p>
+</header>
+<main>
+<div id="game" class="layout">
+<section class="card stage">
+<h2>Your circuit</h2>
+<div id="target" class="target"></div>
+<svg id="diagram" class="diagram" viewBox="0 0 500 320" role="img" aria-label="Circuit with a supply, resistors, ammeter and voltmeter"></svg>
+<div class="readings">
+<div class="meter">Ammeter <strong id="ammeter">0.00 A</strong></div>
+<div class="meter">Voltmeter <strong id="voltmeter">0.00 V</strong></div>
+<div class="meter">Total resistance <strong id="totalR">0.00 Ω</strong></div>
+<div class="meter">Total power <strong id="power">0.00 W</strong></div>
+</div>
+<figure class="concept">
+<svg viewBox="0 0 330 115" role="img" aria-label="V equals I multiplied by R; series resistances add, parallel reciprocal resistances add">
+<path d="M50 13L12 83H88Z" fill="#fff" stroke="#111" stroke-width="4" stroke-linejoin="round"/>
+<path d="M31 48H69" stroke="#111" stroke-width="3"/>
+<text x="50" y="40" text-anchor="middle" font-size="19" font-weight="800">V</text>
+<text x="31" y="73" text-anchor="middle" font-size="18">I</text>
+<text x="69" y="73" text-anchor="middle" font-size="18">R</text>
+<text x="111" y="32" font-size="14" font-weight="700">Series: R = R₁ + R₂</text>
+<text x="111" y="58" font-size="14" font-weight="700">Parallel: 1/R = Σ(1/Rᵢ)</text>
+<text x="111" y="85" font-size="14" font-weight="700">Power: P = VI</text>
+</svg>
+<figcaption>Ohm's law connects p.d., current and resistance.</figcaption>
+</figure>
+</section>
+<section class="card">
+<h2>Build and adjust</h2>
+<div id="controls"></div>
+<div class="actions" style="margin-top:17px">
+<button id="hint">Hint (−25 points)</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" class="next hidden">Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Choose your components and check your answer.</div>
+<h2 style="margin-top:20px">Live I–V graph</h2>
+<svg id="plot" viewBox="0 0 490 330" role="img" aria-label="Current plotted against potential difference for player and target resistance"></svg>
+<details>
+<summary>The physics</summary>
+<p><strong>Ohm's law:</strong> V = IR, with V in volts, I in amperes and R in ohms.</p>
+<p><strong>Series:</strong> R_total = R₁ + R₂ + R₃. The same current passes through each resistor.</p>
+<p><strong>Parallel:</strong> 1/R_total = 1/R₁ + 1/R₂ + 1/R₃. Each branch has the same p.d.</p>
+<p><strong>Power:</strong> P = VI = V²/R. For ideal resistors, the I–V line passes through the origin.</p>
+</details>
+</section>
+</div>
+<section id="end" class="card end hidden">
+<h2>Mission complete!</h2>
+<div id="stars" class="stars"></div>
+<h2 id="final"></h2>
+<p>You used circuit rules and Ohm's law to design six working networks.</p>
+<button id="again" class="check">Play again ↻</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const vals=[2,4,6,10,12];
+let rounds=[],round=0,score=0,tries=0,hinted=false,done=false;
+let supply=6,layout="series",n=2,res=[2,4,6];
+const safe=x=>Number.isFinite(x)?x:0;
+const fmt=(x,d=2)=>safe(x).toFixed(d);
+const line=(d,c="#111",w=3)=>`<path d="${d}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+function random(seed){return()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};}
+function equivalent(a,type){
+if(!a.length)return 0;
+if(type==="series")return a.reduce((s,v)=>s+v,0);
+const inv=a.reduce((s,v)=>s+(v>0?1/v:0),0);
+return inv>0?1/inv:0;
+}
+function initialise(){
+const r=random((Date.now()>>>0)||7);
+rounds=[];
+for(let i=0;i<6;i++){
+const count=i<2?2:3;
+const mode=i%2===0?"series":"parallel";
+const v=r()<.5?6:12;
+const parts=Array.from({length:count},()=>vals[Math.floor(r()*vals.length)]);
+const R=equivalent(parts,mode);
+const metric=i%3===2?"power":"current";
+rounds.push({count,mode,v,parts,R,metric,target:metric==="power"?v*v/R:v/R});
+}
+round=0;score=0;$("end").classList.add("hidden");$("game").classList.remove("hidden");load();
+}
+function load(){
+const q=rounds[round];
+tries=0;hinted=false;done=false;
+supply=q.v===6?12:6;
+layout=q.mode==="series"?"parallel":"series";
+n=q.count;
+res=[2,2,2];
+$("round").textContent="Round "+(round+1)+"/6";
+$("score").textContent="Score "+score;
+$("target").textContent="TARGET · "+(q.metric==="current"?"Total current "+fmt(q.target,3)+" A":"Total power "+fmt(q.target,3)+" W")+" (±2%)";
+$("check").classList.remove("hidden");$("next").classList.add("hidden");$("hint").disabled=false;
+feedback("Choose resistors, a layout and a supply.","");
+render();
+}
+function R(){return equivalent(res.slice(0,n),layout);}
+function I(){const rr=R();return rr>0?supply/rr:0;}
+function P(){return supply*I();}
+function render(){
+const q=rounds[round];
+let html=`<h3>Supply voltage</h3><div class="selectrow">`;
+for(const v of [6,12])html+=`<button data-voltage="${v}" class="${supply===v?"selected":""}" aria-pressed="${supply===v}">${v} V</button>`;
+html+=`</div><h3>Arrangement</h3><div class="selectrow">`;
+for(const mode of ["series","parallel"])html+=`<button data-layout="${mode}" class="${layout===mode?"selected":""}" aria-pressed="${layout===mode}">${mode==="series"?"Series":"Parallel"}</button>`;
+html+=`</div><h3>Resistors</h3><div class="selectrow">`;
+for(const count of [2,3])html+=`<button data-count="${count}" class="${n===count?"selected":""}" aria-pressed="${n===count}">${count} resistors</button>`;
+html+="</div>";
+for(let j=0;j<n;j++){
+html+=`<div class="slot"><span>R${j+1}</span><div class="selectrow">`;
+for(const v of vals)html+=`<button data-slot="${j}" data-ohms="${v}" class="${res[j]===v?"selected":""}" aria-pressed="${res[j]===v}">${v} Ω</button>`;
+html+="</div></div>";
+}
+$("controls").innerHTML=html;
+$("controls").querySelectorAll("[data-voltage]").forEach(b=>b.onclick=()=>{if(!done){supply=Number(b.dataset.voltage);render();}});
+$("controls").querySelectorAll("[data-layout]").forEach(b=>b.onclick=()=>{if(!done){layout=b.dataset.layout;render();}});
+$("controls").querySelectorAll("[data-count]").forEach(b=>b.onclick=()=>{if(!done){n=Number(b.dataset.count);render();}});
+$("controls").querySelectorAll("[data-slot]").forEach(b=>b.onclick=()=>{if(!done){res[Number(b.dataset.slot)]=Number(b.dataset.ohms);render();}});
+$("ammeter").textContent=fmt(I(),3)+" A";
+$("voltmeter").textContent=fmt(supply,1)+" V";
+$("totalR").textContent=fmt(R(),3)+" Ω";
+$("power").textContent=fmt(P(),3)+" W";
+renderDiagram();renderPlot();
+}
+function resistor(cx,y,label){
+return line(`M${cx-43} ${y}H${cx-30} M${cx+30} ${y}H${cx+43}`)+
+`<rect x="${cx-30}" y="${y-12}" width="60" height="24" fill="#fff" stroke="#111" stroke-width="3" rx="3"/>`+
+`<text x="${cx}" y="${y-20}" font-size="13" font-weight="800" text-anchor="middle">${label}</text>`;
+}
+function renderDiagram(){
+const curr=I(),speed=Math.max(.22,Math.min(3,2/(.2+curr*.3)));
+let a=`<text x="250" y="22" font-size="16" font-weight="800" text-anchor="middle">${layout.toUpperCase()} CIRCUIT</text>`;
+a+=line("M75 85H120 M160 85H440V265H75V85");
+a+=`<circle cx="140" cy="85" r="20" fill="white" stroke="#111" stroke-width="3"/><text x="140" y="91" font-size="20" font-weight="800" text-anchor="middle">A</text>`;
+a+=line("M66 164H84 M58 180H92","#111",4);
+a+=`<text x="10" y="150" font-size="13" font-weight="800">${supply} V</text><text x="97" y="171" font-size="13">+</text>`;
+a+=`<circle cx="250" cy="85" r="17" fill="white" stroke="#111" stroke-width="3"/><text x="250" y="91" font-size="19" text-anchor="middle">V</text>`;
+if(layout==="series"){
+a+=line("M265 265H300");
+const width=270/n,first=195;
+a+=line(`M160 85H${first-42}`);
+for(let j=0;j<n;j++){
+const x=first+j*width;
+a+=resistor(x,85,`R${j+1} = ${res[j]} Ω`);
+if(j>0)a+=line(`M${x-width+43} 85H${x-43}`);
+}
+a+=line(`M${first+(n-1)*width+43} 85H440`);
+a+=`<text x="250" y="307" text-anchor="middle" font-size="13">Same current in every resistor</text>`;
+}else{
+a+=line("M160 85H195V235H440");
+for(let j=0;j<n;j++){
+const y=115+j*(n===2?85:57);
+a+=line(`M195 ${y}H212 M288 ${y}H420`);
+a+=resistor(250,y,`R${j+1} = ${res[j]} Ω`);
+a+=line(`M420 ${y}H440`);
+}
+a+=line("M440 85V265");
+a+=`<text x="250" y="307" text-anchor="middle" font-size="13">Same p.d. across every branch</text>`;
+}
+if(curr>.001){
+a+=`<path class="current" style="animation-duration:${speed}s" d="M90 110V85H440V265H75V190"/>`;
+if(layout==="parallel")for(let j=0;j<n;j++){
+const y=115+j*(n===2?85:57);
+a+=`<path class="current" style="animation-duration:${speed}s" d="M205 ${y}H420"/>`;
+}
+}
+$("diagram").innerHTML=a;
+$("diagram").setAttribute("aria-label",`${supply} V ideal supply, ${n} resistors in ${layout}, combined resistance ${fmt(R(),2)} ohms, ammeter ${fmt(curr,3)} amperes, voltmeter ${supply} volts`);
+}
+function renderPlot(){
+const q=rounds[round],rp=R(),rt=q.R;
+const left=68,right=456,top=49,bottom=265;
+const maxI=Math.max(1,12/Math.max(.1,Math.min(rp,rt)))*1.1;
+const xx=v=>left+v/12*(right-left);
+const yy=i=>bottom-i/maxI*(bottom-top);
+let a=`<rect x="0" y="0" width="490" height="330" fill="white"/>
+<text x="245" y="22" font-size="16" font-weight="800" text-anchor="middle">Current–p.d. characteristics</text>`;
+for(let k=0;k<=4;k++){
+const v=k*3,x=xx(v),i=maxI*k/4,y=yy(i);
+a+=line(`M${x} ${top}V${bottom}`,"#e5e5e5",1)+line(`M${left} ${y}H${right}`,"#e5e5e5",1);
+a+=`<text x="${x}" y="283" font-size="12" text-anchor="middle">${v}</text>`;
+a+=`<text x="${left-8}" y="${y+4}" font-size="11" text-anchor="end">${fmt(i,2)}</text>`;
+}
+a+=line(`M${left} ${top}V${bottom}H${right}`,"#111",3);
+a+=`<text x="250" y="315" font-size="13" text-anchor="middle">Potential difference V (V)</text>
+<text x="16" y="158" transform="rotate(-90 16 158)" font-size="13" text-anchor="middle">Current I (A)</text>`;
+const playerEnd=rp>0?12/rp:0,targetEnd=rt>0?12/rt:0;
+a+=`<path d="M${xx(0)} ${yy(0)}L${xx(12)} ${yy(targetEnd)}" stroke="#D92D20" stroke-width="3" stroke-dasharray="9 6" fill="none"/>`;
+a+=line(`M${xx(0)} ${yy(0)}L${xx(12)} ${yy(playerEnd)}`,"#127D68",4);
+a+=`<circle cx="${xx(supply)}" cy="${yy(I())}" r="7" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+a+=`<text x="79" y="39" font-size="12" fill="#127D68">━━ Your circuit</text>
+<text x="253" y="39" font-size="12" fill="#D92D20">┄┄ Target</text>
+<text x="370" y="39" font-size="11">● Working point</text>`;
+$("plot").innerHTML=a;
+$("plot").setAttribute("aria-label",`Current versus potential difference from zero to 12 volts. Player resistance ${fmt(rp,3)} ohms, target ${fmt(rt,3)} ohms. Current at ${supply} volts ${fmt(I(),3)} amperes.`);
+}
+function feedback(t,c){$("feedback").className="feedback"+(c?" "+c:"");$("feedback").textContent=t;}
+function check(){
+if(done)return;
+const q=rounds[round],actual=q.metric==="power"?P():I();
+const error=Math.abs(actual-q.target)/Math.max(q.target,1e-9);
+if(error<=.02){
+done=true;
+const gain=hinted?50:tries===0?100:75;
+score+=gain;$("score").textContent="Score "+score;
+feedback("🎉 Target reached! +"+gain+" points. The equivalent resistance determines both total current and power.","good");
+$("next").classList.remove("hidden");$("check").classList.add("hidden");$("hint").disabled=true;
+}else{
+tries++;
+feedback("Not yet. "+(q.metric==="current"?"Current":"Power")+" is "+fmt(Math.abs(actual-q.target),3)+(q.metric==="current"?" A":" W")+" too "+(actual>q.target?"high":"low")+". Adjust the supply or equivalent resistance.","bad");
+}
+}
+function hint(){
+if(done||hinted)return;
+hinted=true;$("hint").disabled=true;
+const q=rounds[round];
+feedback("Hint: Calculate R_total first. The target requires "+fmt(q.R,3)+" Ω. Use R_series = ΣR or 1/R_parallel = Σ(1/R). Maximum 50 points this round.","");
+}
+function next(){
+if(round===5){finish();return;}
+round++;load();
+}
+function finish(){
+$("game").classList.add("hidden");$("end").classList.remove("hidden");
+let stars=score>=540?3:score>=390?2:1;
+$("stars").innerHTML=[0,1,2].map(i=>`<span class="${i<stars?"earned":""}">${i<stars?"★":"☆"}</span>`).join("");
+$("stars").setAttribute("aria-label",stars+" out of 3 stars");
+$("final").textContent=score+" / 600 points";
+}
+$("check").onclick=check;$("hint").onclick=hint;$("next").onclick=next;$("again").onclick=initialise;
+initialise();
+})();
+</script>
+</body>
+</html>

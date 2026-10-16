@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bulb Builder | Fix It Today</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+button,input{font:inherit}
+button{min-height:44px;border:2px solid #111;border-radius:999px;background:white;color:#111;padding:9px 16px;font-weight:800;cursor:pointer;touch-action:manipulation}
+button:hover:not(:disabled){background:var(--lvl-primary-tint)}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button:active:not(:disabled){transform:translateY(2px)}
+button.selected{background:var(--lvl-primary)}
+button.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2);font-size:17px}
+button.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button.next{background:var(--fit-green);border:3px solid #111}
+header,main,footer{max-width:1160px;margin:auto;padding:18px}
+header{padding-bottom:0}
+h1{font-size:clamp(30px,5vw,45px);line-height:1.1;margin:12px 0 5px;font-weight:800}
+h2{font-size:21px;margin:0 0 12px;font-weight:800}
+p{margin:7px 0}
+.hud{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;padding:7px 13px;border:2px solid #111;border-radius:999px;background:var(--lvl-primary);color:var(--lvl-primary-on);font-size:12px;font-weight:800;text-transform:uppercase}
+.pill{padding:7px 12px;background:var(--fit-sunken);border:2px solid #111;border-radius:999px;font-weight:800;font-size:13px}
+.layout{display:grid;grid-template-columns:1fr;gap:18px}
+.card{min-width:0;border:2px solid #111;border-radius:24px;padding:17px;background:white;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-primary-tint);border-radius:32px;box-shadow:var(--sh-3)}
+svg{display:block;width:100%;height:auto}
+.diagram{max-width:540px;margin:auto}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:13px 0}
+.readout{display:inline-block;border:2px solid #111;background:white;border-radius:12px;padding:9px 12px;font-weight:800}
+.object{min-width:120px;touch-action:none}
+.zones{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.zone{border:3px dashed #111;border-radius:18px;min-height:82px;background:white;display:grid;place-items:center;padding:10px;text-align:center}
+.zone.selected{border-style:solid;background:var(--fit-green)}
+.zone.bad{background:#ffe5e2}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper output{min-width:60px;text-align:center;font-size:21px;font-weight:800}
+input[type=range]{width:100%;accent-color:#111;min-height:44px;cursor:pointer}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.feedback{min-height:48px;border-left:5px solid #111;padding:8px 11px;background:var(--fit-sunken);font-weight:600;margin-top:14px}
+.feedback.good{border-color:var(--fit-success);background:#e2f8eb}
+.feedback.bad{border-color:var(--fit-danger);background:#fff0ee}
+.concept{max-width:330px;margin:15px auto 0}
+.concept figcaption{font-size:13px;color:var(--fit-ink-2);text-align:center}
+details{margin-top:16px;border:2px solid #111;border-radius:16px;background:white;padding:12px}
+summary{cursor:pointer;font-weight:800;min-height:32px}
+.hidden{display:none!important}
+.end{text-align:center;padding:28px}
+.stars{font-size:48px;letter-spacing:5px;color:#d3d3d3}
+.stars .earned{color:#e6a600}
+.current{stroke:#207c49;stroke-width:3;stroke-dasharray:5 13;animation:travel 1s linear infinite;fill:none;stroke-linecap:round}
+@keyframes travel{to{stroke-dashoffset:-36}}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.12fr) minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header>
+<div class="hud">
+<span class="badge">Primary · P5 Science</span>
+<span class="pill" id="round">Round 1/6</span>
+<span class="pill" id="score">Score 0</span>
+</div>
+<h1>💡 Bulb Builder</h1>
+<p>Build a complete path for electricity. Make the bulb shine!</p>
+</header>
+<main>
+<div id="game" class="layout">
+<section class="card stage">
+<h2 id="task">Close the loop</h2>
+<p id="instruction"></p>
+<svg id="circuit" class="diagram" viewBox="0 0 480 300" role="img" aria-label="Battery, switch, bulb and a gap in a circuit"></svg>
+<div id="parts"></div>
+<div class="row">
+<span class="readout" id="state">Bulb: OFF</span>
+<span class="readout" id="path">Path: open</span>
+</div>
+<figure class="concept">
+<svg viewBox="0 0 300 94" role="img" aria-label="An open loop stops current; a closed conducting loop lets current flow">
+<path d="M20 30H115V69H20V30 M185 30H280V69H185V30" fill="none" stroke="#111" stroke-width="4" stroke-linejoin="round"/>
+<rect x="49" y="23" width="24" height="15" fill="#ffc83d" stroke="#111" stroke-width="3"/>
+<path d="M221 30h25" stroke="#fff" stroke-width="7"/>
+<path d="M217 30l29 -14" stroke="#111" stroke-width="4"/>
+<text x="68" y="87" font-size="13" text-anchor="middle">Closed path ✓</text>
+<text x="235" y="87" font-size="13" text-anchor="middle">Open path ✕</text>
+</svg>
+<figcaption>Electricity needs an unbroken conducting path.</figcaption>
+</figure>
+</section>
+<section class="card">
+<h2>Try it!</h2>
+<div id="activity"></div>
+<div class="controls">
+<button id="hint">Hint (−25 points)</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" class="next hidden">Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Choose your parts, then press Check.</div>
+<h2 style="margin-top:20px">Live brightness chart</h2>
+<svg id="plot" viewBox="0 0 460 285" role="img" aria-label="Bulb brightness for one, two and three batteries"></svg>
+<details>
+<summary>The physics</summary>
+<p>A bulb needs a <strong>closed circuit</strong> and conducting parts.</p>
+<p>Metals usually let electric current flow. Plastic, dry rubber and dry wood are insulators.</p>
+<p>More batteries can make a bulb brighter in this simple model. Do not mix batteries in real experiments.</p>
+<p>Brightness is a relative model: bulb power grows with the square of the voltage, so 2 cells give about 4× and 3 cells about 9× the brightness of 1 cell.</p>
+</details>
+</section>
+</div>
+<section id="end" class="card end hidden">
+<h2>Well done, circuit builder!</h2>
+<div id="stars" class="stars" aria-label="Stars earned"></div>
+<h2 id="finalScore"></h2>
+<p id="ending"></p>
+<button class="check" id="again">Play again ↻</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const objects=[
+{name:"Steel spoon",good:true},
+{name:"Copper wire",good:true},
+{name:"Plastic ruler",good:false},
+{name:"Rubber band",good:false},
+{name:"Aluminium foil",good:true},
+{name:"Wooden stick",good:false}
+];
+let rounds=[],index=0,score=0,tries=0,hinted=false,done=false;
+let part="",switchClosed=true,batteries=1,choice=-1;
+const path=(d,col="#111",w=4)=>`<path d="${d}" stroke="${col}" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+function rng(seed){return function(){seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};}
+function shuffle(a,r){return a.map(v=>({v,k:r()})).sort((x,y)=>x.k-y.k).map(x=>x.v);}
+function init(){
+const r=rng((Date.now()>>>0)||1);
+const order=shuffle(objects,r);
+rounds=[
+{type:"gap",title:"Close the loop",instruction:"Put a wire into the gap. A complete loop makes the bulb light."},
+{type:"switch",title:"Control the bulb",instruction:"The switch is part of the path. Make the bulb "+(r()<.5?"light up.":"go off."),want:null},
+{type:"sort",title:"Materials test · 1",items:order.slice(0,2)},
+{type:"sort",title:"Materials test · 2",items:order.slice(2,4)},
+{type:"sort",title:"Materials test · 3",items:order.slice(4,5)},
+{type:"sort",title:"Materials test · 4",items:order.slice(5,6)}
+];
+rounds[1].want=rounds[1].instruction.includes("light up");
+index=0;score=0;$("end").classList.add("hidden");$("game").classList.remove("hidden");
+load();
+}
+function currentRound(){return rounds[index];}
+function load(){
+tries=0;hinted=false;done=false;part="";choice=-1;batteries=1;switchClosed=false;
+const q=currentRound();
+if(q.type==="switch")switchClosed=!q.want;
+$("round").textContent="Round "+(index+1)+"/6";
+$("score").textContent="Score "+score;
+$("task").textContent=q.title;
+$("instruction").textContent=q.type==="sort"?"Test each object. Decide whether it lets electric current flow or stops current.":q.instruction;
+$("next").classList.add("hidden");$("check").classList.remove("hidden");
+$("hint").disabled=false;
+message("Choose your parts, then press Check.","");
+render();
+}
+function active(){
+const q=currentRound();
+if(q.type==="gap")return part==="wire"&&switchClosed;
+if(q.type==="switch")return switchClosed;
+return part==="metal"&&switchClosed;
+}
+function renderCircuit(){
+const on=active(),closed=currentRound().type==="gap"?part==="wire":currentRound().type==="switch"?switchClosed:part==="metal";
+const c=on?"#FFDD00":"#FFFFFF";
+const loop=`M100 90H192 M275 90H379V223H100V90`;
+let out=path(loop);
+out+=`<rect x="82" y="147" width="36" height="45" rx="6" fill="#fff" stroke="#111" stroke-width="3"/>`;
+out+=path("M91 161H109 M91 177H109", "#111",3);
+out+=`<text x="32" y="146" font-size="14" font-weight="700">${batteries} cell${batteries===1?"":"s"}</text>`;
+out+=`<circle cx="379" cy="157" r="28" fill="${c}" stroke="#111" stroke-width="4"/>`;
+out+=path("M360 138L398 176 M398 138L360 176","#111",3);
+if(on)out+=`<path d="M379 113V103 M416 123L425 114 M425 157H438 M418 191L426 200" stroke="#e4a000" stroke-width="5" stroke-linecap="round"/>`;
+out+=`<text x="379" y="202" font-size="14" text-anchor="middle" font-weight="700">Bulb</text>`;
+out+=`<circle cx="192" cy="90" r="5" fill="#111"/><circle cx="275" cy="90" r="5" fill="#111"/>`;
+if(currentRound().type==="gap"){
+if(part==="wire")out+=path("M192 90H275","#3DBE6B",6);
+else if(part==="plastic")out+=`<rect x="194" y="80" width="79" height="20" rx="5" fill="#FF8FB8" stroke="#111" stroke-width="3"/>`;
+else out+=`<rect x="200" y="68" width="68" height="42" rx="10" fill="#fff" stroke="#111" stroke-width="2" stroke-dasharray="6 6"/><text x="234" y="94" font-size="14" text-anchor="middle">GAP</text>`;
+}else{
+out+=path("M192 90H275");
+}
+out+=`<circle cx="225" cy="223" r="5" fill="#111"/><circle cx="274" cy="223" r="5" fill="#111"/>`;
+out+=path(closed?"M225 223H274":"M225 223L269 203",closed?"#3DBE6B":"#111",4);
+out+=`<text x="249" y="261" font-size="14" text-anchor="middle">Switch</text>`;
+if(on)out+=`<path class="current" style="animation-duration:${1.2/batteries}s" d="M130 90H379V223H100V96"/>`;
+out+=`<text x="238" y="24" font-size="17" font-weight="800" text-anchor="middle">${on?"CURRENT FLOWS →":"NO CURRENT"}</text>`;
+$("circuit").innerHTML=out;
+$("circuit").setAttribute("aria-label",`${batteries} batteries, bulb ${on?"lit":"off"}, conducting path ${on?"closed":"incomplete"}`);
+$("state").textContent="Bulb: "+(on?"ON 💡":"OFF");
+$("path").textContent="Path: "+(on?"closed ✓":"open ✕");
+}
+function renderPlot(){
+const on=active(),h=230,x0=60,y0=226,w=365,top=42;
+let a=`<rect x="0" y="0" width="460" height="285" rx="14" fill="#fff"/>
+<text x="230" y="22" text-anchor="middle" font-size="15" font-weight="800">Bulb brightness (relative)</text>`;
+for(let v=0;v<=100;v+=25){
+const y=y0-v/100*(y0-top);
+a+=path(`M${x0} ${y}H${x0+w}`,"#ddd",1);
+a+=`<text x="51" y="${y+4}" text-anchor="end" font-size="12">${v}</text>`;
+}
+a+=path(`M${x0} ${top}V${y0}H${x0+w}`);
+a+=`<text x="230" y="274" text-anchor="middle" font-size="13">Number of batteries (cells)</text>
+<text x="14" y="142" transform="rotate(-90 14 142)" text-anchor="middle" font-size="12">Relative brightness (%)</text>`;
+for(let n=1;n<=3;n++){
+const v=on?Math.round(100*n*n/9):0;
+const x=x0+57+(n-1)*115;
+const y=y0-v/100*(y0-top);
+a+=`<rect x="${x}" y="${y}" width="54" height="${Math.max(1,y0-y)}" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+a+=`<text x="${x+27}" y="${y-7}" text-anchor="middle" font-weight="700" font-size="12">${v}%</text>`;
+a+=`<text x="${x+27}" y="${y0+18}" text-anchor="middle" font-size="13">${n}</text>`;
+if(n===batteries)a+=`<path d="M${x+13} ${y0+29}H${x+41}" stroke="#1F66E5" stroke-width="4"/><circle cx="${x+27}" cy="${Math.max(top,y)}" r="5" fill="#1F66E5"/>`;
+}
+a+=`<text x="335" y="38" font-size="11">● Selected: ${batteries} cell(s)</text>`;
+$("plot").innerHTML=a;
+$("plot").setAttribute("aria-label",`Brightness for one, two and three cells: ${on?"11, 44, 100":"0, 0, 0"} percent. Selected ${batteries} cells.`);
+}
+function render(){
+const q=currentRound();
+const area=$("activity"),parts=$("parts");
+parts.innerHTML="";
+if(q.type==="gap"){
+switchClosed=true;
+parts.innerHTML=`<p><strong>Choose a part for the gap:</strong></p><div class="row">
+<button draggable="true" data-part="wire" class="${part==="wire"?"selected":""}">🔗 Wire</button>
+<button draggable="true" data-part="plastic" class="${part==="plastic"?"selected":""}">📏 Plastic</button></div>`;
+area.innerHTML=`<p>Tap a part or drag it onto the gap. Only a conductor completes the circuit.</p>`;
+parts.querySelectorAll("[data-part]").forEach(b=>{
+b.addEventListener("click",()=>{if(done)return;part=b.dataset.part;render();});
+b.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",b.dataset.part));
+});
+$("circuit").addEventListener("dragover",e=>e.preventDefault(),{once:true});
+$("circuit").ondrop=e=>{e.preventDefault();if(!done){const p=e.dataTransfer.getData("text/plain");if(["wire","plastic"].includes(p)){part=p;render();}}};
+}else if(q.type==="switch"){
+parts.innerHTML=`<div class="row"><button id="switchButton" aria-pressed="${switchClosed}" ${done?"disabled":""}>Switch: ${switchClosed?"CLOSED ✓":"OPEN ✕"}</button></div>`;
+$("switchButton").onclick=()=>{switchClosed=!switchClosed;render();};
+area.innerHTML="<p>Tap the switch. Watch the bulb and the moving current arrows.</p>";
+}else{
+switchClosed=true;
+part=choice<0?"":q.items[choice].good?"metal":"insulator";
+const ob=q.items[0];
+area.innerHTML=`<p><strong>Object ${index===2?"1–2":index===3?"3–4":index===4?"5":"6"} of 6</strong></p>
+<div id="objectChoices"></div>
+<p>Where does this object belong?</p>
+<div class="zones">
+<button class="zone ${choice===1?"selected":""}" id="goodZone">✓ Lets current flow</button>
+<button class="zone ${choice===0?"selected":""}" id="badZone">✕ Stops current</button>
+</div>`;
+let item=0;
+if(q.items.length===2){
+item=Number(q.position||0);
+}
+const actual=q.items[item];
+$("objectChoices").innerHTML=`<div class="row"><span class="readout">🧪 ${actual.name}</span></div>`;
+$("goodZone").onclick=()=>{choice=1;part=actual.good?"metal":"insulator";renderCircuit();renderPlot();renderZones();};
+$("badZone").onclick=()=>{choice=0;part=actual.good?"metal":"insulator";renderCircuit();renderPlot();renderZones();};
+function renderZones(){
+$("goodZone").classList.toggle("selected",choice===1);
+$("badZone").classList.toggle("selected",choice===0);
+}
+}
+if(q.type!=="sort"){
+area.innerHTML+=`<p><strong>Number of batteries</strong></p><div class="stepper">
+<button id="minus" aria-label="Remove one battery">−</button>
+<output id="cellCount">${batteries}</output>
+<button id="plus" aria-label="Add one battery">+</button></div>`;
+$("minus").onclick=()=>{batteries=Math.max(1,batteries-1);$("cellCount").textContent=batteries;renderCircuit();renderPlot();};
+$("plus").onclick=()=>{batteries=Math.min(3,batteries+1);$("cellCount").textContent=batteries;renderCircuit();renderPlot();};
+}
+renderCircuit();renderPlot();
+}
+function message(text,kind){
+$("feedback").textContent=text;
+$("feedback").className="feedback"+(kind?" "+kind:"");
+}
+function check(){
+if(done)return;
+const q=currentRound();
+let correct=false,reason="",wrong="";
+if(q.type==="gap"){
+correct=part==="wire";
+reason="A metal wire joins both ends. The circuit is now complete, so current can flow.";
+wrong=part===""?"The gap is still empty.":"Plastic stops current. Try a conducting wire.";
+}else if(q.type==="switch"){
+correct=switchClosed===q.want;
+reason=switchClosed?"Closing the switch completes the loop. The bulb lights.":"Opening the switch breaks the loop. The bulb goes off.";
+wrong="The bulb is "+(switchClosed?"on":"off")+", but it must be "+(q.want?"on":"off")+".";
+}else{
+let item=Number(q.position||0),ob=q.items[item];
+correct=choice!==( -1 )&&((choice===1)===ob.good);
+reason=ob.name+(ob.good?" is a conductor: it lets current flow.":" is an insulator: it stops current.");
+wrong=choice===-1?"Choose one of the two groups.":"Try again. Think about the material, not its shape.";
+if(correct&&q.items.length>1&&item===0){
+q.position=1;choice=-1;part="";
+message("✓ Correct! "+reason+" Now test the next object.","good");
+render();
+return;
+}
+}
+if(correct){
+const gain=hinted?50:tries===0?100:75;
+score+=gain;done=true;
+$("score").textContent="Score "+score;
+message("🎉 Correct! +"+gain+" points. "+reason,"good");
+$("next").classList.remove("hidden");$("check").classList.add("hidden");
+$("hint").disabled=true;
+}else{
+tries++;
+message("Not yet. "+wrong,"bad");
+}
+}
+function hint(){
+if(done||hinted)return;
+hinted=true;$("hint").disabled=true;
+const q=currentRound();
+const clue=q.type==="gap"?"Metals let current flow. Choose the wire.":q.type==="switch"?"A closed switch makes the bulb light; an open switch makes it go off.":"Steel, copper and aluminium conduct. Plastic, rubber and dry wood insulate.";
+message("Hint: "+clue+" Your round is now worth 50 points.","");
+}
+function advance(){
+if(index===5){finish();return;}
+index++;load();
+}
+function finish(){
+$("game").classList.add("hidden");$("end").classList.remove("hidden");
+const n=score>=540?3:score>=390?2:1;
+$("stars").innerHTML=[0,1,2].map(i=>`<span class="${i<n?"earned":""}">${i<n?"★":"☆"}</span>`).join("");
+$("stars").setAttribute("aria-label",n+" out of 3 stars");
+$("finalScore").textContent=score+" / 600 points";
+$("ending").textContent="You built circuits, controlled a switch and tested six materials.";
+}
+$("check").onclick=check;$("hint").onclick=hint;$("next").onclick=advance;$("again").onclick=init;
+init();
+})();
+</script>
+</body>
+</html>

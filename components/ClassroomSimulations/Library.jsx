@@ -26,6 +26,7 @@ const TOPIC_ICON = {
   differentiation: <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M3 19c4-1 7-6 9-11 1-2.5 3-4 6-4"/><path d="M5 15.5 19 5.5"/><circle cx="11" cy="10" r="1.8" fill="currentColor"/></g>,
   forces: <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="9" width="8" height="8" rx="1.5"/><path d="M12 13h8M17 10l3 3-3 3"/></g>,
   'linear-graphs': <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 3v17h17"/><path d="M6 17 19 6"/></g>,
+  circuits: <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 8V5h16v14H4v-3"/><path d="M2 10h4M3.5 13h1"/><circle cx="20" cy="12" r="2.6" fill="currentColor"/></g>,
 }
 
 function Tile({ sim, hidden, addToClassEnabled }) {

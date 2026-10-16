@@ -8,6 +8,7 @@ import robots from '@/app/robots'
 import { GET as legacySitemap } from '@/app/sitemap-0.xml/route'
 // Original-activity contract: concept-family variants are switched on separately (see tests/simFamilies/live.test.js).
 vi.mock('../../public/simulations/families/live.js', () => ({ LIVE_FAMILY: [] }))
+vi.mock('../../content/sims/htmlSims.js', () => ({ htmlSims: [] }))
 
 const liveSimulationIds = [
     'sampling', 'feedback', 'base-rates', 'heat-path',

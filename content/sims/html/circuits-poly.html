@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kirchhoff Junction | Fix It Today</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+button,input{font:inherit}
+button{background:white;border:2px solid #111;border-radius:999px;min-width:44px;min-height:44px;padding:9px 14px;font-weight:800;cursor:pointer;touch-action:manipulation}
+button:hover:not(:disabled){background:var(--lvl-poly-tint)}
+button:active:not(:disabled){transform:translateY(2px)}
+button:disabled{opacity:.45}
+button.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2);font-size:17px}
+button.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button.next{background:var(--fit-green);border:3px solid #111}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+header,main{max-width:1180px;margin:auto;padding:18px}
+header{padding-bottom:0}
+h1{font-size:clamp(30px,5vw,45px);font-weight:800;line-height:1.1;margin:12px 0 6px}
+h2{font-size:21px;font-weight:800;margin:0 0 12px}
+h3{font-size:16px;font-weight:800;margin:12px 0 7px}
+p{margin:7px 0}
+.hud,.row,.actions{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.badge{background:var(--lvl-poly);color:var(--lvl-poly-on);padding:7px 13px;border:2px solid #111;border-radius:999px;font-size:12px;font-weight:800;text-transform:uppercase}
+.pill{background:var(--fit-sunken);padding:7px 12px;border:2px solid #111;border-radius:999px;font-size:13px;font-weight:800}
+.layout{display:grid;grid-template-columns:1fr;gap:18px}
+.card{min-width:0;border:2px solid #111;border-radius:24px;padding:17px;background:white;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-poly-tint);border-radius:32px;box-shadow:var(--sh-3)}
+svg{width:100%;height:auto;display:block}
+.diagram{max-width:540px;margin:auto}
+.metrics{display:grid;grid-template-columns:1fr;gap:9px}
+.metric{background:white;padding:10px 12px;border:2px solid #111;border-radius:13px;font-weight:800;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.metric.pass{background:#dcf8e5;border-color:var(--fit-success)}
+.metric.fail{background:#fff1e9;border-color:var(--fit-danger)}
+.metric strong{font-variant-numeric:tabular-nums}
+.stepper{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:7px 0}
+.stepper output{font-weight:800;font-variant-numeric:tabular-nums;font-size:20px;min-width:86px;text-align:center}
+.stepper button{min-width:48px}
+input[type=number]{border:2px solid #111;min-height:48px;border-radius:12px;padding:8px 10px;font-weight:800;width:140px;max-width:100%}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-poly);cursor:pointer}
+.target{background:var(--fit-sun);border:2px solid #111;border-radius:16px;padding:12px;font-weight:800;margin-bottom:12px}
+.feedback{background:var(--fit-sunken);border-left:5px solid #111;padding:10px 12px;min-height:50px;margin:14px 0;font-weight:600}
+.feedback.good{background:#e2f8eb;border-color:var(--fit-success)}
+.feedback.bad{background:#fff0ee;border-color:var(--fit-danger)}
+.concept{max-width:350px;margin:16px auto 0}
+.concept figcaption{font-size:13px;text-align:center;color:var(--fit-ink-2)}
+details{margin-top:16px;border:2px solid #111;border-radius:16px;padding:12px;background:white}
+summary{min-height:32px;cursor:pointer;font-weight:800}
+.hidden{display:none!important}
+.end{text-align:center;padding:28px}
+.stars{font-size:48px;color:#ccc}
+.stars .earned{color:#e6a600}
+.current{stroke:#cc4c1e;stroke-width:4;stroke-dasharray:5 17;fill:none;animation:move 1.2s linear infinite;stroke-linecap:round}
+@keyframes move{to{stroke-dashoffset:-44}}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.08fr) minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+<div class="hud">
+<span class="badge">Polytechnic · Engineering</span>
+<span class="pill" id="round">Round 1/6</span>
+<span class="pill" id="score">Score 0</span>
+</div>
+<h1>🔧 Kirchhoff Junction</h1>
+<p>Balance two loops, then solve their Thévenin equivalent.</p>
+</header>
+<main>
+<div id="game" class="layout">
+<section class="card stage">
+<h2 id="heading">Balance the junction</h2>
+<div id="target" class="target">Make every residual zero.</div>
+<svg id="diagram" class="diagram" viewBox="0 0 520 345" role="img" aria-label="Two voltage sources feeding a common node through two resistors, with a load to ground"></svg>
+<div class="metrics">
+<div id="kcl" class="metric"><span>KCL residual</span><strong>0 A</strong></div>
+<div id="kvl1" class="metric"><span>Left-loop KVL residual</span><strong>0 V</strong></div>
+<div id="kvl2" class="metric"><span>Right-loop KVL residual</span><strong>0 V</strong></div>
+</div>
+<figure class="concept">
+<svg viewBox="0 0 340 116" role="img" aria-label="Kirchhoff current law with two currents entering a node and one leaving">
+<path d="M22 52H158 M158 52H300" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+<path d="M158 52L101 12 M158 52L101 95" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+<circle cx="158" cy="52" r="12" fill="#FF6B3D" stroke="#111" stroke-width="3"/>
+<path d="M82 25L133 43 M82 83L133 62 M216 52H273" stroke="#3DBE6B" stroke-width="4" stroke-linecap="round"/>
+<path d="M120 34l13 9 -16 1 M120 71l13 -9 -16 -1 M260 44l13 8 -13 8" fill="none" stroke="#3DBE6B" stroke-width="3"/>
+<text x="55" y="25" font-size="14" font-weight="800">I₁</text>
+<text x="55" y="97" font-size="14" font-weight="800">I₂</text>
+<text x="279" y="42" font-size="14" font-weight="800">I₃</text>
+<text x="173" y="100" font-size="17" font-weight="800">I₁ + I₂ = I₃</text>
+</svg>
+<figcaption>KCL conserves charge at a junction; KVL conserves energy round a loop.</figcaption>
+</figure>
+</section>
+<section class="card">
+<h2 id="controlsTitle">Set branch currents</h2>
+<div id="controls"></div>
+<div class="actions" style="margin-top:16px">
+<button id="hint">Hint (−25 points)</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" class="next hidden">Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Adjust the signed currents until all residuals read 0.</div>
+<h2 style="margin-top:20px">Live load-power curve</h2>
+<svg id="plot" viewBox="0 0 500 342" role="img" aria-label="Load power in watts against load resistance in ohms on a logarithmic horizontal axis"></svg>
+<details>
+<summary>The physics</summary>
+<p><strong>KCL:</strong> ΣI_entering = ΣI_leaving (A).</p>
+<p><strong>KVL:</strong> Σ voltage rises − Σ voltage drops = 0 V.</p>
+<p><strong>Ohm's law:</strong> V = IR. The branch current sign indicates its direction.</p>
+<p><strong>Thévenin:</strong> Vth = (E₁/R₁ + E₂/R₂)/(1/R₁ + 1/R₂).</p>
+<p>With ideal sources set to zero, Rth = R₁R₂/(R₁ + R₂).</p>
+<p><strong>Load power:</strong> P = Vth²RL/(Rth + RL)². Its maximum occurs at RL = Rth.</p>
+</details>
+</section>
+</div>
+<section id="end" class="card end hidden">
+<h2>Network solved!</h2>
+<div class="stars" id="stars"></div>
+<h2 id="final"></h2>
+<p>You solved KCL, both KVL loops and a Thévenin load-matching problem.</p>
+<button id="again" class="check">Play again ↻</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const fmt=(x,n=2)=>Number.isFinite(x)?x.toFixed(n):"0";
+const limit=(x,a,b)=>Math.min(b,Math.max(a,x));
+const line=(d,c="#111",w=3,extra="")=>`<path d="${d}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+let rounds=[],index=0,score=0,tries=0,hinted=false,done=false;
+let i1=0,i2=0,i3=0,rl=10,vGuess="",rGuess="";
+function rng(seed){return()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};}
+function generate(){
+const r=rng((Date.now()>>>0)||11);
+rounds=[];
+for(let k=0;k<6;k++){
+const r1=[2,3,4,6][Math.floor(r()*4)];
+const r2=[2,4,5,6][Math.floor(r()*4)];
+const r3=[2,3,4,6][Math.floor(r()*4)];
+const target1=1+Math.floor(r()*3);
+const target2=1+Math.floor(r()*3);
+const currentSum=target1+target2;
+const V=r3*currentSum;
+const e1=V+r1*target1;
+const e2=V+r2*target2;
+rounds.push({r1,r2,r3,e1,e2,solution:[target1,target2,currentSum]});
+}
+index=0;score=0;$("game").classList.remove("hidden");$("end").classList.add("hidden");load();
+}
+function q(){return rounds[index];}
+function th(){
+const a=q();
+const conductance=1/a.r1+1/a.r2;
+return{v:(a.e1/a.r1+a.e2/a.r2)/conductance,r:1/conductance};
+}
+function load(){
+tries=0;hinted=false;done=false;i1=0;i2=0;i3=0;vGuess="";rGuess="";
+rl=10;
+$("round").textContent="Round "+(index+1)+"/6";
+$("score").textContent="Score "+score;
+$("heading").textContent=index===5?"Thévenin bonus":"Two-source, two-loop network";
+$("controlsTitle").textContent=index===5?"Find the source equivalent":"Set signed branch currents";
+$("target").textContent=index===5?"Remove the load conceptually. Find Vth and Rth within ±2% and match RL to Rth.":"Make the KCL and both KVL residuals equal 0.00 using the current controls.";
+$("check").classList.remove("hidden");$("next").classList.add("hidden");$("hint").disabled=false;
+feedback("Use the stated current-arrow directions as positive.","");
+render();
+}
+function residuals(){
+const a=q();
+return{
+k:i1+i2-i3,
+l:a.e1-a.r1*i1-a.r3*i3,
+r:a.e2-a.r2*i2-a.r3*i3
+};
+}
+function setCurrent(id,d){
+if(done)return;
+const value=limit(Math.round((({i1,i2,i3})[id]+d)*2)/2,-20,20);
+if(id==="i1")i1=value;
+if(id==="i2")i2=value;
+if(id==="i3")i3=value;
+render();
+}
+function render(){
+const a=q();
+if(index===5){
+$("controls").innerHTML=`
+<p>Open-circuit the load to determine the equivalent source seen at the load terminals.</p>
+<div class="row"><label for="vthInput"><strong>Vth (V)</strong></label><input type="number" id="vthInput" min=".01" max="200" step=".01" value="${vGuess}" placeholder="Voltage"></div>
+<div class="row" style="margin-top:12px"><label for="rthInput"><strong>Rth (Ω)</strong></label><input type="number" id="rthInput" min=".01" max="100" step=".01" value="${rGuess}" placeholder="Resistance"></div>
+<h3>Load resistance RL</h3>
+<div class="row">
+<button id="loadMinus">÷ 2</button><button id="loadFineMinus" aria-label="Decrease load by 0.05 ohms">−0.05</button><span class="pill">${fmt(rl,2)} Ω</span><button id="loadFinePlus" aria-label="Increase load by 0.05 ohms">+0.05</button><button id="loadPlus">× 2</button>
+</div>
+<input type="range" id="loadSlider" min="0" max="300" step="1" value="${Math.round(100*Math.log10(rl))}" aria-label="Load resistance, logarithmic scale from 1 to 1000 ohms">
+<p>Load power: <strong>${fmt(loadPower(rl),3)} W</strong></p>`;
+$("vthInput").oninput=e=>vGuess=e.target.value;
+$("rthInput").oninput=e=>rGuess=e.target.value;
+$("loadMinus").onclick=()=>{rl=limit(rl/2,1,1000);render();};
+$("loadPlus").onclick=()=>{rl=limit(rl*2,1,1000);render();};
+$("loadFineMinus").onclick=()=>{rl=limit(Math.round((rl-.05)*100)/100,1,1000);render();};
+$("loadFinePlus").onclick=()=>{rl=limit(Math.round((rl+.05)*100)/100,1,1000);render();};
+$("loadSlider").oninput=e=>{rl=Math.pow(10,Number(e.target.value)/100);render();};
+}else{
+let html="";
+for(const id of ["i1","i2","i3"]){
+const value=({i1,i2,i3})[id],symbol=id==="i1"?"I₁":id==="i2"?"I₂":"I₃";
+html+=`<h3>${symbol} (${id==="i3"?"downwards":"towards node"})</h3>
+<div class="stepper">
+<button data-id="${id}" data-step="-1" aria-label="Decrease ${symbol} by one ampere">−1</button>
+<button data-id="${id}" data-step="-.5" aria-label="Decrease ${symbol} by half an ampere">−0.5</button>
+<output>${fmt(value,1)} A</output>
+<button data-id="${id}" data-step=".5" aria-label="Increase ${symbol} by half an ampere">+0.5</button>
+<button data-id="${id}" data-step="1" aria-label="Increase ${symbol} by one ampere">+1</button>
+</div>`;
+}
+$("controls").innerHTML=html;
+$("controls").querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>setCurrent(b.dataset.id,Number(b.dataset.step)));
+}
+renderDiagram();renderResiduals();renderPlot();
+}
+function renderResiduals(){
+const r=residuals();
+for(const [id,value,unit] of [["kcl",r.k,"A"],["kvl1",r.l,"V"],["kvl2",r.r,"V"]]){
+const el=$(id);
+el.querySelector("strong").textContent=(Math.abs(value)<1e-9?"✓ ":"✕ ")+fmt(value,2)+" "+unit;
+el.classList.toggle("pass",Math.abs(value)<1e-9);
+el.classList.toggle("fail",Math.abs(value)>=1e-9);
+}
+if(index===5){
+for(const id of ["kcl","kvl1","kvl2"]){
+$(id).classList.remove("fail");$(id).classList.add("pass");
+$(id).querySelector("strong").textContent="Bonus: source analysis";
+}
+}
+}
+function resistor(x,y,txt,vertical){
+let shape="";
+if(vertical){
+shape=`<rect x="${x-12}" y="${y-27}" width="24" height="54" fill="#fff" stroke="#111" stroke-width="3"/>`;
+shape+=`<text x="${x+18}" y="${y+5}" font-size="13" font-weight="800">${txt}</text>`;
+}else{
+shape=`<rect x="${x-29}" y="${y-12}" width="58" height="24" fill="#fff" stroke="#111" stroke-width="3"/>`;
+shape+=`<text x="${x}" y="${y-20}" text-anchor="middle" font-size="13" font-weight="800">${txt}</text>`;
+}
+return shape;
+}
+function renderDiagram(){
+const a=q();
+let out=`<text x="260" y="22" font-size="16" text-anchor="middle" font-weight="800">TWO SOURCES · THREE BRANCHES</text>`;
+out+=line("M90 112H242 M278 112H435V282H90V112");
+out+=`<circle cx="260" cy="112" r="9" fill="#FF6B3D" stroke="#111" stroke-width="3"/>
+<text x="250" y="89" text-anchor="middle" font-size="13" font-weight="800">Node Vn</text>`;
+out+=line("M90 112V162 M90 222V282 M435 112V162 M435 222V282");
+out+=line("M70 179H110 M78 194H102 M415 179H455 M423 194H447","#111",4);
+out+=`<text x="24" y="156" font-size="14" font-weight="800">E₁</text>
+<text x="20" y="173" font-size="13">${a.e1} V</text>
+<text x="451" y="157" font-size="14" font-weight="800">E₂</text>
+<text x="451" y="174" font-size="13">${a.e2} V</text>
+<text x="106" y="178" font-size="13">+</text><text x="452" y="179" font-size="13">+</text>`;
+out+=resistor(155,112,`R₁ ${a.r1} Ω`,false);
+out+=resistor(367,112,`R₂ ${a.r2} Ω`,false);
+out+=line("M260 121V165 M260 219V282");
+out+=resistor(260,192,`RL ${a.r3} Ω`,true);
+out+=`<path d="M205 112h28l-9 -7m9 7l-9 7" stroke="#111" stroke-width="3" fill="none"/>
+<path d="M316 112h-28l9 -7m-9 7l9 7" stroke="#111" stroke-width="3" fill="none"/>
+<path d="M245 235v29l-7 -9m7 9l7 -9" stroke="#111" stroke-width="3" fill="none"/>
+<text x="210" y="98" font-size="14" font-weight="800">I₁</text>
+<text x="302" y="98" font-size="14" font-weight="800">I₂</text>
+<text x="216" y="245" font-size="14" font-weight="800">I₃</text>`;
+out+=`<text x="260" y="323" text-anchor="middle" font-size="13" font-weight="700">Reference: I₁ and I₂ enter the node; I₃ leaves.</text>`;
+if(index===5){
+out+=`<text x="260" y="49" text-anchor="middle" font-size="13">Determine source as viewed from RL</text>`;
+}else{
+const currents=[i1,i2,i3],routes=["M95 112H237","M428 112H281","M260 125V275"];
+currents.forEach((v,j)=>{
+if(Math.abs(v)>.001){
+out+=`<path class="current" style="animation-duration:${limit(1.5/Math.abs(v),.25,2.5)}s;animation-direction:${v<0?"reverse":"normal"}" d="${routes[j]}"/>`;
+}
+});
+}
+$("diagram").innerHTML=out;
+$("diagram").setAttribute("aria-label",`Two-source circuit. E1 ${a.e1} volts with R1 ${a.r1} ohms; E2 ${a.e2} volts with R2 ${a.r2} ohms; load ${a.r3} ohms. Signed trial currents ${fmt(i1,1)}, ${fmt(i2,1)}, ${fmt(i3,1)} amperes.`);
+}
+function loadPower(RL){
+const t=th();
+const sum=t.r+RL;
+if(!(sum>0))return 0;
+return t.v*t.v*RL/(sum*sum);
+}
+function renderPlot(){
+const t=th(),left=69,right=467,top=51,bottom=271;
+const X=v=>left+Math.log10(limit(v,1,1000))/3*(right-left);
+const peak=loadPower(t.r),maxP=Math.max(.001,peak*1.18);
+const Y=v=>bottom-limit(v/maxP,0,1)*(bottom-top);
+let out=`<rect width="500" height="342" fill="#fff"/>
+<text x="250" y="21" font-size="15" font-weight="800" text-anchor="middle">Load power versus load resistance</text>`;
+for(let n=0;n<=3;n++){
+const val=Math.pow(10,n),x=X(val);
+out+=line(`M${x} ${top}V${bottom}`,"#e4e2db",1);
+out+=`<text x="${x}" y="290" font-size="12" text-anchor="middle">${val}</text>`;
+}
+for(let n=0;n<=4;n++){
+const value=maxP*n/4,y=Y(value);
+out+=line(`M${left} ${y}H${right}`,"#e4e2db",1);
+out+=`<text x="${left-9}" y="${y+4}" font-size="11" text-anchor="end">${fmt(value,2)}</text>`;
+}
+out+=line(`M${left} ${top}V${bottom}H${right}`);
+out+=`<text x="250" y="330" font-size="13" text-anchor="middle">Load resistance RL (Ω, log scale)</text>
+<text x="16" y="160" font-size="13" transform="rotate(-90 16 160)" text-anchor="middle">Load power P (W)</text>`;
+let d="";
+for(let n=0;n<=160;n++){
+const v=Math.pow(10,n*3/160);
+d+=(n?"L":"M")+X(v)+" "+Y(loadPower(v))+" ";
+}
+out+=`<path d="${d}" fill="none" stroke="#FF6B3D" stroke-width="4"/>`;
+out+=line(`M${X(t.r)} ${top}V${bottom}`,"#1E9E5A",2,'stroke-dasharray="7 5"');
+out+=`<circle cx="${X(t.r)}" cy="${Y(peak)}" r="7" fill="#3DBE6B" stroke="#111" stroke-width="2"/>`;
+out+=`<circle cx="${X(rl)}" cy="${Y(loadPower(rl))}" r="7" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+out+=`<text x="81" y="40" font-size="11">━ Load curve · ● Peak (Rth) · ● Selected RL</text>`;
+$("plot").innerHTML=out;
+$("plot").setAttribute("aria-label",`Load power versus load resistance from 1 to 1000 ohms, logarithmic scale. Maximum at ${fmt(t.r,3)} ohms and ${fmt(peak,3)} watts. Selected ${fmt(rl,2)} ohms gives ${fmt(loadPower(rl),3)} watts.`);
+}
+function feedback(text,kind){$("feedback").textContent=text;$("feedback").className="feedback"+(kind?" "+kind:"");}
+function check(){
+if(done)return;
+const a=q(),r=residuals();
+let ok=false,wrong="",why="";
+if(index===5){
+const t=th(),v=Number(vGuess),res=Number(rGuess);
+if(vGuess===""||rGuess===""||!Number.isFinite(v)||!Number.isFinite(res)||v<=0||res<=0){
+wrong="Enter positive values for both Vth and Rth.";
+}else{
+const ev=Math.abs(v-t.v)/t.v,er=Math.abs(res-t.r)/t.r,el=Math.abs(rl-t.r)/t.r;
+ok=ev<=.02&&er<=.02&&el<=.02;
+wrong="Vth error "+fmt(ev*100,1)+"%; Rth error "+fmt(er*100,1)+"%; load-match error "+fmt(el*100,1)+"%. All must be at most 2%.";
+}
+why="Vth = "+fmt(t.v,3)+" V; Rth = "+fmt(t.r,3)+" Ω. Maximum power occurs when RL = Rth.";
+}else{
+ok=Math.abs(r.k)<1e-8&&Math.abs(r.l)<1e-8&&Math.abs(r.r)<1e-8;
+const parts=[];
+if(Math.abs(r.k)>1e-8)parts.push("KCL "+fmt(Math.abs(r.k),2)+" A");
+if(Math.abs(r.l)>1e-8)parts.push("left KVL "+fmt(Math.abs(r.l),2)+" V");
+if(Math.abs(r.r)>1e-8)parts.push("right KVL "+fmt(Math.abs(r.r),2)+" V");
+wrong="Residuals still non-zero: "+parts.join("; ")+".";
+why="The branch currents are I₁ = "+a.solution[0]+" A, I₂ = "+a.solution[1]+" A and I₃ = "+a.solution[2]+" A. Both loop voltage sums vanish.";
+}
+if(ok){
+done=true;
+const gain=hinted?50:tries===0?100:75;score+=gain;
+$("score").textContent="Score "+score;
+feedback("🎉 All conditions met! +"+gain+" points. "+why,"good");
+$("hint").disabled=true;$("check").classList.add("hidden");$("next").classList.remove("hidden");
+}else{
+tries++;feedback("Not yet. "+wrong,"bad");
+}
+}
+function hint(){
+if(done||hinted)return;
+hinted=true;$("hint").disabled=true;
+const a=q();
+feedback("Hint: "+(index===5?"Short the ideal voltage sources when finding Rth, then use R1 parallel R2. For power matching, RL = Rth.":"Start with I₃ = I₁ + I₂. Use E₁ = R₁I₁ + RLI₃ and E₂ = R₂I₂ + RLI₃.")+" Maximum 50 points this round.","");
+}
+function next(){
+if(index===5){finish();return;}
+index++;load();
+}
+function finish(){
+$("game").classList.add("hidden");$("end").classList.remove("hidden");
+const n=score>=540?3:score>=390?2:1;
+$("stars").innerHTML=[0,1,2].map(i=>`<span class="${i<n?"earned":""}">${i<n?"★":"☆"}</span>`).join("");
+$("stars").setAttribute("aria-label",n+" out of 3 stars");
+$("final").textContent=score+" / 600 points";
+}
+$("check").onclick=check;$("hint").onclick=hint;$("next").onclick=next;$("again").onclick=generate;
+generate();
+})();
+</script>
+</body>
+</html>

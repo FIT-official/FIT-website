@@ -5,6 +5,7 @@ import ActivityPage, { generateMetadata, generateStaticParams, dynamic as activi
 import { simsRegistry } from '../../content/sims/registry'
 // Original-activity contract: concept-family variants are switched on separately (see tests/simFamilies/live.test.js).
 vi.mock('../../public/simulations/families/live.js', () => ({ LIVE_FAMILY: [] }))
+vi.mock('../../content/sims/htmlSims.js', () => ({ htmlSims: [] }))
 
 vi.mock('next/navigation', () => ({ notFound: () => { throw new Error('NEXT_NOT_FOUND') } }))
 vi.mock('@/components/ClassroomSimulations/Library', () => ({ default: ({ addToClassEnabled }) => <main data-add-to-class={String(addToClassEnabled)}>Simulation library</main> }))

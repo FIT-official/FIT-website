@@ -4,6 +4,7 @@ import { simsRegistry, SIMULATION_LEVELS, getLiveSims, getLiveSim, filterSimulat
 import { createEmbedSnippet, getEmbedPath } from '../../lib/sims/embed'
 // Original-activity contract: concept-family variants are switched on separately (see tests/simFamilies/live.test.js).
 vi.mock('../../public/simulations/families/live.js', () => ({ LIVE_FAMILY: [] }))
+vi.mock('../../content/sims/htmlSims.js', () => ({ htmlSims: [] }))
 
 describe('Simulation registry', () => {
   it('registers every original activity with a curriculum level and lesson context', () => {

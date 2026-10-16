@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RLC Tuner | Fix It Today</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+button,input{font:inherit}
+button{border:2px solid #111;border-radius:999px;background:white;color:#111;min-width:44px;min-height:44px;padding:9px 14px;font-weight:800;cursor:pointer;touch-action:manipulation}
+button:hover:not(:disabled){background:var(--lvl-uni-tint)}
+button:active:not(:disabled){transform:translateY(2px)}
+button:disabled{opacity:.45}
+button.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2);font-size:17px}
+button.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button.next{background:var(--fit-green);border:3px solid #111}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+header,main{max-width:1180px;margin:auto;padding:18px}
+header{padding-bottom:0}
+h1{font-size:clamp(30px,5vw,44px);font-weight:800;line-height:1.1;margin:12px 0 6px}
+h2{font-size:21px;font-weight:800;margin:0 0 12px}
+h3{font-size:16px;font-weight:800;margin:13px 0 7px}
+p{margin:7px 0}
+.hud,.row,.actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.badge{background:var(--lvl-uni);color:var(--lvl-uni-on);padding:7px 13px;border:2px solid #111;border-radius:999px;font-size:12px;font-weight:800;text-transform:uppercase}
+.pill{background:var(--fit-sunken);padding:7px 12px;border:2px solid #111;border-radius:999px;font-size:13px;font-weight:800}
+.layout{display:grid;grid-template-columns:1fr;gap:18px}
+.card{min-width:0;border:2px solid #111;border-radius:24px;padding:17px;background:white;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-uni-tint);border-radius:32px;box-shadow:var(--sh-3)}
+svg{display:block;width:100%;height:auto}
+.diagram{max-width:560px;margin:auto}
+.target{background:var(--fit-sun);border:2px solid #111;border-radius:16px;padding:12px;font-weight:800;margin-bottom:12px}
+.readings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:13px 0}
+.meter{background:white;border:2px solid #111;border-radius:16px;padding:10px;text-align:center;font-weight:700}
+.meter strong{display:block;font-weight:800;font-size:clamp(19px,4vw,26px);font-variant-numeric:tabular-nums}
+.stepper{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:10px 0}
+.stepper output{min-width:105px;text-align:center;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--lvl-uni);min-height:44px;cursor:pointer}
+input[type=number]{border:2px solid #111;min-height:48px;max-width:165px;width:100%;border-radius:12px;padding:8px 10px;font-weight:800}
+.field{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:13px 0}
+.field label{font-weight:800}
+.feedback{background:var(--fit-sunken);border-left:5px solid #111;padding:9px 12px;margin:14px 0;min-height:50px;font-weight:600}
+.feedback.good{border-color:var(--fit-success);background:#e2f8eb}
+.feedback.bad{border-color:var(--fit-danger);background:#fff0ee}
+.concept{max-width:380px;margin:17px auto}
+.concept figcaption{font-size:13px;text-align:center;color:var(--fit-ink-2)}
+details{margin-top:16px;border:2px solid #111;border-radius:16px;background:white;padding:12px}
+summary{min-height:32px;cursor:pointer;font-weight:800}
+.hidden{display:none!important}
+.end{text-align:center;padding:30px}
+.stars{font-size:48px;color:#ccc}
+.stars .earned{color:#e6a600}
+.current{fill:none;stroke:#1F66E5;stroke-width:4;stroke-dasharray:5 16;animation:move 1.2s linear infinite}
+@keyframes move{to{stroke-dashoffset:-42}}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+<div class="hud">
+<span class="badge">University, Electromagnetism</span>
+<span class="pill" id="round">Round 1/6</span>
+<span class="pill" id="score">Score 0</span>
+</div>
+<h1>〰️ RLC Tuner</h1>
+<p>Tune damping, resonance and quality factor in a series RLC circuit.</p>
+</header>
+<main>
+<div id="game" class="layout">
+<section class="card stage">
+<h2 id="heading">Transient response</h2>
+<div id="target" class="target"></div>
+<svg id="diagram" class="diagram" viewBox="0 0 520 290" role="img" aria-label="Series circuit consisting of a voltage source, resistor, inductor and capacitor"></svg>
+<div class="readings">
+<div class="meter">Natural frequency <strong id="f0">0 Hz</strong></div>
+<div class="meter">Critical resistance <strong id="rcrit">0 Ω</strong></div>
+<div class="meter">Quality factor Q <strong id="quality">0</strong></div>
+<div class="meter">Damping regime <strong id="regime">Critical</strong></div>
+</div>
+<figure class="concept">
+<svg viewBox="0 0 370 120" role="img" aria-label="Phasor diagram with resistance on the real axis, inductive and capacitive reactances opposing along the imaginary axis">
+<path d="M32 88H175 M64 107V15" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+<path d="M64 88H152L143 82 M152 88L143 94" stroke="#1F66E5" stroke-width="4" fill="none"/>
+<path d="M64 88V29L58 40 M64 29L70 40" stroke="#D92D20" stroke-width="4" fill="none"/>
+<text x="153" y="106" font-size="12">R</text>
+<text x="75" y="24" font-size="12">XL − XC</text>
+<text x="195" y="38" font-size="15" font-weight="800">Z = R + j(XL − XC)</text>
+<text x="195" y="65" font-size="14">XL = ωL</text>
+<text x="195" y="88" font-size="14">XC = 1/(ωC)</text>
+</svg>
+<figcaption>At resonance, inductive and capacitive reactances cancel.</figcaption>
+</figure>
+</section>
+<section class="card">
+<h2 id="controlsTitle">Tune the resistance</h2>
+<div id="controls"></div>
+<div class="actions" style="margin-top:16px">
+<button id="hint">Hint (−25 points)</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" class="next hidden">Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Adjust R to meet the target.</div>
+<h2 style="margin-top:20px">Step response</h2>
+<svg id="transient" viewBox="0 0 500 300" role="img" aria-label="Capacitor voltage in volts versus elapsed time in milliseconds"></svg>
+<h2 style="margin-top:17px">Frequency response</h2>
+<svg id="frequency" viewBox="0 0 500 330" role="img" aria-label="Current amplitude in milliamperes versus frequency in hertz on a logarithmic scale"></svg>
+<details>
+<summary>The physics</summary>
+<p><strong>Series RLC:</strong> L d²q/dt² + R dq/dt + q/C = Vsource.</p>
+<p><strong>Natural angular frequency:</strong> ω₀ = 1/√(LC) (rad/s).</p>
+<p><strong>Critical damping:</strong> Rcrit = 2√(L/C) (Ω).</p>
+<p>R below Rcrit: underdamped; R equal to Rcrit: critically damped; R above Rcrit: overdamped.</p>
+<p><strong>Resonance:</strong> f₀ = 1/(2π√(LC)) (Hz).</p>
+<p><strong>Quality factor:</strong> Q = (1/R)√(L/C), dimensionless.</p>
+<p><strong>Steady-state current:</strong> |I| = Vac/√(R² + (ωL − 1/(ωC))²).</p>
+<p>At the −3 dB points, current amplitude is peak amplitude divided by √2. For a series circuit, bandwidth Δf = R/(2πL), and Q = f₀/Δf.</p>
+</details>
+</section>
+</div>
+<section id="end" class="card end hidden">
+<h2>RLC tuning complete!</h2>
+<div id="stars" class="stars"></div>
+<h2 id="final"></h2>
+<p>You tuned transient damping and steady-state resonance across six challenges.</p>
+<button id="again" class="check">Play again ↻</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const fmt=(x,d=2)=>Number.isFinite(x)?x.toFixed(d):"0";
+const line=(d,c="#111",w=3,extra="")=>`<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+let rounds=[],index=0,score=0,tries=0,hinted=false,done=false;
+let R=20,fInput="",cursor=50;
+const VSTEP=5,VAC=5;
+function rng(seed){return()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};}
+function rcritical(q){return 2*Math.sqrt(q.L/q.C);}
+function freq0(q){return 1/(2*Math.PI*Math.sqrt(q.L*q.C));}
+function quality(q){return R>0?Math.sqrt(q.L/q.C)/R:0;}
+function rounded(x){return Math.round(x*10)/10;}
+function init(){
+const r=rng((Date.now()>>>0)||13);
+rounds=[];
+const optionsL=[.04,.06,.08,.1,.12];
+const optionsC=[47e-6,68e-6,100e-6,150e-6];
+for(let i=0;i<6;i++){
+const L=optionsL[Math.floor(r()*optionsL.length)];
+const C=optionsC[Math.floor(r()*optionsC.length)];
+if(i<3){
+rounds.push({type:"transient",L,C,multiplier:[1,.5,1.5][i],name:["Critically damped","Underdamped","Overdamped"][i]});
+}else{
+rounds.push({type:"steady",L,C,Q:[2,3,4][i-3]});
+}
+}
+index=0;score=0;$("end").classList.add("hidden");$("game").classList.remove("hidden");load();
+}
+function q(){return rounds[index];}
+function targetR(a){
+return a.type==="transient"?a.multiplier*rcritical(a):Math.sqrt(a.L/a.C)/a.Q;
+}
+function load(){
+tries=0;hinted=false;done=false;fInput="";
+R=rounded(clamp(targetR(q())*(q().type==="transient"?(q().multiplier===1?.55:1.1):1.8),.1,200));
+cursor=freq0(q());
+$("round").textContent="Round "+(index+1)+"/6";
+$("score").textContent="Score "+score;
+$("heading").textContent=q().type==="transient"?"Step-response damping":"Sinusoidal steady-state resonance";
+$("controlsTitle").textContent=q().type==="transient"?"Set transient damping":"Find f₀ and tune Q";
+$("target").textContent=q().type==="transient"?
+"Target: "+q().name+". Set R to "+(q().multiplier===1?"critical damping (R = Rcrit)":q().multiplier===.5?"0.50 × Rcrit":"1.50 × Rcrit")+" (±1.5%).":
+"Target: find f₀ (±2%) and set Q = "+q().Q+" (±2%).";
+$("hint").disabled=false;$("check").classList.remove("hidden");$("next").classList.add("hidden");
+feedback("Use the resistor controls. Both plots update live.","");
+render();
+}
+function setR(d){
+if(done)return;
+R=rounded(clamp(R+d,.1,200));render();
+}
+function capacitanceLabel(q){return fmt(q.C*1e6,0)+" µF";}
+function render(){
+const a=q();
+let html=`<h3>Series resistance R</h3>
+<div class="stepper">
+<button id="minus1" aria-label="Decrease resistance by 1 ohm">−1</button>
+<button id="minus01" aria-label="Decrease resistance by 0.1 ohm">−0.1</button>
+<output>${fmt(R,1)} Ω</output>
+<button id="plus01" aria-label="Increase resistance by 0.1 ohm">+0.1</button>
+<button id="plus1" aria-label="Increase resistance by 1 ohm">+1</button>
+</div>
+<input type="range" id="resSlider" min=".1" max="200" step=".1" value="${R}" aria-label="Series resistance in ohms">
+<p>Inductance L = <strong>${fmt(a.L*1000,0)} mH</strong> · Capacitance C = <strong>${capacitanceLabel(a)}</strong></p>`;
+if(a.type==="steady"){
+html+=`<div class="field"><label for="fAnswer">Resonant frequency f₀ (Hz)</label>
+<input id="fAnswer" type="number" min=".01" max="50000" step=".01" placeholder="Frequency" value="${fInput}"></div>
+<h3>Inspect current amplitude at frequency</h3>
+<input type="range" id="frequencySlider" min="0" max="200" step="1" value="${Math.round(100*Math.log10(cursor/freq0(a))+100)}" aria-label="Measurement frequency logarithmic slider">
+<p>Inspection frequency: <strong>${fmt(cursor,2)} Hz</strong> · Current amplitude: <strong>${fmt(amplitude(a,cursor)*1000,2)} mA</strong></p>`;
+}
+$("controls").innerHTML=html;
+for(const [id,step] of [["minus1",-1],["minus01",-.1],["plus01",.1],["plus1",1]]){
+$(id).onclick=()=>setR(step);
+}
+$("resSlider").oninput=e=>{R=Number(e.target.value);render();};
+if(a.type==="steady"){
+$("fAnswer").oninput=e=>fInput=e.target.value;
+$("frequencySlider").oninput=e=>{
+cursor=freq0(a)*Math.pow(10,(Number(e.target.value)-100)/100);
+render();
+};
+}
+$("f0").textContent=fmt(freq0(a),2)+" Hz";
+$("rcrit").textContent=fmt(rcritical(a),2)+" Ω";
+$("quality").textContent=fmt(quality(a),2);
+$("regime").textContent=regime(a);
+renderDiagram();plotTransient();plotFrequency();
+}
+function regime(a){
+const ratio=R/rcritical(a);
+if(Math.abs(ratio-1)<.015)return"Critical";
+return ratio<1?"Underdamped":"Overdamped";
+}
+function renderDiagram(){
+const a=q();
+let out=`<text x="260" y="22" font-size="16" font-weight="800" text-anchor="middle">SERIES RLC CIRCUIT</text>`;
+out+=line("M75 90H445V245H75V90");
+out+=line("M75 142H61 M75 160H69","#111",3);
+out+=`<circle cx="75" cy="185" r="27" fill="#fff" stroke="#111" stroke-width="3"/>
+<path d="M55 185q10 -22 20 0t20 0" stroke="#111" fill="none" stroke-width="3"/>
+<text x="19" y="123" font-size="13" font-weight="800">${a.type==="transient"?"5 V step":"5 V AC"}</text>`;
+out+=`<rect x="122" y="78" width="67" height="24" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="155" y="66" text-anchor="middle" font-size="13" font-weight="800">R ${fmt(R,1)} Ω</text>`;
+let coil="";
+for(let k=0;k<4;k++)coil+=`<path d="M${224+k*16} 90q8 -28 16 0" fill="none" stroke="#111" stroke-width="3"/>`;
+out+=coil;
+out+=`<text x="254" y="49" text-anchor="middle" font-size="13" font-weight="800">L ${fmt(a.L*1000,0)} mH</text>`;
+out+=line("M357 74V106 M369 74V106","#111",4);
+out+=`<text x="364" y="62" font-size="13" text-anchor="middle" font-weight="800">C ${capacitanceLabel(a)}</text>`;
+out+=`<circle cx="445" cy="164" r="20" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="445" y="171" font-size="20" text-anchor="middle">A</text>`;
+out+=line("M369 90H445");
+out+=`<text x="260" y="276" font-size="13" font-weight="800" text-anchor="middle">i(t) → · vC(t) across the capacitor</text>`;
+out+=`<text x="395" y="126" font-size="12" font-weight="700">+</text>
+<text x="395" y="149" font-size="12">vC</text>`;
+const speed=clamp(1/(.25+Math.abs(amplitude(a,freq0(a)))*5),.25,2);
+out+=`<path class="current" style="animation-duration:${speed}s" d="M92 90H443V245H75V214"/>`;
+$("diagram").innerHTML=out;
+$("diagram").setAttribute("aria-label",`Series RLC circuit, source 5 volts, resistance ${fmt(R,1)} ohms, inductance ${fmt(a.L*1000,0)} millihenries and capacitance ${capacitanceLabel(a)}. ${regime(a)} damping.`);
+}
+function stepResponse(a,t){
+const w0=1/Math.sqrt(a.L*a.C);
+const alpha=R/(2*a.L);
+const diff=alpha*alpha-w0*w0;
+let leftover=1;
+if(diff< -1e-10){
+const wd=Math.sqrt(-diff);
+leftover=Math.exp(-alpha*t)*(Math.cos(wd*t)+(alpha/wd)*Math.sin(wd*t));
+}else if(Math.abs(diff)<1e-10||Math.abs(alpha-w0)/w0<1e-7){
+leftover=Math.exp(-alpha*t)*(1+alpha*t);
+}else{
+const beta=Math.sqrt(diff);
+const s1=-alpha+beta,s2=-alpha-beta;
+leftover=(s2*Math.exp(s1*t)-s1*Math.exp(s2*t))/(s2-s1);
+}
+const v=VSTEP*(1-leftover);
+return Number.isFinite(v)?clamp(v,-VSTEP,VSTEP*2):0;
+}
+function axes(title,xTitle,yTitle,width,height,left,right,top,bottom,xTicks,yTicks,xMap,yMap){
+let s=`<rect width="${width}" height="${height}" fill="#fff"/>
+<text x="${width/2}" y="21" font-size="15" font-weight="800" text-anchor="middle">${title}</text>`;
+for(const [value,label] of xTicks){
+const x=xMap(value);
+s+=line(`M${x} ${top}V${bottom}`,"#e4e2db",1);
+s+=`<text x="${x}" y="${bottom+19}" font-size="11" text-anchor="middle">${label}</text>`;
+}
+for(const [value,label] of yTicks){
+const y=yMap(value);
+s+=line(`M${left} ${y}H${right}`,"#e4e2db",1);
+s+=`<text x="${left-8}" y="${y+4}" font-size="11" text-anchor="end">${label}</text>`;
+}
+s+=line(`M${left} ${top}V${bottom}H${right}`);
+s+=`<text x="${width/2}" y="${height-8}" font-size="13" text-anchor="middle">${xTitle}</text>
+<text x="14" y="${height/2}" transform="rotate(-90 14 ${height/2})" font-size="13" text-anchor="middle">${yTitle}</text>`;
+return s;
+}
+function plotTransient(){
+const a=q(),left=65,right=469,top=44,bottom=245;
+const total=10*Math.sqrt(a.L*a.C)*1000;
+const max=6.5,min=0;
+const X=t=>left+t/total*(right-left);
+const Y=v=>bottom-(v-min)/(max-min)*(bottom-top);
+const xt=[0,.25,.5,.75,1].map(t=>[t*total,fmt(t*total,1)]);
+const yt=[0,2,4,5,6].map(v=>[v,String(v)]);
+let out=axes("Capacitor voltage after a step","Time t (ms)","Capacitor voltage vC (V)",500,300,left,right,top,bottom,xt,yt,X,Y);
+out+=line(`M${left} ${Y(5)}H${right}`,"#D92D20",2,'stroke-dasharray="7 5"');
+let d="";
+for(let k=0;k<=200;k++){
+const t=k*total/200;
+d+=(k?"L":"M")+X(t)+" "+Y(clamp(stepResponse(a,t/1000),min,max))+" ";
+}
+out+=`<path d="${d}" stroke="#1F66E5" stroke-width="4" fill="none"/>`;
+const probeT=total*.5,probeV=stepResponse(a,probeT/1000);
+out+=`<circle cx="${X(probeT)}" cy="${Y(clamp(probeV,min,max))}" r="6" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+out+=`<text x="70" y="37" font-size="11">━ vC(t) · ┄ Final 5 V · ● Sample</text>`;
+$("transient").innerHTML=out;
+$("transient").setAttribute("aria-label",`Capacitor voltage after a 5 volt step versus time in milliseconds, ${regime(a)} response. At ${fmt(probeT,2)} milliseconds, capacitor voltage ${fmt(probeV,3)} volts.`);
+}
+function amplitude(a,f){
+if(!(f>0)||!(R>0))return 0;
+const w=2*Math.PI*f;
+const reactance=w*a.L-1/(w*a.C);
+const impedance=Math.hypot(R,reactance);
+return impedance>0?VAC/impedance:0;
+}
+function bandwidth(a){
+const base=R/a.L;
+const root=Math.sqrt(base*base+4/(a.L*a.C));
+const f1=(root-base)/(4*Math.PI);
+const f2=(root+base)/(4*Math.PI);
+return{f1,f2,delta:f2-f1};
+}
+function plotFrequency(){
+const a=q(),f0=freq0(a),b=bandwidth(a),left=68,right=468,top=53,bottom=269;
+const low=f0/10,high=f0*10;
+const peak=VAC/R*1000,max=peak*1.16;
+const X=f=>left+clamp(Math.log10(f/low)/2,0,1)*(right-left);
+const Y=m=>bottom-clamp(m/max,0,1)*(bottom-top);
+const xt=[low,f0/Math.sqrt(10),f0,f0*Math.sqrt(10),high].map(v=>[v,fmt(v,v>=100?0:1)]);
+const yt=[0,.25,.5,.75,1].map(v=>[v*peak,fmt(v*peak,1)]);
+let out=axes("Current amplitude and resonance","Frequency f (Hz, log scale)","Current amplitude |I| (mA)",500,330,left,right,top,bottom,xt,yt,X,Y);
+let d="";
+for(let k=0;k<=240;k++){
+const f=low*Math.pow(100,k/240);
+d+=(k?"L":"M")+X(f)+" "+Y(amplitude(a,f)*1000)+" ";
+}
+out+=`<path d="${d}" fill="none" stroke="#1F66E5" stroke-width="4"/>`;
+out+=line(`M${left} ${Y(peak/Math.sqrt(2))}H${right}`,"#D92D20",2,'stroke-dasharray="6 5"');
+out+=line(`M${X(f0)} ${top}V${bottom}`,"#1E9E5A",2,'stroke-dasharray="7 5"');
+for(const f of [b.f1,b.f2]){
+if(f>=low&&f<=high)out+=line(`M${X(f)} ${Y(peak/Math.sqrt(2))}V${bottom}`,"#D92D20",2,'stroke-dasharray="3 5"');
+}
+out+=`<circle cx="${X(f0)}" cy="${Y(peak)}" r="7" fill="#3DBE6B" stroke="#111" stroke-width="2"/>`;
+const inspect=clamp(cursor,low,high),amp=amplitude(a,inspect)*1000;
+out+=`<circle cx="${X(inspect)}" cy="${Y(amp)}" r="6" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+out+=`<text x="77" y="40" font-size="10.5">━ |I| · ┄ −3 dB · ● f₀ · ● Inspect</text>`;
+out+=`<text x="250" y="307" font-size="11" text-anchor="middle">f₁ = ${fmt(b.f1,2)} Hz · f₀ = ${fmt(f0,2)} Hz · f₂ = ${fmt(b.f2,2)} Hz</text>`;
+$("frequency").innerHTML=out;
+$("frequency").setAttribute("aria-label",`Current amplitude versus logarithmic frequency, resonant frequency ${fmt(f0,2)} hertz. Half-power frequencies ${fmt(b.f1,2)} and ${fmt(b.f2,2)} hertz. Bandwidth ${fmt(b.delta,2)} hertz, maximum current ${fmt(peak,2)} milliamperes.`);
+}
+function feedback(t,k){$("feedback").textContent=t;$("feedback").className="feedback"+(k?" "+k:"");}
+function check(){
+if(done)return;
+const a=q(),expected=targetR(a),rErr=Math.abs(R-expected)/expected;
+let ok=false,wrong="",why="";
+if(a.type==="transient"){
+ok=rErr<=.015;
+wrong="R is "+fmt(Math.abs(R-expected),2)+" Ω "+(R>expected?"too high":"too low")+". Your circuit is "+regime(a).toLowerCase()+", but the requested resistance ratio must also be met.";
+why="Rcrit = "+fmt(rcritical(a),2)+" Ω. Your target was R = "+fmt(expected,2)+" Ω, giving "+a.name.toLowerCase()+" behaviour.";
+}else{
+const userF=Number(fInput),f0=freq0(a);
+if(fInput===""||!Number.isFinite(userF)||userF<=0){
+wrong="Enter your calculated resonant frequency in hertz.";
+}else{
+const fErr=Math.abs(userF-f0)/f0,qErr=Math.abs(quality(a)-a.Q)/a.Q;
+ok=fErr<=.02&&qErr<=.02;
+wrong="Resonant frequency error: "+fmt(fErr*100,1)+"%; Q error: "+fmt(qErr*100,1)+"%. Each must be at most 2%.";
+}
+why="f₀ = "+fmt(f0,2)+" Hz. For Q = "+a.Q+", R = "+fmt(expected,2)+" Ω. The −3 dB bandwidth is R/(2πL).";
+}
+if(ok){
+done=true;
+const gain=hinted?50:tries===0?100:75;
+score+=gain;$("score").textContent="Score "+score;
+feedback("🎉 Correct! +"+gain+" points. "+why,"good");
+$("hint").disabled=true;$("check").classList.add("hidden");$("next").classList.remove("hidden");
+}else{tries++;feedback("Not yet. "+wrong,"bad");}
+}
+function hint(){
+if(done||hinted)return;
+hinted=true;$("hint").disabled=true;
+const a=q();
+feedback("Hint: "+(a.type==="transient"?"First calculate 2√(L/C) in ohms, then multiply by the requested ratio.":"First find 1/(2π√(LC)) in hertz. Then use R = √(L/C)/Q.")+" Your maximum score this round is 50.","");
+}
+function next(){
+if(index===5){finish();return;}
+index++;load();
+}
+function finish(){
+$("game").classList.add("hidden");$("end").classList.remove("hidden");
+const n=score>=540?3:score>=390?2:1;
+$("stars").innerHTML=[0,1,2].map(i=>`<span class="${i<n?"earned":""}">${i<n?"★":"☆"}</span>`).join("");
+$("stars").setAttribute("aria-label",n+" out of 3 stars");
+$("final").textContent=score+" / 600 points";
+}
+$("hint").onclick=hint;$("check").onclick=check;$("next").onclick=next;$("again").onclick=init;
+init();
+})();
+</script>
+</body>
+</html>
