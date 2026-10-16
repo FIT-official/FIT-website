@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360" role="img" aria-label="Differentiation: a tangent line touching a curve"><title>Differentiation</title>
+  <defs>
+    <pattern id="differentiation-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1.5" fill="#E6E6E6"/>
+    </pattern>
+  </defs>
+  <g id="differentiation-bg">
+    <rect width="480" height="360" fill="#FEFEFE"/>
+    <rect width="480" height="360" fill="url(#differentiation-dots)"/>
+    <circle cx="250" cy="170" r="115" fill="#FFDD00" opacity=".35"/>
+  </g>
+  <g id="differentiation-subject" stroke="#111111" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M72 270V58M72 262H424" fill="none"/>
+    <polygon points="64,66 72,48 80,66" fill="#111111"/>
+    <polygon points="414,254 432,262 414,270" fill="#111111"/>
+    <path d="M84 240Q240 -20 396 240" fill="none" stroke-width="10"/>
+    <path d="M84 240Q240 -20 396 240" fill="none" stroke="#2F6BFF" stroke-width="6"/>
+    <path d="M98 184L270 70" fill="none" stroke-width="10"/>
+    <path d="M98 184L270 70" fill="none" stroke="#FF5A4E" stroke-width="6"/>
+    <circle cx="178" cy="131" r="10" fill="#FF5A4E"/>
+  </g>
+  <g id="differentiation-symbols" stroke="#111111" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M72 131H178V262" fill="none" stroke-dasharray="6 6"/>
+    <polygon points="178,131 258,131 258,78" fill="#111111" transform="translate(6 6)"/>
+    <polygon points="178,131 258,131 258,78" fill="#FFDD00"/>
+    <circle cx="178" cy="131" r="10" fill="#FF5A4E"/>
+  </g>
+</svg>

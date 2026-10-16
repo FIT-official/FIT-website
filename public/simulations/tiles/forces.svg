@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360" role="img" aria-label="Forces: a crate on a slope with force arrows"><title>Forces</title>
+  <defs>
+    <pattern id="forces-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1.5" fill="#E6E6E6"/>
+    </pattern>
+  </defs>
+  <g id="forces-bg">
+    <rect width="480" height="360" fill="#FEFEFE"/>
+    <rect width="480" height="360" fill="url(#forces-dots)"/>
+    <circle cx="150" cy="150" r="115" fill="#FFDD00" opacity=".35"/>
+  </g>
+  <g id="forces-subject" stroke="#111111" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+    <polygon points="60,260 400,260 400,120" fill="#111111" transform="translate(6 6)"/>
+    <polygon points="60,260 400,260 400,120" fill="#2F6BFF"/>
+    <g transform="translate(236 196) rotate(-22.4)">
+      <polygon points="-36,0 -36,-64 -20,-78 52,-78 52,-14 36,0" fill="#111111"/>
+    </g>
+    <g transform="translate(230 190) rotate(-22.4)">
+      <rect x="-36" y="-64" width="72" height="64" fill="#FFDD00"/>
+      <polygon points="-36,-64 -20,-78 52,-78 36,-64" fill="#E0B800"/>
+      <polygon points="36,-64 52,-78 52,-14 36,0" fill="#E0B800"/>
+      <path d="M-36 -64L36 0M36 -64L-36 0" fill="none"/>
+    </g>
+  </g>
+  <g id="forces-symbols" stroke="#111111" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M218 160V228" fill="none" stroke-width="10"/>
+    <path d="M218 160V228" fill="none" stroke="#FF5A4E" stroke-width="6"/>
+    <polygon points="204,226 232,226 218,252" fill="#FF5A4E"/>
+    <path d="M218 160L200 115" fill="none" stroke-width="10"/>
+    <path d="M218 160L200 115" fill="none" stroke="#FEFEFE" stroke-width="6"/>
+    <polygon points="192,96 212,110 188,120" fill="#FEFEFE"/>
+    <path d="M218 160L252 146" fill="none" stroke-width="10"/>
+    <path d="M218 160L252 146" fill="none" stroke="#FF5A4E" stroke-width="6"/>
+    <polygon points="271,138 257,158 247,134" fill="#FF5A4E"/>
+    <circle cx="218" cy="160" r="6" fill="#111111"/>
+  </g>
+</svg>

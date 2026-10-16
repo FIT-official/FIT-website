@@ -5,8 +5,16 @@ const labels = { sampling: 'A wave and its sensor samples', feedback: 'A tempera
 const gamePaper = { 'ratio-sweets-share': '#fff3e8', 'ratio-paint-mix': '#fff0f1', 'fractions-pizza-party': '#fff2df', 'fractions-number-line-jump': '#e8f7ef' }
 
 // Original vector illustrations. No image downloads or third-party artwork.
-export default function ActivityArt({ id, accent }) {
+// FIT Publicity concept tiles: one per concept, shared by every level variant. Art is never recoloured;
+// the level shows only through the coloured badge.
+export const CONCEPT_TILES = ['ratio', 'differentiation', 'forces']
+export const LEVEL_BADGE = { Primary: '#2E9E6B', Secondary: '#2F6FED', JC: '#7A4FE0', Poly: '#E05A2E', University: '#111111' }
+export default function ActivityArt({ id, accent, concept, level }) {
   const gradient = useId().replaceAll(':', '')
+  if (concept && CONCEPT_TILES.includes(concept)) return <span className="fit-tile" style={{ position: 'relative', display: 'block', background: '#FFDD00', aspectRatio: '4 / 3', overflow: 'hidden' }}>
+    <img src={`/simulations/tiles/${concept}.svg`} alt="" width="480" height="360" loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain' }}/>
+    {level && <span className="fit-tile-badge" style={{ position: 'absolute', top: 10, left: 10, background: LEVEL_BADGE[level] || '#111111', color: '#fff', font: '800 12px/1 Inter, system-ui, sans-serif', padding: '6px 10px', borderRadius: 999 }}>{level}</span>}
+  </span>
   const paper = gamePaper[id] || (id === 'base-rates' ? '#edf7f1' : id === 'feedback' ? '#fff1e3' : id === 'heat-path' ? '#fbeef0' : '#eff1fc')
   return <svg viewBox="0 0 480 230" role="img" aria-label={labels[id]}>
     <defs><linearGradient id={gradient} x2="1" y2="1"><stop stopColor={paper}/><stop offset="1" stopColor="#ffffff"/></linearGradient></defs>
