@@ -2,6 +2,7 @@ import { mount } from './shell.js'
 // Explicit allowlist: only the selected concept family's modules are downloaded.
 const families = {
   ratio: () => Promise.all([import('./ratio/variants.js'), import('./ratio/game.js')]),
+  forces: () => Promise.all([import('./forces/variants.js'), import('./forces/game.js')]),
   differentiation: () => Promise.all([import('./differentiation/variants.js'), import('./differentiation/game.js')]),
 }
 const id = document.body.dataset.activity || ''
