@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 const h = vi.hoisted(() => ({ api: vi.fn(), refresh: null }))
 vi.mock('@/components/Workshop/Classroom', () => ({ classroomRequest: (...args) => h.api(...args) }))
@@ -8,11 +8,33 @@ const seat = 'guest_11111111-1111-4111-8111-111111111111', assigned = { status: 
 beforeEach(() => { h.api.mockReset(); h.refresh = null })
 const start = async () => { render(<GuestTinkercad seat={seat} group="g2" />); await act(async () => { await h.refresh() }) }
 describe('private student Tinkercad panel', () => {
-    it.each(['not-ready','awaiting-approval','paused','exhausted'])('shows %s without exposing credentials or a class link', async status => { h.api.mockResolvedValue({ status }); await start(); expect(screen.queryByLabelText('Student login')).not.toBeInTheDocument(); expect(screen.queryByRole('link', { name: 'Open Tinkercad' })).not.toBeInTheDocument(); expect(screen.getByRole('status')).not.toHaveTextContent('Checking') })
-    it('claims only the current approved session and displays the exact slide labels', async () => { h.api.mockResolvedValueOnce({ status: 'ready' }).mockResolvedValueOnce(assigned); await start(); expect(h.api).toHaveBeenNthCalledWith(2, '/api/workshop/guest/tinkercad?homeGroup=g2', 'POST', { expectedSeat: seat }); expect(screen.getByLabelText('Student login')).toHaveValue('example-only'); expect(screen.getByLabelText('Student login')).toHaveAttribute('readonly'); expect(screen.getByLabelText('Class ID')).toHaveValue('EXAMPLE-ONLY'); expect(screen.queryByText('This example is not a real login')).not.toBeInTheDocument(); expect(screen.getByRole('link', { name: 'Open Tinkercad' })).toHaveAttribute('rel', 'noopener noreferrer') })
+    it.each(['not-ready','awaiting-approval','paused','exhausted'])('shows %s without exposing credentials or a class link', async status => { h.api.mockResolvedValue({ status }); await start(); expect(screen.queryByLabelText('Student ID')).not.toBeInTheDocument(); expect(screen.queryByRole('link', { name: 'Open Tinkercad' })).not.toBeInTheDocument(); expect(screen.getByRole('status')).not.toHaveTextContent('Checking') })
+    it('claims only the current approved session and displays the private Student ID and exact Class ID', async () => { h.api.mockResolvedValueOnce({ status: 'ready' }).mockResolvedValueOnce(assigned); await start(); expect(h.api).toHaveBeenNthCalledWith(2, '/api/workshop/guest/tinkercad?homeGroup=g2', 'POST', { expectedSeat: seat }); expect(screen.getByLabelText('Student ID')).toHaveValue('example-only'); expect(screen.getByLabelText('Student ID')).toHaveAttribute('readonly'); expect(screen.getByLabelText('Class ID')).toHaveValue('EXAMPLE-ONLY'); expect(screen.queryByText('This example is not a real login')).not.toBeInTheDocument(); expect(screen.getByRole('link', { name: 'Open Tinkercad' })).toHaveAttribute('rel', 'noopener noreferrer') })
     it('reads an existing assignment without consuming another seat', async () => { h.api.mockResolvedValue(assigned); await start(); await act(async () => { await h.refresh() }); expect(h.api).toHaveBeenCalledTimes(2); expect(h.api.mock.calls.every(row => row.length === 1)).toBe(true) })
-    it('removes displayed credentials after revocation or expiry', async () => { h.api.mockResolvedValueOnce(assigned).mockResolvedValueOnce({ status: 'awaiting-approval' }); await start(); expect(screen.getByLabelText('Student login')).toHaveValue('example-only'); await act(async () => { await h.refresh() }); expect(screen.queryByLabelText('Student login')).not.toBeInTheDocument(); h.api.mockRejectedValueOnce(Object.assign(Error('Session ended'), { status: 401 })); await act(async () => { await h.refresh() }); expect(screen.getByRole('status')).toHaveTextContent('Session ended') })
-    it('clears credentials when a refresh cannot verify current access', async () => { h.api.mockResolvedValueOnce(assigned).mockRejectedValueOnce(Error('Offline')); await start(); await act(async () => { await h.refresh() }); expect(screen.queryByLabelText('Student login')).not.toBeInTheDocument(); expect(screen.queryByRole('link')).not.toBeInTheDocument() })
+    it('removes displayed credentials after revocation or expiry', async () => { h.api.mockResolvedValueOnce(assigned).mockResolvedValueOnce({ status: 'awaiting-approval' }); await start(); expect(screen.getByLabelText('Student ID')).toHaveValue('example-only'); await act(async () => { await h.refresh() }); expect(screen.queryByLabelText('Student ID')).not.toBeInTheDocument(); h.api.mockRejectedValueOnce(Object.assign(Error('Session ended'), { status: 401 })); await act(async () => { await h.refresh() }); expect(screen.getByRole('status')).toHaveTextContent('Session ended') })
+    it('clears credentials when a refresh cannot verify current access', async () => { h.api.mockResolvedValueOnce(assigned).mockRejectedValueOnce(Error('Offline')); await start(); await act(async () => { await h.refresh() }); expect(screen.queryByLabelText('Student ID')).not.toBeInTheDocument(); expect(screen.queryByRole('link')).not.toBeInTheDocument() })
     it('does not render an unsafe class URL', async () => { h.api.mockResolvedValue({ ...assigned, classLink: 'javascript:alert(1)' }); await start(); expect(screen.queryByRole('link')).not.toBeInTheDocument(); expect(screen.getByRole('status')).toHaveTextContent('check the class link') })
-    it('does not use late responses from a discarded session', async () => { let resolve; h.api.mockImplementation(() => new Promise(r => { resolve = r })); const view = render(<GuestTinkercad seat={seat} group="g2" />); let pending; act(() => { pending = h.refresh() }); view.unmount(); await act(async () => { resolve(assigned); await pending }); expect(screen.queryByLabelText('Student login')).not.toBeInTheDocument() })
+    it('does not use late responses from a discarded session', async () => { let resolve; h.api.mockImplementation(() => new Promise(r => { resolve = r })); const view = render(<GuestTinkercad seat={seat} group="g2" />); let pending; act(() => { pending = h.refresh() }); view.unmount(); await act(async () => { resolve(assigned); await pending }); expect(screen.queryByLabelText('Student ID')).not.toBeInTheDocument() })
+    it('explains nickname sign in and keeps the support Session ID collapsed', async () => {
+        h.api.mockResolvedValue(assigned); await start()
+        expect(screen.getByText(/Join with nickname/)).toBeInTheDocument()
+        expect(screen.getByText(/another browser or device/)).toBeInTheDocument()
+        const support = screen.getByText('Session details for teacher support').closest('details')
+        expect(support).not.toHaveAttribute('open')
+        expect(screen.getByLabelText('Session ID')).not.toBeVisible()
+        expect(screen.getByLabelText('Student ID').parentElement.parentElement).toHaveClass('ph-mask', 'ph-no-capture')
+    })
+    it('retries an assignment error when the student selects Check again', async () => {
+        h.api.mockRejectedValueOnce(Error('Could not load the assignment.')).mockResolvedValueOnce(assigned)
+        await start()
+        expect(screen.getByRole('status')).toHaveTextContent('Could not load the assignment.')
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Check again' })) })
+        expect(screen.getByLabelText('Student ID')).toHaveValue('example-only')
+        expect(h.api).toHaveBeenCalledTimes(2)
+    })
+    it('guides an unapproved duplicate session back to the original Student ID', async () => {
+        h.api.mockResolvedValue({ status: 'awaiting-approval' }); await start()
+        expect(screen.getByText(/Choose “Leave class”, then “Sign in with Student ID”/)).toBeVisible()
+        expect(screen.queryByLabelText('Student ID')).not.toBeInTheDocument()
+    })
 })
