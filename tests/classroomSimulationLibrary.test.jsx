@@ -49,7 +49,8 @@ describe('Simulation discovery and classroom embeds', () => {
       expect(article.querySelector('button')).toHaveTextContent('Add to class')
     }
     expect(screen.getByText('TRUE FLAGS')).toBeInTheDocument()
-    expect(screen.getByText(/Syllabus references are awaiting curriculum review/)).toBeVisible()
+    expect(screen.queryByText(/awaiting curriculum review|Begin with a prediction|Explore independently/)).toBeNull()
+    expect(screen.getByText("Original FIT simulations.")).toBeVisible()
   })
   it('mounts the shared shell and copies a minimal-player snippet with visible feedback', async () => {
     const fetch = vi.fn()
@@ -60,7 +61,7 @@ describe('Simulation discovery and classroom embeds', () => {
     expect(screen.queryByText('Workshop class')).not.toBeInTheDocument()
     expect(screen.getByTestId('game-shell')).toHaveTextContent('Game: Signal Sampling Detective')
     expect(screen.getByRole('link', { name: /Open compact player/ })).toHaveAttribute('href', '/embed/sims/sampling')
-    expect(screen.getByText(/external iframe hosting is not enabled/i)).toBeVisible()
+    expect(screen.queryByText(/external iframe hosting|Explore and explain|YOUR INVESTIGATION/i)).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Copy player snippet' }))
     expect(await screen.findByText('Player snippet copied.')).toBeVisible()
     expect(screen.getByRole('button', { name: 'Copied ✓' })).toBeVisible()

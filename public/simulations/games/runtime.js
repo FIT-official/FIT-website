@@ -18,7 +18,7 @@ export function mountGame(host, game, { seed = 'FIT-2026', model = '' } = {}) {
   const root = host.querySelector('main'), $ = selector => root.querySelector(selector)
   $('.game-intro h1').textContent = game.title
   $('.game-subtitle').textContent = game.subtitle
-  $('.game-intro .game-eyebrow').textContent = game.id.startsWith('ratio') ? 'RATIO / MAKE THE PARTS FIT' : 'FRACTIONS / PARTS OF A WHOLE'
+  $('.game-intro .game-eyebrow').textContent = game.eyebrow || (game.id.startsWith('ratio') ? 'RATIO / MAKE THE PARTS FIT' : game.id.startsWith('fractions') ? 'FRACTIONS / PARTS OF A WHOLE' : '')
   $('.game-theory p').textContent = model
   const feedback = $('#game-feedback'), checkButton = $('[data-action="check"]'), resetButton = $('[data-action="reset"]')
   const nextButton = $('[data-action="next"]'), replayButton = $('[data-action="replay"]')

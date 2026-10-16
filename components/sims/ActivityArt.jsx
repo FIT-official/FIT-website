@@ -16,11 +16,21 @@ export const LEVEL_COLOURS = {
   University: { c: '#1F66E5', tint: '#E2ECFD', on: '#FFFFFF' },
 }
 export const CONCEPT_TILES = Object.keys(CONCEPT_TILE_SVG)
+// Where a level colour collides with the art's own colours, shift the level-coloured parts darker
+// (ratio: the pot vs the mint tub at Secondary, vs the blue pots at University).
+export const TILE_SHIFT = { ratio: { Secondary: 55, University: 55 } }
+export function tileColour(concept, level) {
+  const lv = LEVEL_COLOURS[level]
+  if (!lv) return '#FFDD00'
+  const shift = TILE_SHIFT[concept]?.[level]
+  return shift ? `color-mix(in srgb, ${lv.c} ${shift}%, #111111)` : lv.c
+}
 export default function ActivityArt({ id, accent, concept, level }) {
   const gradient = useId().replaceAll(':', '')
   if (concept && CONCEPT_TILE_SVG[concept]) {
     const lv = LEVEL_COLOURS[level] || { c: '#FFDD00', tint: '#FEFEFE', on: '#111111' }
-    const vars = { '--c': lv.c, '--c-dark': `color-mix(in srgb, ${lv.c} 78%, #111111)`, '--tint': lv.tint, '--on': lv.on }
+    const c = tileColour(concept, level)
+    const vars = { '--c': c, '--c-dark': `color-mix(in srgb, ${c} 78%, #111111)`, '--tint': lv.tint, '--on': lv.on }
     return <span className="fit-tile" data-level={level} style={{ ...vars, position: 'relative', display: 'block', background: lv.tint, aspectRatio: '4 / 3', overflow: 'hidden' }}>
       <span style={{ display: 'block', width: '100%', height: '100%' }} dangerouslySetInnerHTML={{ __html: CONCEPT_TILE_SVG[concept].replace(' role="img"', ' aria-hidden="true" focusable="false" width="100%" height="100%"') }}/>
       {level && <span className="fit-tile-badge" style={{ position: 'absolute', top: 10, left: 10, background: lv.c, color: lv.on, border: '2px solid #111111', font: '800 12px/1 Inter, system-ui, sans-serif', letterSpacing: '.04em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 999 }}>{level}</span>}

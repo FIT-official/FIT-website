@@ -28,9 +28,8 @@ $('#app').innerHTML = `
       <div id="toolbar" class="toolbar"></div><div id="visual"></div><div id="metrics" class="metric-grid"></div><div id="status" class="status"></div><div id="data"></div>
     </section><aside id="controls" class="panel controls" aria-label="Simulation controls"></aside></main>
     <details><summary>Equations, units & model limits</summary><p class="model">${activity.model}</p><p id="model-extra"></p></details>
-    <section class="lesson"><div class="eyebrow">Predict → test → explain</div><h2>Your investigation</h2><p>${activity.prediction}</p><ol>${activity.steps.map(step => `<li>${step}</li>`).join('')}</ol><p><strong>Explain:</strong> ${activity.transfer}</p></section>
-    <details class="teacher"><summary>Teacher prompts & expected observations</summary><p>${activity.teacher}</p><p>Suggested age ${activity.ages}; ${activity.minutes} minutes. Adapt language and prior knowledge to your class. These mathematically validated demos have not undergone a classroom learning-outcomes study.</p></details>
-    <footer class="footer">Independently authored FIT learning activity. No account or private class data required. This simulation sends no measurements or responses to a service. The FIT host may retain ordinary access logs. <a href="/class/simulations">Explore all activities</a></footer>
+    <details class="teacher"><summary>Teacher prompts & expected observations</summary><p>${activity.teacher}</p><p>Suggested age ${activity.ages}; ${activity.minutes} minutes.</p></details>
+    <footer class="footer">Original FIT simulations. <a href="/class/simulations">Explore all activities</a></footer>
     <div id="announcement" class="sr-only" aria-live="polite"></div>
   </div>`;
 

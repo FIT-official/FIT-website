@@ -14,7 +14,6 @@ export default function ClassPage() {
     <header className={styles.hero}>
       <p className={styles.eyebrow}>FIT LEARNING STUDIO</p>
       <h1>Class</h1>
-      <p>Make a prediction. Try an idea. Discover something new.</p>
     </header>
     <section className={styles.sections} aria-label="Explore Class">
       <Link className={styles.card} href="/class/simulations" aria-labelledby="simulations-heading" aria-describedby="simulations-description">
@@ -22,7 +21,7 @@ export default function ClassPage() {
         <div className={styles.cardBody}>
           <p className={styles.eyebrow}>EXPLORE AND PLAY</p>
           <h2 id="simulations-heading">Simulations</h2>
-          <p id="simulations-description">Explore maths and physics through interactive experiments and games. Change a variable, test your prediction and see what happens.</p>
+          <p id="simulations-description">Interactive maths and physics experiments and games.</p>
           <span className={styles.action}>Explore simulations <span aria-hidden="true">↗</span></span>
         </div>
       </Link>

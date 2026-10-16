@@ -50,3 +50,11 @@ describe('linear-graphs family', () => {
     app.destroy(); host.remove()
   })
 })
+
+import { readFileSync } from 'fs'
+describe('linear graphs heading', () => {
+  it('runtime uses each game\'s own eyebrow instead of the fractions default', () => {
+    const rt = readFileSync('public/simulations/games/runtime.js', 'utf8')
+    expect(rt).toMatch(/game\.eyebrow \|\|/)
+  })
+})

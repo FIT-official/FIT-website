@@ -28,3 +28,13 @@ describe('embedded family player sizing', () => {
     expect(css).not.toMatch(/\d+(\.\d+)?(d|s|l)?vh/)
   })
 })
+
+describe('concept tile colours', () => {
+  it('shifts the ratio pot at Secondary and University, leaves other levels on the spec colour', async () => {
+    const { tileColour, LEVEL_COLOURS } = await import('../../components/sims/ActivityArt.jsx')
+    expect(tileColour('ratio', 'Secondary')).toMatch(/color-mix\(in srgb, #2EC4A6 55%, #111111\)/)
+    expect(tileColour('ratio', 'University')).toMatch(/#1F66E5 55%/)
+    expect(tileColour('ratio', 'JC')).toBe(LEVEL_COLOURS.JC.c)
+    expect(tileColour('forces', 'Secondary')).toBe(LEVEL_COLOURS.Secondary.c)
+  })
+})
