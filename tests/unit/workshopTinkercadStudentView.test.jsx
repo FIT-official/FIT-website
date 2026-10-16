@@ -15,9 +15,9 @@ describe('private student Tinkercad panel', () => {
     it('clears credentials when a refresh cannot verify current access', async () => { h.api.mockResolvedValueOnce(assigned).mockRejectedValueOnce(Error('Offline')); await start(); await act(async () => { await h.refresh() }); expect(screen.queryByLabelText('Student ID')).not.toBeInTheDocument(); expect(screen.queryByRole('link')).not.toBeInTheDocument() })
     it('does not render an unsafe class URL', async () => { h.api.mockResolvedValue({ ...assigned, classLink: 'javascript:alert(1)' }); await start(); expect(screen.queryByRole('link')).not.toBeInTheDocument(); expect(screen.getByRole('status')).toHaveTextContent('check the class link') })
     it('does not use late responses from a discarded session', async () => { let resolve; h.api.mockImplementation(() => new Promise(r => { resolve = r })); const view = render(<GuestTinkercad seat={seat} group="g2" />); let pending; act(() => { pending = h.refresh() }); view.unmount(); await act(async () => { resolve(assigned); await pending }); expect(screen.queryByLabelText('Student ID')).not.toBeInTheDocument() })
-    it('explains nickname sign in and keeps the support Session ID collapsed', async () => {
+    it('uses the live Tinkercad Student login wording and keeps the support Session ID collapsed', async () => {
         h.api.mockResolvedValue(assigned); await start()
-        expect(screen.getByText(/Join with nickname/)).toBeInTheDocument()
+        expect(screen.getByText(/Join with Student login/)).toBeInTheDocument()
         expect(screen.getByText(/another browser or device/)).toBeInTheDocument()
         const support = screen.getByText('Session details for teacher support').closest('details')
         expect(support).not.toHaveAttribute('open')
