@@ -1,6 +1,6 @@
 # FIT simulation library
 
-FIT's library contains four original activities, a shared practice shell and teacher assignment to the existing workshop classroom. The public library uses `/classes/simulations`; the separate, held Classes platform is not imported. Simulation models and controls in `public/simulations/` retain their existing behaviour.
+FIT's library contains eight original activities: four experiments and four maths games, a shared practice shell and teacher assignment to the existing workshop classroom. The public library uses `/classes/simulations`; the separate, held Classes platform is not imported. The four existing simulation models and controls retain their behaviour.
 
 ## Routes and interaction
 
@@ -9,6 +9,10 @@ FIT's library contains four original activities, a shared practice shell and tea
 - `/classes/simulations/feedback`: Feedback Control Lab.
 - `/classes/simulations/base-rates`: Evidence & Base Rates.
 - `/classes/simulations/heat-path`: Heat Path Designer.
+- `/classes/simulations/ratio-sweets-share`: Sweet Share.
+- `/classes/simulations/ratio-paint-mix`: Paint Mix Studio.
+- `/classes/simulations/fractions-pizza-party`: Pizza Party.
+- `/classes/simulations/fractions-number-line-jump`: Fraction Frog.
 - `/simulations/<activity>`: standalone, no-account activity document, behind the existing page gate.
 - `/simulations/<activity>?embed=1`: compact same-origin player.
 - `/embed/sims/<id>`: minimal same-origin activity document, without site chrome.
@@ -18,9 +22,24 @@ FIT's library contains four original activities, a shared practice shell and tea
 
 ## Practice and progress
 
-`components/sims/GameShell` provides three conceptual checkpoints (Notice, Explain, Apply), one star per completed checkpoint and optional elapsed time. Correct first, second and later attempts earn 100, 75 and 50 points. The timer never affects the score. Checkpoint answers are independent of the simulator's state: points are practice feedback, not experiment measurements, assessed grades or evidence of learning gains.
+For the four experiments, `components/sims/GameShell` provides three conceptual checkpoints (Notice, Explain, Apply), one star per completed checkpoint and optional elapsed time. Correct first, second and later attempts earn 100, 75 and 50 points. The timer never affects the score. Checkpoint answers are independent of the simulator's state: points are practice feedback, not experiment measurements, assessed grades or evidence of learning gains.
 
 Versioned progress stays in this browser's localStorage. Storage failures leave the experiment usable. Sound begins off and uses short WebAudio tones after a user action. The activity stage and decorative canvas load dynamically when visible; celebration respects reduced-motion preferences. The unchanged player still supplies equations, assumptions, text/numeric equivalents and keyboard/touch controls.
+
+## Ratio and fraction games
+
+The maths games use the same lazy GameShell stage and allowlisted player routes. Each player imports only its selected game module. Its six challenges check the board state directly and award 100/75/50 points on the first/second/later correct attempt, with one star per solved challenge. Checking a solved challenge again awards nothing. Restarting the current challenge keeps the attempt penalty; Play again starts a new six-challenge session. Game scores last for the current visit, without localStorage or server writes. The outer shell's optional timer does not affect scoring. There are no duplicate concept checkpoints or sound controls for these games.
+
+| Game | Concepts and progression | Exact success condition |
+| --- | --- | --- |
+| Sweet Share | Two-part ratios, larger totals, then three-part ratios | Every integer sweet is allocated and all jar counts share the target ratio |
+| Paint Mix Studio | Ratio recipes and equivalent ratios at larger batch sizes | Integer paint drops match both the ratio and the required total |
+| Pizza Party | Equal partitions, equivalent fractions, adding like denominators | Requested cut count and a unique set of served slices representing the target rational amount |
+| Fraction Frog | Fraction positions, comparison, ordering, mixed numbers | Recorded integer tick positions match the requested landing or ordered sequence |
+
+All challenges are reproducible from a seed and level; the player uses the fixed `FIT-2026` seed. Shared session logic prevents skipped levels and duplicate scoring. Sweets are identical counters. Paint swatches use an arithmetic weighted average of display RGB channels, solely to illustrate proportion; they do not simulate physical pigments. Pizza sectors have equal area in a fixed whole. Frog positions use equally spaced rational ticks, without a motion model. Each player includes its mathematical explanation and exact textual counts, so colour or canvas interpretation is not needed to answer.
+
+Original canvas art redraws only after input or resize, with no animation loop. Pointer actions have labelled native button alternatives; the sweets board and frog also support arrow keys. Controls have at least 44-pixel targets. Reduced-motion styles suppress transitions and animations. Curriculum labels are editorial: all four games support Primary, with Paint Mix Studio and Fraction Frog also discoverable under Secondary. All syllabus references await teacher review.
 
 ## Classroom assignment
 
@@ -66,7 +85,7 @@ The selected instructional tasks concern signed alias detection and sampling bud
 
 ## Verification and integration
 
-Focused checks: `node node_modules/vitest/vitest.mjs run tests/classroomSimulation tests/sims tests/unit/sims --maxWorkers=2 --minWorkers=1`. These cover model references, scoring and level order, local progress, sound, visibility, registry filtering, embed escaping, route gates and class assignment through mocked storage.
+Focused checks: `node node_modules/vitest/vitest.mjs run tests/games tests/classroomSimulation tests/sims tests/unit/sims --maxWorkers=2 --minWorkers=1`. These cover model references, scoring and level order, local progress, sound, visibility, registry filtering, embed escaping, route gates and class assignment through mocked storage.
 
 Whole checks follow existing coverage, lint and production-build scripts. The isolated Windows QA runner strips inherited app credentials, blocks outbound network, uses mocked build fonts and synthetic keys only. Those fixtures are outside tracked source and must not be deployed. The generated playground-worker prebuild is absent from this production base and was not imported from the held candidate.
 

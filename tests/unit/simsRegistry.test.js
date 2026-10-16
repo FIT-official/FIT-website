@@ -29,8 +29,9 @@ describe('Simulation registry', () => {
     expect(filterSimulations({ query: '  ALIASING sensor ', subject: 'Computing', level: 'JC', topic: 'Waves and sampling' }).map(sim => sim.id)).toEqual(['sampling'])
     expect(filterSimulations({ subject: 'Physics', level: 'Secondary' }).map(sim => sim.id)).toEqual(['heat-path'])
     expect(filterSimulations({ query: 'sampling', topic: 'Heat transfer' })).toEqual([])
-    expect(filterSimulations({ level: 'Primary' })).toEqual([])
-    expect(filterSimulations({ query: '   ' })).toHaveLength(4)
+    expect(filterSimulations({ level: 'Primary' })).toHaveLength(4)
+    expect(filterSimulations({ subject: 'Maths', level: 'Secondary' }).map(sim => sim.id)).toEqual(['ratio-paint-mix', 'fractions-number-line-jump'])
+    expect(filterSimulations({ query: '   ' })).toHaveLength(8)
   })
 })
 

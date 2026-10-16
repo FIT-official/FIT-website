@@ -11,6 +11,7 @@ const GameCanvas = dynamic(() => import('./GameShellCanvas'), { ssr: false })
 const NO_CHALLENGES = []
 
 function GameSession({ activity, compact }) {
+  const isGame = activity.kind === 'game'
   const shell = useRef(null)
   const soundPlayer = useRef(null)
   const checkpointHeading = useRef(null)
@@ -105,17 +106,17 @@ function GameSession({ activity, compact }) {
 
   return <section ref={shell} className={`${styles.shell} ${compact ? styles.compact : ''}`} aria-label={`${activity.title} activity`} style={{ '--sim-accent': activity.accent || '#5361d8' }}>
     <div className={styles.bar}>
-      <div className={styles.identity}><span className={styles.kicker}>FIT / EXPERIMENT</span><strong>Explore. Test. Explain.</strong></div>
+      <div className={styles.identity}><span className={styles.kicker}>{isGame ? 'FIT / PLAY' : 'FIT / EXPERIMENT'}</span><strong>{isGame ? 'Try. Solve. Level up.' : 'Explore. Test. Explain.'}</strong></div>
       <div className={styles.utilities}>
-        <button type="button" className={styles.control} aria-pressed={sound} onClick={toggleSound}><span aria-hidden="true">{sound ? '♪' : '♩'}</span> Sound {sound ? 'on' : 'off'}</button>
+        {!isGame && <button type="button" className={styles.control} aria-pressed={sound} onClick={toggleSound}><span aria-hidden="true">{sound ? '♪' : '♩'}</span> Sound {sound ? 'on' : 'off'}</button>}
         <button type="button" className={styles.control} aria-pressed={timer} onClick={() => setTimer(value => !value)}>{timer ? 'Pause timer' : seconds > 0 ? 'Resume timer' : 'Start timer'}<span className={styles.clock}>{formatElapsed(seconds)}</span></button>
       </div>
     </div>
-    <div className={styles.art}>{visible && <GameCanvas accent={activity.accent} celebration={celebration} reducedMotion={reducedMotion} />}</div>
-    <div className={styles.progress}>
+    {!isGame && <div className={styles.art}>{visible && <GameCanvas accent={activity.accent} celebration={celebration} reducedMotion={reducedMotion} />}</div>}
+    {!isGame && <div className={styles.progress}>
       <div className={styles.levels} aria-label="Concept checkpoint progress">{GAME_LEVELS.map((level, index) => <span key={level} className={`${styles.level} ${index < summary.completed ? styles.done : index === summary.next ? styles.active : ''}`}><span aria-hidden="true">{index < summary.completed ? '✓' : index + 1}</span>{level}<span className={styles.srOnly}>{index < summary.completed ? ', complete' : index === summary.next ? ', current' : ', next'}</span></span>)}</div>
       <div className={styles.score}><span aria-label={`${summary.stars} of ${challenges.length} stars`} className={styles.stars}>{challenges.map((challenge, index) => <span aria-hidden="true" key={challenge.id} className={index < summary.stars ? styles.earned : ''}>★</span>)}</span><strong>{summary.points}<small> points</small></strong></div>
-    </div>
+    </div>}
     <div className={styles.experiment}>{opened ? <GameStage activity={activity} /> : <div className={styles.placeholder}>The experiment opens when it comes into view.</div>}</div>
     {challenges.length > 0 && <div className={styles.checkpoints}>
       <div className={styles.checkpointIntro}><span className={styles.kicker}>CONCEPT CHECKPOINTS</span><h2 ref={checkpointHeading} tabIndex={-1} id={heading}>{current ? `${GAME_LEVELS[summary.next]} · ${summary.next + 1} of ${challenges.length}` : 'Three ideas, connected.'}</h2><p>Try the experiment, then check the ideas behind it. Stars track these answers; they do not measure your experiment.</p></div>

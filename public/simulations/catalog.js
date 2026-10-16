@@ -1,3 +1,5 @@
+import { gameActivities } from './games/catalog.js';
+
 export const activities = [
   {
     id: 'sampling', title: 'Signal Sampling Detective', shortTitle: 'Sampling', category: 'Physics', subjects: ['Math', 'Physics', 'Computing'], level: 'Intermediate', ages: '14+', minutes: '15–25', accent: '#5361d8', symbol: '∿',
@@ -43,6 +45,7 @@ export const activities = [
     transfer: 'Why is a fixed-temperature hot edge different from a finite hot object that is allowed to cool?',
     model: 'cᵢ dTᵢ/dt = Σⱼ gᵢⱼ(Tⱼ − Tᵢ), with cᵢ = 1 J/K and harmonic-mean face conductance gᵢⱼ in W/K. The 16 × 12 equal-tile network uses explicit Euler at 0.2 s (≤0.25 s stability bound). Top/bottom are insulated. Left/right are fixed reservoirs or insulated. It excludes convection and radiation and does not predict a named real material.',
   },
+  ...gameActivities,
 ];
 
 export function findActivity(id) { return activities.find(activity => activity.id === id); }

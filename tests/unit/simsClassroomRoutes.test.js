@@ -34,6 +34,15 @@ beforeEach(() => { h.signedIn = false; h.admin = false; h.row = null; h.collecti
 afterEach(() => vi.unstubAllEnvs())
 
 describe('teacher library assignment route', () => {
+    it.each(['ratio-sweets-share', 'ratio-paint-mix', 'fractions-pizza-party', 'fractions-number-line-jump'])('assigns and reads back %s using the existing mocked class store', async simId => {
+        h.signedIn = h.admin = true
+        expect((await POST(request({ simId }))).status).toBe(200)
+        expect(await (await GET(request())).json()).toMatchObject({ simIds: [simId], version: 1 })
+        expect(h.row.simIds).toEqual([simId])
+        expect(h.writes).toBe(1)
+        expect((await POST(request({ simId }))).status).toBe(200)
+        expect(h.writes).toBe(1)
+    })
     it('requires existing teacher authentication before any storage access', async () => {
         expect((await GET(request())).status).toBe(401)
         expect((await POST(request({ simId: 'sampling' }))).status).toBe(401)

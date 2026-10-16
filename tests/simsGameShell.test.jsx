@@ -20,6 +20,16 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers() })
 
 describe('Game shell', () => {
+  it('uses the same lazy shell for games while their players own the challenge score', () => {
+    render(<GameShell activity={activities.find(activity => activity.id === 'ratio-sweets-share')} />)
+    expect(screen.getByText('Try. Solve. Level up.')).toBeVisible()
+    expect(screen.queryByLabelText('Concept checkpoint progress')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Sound/ })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('lazy-experiment')).not.toBeInTheDocument()
+    act(() => visibility([{ isIntersecting: true }]))
+    expect(screen.getByTestId('lazy-experiment')).toHaveTextContent('ratio-sweets-share')
+    expect(screen.getByRole('button', { name: /Start timer/ })).toBeVisible()
+  })
   it('defers experiment and canvas until visible, then preserves the experiment on scroll-away', () => {
     render(<GameShell activity={activities[0]} />)
     expect(screen.queryByTestId('lazy-experiment')).not.toBeInTheDocument()

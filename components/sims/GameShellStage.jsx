@@ -27,6 +27,6 @@ export default function GameShellStage({ activity, source, title }) {
   }
   return <div className={styles.stage} aria-busy={!loaded}>
     {!loaded && <p className={styles.loading} role="status">Opening the experiment…</p>}
-    <iframe ref={frame} src={source || `/simulations/${encodeURIComponent(activity.id)}?embed=1`} title={title || `${activity.title} interactive experiment`} onLoad={onLoad} style={{ height }} className={styles.frame} loading="lazy" allow="fullscreen" />
+    <iframe ref={frame} src={source || `/simulations/${encodeURIComponent(activity.id)}?embed=1`} title={title || `${activity.title} interactive ${activity.kind === 'game' ? 'game' : 'experiment'}`} onLoad={onLoad} style={{ height }} className={styles.frame} loading="lazy" allow="fullscreen" />
   </div>
 }

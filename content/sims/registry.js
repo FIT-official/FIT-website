@@ -47,4 +47,28 @@ export const simsRegistry = [
     activityPrompt: 'Design a path that warms target A while protecting probe B. Compare both probes at equal times, then test energy conservation with insulated boundaries.',
     status: 'live',
   },
+  {
+    id: 'ratio-sweets-share', title: 'Sweet Share', level: 'Primary', subject: 'Maths', topic: 'Ratio', syllabusRef: '',
+    approach: 'Share a fixed number of sweets between character jars. Find one equal part, then scale two-part and three-part ratios.',
+    activityPrompt: 'Drag sweets into the jars or use the sharing buttons. Use every sweet and match the given ratio, then explain the size of one part.',
+    status: 'live',
+  },
+  {
+    id: 'ratio-paint-mix', title: 'Paint Mix Studio', level: 'Primary', levels: ['Primary', 'Secondary'], subject: 'Maths', topic: 'Ratio', syllabusRef: '',
+    approach: 'Measure paint drops to match a recipe and a batch size. Scale equivalent ratios while comparing illustrative colour swatches.',
+    activityPrompt: 'Match the target paint ratio using exactly the requested number of drops. Explain why scaling every paint by the same factor preserves the recipe.',
+    status: 'live',
+  },
+  {
+    id: 'fractions-pizza-party', title: 'Pizza Party', level: 'Primary', subject: 'Maths', topic: 'Fractions', syllabusRef: '',
+    approach: 'Cut one pizza into equal slices and serve fractions of the whole. Connect equivalent fractions with adding like denominators.',
+    activityPrompt: 'Choose the equal cuts and serve the target fraction. Show an equivalent portion and explain why the denominator stays the same when adding equal-sized slices.',
+    status: 'live',
+  },
+  {
+    id: 'fractions-number-line-jump', title: 'Fraction Frog', level: 'Primary', levels: ['Primary', 'Secondary'], subject: 'Maths', topic: 'Fractions', syllabusRef: '',
+    approach: 'Place a frog on equal number-line intervals. Compare and order fractions, then locate mixed numbers beyond one whole.',
+    activityPrompt: 'Aim and land on the target fractions. For ordered jumps, visit them from smallest to largest and explain each position using a common unit.',
+    status: 'live',
+  },
 ]

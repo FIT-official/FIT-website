@@ -11,16 +11,16 @@ afterEach(cleanup)
 const activities = getLiveSims()
 
 describe('Simulation discovery and classroom embeds', () => {
-  it('lists four valid routes and filters without losing reset recovery', () => {
+  it('lists all live routes and filters without losing reset recovery', () => {
     render(<Library />)
-    expect(screen.getAllByRole('article')).toHaveLength(4)
+    expect(screen.getAllByRole('article')).toHaveLength(8)
     fireEvent.change(screen.getByLabelText('Search activities'), { target: { value: '  aliasing  ' } })
     expect(screen.getAllByRole('article')).toHaveLength(1)
     expect(screen.getByRole('link', { name: 'Launch Signal Sampling Detective' })).toHaveAttribute('href', '/classes/simulations/sampling')
     fireEvent.change(screen.getByLabelText('Learning level'), { target: { value: 'Poly' } })
     expect(screen.queryAllByRole('article')).toHaveLength(0)
     fireEvent.click(screen.getByRole('button', { name: 'Show all activities' }))
-    expect(screen.getAllByRole('article')).toHaveLength(4)
+    expect(screen.getAllByRole('article')).toHaveLength(8)
   })
   it('combines subject, level and topic with accessible pressed state', () => {
     render(<Library />)
@@ -33,7 +33,7 @@ describe('Simulation discovery and classroom embeds', () => {
     fireEvent.change(screen.getByLabelText('Topic'), { target: { value: 'Probability and evidence' } })
     expect(screen.queryAllByRole('article')).toHaveLength(0)
     fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }))
-    expect(screen.getAllByRole('article')).toHaveLength(4)
+    expect(screen.getAllByRole('article')).toHaveLength(8)
   })
   it('keeps subject and level outside the decorative artwork, with class controls on every card', () => {
     render(<Library />)
@@ -41,7 +41,7 @@ describe('Simulation discovery and classroom embeds', () => {
       const activity = activities.find(item => article.textContent.includes(item.title))
       const artwork = article.querySelector('a[aria-hidden="true"]')
       const subject = Array.from(article.querySelectorAll('span')).find(span => span.textContent === activity.subject)
-      const level = Array.from(article.querySelectorAll('span')).find(span => span.textContent === activity.level)
+      const level = Array.from(article.querySelectorAll('span')).find(span => span.textContent === (activity.levels?.join(' / ') || activity.level))
       expect(artwork).not.toContainElement(subject)
       expect(subject.closest('[aria-hidden="true"]')).toBeNull()
       expect(level.closest('[aria-hidden="true"]')).toBeNull()

@@ -28,6 +28,30 @@ beforeEach(async () => {
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs() })
 
 describe('Gated original player entrypoints', () => {
+  it.each(['ratio-sweets-share', 'ratio-paint-mix', 'fractions-pizza-party', 'fractions-number-line-jump'])('serves the lazy original %s game at both player routes', async id => {
+    for (const response of [
+      await GET(request(`/simulations/${id}`), { params: Promise.resolve({ activity: id }) }),
+      await embedGET(request(`/embed/sims/${id}`), { params: Promise.resolve({ id }) }),
+    ]) {
+      expect(response.status).toBe(200)
+      expect(response.headers.get('cache-control')).toBe('no-store')
+      const html = await response.text()
+      expect(html).toContain(`data-activity="${id}"`)
+      expect(html).toContain('src="/simulations/games/main.js"')
+      expect(html).toContain('href="/simulations/games/games.css"')
+      expect(html).not.toMatch(/clerk|<nav|<iframe|__next|\/lab.js/)
+      expect(existsSync(resolve(`public/simulations/games/${id}.js`))).toBe(true)
+    }
+    expect((await middleware(auth, request(`/embed/sims/${id}`))).status).toBe(503)
+    expect((await middleware(auth, request(`/simulations/${id}`))).status).toBe(503)
+    const entry = simsRegistry.find(activity => activity.id === id)
+    const previous = entry.status
+    try {
+      entry.status = 'draft'
+      expect(playerDocument(id)).toBeNull()
+      expect((await embedGET(request(`/embed/sims/${id}`), { params: Promise.resolve({ id }) })).status).toBe(404)
+    } finally { entry.status = previous }
+  })
   it.each(['sampling', 'feedback', 'base-rates', 'heat-path'])('serves a public, uncached allowlisted %s document', async id => {
     const response = await GET(request(`/simulations/${id}`), { params: Promise.resolve({ activity: id }) })
     const html = await response.text()

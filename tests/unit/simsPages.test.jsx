@@ -16,7 +16,7 @@ describe('Simulation page routes', () => {
     expect(metadata.alternates.canonical).toBe('/classes/simulations')
   })
   it('renders each live detail route and its metadata from the same registry', async () => {
-    expect(generateStaticParams()).toHaveLength(4)
+    expect(generateStaticParams()).toHaveLength(8)
     for (const { slug } of generateStaticParams()) {
       const detail = await generateMetadata({ params: Promise.resolve({ slug }) })
       expect(detail.alternates.canonical).toBe(`/classes/simulations/${slug}`)
