@@ -7,7 +7,7 @@ const challenges = GAME_CHALLENGES.sampling
 describe('Concept checkpoints and practice scoring', () => {
   it('provides three valid, distinct checkpoints for every conceptual experiment', () => {
     expect(GAME_LEVELS).toHaveLength(3)
-    for (const activity of activities.filter(item => item.kind !== 'game')) {
+    for (const activity of activities.filter(item => item.kind !== 'game' && item.kind !== 'family')) {
       const items = GAME_CHALLENGES[activity.id]
       expect(items).toHaveLength(3)
       expect(new Set(items.map(item => item.id)).size).toBe(3)

@@ -150,8 +150,8 @@ describe('Spatial heat: symmetric fluxes and stable bounds', () => {
 
 describe('Library search', () => {
   it('finds topics using all words, ignores whitespace and applies intersecting filters', () => {
-    expect(filterActivities({ query: '  SENSOR  waves  ' }).map(a => a.id)).toEqual(['sampling'])
-    expect(filterActivities({ subject: 'Physics', level: 'Advanced' }).map(a => a.id)).toEqual(['feedback'])
+    expect(filterActivities({ query: '  SENSOR  waves  ' }).filter(a => a.kind !== 'family').map(a => a.id)).toEqual(['sampling'])
+    expect(filterActivities({ subject: 'Physics', level: 'Advanced' }).filter(a => a.kind !== 'family').map(a => a.id)).toEqual(['feedback'])
     expect(filterActivities({ query: 'no such topic' })).toEqual([])
     expect(filterActivities()).toEqual(activities)
   })

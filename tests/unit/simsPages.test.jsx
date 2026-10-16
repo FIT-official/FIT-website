@@ -3,6 +3,8 @@ import { cleanup, render, screen } from '@testing-library/react'
 import LibraryPage, { metadata, dynamic as libraryDynamic } from '../../app/class/simulations/page'
 import ActivityPage, { generateMetadata, generateStaticParams, dynamic as activityDynamic } from '../../app/class/simulations/[slug]/page'
 import { simsRegistry } from '../../content/sims/registry'
+// Original-activity contract: concept-family variants are switched on separately (see tests/simFamilies/live.test.js).
+vi.mock('../../public/simulations/families/live.js', () => ({ LIVE_FAMILY: [] }))
 
 vi.mock('next/navigation', () => ({ notFound: () => { throw new Error('NEXT_NOT_FOUND') } }))
 vi.mock('@/components/ClassroomSimulations/Library', () => ({ default: ({ addToClassEnabled }) => <main data-add-to-class={String(addToClassEnabled)}>Simulation library</main> }))

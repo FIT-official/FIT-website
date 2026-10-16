@@ -3,6 +3,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import Library from '../components/ClassroomSimulations/Library'
 import Activity from '../components/ClassroomSimulations/Activity'
 import { getLiveSims } from '../lib/sims/registry'
+// Original-activity contract: concept-family variants are switched on separately (see tests/simFamilies/live.test.js).
+vi.mock('../public/simulations/families/live.js', () => ({ LIVE_FAMILY: [] }))
 vi.mock('next/link', () => ({ default: ({ children, ...props }) => <a {...props}>{children}</a> }))
 vi.mock('@/components/sims/GameShell', () => ({ default: ({ activity }) => <div data-testid="game-shell">Game: {activity.title}</div> }))
 afterEach(() => { cleanup(); vi.unstubAllGlobals() })

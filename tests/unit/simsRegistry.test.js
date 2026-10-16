@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { activities } from '../../public/simulations/catalog'
 import { simsRegistry, SIMULATION_LEVELS, getLiveSims, getLiveSim, filterSimulations, getSimulationFilterOptions } from '../../lib/sims/registry'
 import { createEmbedSnippet, getEmbedPath } from '../../lib/sims/embed'
+// Original-activity contract: concept-family variants are switched on separately (see tests/simFamilies/live.test.js).
+vi.mock('../../public/simulations/families/live.js', () => ({ LIVE_FAMILY: [] }))
 
 describe('Simulation registry', () => {
   it('registers every original activity with a curriculum level and lesson context', () => {
@@ -9,6 +11,7 @@ describe('Simulation registry', () => {
     expect(new Set(simsRegistry.map(sim => sim.id)).size).toBe(simsRegistry.length)
     for (const sim of simsRegistry) {
       expect(SIMULATION_LEVELS).toContain(sim.level)
+      if (activities.find(activity => activity.id === sim.id).kind === 'family') { expect(sim.syllabusRef.trim()).not.toBe(''); expect(sim.syllabusRef).not.toMatch(/\b(MA|CS|PC|EE|ME|MH|CE)\d{4}\b/); continue }
       expect(['live', 'draft']).toContain(sim.status)
       for (const key of ['id', 'title', 'subject', 'topic', 'approach', 'activityPrompt']) expect(sim[key].trim()).not.toBe('')
       expect(sim).toHaveProperty('syllabusRef', '')

@@ -2,6 +2,7 @@
 import { variants as ratio } from './ratio/variants.js'
 import { variants as differentiation } from './differentiation/variants.js'
 import { variants as forces } from './forces/variants.js'
+import { LIVE_FAMILY } from './live.js'
 
 const SUBJECT = { ratio: 'Maths', differentiation: 'Maths', forces: 'Physics' }
 const subjectFor = v => (/chem/i.test(v.syllabus + v.topic) ? 'Chemistry' : /gear|statics|moment/i.test(v.topic) ? 'Engineering' : SUBJECT[v.concept] || 'Maths')
@@ -13,5 +14,5 @@ export const familyActivities = familyVariants.map(v => ({
 }))
 export const familyRegistry = familyVariants.map(v => ({
   id: v.id, title: v.title, level: v.level, subject: subjectFor(v), topic: v.topic, syllabusRef: v.syllabus || '',
-  approach: v.objective, activityPrompt: `Play all rounds, then explain: ${v.objective}`, status: 'live',
+  approach: v.objective, activityPrompt: `Play all rounds, then explain: ${v.objective}`, status: LIVE_FAMILY.includes(v.id) ? 'live' : 'draft',
 }))
