@@ -1,20 +1,31 @@
 import { useId } from 'react'
+import { CONCEPT_TILE_SVG } from './conceptTiles'
 
 const labels = { sampling: 'A wave and its sensor samples', feedback: 'A temperature response approaching a target', 'base-rates': 'Inspection counts in a batch', 'heat-path': 'A patterned heat-conduction plate', 'ratio-sweets-share': 'Three colourful sweet jars showing a one-to-two-to-three ratio', 'ratio-paint-mix': 'Two measured paint colours blend into a matching purple swatch', 'fractions-pizza-party': 'An eight-slice pizza with three slices marked and the fraction three eighths', 'fractions-number-line-jump': 'A friendly frog at one half on a number line from zero to one' }
 
 const gamePaper = { 'ratio-sweets-share': '#fff3e8', 'ratio-paint-mix': '#fff0f1', 'fractions-pizza-party': '#fff2df', 'fractions-number-line-jump': '#e8f7ef' }
 
 // Original vector illustrations. No image downloads or third-party artwork.
-// FIT Publicity concept tiles: one per concept, shared by every level variant. Art is never recoloured;
-// the level shows only through the coloured badge.
-export const CONCEPT_TILES = ['ratio', 'differentiation', 'forces']
-export const LEVEL_BADGE = { Primary: '#2E9E6B', Secondary: '#2F6FED', JC: '#7A4FE0', Poly: '#E05A2E', University: '#111111' }
+// FIT Publicity concept tiles: one per concept, shared by every level variant, recoloured at render
+// time by level (DESIGN_SPEC level colours) through CSS variables. No per-level art files.
+export const LEVEL_COLOURS = {
+  Primary: { c: '#FFC83D', tint: '#FFF4D6', on: '#111111' },
+  Secondary: { c: '#2EC4A6', tint: '#DDF7F1', on: '#111111' },
+  JC: { c: '#6A45F5', tint: '#ECE7FF', on: '#FFFFFF' },
+  Poly: { c: '#FF6B3D', tint: '#FFE6DC', on: '#111111' },
+  University: { c: '#1F66E5', tint: '#E2ECFD', on: '#FFFFFF' },
+}
+export const CONCEPT_TILES = Object.keys(CONCEPT_TILE_SVG)
 export default function ActivityArt({ id, accent, concept, level }) {
   const gradient = useId().replaceAll(':', '')
-  if (concept && CONCEPT_TILES.includes(concept)) return <span className="fit-tile" style={{ position: 'relative', display: 'block', background: '#FFDD00', aspectRatio: '4 / 3', overflow: 'hidden' }}>
-    <img src={`/simulations/tiles/${concept}.svg`} alt="" width="480" height="360" loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain' }}/>
-    {level && <span className="fit-tile-badge" style={{ position: 'absolute', top: 10, left: 10, background: LEVEL_BADGE[level] || '#111111', color: '#fff', font: '800 12px/1 Inter, system-ui, sans-serif', padding: '6px 10px', borderRadius: 999 }}>{level}</span>}
-  </span>
+  if (concept && CONCEPT_TILE_SVG[concept]) {
+    const lv = LEVEL_COLOURS[level] || { c: '#FFDD00', tint: '#FEFEFE', on: '#111111' }
+    const vars = { '--c': lv.c, '--c-dark': `color-mix(in srgb, ${lv.c} 78%, #111111)`, '--tint': lv.tint, '--on': lv.on }
+    return <span className="fit-tile" data-level={level} style={{ ...vars, position: 'relative', display: 'block', background: lv.tint, aspectRatio: '4 / 3', overflow: 'hidden' }}>
+      <span style={{ display: 'block', width: '100%', height: '100%' }} dangerouslySetInnerHTML={{ __html: CONCEPT_TILE_SVG[concept].replace(' role="img"', ' aria-hidden="true" focusable="false" width="100%" height="100%"') }}/>
+      {level && <span className="fit-tile-badge" style={{ position: 'absolute', top: 10, left: 10, background: lv.c, color: lv.on, border: '2px solid #111111', font: '800 12px/1 Inter, system-ui, sans-serif', letterSpacing: '.04em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 999 }}>{level}</span>}
+    </span>
+  }
   const paper = gamePaper[id] || (id === 'base-rates' ? '#edf7f1' : id === 'feedback' ? '#fff1e3' : id === 'heat-path' ? '#fbeef0' : '#eff1fc')
   return <svg viewBox="0 0 480 230" role="img" aria-label={labels[id]}>
     <defs><linearGradient id={gradient} x2="1" y2="1"><stop stopColor={paper}/><stop offset="1" stopColor="#ffffff"/></linearGradient></defs>
