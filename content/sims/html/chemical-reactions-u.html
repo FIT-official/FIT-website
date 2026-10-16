@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Equilibrium Engine | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit}
+button{min-height:46px;min-width:46px;border:2px solid #111;border-radius:999px;background:#fff;padding:8px 13px;font-weight:800;color:#111;cursor:pointer;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-uni);cursor:pointer}
+.wrap{max-width:1240px;margin:auto;padding:22px 15px 55px}
+header,.row,.hud,.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+header{justify-content:space-between;margin-bottom:17px}
+.brand{font-size:17px;font-weight:900}
+.badge{background:var(--lvl-uni);color:var(--lvl-uni-on);border:2px solid #111;border-radius:999px;padding:5px 12px;font-size:12px;text-transform:uppercase;font-weight:800}
+.counter{padding:6px 12px;border:2px solid #111;border-radius:999px;font-size:13px;font-weight:800;background:#fff}
+h1{font-size:clamp(30px,5vw,49px);line-height:1.1;letter-spacing:-1.5px;font-weight:800;margin:5px 0 8px}
+h2{font-size:20px;font-weight:800;margin:0 0 13px}
+h3{font-size:16px;font-weight:800;margin:0 0 8px}
+.intro{color:var(--fit-ink-2);margin:0 0 23px}
+.layout{display:grid;grid-template-columns:1fr;gap:20px;align-items:start}
+.card{background:#fff;border:2px solid #111;border-radius:24px;box-shadow:var(--sh-2);padding:19px;min-width:0}
+.stage{background:var(--lvl-uni-tint)}
+.scene,.graph{background:#fff;border:2px solid #111;border-radius:18px;overflow:hidden;margin:11px 0}
+.graph{border-color:var(--fit-line-soft)}
+svg{width:100%;height:auto;display:block}
+.scene svg{min-height:255px}
+.question{font-weight:700;margin:12px 0}
+.control{border:2px solid var(--fit-line-soft);border-radius:16px;padding:12px;margin:10px 0;background:#fff}
+.control label{font-weight:800;display:block;margin-bottom:6px}
+.stepper{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.stepper button{flex:1}
+.readout{min-width:82px;text-align:center;font-size:17px;font-weight:900}
+.coarse{background:var(--lvl-uni-tint)}
+.selected{background:var(--lvl-uni);color:#fff}
+.primary-button{background:var(--fit-sun);color:#111;border:3px solid #111;box-shadow:var(--sh-2)}
+.primary-button:active{box-shadow:none}
+.feedback{margin-top:15px;padding:12px;background:var(--fit-sunken);border:2px solid #111;border-radius:14px;min-height:56px;font-weight:600}
+.feedback.good{background:#DDF7E6}
+.feedback.bad{background:#FFE8E4}
+.small{font-size:13px;color:var(--fit-ink-3)}
+.readoutbox{border:2px solid #111;background:var(--lvl-uni-tint);border-radius:14px;padding:11px;font-weight:700;font-variant-numeric:tabular-nums;margin:11px 0}
+.concept{margin-top:16px;background:#fff;border:2px dashed #111;border-radius:16px;padding:12px}
+.concept svg{max-height:135px}
+details{border:2px solid #111;border-radius:16px;padding:12px 15px;margin-top:20px;background:#fff}
+summary{font-weight:800;cursor:pointer}
+details p{font-size:14px;margin:9px 0}
+.end{border:3px solid #111;border-radius:28px;box-shadow:var(--sh-3);padding:28px;text-align:center;background:var(--lvl-uni-tint)}
+.stars{font-size:42px;letter-spacing:8px}
+.hidden{display:none!important}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr)}.scene svg{min-height:285px}.wrap{padding-top:30px}}
+@media(max-width:440px){.wrap{padding:12px 12px 40px}.card{padding:14px}.stepper{gap:5px}.stepper button{padding:8px 9px}.readout{min-width:65px;font-size:15px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+<div class="row"><strong class="brand">FIT / PHYSICAL CHEMISTRY</strong><span class="badge">University, Physical Chemistry</span></div>
+<div class="hud"><span id="round" class="counter">Round 1/6</span><span id="score" class="counter">Score 0</span></div>
+</header>
+<h1>Equilibrium Engine</h1>
+<p class="intro">Solve a nonlinear gas equilibrium. Explore reaction quotients, Gibbs energy and temperature dependence.</p>
+<div id="game" class="layout">
+<section class="card stage">
+<div class="row"><span class="badge" id="mode">Equilibrium yield</span><strong id="case">Run 01</strong></div>
+<h2 style="margin-top:15px">Gas-phase equilibrium vessel</h2>
+<div class="scene">
+<svg id="scene" viewBox="0 0 520 330" role="img" aria-label="Equilibrium vessel containing gas species A and B"></svg>
+</div>
+<p class="small" id="sceneNote">Square particles represent A. Circular particles represent B.</p>
+<div class="concept">
+<h3>Concept figure: reaction quotient</h3>
+<svg viewBox="0 0 470 135" role="img" aria-label="Q less than K shifts forward, Q greater than K shifts backward">
+<rect x="8" y="12" width="214" height="89" rx="13" fill="#E2ECFD" stroke="#111" stroke-width="2"/>
+<rect x="247" y="12" width="214" height="89" rx="13" fill="#FFF4D6" stroke="#111" stroke-width="2"/>
+<text x="115" y="38" text-anchor="middle" font-size="17" font-weight="800">Q &lt; K</text>
+<path d="M56 64 H169 M156 53 L171 64 156 75" fill="none" stroke="#1F66E5" stroke-width="4"/>
+<text x="115" y="94" text-anchor="middle" font-size="13">Forward reaction</text>
+<text x="354" y="38" text-anchor="middle" font-size="17" font-weight="800">Q &gt; K</text>
+<path d="M301 64 H414 M314 53 L299 64 314 75" fill="none" stroke="#D92D20" stroke-width="4"/>
+<text x="354" y="94" text-anchor="middle" font-size="13">Reverse reaction</text>
+<text x="235" y="127" text-anchor="middle" font-size="12">At equilibrium, Q = K and ΔᵣG = 0.</text>
+</svg>
+<p class="small">The system responds until its reaction quotient matches the equilibrium constant.</p>
+</div>
+</section>
+<section class="card">
+<h2 id="taskTitle">Set the equilibrium</h2>
+<p class="question" id="question"></p>
+<div id="controls"></div>
+<div id="measurement" class="readoutbox" aria-live="polite"></div>
+<div class="actions">
+<button id="hint">💡 Hint</button>
+<button id="check" class="primary-button">✓ Check</button>
+<button id="next" class="hidden">Next system →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Adjust the system, then check your answer.</div>
+<h2 style="margin-top:24px">Species amounts during equilibration</h2>
+<div class="graph">
+<svg id="amountPlot" viewBox="0 0 520 292" role="img" aria-label="Amount of A and B in moles against reaction progress"></svg>
+</div>
+<h2 style="margin-top:20px">Gibbs energy landscape</h2>
+<div class="graph">
+<svg id="gibbsPlot" viewBox="0 0 520 292" role="img" aria-label="Gibbs energy in kilojoules against extent of reaction"></svg>
+</div>
+<h2 style="margin-top:20px">Van 't Hoff relationship</h2>
+<div class="graph">
+<svg id="vantPlot" viewBox="0 0 520 292" role="img" aria-label="Natural logarithm of equilibrium constant against reciprocal temperature"></svg>
+</div>
+<details>
+<summary>The chemistry</summary>
+<p><strong>Model reaction:</strong> A(g) ⇌ 2B(g). Standard pressure p° = 1 bar. All gases behave ideally.</p>
+<p><strong>Amounts at extent ξ:</strong> n<sub>A</sub> = n<sub>A,0</sub> − ξ; n<sub>B</sub> = n<sub>B,0</sub> + 2ξ. Units: mol.</p>
+<p><strong>Pressure quotient:</strong> Q<sub>p</sub> = (p<sub>B</sub>/p°)² / (p<sub>A</sub>/p°), where p<sub>i</sub> = y<sub>i</sub>P.</p>
+<p><strong>Standard Gibbs energy:</strong> ΔᵣG° = ΔᵣH° − TΔᵣS° = −RT ln K<sub>p</sub>.</p>
+<p><strong>Van 't Hoff:</strong> ln K<sub>p</sub> = −ΔᵣH°/(RT) + ΔᵣS°/R. The gradient of ln K against 1/T is −ΔᵣH°/R.</p>
+<p><strong>Reaction direction:</strong> ΔᵣG = RT ln(Q<sub>p</sub>/K<sub>p</sub>). Forward if Q &lt; K, reverse if Q &gt; K.</p>
+<p><strong>Equilibrium calculation:</strong> numerically solve Q<sub>p</sub>(ξ) = K<sub>p</sub> for an admissible ξ. A minimum of G(ξ) occurs at equilibrium.</p>
+<p><strong>Assumptions:</strong> ideal gases, fixed total pressure and temperature within each equilibrium calculation, constant ΔᵣH° and ΔᵣS°, no inert gas or side reactions. K<sub>p</sub> and Q<sub>p</sub> are dimensionless.</p>
+<p>R = 8.31 J mol⁻¹ K⁻¹. Temperature is in K, pressure in bar, and Gibbs energy in kJ.</p>
+</details>
+</section>
+</div>
+<section id="end" class="end hidden">
+<h2>Equilibrium achieved!</h2>
+<div id="stars" class="stars">☆☆☆</div>
+<p id="total"></p>
+<button id="again" class="primary-button">Play again</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const R=8.31;
+const rounds=["yield","shift","yield","shift","yield","shift"];
+let seed=1,rnd=0,score=0,tries=0,hinted=false,solved=false;
+let task={},state={},direction="",showCorrect=false;
+function random(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function pick(a){return a[Math.floor(random()*a.length)]}
+function finite(v,fallback=0){const n=Number(v);return Number.isFinite(n)?n:fallback}
+function fmt(v,d=3){return Number.isFinite(v)?v.toFixed(d):"—"}
+function feedback(message,kind=""){$("feedback").textContent=message;$("feedback").className="feedback "+kind}
+function mode(){return rounds[rnd]}
+function text(x,y,s,size=13,anchor="middle"){return '<text x="'+x+'" y="'+y+'" font-size="'+size+'" font-weight="700" text-anchor="'+anchor+'" fill="#111">'+s+'</text>'}
+function clamp(v,min,max){return Math.min(max,Math.max(min,v))}
+function lnK(temp,dh,ds){
+if(temp<=0)return 0;
+return clamp((ds-dh/temp)/R,-100,100);
+}
+function kValue(temp,dh,ds){return Math.exp(lnK(temp,dh,ds))}
+function amounts(xi,a,b){
+return {a:Math.max(0,a-xi),b:Math.max(0,b+2*xi)};
+}
+function qAt(xi,a,b,P){
+const n=amounts(xi,a,b);
+const total=n.a+n.b;
+if(total<=0||n.a<=0)return 1e100;
+if(n.b<=0)return 0;
+return (n.b*n.b/(n.a*total))*P;
+}
+function equilibrium(a,b,P,K){
+const tiny=1e-12;
+let lo=-b/2+tiny,hi=a-tiny;
+if(lo>=hi)return 0;
+const logK=Math.log(Math.max(1e-100,K));
+for(let i=0;i<110;i++){
+const mid=(lo+hi)/2;
+const q=qAt(mid,a,b,P);
+const lq=Math.log(Math.max(1e-100,Math.min(1e100,q)));
+if(lq>logK)hi=mid;else lo=mid;
+}
+return (lo+hi)/2;
+}
+function conversion(a,b,P,K){
+const eq=equilibrium(a,b,P,K);
+return a>0?eq/a:0;
+}
+function newTask(){
+tries=0;hinted=false;solved=false;showCorrect=false;direction="";
+$("check").disabled=false;$("next").classList.add("hidden");
+if(mode()==="yield"){
+const dh=pick([-26000,-22000,-18000,-14000,12000]);
+const ds=pick([-60,-50,-40,-30,25]);
+const pressure=pick([1,2,3,4]);
+let targetT=pick([320,340,360,380,400,420,440,460,480]);
+let targetA=pick([.5,.75,1,1.25,1.5,1.75]);
+let targetB=pick([.1,.2,.3,.4,.5,.6]);
+const targetK=kValue(targetT,dh,ds);
+const targetConversion=conversion(targetA,targetB,pressure,targetK);
+task={dh,ds,P:pressure,targetT,targetA,targetB,targetConversion,
+targetLabel:fmt(targetConversion*100,2)};
+state={T:300,a:2,b:1,P:pressure};
+if(Math.abs(conversion(state.a,state.b,state.P,kValue(state.T,dh,ds))-targetConversion)<.01){
+state.T=500;state.a=.5;state.b=0.9;
+}
+}else{
+const a=pick([.5,.75,1,1.25,1.5]);
+const b=pick([.5,.75,1,1.25,1.5]);
+const T=pick([320,340,360,380,400]);
+const targetP=pick([2,3,4,5,6,7,8]);
+const requiredK=qAt(0,a,b,targetP);
+const dh=pick([-20000,-10000,10000,20000]);
+const ds=R*Math.log(requiredK)+dh/T;
+const initialP=pick([1,9,10]);
+task={a,b,T,dh,ds,targetP,K:requiredK,initialP,
+originalQ:qAt(0,a,b,initialP)};
+state={T,a,b,P:initialP};
+}
+}
+function stepper(id,title,unit,min,max,small,big){
+return '<div class="control"><label>'+title+'</label>'+
+'<div class="stepper">'+
+'<button class="coarse" data-id="'+id+'" data-step="'+(-big)+'" aria-label="Decrease '+title+' by '+big+' '+unit+'">−−</button>'+
+'<button data-id="'+id+'" data-step="'+(-small)+'" aria-label="Decrease '+title+' by '+small+' '+unit+'">−</button>'+
+'<span id="'+id+'Val" class="readout"></span>'+
+'<button data-id="'+id+'" data-step="'+small+'" aria-label="Increase '+title+' by '+small+' '+unit+'">+</button>'+
+'<button class="coarse" data-id="'+id+'" data-step="'+big+'" aria-label="Increase '+title+' by '+big+' '+unit+'">++</button>'+
+'</div></div>';
+}
+function slider(id,title,unit,min,max,step,value){
+return '<div class="control"><label for="'+id+'">'+title+': <span id="'+id+'Label">'+value+' '+unit+'</span></label>'+
+'<input id="'+id+'" type="range" min="'+min+'" max="'+max+'" step="'+step+'" value="'+value+'"></div>';
+}
+function drawControls(){
+const m=mode();
+$("case").textContent="System "+String(rnd+1).padStart(2,"0");
+$("round").textContent="Round "+(rnd+1)+"/6";$("score").textContent="Score "+score;
+if(m==="yield"){
+$("mode").textContent="A · Equilibrium yield";
+$("taskTitle").textContent="Match the target conversion";
+$("question").textContent="For A(g) ⇌ 2B(g), ΔᵣH° = "+fmt(task.dh/1000,1)+" kJ/mol and ΔᵣS° = "+fmt(task.ds,1)+" J mol⁻¹ K⁻¹ at fixed P = "+task.P+" bar. Set T and the initial amounts so equilibrium conversion of A equals "+task.targetLabel+"% (±0.50 percentage points).";
+$("controls").innerHTML=
+slider("T","Temperature","K",300,500,10,300)+
+stepper("a","Initial amount of A","mol",.5,2,.25,.5)+
+stepper("b","Initial amount of B","mol",.1,1,.1,.2)+
+'<p class="small">Conversion of A = 100ξeq/nA,0 (%). The target was generated from a reachable combination of control settings.</p>';
+$("T").addEventListener("input",()=>{state.T=finite($("T").value,300);redraw()});
+}else{
+$("mode").textContent="B · Le Chatelier";
+$("taskTitle").textContent="Restore Q = K by pressure";
+$("question").textContent="At T = "+task.T+" K, the initial mixture has nA = "+fmt(task.a,2)+" mol and nB = "+fmt(task.b,2)+" mol. The initial pressure is "+fmt(task.initialP,1)+" bar. The reaction quotient is Q = "+fmt(task.originalQ,4)+" and K = "+fmt(task.K,4)+". Identify the initial direction of shift, then adjust pressure until this unchanged composition satisfies Q = K (±0.5%).";
+$("controls").innerHTML=
+'<div class="control"><label>Initial spontaneous direction</label>'+
+'<div class="row"><button data-dir="forward">→ Forward</button><button data-dir="reverse">← Reverse</button></div></div>'+
+stepper("P","Total pressure","bar",1,10,.1,1)+
+'<p class="small">The mixture composition is held fixed while choosing pressure. After Check, the equilibrium solver determines whether a further composition change is necessary.</p>';
+document.querySelectorAll("[data-dir]").forEach(b=>b.addEventListener("click",()=>{
+direction=b.dataset.dir;
+document.querySelectorAll("[data-dir]").forEach(x=>{let on=x===b;x.classList.toggle("selected",on);x.setAttribute("aria-pressed",String(on))});
+}));
+}
+document.querySelectorAll("[data-id]").forEach(button=>button.addEventListener("click",()=>{
+if(solved)return;
+let id=button.dataset.id,d=finite(button.dataset.step);
+const bounds={a:[.5,2],b:[.1,1],P:[1,10]};
+const [lo,hi]=bounds[id];
+state[id]=Math.round(clamp(state[id]+d,lo,hi)*1000)/1000;
+redraw();
+}));
+}
+function start(){
+newTask();drawControls();feedback("Adjust the variables and analyse the live plots.");redraw();
+}
+function currentK(){return kValue(state.T,task.dh,task.ds)}
+function currentEq(){return equilibrium(state.a,state.b,state.P,currentK())}
+function drawScene(){
+const K=currentK(),xi=currentEq(),n=amounts(xi,state.a,state.b);
+const total=n.a+n.b,frA=total>0?n.a/total:0;
+let s='<rect width="520" height="330" fill="#fff"/>'+
+'<rect x="60" y="58" width="400" height="201" rx="37" fill="#E2ECFD" stroke="#111" stroke-width="4"/>'+
+'<path d="M85 160 H435" stroke="#B1C9F0" stroke-width="2" stroke-dasharray="7 7"/>';
+let count=28,na=Math.round(count*frA);
+for(let i=0;i<count;i++){
+const x=92+(i%8)*46+((i*7)%13),y=87+Math.floor(i/8)*43+((i*13)%11);
+if(i<na)s+='<rect x="'+x+'" y="'+y+'" width="17" height="17" rx="3" fill="#1F66E5" stroke="#111" stroke-width="2"/>';
+else s+='<circle cx="'+(x+8)+'" cy="'+(y+8)+'" r="9" fill="#FF8FB8" stroke="#111" stroke-width="2"/>';
+}
+s+='<rect x="79" y="14" width="170" height="37" rx="15" fill="#fff" stroke="#111" stroke-width="2"/>'+
+text(164,37,"T = "+state.T+" K",16)+
+'<rect x="270" y="14" width="170" height="37" rx="15" fill="#fff" stroke="#111" stroke-width="2"/>'+
+text(355,37,"P = "+fmt(state.P,1)+" bar",16)+
+'<rect x="87" y="274" width="346" height="44" rx="12" fill="#fff" stroke="#111" stroke-width="2"/>'+
+'<rect x="101" y="288" width="13" height="13" rx="2" fill="#1F66E5" stroke="#111"/>'+
+text(124,301,"A: "+fmt(n.a,3)+" mol",13,"start")+
+'<circle cx="282" cy="295" r="7" fill="#FF8FB8" stroke="#111" stroke-width="2"/>'+
+text(298,301,"B: "+fmt(n.b,3)+" mol",13,"start");
+$("scene").innerHTML=s;
+$("scene").setAttribute("aria-label","Equilibrium gas vessel. Temperature "+state.T+" kelvin, pressure "+fmt(state.P,1)+" bar, A "+fmt(n.a,3)+" mol, B "+fmt(n.b,3)+" mol. Squares A, circles B.");
+}
+function coordinates(xmin,xmax,ymin,ymax){
+const xrange=Math.max(1e-12,xmax-xmin),yrange=Math.max(1e-12,ymax-ymin);
+return {x:v=>65+407*(v-xmin)/xrange,y:v=>241-181*(v-ymin)/yrange};
+}
+function basicGraph(title,xlabel,ylabel,xmin,xmax,ymin,ymax){
+let s='<rect width="520" height="292" fill="#fff"/>'+text(260,22,title,15);
+const fy=v=>Math.abs(v)<.001&&v!==0?fmt(v,5):Math.abs(v)<10?fmt(v,2):fmt(v,0);
+for(let i=0;i<=4;i++){
+let x=65+i*407/4,y=241-i*181/4;
+s+='<line x1="'+x+'" y1="60" x2="'+x+'" y2="241" stroke="#E4E2DB"/>'+
+'<line x1="65" y1="'+y+'" x2="472" y2="'+y+'" stroke="#E4E2DB"/>'+
+text(x,257,fy(xmin+(xmax-xmin)*i/4),10)+
+text(58,y+4,fy(ymin+(ymax-ymin)*i/4),10,"end");
+}
+s+='<path d="M65 60 V241 H472" fill="none" stroke="#111" stroke-width="2"/>'+
+'<text x="263" y="285" text-anchor="middle" font-size="12">'+xlabel+'</text>'+
+'<text x="15" y="155" text-anchor="middle" font-size="12" transform="rotate(-90 15 155)">'+ylabel+'</text>';
+return s;
+}
+function series(points,c,color,dashed=false){
+return '<polyline points="'+points.map(p=>c.x(p[0]).toFixed(2)+","+c.y(p[1]).toFixed(2)).join(" ")+'" fill="none" stroke="'+color+'" stroke-width="3" '+(dashed?'stroke-dasharray="6 5"':'')+'/>';
+}
+function marker(x,y,c,color="#FFC83D"){
+return '<circle cx="'+c.x(x)+'" cy="'+c.y(y)+'" r="6" fill="'+color+'" stroke="#111" stroke-width="2"/>';
+}
+function amountGraph(){
+const a=state.a,b=state.b,xi=currentEq(),lo=-b/2,hi=a;
+let da=[],db=[];
+for(let i=0;i<=100;i++){
+let x=lo+(hi-lo)*i/100,n=amounts(x,state.a,state.b);
+da.push([x,n.a]);db.push([x,n.b]);
+}
+const ymax=Math.max(a+b/2,b+2*a,1)*1.12;
+const c=coordinates(lo,hi,0,ymax);
+let s=basicGraph("Amounts versus reaction extent","Extent ξ (mol)","Amount n (mol)",lo,hi,0,ymax);
+s+=series(da,c,"#1F66E5")+series(db,c,"#D85A91");
+const eq=amounts(xi,a,b);
+s+='<line x1="'+c.x(xi)+'" y1="60" x2="'+c.x(xi)+'" y2="241" stroke="#111" stroke-width="1.5" stroke-dasharray="5 5"/>'+
+marker(xi,eq.a,c)+marker(xi,eq.b,c);
+s+='<line x1="170" y1="42" x2="190" y2="42" stroke="#1F66E5" stroke-width="3"/>'+text(196,46,"A",12,"start")+
+'<line x1="255" y1="42" x2="275" y2="42" stroke="#D85A91" stroke-width="3"/>'+text(281,46,"B",12,"start");
+$("amountPlot").innerHTML=s;
+$("amountPlot").setAttribute("aria-label","Amounts versus extent: equilibrium at extent "+fmt(xi,4)+" mol, A "+fmt(eq.a,3)+" mol, B "+fmt(eq.b,3)+" mol");
+}
+function mixingSum(xi){
+const n=amounts(xi,state.a,state.b);
+const tot=n.a+n.b;
+function part(v){
+if(v<=0||tot<=0)return 0;
+return v*Math.log(Math.max(1e-100,v/tot*state.P));
+}
+return part(n.a)+part(n.b);
+}
+function relativeG(xi){
+const g0=-R*state.T*Math.log(currentK());
+return (xi*g0+R*state.T*(mixingSum(xi)-mixingSum(0)))/1000;
+}
+function gibbsGraph(){
+const a=state.a,b=state.b,lo=-b/2,hi=a,xi=currentEq();
+let pts=[];
+for(let i=0;i<=160;i++){
+let x=lo+(hi-lo)*i/160;
+pts.push([x,relativeG(x)]);
+}
+let vals=pts.map(v=>v[1]);
+const ymin=Math.min(...vals)-.5,ymax=Math.max(...vals)+.5,c=coordinates(lo,hi,ymin,ymax);
+let s=basicGraph("Gibbs energy and equilibrium","Extent ξ (mol)","Relative G (kJ)",lo,hi,ymin,ymax);
+s+=series(pts,c,"#1F66E5");
+s+=marker(xi,relativeG(xi),c,"#3DBE6B");
+s+='<rect x="308" y="27" width="172" height="27" rx="10" fill="#DDF7E6" stroke="#111"/>'+
+text(394,45,"● Gibbs minimum",12);
+$("gibbsPlot").innerHTML=s;
+$("gibbsPlot").setAttribute("aria-label","Relative Gibbs energy has minimum "+fmt(relativeG(xi),3)+" kilojoules at extent "+fmt(xi,4)+" mol");
+}
+function vanthoffGraph(){
+const minT=280,maxT=550,low=1/maxT,high=1/minT;
+let pts=[];
+for(let T=minT;T<=maxT;T+=2)pts.push([1/T,lnK(T,task.dh,task.ds)]);
+let vals=pts.map(v=>v[1]),lowY=Math.min(...vals)-.8,highY=Math.max(...vals)+.8;
+const c=coordinates(low,high,lowY,highY);
+let s=basicGraph("Van 't Hoff: gradient −ΔᵣH°/R","1/T (K⁻¹)","ln Kₚ (unitless)",low,high,lowY,highY);
+s+=series(pts,c,"#1F66E5");
+s+=marker(1/state.T,lnK(state.T,task.dh,task.ds),c);
+s+='<rect x="250" y="29" width="225" height="26" rx="10" fill="#E2ECFD" stroke="#111"/>'+
+text(362,47,"Gradient "+fmt(-task.dh/R,1)+" K",12);
+$("vantPlot").innerHTML=s;
+$("vantPlot").setAttribute("aria-label","Van t Hoff line with slope "+fmt(-task.dh/R,1)+" kelvin; current ln K "+fmt(lnK(state.T,task.dh,task.ds),3));
+}
+function drawMeasurement(){
+if(mode()==="yield"){
+const conv=conversion(state.a,state.b,state.P,currentK());
+$("measurement").textContent="Kₚ = "+fmt(currentK(),4)+
+"  |  ξeq = "+fmt(currentEq(),4)+" mol"+
+"  |  Your conversion = "+fmt(conv*100,2)+"%";
+}else{
+const q=qAt(0,task.a,task.b,state.P),K=currentK();
+$("measurement").textContent="Qₚ(current composition) = "+fmt(q,5)+
+"  |  Kₚ = "+fmt(K,5)+
+"  |  Q/K = "+fmt(q/Math.max(K,1e-100),4);
+}
+}
+function redraw(){
+if(mode()==="yield"){
+$("T").value=state.T;
+$("TLabel").textContent=state.T+" K";
+$("aVal").textContent=fmt(state.a,2)+" mol";
+$("bVal").textContent=fmt(state.b,2)+" mol";
+}else{
+$("PVal").textContent=fmt(state.P,1)+" bar";
+}
+drawMeasurement();drawScene();amountGraph();gibbsGraph();vanthoffGraph();
+}
+function check(){
+if(solved)return;
+tries++;
+if(mode()==="yield"){
+const actual=conversion(state.a,state.b,state.P,currentK());
+const diff=Math.abs((actual-task.targetConversion)*100);
+if(diff<=.500001){
+success("The numerical equilibrium gives "+fmt(actual*100,2)+"% conversion. At the Gibbs minimum, Qₚ = Kₚ.");
+}else feedback("✗ Conversion differs from the target by "+fmt(diff,2)+" percentage points. Adjust T or initial composition.","bad");
+}else{
+const expected=task.originalQ<task.K?"forward":"reverse";
+const q=qAt(0,task.a,task.b,state.P),ratio=q/Math.max(task.K,1e-100);
+const qError=Math.abs(ratio-1);
+if(direction===expected&&qError<=.0050001){
+success("The initial shift is "+expected+". Pressure now makes Qₚ equal Kₚ at the original composition.");
+}else{
+let problem=[];
+if(direction!==expected)problem.push("The initial direction is wrong: compare the given Q with K.");
+if(qError>.0050001)problem.push("Current Q/K differs from 1 by "+fmt(qError*100,2)+"%. Adjust pressure.");
+feedback("✗ "+problem.join(" "),"bad");
+}
+}
+}
+function success(message){
+solved=true;score+=hinted?50:tries===1?100:75;showCorrect=true;
+feedback("✓ Equilibrium reached! "+message,"good");
+$("score").textContent="Score "+score;$("check").disabled=true;
+$("next").textContent=rnd===5?"View results ★":"Next system →";$("next").classList.remove("hidden");
+}
+$("hint").addEventListener("click",()=>{
+if(solved)return;hinted=true;
+if(mode()==="yield"){
+feedback("Hint: compute Kₚ = exp(−ΔᵣH°/RT + ΔᵣS°/R). Substitute nA = nA,0 − ξ and nB = nB,0 + 2ξ into Qₚ, then solve Qₚ = Kₚ.");
+}else{
+feedback("Hint: at fixed composition for A ⇌ 2B, Qₚ is directly proportional to total pressure. First decide the direction using the original Q/K.");
+}
+});
+$("check").addEventListener("click",check);
+$("next").addEventListener("click",()=>{
+if(rnd===5){finish();return}
+rnd++;start();
+});
+function finish(){
+$("game").classList.add("hidden");$("end").classList.remove("hidden");
+const n=score>=510?3:score>=375?2:1;
+$("stars").textContent="★".repeat(n)+"☆".repeat(3-n);
+$("total").textContent=score+" / 600 points · "+n+" star"+(n===1?"":"s");
+}
+$("again").addEventListener("click",restart);
+function restart(){
+seed=(Date.now()>>>0)||2026;
+rnd=0;score=0;
+$("game").classList.remove("hidden");$("end").classList.add("hidden");
+start();
+}
+restart();
+})();
+</script>
+</body>
+</html>

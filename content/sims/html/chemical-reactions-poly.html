@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Titration Station | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit}
+button{min-height:46px;min-width:46px;border:2px solid #111;border-radius:999px;background:#fff;color:#111;cursor:pointer;padding:8px 14px;font-weight:800;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+input[type=number]{border:2px solid #111;border-radius:12px;min-height:46px;padding:8px;width:150px;max-width:100%}
+.wrap{max-width:1200px;margin:auto;padding:22px 15px 55px}
+header,.row,.hud,.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+header{justify-content:space-between;margin-bottom:18px}
+.brand{font-weight:900;font-size:17px}
+.badge{display:inline-block;background:var(--lvl-poly);color:var(--lvl-poly-on);font-size:12px;font-weight:800;text-transform:uppercase;padding:5px 12px;border:2px solid #111;border-radius:999px}
+.counter{border:2px solid #111;border-radius:999px;padding:6px 12px;font-weight:800;font-size:13px;background:#fff}
+h1{font-size:clamp(30px,5vw,48px);line-height:1.1;letter-spacing:-1.5px;font-weight:800;margin:5px 0 8px}
+h2{font-size:21px;font-weight:800;margin:0 0 13px}
+h3{font-size:16px;font-weight:800;margin:0 0 8px}
+.intro{color:var(--fit-ink-2);margin:0 0 22px}
+.layout{display:grid;grid-template-columns:1fr;gap:20px;align-items:start}
+.card{background:#fff;border:2px solid #111;border-radius:24px;box-shadow:var(--sh-2);padding:19px;min-width:0}
+.stage{background:var(--lvl-poly-tint)}
+.scene,.graph{background:#fff;border:2px solid #111;border-radius:18px;overflow:hidden;margin:12px 0}
+.graph{border-color:var(--fit-line-soft)}
+svg{width:100%;height:auto;display:block}
+.scene svg{min-height:240px}
+.question{font-weight:700}
+.control{background:#fff;border:2px solid var(--fit-line-soft);border-radius:16px;padding:12px;margin:10px 0}
+.control label{font-weight:800;display:block;margin-bottom:7px}
+.stepper{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.stepper button{flex:1}
+.readout{font-weight:800;font-size:23px;text-align:center;min-width:115px}
+.coarse{background:var(--lvl-poly-tint)}
+.selected{background:var(--lvl-poly)}
+.primary-button{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
+.primary-button:active{box-shadow:none}
+.feedback{padding:12px;border:2px solid #111;border-radius:14px;min-height:56px;background:var(--fit-sunken);font-weight:600;margin-top:15px}
+.feedback.good{background:#DDF7E6}
+.feedback.bad{background:#FFE8E4}
+.small{font-size:13px;color:var(--fit-ink-3)}
+.concept{margin-top:16px;background:#fff;border:2px dashed #111;border-radius:16px;padding:12px}
+.concept svg{max-height:130px}
+details{border:2px solid #111;border-radius:16px;padding:12px 15px;margin-top:20px;background:#fff}
+summary{font-weight:800;cursor:pointer}
+details p{font-size:14px;margin:9px 0}
+.end{border:3px solid #111;border-radius:28px;box-shadow:var(--sh-3);background:var(--lvl-poly-tint);padding:28px;text-align:center}
+.stars{font-size:42px;letter-spacing:8px}
+.hidden{display:none!important}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.scene svg{min-height:280px}.wrap{padding-top:30px}}
+@media(max-width:440px){.wrap{padding:12px 12px 40px}.card{padding:14px}.stepper{gap:5px}.stepper button{padding:8px 9px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+<div class="row"><strong class="brand">FIT / APPLIED CHEMISTRY</strong><span class="badge">Polytechnic</span></div>
+<div class="hud"><span id="round" class="counter">Round 1/6</span><span id="score" class="counter">Score 0</span></div>
+</header>
+<h1>Titration Station</h1>
+<p class="intro">Use a burette, choose an indicator and calculate an unknown acid concentration.</p>
+<div id="game" class="layout">
+<section class="card stage">
+<div class="row"><span class="badge">Titration bench</span><strong id="case">Sample 01</strong></div>
+<h2 style="margin-top:15px">Burette and conical flask</h2>
+<div class="scene">
+<svg id="scene" viewBox="0 0 500 330" role="img" aria-label="Burette dispensing sodium hydroxide into an acid sample"></svg>
+</div>
+<p class="small" id="sceneNote"></p>
+<div class="concept">
+<h3>Concept figure: neutralisation</h3>
+<svg viewBox="0 0 470 118" role="img" aria-label="Hydrogen ions react with hydroxide ions to form water">
+<circle cx="50" cy="42" r="18" fill="#FF8FB8" stroke="#111" stroke-width="3"/>
+<text x="50" y="47" text-anchor="middle" font-size="13" font-weight="800">H⁺</text>
+<text x="97" y="48" font-size="25">+</text>
+<rect x="139" y="24" width="45" height="36" rx="10" fill="#2EC4A6" stroke="#111" stroke-width="3"/>
+<text x="161" y="47" text-anchor="middle" font-size="13" font-weight="800">OH⁻</text>
+<path d="M203 42 H289" stroke="#111" stroke-width="3"/>
+<path d="M277 32 L290 42 277 52" fill="none" stroke="#111" stroke-width="3"/>
+<ellipse cx="362" cy="42" rx="45" ry="27" fill="#BDEBFA" stroke="#111" stroke-width="3"/>
+<text x="362" y="47" text-anchor="middle" font-size="16" font-weight="800">H₂O</text>
+<text x="235" y="99" text-anchor="middle" font-size="13">One H⁺ reacts with one OH⁻.</text>
+</svg>
+<p class="small">A monoprotic acid needs one mole of NaOH per mole of acid for complete neutralisation.</p>
+</div>
+</section>
+<section class="card">
+<h2>Perform the titration</h2>
+<p class="question" id="question"></p>
+<div class="control">
+<label>Choose indicator</label>
+<div class="row">
+<button id="pheno" data-ind="phenolphthalein">Phenolphthalein</button>
+<button id="methyl" data-ind="methyl orange">Methyl orange</button>
+</div>
+<p class="small" id="indicatorNote"></p>
+</div>
+<div class="control">
+<label>NaOH added from burette</label>
+<div class="stepper">
+<button id="minusBig" class="coarse" aria-label="Remove 1 cubic centimetre of NaOH">−−</button>
+<button id="minusSmall" aria-label="Remove 0.05 cubic centimetres of NaOH">−</button>
+<span id="titre" class="readout">0.00 cm³</span>
+<button id="plusSmall" aria-label="Add 0.05 cubic centimetres of NaOH">+</button>
+<button id="plusBig" class="coarse" aria-label="Add 1 cubic centimetre of NaOH">++</button>
+</div>
+<p class="small">Coarse: 1.00 cm³. Fine: 0.05 cm³. Adjust the stopcock to approach the end point.</p>
+</div>
+<div class="control">
+<label for="acidInput">Calculated acid concentration (mol/dm³)</label>
+<input id="acidInput" type="number" min="0" max="5" step="0.0001" value="0.0100">
+</div>
+<div class="actions" style="margin-top:16px">
+<button id="hint">💡 Hint</button>
+<button id="check" class="primary-button">✓ Check</button>
+<button id="next" class="hidden">Next sample →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Add alkali, observe the indicator, and calculate the concentration.</div>
+<h2 style="margin-top:24px">Live titration curve</h2>
+<div class="graph">
+<svg id="plot" viewBox="0 0 510 315" role="img" aria-label="pH versus volume of sodium hydroxide added"></svg>
+</div>
+<p class="small" id="plotNote">The yellow marker shows your current volume. The equivalence point will be marked after Check.</p>
+<details>
+<summary>The chemistry</summary>
+<p><strong>Strong acid:</strong> HCl(aq) + NaOH(aq) → NaCl(aq) + H₂O(l).</p>
+<p><strong>Weak acid:</strong> CH₃COOH(aq) + NaOH(aq) → CH₃COONa(aq) + H₂O(l).</p>
+<p><strong>Stoichiometry:</strong> c(acid) × V(acid) = c(NaOH) × V(equivalence), with both volumes in the same units, for monoprotic acids.</p>
+<p>At 25 °C: Kᵥ = Kᵥ is not used; the water ion product is Kᵥ-independent and written K<sub>w</sub> = 1.0 × 10⁻¹⁴ mol²/dm⁶. For ethanoic acid, K<sub>a</sub> = 1.8 × 10⁻⁵ mol/dm³.</p>
+<p>Phenolphthalein changes from colourless to pink around pH 8.2–10.0. Methyl orange changes from red to yellow around pH 3.1–4.4. A weak acid–strong base titration requires an indicator whose transition occurs within its alkaline pH jump.</p>
+<p>The pH curves assume ideal dilute aqueous solutions at 25 °C with additive volumes and complete NaOH dissociation. Indicator colours are approximated.</p>
+</details>
+</section>
+</div>
+<section id="end" class="end hidden">
+<h2>Six samples analysed!</h2>
+<div id="stars" class="stars">☆☆☆</div>
+<p id="total"></p>
+<button id="again" class="primary-button">Play again</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const Kw=1e-14,Ka=1.8e-5;
+let seed=1,rnd=0,score=0,tries=0,hinted=false,solved=false,vol=0,indicator="phenolphthalein",reveal=false,task={};
+function random(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function choose(a){return a[Math.floor(random()*a.length)]}
+function num(s,f=0){let v=Number(s);return Number.isFinite(v)?v:f}
+function fmt(v,d=2){return Number.isFinite(v)?v.toFixed(d):"—"}
+function t(x,y,st,size=13,anchor="middle"){return '<text x="'+x+'" y="'+y+'" fill="#111" font-size="'+size+'" font-weight="700" text-anchor="'+anchor+'">'+st+'</text>'}
+function feedback(msg,kind=""){$("feedback").textContent=msg;$("feedback").className="feedback "+kind}
+function experiment(){
+const weak=rnd===2||rnd===5;
+let base=choose([.10,.15,.20]),equiv=choose([12,15,18,20,22,25,28,30,32,35,38]);
+let acidVol=choose([20,25,30]);
+task={weak,base,equiv,acidVol,acidConc:base*equiv/acidVol,maxVol:Math.max(45,equiv+9)};
+vol=0;indicator=task.weak?"methyl orange":"phenolphthalein";reveal=false;tries=0;hinted=false;solved=false;
+$("case").textContent="Sample "+String(rnd+1).padStart(2,"0");
+$("round").textContent="Round "+(rnd+1)+"/6";
+$("score").textContent="Score "+score;
+$("check").disabled=false;$("next").classList.add("hidden");
+$("question").textContent="Unknown "+(weak?"ethanoic acid, CH₃COOH":"hydrochloric acid, HCl")+" sample: "+acidVol+" cm³. Titrate against "+fmt(base,2)+" mol/dm³ NaOH, stop at the equivalence end point (±0.10 cm³), then calculate the acid concentration within ±1%.";
+$("acidInput").value="0.0100";
+$("indicatorNote").textContent="Selected: "+indicator;
+feedback("Find the end point from the sharp pH change. The required titre is not given.");
+redraw();
+}
+function ph(volume){
+const V=(task.acidVol+volume)/1000;
+const na=task.base*Math.max(0,volume)/1000;
+const acid=task.acidConc*task.acidVol/1000;
+const sodium=na/Math.max(V,1e-12);
+if(!task.weak){
+const hEx=(acid-na)/V;
+if(hEx>1e-12)return Math.max(0,Math.min(14,-Math.log10(hEx)));
+if(hEx< -1e-12)return Math.max(0,Math.min(14,14+Math.log10(-hEx)));
+return 7;
+}
+const Ct=acid/V;
+function charge(logH){
+const H=Math.pow(10,logH);
+const acetate=Ct*Ka/(Ka+H);
+return H+sodium-acetate-Kw/H;
+}
+let low=-14,high=0;
+for(let i=0;i<72;i++){
+const mid=(low+high)/2;
+if(charge(mid)>0)high=mid;else low=mid;
+}
+return Math.min(14,Math.max(0,-(low+high)/2));
+}
+function colour(){
+const p=ph(vol);
+if(indicator==="phenolphthalein"){
+if(p<8.2)return "#E6F9FF";
+if(p>=10)return "#FA5C9C";
+return p<9.1?"#FFD9E8":"#FF9EC1";
+}
+if(p<=3.1)return "#EE6055";
+if(p>=4.4)return "#FFE26E";
+return "#FFAE5C";
+}
+function scene(){
+let y=vol/task.maxVol*125;
+let s='<rect width="500" height="330" fill="#fff"/>'+
+'<path d="M92 285 H425" stroke="#111" stroke-width="4"/>'+
+'<path d="M160 36 V212" stroke="#111" stroke-width="7"/>'+
+'<rect x="195" y="28" width="49" height="169" rx="7" fill="#fff" stroke="#111" stroke-width="3"/>'+
+'<rect x="200" y="'+(33+y)+'" width="39" height="'+(159-y)+'" fill="#BDEBFA"/>';
+for(let i=0;i<12;i++)s+='<path d="M199 '+(45+i*12)+' h'+(i%2?8:14)+'" stroke="#111" stroke-width="1.4"/>';
+s+='<path d="M220 197 V225 M205 211 H236" stroke="#111" stroke-width="4"/>'+
+'<rect x="215" y="221" width="11" height="8" rx="2" fill="#111"/>'+
+'<path d="M220 236 L220 247" stroke="#FF6B3D" stroke-width="3"/>'+
+'<path d="M159 215 L116 281 Q114 296 132 296 H317 Q337 296 329 281 L279 215" fill="'+colour()+'" stroke="#111" stroke-width="4"/>'+
+'<path d="M159 215 H279" stroke="#111" stroke-width="4"/>'+
+'<path d="M150 269 Q222 254 291 269" fill="none" stroke="#111" stroke-width="2"/>'+
+t(311,45,"NaOH burette",15,"start")+
+t(311,64,fmt(task.base,2)+" mol/dm³",14,"start")+
+t(311,91,"Dispensed",13,"start")+
+t(311,112,fmt(vol,2)+" cm³",18,"start")+
+t(65,242,"Acid",15)+t(65,263,task.acidVol+" cm³",13)+
+t(245,317,"Current pH = "+fmt(ph(vol),2),15);
+$("scene").innerHTML=s;
+$("scene").setAttribute("aria-label","Burette dispensed "+fmt(vol,2)+" cubic centimetres of sodium hydroxide. Conical flask pH "+fmt(ph(vol),2)+". Indicator "+indicator);
+}
+function plot(){
+let s='<rect width="510" height="315" fill="#fff"/>'+t(255,24,"pH versus NaOH added",16);
+const X=v=>64+405*v/task.maxVol,Y=p=>250-190*p/14;
+for(let i=0;i<=7;i++){
+let y=250-i*190/7;
+s+='<line x1="64" y1="'+y+'" x2="469" y2="'+y+'" stroke="#E4E2DB"/>'+t(55,y+4,String(i*2),11,"end");
+}
+for(let i=0;i<=5;i++){
+let x=64+i*405/5,v=task.maxVol*i/5;
+s+='<line x1="'+x+'" y1="60" x2="'+x+'" y2="250" stroke="#E4E2DB"/>'+t(x,269,fmt(v,0),11);
+}
+s+='<path d="M64 60 V250 H469" fill="none" stroke="#111" stroke-width="2"/>';
+let points=[];
+for(let i=0;i<=260;i++){let v=i*vol/260;points.push(X(v).toFixed(2)+","+Y(ph(v)).toFixed(2))}
+s+='<polyline points="'+points.join(" ")+'" fill="none" stroke="#FF6B3D" stroke-width="3.5"/>';
+let curx=X(vol),cury=Y(ph(vol));
+s+='<line x1="'+curx+'" y1="60" x2="'+curx+'" y2="250" stroke="#111" stroke-dasharray="4 5" stroke-width="1.5"/>'+
+'<circle cx="'+curx+'" cy="'+cury+'" r="7" fill="#FFC83D" stroke="#111" stroke-width="2.5"/>';
+if(solved){
+let eqX=X(task.equiv),eqY=Y(ph(task.equiv));
+s+='<line x1="'+eqX+'" y1="60" x2="'+eqX+'" y2="250" stroke="#1E9E5A" stroke-dasharray="6 4" stroke-width="2"/>'+
+'<circle cx="'+eqX+'" cy="'+eqY+'" r="6" fill="#1E9E5A" stroke="#111" stroke-width="2"/>'+
+'<rect x="235" y="32" width="228" height="24" rx="8" fill="#DDF7E6" stroke="#111"/>'+t(349,49,"Equivalence: "+fmt(task.equiv,2)+" cm³",12);
+}
+s+='<text x="260" y="302" font-size="12" text-anchor="middle">Volume of NaOH V (cm³)</text>'+
+'<text x="18" y="157" font-size="12" text-anchor="middle" transform="rotate(-90 18 157)">pH (unitless)</text>';
+$("plot").innerHTML=s;
+$("plot").setAttribute("aria-label","Titration graph at "+fmt(vol,2)+" cubic centimetres, pH "+fmt(ph(vol),2)+(solved?", equivalence point "+fmt(task.equiv,2)+" cubic centimetres":""));
+}
+function redraw(){
+$("titre").textContent=fmt(vol,2)+" cm³";
+document.querySelectorAll("[data-ind]").forEach(b=>{
+let yes=b.dataset.ind===indicator;b.classList.toggle("selected",yes);b.setAttribute("aria-pressed",String(yes));
+});
+scene();plot();
+}
+function adjust(d){
+if(solved)return;
+vol=Math.round(Math.max(0,Math.min(task.maxVol,vol+d))*20)/20;
+redraw();
+}
+$("minusBig").addEventListener("click",()=>adjust(-1));
+$("minusSmall").addEventListener("click",()=>adjust(-.05));
+$("plusSmall").addEventListener("click",()=>adjust(.05));
+$("plusBig").addEventListener("click",()=>adjust(1));
+document.querySelectorAll("[data-ind]").forEach(b=>b.addEventListener("click",()=>{
+if(solved)return;
+indicator=b.dataset.ind;$("indicatorNote").textContent="Selected: "+indicator;redraw();
+}));
+$("hint").addEventListener("click",()=>{
+if(solved)return;hinted=true;
+feedback(task.weak?"Hint: the weak-acid equivalence region is alkaline. Choose an indicator whose transition occurs there.":"Hint: the equivalence point lies near the middle of the steep rise. Approach with fine 0.05 cm³ drops.");
+});
+$("check").addEventListener("click",()=>{
+if(solved)return;tries++;reveal=true;
+const err=vol-task.equiv;
+const candidate=num($("acidInput").value,-1);
+const concDiff=candidate-task.acidConc;
+const correctIndicator=!task.weak||indicator==="phenolphthalein";
+if(Math.abs(err)<=.100001&&candidate>=0&&Math.abs(concDiff)<=task.acidConc*.01&&correctIndicator){
+solved=true;score+=hinted?50:tries===1?100:75;
+feedback("✓ Excellent! Equivalence at "+fmt(task.equiv,2)+" cm³. Using the 1:1 mole ratio gives "+fmt(task.acidConc,4)+" mol/dm³.","good");
+$("score").textContent="Score "+score;$("check").disabled=true;
+$("next").textContent=rnd===5?"View results ★":"Next sample →";$("next").classList.remove("hidden");
+}else{
+let issues=[];
+if(!correctIndicator)issues.push("Methyl orange is unsuitable for this weak-acid titration.");
+if(Math.abs(err)>.100001)issues.push("Titre is "+fmt(Math.abs(err),2)+" cm³ "+(err>0?"past":"before")+" equivalence.");
+if(candidate<0||Math.abs(concDiff)>task.acidConc*.01)issues.push("Calculated acid concentration is "+fmt(Math.abs(concDiff),4)+" mol/dm³ "+(concDiff>0?"too high":"too low")+".");
+feedback("✗ "+issues.join(" "),"bad");
+}
+redraw();
+});
+$("next").addEventListener("click",()=>{if(rnd===5)finish();else{rnd++;experiment()}});
+function finish(){
+$("game").classList.add("hidden");$("end").classList.remove("hidden");
+let n=score>=510?3:score>=375?2:1;
+$("stars").textContent="★".repeat(n)+"☆".repeat(3-n);
+$("total").textContent=score+" / 600 points · "+n+" star"+(n===1?"":"s");
+}
+$("again").addEventListener("click",restart);
+function restart(){seed=(Date.now()>>>0)||446;rnd=0;score=0;$("game").classList.remove("hidden");$("end").classList.add("hidden");experiment()}
+restart();
+})();
+</script>
+</body>
+</html>

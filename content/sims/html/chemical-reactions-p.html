@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Change Detective | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input{font:inherit}
+button{cursor:pointer;min-height:46px;border:2px solid #111;border-radius:999px;background:white;color:#111;font-weight:800;padding:9px 17px;box-shadow:var(--sh-1);transition:transform .12s,box-shadow .12s}
+button:active{transform:translateY(2px);box-shadow:none}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.wrap{max-width:1190px;margin:auto;padding:20px 15px 50px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
+.brand{font-size:18px;font-weight:900;letter-spacing:-.6px}
+.badge{display:inline-block;background:var(--lvl-primary);color:var(--lvl-primary-on);border:2px solid #111;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:800;text-transform:uppercase}
+.hud{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.counter{padding:6px 12px;border:2px solid #111;border-radius:999px;font-size:13px;font-weight:800;background:white}
+h1{font-size:clamp(30px,5vw,49px);line-height:1.1;margin:4px 0 8px;font-weight:800;letter-spacing:-1.5px}
+h2{font-size:21px;line-height:1.2;margin:0 0 14px;font-weight:800}
+h3{font-size:16px;margin:0 0 8px;font-weight:800}
+.intro{margin:0 0 22px;color:var(--fit-ink-2)}
+.layout{display:grid;grid-template-columns:1fr;gap:20px;align-items:start}
+.card{border:2px solid #111;border-radius:24px;padding:20px;background:#fff;box-shadow:var(--sh-2);min-width:0}
+.stage{background:var(--lvl-primary-tint)}
+.scene{border:2px solid #111;background:#fff;border-radius:18px;overflow:hidden;margin-top:14px}
+svg{display:block;width:100%;height:auto}
+.scene svg{min-height:210px}
+.experiment-name{font-size:23px;font-weight:800}
+.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:17px 0 0}
+.primary-button{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.primary-button:active{box-shadow:none}
+.selected{background:var(--lvl-primary);box-shadow:inset 0 0 0 2px #111}
+.choice{flex:1;min-width:115px}
+.clues{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.clues button{border-radius:15px;text-align:left;min-height:58px;padding:8px 12px}
+.prompt{font-weight:700;margin:17px 0 10px}
+.note{font-size:13px;color:var(--fit-ink-3)}
+.feedback{padding:12px 14px;border:2px solid #111;border-radius:14px;background:var(--fit-sunken);min-height:54px;margin-top:15px;font-weight:600}
+.feedback.good{background:#DCF8E7}
+.feedback.bad{background:#FFE8E4}
+.graph{border:2px solid var(--fit-line-soft);border-radius:16px;background:white;margin-top:10px;overflow:hidden}
+.concept{border:2px dashed #111;border-radius:16px;padding:11px;margin-top:16px;background:#fff}
+.concept svg{max-height:125px}
+details{margin-top:20px;border:2px solid #111;border-radius:16px;background:white;padding:12px 16px}
+summary{cursor:pointer;font-weight:800}
+details p{font-size:14px;margin:9px 0}
+.end{background:var(--lvl-primary-tint);border:3px solid #111;border-radius:28px;padding:28px;text-align:center;box-shadow:var(--sh-3)}
+.stars{font-size:40px;letter-spacing:8px;margin:16px 0}
+.hidden{display:none!important}
+.barlabel{font-weight:700}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}.wrap{padding-top:30px}.scene svg{min-height:275px}}
+@media(max-width:430px){.card{padding:15px}.clues{grid-template-columns:1fr 1fr}.clues button{font-size:13px}.wrap{padding:12px 12px 35px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+<div class="row"><strong class="brand">FIT / SCIENCE LAB</strong><span class="badge">Primary · P5–P6</span></div>
+<div class="hud"><span class="counter" id="round">Round 1/6</span><span class="counter" id="score">Score 0</span></div>
+</header>
+<h1>Change Detective</h1>
+<p class="intro">Watch a change. Decide what happened and find the evidence.</p>
+<div id="game" class="layout">
+<section class="card stage">
+<h2>Investigation scene</h2>
+<div class="row"><span class="badge" id="sample">Case 01</span><strong id="name" class="experiment-name">Mystery change</strong></div>
+<div class="scene">
+<svg id="scene" viewBox="0 0 450 270" role="img" aria-label="Experiment before observation">
+<rect x="0" y="0" width="450" height="270" fill="#fff"/>
+</svg>
+</div>
+<div class="actions">
+<button id="play">▶ Watch change</button>
+<button id="replay">↺ Reset scene</button>
+</div>
+<p class="note" id="observation">Press Watch change to see what happens.</p>
+<div class="concept">
+<h3>Concept sketch</h3>
+<svg viewBox="0 0 420 105" role="img" aria-label="Physical change preserves the substance; chemical change creates new substances">
+<rect x="5" y="12" width="175" height="65" rx="12" fill="#FFF4D6" stroke="#111" stroke-width="2"/>
+<rect x="238" y="12" width="175" height="65" rx="12" fill="#DCF8E7" stroke="#111" stroke-width="2"/>
+<g fill="#5598E3" stroke="#111" stroke-width="2">
+<circle cx="42" cy="43" r="9"/><circle cx="73" cy="43" r="9"/><circle cx="104" cy="43" r="9"/>
+</g>
+<path d="M146 44 H224" stroke="#111" stroke-width="3"/>
+<path d="M213 35 L225 44 213 53" fill="none" stroke="#111" stroke-width="3"/>
+<g stroke="#111" stroke-width="2">
+<circle cx="269" cy="43" r="9" fill="#5598E3"/>
+<rect x="290" y="34" width="18" height="18" rx="3" fill="#FF8FB8"/>
+<path d="M325 34 L338 52 312 52Z" fill="#FFC83D"/>
+</g>
+<text x="12" y="96" font-size="12">Same material: physical</text>
+<text x="247" y="96" font-size="12">New material: chemical</text>
+</svg>
+<p class="note">A new substance is the strongest evidence of a chemical change.</p>
+</div>
+</section>
+<section class="card">
+<h2>Your detective report</h2>
+<p class="prompt">1. What type of change is it?</p>
+<div class="row" id="types">
+<button class="choice" data-type="physical">↩ Physical</button>
+<button class="choice" data-type="chemical">✦ Chemical</button>
+</div>
+<p class="prompt">2. Which clue best supports your decision?</p>
+<div id="clues" class="clues">
+<button data-clue="state">Changed state</button>
+<button data-clue="gas">Gas bubbles formed</button>
+<button data-clue="colour">Colour changed</button>
+<button data-clue="heat">Heat or light</button>
+<button data-clue="new">New substance</button>
+<button data-clue="dissolve">Dissolved in water</button>
+</div>
+<div class="actions">
+<button id="hint">💡 Hint</button>
+<button class="primary-button" id="check">✓ Check</button>
+<button id="next" class="hidden">Next case →</button>
+</div>
+<div class="feedback" id="feedback" role="status" aria-live="polite">Choose one answer from each group.</div>
+<h2 style="margin-top:24px">Live temperature comparison</h2>
+<div class="graph">
+<svg id="plot" viewBox="0 0 460 265" role="img" aria-label="Temperature before and after in degrees Celsius"></svg>
+</div>
+<p class="note">The thermometer readings change as the scene plays. Temperature alone does not always prove a chemical change.</p>
+<details>
+<summary>The chemistry</summary>
+<p><strong>Physical change:</strong> the substance stays the same. Melting and dissolving are examples.</p>
+<p><strong>Chemical change:</strong> one or more new substances form. Examples include burning, rusting and cooking.</p>
+<p>Signs may include a new colour, gas, heat or light, but any single sign is not always conclusive.</p>
+<p>A physical change may absorb heat without immediately increasing temperature. The temperature values here represent simplified observations for classroom comparison.</p>
+</details>
+</section>
+</div>
+<section id="end" class="end hidden" aria-live="polite">
+<h2>Investigation complete!</h2>
+<div class="stars" id="stars">☆☆☆</div>
+<p id="total"></p>
+<button class="primary-button" id="again">Play again</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const cases=[
+{id:"ice",name:"Melting ice",type:"physical",clue:"state",start:0,end:8,description:"Solid ice becomes liquid water. It is still water.",question:"Watch the shape and state carefully."},
+{id:"paper",name:"Burning paper",type:"chemical",clue:"heat",start:22,end:95,description:"Paper burns and produces ash and gases. Light and heat are released.",question:"Look for energy given out and what remains."},
+{id:"fizz",name:"Baking soda + vinegar",type:"chemical",clue:"gas",start:22,end:19,description:"Bubbles of carbon dioxide form during the reaction.",question:"Watch for something escaping from the liquid."},
+{id:"rust",name:"Rusting nail",type:"chemical",clue:"colour",start:24,end:24,description:"Reddish-brown rust forms as iron reacts with oxygen and water.",question:"Look at the metal surface."},
+{id:"sugar",name:"Dissolving sugar",type:"physical",clue:"dissolve",start:22,end:21,description:"Sugar spreads through water without becoming a new substance.",question:"Watch what happens to the sugar crystals."},
+{id:"egg",name:"Cooking an egg",type:"chemical",clue:"new",start:23,end:82,description:"Heating permanently changes the egg proteins into a cooked structure.",question:"Look at what the egg becomes."}
+];
+let order=[],round=0,score=0,tries=0,hinted=false,solved=false,progress=0,selectedType="",selectedClue="",animation=0,token=0,seed=1;
+function rand(){seed=(1664525*seed+1013904223)>>>0;return seed/4294967296}
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(rand()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function current(){return cases[order[round]]}
+function text(x,y,str,size=16,anchor="middle"){return '<text x="'+x+'" y="'+y+'" text-anchor="'+anchor+'" fill="#111" font-weight="700" font-size="'+size+'">'+str+'</text>'}
+function baseScene(){
+return '<rect width="450" height="270" fill="#fff"/>'+
+'<path d="M30 218 H420" stroke="#111" stroke-width="4"/>'+
+text(225,24,"Observe the change",16);
+}
+function drawScene(){
+const c=current(),p=progress;
+let s=baseScene();
+if(c.id==="ice"){
+let h=75*(1-p),y=194-h;
+s+='<ellipse cx="225" cy="204" rx="'+(45+p*65)+'" ry="'+(12+p*6)+'" fill="#73C8FA" stroke="#111" stroke-width="3"/>'+
+'<path d="M180 '+(y+15)+' L215 '+y+' 267 '+(y+14)+' 265 '+(y+15+h*.8)+' 194 '+(y+15+h*.8)+'Z" fill="#B4EAFF" stroke="#111" stroke-width="3"/>';
+s+=text(225,246,p>.8?"Liquid water":"Ice / water",16);
+}else if(c.id==="paper"){
+s+='<rect x="175" y="104" width="95" height="113" rx="4" fill="'+(p>.7?"#777":"#fff")+'" stroke="#111" stroke-width="4"/>';
+if(p>.05){
+for(let i=0;i<4;i++){let x=185+i*24,h=35+Math.sin(i*4+p*8)*12;s+='<path d="M'+x+' 160 Q'+(x-20)+' '+(135-h)+' '+(x+9)+' '+(137-h)+' Q'+(x+22)+' 149 '+x+' 160Z" fill="'+(i%2?"#FFC83D":"#FF6B3D")+'" stroke="#111" stroke-width="2"/>'}
+}
+s+=text(225,246,p>.7?"Ash and gases":"Paper",16);
+}else if(c.id==="fizz"||c.id==="sugar"){
+s+='<path d="M155 64 V194 Q155 215 176 215 H274 Q295 215 295 194 V64" fill="none" stroke="#111" stroke-width="4"/>'+
+'<path d="M159 129 H291 V194 Q291 211 274 211 H176 Q159 211 159 194Z" fill="#BDEBFA" stroke="none"/>';
+if(c.id==="fizz"){
+for(let i=0;i<15;i++){let x=169+(i*37%112),y=190-((i*31+p*125)%112),r=3+(i%3);s+='<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="#fff" stroke="#111" stroke-width="1.6"/>'}
+s+=text(225,246,p>.3?"Gas bubbles rising":"Vinegar + powder",15);
+}else{
+for(let i=0;i<11;i++){let x=177+(i*31%93),y=193-(i*17%42)-p*(i%3)*9;s+='<rect x="'+x+'" y="'+y+'" width="5" height="5" fill="'+(p>.55?"#91C8DC":"#fff")+'" stroke="#111" stroke-width="1"/>'}
+s+=text(225,246,p>.8?"Sugar dissolved":"Sugar crystals",15);
+}
+}else if(c.id==="rust"){
+s+='<path d="M125 144 H310 L330 156 310 168 H125Z" fill="#AAB8C6" stroke="#111" stroke-width="4"/>';
+for(let i=0;i<11;i++){let x=151+i*14;if(p>i/13){s+='<ellipse cx="'+x+'" cy="'+(150+i%2*8)+'" rx="10" ry="7" fill="#B45A29" stroke="#111" stroke-width="1.5"/>'}}
+s+=text(225,246,p>.6?"Reddish-brown rust":"Iron nail",16);
+}else{
+s+='<ellipse cx="225" cy="180" rx="108" ry="38" fill="#fff" stroke="#111" stroke-width="4"/>'+
+'<ellipse cx="225" cy="169" rx="83" ry="31" fill="'+(p>.5?"#FBFBF1":"#FFE89B")+'" stroke="#111" stroke-width="2"/>'+
+'<circle cx="225" cy="170" r="20" fill="'+(p>.8?"#F6C85B":"#F9A61C")+'" stroke="#111" stroke-width="2"/>';
+for(let i=0;i<3;i++)if(p>.2)s+='<path d="M'+(188+i*39)+' 126 Q'+(177+i*39)+' 105 '+(191+i*39)+' 85" fill="none" stroke="#777" stroke-width="2" stroke-dasharray="5 6"/>';
+s+=text(225,246,p>.7?"Cooked egg":"Raw egg",16);
+}
+s+='<rect x="316" y="46" width="116" height="55" rx="12" fill="#FFF4D6" stroke="#111" stroke-width="2"/>'+
+text(374,69,"Thermometer",12)+text(374,89,(c.start+(c.end-c.start)*p).toFixed(1)+" °C",15);
+$("scene").innerHTML=s;
+$("scene").setAttribute("aria-label",c.name+", "+Math.round(p*100)+" percent of change observed");
+}
+function drawPlot(){
+const c=current(),value=c.start+(c.end-c.start)*progress;
+let max=Math.max(c.start,c.end,20)+15,min=Math.min(0,c.start,c.end)-5;
+const top=39,bottom=205,left=64,height=bottom-top;
+let s='<rect width="460" height="265" fill="#fff"/>'+text(230,22,"Temperature (°C)",15);
+for(let i=0;i<=4;i++){
+const v=min+(max-min)*i/4,y=bottom-i*height/4;
+s+='<line x1="'+left+'" y1="'+y+'" x2="430" y2="'+y+'" stroke="#E4E2DB"/>'+text(54,y+5,v.toFixed(0),12,"end");
+}
+s+='<line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+bottom+'" stroke="#111" stroke-width="2"/>'+
+'<line x1="'+left+'" y1="'+bottom+'" x2="430" y2="'+bottom+'" stroke="#111" stroke-width="2"/>';
+let vals=[c.start,value];
+vals.forEach((v,i)=>{
+let x=126+i*172,y=bottom-(v-min)/(max-min)*height;
+s+='<rect x="'+x+'" y="'+y+'" width="70" height="'+(bottom-y)+'" rx="5" fill="'+(i?"#FF8FB8":"#FFC83D")+'" stroke="#111" stroke-width="2"/>'+text(x+35,Math.max(40,y-8),v.toFixed(1)+" °C",13)+text(x+35,230,i?"After":"Before",14);
+});
+s+=text(231,254,"Stage of change",12);
+$("plot").innerHTML=s;
+$("plot").setAttribute("aria-label","Before "+c.start+" degrees Celsius, current after-reading "+value.toFixed(1)+" degrees Celsius");
+}
+function update(){
+drawScene();drawPlot();
+$("round").textContent="Round "+(round+1)+"/6";
+$("score").textContent="Score "+score;
+document.querySelectorAll("[data-type]").forEach(b=>{let on=b.dataset.type===selectedType;b.classList.toggle("selected",on);b.setAttribute("aria-pressed",String(on))});
+document.querySelectorAll("[data-clue]").forEach(b=>{let on=b.dataset.clue===selectedClue;b.classList.toggle("selected",on);b.setAttribute("aria-pressed",String(on))});
+}
+function feedback(msg,kind){
+$("feedback").textContent=msg;$("feedback").className="feedback "+(kind||"");
+}
+function begin(){
+token++;cancelAnimationFrame(animation);
+progress=0;tries=0;hinted=false;solved=false;selectedType="";selectedClue="";
+$("play").disabled=false;$("next").classList.add("hidden");$("check").disabled=false;
+const c=current();$("name").textContent=c.name;$("sample").textContent="Case "+String(round+1).padStart(2,"0");
+$("observation").textContent=c.question;feedback("Watch the change and choose your answers.");
+update();
+}
+function animate(){
+token++;const mine=token;cancelAnimationFrame(animation);
+const start=performance.now(),initial=progress;
+function frame(t){
+if(mine!==token)return;
+progress=Math.min(1,initial+(t-start)/1450);
+update();
+if(progress<1)animation=requestAnimationFrame(frame);
+else{$("observation").textContent="Change finished. Was it a reversible or an irreversible change, and which clue did you see?";$("play").disabled=true}
+}
+animation=requestAnimationFrame(frame);
+}
+function mark(){
+if(solved)return;
+if(!selectedType||!selectedClue){feedback("Select both the change type and a clue.","bad");return}
+tries++;
+const c=current(),typeOK=selectedType===c.type,clueOK=selectedClue===c.clue;
+if(typeOK&&clueOK){
+solved=true;score+=hinted?50:tries===1?100:75;
+feedback("✓ Case solved! "+c.description,"good");
+$("score").textContent="Score "+score;$("check").disabled=true;
+$("next").textContent=round===5?"See results ★":"Next case →";
+$("next").classList.remove("hidden");progress=1;update();return;
+}
+let msg=!typeOK?"The type of change is incorrect. Ask whether a new substance formed.":"The type is right, but the selected clue is not the strongest one for this case.";
+feedback("✗ "+msg,"bad");
+}
+function next(){
+if(round===5){showEnd();return}
+round++;begin();
+}
+function showEnd(){
+$("game").classList.add("hidden");$("end").classList.remove("hidden");
+let count=score>=510?3:score>=375?2:1;
+$("stars").textContent="★".repeat(count)+"☆".repeat(3-count);
+$("total").textContent=score+" / 600 points · "+count+" star"+(count===1?"":"s");
+}
+function restart(){
+seed=(Date.now()>>>0)||1;order=shuffle([0,1,2,3,4,5]);round=0;score=0;
+$("end").classList.add("hidden");$("game").classList.remove("hidden");begin();
+}
+document.querySelectorAll("[data-type]").forEach(b=>b.addEventListener("click",()=>{selectedType=b.dataset.type;update()}));
+document.querySelectorAll("[data-clue]").forEach(b=>b.addEventListener("click",()=>{selectedClue=b.dataset.clue;update()}));
+$("play").addEventListener("click",animate);
+$("replay").addEventListener("click",()=>{token++;cancelAnimationFrame(animation);progress=0;$("play").disabled=false;$("observation").textContent=current().question;update()});
+$("hint").addEventListener("click",()=>{
+if(solved)return;hinted=true;
+const c=current();feedback(c.type==="physical"?"Hint: can you get back the same substance without a chemical reaction?":"Hint: think about the most noticeable evidence in this experiment.");
+});
+$("check").addEventListener("click",mark);
+$("next").addEventListener("click",next);
+$("again").addEventListener("click",restart);
+restart();
+})();
+</script>
+</body>
+</html>

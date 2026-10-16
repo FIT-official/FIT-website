@@ -27,6 +27,7 @@ const TOPIC_ICON = {
   forces: <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="9" width="8" height="8" rx="1.5"/><path d="M12 13h8M17 10l3 3-3 3"/></g>,
   'linear-graphs': <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 3v17h17"/><path d="M6 17 19 6"/></g>,
   energy: <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round"><path d="M13 2.5 5 13.5h6l-1 8 8-11h-6l1-8Z"/></g>,
+  'chemical-reactions': <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round"><path d="M9 3h6M10 3v6l-5 10a1.5 1.5 0 0 0 1.3 2h11.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7.5 15h9"/></g>,
   circuits: <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 8V5h16v14H4v-3"/><path d="M2 10h4M3.5 13h1"/><circle cx="20" cy="12" r="2.6" fill="currentColor"/></g>,
 }
 

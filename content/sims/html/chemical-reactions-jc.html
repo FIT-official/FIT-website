@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rate Lab | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit}
+button{min-height:46px;min-width:46px;border:2px solid #111;border-radius:999px;background:#fff;padding:8px 14px;font-weight:800;color:#111;cursor:pointer;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+input[type=number]{width:120px;max-width:100%;border:2px solid #111;border-radius:12px;min-height:46px;padding:8px;background:#fff}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-jc)}
+.wrap{max-width:1230px;margin:auto;padding:23px 15px 55px}
+header,.row,.hud,.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+header{justify-content:space-between;margin-bottom:18px}
+.brand{font-size:17px;font-weight:900}
+.badge{font-size:12px;font-weight:800;text-transform:uppercase;background:var(--lvl-jc);color:var(--lvl-jc-on);border:2px solid #111;border-radius:999px;padding:5px 12px}
+.counter{border:2px solid #111;border-radius:999px;background:#fff;padding:6px 12px;font-size:13px;font-weight:800}
+h1{font-size:clamp(31px,5vw,49px);letter-spacing:-1.5px;font-weight:800;line-height:1.1;margin:4px 0 9px}
+h2{font-size:21px;font-weight:800;margin:0 0 13px}
+h3{font-size:16px;font-weight:800;margin:0 0 8px}
+.intro{color:var(--fit-ink-2);margin:0 0 22px}
+.layout{display:grid;grid-template-columns:1fr;gap:20px;align-items:start}
+.card{border:2px solid #111;border-radius:24px;background:#fff;padding:19px;box-shadow:var(--sh-2);min-width:0}
+.stage{background:var(--lvl-jc-tint)}
+.scene,.graph{background:#fff;border:2px solid #111;border-radius:18px;overflow:hidden;margin:10px 0}
+.graph{border-color:var(--fit-line-soft)}
+svg{width:100%;height:auto;display:block}
+.scene svg{min-height:240px}
+.control{border:2px solid var(--fit-line-soft);padding:12px;border-radius:16px;margin:10px 0;background:#fff}
+.control label{font-weight:800;display:block;margin-bottom:5px}
+.control .row{margin-top:7px}
+.stepper{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.stepper strong{min-width:64px;text-align:center}
+.coarse{background:var(--lvl-jc-tint)}
+.primary-button{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
+.primary-button:active{box-shadow:none}
+.feedback{border:2px solid #111;border-radius:14px;padding:12px;min-height:56px;margin-top:15px;background:var(--fit-sunken);font-weight:600}
+.feedback.good{background:#DDF7E6}
+.feedback.bad{background:#FFE8E4}
+.question{font-weight:700;margin:10px 0 15px}
+.small{font-size:13px;color:var(--fit-ink-3)}
+.tablewrap{overflow-x:auto;border:2px solid #111;border-radius:14px;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid #DDD;padding:8px;text-align:center;font-variant-numeric:tabular-nums}
+th{background:#ECE7FF;font-weight:800}
+tr:last-child td{border-bottom:none}
+.readout{padding:12px;background:var(--fit-sunken);border:2px solid #111;border-radius:14px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:12px}
+.concept{margin-top:17px;padding:12px;background:#fff;border:2px dashed #111;border-radius:16px}
+.concept svg{max-height:145px}
+details{margin-top:20px;border:2px solid #111;border-radius:16px;background:#fff;padding:12px 15px}
+summary{font-weight:800;cursor:pointer}
+details p{font-size:14px;margin:9px 0}
+.end{border:3px solid #111;border-radius:28px;background:var(--lvl-jc-tint);padding:28px;text-align:center;box-shadow:var(--sh-3)}
+.stars{font-size:42px;letter-spacing:8px}
+.hidden{display:none!important}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}.wrap{padding-top:30px}.scene svg{min-height:265px}}
+@media(max-width:440px){.wrap{padding:12px 12px 40px}.card{padding:14px}.stepper button{padding:7px 10px}.tablewrap{font-size:12px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+<div class="row"><strong class="brand">FIT / CHEMISTRY</strong><span class="badge">JC · H2 Chemistry</span></div>
+<div class="hud"><span class="counter" id="round">Round 1/6</span><span class="counter" id="score">Score 0</span></div>
+</header>
+<h1>Rate Lab</h1>
+<p class="intro">Design kinetic experiments. Extract reaction orders, half-lives and activation behaviour.</p>
+<div id="game" class="layout">
+<section class="card stage">
+<div class="row"><span class="badge" id="mode">Initial rates</span><strong id="case">Experiment 01</strong></div>
+<h2 id="stageTitle" style="margin-top:15px">Kinetics apparatus</h2>
+<div class="scene">
+<svg id="scene" viewBox="0 0 510 290" role="img" aria-label="Reaction flask and kinetic measurements"></svg>
+</div>
+<p class="small" id="sceneNote"></p>
+<div class="concept">
+<h3>Concept figure: reaction energy profile</h3>
+<svg viewBox="0 0 470 145" role="img" aria-label="Activation energy separates reactants from the transition state">
+<path d="M45 14 V117 H450" fill="none" stroke="#111" stroke-width="3"/>
+<path d="M55 102 H110 Q145 102 175 53 Q205 8 239 51 Q269 91 310 84 H445" fill="none" stroke="#6A45F5" stroke-width="4"/>
+<path d="M190 101 V23" stroke="#111" stroke-width="2" stroke-dasharray="5 5"/>
+<path d="M183 34 L190 23 197 34" fill="none" stroke="#111" stroke-width="2"/>
+<text x="175" y="16" font-size="12" text-anchor="middle">Eₐ (kJ/mol)</text>
+<text x="80" y="93" font-size="12">Reactants</text>
+<text x="350" y="76" font-size="12">Products</text>
+<text x="260" y="138" font-size="12" text-anchor="middle">Reaction coordinate</text>
+</svg>
+<p class="small">Higher activation energy gives stronger temperature dependence at fixed pre-exponential factor.</p>
+</div>
+</section>
+<section class="card">
+<h2 id="taskTitle">Analyse the rate</h2>
+<p class="question" id="question"></p>
+<div id="controls"></div>
+<div class="actions" style="margin-top:17px">
+<button id="hint">💡 Hint</button>
+<button id="check" class="primary-button">✓ Check</button>
+<button id="next" class="hidden">Next experiment →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Run experiments and analyse the results.</div>
+<h2 style="margin-top:24px">Live concentration plot</h2>
+<div class="graph">
+<svg id="plotA" viewBox="0 0 510 295" role="img" aria-label="Concentration A against time with labelled axes"></svg>
+</div>
+<h2 style="margin-top:18px">Arrhenius plot</h2>
+<div class="graph">
+<svg id="plotB" viewBox="0 0 510 295" role="img" aria-label="Natural logarithm of k against inverse absolute temperature"></svg>
+</div>
+<p class="small" id="graphNote"></p>
+<details>
+<summary>The chemistry</summary>
+<p><strong>Rate law:</strong> rate = k[A]ᵐ[B]ⁿ. Compare experiments where just one initial concentration changes.</p>
+<p><strong>Units of k:</strong> (mol/dm³)^(1 − m − n) s⁻¹. For total order zero: mol dm⁻³ s⁻¹; first: s⁻¹; second: dm³ mol⁻¹ s⁻¹; third: dm⁶ mol⁻² s⁻¹.</p>
+<p><strong>First-order decay:</strong> [A] = [A]₀exp(−kt), t½ = ln 2 / k.</p>
+<p><strong>Arrhenius:</strong> k = A exp(−Eₐ/RT). Thus ln k = ln A − (Eₐ/R)(1/T), with R = 8.31 J mol⁻¹ K⁻¹.</p>
+<p>The initial-rate experiments use a synthetic exact power-law model. Other plots use a first-order concentration-decay illustration with the corresponding positive k in s⁻¹. These are separate kinetic scenarios.</p>
+</details>
+</section>
+</div>
+<section id="end" class="end hidden">
+<h2>Kinetics mastered!</h2>
+<div class="stars" id="stars">☆☆☆</div>
+<p id="total"></p>
+<button id="again" class="primary-button">Play again</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const R=8.31;
+const sequence=["initial","half","arrhenius","initial","half","arrhenius"];
+let seed=1,rnd=0,score=0,tries=0,hinted=false,solved=false,experiment={},rows=[],aVal=.1,bVal=.1,temperature=300,timeCursor=0;
+function random(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function choose(a){return a[Math.floor(random()*a.length)]}
+function finite(v,fallback=0){let n=Number(v);return Number.isFinite(n)?n:fallback}
+function fmt(v,d=3){return Number.isFinite(v)?v.toFixed(d):"—"}
+function feedback(t,k=""){$("feedback").textContent=t;$("feedback").className="feedback "+k}
+function mode(){return sequence[rnd]}
+function t(x,y,v,size=13,anchor="middle"){return '<text x="'+x+'" y="'+y+'" font-size="'+size+'" fill="#111" font-weight="700" text-anchor="'+anchor+'">'+v+'</text>'}
+function newExperiment(){
+let m=mode();
+if(m==="initial"){
+let orderA=choose([0,1,2]),orderB=choose([0,1,2]);
+if(orderA+orderB===0)orderA=1;
+let k=choose([.0125,.025,.05,.1,.2]);
+experiment={m:orderA,n:orderB,k,base:.1,unit:units(orderA+orderB)};
+rows=[];aVal=.1;bVal=.1;
+}else if(m==="half"){
+let half=choose([20,30,40,50,60,80,100]);
+experiment={half,k:Math.log(2)/half,a0:choose([.4,.6,.8,1])};
+timeCursor=0;
+}else{
+let Ea=choose([30,40,50,60,70])*1000;
+let baseT=choose([280,290,300,310]);
+let targetT=choose([320,330,340,350,360,370,380]);
+let kRef=choose([.002,.005,.01,.02]);
+let lnA=Math.log(kRef)+Ea/(R*baseT);
+experiment={Ea,lnA,targetT,targetK:arrk(lnA,Ea,targetT),baseT};
+temperature=baseT;
+}
+}
+function units(order){
+if(order===0)return "mol dm⁻³ s⁻¹";
+if(order===1)return "s⁻¹";
+if(order===2)return "dm³ mol⁻¹ s⁻¹";
+if(order===3)return "dm⁶ mol⁻² s⁻¹";
+return "dm⁹ mol⁻³ s⁻¹";
+}
+function arrk(lnA,Ea,temp){return Math.exp(Math.min(50,Math.max(-100,lnA-Ea/(R*temp))))}
+function valueRate(a,b){return experiment.k*Math.pow(a,experiment.m)*Math.pow(b,experiment.n)}
+function controls(){
+const m=mode(),el=$("controls");
+if(m==="initial"){
+$("mode").textContent="A · Initial rates";$("stageTitle").textContent="Initial-rate experiments";
+$("taskTitle").textContent="Determine the rate law";
+$("question").textContent="Run at least three experiments. Vary one concentration at a time to deduce the orders in A and B, then calculate k.";
+el.innerHTML=
+'<div class="control"><label for="a">[A]₀: <span id="aValue">0.10</span> mol/dm³</label><input id="a" type="range" min="0.1" max="0.4" step="0.1" value="0.1"></div>'+
+'<div class="control"><label for="b">[B]₀: <span id="bValue">0.10</span> mol/dm³</label><input id="b" type="range" min="0.1" max="0.4" step="0.1" value="0.1"></div>'+
+'<button id="run">▶ Run experiment</button>'+
+'<div class="tablewrap"><table><thead><tr><th>Run</th><th>[A]₀<br>(mol/dm³)</th><th>[B]₀<br>(mol/dm³)</th><th>Initial rate<br>(mol dm⁻³ s⁻¹)</th></tr></thead><tbody id="results"><tr><td colspan="4">No experiments yet</td></tr></tbody></table></div>'+
+'<div class="control"><label for="mInput">Order in A</label><input type="number" id="mInput" min="0" max="3" step="1" value="0">'+
+'<label for="nInput">Order in B</label><input type="number" id="nInput" min="0" max="3" step="1" value="0">'+
+'<label for="kInput">Rate constant k (numerical value)</label><input type="number" id="kInput" min="0" step="0.000001" value="0.001">'+
+'<label for="unitInput">Units of k</label><div id="units"></div></div>';
+let u=["mol dm⁻³ s⁻¹","s⁻¹","dm³ mol⁻¹ s⁻¹","dm⁶ mol⁻² s⁻¹","dm⁹ mol⁻³ s⁻¹"];
+$("units").innerHTML=u.map((v,i)=>'<button data-unit="'+i+'" style="margin:4px 4px 0 0" aria-pressed="false">'+v+'</button>').join("");
+experiment.selectedUnit=-1;
+document.querySelectorAll("[data-unit]").forEach(b=>b.addEventListener("click",()=>{
+experiment.selectedUnit=Number(b.dataset.unit);
+document.querySelectorAll("[data-unit]").forEach(x=>{let on=x===b;x.classList.toggle("coarse",on);x.setAttribute("aria-pressed",String(on))});
+}));
+$("a").addEventListener("input",()=>{aVal=finite($("a").value,.1);$("aValue").textContent=fmt(aVal,2);redraw()});
+$("b").addEventListener("input",()=>{bVal=finite($("b").value,.1);$("bValue").textContent=fmt(bVal,2);redraw()});
+$("run").addEventListener("click",()=>{
+let existing=rows.find(x=>x.a===aVal&&x.b===bVal);
+if(existing){feedback("This condition has already been measured. Try a new combination.");return}
+rows.push({a:aVal,b:bVal,rate:valueRate(aVal,bVal)});
+$("results").innerHTML=rows.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+fmt(x.a,2)+'</td><td>'+fmt(x.b,2)+'</td><td>'+x.rate.toExponential(3)+'</td></tr>').join("");
+feedback("Measurement recorded. Compare runs with only one changing concentration.");redraw();
+});
+$("sceneNote").textContent="Two independently adjustable initial concentrations feed the kinetic reactor. All rates are exact synthetic measurements.";
+$("graphNote").textContent="Concentration plot shows an illustrative depletion trajectory; the Arrhenius chart is a reference demonstration for the other challenges.";
+}else if(m==="half"){
+$("mode").textContent="B · Half-life";$("stageTitle").textContent="First-order decay reactor";
+$("taskTitle").textContent="Read the half-life";
+$("question").textContent="Find t½ using the concentration graph, then calculate k = ln 2 / t½. Enter your measurements with correct units.";
+el.innerHTML=
+'<div class="control"><label for="cursor">Graph time cursor: <span id="timeLabel">0 s</span></label><input id="cursor" type="range" min="0" max="240" step="1" value="0"></div>'+
+'<div class="readout" id="readout">[A] = 0.000 mol/dm³</div>'+
+'<div class="control"><label for="halfInput">Measured half-life (s)</label><input type="number" id="halfInput" min="0" step="0.1" value="10">'+
+'<label for="kHalfInput">Rate constant k (s⁻¹)</label><input type="number" id="kHalfInput" min="0" step="0.00001" value="0.001"></div>';
+$("cursor").addEventListener("input",()=>{timeCursor=finite($("cursor").value);$("timeLabel").textContent=timeCursor+" s";redraw()});
+$("sceneNote").textContent="The optical sensor follows the concentration of reactant A while the reaction proceeds.";
+$("graphNote").textContent="Use the cursor to locate the time when [A] has halved. The plot has concentration and time units.";
+}else{
+$("mode").textContent="C · Arrhenius";$("stageTitle").textContent="Temperature-controlled reactor";
+$("taskTitle").textContent="Reach the target rate constant";
+$("question").textContent="Activation energy Eₐ = "+fmt(experiment.Ea/1000,0)+" kJ/mol. Pre-exponential factor A = "+fmt(Math.exp(experiment.lnA),2)+" s⁻¹. Set temperature to produce k = "+fmt(experiment.targetK,6)+" s⁻¹. R = 8.31 J mol⁻¹ K⁻¹.";
+el.innerHTML=
+'<div class="control"><label for="temp">Temperature T: <span id="tempLabel">'+temperature+' K</span></label><input id="temp" type="range" min="280" max="400" step="1" value="'+temperature+'"></div>'+
+'<div class="stepper"><button id="minus10" class="coarse" aria-label="Decrease temperature by ten kelvin">−−</button><button id="minus1" aria-label="Decrease temperature by one kelvin">−</button><strong id="tempDisplay">'+temperature+' K</strong><button id="plus1" aria-label="Increase temperature by one kelvin">+</button><button id="plus10" class="coarse" aria-label="Increase temperature by ten kelvin">++</button></div>'+
+'<div class="readout" id="kReadout">Calculated k</div>';
+$("temp").addEventListener("input",()=>{temperature=finite($("temp").value,280);redraw()});
+[["minus10",-10],["minus1",-1],["plus1",1],["plus10",10]].forEach(([id,d])=>$(id).addEventListener("click",()=>{temperature=Math.min(400,Math.max(280,temperature+d));redraw()}));
+$("sceneNote").textContent="The thermostat controls absolute temperature in kelvin. The reaction follows the Arrhenius relation.";
+$("graphNote").textContent="ln k against 1/T is linear. Its gradient is −Eₐ/R, expressed in K.";
+}
+}
+function drawScene(){
+let s='<rect width="510" height="290" fill="#fff"/><path d="M35 236 H475" stroke="#111" stroke-width="4"/>'+
+'<path d="M150 74 V115 L115 205 Q110 230 141 230 H365 Q397 230 390 205 L355 115 V74" fill="#BDEBFA" stroke="#111" stroke-width="4"/>'+
+'<path d="M126 192 Q251 173 380 192 L390 211 Q390 229 360 229 H143 Q117 229 126 211Z" fill="#ECE7FF"/>'+
+'<path d="M150 74 H355" stroke="#111" stroke-width="4"/>'+
+'<rect x="235" y="38" width="31" height="87" rx="6" fill="#fff" stroke="#111" stroke-width="3"/>'+
+'<rect x="245" y="89" width="11" height="26" rx="5" fill="#6A45F5" stroke="#111" stroke-width="1.5"/>';
+let m=mode();
+for(let i=0;i<16;i++){
+let x=154+i*13,y=201-(i%4)*15;
+let col=i%3===0?"#FF8FB8":"#6A45F5";
+let shape=i%3===0?'<rect x="'+x+'" y="'+y+'" width="9" height="9" rx="2" fill="'+col+'" stroke="#111"/>':'<circle cx="'+x+'" cy="'+y+'" r="5" fill="'+col+'" stroke="#111"/>';
+s+=shape;
+}
+if(m==="initial"){
+s+=t(252,26,"Mixing reactor",17)+t(252,259,"[A]₀ = "+fmt(aVal,2)+" mol/dm³",14)+t(252,280,"[B]₀ = "+fmt(bVal,2)+" mol/dm³",14);
+}else if(m==="half"){
+let c=experiment.a0*Math.exp(-experiment.k*timeCursor);
+s+=t(252,26,"Optical concentration probe",16)+t(252,260,"Time = "+timeCursor+" s",14)+t(252,280,"[A] = "+fmt(c,4)+" mol/dm³",14);
+}else{
+s+=t(252,26,"Thermostat",17)+t(252,261,"T = "+temperature+" K",15)+t(252,281,"Eₐ = "+fmt(experiment.Ea/1000,0)+" kJ/mol",13);
+}
+$("scene").innerHTML=s;
+$("scene").setAttribute("aria-label","Laboratory reactor. "+(m==="arrhenius"?"Temperature "+temperature+" kelvin":m==="half"?"Elapsed time "+timeCursor+" seconds":"Initial concentrations "+aVal+" and "+bVal+" mol per cubic decimetre"));
+}
+function graph(title,xLabel,yLabel,series,xmin,xmax,ymin,ymax,mark){
+const x=xv=>66+403*(xv-xmin)/Math.max(xmax-xmin,1e-9);
+const y=yv=>247-187*(yv-ymin)/Math.max(ymax-ymin,1e-9);
+let s='<rect width="510" height="295" fill="#fff"/>'+t(255,22,title,15);
+for(let i=0;i<=4;i++){
+let xx=66+i*403/4,yy=247-i*187/4;
+s+='<line x1="'+xx+'" y1="60" x2="'+xx+'" y2="247" stroke="#E4E2DB"/>'+
+'<line x1="66" y1="'+yy+'" x2="469" y2="'+yy+'" stroke="#E4E2DB"/>'+
+t(xx,263,fmt(xmin+(xmax-xmin)*i/4,xmax<=.005?5:0),10)+
+t(59,yy+4,fmt(ymin+(ymax-ymin)*i/4,Math.abs(ymax-ymin)<2?2:0),10,"end");
+}
+s+='<path d="M66 60 V247 H469" fill="none" stroke="#111" stroke-width="2"/>';
+series.forEach((a,i)=>{
+let p=a.points.map(q=>x(q[0]).toFixed(2)+","+y(q[1]).toFixed(2)).join(" ");
+s+='<polyline points="'+p+'" fill="none" stroke="'+a.color+'" stroke-width="3" '+(a.dash?'stroke-dasharray="6 5"':'')+'/>';
+if(series.length>1)s+='<line x1="'+(180+i*115)+'" y1="43" x2="'+(201+i*115)+'" y2="43" stroke="'+a.color+'" stroke-width="3"/>'+t(207+i*115,47,a.name,11,"start");
+});
+if(mark&&Number.isFinite(mark[0])&&Number.isFinite(mark[1])){
+s+='<circle cx="'+x(mark[0])+'" cy="'+y(mark[1])+'" r="6" fill="#FFC83D" stroke="#111" stroke-width="2"/>';
+}
+s+='<text x="260" y="287" text-anchor="middle" font-size="12">'+xLabel+'</text>'+
+'<text x="16" y="152" transform="rotate(-90 16 152)" text-anchor="middle" font-size="12">'+yLabel+'</text>';
+return s;
+}
+function drawPlots(){
+let m=mode(),c0=m==="half"?experiment.a0:m==="initial"?aVal:1;
+let k=m==="half"?experiment.k:m==="initial"?Math.max(.0001,Math.min(.2,valueRate(aVal,bVal)/Math.max(aVal,.01))):arrk(experiment.lnA,experiment.Ea,temperature);
+let duration=m==="half"?240:200;
+let data=[];
+for(let tt=0;tt<=duration;tt+=2)data.push([tt,c0*Math.exp(-Math.min(k,10)*tt)]);
+let currentT=m==="half"?timeCursor:Math.round(duration*.25);
+let cv=c0*Math.exp(-Math.min(k,10)*currentT);
+$("plotA").innerHTML=graph("Concentration of A against time","Time t (s)","Concentration [A] (mol/dm³)",[
+{points:data,color:"#6A45F5",name:"[A]"}
+],0,duration,0,c0*1.1,[currentT,cv]);
+$("plotA").setAttribute("aria-label","Concentration A from "+fmt(c0,3)+" mol per cubic decimetre, marker at "+currentT+" seconds and "+fmt(cv,4)+" mol per cubic decimetre");
+if(m==="half")$("readout").textContent="At "+timeCursor+" s: [A] = "+fmt(cv,4)+" mol/dm³; initial [A] = "+fmt(c0,4)+" mol/dm³.";
+if(m==="arrhenius"){
+let points=[],low=1/400,high=1/280;
+for(let T=280;T<=400;T+=2)points.push([1/T,experiment.lnA-experiment.Ea/(R*T)]);
+let lo=Math.min(...points.map(p=>p[1]))-1,hi=Math.max(...points.map(p=>p[1]))+1;
+$("plotB").innerHTML=graph("Arrhenius: gradient = −Eₐ/R","1/T (K⁻¹)","ln(k / s⁻¹)",[{points,color:"#6A45F5"}],low,high,lo,hi,[1/temperature,Math.log(Math.max(k,1e-99))]);
+$("plotB").setAttribute("aria-label","Arrhenius line with gradient "+fmt(-experiment.Ea/R,1)+" kelvin; current marker at inverse temperature "+fmt(1/temperature,6));
+$("kReadout").textContent="At "+temperature+" K: k = "+fmt(k,7)+" s⁻¹";
+}else{
+let Ea=45000,lnA=Math.log(.01)+Ea/(R*300),points=[];
+for(let T=280;T<=400;T+=2)points.push([1/T,lnA-Ea/(R*T)]);
+let lo=Math.min(...points.map(p=>p[1]))-1,hi=Math.max(...points.map(p=>p[1]))+1;
+$("plotB").innerHTML=graph("Reference Arrhenius example","1/T (K⁻¹)","ln(k / s⁻¹)",[{points,color:"#6A45F5"}],1/400,1/280,lo,hi,null);
+$("plotB").setAttribute("aria-label","Illustrative Arrhenius line with activation energy 45 kilojoules per mole and negative gradient");
+}
+}
+function redraw(){
+if(mode()==="arrhenius"){
+$("temp").value=temperature;$("tempLabel").textContent=temperature+" K";$("tempDisplay").textContent=temperature+" K";
+}
+drawScene();drawPlots();
+}
+function start(){
+tries=0;hinted=false;solved=false;
+$("next").classList.add("hidden");$("check").disabled=false;
+$("round").textContent="Round "+(rnd+1)+"/6";$("score").textContent="Score "+score;
+$("case").textContent="Experiment "+String(rnd+1).padStart(2,"0");
+newExperiment();controls();feedback("Perform the investigation, then press Check.");redraw();
+}
+function hasUsefulRows(){
+let base=rows.find(r=>r.a===.1&&r.b===.1);
+if(!base)return false;
+return rows.some(r=>r.b===base.b&&r.a!==base.a)&&rows.some(r=>r.a===base.a&&r.b!==base.b);
+}
+function check(){
+if(solved)return;
+tries++;
+if(mode()==="initial"){
+if(!hasUsefulRows()){feedback("✗ Run a baseline and two comparisons: change [A] alone, then [B] alone.","bad");return}
+let m=finite($("mInput").value,-10),n=finite($("nInput").value,-10),k=finite($("kInput").value,-10);
+let correctUnit=["mol dm⁻³ s⁻¹","s⁻¹","dm³ mol⁻¹ s⁻¹","dm⁶ mol⁻² s⁻¹","dm⁹ mol⁻³ s⁻¹"].indexOf(experiment.unit);
+if(m===experiment.m&&n===experiment.n&&Math.abs(k-experiment.k)<=experiment.k*.01&&experiment.selectedUnit===correctUnit){
+success("The experimental ratios support rate = k[A]ᵐ[B]ⁿ and the stated units.");
+}else{
+let message=m!==experiment.m||n!==experiment.n?"One or both reaction orders are incorrect. Compare rates when only one concentration doubles.":Math.abs(k-experiment.k)>experiment.k*.01?"Your k differs from the experimental value. Substitute a measured rate and both initial concentrations.":"The units of k do not match the overall order.";
+feedback("✗ "+message,"bad");
+}
+}else if(mode()==="half"){
+let half=finite($("halfInput").value,-10),k=finite($("kHalfInput").value,-10);
+if(Math.abs(half-experiment.half)<=.01&&Math.abs(k-experiment.k)<=experiment.k*.01)
+success("The reactant concentration halves after a constant interval, and k = ln 2 / t½.");
+else feedback("✗ "+(Math.abs(half-experiment.half)>.01?"The half-life is not the interval from [A]₀ to [A]₀/2. ":"")+"Your k differs by "+fmt(Math.abs(k-experiment.k),5)+" s⁻¹.","bad");
+}else{
+let k=arrk(experiment.lnA,experiment.Ea,temperature);
+if(Math.abs(k-experiment.targetK)<=experiment.targetK*.005)
+success("The Arrhenius equation gives the requested rate constant at "+temperature+" K.");
+else feedback("✗ Calculated k is "+fmt(k,7)+" s⁻¹, differing from the target by "+fmt(Math.abs(k-experiment.targetK),7)+" s⁻¹. Use the ln k versus 1/T relation.","bad");
+}
+}
+function success(message){
+solved=true;score+=hinted?50:tries===1?100:75;
+feedback("✓ Correct! "+message,"good");$("score").textContent="Score "+score;$("check").disabled=true;
+$("next").classList.remove("hidden");$("next").textContent=rnd===5?"View results ★":"Next experiment →";
+}
+$("hint").addEventListener("click",()=>{
+if(solved)return;hinted=true;
+if(mode()==="initial")feedback("Hint: if doubling a concentration changes the rate by a factor f, the order is log₂(f). Keep the other concentration unchanged.");
+if(mode()==="half")feedback("Hint: trace across from half of the initial concentration. Divide ln 2 by the measured time.");
+if(mode()==="arrhenius")feedback("Hint: ln(k/A) = −Eₐ/(RT). Use joules per mole, not kilojoules per mole.");
+});
+$("check").addEventListener("click",check);
+$("next").addEventListener("click",()=>{if(rnd===5){end();return}rnd++;start()});
+function end(){
+$("game").classList.add("hidden");$("end").classList.remove("hidden");
+let n=score>=510?3:score>=375?2:1;
+$("stars").textContent="★".repeat(n)+"☆".repeat(3-n);
+$("total").textContent=score+" / 600 points · "+n+" star"+(n===1?"":"s");
+}
+$("again").addEventListener("click",restart);
+function restart(){seed=(Date.now()>>>0)||98765;rnd=0;score=0;$("game").classList.remove("hidden");$("end").classList.add("hidden");start()}
+restart();
+})();
+</script>
+</body>
+</html>

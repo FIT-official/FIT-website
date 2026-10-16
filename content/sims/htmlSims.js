@@ -6,6 +6,7 @@
 const circuits = { subject: 'Physics', concept: 'circuits', accent: '#FFC83D', minutes: '10–15', status: 'live' }
 const energy = { subject: 'Physics', concept: 'energy', accent: '#3DBE6B', minutes: '10–15', status: 'live' }
 const waves = { subject: 'Physics', concept: 'waves', accent: '#1F66E5', minutes: '10–15', status: 'live' }
+const reactions = { subject: 'Chemistry', concept: 'chemical-reactions', accent: '#FF8FB8', minutes: '10–15', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -67,4 +68,24 @@ export const htmlSims = [
     syllabusRef: 'University, Waves and Optics',
     approach: 'Build square, sawtooth and triangle waves from six harmonics, then set a packet’s k₀ for a target group velocity in a dispersive medium.',
     activityPrompt: 'Play all rounds, then explain why the envelope and the crests of a packet move at different speeds.', tags: ['University', 'Waves and Optics', 'Fourier series', 'dispersion'] },
+  { ...reactions, id: 'chemical-reactions-p', title: 'Change Detective', level: 'Primary', subject: 'Science', topic: 'Reversible and irreversible changes', symbol: '🔎', height: 1300,
+    syllabusRef: 'MOE Primary Science: Matter and interactions (reversible and irreversible changes)',
+    approach: 'Watch everyday changes, sort them as reversible or irreversible, and name the clue that shows a new substance formed.',
+    activityPrompt: 'Play all rounds, then explain how you can tell that a new substance has been made.', tags: ['chemical reactions', 'reversible', 'irreversible', 'signs of reaction'] },
+  { ...reactions, id: 'chemical-reactions-s', title: 'Equation Balancer', level: 'Secondary', topic: 'Equations, reacting masses and rates', symbol: '⚖️', height: 1490,
+    syllabusRef: 'MOE Secondary Chemistry: Chemical calculations and rates of reaction (balanced equations, reacting masses, factors affecting rate)',
+    approach: 'Balance equations atom by atom, calculate reacting masses from mole ratios, and tune conditions to match a CO₂ rate curve.',
+    activityPrompt: 'Play all rounds, then explain how the mole ratio in a balanced equation gives the mass of product.', tags: ['chemical reactions', 'balancing equations', 'moles', 'rate of reaction'] },
+  { ...reactions, id: 'chemical-reactions-jc', title: 'Rate Lab', level: 'JC', topic: 'Reaction kinetics', symbol: '⏱️', height: 2210,
+    syllabusRef: 'H2 Chemistry: Reaction kinetics (rate equations, orders, half-life, Arrhenius equation)',
+    approach: 'Deduce orders and k from initial-rate experiments, read a first-order half-life, and set the temperature for a target k.',
+    activityPrompt: 'Play all rounds, then explain how comparing two runs reveals the order in one reactant.', tags: ['chemical reactions', 'kinetics', 'rate equation', 'Arrhenius'] },
+  { ...reactions, id: 'chemical-reactions-poly', title: 'Titration Station', level: 'Poly', topic: 'Acid–base titration', symbol: '🧪', height: 1570,
+    syllabusRef: 'Poly applied chemistry: volumetric analysis and acid–base titration (generic)',
+    approach: 'Titrate an acid with NaOH to the end point, choose a suitable indicator, and calculate the acid concentration from the titre.',
+    activityPrompt: 'Play all rounds, then explain why phenolphthalein suits a weak acid–strong base titration.', tags: ['chemical reactions', 'titration', 'pH', 'indicators'] },
+  { ...reactions, id: 'chemical-reactions-u', title: 'Equilibrium Engine', level: 'University', topic: 'Chemical equilibrium and Gibbs energy', symbol: '⚗️', height: 2200,
+    syllabusRef: 'University, Physical Chemistry',
+    approach: 'Set temperature and initial amounts to hit an equilibrium conversion from ΔH° and ΔS°, then use Q and K to restore equilibrium by pressure.',
+    activityPrompt: 'Play all rounds, then explain how the sign of Q − K decides the direction of shift.', tags: ['University', 'Physical Chemistry', 'equilibrium', 'Gibbs energy'] },
 ]

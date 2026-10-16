@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Equation Balancer | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit}
+button{min-height:46px;min-width:46px;border:2px solid #111;border-radius:999px;background:#fff;color:#111;padding:8px 14px;font-weight:800;cursor:pointer;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+input[type=number]{width:120px;max-width:100%;min-height:46px;border:2px solid #111;border-radius:12px;padding:8px;background:#fff}
+input[type=range]{width:100%;accent-color:#169E84;min-height:44px;cursor:pointer}
+.wrap{max-width:1210px;margin:auto;padding:22px 15px 55px}
+header,.hud,.row,.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+header{justify-content:space-between;margin-bottom:17px}
+.brand{font-size:17px;font-weight:900}
+.badge{background:var(--lvl-secondary);color:var(--lvl-secondary-on);border:2px solid #111;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:800;text-transform:uppercase}
+.counter{border:2px solid #111;background:white;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:800}
+h1{font-size:clamp(30px,5vw,48px);line-height:1.1;margin:5px 0 8px;letter-spacing:-1.5px;font-weight:800}
+h2{font-size:21px;font-weight:800;margin:0 0 13px}
+h3{font-size:16px;font-weight:800;margin:0 0 7px}
+.intro{color:var(--fit-ink-2);margin:0 0 22px}
+.layout{display:grid;grid-template-columns:1fr;gap:20px;align-items:start}
+.card{min-width:0;background:#fff;border:2px solid #111;border-radius:24px;padding:19px;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-secondary-tint)}
+.scene,.graph{background:#fff;border:2px solid #111;border-radius:18px;overflow:hidden;margin-top:12px}
+.graph{border-color:var(--fit-line-soft)}
+svg{width:100%;display:block;height:auto}
+.scene svg{min-height:220px}
+.primary-button{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
+.primary-button:active{box-shadow:none}
+.feedback{padding:12px;border:2px solid #111;border-radius:14px;min-height:55px;background:var(--fit-sunken);margin-top:16px;font-weight:600}
+.feedback.good{background:#DDF7E6}
+.feedback.bad{background:#FFE8E4}
+.pill{display:inline-block;border:2px solid #111;border-radius:999px;padding:5px 11px;background:#fff;font-size:13px;font-weight:700}
+.question{font-weight:700;margin:13px 0}
+.stepper{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:11px 0}
+.stepper .number{min-width:44px;text-align:center;font-weight:900;font-size:23px}
+.coeff{border:2px solid #111;border-radius:15px;background:#fff;padding:10px;margin:10px 0}
+.coeff strong{display:inline-block;min-width:75px}
+.coarse{background:var(--lvl-secondary-tint)}
+.control{border:2px solid var(--fit-line-soft);border-radius:15px;padding:11px;margin-top:10px;background:#fff}
+.control label{display:block;font-weight:800;margin-bottom:5px}
+.controloutput{font-weight:800}
+.small{font-size:13px;color:var(--fit-ink-3)}
+.ar{font-size:13px;border-top:2px dashed #111;padding-top:10px;margin-top:12px}
+.concept{margin-top:17px;border:2px dashed #111;border-radius:16px;padding:12px;background:#fff}
+.concept svg{max-height:140px}
+details{margin-top:20px;border:2px solid #111;border-radius:16px;padding:12px 15px;background:#fff}
+summary{cursor:pointer;font-weight:800}
+details p{font-size:14px;margin:9px 0}
+.end{border:3px solid #111;background:var(--lvl-secondary-tint);border-radius:28px;padding:30px;text-align:center;box-shadow:var(--sh-3)}
+.stars{font-size:42px;letter-spacing:8px}
+.hidden{display:none!important}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}.wrap{padding-top:30px}.scene svg{min-height:275px}}
+@media(max-width:440px){.wrap{padding:12px 12px 40px}.card{padding:14px}.stepper{gap:5px}.stepper button{padding:7px 10px}.coeff strong{min-width:60px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+<div class="row"><strong class="brand">FIT / CHEMISTRY</strong><span class="badge">Secondary · O-Level</span></div>
+<div class="hud"><span id="round" class="counter">Round 1/6</span><span id="score" class="counter">Score 0</span></div>
+</header>
+<h1>Equation Balancer</h1>
+<p class="intro">Conserve atoms. Calculate reacting masses. Control reaction rates.</p>
+<div id="game" class="layout">
+<section class="card stage">
+<div class="row"><span id="mode" class="badge">Balance</span><span id="case" class="pill">Investigation</span></div>
+<h2 style="margin-top:15px" id="sceneTitle">Reaction chamber</h2>
+<div class="scene">
+<svg id="scene" viewBox="0 0 500 300" role="img" aria-label="Chemical reaction particle diagram"></svg>
+</div>
+<p class="small" id="sceneNote"></p>
+<div class="concept">
+<h3>Concept figure</h3>
+<svg viewBox="0 0 470 135" role="img" aria-label="Collision theory: particles must collide with enough energy">
+<rect x="5" y="8" width="220" height="95" rx="13" fill="#DDF7F1" stroke="#111" stroke-width="2"/>
+<rect x="245" y="8" width="220" height="95" rx="13" fill="#FFF4D6" stroke="#111" stroke-width="2"/>
+<g stroke="#111" stroke-width="2">
+<circle cx="46" cy="34" r="11" fill="#FF8FB8"/><rect x="146" y="65" width="21" height="21" rx="3" fill="#FFC83D"/>
+<path d="M69 41 L117 56 M104 48 L117 56 106 64" fill="none" stroke-width="3"/>
+<circle cx="291" cy="44" r="11" fill="#FF8FB8"/><rect x="319" y="36" width="21" height="21" rx="3" fill="#FFC83D"/>
+<path d="M346 40 L389 40" stroke-width="3"/>
+<path d="M378 31 L391 40 378 49" fill="none" stroke-width="3"/>
+</g>
+<text x="115" y="123" font-size="13" text-anchor="middle">Few collisions</text>
+<text x="355" y="123" font-size="13" text-anchor="middle">More effective collisions</text>
+</svg>
+<p class="small">Higher collision frequency or energy can increase the rate of reaction.</p>
+</div>
+</section>
+<section class="card">
+<h2 id="taskTitle">Your challenge</h2>
+<p id="question" class="question"></p>
+<div id="controls"></div>
+<div class="actions" style="margin-top:18px">
+<button id="hint">💡 Hint</button>
+<button id="check" class="primary-button">✓ Check</button>
+<button id="next" class="hidden">Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Adjust the controls, then check.</div>
+<h2 style="margin-top:24px" id="plotTitle">Live graph</h2>
+<div class="graph">
+<svg id="plot" viewBox="0 0 500 310" role="img" aria-label="Live reaction graph with labelled axes"></svg>
+</div>
+<p id="plotNote" class="small"></p>
+<p class="ar"><strong>Relative atomic masses:</strong> H 1, C 12, O 16, Mg 24, Al 27, Cl 35.5, Ca 40, Fe 56. <strong>Gas molar volume:</strong> 24 dm³/mol at room conditions.</p>
+<details>
+<summary>The chemistry</summary>
+<p><strong>Balancing:</strong> the number of atoms of each element must be equal on both sides. Change coefficients, never subscripts.</p>
+<p><strong>Reacting masses:</strong> n = m / M; use the coefficient ratio to find product moles; m = nM.</p>
+<p><strong>Rate:</strong> initial rate ≈ initial gradient of the CO₂ volume–time graph, in cm³/s.</p>
+<p>For CaCO₃(s) + 2HCl(aq) → CaCl₂(aq) + H₂O(l) + CO₂(g), 1 mol of CaCO₃ produces 1 mol of CO₂ if acid is sufficient.</p>
+<p>Rate model: V(t) = V∞[1 − exp(−rt/V∞)]. The effective rate parameter changes with temperature, concentration and chip size. This is a simplified teaching model, not a measured kinetic law.</p>
+</details>
+</section>
+</div>
+<section id="end" class="end hidden">
+<h2>Reaction expert!</h2>
+<div id="stars" class="stars">☆☆☆</div>
+<p id="total"></p>
+<button id="again" class="primary-button">Play again</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const Ar={H:1,C:12,O:16,Mg:24,Al:27,Cl:35.5,Ca:40,Fe:56};
+const equations=[
+{names:["CH₄","O₂","CO₂","H₂O"],atoms:[{C:1,H:4},{O:2},{C:1,O:2},{H:2,O:1}],solution:[1,2,1,2],split:2,word:"Methane combustion"},
+{names:["Fe","O₂","Fe₂O₃"],atoms:[{Fe:1},{O:2},{Fe:2,O:3}],solution:[4,3,2],split:2,word:"Iron oxidation"},
+{names:["Al","HCl","AlCl₃","H₂"],atoms:[{Al:1},{H:1,Cl:1},{Al:1,Cl:3},{H:2}],solution:[2,6,2,3],split:2,word:"Aluminium and acid"},
+{names:["C₃H₈","O₂","CO₂","H₂O"],atoms:[{C:3,H:8},{O:2},{C:1,O:2},{H:2,O:1}],solution:[1,5,3,4],split:2,word:"Propane combustion"}
+];
+const massCases=[
+{eq:"2Mg(s) + O₂(g) → 2MgO(s)",given:"Mg",givenM:24,product:"MgO",productM:40,ratio:1},
+{eq:"CaCO₃(s) → CaO(s) + CO₂(g)",given:"CaCO₃",givenM:100,product:"CO₂",productM:44,ratio:1},
+{eq:"2Al(s) + 3Cl₂(g) → 2AlCl₃(s)",given:"Al",givenM:27,product:"AlCl₃",productM:133.5,ratio:1},
+{eq:"Fe₂O₃(s) + 3CO(g) → 2Fe(s) + 3CO₂(g)",given:"Fe₂O₃",givenM:160,product:"Fe",productM:56,ratio:2}
+];
+const sequence=["balance","mass","rate","balance","mass","rate"];
+let seed=1,rnd=0,score=0,tries=0,hinted=false,solved=false,caseData={},coeff=[],answer=0,setting={};
+function random(){seed=(Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296}
+function choice(a){return a[Math.floor(random()*a.length)]}
+function mode(){return sequence[rnd]}
+function numeric(v,defaultValue=0){let n=Number(v);return Number.isFinite(n)?n:defaultValue}
+function fmt(v,d=2){return Number.isFinite(v)?v.toFixed(d):"—"}
+function feedback(message,kind=""){let el=$("feedback");el.textContent=message;el.className="feedback "+kind}
+function txt(x,y,str,size=14,anchor="middle"){return '<text x="'+x+'" y="'+y+'" font-size="'+size+'" font-weight="700" fill="#111" text-anchor="'+anchor+'">'+str+'</text>'}
+function totals(eq){
+const left={},right={};
+eq.atoms.forEach((atom,i)=>Object.keys(atom).forEach(e=>{
+let dest=i<eq.split?left:right;dest[e]=(dest[e]||0)+coeff[i]*atom[e];
+}));
+return {left,right};
+}
+function balanced(){
+let t=totals(caseData),elements=new Set([...Object.keys(t.left),...Object.keys(t.right)]);
+return [...elements].every(e=>(t.left[e]||0)===(t.right[e]||0));
+}
+function dot(x,y,elem,r=8){
+const colors={C:"#555",H:"#fff",O:"#FF8FB8",Fe:"#A9B8C8",Al:"#FFC83D",Cl:"#3DBE6B"};
+const shapes={C:"circle",H:"circle",O:"circle",Fe:"square",Al:"triangle",Cl:"square"};
+const col=colors[elem]||"#B7DFF9",shape=shapes[elem]||"circle";
+if(shape==="square")return '<rect x="'+(x-r)+'" y="'+(y-r)+'" width="'+(2*r)+'" height="'+(2*r)+'" rx="3" fill="'+col+'" stroke="#111" stroke-width="1.7"/>';
+if(shape==="triangle")return '<path d="M'+x+' '+(y-r*1.2)+' L'+(x+r*1.2)+' '+(y+r)+' H'+(x-r*1.2)+'Z" fill="'+col+'" stroke="#111" stroke-width="1.7"/>';
+return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+col+'" stroke="#111" stroke-width="1.7"/>';
+}
+function particles(){
+const e=caseData,t=totals(e);
+let s='<rect width="500" height="300" fill="#fff"/>'+txt(125,26,"REACTANTS",15)+txt(375,26,"PRODUCTS",15);
+s+='<rect x="15" y="42" width="224" height="197" rx="14" fill="#F4F3EF" stroke="#111" stroke-width="2"/>'+
+'<rect x="261" y="42" width="224" height="197" rx="14" fill="#F4F3EF" stroke="#111" stroke-width="2"/>';
+let elements=[...new Set(e.atoms.flatMap(a=>Object.keys(a)))].sort();
+elements.forEach((element,ei)=>{
+let l=Math.min(t.left[element]||0,48),r=Math.min(t.right[element]||0,48),y=65+ei*53;
+s+=txt(35,y+4,element,13,"start");
+for(let j=0;j<l;j++)s+=dot(78+(j%10)*15,y+Math.floor(j/10)*8,element,5);
+s+=txt(467,y+4,element,13,"end");
+for(let j=0;j<r;j++)s+=dot(285+(j%10)*15,y+Math.floor(j/10)*8,element,5);
+});
+s+='<rect x="145" y="251" width="210" height="36" rx="18" fill="'+(balanced()?"#DDF7E6":"#FFE8E4")+'" stroke="#111" stroke-width="2"/>'+
+txt(250,274,balanced()?"✓ ATOMS CONSERVED":"✗ COUNTS DIFFER",14);
+$("scene").innerHTML=s;
+$("scene").setAttribute("aria-label","Particle box: "+elements.map(e=>e+" "+(t.left[e]||0)+" on left and "+(t.right[e]||0)+" on right").join("; "));
+}
+function otherScene(){
+let s='<rect width="500" height="300" fill="#fff"/>';
+if(mode()==="mass"){
+const m=caseData.mass;
+s+='<path d="M80 225 H420" stroke="#111" stroke-width="4"/>'+
+'<rect x="100" y="139" width="118" height="85" rx="8" fill="#DDF7F1" stroke="#111" stroke-width="3"/>'+
+'<path d="M280 110 V206 Q280 226 300 226 H380 Q400 226 400 206 V110" fill="#fff" stroke="#111" stroke-width="3"/>'+
+'<rect x="283" y="158" width="114" height="65" fill="#BDEBFA"/>'+
+txt(159,126,"Reactant sample",14)+txt(159,178,fmt(m,1)+" g",19)+txt(340,87,"Product vessel",14)+txt(340,244,caseData.product,14);
+}else{
+const v=volume(120),cap=caseData.cap;
+s+='<path d="M90 65 V219 H245 V65" fill="none" stroke="#111" stroke-width="4"/>'+
+'<rect x="94" y="151" width="147" height="64" fill="#BDEBFA"/>';
+for(let i=0;i<12;i++)s+='<circle cx="'+(113+i*11)+'" cy="'+(174-i%3*17)+'" r="'+(3+i%3)+'" fill="#fff" stroke="#111"/>';
+s+='<path d="M245 94 H325 V67 H440 V132 H325 V110" fill="none" stroke="#111" stroke-width="3"/>'+
+'<rect x="325" y="74" width="'+(110*Math.min(1,v/Math.max(cap,1)))+'" height="51" fill="#DDF7F1" stroke="#111"/>'+
+txt(165,242,"Marble chips + HCl",16)+txt(385,158,"CO₂ gas syringe",14)+txt(385,184,fmt(v,1)+" cm³",19)+txt(166,273,setting.temp+" °C · "+setting.conc.toFixed(1)+" mol/dm³",13);
+}
+$("scene").innerHTML=s;
+$("scene").setAttribute("aria-label",mode()==="mass"?"Reactant sample "+caseData.mass+" grams and product vessel":("Marble chips in acid, gas syringe "+fmt(volume(120),1)+" cubic centimetres"));
+}
+function stepControl(i){
+let name=caseData.names[i];
+return '<div class="coeff"><strong>'+name+'</strong><div class="stepper">'+
+'<button aria-label="Decrease '+name+' coefficient by two" data-co="'+i+'" data-d="-2" class="coarse">−−</button>'+
+'<button aria-label="Decrease '+name+' coefficient by one" data-co="'+i+'" data-d="-1">−</button>'+
+'<span class="number" id="c'+i+'">'+coeff[i]+'</span>'+
+'<button aria-label="Increase '+name+' coefficient by one" data-co="'+i+'" data-d="1">+</button>'+
+'<button aria-label="Increase '+name+' coefficient by two" data-co="'+i+'" data-d="2" class="coarse">++</button>'+
+'</div></div>';
+}
+function start(){
+tries=0;hinted=false;solved=false;coeff=[];$("next").classList.add("hidden");$("check").disabled=false;
+$("round").textContent="Round "+(rnd+1)+"/6";$("score").textContent="Score "+score;
+const m=mode();$("mode").textContent=m==="balance"?"Balance":m==="mass"?"Reacting mass":"Reaction rate";
+$("plotTitle").textContent=m==="balance"?"Atom conservation":m==="mass"?"Mass relationship":"Live CO₂ production";
+if(m==="balance"){
+caseData=rnd===0?choice(equations.slice(0,2)):choice(equations.slice(2));
+coeff=caseData.solution.map(()=>1);
+$("case").textContent=caseData.word;$("sceneTitle").textContent="Particle balance chamber";
+$("taskTitle").textContent="Set the coefficients";
+$("question").textContent="Balance "+caseData.names.slice(0,caseData.split).join(" + ")+" → "+caseData.names.slice(caseData.split).join(" + ")+". Find the smallest positive whole-number coefficients.";
+$("controls").innerHTML=caseData.names.map((_,i)=>stepControl(i)).join("");
+$("sceneNote").textContent="Particles are atom-count tokens, not molecular geometry. Counts are calculated from your coefficients.";
+$("plotNote").textContent="Paired bars show the number of each element's atoms on the two sides.";
+}else if(m==="mass"){
+caseData={...choice(rnd===1?massCases.slice(0,2):massCases.slice(2))};
+caseData.mass=choice([5,8,12,15,20,25,30,40,48,60]);
+answer=caseData.mass/caseData.givenM*caseData.ratio*caseData.productM;
+$("case").textContent=caseData.given+" → "+caseData.product;
+$("sceneTitle").textContent="Reaction mass bench";$("taskTitle").textContent="Calculate the product";
+$("question").textContent="For "+caseData.eq+", "+fmt(caseData.mass,1)+" g of "+caseData.given+" reacts completely. Find the mass of "+caseData.product+" produced.";
+$("controls").innerHTML='<div class="control"><label for="massInput">Product mass (g)</label><input id="massInput" type="number" min="0" max="1000" step="0.01" value="1.00"></div>';
+$("sceneNote").textContent="Reactant fully converts according to the stated balanced equation. Other required reactants are sufficient.";
+$("plotNote").textContent="The calculation scale compares the supplied reactant mass with your proposed product mass; it does not reveal the required answer.";
+}else{
+caseData={targetTemp:choice([25,35,45]),targetConc:choice([1,1.5,2]),targetSize:choice([1,2]),acidMol:choice([.012,.018,.024]),chipMol:choice([.016,.022,.030])};
+caseData.cap=Math.min(caseData.chipMol,caseData.acidMol/2)*24000;
+caseData.targetRate=targetRate();
+setting={temp:20,conc:.5,size:3,chip:caseData.chipMol,acid:caseData.acidMol};
+if(caseData.targetTemp===20&&caseData.targetConc===.5&&caseData.targetSize===3)setting.temp=30;
+$("case").textContent="CaCO₃ + HCl";
+$("sceneTitle").textContent="Gas collection apparatus";$("taskTitle").textContent="Tune the reaction rate";
+$("question").textContent="React "+fmt(caseData.chipMol*1000,0)+" mmol of CaCO₃ with "+fmt(caseData.acidMol*1000,0)+" mmol of HCl. Match initial CO₂ rate "+fmt(caseData.targetRate,2)+" cm³/s and final CO₂ volume "+fmt(caseData.cap,1)+" cm³. Change temperature, HCl concentration and chip size.";
+$("controls").innerHTML=[
+slider("temp","Temperature","°C",20,50,5,20),
+slider("conc","HCl concentration","mol/dm³",.5,2,.5,.5),
+'<div class="control"><label for="size">Chip size (smaller = faster)</label><input id="size" type="range" min="1" max="3" step="1" value="3"><strong id="sizeVal">Large chips</strong></div>',
+'<p class="small">The total amount of HCl is fixed. Changing concentration changes solution volume, not acid moles.</p>'
+].join("");
+$("sceneNote").textContent="The gas syringe collects CO₂. HCl and CaCO₃ quantities remain fixed.";
+$("plotNote").textContent="Solid = your settings; dashed = target. Initial rate is the initial tangent gradient.";
+}
+feedback("Adjust the controls and press Check.");
+bindControls();redraw();
+}
+function slider(id,label,unit,min,max,step,val){
+return '<div class="control"><label for="'+id+'">'+label+': <span id="'+id+'Val">'+val+' '+unit+'</span></label><input id="'+id+'" type="range" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'"></div>';
+}
+function bindControls(){
+document.querySelectorAll("[data-co]").forEach(b=>b.addEventListener("click",()=>{
+let i=Number(b.dataset.co),d=Number(b.dataset.d);
+coeff[i]=Math.max(1,Math.min(20,coeff[i]+d));$("c"+i).textContent=coeff[i];redraw();
+}));
+if(mode()==="mass"){
+$("massInput").addEventListener("input",redraw);
+}else if(mode()==="rate"){
+["temp","conc","size"].forEach(id=>$(id).addEventListener("input",()=>{
+setting[id]=numeric($(id).value,setting[id]);
+$("tempVal").textContent=setting.temp+" °C";$("concVal").textContent=setting.conc.toFixed(1)+" mol/dm³";
+$("sizeVal").textContent=["","Small chips","Medium chips","Large chips"][setting.size];
+redraw();
+}));
+}
+}
+function cap(){return Math.min(setting.chip,setting.acid/2)*24000}
+function targetRate(){
+return rateFor(caseData.targetTemp,caseData.targetConc,caseData.targetSize,caseData.cap);
+}
+function rateFor(temp,conc,size,vol){
+return vol*.012*Math.pow(1.65,(temp-20)/10)*(conc/.5)*(4-size)/3;
+}
+function rate(){return rateFor(setting.temp,setting.conc,setting.size,cap())}
+function volume(t){let v=cap(),r=rate();return v*(1-Math.exp(-r*t/Math.max(v,.001)))}
+function linePlot(title,xLabel,yLabel,series,xmax,ymax){
+let s='<rect width="500" height="310" fill="#fff"/>'+txt(250,22,title,16);
+const X=x=>55+405*x/xmax,Y=y=>257-204*y/Math.max(ymax,.001);
+for(let i=0;i<=4;i++){
+let x=55+i*405/4,y=257-i*204/4;
+s+='<line x1="55" y1="'+y+'" x2="460" y2="'+y+'" stroke="#E4E2DB"/>'+
+'<line x1="'+x+'" y1="53" x2="'+x+'" y2="257" stroke="#E4E2DB"/>'+
+txt(46,y+4,fmt(ymax*i/4,0),11,"end")+txt(x,275,fmt(xmax*i/4,0),11);
+}
+s+='<path d="M55 53 V257 H460" fill="none" stroke="#111" stroke-width="2"/>'+
+'<text x="250" y="300" text-anchor="middle" font-size="12">'+xLabel+'</text>'+
+'<text x="17" y="155" transform="rotate(-90 17 155)" text-anchor="middle" font-size="12">'+yLabel+'</text>';
+series.forEach((a,i)=>{
+let points=a.values.map(p=>X(p[0]).toFixed(2)+","+Y(p[1]).toFixed(2)).join(" ");
+s+='<polyline points="'+points+'" fill="none" stroke="'+a.color+'" stroke-width="3" '+(a.dash?'stroke-dasharray="7 5"':'')+'/>';
+s+='<line x1="'+(245+i*95)+'" y1="39" x2="'+(267+i*95)+'" y2="39" stroke="'+a.color+'" stroke-width="3" '+(a.dash?'stroke-dasharray="6 4"':'')+'/>'+txt(277+i*95,43,a.label,11,"start");
+});
+return s;
+}
+function drawPlot(){
+let s="";
+if(mode()==="balance"){
+const t=totals(caseData),elements=[...new Set(caseData.atoms.flatMap(a=>Object.keys(a)))].sort();
+let ymax=Math.max(4,...elements.flatMap(e=>[t.left[e]||0,t.right[e]||0]))*1.18;
+s='<rect width="500" height="310" fill="#fff"/>'+txt(250,24,"Atom counts on each side",16);
+for(let i=0;i<=4;i++){let y=250-194*i/4;s+='<line x1="55" y1="'+y+'" x2="460" y2="'+y+'" stroke="#E4E2DB"/>'+txt(45,y+4,fmt(ymax*i/4,0),11,"end")}
+s+='<path d="M55 48 V250 H460" fill="none" stroke="#111" stroke-width="2"/>';
+elements.forEach((e,i)=>{
+let x=75+i*375/elements.length,w=Math.min(30,130/elements.length);
+[t.left[e]||0,t.right[e]||0].forEach((n,j)=>{
+let h=n/ymax*194;s+='<rect x="'+(x+j*(w+3))+'" y="'+(250-h)+'" width="'+w+'" height="'+h+'" fill="'+(j?"#FF8FB8":"#2EC4A6")+'" stroke="#111" stroke-width="1.5"/>';
+});s+=txt(x+w,271,e,13);
+});
+s+=txt(253,297,"Element",13)+txt(20,150,"Atoms",12);
+s+='<rect x="305" y="28" width="12" height="12" fill="#2EC4A6"/>'+txt(323,39,"Left",11,"start")+
+'<rect x="374" y="28" width="12" height="12" fill="#FF8FB8"/>'+txt(392,39,"Right",11,"start");
+$("plot").setAttribute("aria-label","Atom comparison chart. "+elements.map(e=>e+": left "+(t.left[e]||0)+", right "+(t.right[e]||0)).join("; "));
+}else if(mode()==="mass"){
+let val=Math.max(0,numeric($("massInput").value,0));
+let ymax=Math.max(caseData.mass,val,5)*1.25;
+s='<rect width="500" height="310" fill="#fff"/>'+txt(250,24,"Mass comparison",16);
+for(let i=0;i<=4;i++){let y=250-190*i/4;s+='<line x1="60" y1="'+y+'" x2="450" y2="'+y+'" stroke="#E4E2DB"/>'+txt(52,y+4,fmt(ymax*i/4,1),11,"end")}
+s+='<path d="M60 60 V250 H450" fill="none" stroke="#111" stroke-width="2"/>';
+[caseData.mass,val].forEach((v,i)=>{let x=130+i*180,h=Math.min(190,v/ymax*190);s+='<rect x="'+x+'" y="'+(250-h)+'" width="83" height="'+h+'" rx="3" fill="'+(i?"#FF8FB8":"#2EC4A6")+'" stroke="#111" stroke-width="2"/>'+txt(x+41,Math.max(50,240-h),fmt(v,2)+" g",13)+txt(x+41,274,i?"Your product":"Reactant",13)});
+s+=txt(20,155,"Mass (g)",12)+txt(255,302,"Sample",13);
+$("plot").setAttribute("aria-label","Reactant mass "+caseData.mass+" grams and proposed product mass "+fmt(val,2)+" grams");
+}else{
+let target=[],actual=[],vmax=Math.max(caseData.cap,cap())*1.1;
+for(let t=0;t<=240;t+=4){
+target.push([t,caseData.cap*(1-Math.exp(-caseData.targetRate*t/caseData.cap))]);
+actual.push([t,volume(t)]);
+}
+s=linePlot("CO₂ volume–time graph","Time t (s)","Volume V (cm³)",[
+{label:"Yours",color:"#169E84",values:actual},
+{label:"Target",color:"#D92D20",dash:true,values:target}
+],240,vmax);
+let px=55+405*.5,py=257-204*volume(120)/vmax;
+s+='<circle cx="'+px+'" cy="'+py+'" r="5" fill="#FFC83D" stroke="#111" stroke-width="2"/>';
+$("plot").setAttribute("aria-label","CO2 curve: current initial rate "+fmt(rate(),2)+" cubic centimetres per second; final volume "+fmt(cap(),1)+" cubic centimetres");
+}
+$("plot").innerHTML=s;
+}
+function redraw(){if(mode()==="balance")particles();else otherScene();drawPlot()}
+function check(){
+if(solved)return;tries++;
+if(mode()==="balance"){
+if(balanced()){
+let g=coeff.reduce((a,b)=>gcd(a,b),coeff[0]);
+if(g!==1){feedback("Atom counts agree, but divide every coefficient by "+g+" to obtain the smallest ratio.","bad");return}
+success("Every element has the same atom count on both sides.");
+}else{
+let t=totals(caseData),wrong=[...new Set(caseData.atoms.flatMap(a=>Object.keys(a)))].filter(e=>(t.left[e]||0)!==(t.right[e]||0));
+feedback("✗ Atom count mismatch for "+wrong.join(", ")+". Inspect the paired bars.","bad");
+}
+}else if(mode()==="mass"){
+let v=numeric($("massInput").value,-1);
+if(v<0){feedback("Enter a non-negative mass in g.","bad");return}
+let diff=v-answer;
+if(Math.abs(diff)<=answer*.01)success("Correct mole ratio and reacting mass. The calculated product mass is "+fmt(answer,3)+" g.");
+else feedback("✗ Your product mass is "+fmt(Math.abs(diff),2)+" g too "+(diff>0?"high":"low")+". Check moles and coefficient ratios.","bad");
+}else{
+let dv=Math.abs(cap()-caseData.cap),dr=Math.abs(rate()-caseData.targetRate);
+if(dv<=.01&&dr<=caseData.targetRate*.01)success("The initial rate and final CO₂ yield both match. A change of conditions affects the curve's slope.");
+else feedback("✗ "+(dv>.01?"Final volume differs by "+fmt(dv,1)+" cm³. ":"")+"Initial rate differs by "+fmt(dr,2)+" cm³/s. Adjust temperature, size or concentration.","bad");
+}
+}
+function gcd(a,b){while(b){let t=a%b;a=b;b=t}return a}
+function success(explanation){
+solved=true;score+=hinted?50:tries===1?100:75;
+feedback("✓ Excellent! "+explanation,"good");$("score").textContent="Score "+score;$("check").disabled=true;
+$("next").textContent=rnd===5?"View results ★":"Next round →";$("next").classList.remove("hidden");
+}
+$("hint").addEventListener("click",()=>{
+if(solved)return;hinted=true;
+if(mode()==="balance")feedback("Hint: balance elements that appear in the fewest compounds first. Leave hydrogen and oxygen until later where helpful.");
+if(mode()==="mass")feedback("Hint: mass → moles of reactant → moles of product using coefficients → product mass.");
+if(mode()==="rate")feedback("Hint: the final gas volume is set by the limiting reagent; a larger initial gradient needs more frequent effective collisions.");
+});
+$("check").addEventListener("click",check);
+$("next").addEventListener("click",()=>{if(rnd===5){end();return}rnd++;start()});
+function end(){
+$("game").classList.add("hidden");$("end").classList.remove("hidden");
+let n=score>=510?3:score>=375?2:1;
+$("stars").textContent="★".repeat(n)+"☆".repeat(3-n);
+$("total").textContent=score+" / 600 points · "+n+" star"+(n===1?"":"s");
+}
+$("again").addEventListener("click",restart);
+function restart(){seed=(Date.now()>>>0)||12345;rnd=0;score=0;$("game").classList.remove("hidden");$("end").classList.add("hidden");start()}
+restart();
+})();
+</script>
+</body>
+</html>
