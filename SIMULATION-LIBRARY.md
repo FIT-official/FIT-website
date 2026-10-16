@@ -1,16 +1,32 @@
 # FIT simulation library
 
-This addition starts from production `5789481df0ecfe506a30aed7b13bcb56cbda115e`. It does not import the held Classes platform or protected-copy candidate `dbc9e1d`, or change class seats, submissions, rosters, classroom APIs, middleware, credentials or site-wide headers. The coordinated desktop/mobile Classes link points directly to the public library.
+FIT's library contains four original activities, a shared practice shell and teacher assignment to the existing workshop classroom. The public library uses `/classes/simulations`; the separate, held Classes platform is not imported. Simulation models and controls in `public/simulations/` retain their existing behaviour.
 
 ## Routes and interaction
 
-- `/classes/simulations`: searchable subject/difficulty library.
+- `/classes/simulations`: search and learning-level, subject and topic filters.
 - `/classes/simulations/sampling`: Signal Sampling Detective.
 - `/classes/simulations/feedback`: Feedback Control Lab.
 - `/classes/simulations/base-rates`: Evidence & Base Rates.
 - `/classes/simulations/heat-path`: Heat Path Designer.
 - `/simulations/<activity>`: standalone, no-account activity document, behind the existing page gate.
 - `/simulations/<activity>?embed=1`: compact same-origin player.
+- `/embed/sims/<id>`: minimal same-origin activity document, without site chrome.
+- `/workshop/classroom`: the existing classroom, including teacher-assigned simulations and activity prompts.
+
+`content/sims/registry.js` owns discovery metadata. Only `live` entries appear in the library, detail pages, player documents, snippets and class content. Curriculum levels are editorial lesson-planning assumptions; `syllabusRef` stays empty until a teacher reviews a specific syllabus. No accreditation is implied.
+
+## Practice and progress
+
+`components/sims/GameShell` provides three conceptual checkpoints (Notice, Explain, Apply), one star per completed checkpoint and optional elapsed time. Correct first, second and later attempts earn 100, 75 and 50 points. The timer never affects the score. Checkpoint answers are independent of the simulator's state: points are practice feedback, not experiment measurements, assessed grades or evidence of learning gains.
+
+Versioned progress stays in this browser's localStorage. Storage failures leave the experiment usable. Sound begins off and uses short WebAudio tones after a user action. The activity stage and decorative canvas load dynamically when visible; celebration respects reduced-motion preferences. The unchanged player still supplies equations, assumptions, text/numeric equivalents and keyboard/touch controls.
+
+## Classroom assignment
+
+The branch has one workshop lesson, shared by ten groups, rather than a multi-class picker. A signed-in workshop teacher can add an activity with one click from a library card or activity page. `POST /api/admin/workshop/guest/sims` uses existing teacher authentication and the lesson store's optimistic concurrency and audit trail. Assignments are a bounded `simIds` list on the existing `workshopGuestLessons` document; there is no new collection. Teachers can remove activities in the existing classroom panel. Learners see each assigned live simulation and its activity prompt.
+
+Simulation assignment does not store learner progress on the server. Local verification uses synthetic API responses and mocked stores; it does not write to a database. Expanding beyond the single workshop requires a future class-identity/data-model decision.
 
 Each activity includes accessible native controls, reset, numeric/text equivalents, equations, units, assumptions, an investigation and teacher guidance. Thermal and heat activities have run/pause, fixed numerical stepping and a bounded 300-second experiment. Playback pauses when the workbench leaves the viewport or the document is hidden. Sampling starts with the source hidden; inspection has deterministic expected and seeded sample modes. Heat has roving keyboard cell focus and material brushes.
 
@@ -43,15 +59,15 @@ Official-source research was supplied on 14 October 2026. These sites are option
 | [Desmos](https://www.desmos.com/api/v1.12/docs/index.html?lang=en) | Expression-driven graphs, tables and sliders | [Commercial API plans](https://www.desmos.com/my-api) and feature scope require confirmation; Classroom is separately [Amplify Classroom](https://help.desmos.com/hc/en-us/articles/23421565218573-Amplify-Classroom-formerly-Desmos-Classroom-now-a-part-of-Amplify) |
 | [GeoGebra](https://geogebra.github.io/docs/reference/en/Material_Embedding_%28Iframe%29/) | Geometry, algebra and 3D | [Complete-product/material licensing](https://www.geogebra.org/license) differs from source licensing |
 | [Falstad](https://www.falstad.com/mathphysics.html) | Circuits and advanced mathematical models | [CircuitJS1](https://github.com/sharpie7/circuitjs1) has GPL obligations; applets have different terms |
-| [myPhysicsLab](https://www.myphysicslab.com/develop/docs/index.html) | Mechanics, graphing, derivations and solver controls | Apache-licensed code is an optional future engine; no code reused here |
+| [myPhysicsLab](https://www.myphysicslab.com/develop/docs/index.html) | Mechanics, graphing, derivations and solver controls | Referenced for context only; no code reused here |
 | [Concord](https://concord.org/licensing/) | Molecular/environmental computational models | Software and finished educational resource licenses differ |
 
 The selected instructional tasks concern signed alias detection and sampling budgets; thermal controller tuning under delay/power constraints; contextual base-rate inspection; and spatial heat-path design. Similar underlying topics already exist elsewhere. The gaps are qualified task-level opportunities, not claims that an entire subject is absent from PhET or peers.
 
 ## Verification and integration
 
-Focused checks: `node node_modules/vitest/vitest.mjs run tests/classroomSimulationModels.test.js tests/classroomSimulationLibrary.test.jsx tests/classroomSimulationPlayer.test.js`.
+Focused checks: `node node_modules/vitest/vitest.mjs run tests/classroomSimulation tests/sims tests/unit/sims --maxWorkers=2 --minWorkers=1`. These cover model references, scoring and level order, local progress, sound, visibility, registry filtering, embed escaping, route gates and class assignment through mocked storage.
 
 Whole checks follow existing coverage, lint and production-build scripts. The isolated Windows QA runner strips inherited app credentials, blocks outbound network, uses mocked build fonts and synthetic keys only. Those fixtures are outside tracked source and must not be deployed. The generated playground-worker prebuild is absent from this production base and was not imported from the held candidate.
 
-The production Classes parent route does not yet exist; the held Classes platform owns it. Its owner approved only Classes links in Navbar/MobileMenu to this library. No parent redirect, private hub or audience route is imported. The held schema permits a literal class ID `simulations`, which would conflict with the new static prefix when that private hub is later combined; an authorized roster/ID check is required before the combined release. This isolated production-based release contains no private class route. Only these reviewed commits should enter the production release checkout, and production SHA must still match the recorded base or be explicitly reconciled with a fresh source review.
+The `/classes` parent route remains reserved for the separate Classes platform. No parent redirect or class-ID route is introduced here. Before combining that platform with the library, review any existing class ID named `simulations`, because it would overlap the library's static route. The workshop integration uses the established `/workshop/classroom` and `/admin/workshop` surfaces.

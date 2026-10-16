@@ -2,6 +2,8 @@
 import { NextRequest } from 'next/server'
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import { GET } from '../app/simulations/[activity]/route'
+import { GET as embedGET } from '../app/embed/sims/[id]/route'
+import { simsRegistry } from '../content/sims/registry'
 import { playerDocument } from '../lib/classroomSimulations/playerDocument'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -41,7 +43,27 @@ describe('Gated original player entrypoints', () => {
     const response = await GET(request('/simulations/unknown'), { params: Promise.resolve({ activity }) })
     expect(response.status).toBe(404)
   })
-  it.each(['/simulations/sampling', '/simulations/feedback', '/simulations/base-rates', '/simulations/heat-path', '/classes/simulations'])('preserves the actual maintenance gate for %s', async path => {
+  it.each(['sampling', 'feedback', 'base-rates', 'heat-path'])('serves %s at the minimal embed route without site chrome', async id => {
+    const response = await embedGET(request(`/embed/sims/${id}`), { params: Promise.resolve({ id }) })
+    const html = await response.text()
+    expect(response.status).toBe(200)
+    expect(response.headers.get('Cache-Control')).toBe('no-store')
+    expect(response.headers.get('Content-Type')).toBe('text/html; charset=utf-8')
+    expect(html).toContain(`data-activity="${id}" class="embed"`)
+    expect(html).toContain('src="/simulations/lab.js"')
+    expect(html).not.toMatch(/clerk|<nav|<iframe|__next/)
+  })
+  it('rejects unknown and draft entries at both player routes', async () => {
+    expect((await embedGET(request('/embed/sims/unknown'), { params: Promise.resolve({ id: 'unknown' }) })).status).toBe(404)
+    const previous = simsRegistry[0].status
+    try {
+      simsRegistry[0].status = 'draft'
+      expect(playerDocument('sampling')).toBeNull()
+      expect((await GET(request('/simulations/sampling'), { params: Promise.resolve({ activity: 'sampling' }) })).status).toBe(404)
+      expect((await embedGET(request('/embed/sims/sampling'), { params: Promise.resolve({ id: 'sampling' }) })).status).toBe(404)
+    } finally { simsRegistry[0].status = previous }
+  })
+  it.each(['/simulations/sampling', '/simulations/feedback', '/simulations/base-rates', '/simulations/heat-path', '/classes/simulations', '/embed/sims/sampling'])('preserves the actual maintenance gate for %s', async path => {
     expect(new RegExp(`^${matcher[0]}$`).test(path)).toBe(true)
     const response = await middleware(auth, request(path + '?embed=1'))
     expect(response.status).toBe(503)

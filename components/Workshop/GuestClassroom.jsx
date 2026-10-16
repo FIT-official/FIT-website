@@ -15,6 +15,7 @@ import GuestReturnHelp from './GuestReturnHelp'
 import styles from './GuestClassroom.module.css'
 import design from './ClassroomDesign.module.css'
 import { ClassBrand, ClassIcon, IdeaPal } from './ClassroomDecor'
+import ClassSimulations from '@/components/sims/ClassSimulations'
 export const classroomRequest = apiRequest
 export default function GuestClassroom({ homeGroup = null }) {
     const router = useRouter(), [name, setName] = useState(''), [group, setGroup] = useState(homeGroup || 'g1'), [lesson, setLesson] = useState(null), [entryOpen, setEntryOpen] = useState(false), [busy, setBusy] = useState(false), [message, setMessage] = useState('Checking class entry…'), [viewPhase, setViewPhase] = useState(null), [target, setTarget] = useState(null), [targetRound, setTargetRound] = useState(null), [exploreGroup, setExploreGroup] = useState(null), [offline, setOffline] = useState(false), [actualHome, setActualHome] = useState(null)
@@ -88,6 +89,7 @@ export default function GuestClassroom({ homeGroup = null }) {
         {offline && <p role="status" className="mt-3">You are offline. Keep writing here, then reconnect to save.</p>}
         {lesson.navigationLocked && <p role="status" className="border rounded-lg p-3 mt-4">Stay on {names[lesson.navigationTarget]} for now. Your teacher will let you know when to move on.</p>}
         {message && <p role="status" aria-live="polite" className="mt-3">{message}</p>}
+        {!lesson.navigationLocked && <ClassSimulations simIds={lesson.simIds} />}
         <nav className={design.activityNav} aria-label="Class activities">{['PRESENT', 'FEEDBACK', 'REFINE', 'TINKERCAD'].map(phase => <button type="button" key={phase} className={design.activityButton} disabled={lesson.navigationLocked && phase !== lesson.navigationTarget} aria-pressed={phase === activeView} onClick={() => { if (!lesson.navigationLocked) setViewPhase(phase) }}><ClassIcon kind={phase} /><span>{phase === 'TINKERCAD' ? 'Tinkercad' : names[phase]}</span></button>)}</nav>
         {activeView === 'TINKERCAD' && <GuestTinkercad key={lesson.seat} seat={lesson.seat} group={lesson.group} />}
         {activeView === 'PRESENT' && <section className="mt-6"><h2 className="text-2xl font-bold">Explore everyone’s ideas</h2><p className="mt-2">Choose a group to read its two ideas.</p><label className="block mt-3">Group to explore<select className="formInput block" aria-label="Group to explore" value={exploreGroup || lesson.group} onChange={event => setExploreGroup(event.target.value)}>{workshopGroups.map(row => <option value={row.id} key={row.id}>Group {row.number}</option>)}</select></label><ReviewedGroupPage group={workshopClassroomGroupPage(exploreGroup || lesson.group)} classroom /></section>}
