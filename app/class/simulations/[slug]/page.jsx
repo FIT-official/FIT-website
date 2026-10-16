@@ -10,7 +10,7 @@ export async function generateMetadata({ params }) {
   const { slug } = await params
   const activity = getLiveSim(slug)
   if (!activity) return { title: 'Activity not found | FIT' }
-  return { title: `${activity.title} | FIT Learning Studio`, description: activity.description, alternates: { canonical: `/classes/simulations/${slug}` } }
+  return { title: `${activity.title} | FIT Learning Studio`, description: activity.description, alternates: { canonical: `/class/simulations/${slug}` } }
 }
 export default async function SimulationActivityPage({ params }) {
   const { slug } = await params

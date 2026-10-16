@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
-import LibraryPage, { metadata, dynamic as libraryDynamic } from '../../app/classes/simulations/page'
-import ActivityPage, { generateMetadata, generateStaticParams, dynamic as activityDynamic } from '../../app/classes/simulations/[slug]/page'
+import LibraryPage, { metadata, dynamic as libraryDynamic } from '../../app/class/simulations/page'
+import ActivityPage, { generateMetadata, generateStaticParams, dynamic as activityDynamic } from '../../app/class/simulations/[slug]/page'
 import { simsRegistry } from '../../content/sims/registry'
 
 vi.mock('next/navigation', () => ({ notFound: () => { throw new Error('NEXT_NOT_FOUND') } }))
@@ -13,7 +13,7 @@ describe('Simulation page routes', () => {
   it('renders the existing library route with a canonical URL', () => {
     render(<LibraryPage />)
     expect(screen.getByRole('main')).toHaveTextContent('Simulation library')
-    expect(metadata.alternates.canonical).toBe('/classes/simulations')
+    expect(metadata.alternates.canonical).toBe('/class/simulations')
   })
   it.each([undefined, '', '0', 'true', '01', '1 '])('keeps assignment disabled on both routes for SIMS_ADD_TO_CLASS=%s', async value => {
     vi.stubEnv('SIMS_ADD_TO_CLASS', value)
@@ -37,7 +37,7 @@ describe('Simulation page routes', () => {
     expect(generateStaticParams()).toHaveLength(8)
     for (const { slug } of generateStaticParams()) {
       const detail = await generateMetadata({ params: Promise.resolve({ slug }) })
-      expect(detail.alternates.canonical).toBe(`/classes/simulations/${slug}`)
+      expect(detail.alternates.canonical).toBe(`/class/simulations/${slug}`)
       expect(detail.title).toContain(simsRegistry.find(sim => sim.id === slug).title)
     }
     render(await ActivityPage({ params: Promise.resolve({ slug: 'sampling' }) }))

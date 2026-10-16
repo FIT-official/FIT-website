@@ -11,8 +11,8 @@ import styles from './ChatLauncher.module.css';
 
 export default function ChatLauncher() {
     const pathname = usePathname();
-    const simulationPage = pathname === '/classes/simulations'
-        || pathname?.startsWith('/classes/simulations/')
+    const simulationPage = pathname === '/class/simulations'
+        || pathname?.startsWith('/class/simulations/')
         || pathname?.startsWith('/simulations/');
     const [simulationHost, setSimulationHost] = useState(null);
     const { user, isLoaded } = useUser();

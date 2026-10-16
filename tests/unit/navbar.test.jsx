@@ -455,30 +455,32 @@ describe('Blog navigation', () => {
     })
 })
 
-describe('Public Classes simulation entry', () => {
+describe('Public Class navigation', () => {
     afterEach(() => { mockPathname = '/' })
-    it.each([true, false])('keeps Classes visible on desktop and mobile when signed in = %s', async signedIn => {
+    it.each([true, false])('keeps Class visible on desktop and mobile when signed in = %s', async signedIn => {
         if (!signedIn) mockUser = null
         render(<Navbar />)
         const primary = screen.getByRole('navigation', { name: 'Primary' })
-        expect(within(primary).getByRole('link', { name: 'Classes' })).toHaveAttribute('href', '/classes/simulations')
+        expect(within(primary).getByRole('link', { name: 'Class' })).toHaveAttribute('href', '/class')
+        expect(within(primary).queryByRole('link', { name: 'Classes' })).toBeNull()
         fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
         const sheet = await screen.findByRole('dialog', { name: 'Menu' })
-        const link = within(sheet).getByRole('link', { name: 'Classes' })
-        expect(link).toHaveAttribute('href', '/classes/simulations')
+        const link = within(sheet).getByRole('link', { name: 'Class' })
+        expect(link).toHaveAttribute('href', '/class')
+        expect(within(sheet).queryByRole('link', { name: 'Classes' })).toBeNull()
         fireEvent.click(link)
         await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Menu' })).toBeNull())
     })
-    it.each(['/classes/simulations', '/classes/simulations/sampling'])('marks Classes active for %s', async pathname => {
+    it.each(['/class', '/class/simulations', '/class/simulations/sampling'])('marks Class active for %s', async pathname => {
         mockPathname = pathname; render(<Navbar />)
-        expect(within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { name: 'Classes' })).toHaveAttribute('aria-current', 'page')
+        expect(within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { name: 'Class' })).toHaveAttribute('aria-current', 'page')
         fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
-        expect(within(await screen.findByRole('dialog', { name: 'Menu' })).getByRole('link', { name: 'Classes' })).toHaveAttribute('aria-current', 'page')
+        expect(within(await screen.findByRole('dialog', { name: 'Menu' })).getByRole('link', { name: 'Class' })).toHaveAttribute('aria-current', 'page')
     })
-    it('does not confuse /classes-extra with the Classes namespace', async () => {
-        mockPathname = '/classes-extra'; render(<Navbar />)
-        expect(within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { name: 'Classes' })).not.toHaveAttribute('aria-current')
+    it.each(['/class-extra', '/classes'])('does not confuse %s with the Class namespace', async pathname => {
+        mockPathname = pathname; render(<Navbar />)
+        expect(within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { name: 'Class' })).not.toHaveAttribute('aria-current')
         fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
-        expect(within(await screen.findByRole('dialog', { name: 'Menu' })).getByRole('link', { name: 'Classes' })).not.toHaveAttribute('aria-current')
+        expect(within(await screen.findByRole('dialog', { name: 'Menu' })).getByRole('link', { name: 'Class' })).not.toHaveAttribute('aria-current')
     })
 })

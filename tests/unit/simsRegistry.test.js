@@ -37,7 +37,7 @@ describe('Simulation registry', () => {
 
 describe('Same-origin player snippet', () => {
   it('uses the minimal embed route, a safely escaped title and the supplied origin only', () => {
-    const snippet = createEmbedSnippet('base-rates', 'https://fit.example/classes/simulations?student=private#secret')
+    const snippet = createEmbedSnippet('base-rates', 'https://fit.example/class/simulations?student=private#secret')
     expect(snippet).toContain('src="https://fit.example/embed/sims/base-rates"')
     expect(snippet).toContain('title="FIT: Evidence &amp; Base Rates"')
     expect(snippet).toContain('loading="lazy"')

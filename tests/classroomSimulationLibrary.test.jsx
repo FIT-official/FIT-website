@@ -15,7 +15,7 @@ describe('Simulation discovery and classroom embeds', () => {
     expect(screen.getAllByRole('article')).toHaveLength(8)
     fireEvent.change(screen.getByLabelText('Search activities'), { target: { value: '  aliasing  ' } })
     expect(screen.getAllByRole('article')).toHaveLength(1)
-    expect(screen.getByRole('link', { name: 'Launch Signal Sampling Detective' })).toHaveAttribute('href', '/classes/simulations/sampling')
+    expect(screen.getByRole('link', { name: 'Launch Signal Sampling Detective' })).toHaveAttribute('href', '/class/simulations/sampling')
     fireEvent.change(screen.getByLabelText('Learning level'), { target: { value: 'Poly' } })
     expect(screen.queryAllByRole('article')).toHaveLength(0)
     fireEvent.click(screen.getByRole('button', { name: 'Show all activities' }))

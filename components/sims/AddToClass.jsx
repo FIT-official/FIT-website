@@ -35,7 +35,7 @@ export default function AddToClass({ simId }) {
 
     return <div className={styles.addControl}>
         {state !== 'added' && <span className={styles.target}>Workshop class</span>}
-        {state === 'signin' ? <Link className={styles.button} href="/sign-in?redirect_url=%2Fclasses%2Fsimulations">Teacher sign in <span aria-hidden="true">↗</span></Link> : <button type="button" className={styles.button} onClick={add} disabled={state === 'saving' || state === 'added'}>
+        {state === 'signin' ? <Link className={styles.button} href="/sign-in?redirect_url=%2Fclass%2Fsimulations">Teacher sign in <span aria-hidden="true">↗</span></Link> : <button type="button" className={styles.button} onClick={add} disabled={state === 'saving' || state === 'added'}>
             <span aria-hidden="true">{state === 'added' ? '✓' : '+'}</span> {state === 'saving' ? 'Adding…' : state === 'added' ? 'Added to class' : 'Add to class'}
         </button>}
         <span className={styles.feedback} role="status" aria-live="polite">{message}</span>

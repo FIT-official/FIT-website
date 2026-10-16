@@ -87,20 +87,23 @@ describe('Gated original player entrypoints', () => {
       expect((await embedGET(request('/embed/sims/sampling'), { params: Promise.resolve({ id: 'sampling' }) })).status).toBe(404)
     } finally { simsRegistry[0].status = previous }
   })
-  it.each(['/simulations/sampling', '/simulations/feedback', '/simulations/base-rates', '/simulations/heat-path', '/classes/simulations', '/embed/sims/sampling'])('preserves the actual maintenance gate for %s', async path => {
+  it.each(['/simulations/sampling', '/simulations/feedback', '/simulations/base-rates', '/simulations/heat-path', '/class', '/class/simulations', '/class/simulations/sampling', '/embed/sims/sampling'])('preserves the actual maintenance gate for %s', async path => {
     expect(new RegExp(`^${matcher[0]}$`).test(path)).toBe(true)
     const response = await middleware(auth, request(path + '?embed=1'))
     expect(response.status).toBe(503)
     expect(response.headers.get('x-middleware-rewrite')).toBe('https://fit.example/maintenance')
     expect(response.headers.get('Cache-Control')).toBe('no-store')
   })
-  it('opens anonymously when maintenance is off, and preserves onboarding for incomplete signed-in accounts', async () => {
+  it.each(['/class', '/class/simulations', '/class/simulations/sampling', '/simulations/sampling'])('opens %s anonymously when maintenance is off, and preserves onboarding for incomplete signed-in accounts', async path => {
     flags.maintenance_page.enabled = false
-    expect((await middleware(auth, request('/simulations/sampling')))?.status ?? 200).toBe(200)
+    const publicResponse = await middleware(auth, request(path))
+    expect(publicResponse?.status ?? 200).toBe(200)
+    expect(publicResponse?.headers.get('location') ?? null).toBeNull()
+    expect(auth.protect).not.toHaveBeenCalled()
     auth.mockResolvedValue({ userId: 'synthetic-incomplete', sessionClaims: { metadata: {} } })
     mocks.getUser.mockResolvedValue({ publicMetadata: { onboardingComplete: false } })
     const middlewareModule = await import('../middleware')
-    const response = await middlewareModule.default(auth, request('/simulations/sampling'))
+    const response = await middlewareModule.default(auth, request(path))
     expect(response.status).toBe(307)
     expect(response.headers.get('location')).toBe('https://fit.example/onboarding')
   })

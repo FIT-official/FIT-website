@@ -22,7 +22,7 @@ let thermal, inspection, heatHistory = [{ t: 0, ...heatMetrics(grid) }];
 
 $('#app').innerHTML = `
   <div class="wrap">
-    <header class="top"><a class="brand" href="/classes/simulations">FIT / EXPLORE</a><span class="badge">Original FIT activity</span></header>
+    <header class="top"><a class="brand" href="/class/simulations">FIT / EXPLORE</a><span class="badge">Original FIT activity</span></header>
     <div class="intro"><div class="eyebrow">${activity.subjects.join(' · ')} / ${activity.level}</div><h1>${activity.title}</h1><p>${activity.description}</p></div>
     <main class="workbench"><section class="panel"><div class="eyebrow">Observe & experiment</div><h2 id="work-title">${activity.question}</h2>
       <div id="toolbar" class="toolbar"></div><div id="visual"></div><div id="metrics" class="metric-grid"></div><div id="status" class="status"></div><div id="data"></div>
@@ -30,7 +30,7 @@ $('#app').innerHTML = `
     <details><summary>Equations, units & model limits</summary><p class="model">${activity.model}</p><p id="model-extra"></p></details>
     <section class="lesson"><div class="eyebrow">Predict → test → explain</div><h2>Your investigation</h2><p>${activity.prediction}</p><ol>${activity.steps.map(step => `<li>${step}</li>`).join('')}</ol><p><strong>Explain:</strong> ${activity.transfer}</p></section>
     <details class="teacher"><summary>Teacher prompts & expected observations</summary><p>${activity.teacher}</p><p>Suggested age ${activity.ages}; ${activity.minutes} minutes. Adapt language and prior knowledge to your class. These mathematically validated demos have not undergone a classroom learning-outcomes study.</p></details>
-    <footer class="footer">Independently authored FIT learning activity. No account or private class data required. This simulation sends no measurements or responses to a service. The FIT host may retain ordinary access logs. <a href="/classes/simulations">Explore all activities</a></footer>
+    <footer class="footer">Independently authored FIT learning activity. No account or private class data required. This simulation sends no measurements or responses to a service. The FIT host may retain ordinary access logs. <a href="/class/simulations">Explore all activities</a></footer>
     <div id="announcement" class="sr-only" aria-live="polite"></div>
   </div>`;
 

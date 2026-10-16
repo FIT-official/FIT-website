@@ -74,7 +74,7 @@ describe('classroom simulation availability', () => {
         bridge.request.mockResolvedValue(lesson({ simsAddToClassEnabled: true, simIds: ['sampling'] }))
         render(<GuestTeacherClassroom />)
         expect(await screen.findByRole('region', { name: 'Class simulations' })).toBeInTheDocument()
-        expect(screen.getByRole('link', { name: /Choose activities/ })).toHaveAttribute('href', '/classes/simulations')
+        expect(screen.getByRole('link', { name: /Choose activities/ })).toHaveAttribute('href', '/class/simulations')
         fireEvent.click(screen.getByRole('button', { name: 'Remove Signal Sampling Detective from class' }))
         await waitFor(() => expect(bridge.request).toHaveBeenCalledWith('/api/admin/workshop/guest', 'PATCH', { action: 'removeSimulation', simId: 'sampling' }))
         await screen.findByText('Saved. Student screens update after their next refresh.')

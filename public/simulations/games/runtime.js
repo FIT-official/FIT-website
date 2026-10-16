@@ -3,7 +3,7 @@ import { createSession, LEVEL_COUNT } from './shared.js'
 export function mountGame(host, game, { seed = 'FIT-2026', model = '' } = {}) {
   let session = createSession(game, seed), board
   host.innerHTML = `<main class="game-root" data-game-id="${game.id}">
-    <header class="game-header"><a href="/classes/simulations" target="_top" class="game-brand">FIT <span>/ PLAY & DISCOVER</span></a><span class="game-badge">Maths studio</span></header>
+    <header class="game-header"><a href="/class/simulations" target="_top" class="game-brand">FIT <span>/ PLAY & DISCOVER</span></a><span class="game-badge">Maths studio</span></header>
     <div class="game-intro"><p class="game-eyebrow"></p><h1></h1><p class="game-subtitle"></p></div>
     <section class="game-panel" aria-label="Game challenge">
       <div class="game-progress"><span class="game-level"></span><span class="game-stars" aria-label="Completed challenges"></span><strong class="game-score" aria-live="polite"></strong></div>

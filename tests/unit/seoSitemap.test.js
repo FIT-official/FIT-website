@@ -3,8 +3,14 @@ import { statusQuery } from '@/lib/blog/status'
 import { matchesBlogFilter, visibilityPosts } from '../helpers/blogFilter'
 import { buildPublicSitemap } from '@/lib/seo/sitemap'
 import { NON_PUBLIC_PRODUCT_SLUGS } from '@/lib/productPublicContent'
+import { simsRegistry } from '@/lib/sims/registry'
 import robots from '@/app/robots'
 import { GET as legacySitemap } from '@/app/sitemap-0.xml/route'
+
+const liveSimulationIds = [
+    'sampling', 'feedback', 'base-rates', 'heat-path',
+    'ratio-sweets-share', 'ratio-paint-mix', 'fractions-pizza-party', 'fractions-number-line-jump',
+]
 
 const db = vi.hoisted(() => ({
     connect: vi.fn(), products: [], posts: [], creators: [], productFilter: null,
@@ -51,21 +57,46 @@ beforeEach(() => {
 })
 
 describe('public sitemap URLs', () => {
-    it('lists only public landing pages under the canonical www origin', () => {
+    it('lists public pages under the canonical www origin', () => {
         const entries = buildPublicSitemap()
         expect(entries.map(entry => entry.url)).toEqual([
             'https://www.fixitoday.com/', 'https://www.fixitoday.com/about',
             'https://www.fixitoday.com/shop', 'https://www.fixitoday.com/prints',
             'https://www.fixitoday.com/creators', 'https://www.fixitoday.com/creators/join',
             'https://www.fixitoday.com/blog',
+            'https://www.fixitoday.com/class', 'https://www.fixitoday.com/class/simulations',
             'https://www.fixitoday.com/school-programmes', 'https://www.fixitoday.com/company-workshops',
             'https://www.fixitoday.com/research-fabrication', 'https://www.fixitoday.com/metal-fabrication',
             'https://www.fixitoday.com/3d-design-printing', 'https://www.fixitoday.com/electronics-prototyping',
             'https://www.fixitoday.com/printer-repair',
             'https://www.fixitoday.com/maker-tools', 'https://www.fixitoday.com/maker-tools/playground',
             'https://www.fixitoday.com/guides/3d-printing-problems', 'https://www.fixitoday.com/community', 'https://www.fixitoday.com/privacy', 'https://www.fixitoday.com/terms',
+            ...liveSimulationIds.map(id => `https://www.fixitoday.com/class/simulations/${id}`),
         ])
         expect(entries.every(entry => !('lastModified' in entry))).toBe(true)
+    })
+
+    it('includes the Class hub, library and all eight live activities without legacy Classes URLs', () => {
+        const urls = buildPublicSitemap().map(entry => entry.url)
+        expect(urls).toContain('https://www.fixitoday.com/class')
+        expect(urls).toContain('https://www.fixitoday.com/class/simulations')
+        expect(urls.filter(url => url.includes('/class/simulations/'))).toEqual(
+            liveSimulationIds.map(id => `https://www.fixitoday.com/class/simulations/${id}`),
+        )
+        expect(urls.some(url => /\/classes(?:\/|$)/.test(url))).toBe(false)
+    })
+
+    it('omits simulation detail pages when their registry entries are drafts', () => {
+        const activity = simsRegistry.find(entry => entry.id === 'sampling')
+        const previousStatus = activity.status
+        activity.status = 'draft'
+        try {
+            const urls = buildPublicSitemap().map(entry => entry.url)
+            expect(urls).not.toContain('https://www.fixitoday.com/class/simulations/sampling')
+            expect(urls).toContain('https://www.fixitoday.com/class/simulations/feedback')
+        } finally {
+            activity.status = previousStatus
+        }
     })
 
     it('lists published creator pages by display name and skips unpublished, nameless or id-named ones', () => {

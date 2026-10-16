@@ -1,18 +1,19 @@
 # FIT simulation library
 
-FIT's library contains eight original activities: four experiments and four maths games, a shared practice shell and copyable player snippets. Classroom assignment is disabled by default. The public library uses `/classes/simulations`; the separate, held Classes platform is not imported. The four existing simulation models and controls retain their behaviour.
+FIT's library contains eight original activities: four experiments and four maths games, a shared practice shell and copyable player snippets. Classroom assignment is disabled by default. The public library uses `/class/simulations`; the separate, held Classes platform is not imported. The four existing simulation models and controls retain their behaviour.
 
 ## Routes and interaction
 
-- `/classes/simulations`: search and learning-level, subject and topic filters.
-- `/classes/simulations/sampling`: Signal Sampling Detective.
-- `/classes/simulations/feedback`: Feedback Control Lab.
-- `/classes/simulations/base-rates`: Evidence & Base Rates.
-- `/classes/simulations/heat-path`: Heat Path Designer.
-- `/classes/simulations/ratio-sweets-share`: Sweet Share.
-- `/classes/simulations/ratio-paint-mix`: Paint Mix Studio.
-- `/classes/simulations/fractions-pizza-party`: Pizza Party.
-- `/classes/simulations/fractions-number-line-jump`: Fraction Frog.
+- `/class`: public Class hub with a Simulations card.
+- `/class/simulations`: search and learning-level, subject and topic filters.
+- `/class/simulations/sampling`: Signal Sampling Detective.
+- `/class/simulations/feedback`: Feedback Control Lab.
+- `/class/simulations/base-rates`: Evidence & Base Rates.
+- `/class/simulations/heat-path`: Heat Path Designer.
+- `/class/simulations/ratio-sweets-share`: Sweet Share.
+- `/class/simulations/ratio-paint-mix`: Paint Mix Studio.
+- `/class/simulations/fractions-pizza-party`: Pizza Party.
+- `/class/simulations/fractions-number-line-jump`: Fraction Frog.
 - `/simulations/<activity>`: standalone, no-account activity document, behind the existing page gate.
 - `/simulations/<activity>?embed=1`: compact same-origin player.
 - `/embed/sims/<id>`: minimal same-origin activity document, without site chrome.
@@ -93,4 +94,4 @@ Focused checks: `node node_modules/vitest/vitest.mjs run tests/games tests/class
 
 Whole checks use the test suite with at most two workers and repository lint. Production builds run in Vercel previews; local `next build` is avoided on the D: exFAT worktree. The isolated Windows QA runner strips inherited app credentials, blocks non-loopback network and database ports, and keeps temporary files and caches on D:. Those fixtures are outside tracked source and must not be deployed. The generated playground-worker prebuild is absent from this production base and was not imported from the held candidate.
 
-The `/classes` parent route remains reserved for the separate Classes platform. No parent redirect or class-ID route is introduced here. Before combining that platform with the library, review any existing class ID named `simulations`, because it would overlap the library's static route. The workshop integration uses the established `/workshop/classroom` and `/admin/workshop` surfaces.
+The public hub is `/class`. Both `/classes` and `/classes/:path*` permanently redirect to their `/class` equivalents with HTTP 301. The held Classes platform is absent from this branch; any future integration must review its parent and class-ID routes against this hub and the reserved `simulations` segment. The workshop integration uses the established `/workshop/classroom` and `/admin/workshop` surfaces.

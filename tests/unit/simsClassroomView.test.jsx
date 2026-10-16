@@ -23,7 +23,7 @@ describe('class simulation controls', () => {
         vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 401, json: async () => ({ error: 'Class login required.' }) })))
         render(<AddToClass simId="sampling" />)
         fireEvent.click(screen.getByRole('button', { name: 'Add to class' }))
-        await waitFor(() => expect(screen.getByRole('link', { name: /Teacher sign in/ })).toHaveAttribute('href', '/sign-in?redirect_url=%2Fclasses%2Fsimulations'))
+        await waitFor(() => expect(screen.getByRole('link', { name: /Teacher sign in/ })).toHaveAttribute('href', '/sign-in?redirect_url=%2Fclass%2Fsimulations'))
     })
 
     it('keeps failed additions retryable', async () => {

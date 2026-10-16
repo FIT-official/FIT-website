@@ -18,7 +18,7 @@ export default function Activity({ activity, addToClassEnabled = false }) {
     catch { setCopyStatus('Select the snippet below to copy it manually.') }
   }
   return <main className={styles.activity}>
-    <Link className={styles.back} href="/classes/simulations">← All experiments</Link>
+    <Link className={styles.back} href="/class/simulations">← All experiments</Link>
     <div className={styles.activityMeta}><span className={styles.levelTag}>{activity.levels?.join(' / ') || activity.level}</span><span>{activity.subject}</span><span>{activity.topic}</span><span>{activity.minutes} min</span></div>
     <h1>{activity.title}</h1><p className={styles.activityLead}>{activity.approach}</p>
     <div className={styles.activityPrompt}><p className={styles.eyebrow}>YOUR INVESTIGATION</p><p>{activity.activityPrompt}</p></div>

@@ -33,7 +33,7 @@ export default function ClassSimulations({ simIds = [], teacher = false, busy = 
     return <section className={styles.section} aria-label="Class simulations">
         <header className={styles.heading}>
             <div><p className={styles.eyebrow}>Explore together</p><h2>Class simulations</h2><p>Try a prediction, change one thing, and explain what you notice.</p></div>
-            {teacher && <Link className={styles.button} href="/classes/simulations">Choose activities <span aria-hidden="true">↗</span></Link>}
+            {teacher && <Link className={styles.button} href="/class/simulations">Choose activities <span aria-hidden="true">↗</span></Link>}
         </header>
         {!activities.length && <p className={styles.empty}>Choose a simulation from the library to share with this class.</p>}
         {activities.map(activity => <article className={styles.activity} key={activity.id}>
@@ -43,7 +43,7 @@ export default function ClassSimulations({ simIds = [], teacher = false, busy = 
             </div>
             <p className={styles.prompt}><strong>Your activity</strong>{activity.activityPrompt}</p>
             <ClassSimulationPlayer activity={activity} />
-            <Link className={styles.textLink} href={'/classes/simulations/' + activity.id} target="_blank" rel="noopener noreferrer">Open {activity.title} in a full page <span aria-hidden="true">↗</span></Link>
+            <Link className={styles.textLink} href={'/class/simulations/' + activity.id} target="_blank" rel="noopener noreferrer">Open {activity.title} in a full page <span aria-hidden="true">↗</span></Link>
         </article>)}
     </section>
 }

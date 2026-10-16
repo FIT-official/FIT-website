@@ -28,7 +28,7 @@ it('keeps a named keyboard control and anonymous open/close behavior without con
     expect(getInstance).not.toHaveBeenCalled()
 })
 
-it.each(['/classes/simulations', '/classes/simulations/sampling', '/simulations/feedback'])(
+it.each(['/class/simulations', '/class/simulations/sampling', '/simulations/feedback'])(
     'places chat after page content on %s for the mobile flow layout', async pathname => {
         route.pathname = pathname
         const main = document.createElement('main')
@@ -54,7 +54,7 @@ it.each(['/classes/simulations', '/classes/simulations/sampling', '/simulations/
     },
 )
 
-it.each(['/', '/shop', '/classes', '/classes/simulations-extra', '/simulations', '/simulations-extra/sampling'])(
+it.each(['/', '/shop', '/class', '/class/simulations-extra', '/simulations', '/simulations-extra/sampling'])(
     'keeps the original launcher placement on %s', pathname => {
         route.pathname = pathname
         const main = document.createElement('main')
@@ -70,7 +70,7 @@ it.each(['/', '/shop', '/classes', '/classes/simulations-extra', '/simulations',
 )
 
 it('moves the launcher back when leaving simulations and finds a replaced page host', () => {
-    route.pathname = '/classes/simulations/sampling'
+    route.pathname = '/class/simulations/sampling'
     const main = document.createElement('main')
     main.id = 'main-content'
     document.body.append(main)
@@ -84,7 +84,7 @@ it('moves the launcher back when leaving simulations and finds a replaced page h
     const nextMain = document.createElement('main')
     nextMain.id = 'main-content'
     document.body.append(nextMain)
-    route.pathname = '/classes/simulations/heat-path'
+    route.pathname = '/class/simulations/heat-path'
     rerender(<ChatLauncher />)
     expect(nextMain).toContainElement(screen.getByRole('button', { name: 'Chat with us', exact: true }))
 })

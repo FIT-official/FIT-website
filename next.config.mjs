@@ -91,13 +91,18 @@ const nextConfig = {
     },
     skipTrailingSlashRedirect: true,
     async redirects() {
-        return [
+        const productRedirects = [
             ['bambu-lab-3d-printing-filament-1kg-pva-support', 'bambu-lab-3d-printing-filament-05kg-pva-support'],
             ['esp32-wroomdevkit-30pin-2', 'esp32-wroomdevkit-30pin'],
             ['esp32-wroomdevkit-30pin-3', 'esp32-wroomdevkit-30pin'],
             ['copper-stripboard-65145cm-254mm-2', 'copper-stripboard-65145cm-254mm'],
             ['tft-ili9341-240-x-320-28-inch-2', 'tft-ili9341-240-x-320-28-inch'],
         ].map(([from, to]) => ({ source: `/products/${from}`, destination: `/products/${to}`, permanent: true }));
+        return [
+            { source: '/classes', destination: '/class', statusCode: 301 },
+            { source: '/classes/:path*', destination: '/class/:path*', statusCode: 301 },
+            ...productRedirects,
+        ];
     },
     async headers() {
         const unlistedHeaders = (process.env.UNLISTED_BLOG_SLUGS || '').split(',')
