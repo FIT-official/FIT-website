@@ -1,4 +1,5 @@
 import { gameActivities } from './games/catalog.js';
+import { familyActivities } from './families/catalog.js';
 
 export const activities = [
   {
@@ -46,6 +47,7 @@ export const activities = [
     model: 'cᵢ dTᵢ/dt = Σⱼ gᵢⱼ(Tⱼ − Tᵢ), with cᵢ = 1 J/K and harmonic-mean face conductance gᵢⱼ in W/K. The 16 × 12 equal-tile network uses explicit Euler at 0.2 s (≤0.25 s stability bound). Top/bottom are insulated. Left/right are fixed reservoirs or insulated. It excludes convection and radiation and does not predict a named real material.',
   },
   ...gameActivities,
+  ...familyActivities,
 ];
 
 export function findActivity(id) { return activities.find(activity => activity.id === id); }

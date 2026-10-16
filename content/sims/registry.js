@@ -1,3 +1,4 @@
+import { familyRegistry } from '../../public/simulations/families/catalog.js'
 // Curriculum levels are editorial starting points, not syllabus accreditation.
 // Keep syllabusRef empty until a teacher has reviewed a specific syllabus.
 export const SIMULATION_LEVELS = ['Primary', 'Secondary', 'JC', 'Poly', 'University']
@@ -71,4 +72,5 @@ export const simsRegistry = [
     activityPrompt: 'Aim and land on the target fractions. For ordered jumps, visit them from smallest to largest and explain each position using a common unit.',
     status: 'live',
   },
+  ...familyRegistry,
 ]
