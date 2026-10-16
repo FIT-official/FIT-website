@@ -5,6 +5,7 @@
 // approach, activityPrompt, accent, symbol, minutes, tags, height (px, iframe), status ('live'|'draft').
 const circuits = { subject: 'Physics', concept: 'circuits', accent: '#FFC83D', minutes: '10–15', status: 'live' }
 const energy = { subject: 'Physics', concept: 'energy', accent: '#3DBE6B', minutes: '10–15', status: 'live' }
+const waves = { subject: 'Physics', concept: 'waves', accent: '#1F66E5', minutes: '10–15', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -46,4 +47,24 @@ export const htmlSims = [
     syllabusRef: 'University, Thermodynamics',
     approach: 'Shape a Carnot cycle to deliver a target net work, then compare it with an Otto-like cycle on P–V and T–S diagrams.',
     activityPrompt: 'Play all rounds, then explain why no engine between two temperatures beats the Carnot efficiency.', tags: ['University', 'Thermodynamics', 'Carnot cycle', 'heat engines'] },
+  { ...waves, id: 'waves-p', title: 'Echo and Shadow', level: 'Primary', topic: 'Light and sound', symbol: '🔔', height: 1280,
+    syllabusRef: 'MOE Primary Science: Energy (light and shadows; sound needs a medium)',
+    approach: 'Decide where a bell can be heard, move a torch to size a shadow, and sort materials by how much light they let through.',
+    activityPrompt: 'Play all rounds, then explain why moving the torch closer makes the shadow bigger.', tags: ['waves', 'light', 'sound', 'shadows'] },
+  { ...waves, id: 'waves-s', title: 'Wave Tuner', level: 'Secondary', topic: 'General wave properties', symbol: '🌊', height: 1500,
+    syllabusRef: 'MOE Secondary Physics: General wave properties and the electromagnetic spectrum (v = fλ, T = 1/f)',
+    approach: 'Match rope and slinky waves using v = fλ and T = 1/f, and order the electromagnetic spectrum by wavelength.',
+    activityPrompt: 'Play all rounds, then explain how frequency and wavelength are linked when the wave speed is fixed.', tags: ['waves', 'wavelength', 'frequency', 'electromagnetic spectrum'] },
+  { ...waves, id: 'waves-jc', title: 'Fringe Finder', level: 'JC', topic: 'Superposition', symbol: '🌈', height: 1500,
+    syllabusRef: 'H2 Physics: Superposition (two-source interference, diffraction grating, stationary waves)',
+    approach: 'Set double-slit and grating parameters to hit target fringe spacings and angles, then drive a string at a chosen harmonic.',
+    activityPrompt: 'Play all rounds, then explain why fringe spacing grows with D and shrinks with slit separation.', tags: ['waves', 'interference', 'diffraction grating', 'stationary waves'] },
+  { ...waves, id: 'waves-poly', title: 'Sonar Ranger', level: 'Poly', topic: 'Echo ranging and Doppler', symbol: '📡', height: 1660,
+    syllabusRef: 'Poly engineering science: sound, ultrasonic ranging and the Doppler effect (generic)',
+    approach: 'Window an ultrasonic echo to find distance with d = vt/2 in air or water, then find a moving source’s speed from its Doppler shift.',
+    activityPrompt: 'Play all rounds, then explain why the echo time is halved before computing distance.', tags: ['waves', 'ultrasound', 'echo', 'Doppler'] },
+  { ...waves, id: 'waves-u', title: 'Wave Packet Lab', level: 'University', topic: 'Fourier synthesis and dispersion', symbol: '〰️', height: 2860,
+    syllabusRef: 'University, Waves and Optics',
+    approach: 'Build square, sawtooth and triangle waves from six harmonics, then set a packet’s k₀ for a target group velocity in a dispersive medium.',
+    activityPrompt: 'Play all rounds, then explain why the envelope and the crests of a packet move at different speeds.', tags: ['University', 'Waves and Optics', 'Fourier series', 'dispersion'] },
 ]
