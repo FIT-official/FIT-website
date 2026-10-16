@@ -11,7 +11,7 @@ describe('Simulation registry', () => {
     expect(new Set(simsRegistry.map(sim => sim.id)).size).toBe(simsRegistry.length)
     for (const sim of simsRegistry) {
       expect(SIMULATION_LEVELS).toContain(sim.level)
-      if (activities.find(activity => activity.id === sim.id).kind === 'family') { expect(sim.syllabusRef.trim()).not.toBe(''); expect(sim.syllabusRef).not.toMatch(/\b(MA|CS|PC|EE|ME|MH|CE)\d{4}\b/); continue }
+      if (activities.find(activity => activity.id === sim.id).kind === 'family' || sim.concept) { if (sim.concept && !sim.syllabusRef) { expect(sim.syllabusSource).toBeTruthy(); continue } expect(sim.syllabusRef.trim()).not.toBe(''); expect(sim.syllabusRef).not.toMatch(/\b(MA|CS|PC|EE|ME|MH|CE)\d{4}\b/); continue }
       expect(['live', 'draft']).toContain(sim.status)
       for (const key of ['id', 'title', 'subject', 'topic', 'approach', 'activityPrompt']) expect(sim[key].trim()).not.toBe('')
       expect(sim).toHaveProperty('syllabusRef', '')

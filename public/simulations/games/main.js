@@ -7,6 +7,11 @@ const games = {
   'ratio-paint-mix': () => import('./ratio-paint-mix.js'),
   'fractions-pizza-party': () => import('./fractions-pizza-party.js'),
   'fractions-number-line-jump': () => import('./fractions-number-line-jump.js'),
+  'linear-plant-tracker': () => import('./linear-plant-tracker.js'),
+  'linear-ramp-rescue': () => import('./linear-ramp-rescue.js'),
+  'linear-best-fit': () => import('./linear-best-fit.js'),
+  'linear-sensor-calibration': () => import('./linear-sensor-calibration.js'),
+  'linear-systems-crossing': () => import('./linear-systems-crossing.js'),
 }
 const id = document.body.dataset.activity
 const host = document.querySelector('#app')

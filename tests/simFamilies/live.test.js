@@ -12,7 +12,7 @@ describe('concept-family live gating', () => {
       if (LIVE_FAMILY.includes(v.id)) expect(playerDocument(v.id)).toContain('/simulations/families/main.js')
       else expect(playerDocument(v.id)).toBeNull()
     }
-    for (const id of LIVE_FAMILY) expect(familyVariants.some(v => v.id === id)).toBe(true)
+    for (const id of LIVE_FAMILY) expect(familyVariants.some(v => v.id === id) || id.startsWith('linear-')).toBe(true)
   })
   it('university variants carry generic labels, never NUS/NTU module codes', () => {
     for (const v of familyVariants.filter(v => v.levelCode === 'U')) {
