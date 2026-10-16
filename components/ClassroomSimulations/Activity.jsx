@@ -7,7 +7,7 @@ import AddToClass from '@/components/sims/AddToClass'
 import { createEmbedSnippet, getEmbedPath } from '@/lib/sims/embed'
 import styles from './library.module.css'
 
-export default function Activity({ activity }) {
+export default function Activity({ activity, addToClassEnabled = false }) {
   const [snippet, setSnippet] = useState('')
   const [copyStatus, setCopyStatus] = useState('')
   const source = `/simulations/${activity.id}`
@@ -23,7 +23,7 @@ export default function Activity({ activity }) {
     <h1>{activity.title}</h1><p className={styles.activityLead}>{activity.approach}</p>
     <div className={styles.activityPrompt}><p className={styles.eyebrow}>YOUR INVESTIGATION</p><p>{activity.activityPrompt}</p></div>
     <GameShell activity={activity}/>
-    <div className={styles.actions}><AddToClass simId={activity.id}/><a href={source} target="_blank" rel="noopener noreferrer">Open full-page activity ↗</a><a href={getEmbedPath(activity.id)} target="_blank" rel="noopener noreferrer">Open compact player ↗</a></div>
+    <div className={styles.actions}>{addToClassEnabled === true && <AddToClass simId={activity.id}/>}<a href={source} target="_blank" rel="noopener noreferrer">Open full-page activity ↗</a><a href={getEmbedPath(activity.id)} target="_blank" rel="noopener noreferrer">Open compact player ↗</a></div>
     <details open><summary>Explore and explain</summary><p>{activity.prediction}</p><ol>{activity.steps.map(step => <li key={step}>{step}</li>)}</ol><p><strong>Explain:</strong> {activity.transfer}</p></details>
     <details><summary>Theory and model assumptions</summary><p className={styles.model}>{activity.model}</p></details>
     <details><summary>Teacher guidance</summary><p>{activity.teacher}</p><p>Expected time: {activity.minutes} minutes. The {activity.level} level is a starting point to adapt to your learners; syllabus references are awaiting review. Classroom learning outcomes have not yet been evaluated.</p></details>

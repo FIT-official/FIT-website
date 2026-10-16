@@ -10,7 +10,7 @@ import styles from './library.module.css'
 const activities = getLiveSims()
 const filterOptions = getSimulationFilterOptions()
 
-export default function Library() {
+export default function Library({ addToClassEnabled = false }) {
   const [query, setQuery] = useState('')
   const [subject, setSubject] = useState('All')
   const [level, setLevel] = useState('All')
@@ -34,11 +34,11 @@ export default function Library() {
       <div className={styles.resultTop}><p aria-live="polite">{results.length} {results.length === 1 ? 'activity' : 'activities'}</p>{(query || subject !== 'All' || level !== 'All' || topic !== 'All') && <button type="button" onClick={clear}>Clear filters</button>}</div>
       <div className={styles.grid}>{results.map(activity => <article className={styles.card} key={activity.id}>
         <Link href={`/classes/simulations/${activity.id}`} className={styles.artLink} tabIndex={-1} aria-hidden="true"><ActivityArt id={activity.id} accent={activity.accent}/></Link>
-        <div className={styles.cardBody}><span className={styles.category}>{activity.subject}</span><div className={styles.cardMeta}><span className={styles.levelTag}>{activity.levels?.join(' / ') || activity.level}</span><span>{activity.minutes} min</span></div><h3><Link href={`/classes/simulations/${activity.id}`}>{activity.title}</Link></h3><p>{activity.approach}</p><div className={styles.cardFoot}><span>{activity.topic}</span><Link href={`/classes/simulations/${activity.id}`} aria-label={`Launch ${activity.title}`}>Explore <span aria-hidden="true">↗</span></Link></div><div className={styles.addToClass}><AddToClass simId={activity.id}/></div></div>
+        <div className={styles.cardBody}><span className={styles.category}>{activity.subject}</span><div className={styles.cardMeta}><span className={styles.levelTag}>{activity.levels?.join(' / ') || activity.level}</span><span>{activity.minutes} min</span></div><h3><Link href={`/classes/simulations/${activity.id}`}>{activity.title}</Link></h3><p>{activity.approach}</p><div className={styles.cardFoot}><span>{activity.topic}</span><Link href={`/classes/simulations/${activity.id}`} aria-label={`Launch ${activity.title}`}>Explore <span aria-hidden="true">↗</span></Link></div>{addToClassEnabled === true && <div className={styles.addToClass}><AddToClass simId={activity.id}/></div>}</div>
       </article>)}</div>
       {results.length === 0 && <div className={styles.empty}><span aria-hidden="true">⌕</span><h3>No experiments match yet.</h3><p>Try another topic or clear the filters to explore the collection.</p><button type="button" onClick={clear}>Show all activities</button></div>}
     </section>
-    <section className={styles.teacherStrip}><div><p className={styles.eyebrow}>FOR THE CLASSROOM</p><h2>Begin with a prediction.</h2><p>Each activity brings together a question, an interactive model and the ideas behind it. Add an experiment to your class, then compare observations and explain what changed.</p><p className={styles.small}>Levels are starting points for lesson planning. Syllabus references are awaiting curriculum review.</p></div><div className={styles.process}><span>01 <b>Predict</b></span><span>02 <b>Explore</b></span><span>03 <b>Explain</b></span></div></section>
+    <section className={styles.teacherStrip}><div><p className={styles.eyebrow}>FOR THE CLASSROOM</p><h2>Begin with a prediction.</h2><p>Each activity brings together a question, an interactive model and the ideas behind it. Explore an experiment, compare observations and explain what changed.</p><p className={styles.small}>Levels are starting points for lesson planning. Syllabus references are awaiting curriculum review.</p></div><div className={styles.process}><span>01 <b>Predict</b></span><span>02 <b>Explore</b></span><span>03 <b>Explain</b></span></div></section>
     <footer className={styles.libraryFooter}>Original FIT activities. Models simplify real systems; read the assumptions in each experiment.</footer>
   </main>
 }

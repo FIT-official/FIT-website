@@ -1,6 +1,6 @@
 # FIT simulation library
 
-FIT's library contains eight original activities: four experiments and four maths games, a shared practice shell and teacher assignment to the existing workshop classroom. The public library uses `/classes/simulations`; the separate, held Classes platform is not imported. The four existing simulation models and controls retain their behaviour.
+FIT's library contains eight original activities: four experiments and four maths games, a shared practice shell and copyable player snippets. Classroom assignment is disabled by default. The public library uses `/classes/simulations`; the separate, held Classes platform is not imported. The four existing simulation models and controls retain their behaviour.
 
 ## Routes and interaction
 
@@ -16,7 +16,7 @@ FIT's library contains eight original activities: four experiments and four math
 - `/simulations/<activity>`: standalone, no-account activity document, behind the existing page gate.
 - `/simulations/<activity>?embed=1`: compact same-origin player.
 - `/embed/sims/<id>`: minimal same-origin activity document, without site chrome.
-- `/workshop/classroom`: the existing classroom, including teacher-assigned simulations and activity prompts.
+- `/workshop/classroom`: the existing classroom; assigned simulations and activity prompts appear only when classroom assignment is enabled.
 
 `content/sims/registry.js` owns discovery metadata. Only `live` entries appear in the library, detail pages, player documents, snippets and class content. Curriculum levels are editorial lesson-planning assumptions; `syllabusRef` stays empty until a teacher reviews a specific syllabus. No accreditation is implied.
 
@@ -43,7 +43,11 @@ Original canvas art redraws only after input or resize, with no animation loop. 
 
 ## Classroom assignment
 
-The branch has one workshop lesson, shared by ten groups, rather than a multi-class picker. A signed-in workshop teacher can add an activity with one click from a library card or activity page. `POST /api/admin/workshop/guest/sims` uses existing teacher authentication and the lesson store's optimistic concurrency and audit trail. Assignments are a bounded `simIds` list on the existing `workshopGuestLessons` document; there is no new collection. Teachers can remove activities in the existing classroom panel. Learners see each assigned live simulation and its activity prompt.
+The server reads `SIMS_ADD_TO_CLASS` through `lib/sims/flags.js`. Only the exact value `1` enables assignment; an unset value, `0`, `true`, or any other value leaves it off. The library and activity pages receive a server-derived boolean, and classroom responses expose simulation controls only while enabled.
+
+With assignment off, every supported HTTP method on `/api/admin/workshop/guest/sims` returns 404 before importing authentication, lesson storage or database helpers. Simulation actions submitted through the existing teacher endpoint are also rejected before opening a database, and the store rejects them before reading or mutating a lesson. Classroom views do not resolve or expose `simIds`, and the guest lesson projection omits that field. Existing workshop entry, feedback, revision and moderation behavior continues unchanged. The library, game pages, player links and snippet copy controls remain available.
+
+When explicitly enabled, the existing integration uses one workshop lesson shared by ten groups. A signed-in workshop teacher can add an activity from a library card or activity page. `POST /api/admin/workshop/guest/sims` uses existing teacher authentication and the lesson store's optimistic concurrency and audit trail. Assignments are a bounded `simIds` list on the existing `workshopGuestLessons` document; there is no new collection. Teachers can remove activities in the classroom panel, and learners see each assigned live simulation and its activity prompt.
 
 Simulation assignment does not store learner progress on the server. Local verification uses synthetic API responses and mocked stores; it does not write to a database. Expanding beyond the single workshop requires a future class-identity/data-model decision.
 
@@ -87,6 +91,6 @@ The selected instructional tasks concern signed alias detection and sampling bud
 
 Focused checks: `node node_modules/vitest/vitest.mjs run tests/games tests/classroomSimulation tests/sims tests/unit/sims --maxWorkers=2 --minWorkers=1`. These cover model references, scoring and level order, local progress, sound, visibility, registry filtering, embed escaping, route gates and class assignment through mocked storage.
 
-Whole checks follow existing coverage, lint and production-build scripts. The isolated Windows QA runner strips inherited app credentials, blocks outbound network, uses mocked build fonts and synthetic keys only. Those fixtures are outside tracked source and must not be deployed. The generated playground-worker prebuild is absent from this production base and was not imported from the held candidate.
+Whole checks use the test suite with at most two workers and repository lint. Production builds run in Vercel previews; local `next build` is avoided on the D: exFAT worktree. The isolated Windows QA runner strips inherited app credentials, blocks non-loopback network and database ports, and keeps temporary files and caches on D:. Those fixtures are outside tracked source and must not be deployed. The generated playground-worker prebuild is absent from this production base and was not imported from the held candidate.
 
 The `/classes` parent route remains reserved for the separate Classes platform. No parent redirect or class-ID route is introduced here. Before combining that platform with the library, review any existing class ID named `simulations`, because it would overlap the library's static route. The workshop integration uses the established `/workshop/classroom` and `/admin/workshop` surfaces.

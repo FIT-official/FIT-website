@@ -1,13 +1,24 @@
-import { requireGuestTeacher } from '@/lib/workshopGuestAccess'
-import { readLesson, moderateClassroom } from '@/lib/workshopGuestClassroomStore'
-import { guestDb, classJson, classFailure, sameOrigin, jsonBody } from '@/lib/workshopGuestHttp'
-import { classSimulationIds } from '@/lib/sims/classroom'
-import { WORKSHOP_SESSION } from '@/lib/workshopFeedback'
+import { simsAddToClassEnabled } from '@/lib/sims/flags'
 
 export const runtime = 'nodejs'
-const classDetails = { id: WORKSHOP_SESSION, title: 'Workshop class', href: '/admin/workshop' }
+const privateHeaders = { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow', 'Vary': 'Cookie' }
+const allow = 'GET, HEAD, OPTIONS, POST'
+const unavailable = () => new Response(null, { status: 404, headers: privateHeaders })
+
+async function dependencies() {
+    const [access, store, http, classroom, { WORKSHOP_SESSION }] = await Promise.all([
+        import('@/lib/workshopGuestAccess'),
+        import('@/lib/workshopGuestClassroomStore'),
+        import('@/lib/workshopGuestHttp'),
+        import('@/lib/sims/classroom'),
+        import('@/lib/workshopFeedback'),
+    ])
+    return { ...access, ...store, ...http, ...classroom, classDetails: { id: WORKSHOP_SESSION, title: 'Workshop class', href: '/admin/workshop' } }
+}
 
 export async function GET(request) {
+    if (!simsAddToClassEnabled()) return unavailable()
+    const { requireGuestTeacher, readLesson, guestDb, classJson, classFailure, classSimulationIds, classDetails } = await dependencies()
     try {
         await requireGuestTeacher(request)
         const db = await guestDb(), lesson = await readLesson(db.collection('workshopGuestLessons'))
@@ -16,6 +27,8 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+    if (!simsAddToClassEnabled()) return unavailable()
+    const { requireGuestTeacher, moderateClassroom, guestDb, classJson, classFailure, sameOrigin, jsonBody, classDetails } = await dependencies()
     try {
         sameOrigin(request)
         const access = await requireGuestTeacher(request), input = await jsonBody(request, 1000)
@@ -27,3 +40,21 @@ export async function POST(request) {
         return classJson({ ...result, class: classDetails })
     } catch (error) { return classFailure(error) }
 }
+
+export async function HEAD(request) {
+    if (!simsAddToClassEnabled()) return unavailable()
+    const response = await GET(request)
+    return new Response(null, { status: response.status, headers: response.headers })
+}
+
+export function OPTIONS() {
+    if (!simsAddToClassEnabled()) return unavailable()
+    return new Response(null, { status: 204, headers: { ...privateHeaders, Allow: allow } })
+}
+
+function unsupported() {
+    if (!simsAddToClassEnabled()) return unavailable()
+    return new Response(null, { status: 405, headers: { ...privateHeaders, Allow: allow } })
+}
+
+export { unsupported as PUT, unsupported as PATCH, unsupported as DELETE }

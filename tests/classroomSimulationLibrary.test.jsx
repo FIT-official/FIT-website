@@ -4,9 +4,8 @@ import Library from '../components/ClassroomSimulations/Library'
 import Activity from '../components/ClassroomSimulations/Activity'
 import { getLiveSims } from '../lib/sims/registry'
 vi.mock('next/link', () => ({ default: ({ children, ...props }) => <a {...props}>{children}</a> }))
-vi.mock('@/components/sims/AddToClass', () => ({ default: ({ simId }) => <button type="button">Add {simId} to class</button> }))
 vi.mock('@/components/sims/GameShell', () => ({ default: ({ activity }) => <div data-testid="game-shell">Game: {activity.title}</div> }))
-afterEach(cleanup)
+afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
 const activities = getLiveSims()
 
@@ -35,8 +34,8 @@ describe('Simulation discovery and classroom embeds', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }))
     expect(screen.getAllByRole('article')).toHaveLength(8)
   })
-  it('keeps subject and level outside the decorative artwork, with class controls on every card', () => {
-    render(<Library />)
+  it('keeps subject and level outside the decorative artwork, with class controls on every enabled card', () => {
+    render(<Library addToClassEnabled />)
     for (const article of screen.getAllByRole('article')) {
       const activity = activities.find(item => article.textContent.includes(item.title))
       const artwork = article.querySelector('a[aria-hidden="true"]')
@@ -45,14 +44,18 @@ describe('Simulation discovery and classroom embeds', () => {
       expect(artwork).not.toContainElement(subject)
       expect(subject.closest('[aria-hidden="true"]')).toBeNull()
       expect(level.closest('[aria-hidden="true"]')).toBeNull()
-      expect(screen.getByRole('button', { name: `Add ${activity.id} to class` })).toBeInTheDocument()
+      expect(article.querySelector('button')).toHaveTextContent('Add to class')
     }
     expect(screen.getByText('TRUE FLAGS')).toBeInTheDocument()
     expect(screen.getByText(/Syllabus references are awaiting curriculum review/)).toBeVisible()
   })
   it('mounts the shared shell and copies a minimal-player snippet with visible feedback', async () => {
+    const fetch = vi.fn()
+    vi.stubGlobal('fetch', fetch)
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: vi.fn().mockResolvedValue() } })
     render(<Activity activity={activities[0]} />)
+    expect(screen.queryByRole('button', { name: 'Add to class' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Workshop class')).not.toBeInTheDocument()
     expect(screen.getByTestId('game-shell')).toHaveTextContent('Game: Signal Sampling Detective')
     expect(screen.getByRole('link', { name: /Open compact player/ })).toHaveAttribute('href', '/embed/sims/sampling')
     expect(screen.getByText(/external iframe hosting is not enabled/i)).toBeVisible()
@@ -64,6 +67,25 @@ describe('Simulation discovery and classroom embeds', () => {
     expect(snippet).toContain('/embed/sims/sampling')
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(snippet)
     expect(snippet).not.toContain('student')
+    expect(fetch).not.toHaveBeenCalled()
+  })
+  it.each([undefined, false, '1', 'true'])('hides library assignment controls and makes no requests for enabled=%s', addToClassEnabled => {
+    const fetch = vi.fn()
+    vi.stubGlobal('fetch', fetch)
+    render(<Library addToClassEnabled={addToClassEnabled} />)
+    expect(screen.getAllByRole('article')).toHaveLength(8)
+    expect(screen.queryByRole('button', { name: 'Add to class' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Workshop class')).not.toBeInTheDocument()
+    expect(fetch).not.toHaveBeenCalled()
+  })
+  it('retains the enabled detail assignment action', async () => {
+    const fetch = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ saved: true }) }))
+    vi.stubGlobal('fetch', fetch)
+    render(<Activity activity={activities[0]} addToClassEnabled />)
+    expect(fetch).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Add to class' }))
+    expect(await screen.findByText('Added to Workshop class.')).toBeVisible()
+    expect(fetch).toHaveBeenCalledWith('/api/admin/workshop/guest/sims', expect.objectContaining({ method: 'POST', body: JSON.stringify({ simId: 'sampling' }) }))
   })
   it('provides manual copy fallback when the clipboard is unavailable', async () => {
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined })

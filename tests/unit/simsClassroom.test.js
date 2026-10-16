@@ -1,10 +1,10 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { classSimulationIds, classSimulations, MAX_CLASS_SIMULATIONS } from '@/lib/sims/classroom'
 import { classroomView, emptyLesson, moderateClassroom } from '@/lib/workshopGuestClassroomStore'
 import * as registry from '@/lib/sims/registry'
 import { simsRegistry } from '@/content/sims/registry'
 
-afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers() })
+afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); vi.unstubAllEnvs() })
 
 function memoryLesson(initial = null) {
     let row = initial
@@ -25,6 +25,7 @@ function memoryLesson(initial = null) {
 const teacher = { role: 'teacher', userId: 'synthetic-teacher' }
 
 describe('simulations in the existing workshop lesson', () => {
+    beforeEach(() => { vi.stubEnv('SIMS_ADD_TO_CLASS', '1') })
     it('supports old lesson documents and suppresses unknown or non-live entries', () => {
         expect(classSimulationIds({})).toEqual([])
         expect(classSimulationIds({ simIds: 'sampling' })).toEqual([])
@@ -102,10 +103,37 @@ describe('simulations in the existing workshop lesson', () => {
         const store = memoryLesson({ ...emptyLesson(), version: 2, simIds: ['sampling', 'heat-path'] })
         const student = { role: 'student', group: 'g1', seat: 'synthetic-student' }
         expect(classroomView(store.read(), student).simIds).toEqual(['sampling', 'heat-path'])
+        expect(classroomView(store.read(), student).simsAddToClassEnabled).toBe(true)
         await moderateClassroom(store, teacher, { action: 'removeSimulation', simId: 'sampling' })
         await moderateClassroom(store, teacher, { action: 'removeSimulation', simId: 'sampling' })
         expect(classroomView(store.read(), student).simIds).toEqual(['heat-path'])
         expect(store.read().version).toBe(3)
         expect(store.read().audit).toHaveLength(1)
+    })
+})
+
+describe('simulation assignments disabled', () => {
+    it.each([undefined, '', '0', 'true', 'false', '01', '1 '])('blocks assignment changes before reading or writing the lesson for flag %s', async value => {
+        vi.stubEnv('SIMS_ADD_TO_CLASS', value)
+        const initial = { ...emptyLesson(), version: 4, simIds: ['sampling'] }
+        const store = memoryLesson(initial)
+        for (const action of ['addSimulation', 'removeSimulation']) {
+            await expect(moderateClassroom(store, teacher, { action, simId: 'sampling' })).rejects.toMatchObject({ status: 404 })
+        }
+        expect(store.findOne).not.toHaveBeenCalled()
+        expect(store.insertOne).not.toHaveBeenCalled()
+        expect(store.replaceOne).not.toHaveBeenCalled()
+        expect(store.read()).toBe(initial)
+    })
+
+    it.each(['student', 'teacher'])('omits simulation fields without accessing simIds in the %s view', role => {
+        vi.stubEnv('SIMS_ADD_TO_CLASS', undefined)
+        const state = emptyLesson(), simIds = vi.fn(() => { throw new Error('simIds must remain unread') })
+        Object.defineProperty(state, 'simIds', { get: simIds, enumerable: true })
+        const view = classroomView(state, { role, group: 'g1', seat: 'synthetic-student' })
+        expect(simIds).not.toHaveBeenCalled()
+        expect(view).not.toHaveProperty('simIds')
+        expect(view).not.toHaveProperty('simsAddToClassEnabled')
+        expect(view).toMatchObject({ phase: 'PRESENT', feedback: [], refinements: [] })
     })
 })

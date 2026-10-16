@@ -22,7 +22,7 @@ vi.mock('@/lib/workshopDatabase', () => ({ workshopDatabase: async () => ({ coll
     }
 } }) }))
 
-import { GET, POST } from '@/app/api/admin/workshop/guest/sims/route'
+import { GET, POST, HEAD, OPTIONS, PUT, PATCH, DELETE } from '@/app/api/admin/workshop/guest/sims/route'
 import { simsRegistry } from '@/content/sims/registry'
 const origin = 'http://127.0.0.1:3109'
 function request(body, requestOrigin = origin) {
@@ -30,10 +30,23 @@ function request(body, requestOrigin = origin) {
         method: 'POST', headers: { origin: requestOrigin, 'content-type': 'application/json' }, body: JSON.stringify(body),
     })
 }
-beforeEach(() => { h.signedIn = false; h.admin = false; h.row = null; h.collections = []; h.writes = 0 })
+beforeEach(() => { vi.stubEnv('SIMS_ADD_TO_CLASS', '1'); h.signedIn = false; h.admin = false; h.row = null; h.collections = []; h.writes = 0 })
 afterEach(() => vi.unstubAllEnvs())
 
 describe('teacher library assignment route', () => {
+    it('preserves authenticated HEAD and method discovery while enabled', async () => {
+        expect((await HEAD(request())).status).toBe(401)
+        expect(h.collections).toEqual([])
+        h.signedIn = h.admin = true
+        const response = await HEAD(request())
+        expect(response.status).toBe(200)
+        expect(await response.text()).toBe('')
+        expect(response.headers.get('cache-control')).toContain('no-store')
+        expect(OPTIONS().status).toBe(204)
+        expect(OPTIONS().headers.get('allow')).toBe('GET, HEAD, OPTIONS, POST')
+        for (const handler of [PUT, PATCH, DELETE]) expect(handler().status).toBe(405)
+    })
+
     it.each(['ratio-sweets-share', 'ratio-paint-mix', 'fractions-pizza-party', 'fractions-number-line-jump'])('assigns and reads back %s using the existing mocked class store', async simId => {
         h.signedIn = h.admin = true
         expect((await POST(request({ simId }))).status).toBe(200)
