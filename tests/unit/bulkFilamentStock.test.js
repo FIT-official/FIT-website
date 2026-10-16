@@ -4,6 +4,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { loadBulkStock } from '@/lib/bulkFilamentStock'
 import { bulkCatalogue } from '@/lib/bulkFilament'
 import { bulkFailure } from '@/lib/bulkFilamentHttp'
+import { bulkStage } from '@/lib/bulkFilamentDiagnostics'
 afterEach(()=>{vi.unstubAllEnvs();vi.unstubAllGlobals();vi.restoreAllMocks()})
 it('uses the dated Sheet snapshot when the service account is absent',async()=>{
   vi.stubEnv('FIT_INVENTORY_SERVICE_ACCOUNT_JSON','');vi.stubGlobal('fetch',vi.fn())
@@ -104,4 +105,59 @@ it('identifies the conflicting Sheet barcode while retaining fail-closed parsing
     ] }) }))
   expect(await stockDiagnostic()).toEqual({ name: 'Error', stage: 'inventory-parse',
     message: 'Conflicting inventory identities: Lanbo:PLA:312' })
+})
+
+it.each(['inventory-authentication', 'inventory-sheet'])('logs only the service-account email from credentials for %s failures', async stage => {
+  const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 })
+  const credentials = { client_email: 'inventory-test@fit-test.iam.gserviceaccount.com',
+    private_key: privateKey.export({ type: 'pkcs8', format: 'pem' }), private_key_id: 'synthetic-private-key-id',
+    token_uri: 'https://oauth2.googleapis.com/token', project_id: 'synthetic-project-id' }
+  const raw = JSON.stringify(credentials), token = 'synthetic-access-token'
+  vi.stubEnv('FIT_INVENTORY_SERVICE_ACCOUNT_JSON', raw)
+  const fetcher = vi.fn()
+  if (stage === 'inventory-sheet') fetcher.mockResolvedValueOnce({ ok: true, json: async () => ({ access_token: token }) })
+  const status = stage === 'inventory-sheet' ? 403 : 401
+  fetcher.mockResolvedValueOnce({ ok: false, status })
+  vi.stubGlobal('fetch', fetcher)
+  expect(await stockDiagnostic()).toEqual({ name: 'Error', stage,
+    message: `Inventory ${stage === 'inventory-sheet' ? 'Sheet' : 'authentication'} unavailable (HTTP ${status})`,
+    serviceAccount: credentials.client_email })
+  const output = JSON.stringify(console.error.mock.calls)
+  expect(output).toContain(credentials.client_email)
+  for (const secret of [raw, credentials.private_key, ...credentials.private_key.trim().split('\n'),
+    credentials.private_key_id, credentials.token_uri, credentials.project_id, token, 'private_key', 'private_key_id']) {
+    expect(output).not.toContain(secret)
+  }
+})
+
+it.each([
+  [undefined, 'invalid'], [null, 'invalid'], [123, 'invalid'],
+  [['inventory-test@fit-test.iam.gserviceaccount.com'], 'invalid'],
+  ['synthetic@example.invalid', 'invalid'],
+  ['inventory-test@fit-test.iam.gserviceaccount.com\n', 'invalid'],
+  ['inventory-test@fit-test.iam.gserviceaccount.com.evil.test', 'invalid'],
+  ['INVENTORY-TEST@FIT-TEST.iam.gserviceaccount.com', 'INVENTORY-TEST@FIT-TEST.iam.gserviceaccount.com'],
+])('validates the service-account email before logging: case %#', async (client_email, expected) => {
+  vi.stubEnv('FIT_INVENTORY_SERVICE_ACCOUNT_JSON', JSON.stringify({ client_email, private_key: 'synthetic-private-key' }))
+  const log = vi.spyOn(console, 'error').mockImplementation(() => {})
+  const failure = await bulkStage('inventory-sheet', () => { throw new Error('Inventory Sheet unavailable (HTTP 403)') }).catch(error => error)
+  const response = bulkFailure(failure)
+  expect(log).toHaveBeenCalledExactlyOnceWith('bulk-filament failure', {
+    name: 'Error', stage: 'inventory-sheet', message: 'Inventory Sheet unavailable (HTTP 403)', serviceAccount: expected,
+  })
+  expect(JSON.stringify(log.mock.calls)).not.toContain('synthetic-private-key')
+  const body = JSON.stringify(await response.json())
+  expect(body).not.toContain('serviceAccount')
+  expect(body).not.toContain('gserviceaccount.com')
+})
+
+it.each(['{"private_key":"synthetic-secret-fragment"', 'null'])('handles unreadable diagnostic credentials without logging their contents: case %#', async raw => {
+  vi.stubEnv('FIT_INVENTORY_SERVICE_ACCOUNT_JSON', raw)
+  const log = vi.spyOn(console, 'error').mockImplementation(() => {})
+  const failure = await bulkStage('inventory-authentication', () => { throw new Error('Inventory authentication unavailable') }).catch(error => error)
+  bulkFailure(failure)
+  expect(log).toHaveBeenCalledExactlyOnceWith('bulk-filament failure', {
+    name: 'Error', stage: 'inventory-authentication', message: 'Inventory authentication unavailable', serviceAccount: 'invalid',
+  })
+  expect(JSON.stringify(log.mock.calls)).not.toContain('synthetic-secret-fragment')
 })
