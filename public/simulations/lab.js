@@ -1,5 +1,6 @@
 import { findActivity } from './catalog.js';
 import { samplingModel, signalValue, inspectionModel, inspectionSample, feedbackModel, createHeatGrid, heatStep, heatMetrics, HEAT_WIDTH } from './models.js';
+import { heatColor, heatLegendGradient } from './visuals.js';
 
 const id = document.body.dataset.activity;
 const activity = findActivity(id);
@@ -37,7 +38,7 @@ function range(key, label, min, max, step, unit = '') {
   return `<div class="control"><label for="${key}">${label}<span>${unit}</span></label><input id="${key}" data-key="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${state[key]}" aria-label="${label} (${unit || 'value'})"><input id="${key}-number" data-key="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${state[key]}" aria-label="${label}, numeric value (${unit || 'value'})"></div>`;
 }
 function select(key, label, options) {
-  return `<div class="control"><label for="${key}">${label}</label><select id="${key}" data-key="${key}">${options.map(([value, text]) => `<option value="${value}" ${String(state[key]) === String(value) ? 'selected' : ''}>${text}</option>`).join('')}</select></div>`;
+  return `<div class="control select-control"><label for="${key}">${label}</label><select id="${key}" data-key="${key}">${options.map(([value, text]) => `<option value="${value}" ${String(state[key]) === String(value) ? 'selected' : ''}>${text}</option>`).join('')}</select></div>`;
 }
 function check(key, label) { return `<label class="check wide"><input type="checkbox" data-key="${key}" ${state[key] ? 'checked' : ''}>${label}</label>`; }
 
@@ -46,7 +47,7 @@ function controls() {
   if (id === 'sampling') html += range('frequency', 'Source frequency', 0, 12, 0.5, 'Hz') + range('sampleRate', 'Sampling rate', 1, 40, 1, 'samples/s') + range('phase', 'Phase', 0, 360, 15, '°') + range('amplitude', 'Amplitude', 0, 2, 0.1, 'V') + range('duration', 'Observation window', 1, 4, 1, 's') + check('revealFold', 'Reveal compatible wave') + check('revealSource', 'Reveal source wave');
   if (id === 'feedback') html += select('mode', 'Controller', ['Manual', 'P', 'PI'].map(x => [x, x])) + range('target', 'Target temperature', 25, 90, 1, '°C') + range('kp', 'Proportional gain Kp', 0, 0.3, 0.01, '1/°C') + range('ki', 'Integral gain Ki (PI)', 0, 0.01, 0.0005, '1/(°C·s)') + range('delay', 'Sensor delay', 0, 30, 1, 's') + range('ambient', 'Outside temperature', 0, 30, 1, '°C') + range('loss', 'Heat loss G', 1, 8, 0.5, 'W/K') + range('capacity', 'Thermal capacity C', 100, 500, 50, 'J/K') + range('maxPower', 'Heater limit', 100, 400, 20, 'W') + range('manual', 'Manual heater duty', 0, 1, 0.05, 'fraction') + check('disturbance', 'Cold air at 150 s (−10 °C)');
   if (id === 'base-rates') html += range('prevalence', 'Defect rate', 0, 100, 0.1, '%') + range('sensitivity', 'Sensitivity: catch defects', 0, 100, 1, '%') + range('specificity', 'Specificity: clear sound parts', 0, 100, 1, '%') + select('population', 'Batch size', [[100, '100'], [1000, '1,000'], [10000, '10,000']]) + select('mode', 'Counts', [['Expected', 'Expected frequencies'], ['Sample', 'Seeded finite sample']]) + range('seed', 'Sample seed', 1, 9999, 1, 'integer') + '<p class="quiet wide">The false-alarm rate is 100% minus specificity. Expected counts may be fractional; sampled counts are integers.</p>';
-  if (id === 'heat-path') html += select('brush', 'Paint material', [[1, 'High conductance · 1 W/K'], [0.2, 'Medium conductance · 0.2 W/K'], [0.02, 'Low conductance · 0.02 W/K'], [0, 'Insulator × · 0 W/K']]) + check('fixedEdges', 'Hold edges at 100 °C / 20 °C') + select('selectedRow', 'Selected tile row', Array.from({ length: 12 }, (_, i) => [i + 1, String(i + 1)])) + select('selectedColumn', 'Selected tile column', Array.from({ length: 16 }, (_, i) => [i + 1, String(i + 1)])) + '<button id="paint-selected" class="button wide">Paint selected tile</button><p class="quiet wide">Use row/column controls for precise touch painting, or click a tile. Keyboard: Tab enters the grid, arrows move, Space/Enter paints. Edge reservoirs cannot be painted while fixed. Painting pauses the model and keeps current temperatures. Reset starts a fresh comparison.</p>';
+  if (id === 'heat-path') html += select('brush', 'Paint material (conductance)', [[1, 'High · 1 W/K'], [0.2, 'Medium · 0.2 W/K'], [0.02, 'Low · 0.02 W/K'], [0, 'Insulator × · 0 W/K']]) + check('fixedEdges', 'Hold edges at 100 °C / 20 °C') + select('selectedRow', 'Selected tile row', Array.from({ length: 12 }, (_, i) => [i + 1, String(i + 1)])) + select('selectedColumn', 'Selected tile column', Array.from({ length: 16 }, (_, i) => [i + 1, String(i + 1)])) + '<button id="paint-selected" class="button wide">Paint selected tile</button><p class="quiet wide">Use row/column controls for precise touch painting, or click a tile. Keyboard: Tab enters the grid, arrows move, Space/Enter paints. Edge reservoirs cannot be painted while fixed. Painting pauses the model and keeps current temperatures. Reset starts a fresh comparison.</p>';
   $('#controls').innerHTML = html;
   $('#controls').oninput = event => {
     const input = event.target, key = input.dataset.key;
@@ -82,9 +83,16 @@ function compute() {
 }
 function metric(label, value) { return `<div class="metric"><span>${label}</span><strong>${value}</strong></div>`; }
 function path(points, x, y) { return points.map((p, i) => `${i ? 'L' : 'M'}${x(p).toFixed(2)},${y(p).toFixed(2)}`).join(' '); }
+let chartWidth = 0;
+function availableChartWidth() { return $('#visual').clientWidth > 2 ? $('#visual').clientWidth - 2 : 620; }
 function chart({ series, points = [], maxX = 2, minY = -2.2, maxY = 2.2, xLabel = 'Time (s)', yLabel = 'Voltage (V)', label }) {
-  const x = p => 54 + p.t / maxX * 530, y = p => 244 - (p.y - minY) / (maxY - minY) * 208;
-  return `<svg viewBox="0 0 620 292" role="img" aria-label="${label}"><title>${label}</title><rect width="620" height="292" fill="#f5f8f7"/>${Array.from({ length: 5 }, (_, i) => { const v = minY + (maxY - minY) * i / 4, yy = y({ y: v }); return `<line x1="54" y1="${yy}" x2="584" y2="${yy}" stroke="#d9e2e1"/><text x="46" y="${yy + 4}" text-anchor="end" font-size="11" fill="#586970">${format(v, 1)}</text>`; }).join('')}${Array.from({ length: 5 }, (_, i) => `<text x="${54 + i * 132.5}" y="262" text-anchor="middle" font-size="11" fill="#586970">${format(maxX * i / 4, 1)}</text>`).join('')}<text x="320" y="283" text-anchor="middle" font-size="12" fill="#18272b">${xLabel}</text><text x="10" y="18" font-size="12" fill="#18272b">${yLabel}</text>${series.map(s => `<path d="${path(s.values, x, y)}" fill="none" stroke="${s.color}" stroke-width="${s.width || 2.5}" ${s.dashed ? 'stroke-dasharray="7 5"' : ''}/>`).join('')}${points.map(p => `<circle cx="${x(p)}" cy="${y(p)}" r="3.4" fill="#18272b" stroke="#fff" stroke-width="1"/>`).join('')}</svg>`;
+  // Match SVG units to its rendered width, including inside the class iframe.
+  // Fixed 12-unit text then remains 12 CSS pixels instead of shrinking with a desktop viewBox.
+  const width = availableChartWidth(), height = Math.max(252, Math.min(330, width * 292 / 620));
+  chartWidth = width;
+  const left = 48, right = width - 24, top = 32, bottom = height - 48;
+  const x = p => left + p.t / maxX * (right - left), y = p => bottom - (p.y - minY) / (maxY - minY) * (bottom - top);
+  return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${label}"><title>${label}</title><rect width="${width}" height="${height}" fill="#f5f8f7"/>${Array.from({ length: 5 }, (_, i) => { const v = minY + (maxY - minY) * i / 4, yy = y({ y: v }); return `<line x1="${left}" y1="${yy}" x2="${right}" y2="${yy}" stroke="#d9e2e1"/><text x="${left - 8}" y="${yy + 4}" text-anchor="end" font-size="12" fill="#586970">${format(v, 1)}</text>`; }).join('')}${Array.from({ length: 5 }, (_, i) => `<text x="${x({ t: maxX * i / 4 })}" y="${bottom + 20}" text-anchor="middle" font-size="12" fill="#586970">${format(maxX * i / 4, 1)}</text>`).join('')}<text x="${(left + right) / 2}" y="${height - 8}" text-anchor="middle" font-size="12" fill="#18272b">${xLabel}</text><text x="10" y="18" font-size="12" fill="#18272b">${yLabel}</text>${series.map(s => `<path d="${path(s.values, x, y)}" fill="none" stroke="${s.color}" stroke-width="${s.width || 2.5}" ${s.dashed ? 'stroke-dasharray="7 5"' : ''}/>`).join('')}${points.map(p => `<circle cx="${x(p)}" cy="${y(p)}" r="3.4" fill="#18272b" stroke="#fff" stroke-width="1"/>`).join('')}</svg>`;
 }
 
 function renderSampling() {
@@ -123,7 +131,6 @@ function renderInspection() {
   $('#model-extra').textContent = 'Population values are synthetic. The same seed and settings repeat exactly. Finite samples need not equal expected frequencies. A second-inspection budget is a counting exercise; second-test results are not simulated.';
 }
 
-function heatColor(t) { const f = Math.max(0, Math.min(1, (t - 20) / 80)); return `rgb(${Math.round(222 + 32 * Math.min(1, 2 * f) - 64 * Math.max(0, 2 * f - 1))},${Math.round(242 - 202 * f)},${Math.round(255 - 215 * f)})`; }
 let focusCell = 0;
 function paintHeatCell(index) {
   focusCell = index;
@@ -136,7 +143,7 @@ function paintHeatCell(index) {
 function renderHeat() {
   const metrics = heatMetrics(grid);
   const initialMean = createHeatGrid().reduce((sum, c) => sum + c.temperature, 0) / grid.length;
-  $('#visual').innerHTML = `<div class="stage"><div class="heat-grid" role="group" aria-label="Heat plate: arrow keys move, Space or Enter paints">${grid.map((cell, i) => { const edge = i % 16 === 0 || i % 16 === 15, probe = i === 6 * 16 + 12 ? 'A' : i === 3 * 16 + 8 ? 'B' : ''; return `<button class="heat-cell ${cell.material === 0 ? 'insulator' : cell.material === .02 ? 'low' : cell.material === .2 ? 'mid' : ''}" data-cell="${i}" ${probe ? `data-probe="${probe}"` : ''} tabindex="${i === focusCell ? 0 : -1}" style="background:${cell.material === 0 ? '#34494f' : heatColor(cell.temperature)}" aria-label="Row ${Math.floor(i / HEAT_WIDTH) + 1}, column ${i % HEAT_WIDTH + 1}: ${format(cell.temperature)} degrees Celsius, conductance ${cell.material}${probe ? `, probe ${probe}` : ''}${edge && state.fixedEdges ? ', fixed reservoir' : ''}"></button>`; }).join('')}</div></div><div class="scale" aria-hidden="true"></div><div class="scale-label"><span>20 °C / cold</span><span>60 °C</span><span>100 °C / hot</span></div><p class="quiet">A = target (row 7, column 13). B = protected (row 4, column 9). Material markings: × insulator, · low, + medium, plain high. Fixed scale.</p>`;
+  $('#visual').innerHTML = `<div class="stage"><div class="heat-grid" role="group" aria-label="Heat plate: arrow keys move, Space or Enter paints">${grid.map((cell, i) => { const edge = i % 16 === 0 || i % 16 === 15, probe = i === 6 * 16 + 12 ? 'A' : i === 3 * 16 + 8 ? 'B' : ''; return `<button class="heat-cell ${cell.material === 0 ? 'insulator' : cell.material === .02 ? 'low' : cell.material === .2 ? 'mid' : ''}" data-cell="${i}" ${probe ? `data-probe="${probe}"` : ''} tabindex="${i === focusCell ? 0 : -1}" style="background:${cell.material === 0 ? '#34494f' : heatColor(cell.temperature)}" aria-label="Row ${Math.floor(i / HEAT_WIDTH) + 1}, column ${i % HEAT_WIDTH + 1}: ${format(cell.temperature)} degrees Celsius, conductance ${cell.material}${probe ? `, probe ${probe}` : ''}${edge && state.fixedEdges ? ', fixed reservoir' : ''}"></button>`; }).join('')}</div></div><div class="scale" style="background:${heatLegendGradient()}" aria-hidden="true"></div><div class="scale-label"><span>20 °C / cold</span><span>60 °C</span><span>100 °C / hot</span></div><p class="quiet">A = target (row 7, column 13). B = protected (row 4, column 9). Material markings: × insulator, · low, + medium, plain high. Fixed scale.</p>`;
   $('#metrics').innerHTML = metric('Elapsed model time', `${format(elapsed)} s`) + metric('Target A', `${format(metrics.probe)} °C`) + metric('Protected B', `${format(metrics.protectedProbe)} °C`) + metric('Plate mean', `${format(metrics.mean, 2)} °C`) + metric('Stored-energy change', `${format((metrics.mean - initialMean) * grid.length, 2)} J`) + metric('Boundary mode', state.fixedEdges ? 'Reservoirs' : 'Insulated');
   $('#status').textContent = state.fixedEdges ? 'The edge reservoirs supply and remove energy. Design a conducting path to A while protecting B, then compare at equal elapsed times.' : 'All outside boundaries are insulated. With no source, total energy and mean temperature are conserved even as heat redistributes.';
   $('#data').innerHTML = `<details><summary>Probe measurements</summary><div class="table-wrap"><table><caption>Probe log (up to 300 model seconds)</caption><thead><tr><th scope="col">Time (s)</th><th scope="col">A (°C)</th><th scope="col">B (°C)</th><th scope="col">Mean (°C)</th></tr></thead><tbody>${heatHistory.filter((p, i) => i % 10 === 0 || i === heatHistory.length - 1).map(p => `<tr><td>${format(p.t)}</td><td>${format(p.probe)}</td><td>${format(p.protectedProbe)}</td><td>${format(p.mean, 2)}</td></tr>`).join('')}</tbody></table></div></details>`;
@@ -185,3 +192,8 @@ function render() { renderToolbar(); ({ sampling: renderSampling, feedback: rend
 document.addEventListener('visibilitychange', () => { if (document.hidden) { pause(); renderToolbar(); } });
 if ('IntersectionObserver' in window) new IntersectionObserver(entries => { if (!entries[0].isIntersecting && playing) { pause(); renderToolbar(); } }, { threshold: 0 }).observe($('.workbench'));
 controls(); compute(); render();
+if ((id === 'sampling' || id === 'feedback') && 'ResizeObserver' in window) {
+  new ResizeObserver(() => {
+    if (availableChartWidth() !== chartWidth) (id === 'sampling' ? renderSampling : renderFeedback)();
+  }).observe($('#visual'));
+}

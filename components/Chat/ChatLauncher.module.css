@@ -7,6 +7,18 @@
     .launcher {
         bottom: calc(1rem + var(--fit-consent-inset, 0px));
     }
+    /* Keep the launcher after simulation content, clear of plots at every scroll position. */
+    .launcher.simulationLauncher {
+        position: relative;
+        inset: auto;
+        z-index: auto;
+        width: fit-content;
+        margin: 1.5rem 1rem max(1.5rem, env(safe-area-inset-bottom));
+        margin-left: auto;
+    }
+    .simulationPending {
+        visibility: hidden;
+    }
     .panel {
         bottom: calc(6rem + var(--fit-consent-inset, 0px));
         max-height: calc(100dvh - 10.5rem - var(--fit-consent-inset, 0px));

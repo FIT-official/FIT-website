@@ -26,6 +26,19 @@ describe('Simulation discovery and classroom embeds', () => {
     fireEvent.change(screen.getByLabelText('Difficulty'), { target: { value: 'Intermediate' } })
     expect(screen.getAllByRole('article')).toHaveLength(2)
   })
+  it('keeps category labels outside the artwork and available to screen readers', () => {
+    render(<Library />)
+    for (const article of screen.getAllByRole('article')) {
+      const activity = activities.find(item => article.textContent.includes(item.title))
+      const artwork = article.querySelector('a[aria-hidden="true"]')
+      const category = Array.from(article.querySelectorAll('span')).find(span => span.textContent === activity.category)
+      expect(category).toBeDefined()
+      expect(artwork).not.toContainElement(category)
+      expect(category.closest('[aria-hidden="true"]')).toBeNull()
+      expect(category.parentElement).toBe(artwork.nextElementSibling)
+    }
+    expect(screen.getByText('TRUE FLAGS')).toBeInTheDocument()
+  })
   it('has a titled local iframe and honest external-framing boundary', async () => {
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: vi.fn().mockResolvedValue() } })
     render(<Activity activity={activities[0]} />)
