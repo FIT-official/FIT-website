@@ -1,9 +1,8 @@
 import { gameActivities } from './games/catalog.js';
 import { familyActivities } from './families/catalog.js';
-import { htmlSims } from '../../content/sims/htmlSims.js';
 
-// ChatGPT single-file HTML sims: catalog view of content/sims/htmlSims.js.
-const htmlActivities = htmlSims.map(s => ({ id: s.id, kind: 'html', concept: s.concept, title: s.title, shortTitle: s.title.split(':')[0], category: s.subject, subjects: [s.subject], level: 'Intermediate', ages: '', minutes: s.minutes || '10–15', accent: s.accent || '#2EC4A6', symbol: s.symbol || '', question: s.approach, description: s.approach, tags: s.tags || [], prediction: '', steps: [], teacher: s.syllabusRef || '', transfer: '', model: s.approach, height: s.height || 780 }));
+// Loaded in the browser by lab.js and games/main.js: never import from outside public/ (content/ is not served).
+// Single-file HTML sims are merged server-side in lib/sims/registry.js.
 
 export const activities = [
   {
@@ -52,7 +51,6 @@ export const activities = [
   },
   ...gameActivities,
   ...familyActivities,
-  ...htmlActivities,
 ];
 
 export function findActivity(id) { return activities.find(activity => activity.id === id); }

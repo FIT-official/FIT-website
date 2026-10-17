@@ -5,6 +5,7 @@ import path from 'path'
 import { vetHtmlSim } from '../lib/sims/vetHtmlSim'
 import { readHtmlSim, htmlSimResponse, HTML_SIM_CSP } from '../lib/classroomSimulations/htmlSimDocument'
 import { htmlSims } from '../content/sims/htmlSims'
+import { injectNoTapZoom } from '../lib/sims/noTapZoom'
 
 const ok = readFileSync('tests/fixtures/html-sim-ok.html', 'utf8')
 
@@ -43,7 +44,7 @@ describe('locked-down delivery', () => {
     for (const d of ["default-src 'none'", "connect-src 'none'", "img-src data: blob:", "form-action 'none'", "frame-ancestors 'self'", 'sandbox allow-scripts']) expect(csp).toContain(d)
     expect(csp).not.toMatch(/https?:|allow-same-origin|unsafe-eval/)
     expect(res.headers.get('Cache-Control')).toBe('no-store')
-    expect(await res.text()).toBe(ok)
+    expect(await res.text()).toBe(injectNoTapZoom(ok)) // the vetted file plus only the inline tap guard
   })
 })
 

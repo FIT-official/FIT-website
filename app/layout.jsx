@@ -54,6 +54,9 @@ const GEO_JSON_LD = {
   ]
 };
 
+// Explicit so every wrapper page (/class/simulations, embeds) keeps a zoomable device-width viewport.
+export const viewport = { width: 'device-width', initialScale: 1 };
+
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'Fix It Today | 3D Printing & Custom Parts Singapore',
