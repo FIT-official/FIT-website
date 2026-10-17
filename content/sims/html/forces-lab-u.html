@@ -1,0 +1,2348 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spin Lab | Fix It Today</title>
+<style>
+:root {
+  --fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;
+  --fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;
+  --fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;
+  --fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;
+  --fit-danger:#D92D20;--lvl-primary:#FFC83D;
+  --lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;
+  --lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;
+  --lvl-secondary-on:#111111;--lvl-jc:#6A45F5;
+  --lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;
+  --lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;
+  --lvl-poly-on:#111111;--lvl-uni:#1F66E5;
+  --lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+  --r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;
+  --r-pill:999px;--bw:2px;--bw-strong:3px;
+  --sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;
+  --sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);
+  --dur-1:120ms;--dur-2:180ms;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1260px;margin:auto;padding:16px}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.badge,.hud{min-height:37px;border:2px solid #111;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:800}
+.badge{background:var(--lvl-uni);color:var(--lvl-uni-on);text-transform:uppercase}
+.hud{background:#fff;font-size:14px}
+h1{font-size:clamp(29px,5vw,45px);font-weight:800;line-height:1.1;margin:17px 0 8px}
+h2{font-size:21px;font-weight:800;margin:0 0 12px}
+p{margin:7px 0 13px}
+.layout{display:grid;gap:18px;align-items:start;margin-top:19px}
+.card{min-width:0;background:#fff;border:2px solid #111;border-radius:26px;box-shadow:var(--sh-2);padding:17px}
+.stage{background:var(--lvl-uni-tint)}
+svg{width:100%;height:auto;display:block}
+.scene{aspect-ratio:480/310}
+.plot{aspect-ratio:480/290}
+button,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{min-height:46px;border:2px solid #111;border-radius:999px;background:#fff;padding:9px 14px;box-shadow:var(--sh-1);font:800 14px Inter,system-ui,sans-serif;cursor:pointer}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.5;cursor:default}
+button.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
+button.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button:focus:not(:focus-visible),input:focus:not(:focus-visible){outline:none}
+button:focus-visible,input:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+input[type=range]{width:100%;min-height:48px;accent-color:#111}
+label{font-weight:800}
+.controls{display:grid;gap:11px}
+.stepper,.actions,.choices,.ranking{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.stepper button{min-width:44px;padding:7px}
+.read{min-width:91px;text-align:center;font-weight:800;font-size:19px;background:var(--lvl-uni-tint);padding:7px;border:2px solid #111;border-radius:13px}
+.actions{margin-top:16px}
+.choices button[aria-pressed=true]{background:var(--lvl-uni-tint);border-width:3px}
+.ranking button{min-width:90px}
+.ranking button:disabled{background:var(--fit-sunken);opacity:.6}
+.placed{border:2px dashed #111;border-radius:14px;padding:11px;background:var(--lvl-uni-tint);min-height:47px;font-weight:700}
+.feedback{border:2px dashed #888;border-radius:15px;min-height:76px;padding:13px;margin-top:14px;font-weight:600}
+.feedback.good{border:2px solid var(--fit-success);background:#eafff0}
+.feedback.bad{border:2px solid var(--fit-danger);background:#fff0ed}
+.legend{display:flex;flex-wrap:wrap;gap:11px;font-size:12px;font-weight:700}
+.swatch{display:inline-block;width:11px;height:11px;border:1px solid #111;margin-right:4px}
+.concept{display:flex;gap:12px;align-items:center;border:2px solid #111;border-radius:15px;background:#fff;padding:9px;margin-top:13px;font-size:13px;font-weight:600}
+.concept svg{width:100px;max-width:34%;flex:none}
+details{margin-top:18px;border:2px solid #111;border-radius:16px;background:#fff;padding:12px}
+summary{font-weight:800;cursor:pointer}
+.end{text-align:center;padding:36px 12px}
+.stars{font-size:44px;color:#ae8000;letter-spacing:5px}
+footer{text-align:center;margin:26px;color:#666}
+[hidden]{display:none!important}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.08fr) minmax(0,1fr)}}
+@media(max-width:410px){main{padding:10px}.card{padding:12px}.stepper{gap:4px}.stepper button{padding:7px 9px}.ranking button{min-width:83px}}
+@media(prefers-reduced-motion:no-preference){button{transition:transform var(--dur-1),box-shadow var(--dur-1)}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<span class="badge">University · Mechanics</span>
+<span id="hud" class="hud">Round 1/6 · Score 0</span>
+</header>
+<h1>Spin Lab</h1>
+<p>Race rolling shapes, change an axle offset, investigate a massive pulley and conserve angular momentum. Gravity is 9.81 m/s².</p>
+<div id="game">
+<div class="layout">
+<section class="card stage">
+<h2 id="sceneTitle">Rolling-shape race</h2>
+<svg id="scene" class="scene" viewBox="0 0 480 310" role="img" aria-label="Mechanical apparatus with dimensions"></svg>
+<div class="concept">
+<svg viewBox="0 0 110 70" role="img" aria-label="Wheel about its centre axis">
+<circle cx="55" cy="35" r="29" fill="#E2ECFD" stroke="#111" stroke-width="4"/>
+<path d="M55 6V64M26 35H84" stroke="#111" stroke-width="3"/>
+<circle cx="55" cy="35" r="6" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+</svg>
+<span>Changing the rotation axis changes moment of inertia, even when mass stays constant.</span>
+</div>
+</section>
+<div>
+<section class="card">
+<h2 id="plotTitle">Acceleration vs inertia factor</h2>
+<svg id="plot" class="plot" viewBox="0 0 480 290" role="img" aria-label="Live mechanics plot"></svg>
+<div id="legend" class="legend"></div>
+</section>
+<section class="card" style="margin-top:18px">
+<h2 id="question">Challenge</h2>
+<div id="controls" class="controls"></div>
+<div class="actions">
+<button id="check" class="check">Check</button>
+<button id="hint">Hint (costs points)</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Make a selection, then press Check.</div>
+</section>
+</div>
+</div>
+<details>
+<summary>The physics</summary>
+<p><b>Inertia:</b> a solid disc has I = ½mr²; a hoop has I = mr²; a solid sphere has I = ⅖mr²; a hollow sphere has I = ⅔mr²; a rod about its centre has I = mL²/12. The parallel-axis theorem gives I = I<sub>centre</sub> + md².</p>
+<p><b>Torque:</b> τ = Iα. <b>Rolling without slipping:</b> a = g sin θ/(1 + k), with k = I/(mr²). The frictionless block slides with k = 0. The speed after descending a height h follows v² = 2gh/(1 + k).</p>
+<p><b>Angular momentum:</b> I₁ω₁ = I₂ω₂ when external torque is zero. Rotational kinetic energy is ½Iω². A skater can add kinetic energy by doing work while drawing her arms inward. For the pulley, the light string is inextensible, does not slip, and axle friction is neglected.</p>
+</details>
+</div>
+<section class="card end" id="end" hidden>
+<h2>Spin Lab complete!</h2>
+<div id="stars" class="stars"></div>
+<p id="total"></p>
+<button id="again" class="check">Play again</button>
+</section>
+<footer>Fix It Today</footer>
+</main>
+<script>
+/* FIT-CALC-BEGIN forces */
+const FITCalcForces = (function () {
+  'use strict';
+
+  const EPS = 1e-9;
+  const SNAP = 1e-12;
+  const RAD = Math.PI / 180;
+
+  function err(error, reason) {
+    const e = new Error(reason);
+    e.fitError = error;
+    e.reason = reason;
+    throw e;
+  }
+
+  function num(v) {
+    if (typeof v !== 'number' || !Number.isFinite(v)) {
+      err('ConstraintViolation', 'invalid_number');
+    }
+    return v;
+  }
+
+  function obj(v) {
+    if (!v || typeof v !== 'object' || Array.isArray(v)) {
+      err('ConstraintViolation', 'invalid_input');
+    }
+    return v;
+  }
+
+  function opt(v, fallback) {
+    return v == null ? fallback : num(v);
+  }
+
+  function nonneg(v, reason) {
+    if (v == null) err('ConstraintViolation', reason);
+    v = num(v);
+    if (v < 0) err('ConstraintViolation', reason);
+    return v;
+  }
+
+  function pos(v, reason) {
+    if (v == null) err('ConstraintViolation', reason);
+    v = num(v);
+    if (v <= 0) err('ConstraintViolation', reason);
+    return v;
+  }
+
+  function range(v, lo, hi, reason) {
+    v = num(v);
+    if (v < lo || v > hi) err('ConstraintViolation', reason);
+    return v;
+  }
+
+  function grav(v) {
+    v = opt(v, 9.81);
+    if (v <= 0) err('MathError', 'gravity_must_be_positive');
+    return v;
+  }
+
+  function arr(v, max, reason, min) {
+    if (!Array.isArray(v)) {
+      err('ConstraintViolation', 'invalid_array');
+    }
+    if (v.length > max || v.length < (min || 0)) {
+      err('ConstraintViolation', reason);
+    }
+    return v;
+  }
+
+  function snap(v, tolerance) {
+    return Math.abs(v) < tolerance ? 0 : v;
+  }
+
+  function finite(v) {
+    if (typeof v === 'number' && !Number.isFinite(v)) {
+      err('MathError', 'non_finite_result');
+    }
+    if (v && typeof v === 'object') {
+      Object.keys(v).forEach(k => finite(v[k]));
+    }
+    return v;
+  }
+
+  function safe(fn) {
+    try {
+      return finite(fn());
+    } catch (e) {
+      return e && e.fitError
+        ? { error: e.fitError, reason: e.reason }
+        : { error: 'RuntimeError', reason: 'calculation_failed' };
+    }
+  }
+
+  function loadsOf(v) {
+    return arr(v, 10, 'loads_exceed_10').map(a => {
+      obj(a);
+      return {
+        force_N: nonneg(a.force_N, 'negative_load'),
+        position_m: num(a.position_m)
+      };
+    });
+  }
+
+  function balanceCore(o) {
+    obj(o);
+    const p = num(o.pivot_m);
+    const loads = loadsOf(o.loads);
+    const w = nonneg(opt(o.beam_weight_N, 0), 'negative_load');
+    const cg = opt(o.cg_m, p);
+
+    let cw = 0;
+    let acw = 0;
+    let reaction = 0;
+
+    function add(force, x) {
+      const m = force * (x - p);
+      if (m >= 0) cw += m;
+      else acw -= m;
+      reaction += force;
+    }
+
+    loads.forEach(a => add(a.force_N, a.position_m));
+    add(w, cg);
+
+    const net = snap(cw - acw, EPS);
+    const tips = net > 0
+      ? 'clockwise'
+      : net < 0
+        ? 'anticlockwise'
+        : 'none';
+
+    return {
+      clockwise_N_m: cw,
+      anticlockwise_N_m: acw,
+      net_N_m: net,
+      balanced: tips === 'none',
+      tips,
+      reaction_N: reaction
+    };
+  }
+
+  function beamCore(o) {
+    obj(o);
+    const span = pos(o.span_m, 'span_not_positive');
+    const points = arr(o.point_loads, 10, 'loads_exceed_10')
+      .map(a => {
+        obj(a);
+        const force = nonneg(a.force_N, 'negative_load');
+        const x = num(a.position_m);
+
+        if (x < 0 || x > span) {
+          err('ConstraintViolation', 'load_outside_span');
+        }
+
+        return { force_N: force, position_m: x };
+      })
+      .sort((a, b) => a.position_m - b.position_m);
+
+    const udl = nonneg(opt(o.udl_N_per_m, 0), 'negative_load');
+
+    let total = udl * span;
+    let aboutA = udl * span * span / 2;
+
+    points.forEach(a => {
+      total += a.force_N;
+      aboutA += a.force_N * a.position_m;
+    });
+
+    const RB = aboutA / span;
+    const RA = total - RB;
+
+    function momentAt(x) {
+      let m = RA * x - udl * x * x / 2;
+
+      points.forEach(a => {
+        if (a.position_m < x) {
+          m -= a.force_N * (x - a.position_m);
+        }
+      });
+
+      return snap(m, EPS);
+    }
+
+    return {
+      span,
+      points,
+      udl,
+      RA,
+      RB,
+      momentAt
+    };
+  }
+
+  const K = Object.freeze({
+    solid_disc: 0.5,
+    hoop: 1,
+    solid_sphere: 0.4,
+    hollow_sphere: 2 / 3
+  });
+
+  function shapeK(shape, canSlide) {
+    if (canSlide && shape === 'block_frictionless') {
+      return 0;
+    }
+
+    if (canSlide && shape === 'rod_centre') {
+      err('NotSupported', 'shape_cannot_roll');
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(K, shape)) {
+      err('NotSupported', 'shape_not_supported');
+    }
+
+    return K[shape];
+  }
+
+  /**
+   * Weight in a uniform gravitational field.
+   *
+   * Input:
+   *   mass_kg >= 0
+   *   g_m_s2 > 0 (optional, default 9.81)
+   *
+   * Output:
+   *   weight_N
+   *
+   * Errors:
+   *   ConstraintViolation / negative_mass
+   *   MathError / gravity_must_be_positive
+   *
+   * Hand check:
+   *   2.5 kg at g = 10 m/s2 gives 25 N.
+   */
+  function weight(o) {
+    return safe(() => {
+      obj(o);
+      const g = grav(o.g_m_s2);
+
+      return {
+        weight_N: nonneg(o.mass_kg, 'negative_mass') * g
+      };
+    });
+  }
+
+  /**
+   * Ideal Hooke's-law spring within its proportionality limit.
+   *
+   * Inputs:
+   *   k_N_per_m > 0
+   *   load_N >= 0
+   *   limit_N >= 0 (optional)
+   *
+   * Outputs:
+   *   extension_m
+   *   within_limit
+   *
+   * Above the specified limit, within_limit is false and
+   * extension_m is null; linear extrapolation is not valid.
+   *
+   * Errors:
+   *   ConstraintViolation / spring_constant_not_positive
+   *   ConstraintViolation / negative_load
+   *   ConstraintViolation / negative_limit
+   *
+   * Hand check:
+   *   30 N / 200 N/m = 0.15 m.
+   */
+  function spring(o) {
+    return safe(() => {
+      obj(o);
+
+      const k = pos(
+        o.k_N_per_m,
+        'spring_constant_not_positive'
+      );
+      const f = nonneg(o.load_N, 'negative_load');
+      const limit = o.limit_N == null
+        ? null
+        : nonneg(o.limit_N, 'negative_limit');
+
+      if (limit !== null && f > limit) {
+        return {
+          extension_m: null,
+          within_limit: false
+        };
+      }
+
+      return {
+        extension_m: f / k,
+        within_limit: true
+      };
+    });
+  }
+
+  /**
+   * Sum of 1–10 coplanar force vectors.
+   *
+   * Inputs:
+   *   forces: array of { magnitude_N, direction_deg }
+   *   magnitude_N >= 0
+   *   direction_deg measured anticlockwise from +x
+   *
+   * Outputs:
+   *   Rx_N
+   *   Ry_N
+   *   magnitude_N
+   *   direction_deg: [0,360), or null if balanced
+   *   balanced
+   *
+   * Errors:
+   *   ConstraintViolation / forces_out_of_range_1_10
+   *   ConstraintViolation / negative_magnitude
+   *
+   * Hand check:
+   *   3 N east + 4 N north -> 5 N at 53.1301023542 degrees.
+   */
+  function resultant(o) {
+    return safe(() => {
+      obj(o);
+
+      const forces = arr(
+        o.forces,
+        10,
+        'forces_out_of_range_1_10',
+        1
+      );
+
+      let x = 0;
+      let y = 0;
+
+      forces.forEach(a => {
+        obj(a);
+
+        const f = nonneg(
+          a.magnitude_N,
+          'negative_magnitude'
+        );
+        const t = num(a.direction_deg) * RAD;
+
+        x += f * Math.cos(t);
+        y += f * Math.sin(t);
+      });
+
+      x = snap(x, SNAP);
+      y = snap(y, SNAP);
+
+      const magnitude = Math.hypot(x, y);
+
+      if (magnitude < EPS) {
+        return {
+          Rx_N: x,
+          Ry_N: y,
+          magnitude_N: 0,
+          direction_deg: null,
+          balanced: true
+        };
+      }
+
+      const direction = (
+        Math.atan2(y, x) / RAD + 360
+      ) % 360;
+
+      return {
+        Rx_N: x,
+        Ry_N: y,
+        magnitude_N: magnitude,
+        direction_deg: snap(direction, SNAP),
+        balanced: false
+      };
+    });
+  }
+
+  /**
+   * Horizontal motion from rest with limiting static friction.
+   *
+   * Assumption:
+   *   Once moving, friction has the same magnitude as the
+   *   limiting static friction. All forces are horizontal.
+   *
+   * Inputs:
+   *   mass_kg > 0
+   *   applied_N >= 0
+   *   friction_max_N >= 0
+   *
+   * Outputs:
+   *   friction_N
+   *   net_N
+   *   acceleration_m_s2
+   *   moves
+   *
+   * Errors:
+   *   ConstraintViolation / mass_not_positive
+   *   ConstraintViolation / negative_force
+   *
+   * Hand check:
+   *   12 N push, 4 N friction, 2 kg -> 4 m/s2.
+   */
+  function dynamics(o) {
+    return safe(() => {
+      obj(o);
+
+      const m = pos(o.mass_kg, 'mass_not_positive');
+      const applied = nonneg(
+        o.applied_N,
+        'negative_force'
+      );
+      const limit = nonneg(
+        o.friction_max_N,
+        'negative_force'
+      );
+
+      if (applied - limit <= EPS) {
+        return {
+          friction_N: applied,
+          net_N: 0,
+          acceleration_m_s2: 0,
+          moves: false
+        };
+      }
+
+      const net = applied - limit;
+
+      return {
+        friction_N: limit,
+        net_N: net,
+        acceleration_m_s2: net / m,
+        moves: true
+      };
+    });
+  }
+
+  /**
+   * Magnitude of a force's moment about a point.
+   *
+   * Formula:
+   *   M = F d sin(angle)
+   *
+   * Inputs:
+   *   force_N >= 0
+   *   distance_m >= 0
+   *   angle_deg in [0,180] (optional, default 90)
+   *
+   * Angle is between the force and the moment arm.
+   *
+   * Output:
+   *   moment_N_m
+   *
+   * Errors:
+   *   ConstraintViolation / negative_force
+   *   ConstraintViolation / negative_distance
+   *   ConstraintViolation / angle_out_of_range_0_180
+   *
+   * Hand check:
+   *   10 N x 0.4 m x sin(30 degrees) = 2 N m.
+   */
+  function moment(o) {
+    return safe(() => {
+      obj(o);
+
+      const f = nonneg(
+        o.force_N,
+        'negative_force'
+      );
+      const d = nonneg(
+        o.distance_m,
+        'negative_distance'
+      );
+      const a = range(
+        opt(o.angle_deg, 90),
+        0,
+        180,
+        'angle_out_of_range_0_180'
+      );
+
+      return {
+        moment_N_m: snap(
+          f * d * Math.sin(a * RAD),
+          SNAP
+        )
+      };
+    });
+  }
+
+  /**
+   * Moments of downward loads on a rigid horizontal beam.
+   *
+   * Inputs:
+   *   pivot_m
+   *   loads: up to 10 { force_N >= 0, position_m }
+   *   beam_weight_N >= 0 (optional, default 0)
+   *   cg_m (optional, default pivot position)
+   *
+   * Outputs:
+   *   clockwise_N_m
+   *   anticlockwise_N_m
+   *   net_N_m
+   *   balanced
+   *   tips
+   *   reaction_N
+   *
+   * Positive net moment is clockwise. reaction_N is the
+   * total downward load, including the beam weight ONCE.
+   *
+   * Errors:
+   *   ConstraintViolation / loads_exceed_10
+   *   ConstraintViolation / negative_load
+   *
+   * Hand check:
+   *   Pivot=1 m, 10 N at x=0 m, 5 N at x=3 m:
+   *   clockwise=10 N m, anticlockwise=10 N m,
+   *   reaction=15 N.
+   */
+  function balance(o) {
+    return safe(() => balanceCore(o));
+  }
+
+  /**
+   * Find the additional downward load needed for equilibrium.
+   *
+   * Inputs:
+   *   All balance inputs
+   *   unknown_position_m
+   *
+   * Outputs:
+   *   force_N
+   *   feasible
+   *
+   * A negative force_N means an upward force is required.
+   * In that case, feasible is false for a downward load.
+   *
+   * Errors:
+   *   MathError / unknown_at_pivot
+   *   ConstraintViolation / loads_exceed_10
+   *   ConstraintViolation / negative_load
+   *
+   * Hand check:
+   *   10 N at x=0, pivot=1, unknown x=3 -> 5 N.
+   */
+  function balance_unknown(o) {
+    return safe(() => {
+      obj(o);
+
+      const b = balanceCore(o);
+      const arm =
+        num(o.unknown_position_m) - num(o.pivot_m);
+
+      if (Math.abs(arm) < SNAP) {
+        err('MathError', 'unknown_at_pivot');
+      }
+
+      const force = snap(
+        -b.net_N_m / arm,
+        SNAP
+      );
+
+      return {
+        force_N: force,
+        feasible: force >= -EPS
+      };
+    });
+  }
+
+  /**
+   * Tipping of a uniform rigid block about its lower edge.
+   *
+   * Inputs:
+   *   base_width_m > 0
+   *   cg_height_m > 0
+   *   tilt_deg in [0,90]
+   *
+   * Outputs:
+   *   critical_tilt_deg
+   *   state: 'stable', 'balanced_on_edge', or 'topples'
+   *
+   * Assumption:
+   *   The centre of gravity initially lies over the centre
+   *   of the rectangular supporting base. Positive tilt
+   *   means rotation towards the potential tipping edge.
+   *
+   * Errors:
+   *   ConstraintViolation / base_width_not_positive
+   *   ConstraintViolation / cg_height_not_positive
+   *   ConstraintViolation / angle_out_of_range_0_90
+   *
+   * Hand check:
+   *   Base width=2 m, CG height=1 m -> critical tilt=45°.
+   */
+  function tilt(o) {
+    return safe(() => {
+      obj(o);
+
+      const b = pos(
+        o.base_width_m,
+        'base_width_not_positive'
+      );
+      const h = pos(
+        o.cg_height_m,
+        'cg_height_not_positive'
+      );
+      const t = range(
+        o.tilt_deg,
+        0,
+        90,
+        'angle_out_of_range_0_90'
+      );
+
+      const critical =
+        Math.atan((b / 2) / h) / RAD;
+      const delta = t - critical;
+
+      return {
+        critical_tilt_deg: critical,
+        state: Math.abs(delta) <= EPS
+          ? 'balanced_on_edge'
+          : delta < 0
+            ? 'stable'
+            : 'topples'
+      };
+    });
+  }
+
+  /**
+   * Limiting slope angle for a static-friction coefficient.
+   *
+   * Formula:
+   *   angle = atan(mu_s)
+   *
+   * Input:
+   *   mu_s >= 0
+   *
+   * Output:
+   *   angle_deg
+   *
+   * Error:
+   *   ConstraintViolation / negative_friction_coefficient
+   *
+   * Hand check:
+   *   mu_s=1 -> 45°.
+   */
+  function slip_angle(o) {
+    return safe(() => {
+      obj(o);
+
+      const mu = nonneg(
+        o.mu_s,
+        'negative_friction_coefficient'
+      );
+
+      return {
+        angle_deg: Math.atan(mu) / RAD
+      };
+    });
+  }
+
+  /**
+   * Block initially at rest on a rough inclined plane.
+   *
+   * Inputs:
+   *   mass_kg > 0
+   *   angle_deg in [0,90]
+   *   mu_s >= 0
+   *   mu_k >= 0 and mu_k <= mu_s
+   *   g_m_s2 > 0 (optional, default 9.81)
+   *
+   * Outputs:
+   *   normal_N
+   *   parallel_N
+   *   friction_max_N
+   *   slips
+   *   friction_N
+   *   acceleration_m_s2
+   *
+   * Positive acceleration is down the slope. If the
+   * static-friction limit is not exceeded, the body remains
+   * at rest and friction balances the downhill force.
+   *
+   * Errors:
+   *   MathError / gravity_must_be_positive
+   *   ConstraintViolation / mass_not_positive
+   *   ConstraintViolation / angle_out_of_range_0_90
+   *   ConstraintViolation / negative_friction_coefficient
+   *   ConstraintViolation / kinetic_exceeds_static
+   *
+   * Hand check:
+   *   m=2 kg, g=10, angle=30°, mu_s=.4, mu_k=.3:
+   *   normal=17.3205081 N
+   *   parallel=10 N
+   *   acceleration=2.40192379 m/s2.
+   */
+  function incline(o) {
+    return safe(() => {
+      obj(o);
+
+      const g = grav(o.g_m_s2);
+      const m = pos(
+        o.mass_kg,
+        'mass_not_positive'
+      );
+      const a = range(
+        o.angle_deg,
+        0,
+        90,
+        'angle_out_of_range_0_90'
+      );
+      const mus = nonneg(
+        o.mu_s,
+        'negative_friction_coefficient'
+      );
+      const muk = nonneg(
+        o.mu_k,
+        'negative_friction_coefficient'
+      );
+
+      if (muk > mus) {
+        err(
+          'ConstraintViolation',
+          'kinetic_exceeds_static'
+        );
+      }
+
+      const normal = snap(
+        m * g * Math.cos(a * RAD),
+        SNAP
+      );
+      const parallel = snap(
+        m * g * Math.sin(a * RAD),
+        SNAP
+      );
+      const limit = mus * normal;
+      const slips = parallel - limit > EPS;
+      const friction = slips
+        ? muk * normal
+        : parallel;
+
+      return {
+        normal_N: normal,
+        parallel_N: parallel,
+        friction_max_N: limit,
+        slips,
+        friction_N: friction,
+        acceleration_m_s2: slips
+          ? (parallel - friction) / m
+          : 0
+      };
+    });
+  }
+
+  /**
+   * Two light strings supporting a vertical weight.
+   *
+   * Inputs:
+   *   weight_N >= 0
+   *   angle1_deg in [0,90]
+   *   angle2_deg in [0,90]
+   *
+   * Angles are measured upwards from the horizontal.
+   * Strings and knot are massless and in static equilibrium.
+   *
+   * Outputs:
+   *   T1_N
+   *   T2_N
+   *
+   * The case 90°/90° is statically indeterminate because
+   * both strings are vertical and load sharing is unknown.
+   * Two horizontal strings cannot support a positive weight.
+   *
+   * Errors:
+   *   ConstraintViolation / negative_load
+   *   ConstraintViolation / angle_out_of_range_0_90
+   *   MathError / strings_horizontal_no_solution
+   *   MathError / strings_vertical_indeterminate
+   *
+   * Hand check:
+   *   Weight=10 N, angles=30° and 60°:
+   *   T1=5 N and T2=8.660254 N.
+   */
+  function two_strings(o) {
+    return safe(() => {
+      obj(o);
+
+      const w = nonneg(
+        o.weight_N,
+        'negative_load'
+      );
+      const a = range(
+        o.angle1_deg,
+        0,
+        90,
+        'angle_out_of_range_0_90'
+      );
+      const b = range(
+        o.angle2_deg,
+        0,
+        90,
+        'angle_out_of_range_0_90'
+      );
+
+      if (a === 90 && b === 90) {
+        err(
+          'MathError',
+          'strings_vertical_indeterminate'
+        );
+      }
+
+      const denominator =
+        Math.sin((a + b) * RAD);
+
+      if (Math.abs(denominator) < SNAP) {
+        err(
+          'MathError',
+          'strings_horizontal_no_solution'
+        );
+      }
+
+      const threshold =
+        SNAP * Math.max(1, w);
+
+      return {
+        T1_N: snap(
+          w * Math.cos(b * RAD) / denominator,
+          threshold
+        ),
+        T2_N: snap(
+          w * Math.cos(a * RAD) / denominator,
+          threshold
+        )
+      };
+    });
+  }
+
+  /**
+   * Reactions and maximum sagging moment of a simply
+   * supported beam under downward loads.
+   *
+   * Inputs:
+   *   span_m > 0
+   *   point_loads: up to 10 objects
+   *     { force_N >= 0, position_m in [0,span_m] }
+   *   udl_N_per_m >= 0 (optional, default 0)
+   *
+   * Outputs:
+   *   RA_N
+   *   RB_N
+   *   max_moment_N_m
+   *   max_moment_at_m
+   *
+   * A uniformly distributed load acts across the full span.
+   * The moment maximum is sought at the supports, at point
+   * loads, and wherever shear vanishes within a load-free
+   * interval. Repeated load positions are counted once
+   * when constructing interval boundaries, but every
+   * point-load force contributes to equilibrium and moment.
+   * Tied maxima use the smallest x. If maximum moment is
+   * zero, max_moment_at_m is null.
+   *
+   * Errors:
+   *   ConstraintViolation / span_not_positive
+   *   ConstraintViolation / loads_exceed_10
+   *   ConstraintViolation / negative_load
+   *   ConstraintViolation / load_outside_span
+   *
+   * Hand check:
+   *   4 m span, 10 N central point load:
+   *   RA=5 N, RB=5 N,
+   *   maximum moment=10 N m at x=2 m.
+   */
+  function beam_reactions(o) {
+    return safe(() => {
+      const b = beamCore(o);
+
+      const xs = [0, b.span];
+
+      b.points.forEach(p => {
+        xs.push(p.position_m);
+      });
+
+      if (b.udl > 0) {
+        const boundaries = [
+          ...new Set(xs)
+        ].sort((a, c) => a - c);
+
+        let passed = 0;
+
+        for (
+          let i = 0;
+          i < boundaries.length - 1;
+          i++
+        ) {
+          const left = boundaries[i];
+          const right = boundaries[i + 1];
+
+          b.points.forEach(p => {
+            if (p.position_m === left) {
+              passed += p.force_N;
+            }
+          });
+
+          const root =
+            (b.RA - passed) / b.udl;
+
+          if (root >= left && root <= right) {
+            xs.push(root);
+          }
+        }
+      }
+
+      xs.sort((a, c) => a - c);
+
+      let best = 0;
+      let at = null;
+
+      xs.forEach(x => {
+        const m = b.momentAt(x);
+
+        if (m > best + EPS) {
+          best = m;
+          at = x;
+        } else if (
+          m > EPS &&
+          Math.abs(m - best) <= EPS &&
+          (at === null || x < at)
+        ) {
+          at = x;
+        }
+      });
+
+      if (best < EPS) {
+        best = 0;
+        at = null;
+      }
+
+      return {
+        RA_N: b.RA,
+        RB_N: b.RB,
+        max_moment_N_m: best,
+        max_moment_at_m: at
+      };
+    });
+  }
+
+  /**
+   * Bending moment at a specified section of the same beam.
+   *
+   * Inputs:
+   *   All beam_reactions inputs
+   *   x_m in [0,span_m]
+   *
+   * Output:
+   *   moment_N_m
+   *
+   * Sagging moment is positive. A point load at the section
+   * makes no contribution to its own lever arm.
+   *
+   * Errors:
+   *   All beam_reactions errors
+   *   ConstraintViolation / position_outside_span
+   *
+   * Hand check:
+   *   4 m span, 10 N load at x=2 m:
+   *   bending moment at x=1 m = 5 N m.
+   */
+  function beam_moment(o) {
+    return safe(() => {
+      const b = beamCore(o);
+
+      const x = range(
+        o.x_m,
+        0,
+        b.span,
+        'position_outside_span'
+      );
+
+      return {
+        moment_N_m: b.momentAt(x)
+      };
+    });
+  }
+
+  /**
+   * Moment of inertia of ideal, uniformly dense rigid shapes.
+   *
+   * Supported shapes:
+   *   solid_disc
+   *   hoop
+   *   solid_sphere
+   *   hollow_sphere
+   *   rod_centre
+   *
+   * Inputs:
+   *   shape
+   *   mass_kg > 0
+   *   radius_m > 0 for round shapes
+   *   length_m > 0 for rod_centre
+   *   axis_offset_m >= 0 (optional, default 0)
+   *
+   * The parallel-axis theorem adds mass_kg*axis_offset_m^2.
+   *
+   * Output:
+   *   I_kg_m2
+   *
+   * Errors:
+   *   ConstraintViolation / mass_not_positive
+   *   ConstraintViolation / size_not_positive
+   *   ConstraintViolation / negative_distance
+   *   NotSupported / shape_not_supported
+   *
+   * Missing radius_m or length_m is classified as
+   * ConstraintViolation / size_not_positive.
+   *
+   * Hand check:
+   *   2 kg solid disc with radius 0.5 m:
+   *   I = (1/2)(2)(0.5^2) = 0.25 kg m2.
+   */
+  function inertia(o) {
+    return safe(() => {
+      obj(o);
+
+      const m = pos(
+        o.mass_kg,
+        'mass_not_positive'
+      );
+
+      let central;
+
+      if (o.shape === 'rod_centre') {
+        const L = pos(
+          o.length_m,
+          'size_not_positive'
+        );
+        central = m * L * L / 12;
+      } else {
+        const k = shapeK(o.shape, false);
+        const r = pos(
+          o.radius_m,
+          'size_not_positive'
+        );
+        central = k * m * r * r;
+      }
+
+      const d = nonneg(
+        opt(o.axis_offset_m, 0),
+        'negative_distance'
+      );
+
+      return {
+        I_kg_m2: central + m * d * d
+      };
+    });
+  }
+
+  /**
+   * Rolling without slipping or frictionless sliding.
+   *
+   * Supported shapes:
+   *   solid_disc, hoop, solid_sphere, hollow_sphere,
+   *   block_frictionless
+   *
+   * Inputs:
+   *   shape
+   *   angle_deg in (0,90]
+   *   height_m >= 0
+   *   g_m_s2 > 0 (optional, default 9.81)
+   *
+   * Outputs:
+   *   k
+   *   acceleration_m_s2
+   *   speed_at_bottom_m_s
+   *   distance_m
+   *   time_s
+   *
+   * For rolling bodies k = I/(mr^2), and acceleration is
+   * g sin(angle)/(1+k). For a frictionless block k=0.
+   * All bodies start from rest at the given vertical height.
+   * Mass and radius cancel for each ideal shape.
+   *
+   * Errors:
+   *   MathError / gravity_must_be_positive
+   *   NotSupported / shape_cannot_roll
+   *   NotSupported / shape_not_supported
+   *   ConstraintViolation / angle_out_of_range_0_90
+   *   ConstraintViolation / negative_distance
+   *
+   * Hand check:
+   *   Solid sphere, g=10, angle=30°, height=1 m:
+   *   k=0.4, acceleration=3.57142857 m/s2,
+   *   speed=3.77964473 m/s.
+   */
+  function rolling(o) {
+    return safe(() => {
+      obj(o);
+
+      const g = grav(o.g_m_s2);
+      const k = shapeK(o.shape, true);
+      const a = num(o.angle_deg);
+
+      if (a <= 0 || a > 90) {
+        err(
+          'ConstraintViolation',
+          'angle_out_of_range_0_90'
+        );
+      }
+
+      const h = nonneg(
+        o.height_m,
+        'negative_distance'
+      );
+
+      const sine = Math.sin(a * RAD);
+      const acceleration =
+        g * sine / (1 + k);
+      const distance = h / sine;
+
+      return {
+        k,
+        acceleration_m_s2: acceleration,
+        speed_at_bottom_m_s: Math.sqrt(
+          2 * g * h / (1 + k)
+        ),
+        distance_m: distance,
+        time_s: h === 0
+          ? 0
+          : Math.sqrt(
+              2 * distance / acceleration
+            )
+      };
+    });
+  }
+
+  /**
+   * Conservation of angular momentum about a fixed axis.
+   *
+   * Assumption:
+   *   External torque is zero.
+   *
+   * Inputs:
+   *   I1_kg_m2 > 0
+   *   omega1_rad_s (signed)
+   *   I2_kg_m2 > 0
+   *
+   * Outputs:
+   *   omega2_rad_s
+   *   L_kg_m2_s
+   *   KE1_J
+   *   KE2_J
+   *
+   * Energy need not be conserved because internal work
+   * may be performed when changing the inertia.
+   *
+   * Error:
+   *   ConstraintViolation / inertia_not_positive
+   *
+   * Hand check:
+   *   I1=4, omega1=3, I2=2:
+   *   omega2=6 rad/s, L=12 kg m2/s,
+   *   KE1=18 J, KE2=36 J.
+   */
+  function angular_momentum(o) {
+    return safe(() => {
+      obj(o);
+
+      const i1 = pos(
+        o.I1_kg_m2,
+        'inertia_not_positive'
+      );
+      const w1 = num(o.omega1_rad_s);
+      const i2 = pos(
+        o.I2_kg_m2,
+        'inertia_not_positive'
+      );
+
+      const L = i1 * w1;
+      const w2 = L / i2;
+
+      return {
+        omega2_rad_s: w2,
+        L_kg_m2_s: L,
+        KE1_J: i1 * w1 * w1 / 2,
+        KE2_J: i2 * w2 * w2 / 2
+      };
+    });
+  }
+
+  /**
+   * Angular acceleration under a net fixed-axis torque.
+   *
+   * Formula:
+   *   alpha = torque/I
+   *
+   * Inputs:
+   *   torque_N_m (signed)
+   *   I_kg_m2 > 0
+   *
+   * Output:
+   *   alpha_rad_s2
+   *
+   * Error:
+   *   ConstraintViolation / inertia_not_positive
+   *
+   * Hand check:
+   *   12 N m / 3 kg m2 = 4 rad/s2.
+   */
+  function angular_acceleration(o) {
+    return safe(() => {
+      obj(o);
+
+      const torque = num(o.torque_N_m);
+      const i = pos(
+        o.I_kg_m2,
+        'inertia_not_positive'
+      );
+
+      return {
+        alpha_rad_s2: torque / i
+      };
+    });
+  }
+
+  /**
+   * Atwood machine with optional rotational pulley inertia.
+   *
+   * Assumptions:
+   *   Light, inextensible string; no slip; frictionless axle.
+   *
+   * Inputs:
+   *   m1_kg > 0
+   *   m2_kg > 0
+   *   pulley_I_kg_m2 >= 0 (optional, default 0)
+   *   pulley_radius_m > 0 when pulley inertia is positive
+   *   g_m_s2 > 0 (optional, default 9.81)
+   *
+   * Outputs:
+   *   acceleration_m_s2 (positive when m2 descends)
+   *   T1_N
+   *   T2_N
+   *
+   * Errors:
+   *   MathError / gravity_must_be_positive
+   *   ConstraintViolation / mass_not_positive
+   *   ConstraintViolation / inertia_not_positive
+   *   ConstraintViolation / radius_not_positive
+   *
+   * If pulley_I_kg_m2 > 0 and pulley_radius_m is absent
+   * or null, the documented error is radius_not_positive,
+   * not invalid_number.
+   *
+   * Hand check:
+   *   m1=2 kg, m2=3 kg, g=10, light pulley:
+   *   a=2 m/s2, T1=T2=24 N.
+   */
+  function atwood(o) {
+    return safe(() => {
+      obj(o);
+
+      const g = grav(o.g_m_s2);
+      const m1 = pos(
+        o.m1_kg,
+        'mass_not_positive'
+      );
+      const m2 = pos(
+        o.m2_kg,
+        'mass_not_positive'
+      );
+      const i = nonneg(
+        opt(o.pulley_I_kg_m2, 0),
+        'inertia_not_positive'
+      );
+
+      let effective = 0;
+
+      if (i > 0) {
+        const r = pos(
+          o.pulley_radius_m,
+          'radius_not_positive'
+        );
+        effective = i / (r * r);
+      }
+
+      const a =
+        (m2 - m1) * g /
+        (m1 + m2 + effective);
+
+      return {
+        acceleration_m_s2: snap(a, SNAP),
+        T1_N: m1 * (g + a),
+        T2_N: m2 * (g - a)
+      };
+    });
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    weight,
+    spring,
+    resultant,
+    dynamics,
+    moment,
+    balance,
+    balance_unknown,
+    tilt,
+    slip_angle,
+    incline,
+    two_strings,
+    beam_reactions,
+    beam_moment,
+    inertia,
+    rolling,
+    angular_momentum,
+    angular_acceleration,
+    atwood
+  });
+})();
+/* FIT-CALC-END forces */
+</script>
+<script>
+(function () {
+  'use strict';
+
+  const C = FITCalcForces;
+  const $ = id => document.getElementById(id);
+  const fmt = n => Number.isFinite(n)
+    ? Number(n.toPrecision(4)).toString()
+    : '—';
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const swatch = (colour, text) =>
+    `<span><i class="swatch" style="background:${colour}"></i>${text}</span>`;
+
+  const shapes = [
+    {
+      id: 'hoop',
+      name: 'Hoop',
+      colour: '#FF8FB8'
+    },
+    {
+      id: 'solid_disc',
+      name: 'Disc',
+      colour: '#FFC83D'
+    },
+    {
+      id: 'solid_sphere',
+      name: 'Solid sphere',
+      colour: '#3DBE6B'
+    },
+    {
+      id: 'hollow_sphere',
+      name: 'Hollow sphere',
+      colour: '#6A45F5'
+    },
+    {
+      id: 'block_frictionless',
+      name: 'Smooth block',
+      colour: '#1F66E5'
+    }
+  ];
+
+  let round = 0;
+  let score = 0;
+  let tries = 0;
+  let hinted = false;
+  let solved = false;
+  let replay = 0;
+  let task;
+  let value = 0;
+  let order = [];
+  let choice = 'external';
+  let massChanged = false;
+  let radiusChanged = false;
+  let shapeChanged = false;
+
+  function random(n) {
+    let s = (90613 + n * 10007 + replay * 2053) >>> 0;
+    return () => {
+      s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+  }
+
+  function feedback(message, good) {
+    $('feedback').className = 'feedback ' +
+      (good === null ? '' : good ? 'good' : 'bad');
+    $('feedback').textContent = message;
+  }
+
+  function issue(r) {
+    if (!r || !r.error) return false;
+    feedback(
+      `Cannot calculate: ${r.reason.replace(/_/g, ' ')}.`,
+      false
+    );
+    return true;
+  }
+
+  function roll(shape) {
+    return C.rolling({
+      shape,
+      angle_deg: task.angle,
+      height_m: task.height
+    });
+  }
+
+  function axisAt(offset) {
+    const input = {
+      shape: task.shape,
+      mass_kg: task.mass,
+      axis_offset_m: offset
+    };
+
+    if (task.shape === 'rod_centre') {
+      input.length_m = task.size;
+    } else {
+      input.radius_m = task.size;
+    }
+
+    const r = C.inertia(input);
+    if (r.error) return r;
+
+    const a = C.angular_acceleration({
+      torque_N_m: task.torque,
+      I_kg_m2: r.I_kg_m2
+    });
+
+    return a.error
+      ? a
+      : {
+          I_kg_m2: r.I_kg_m2,
+          alpha_rad_s2: a.alpha_rad_s2
+        };
+  }
+
+  function pulleyAt(I) {
+    return C.atwood({
+      m1_kg: task.m1,
+      m2_kg: task.m2,
+      pulley_I_kg_m2: I,
+      pulley_radius_m: task.radius
+    });
+  }
+
+  function skaterAt(I) {
+    return C.angular_momentum({
+      I1_kg_m2: task.I1,
+      omega1_rad_s: task.omega1,
+      I2_kg_m2: I
+    });
+  }
+
+  function begin() {
+    tries = 0;
+    hinted = false;
+    solved = false;
+    order = [];
+    choice = 'external';
+    massChanged = false;
+    radiusChanged = false;
+    shapeChanged = false;
+
+    const v = random(round)() < .5 ? 0 : 1;
+
+    if (round === 0) {
+      task = {
+        kind: 'rolling',
+        mode: 'rank',
+        angle: 30 + 10 * v,
+        height: 1 + .5 * v,
+        mass: 2,
+        radius: .2
+      };
+    } else if (round === 1) {
+      task = {
+        kind: 'rolling',
+        mode: 'time',
+        angle: 30,
+        height: 1 + .5 * v,
+        mass: 2 + v,
+        radius: .2 + .1 * v,
+        shape: 'solid_sphere'
+      };
+      value = 2;
+    } else if (round === 2) {
+      task = {
+        kind: 'axis',
+        mode: 'offset',
+        shape: v ? 'rod_centre' : 'solid_disc',
+        mass: v ? 3 : 2,
+        size: v ? 2 : .5,
+        torque: v ? 7 : 3,
+        target: 4
+      };
+      value = 0;
+    } else if (round === 3) {
+      task = {
+        kind: 'pulley',
+        mode: 'acceleration',
+        m1: 2 + v,
+        m2: 4 + v,
+        I: .2,
+        radius: .5
+      };
+      value = 0;
+    } else if (round === 4) {
+      task = {
+        kind: 'skater',
+        mode: 'spin',
+        I1: 4,
+        omega1: 3 + v,
+        I2: 2
+      };
+      value = 2;
+    } else {
+      task = {
+        kind: 'rolling',
+        mode: 'invariance',
+        angle: 40,
+        height: 2,
+        mass: 1 + v,
+        radius: .3 + .1 * v
+      };
+    }
+
+    $('hud').textContent = `Round ${round + 1}/6 · Score ${score}`;
+    $('check').disabled = false;
+    $('hint').disabled = false;
+    $('next').hidden = true;
+
+    feedback('Adjust your answer, then press Check.', null);
+    makeControls();
+    draw();
+  }
+
+  function numeric(label, lo, hi, step, unit) {
+    task.unit = unit;
+
+    $('controls').innerHTML =
+      `<label for="range">${label}</label>` +
+      `<div class="stepper">` +
+      `<button data-n="-10" aria-label="Coarse decrease">−−</button>` +
+      `<button data-n="-1" aria-label="Fine decrease">−</button>` +
+      `<output id="read" class="read"></output>` +
+      `<button data-n="1" aria-label="Fine increase">+</button>` +
+      `<button data-n="10" aria-label="Coarse increase">++</button>` +
+      `</div>` +
+      `<input id="range" type="range" min="${lo}" max="${hi}" ` +
+      `step="${step}" value="${value}">`;
+
+    $('range').oninput = e => {
+      value = Number(e.target.value);
+      draw();
+    };
+
+    document.querySelectorAll('[data-n]').forEach(b => {
+      b.onclick = () => {
+        value =
+          Math.round(
+            clamp(
+              value + Number(b.dataset.n) * step,
+              lo,
+              hi
+            ) / step
+          ) * step;
+        draw();
+      };
+    });
+  }
+
+  function makeControls() {
+    if (task.kind === 'rolling') {
+      $('sceneTitle').textContent =
+        'Rolling-shape race';
+      $('plotTitle').textContent =
+        'Acceleration (m/s²) vs k = I/(mr²)';
+      $('legend').innerHTML =
+        shapes.map(s =>
+          swatch(s.colour, s.name)
+        ).join('');
+
+      if (task.mode === 'rank') {
+        $('question').textContent =
+          `A hoop, disc, solid sphere, hollow sphere ` +
+          `and frictionless block descend the same ` +
+          `${task.angle}° ramp from rest. ` +
+          `Select their arrival order, fastest first.`;
+
+        $('controls').innerHTML =
+          `<label>Order of arrival</label>` +
+          `<div id="placed" class="placed"></div>` +
+          `<div id="ranking" class="ranking"></div>` +
+          `<button id="reset">Clear order</button>`;
+
+        $('reset').onclick = () => {
+          order = [];
+          renderRanking();
+          draw();
+        };
+
+        renderRanking();
+      } else if (task.mode === 'time') {
+        $('question').textContent =
+          `A solid sphere of mass ${task.mass} kg and ` +
+          `radius ${task.radius} m rolls without slipping ` +
+          `down a ${task.angle}° slope from vertical ` +
+          `height ${task.height} m. Predict the arrival time.`;
+
+        numeric('Arrival time (s)', 0, 5, .01, 's');
+      } else {
+        $('question').textContent =
+          `Repeat the ideal rolling race with the same ` +
+          `slope and shapes. Which TWO changes keep ` +
+          `the arrival order unchanged?`;
+
+        $('controls').innerHTML =
+          `<div class="choices">` +
+          `<button id="mass" aria-pressed="false">Change mass</button>` +
+          `<button id="radius" aria-pressed="false">Change radius</button>` +
+          `<button id="shape" aria-pressed="false">Change shape</button>` +
+          `</div>`;
+
+        $('mass').onclick = () => {
+          massChanged = !massChanged;
+          draw();
+        };
+        $('radius').onclick = () => {
+          radiusChanged = !radiusChanged;
+          draw();
+        };
+        $('shape').onclick = () => {
+          shapeChanged = !shapeChanged;
+          draw();
+        };
+      }
+    } else if (task.kind === 'axis') {
+      $('sceneTitle').textContent =
+        'Off-centre rotation axis';
+      $('plotTitle').textContent =
+        'Angular acceleration (rad/s²) vs axle offset (m)';
+      $('legend').innerHTML =
+        swatch('#1F66E5', 'Angular acceleration');
+
+      $('question').textContent =
+        `A ${task.mass} kg ` +
+        `${task.shape === 'rod_centre' ? 'rod' : 'disc'} ` +
+        `has ${task.shape === 'rod_centre' ? 'length' : 'radius'} ` +
+        `${task.size} m. Apply ${task.torque} N m torque. ` +
+        `Move the axle so the angular acceleration is ` +
+        `${task.target} rad/s².`;
+
+      numeric(
+        'Parallel-axis offset from CG (m)',
+        0, 1, .05, 'm'
+      );
+    } else if (task.kind === 'pulley') {
+      $('sceneTitle').textContent =
+        'Pulley with rotational inertia';
+      $('plotTitle').textContent =
+        'Acceleration (m/s²) vs pulley inertia (kg m²)';
+      $('legend').innerHTML =
+        swatch('#1F66E5', 'Acceleration');
+
+      $('question').textContent =
+        `An Atwood machine has hanging masses ` +
+        `${task.m1} kg and ${task.m2} kg, pulley inertia ` +
+        `${task.I} kg m² and pulley radius ${task.radius} m. ` +
+        `Find the acceleration, positive when the ` +
+        `heavier mass descends.`;
+
+      numeric('Acceleration (m/s²)', 0, 8, .01, 'm/s²');
+    } else {
+      $('sceneTitle').textContent =
+        'Spinning skater';
+      $('plotTitle').textContent =
+        'Kinetic energy (J) vs I (kg m²) at constant L';
+      $('legend').innerHTML =
+        swatch('#1F66E5', 'Rotational kinetic energy');
+
+      $('question').textContent =
+        `A skater starts with inertia ${task.I1} kg m² ` +
+        `and angular speed ${task.omega1} rad/s. ` +
+        `Her new inertia is ${task.I2} kg m². ` +
+        `Predict her new speed and identify the ` +
+        `source of extra kinetic energy.`;
+
+      numeric(
+        'Final angular speed (rad/s)',
+        0, 20, .1, 'rad/s'
+      );
+
+      const extra = document.createElement('div');
+      extra.innerHTML =
+        `<label>Where does additional kinetic energy come from?</label>` +
+        `<div class="choices">` +
+        `<button id="muscles" aria-pressed="false">Work by her muscles</button>` +
+        `<button id="external" aria-pressed="true">External torque</button>` +
+        `</div>`;
+      $('controls').appendChild(extra);
+
+      $('muscles').onclick = () => {
+        choice = 'muscles';
+        draw();
+      };
+      $('external').onclick = () => {
+        choice = 'external';
+        draw();
+      };
+    }
+  }
+
+  function renderRanking() {
+    if (!$('ranking')) return;
+
+    $('placed').textContent = order.length
+      ? order.map((id, i) =>
+          `${i + 1}. ${shapes.find(s => s.id === id).name}`
+        ).join(' → ')
+      : 'Choose five shapes below.';
+
+    $('ranking').innerHTML =
+      shapes.map(s =>
+        `<button data-shape="${s.id}" ` +
+        `${order.includes(s.id) ? 'disabled' : ''}>` +
+        `${s.name}</button>`
+      ).join('');
+
+    document.querySelectorAll('[data-shape]').forEach(b => {
+      b.onclick = () => {
+        if (
+          order.length < 5 &&
+          !order.includes(b.dataset.shape)
+        ) {
+          order.push(b.dataset.shape);
+          renderRanking();
+          draw();
+        }
+      };
+    });
+  }
+
+  function draw() {
+    if (task.kind === 'rolling') drawRolling();
+    else if (task.kind === 'axis') drawAxis();
+    else if (task.kind === 'pulley') drawPulley();
+    else drawSkater();
+
+    if ($('range')) {
+      $('range').value = String(value);
+      $('read').textContent =
+        `${fmt(value)} ${task.unit}`;
+    }
+
+    if ($('mass')) {
+      $('mass').setAttribute(
+        'aria-pressed', String(massChanged)
+      );
+      $('radius').setAttribute(
+        'aria-pressed', String(radiusChanged)
+      );
+      $('shape').setAttribute(
+        'aria-pressed', String(shapeChanged)
+      );
+    }
+
+    if ($('muscles')) {
+      $('muscles').setAttribute(
+        'aria-pressed', String(choice === 'muscles')
+      );
+      $('external').setAttribute(
+        'aria-pressed', String(choice === 'external')
+      );
+    }
+  }
+
+  function drawRolling() {
+    $('scene').innerHTML =
+      `<path d="M33 195L447 259H33Z" fill="#FFDD00" stroke="#111" stroke-width="4"/>` +
+      shapes.map((s, i) => {
+        const x = 78 + i * 82;
+        const y = 103 + i * 12;
+        const block = s.id === 'block_frictionless';
+
+        const figure = block
+          ? `<rect x="${x - 18}" y="${y - 18}" width="36" height="36" rx="4" fill="${s.colour}" stroke="#111" stroke-width="3"/>`
+          : `<circle cx="${x}" cy="${y}" r="19" fill="${s.colour}" stroke="#111" stroke-width="3"/>` +
+            (s.id === 'hoop' || s.id === 'hollow_sphere'
+              ? `<circle cx="${x}" cy="${y}" r="11" fill="#fff" stroke="#111" stroke-width="2"/>`
+              : '') +
+            `<path d="M${x} ${y}h16" stroke="#111" stroke-width="2"/>`;
+
+        return (
+          figure +
+          `<text x="${x}" y="${y - 30}" text-anchor="middle" font-size="11">${s.name}</text>`
+        );
+      }).join('') +
+      `<text x="24" y="285" font-size="13">Angle ${task.angle}° · vertical height ${task.height} m</text>` +
+      `<text x="24" y="303" font-size="12">A common ideal slope; shapes begin from rest.</text>`;
+
+    $('scene').setAttribute(
+      'aria-label',
+      `Five shapes on a ${task.angle} degree ramp`
+    );
+
+    const data = shapes.map(s => ({
+      ...s,
+      result: roll(s.id)
+    }));
+    if (data.some(a => issue(a.result))) return;
+
+    data.sort(
+      (a, b) => a.result.k - b.result.k
+    );
+
+    const X = k => 58 + k * 360;
+    const max = Math.max(
+      1,
+      ...data.map(a => a.result.acceleration_m_s2)
+    ) * 1.16;
+    const Y = a => 223 - a / max * 180;
+
+    let grid = '';
+
+    for (let i = 0; i <= 4; i++) {
+      const k = i / 4;
+      const y = i * max / 4;
+
+      grid +=
+        `<line x1="${X(k)}" y1="43" x2="${X(k)}" y2="223" stroke="#ddd"/>` +
+        `<text x="${X(k)}" y="243" text-anchor="middle" font-size="12">${fmt(k)}</text>` +
+        `<line x1="58" y1="${Y(y)}" x2="418" y2="${Y(y)}" stroke="#ddd"/>` +
+        `<text x="46" y="${Y(y) + 4}" text-anchor="end" font-size="11">${fmt(y)}</text>`;
+    }
+
+    // The line connects values returned by the calculation module.
+    // No acceleration formula is duplicated in the presentation.
+    const path = data.map((a, i) =>
+      `${i ? 'L' : 'M'}${X(a.result.k)} ` +
+      `${Y(a.result.acceleration_m_s2)}`
+    ).join('');
+
+    $('plot').innerHTML =
+      grid +
+      `<path d="M58 43V223H418" stroke="#111" stroke-width="3" fill="none"/>` +
+      `<path d="${path}" stroke="#1F66E5" stroke-width="3" fill="none"/>` +
+      data.map(a =>
+        `<circle cx="${X(a.result.k)}" ` +
+        `cy="${Y(a.result.acceleration_m_s2)}" r="7" ` +
+        `fill="${a.colour}" stroke="#111" stroke-width="2"/>`
+      ).join('') +
+      `<text x="239" y="275" font-size="13" text-anchor="middle">k = I/(mr²) (dimensionless)</text>` +
+      `<text x="14" y="138" font-size="12" text-anchor="middle" transform="rotate(-90 14 138)">Acceleration (m/s²)</text>`;
+
+    $('plot').setAttribute(
+      'aria-label',
+      'Acceleration versus dimensionless rotational inertia factor for five shapes'
+    );
+  }
+
+  function drawAxis() {
+    const r = axisAt(value);
+    if (issue(r)) return;
+
+    const axle = 240 + value * 93;
+    const figure = task.shape === 'rod_centre'
+      ? `<rect x="93" y="149" width="294" height="28" rx="5" fill="#1F66E5" stroke="#111" stroke-width="4"/>`
+      : `<circle cx="240" cy="163" r="101" fill="#1F66E5" stroke="#111" stroke-width="4"/>`;
+
+    $('scene').innerHTML =
+      figure +
+      `<circle cx="240" cy="163" r="8" fill="#FFC83D" stroke="#111" stroke-width="3"/>` +
+      `<circle cx="${axle}" cy="163" r="12" fill="#FF8FB8" stroke="#111" stroke-width="3"/>` +
+      `<path d="M240 222H${axle}" stroke="#111" stroke-width="3" stroke-dasharray="5 4"/>` +
+      `<text x="240" y="244" font-size="12" text-anchor="middle">Centre of mass</text>` +
+      `<text x="${axle}" y="201" font-size="12" text-anchor="middle">Axle</text>` +
+      `<text x="20" y="26" font-size="13">Torque ${task.torque} N m</text>` +
+      `<text x="20" y="286" font-size="13">Offset ${fmt(value)} m</text>`;
+
+    $('scene').setAttribute(
+      'aria-label',
+      `A rigid body with its axle ${fmt(value)} m from the centre of mass`
+    );
+
+    const X = x => 57 + x * 360;
+    const Y = a => 225 - a / 12 * 180;
+    let grid = '';
+    let path = '';
+
+    for (let i = 0; i <= 4; i++) {
+      grid +=
+        `<line x1="57" y1="${Y(i * 3)}" x2="417" y2="${Y(i * 3)}" stroke="#ddd"/>` +
+        `<text x="45" y="${Y(i * 3) + 4}" text-anchor="end" font-size="12">${i * 3}</text>` +
+        `<text x="${X(i / 4)}" y="245" text-anchor="middle" font-size="12">${i / 4}</text>`;
+    }
+
+    for (let i = 0; i <= 100; i++) {
+      const x = i / 100;
+      const sample = axisAt(x);
+      if (issue(sample)) continue;
+
+      path +=
+        `${i ? 'L' : 'M'}${X(x)} ` +
+        `${Y(Math.min(12, sample.alpha_rad_s2))}`;
+    }
+
+    $('plot').innerHTML =
+      grid +
+      `<path d="M57 45V225H417" stroke="#111" stroke-width="3" fill="none"/>` +
+      `<path d="${path}" stroke="#1F66E5" stroke-width="4" fill="none"/>` +
+      `<circle cx="${X(value)}" cy="${Y(Math.min(12, r.alpha_rad_s2))}" r="7" fill="#FF8FB8" stroke="#111" stroke-width="2"/>` +
+      `<text x="239" y="276" text-anchor="middle" font-size="13">Axis offset (m)</text>` +
+      `<text x="13" y="139" transform="rotate(-90 13 139)" text-anchor="middle" font-size="12">α (rad/s²)</text>`;
+
+    $('plot').setAttribute(
+      'aria-label',
+      'Angular acceleration versus axle offset with a selected marker'
+    );
+  }
+
+  function drawPulley() {
+    const r = pulleyAt(task.I);
+    if (issue(r)) return;
+
+    const len1 = Math.min(70, r.T1_N);
+    const len2 = Math.min(70, r.T2_N);
+
+    $('scene').innerHTML =
+      `<path d="M239 12V35" stroke="#111" stroke-width="6"/>` +
+      `<circle cx="239" cy="102" r="66" fill="#1F66E5" stroke="#111" stroke-width="4"/>` +
+      `<circle cx="239" cy="102" r="8" fill="#FFC83D" stroke="#111" stroke-width="3"/>` +
+      `<path d="M173 102V215M305 102V215" stroke="#111" stroke-width="4"/>` +
+      `<rect x="138" y="215" width="70" height="51" rx="7" fill="#FF8FB8" stroke="#111" stroke-width="3"/>` +
+      `<rect x="270" y="215" width="70" height="65" rx="7" fill="#FFC83D" stroke="#111" stroke-width="3"/>` +
+      `<text x="173" y="244" text-anchor="middle" font-size="15" font-weight="800">${task.m1} kg</text>` +
+      `<text x="305" y="252" text-anchor="middle" font-size="15" font-weight="800">${task.m2} kg</text>` +
+      `<path d="M155 209v-${len1}m-7 9 7 -9 7 9" stroke="#2D7D53" stroke-width="3" fill="none"/>` +
+      `<path d="M323 209v-${len2}m-7 9 7 -9 7 9" stroke="#2D7D53" stroke-width="3" fill="none"/>` +
+      `<text x="15" y="30" font-size="14">Pulley I ${task.I} kg m²</text>` +
+      `<text x="15" y="49" font-size="13">Radius ${task.radius} m</text>` +
+      `<text x="20" y="301" font-size="12">Green arrows represent string tensions.</text>`;
+
+    $('scene').setAttribute(
+      'aria-label',
+      `Atwood machine with ${task.m1} and ${task.m2} kg masses and tension arrows`
+    );
+
+    const X = i => 58 + i / .8 * 360;
+    const ymax = 5;
+    const Y = a => 226 - a / ymax * 182;
+    let grid = '';
+    let path = '';
+
+    for (let i = 0; i <= 4; i++) {
+      grid +=
+        `<line x1="${X(i * .2)}" y1="44" x2="${X(i * .2)}" y2="226" stroke="#ddd"/>` +
+        `<text x="${X(i * .2)}" y="245" text-anchor="middle" font-size="12">${fmt(i * .2)}</text>` +
+        `<line x1="58" y1="${Y(i)}" x2="418" y2="${Y(i)}" stroke="#ddd"/>` +
+        `<text x="46" y="${Y(i) + 4}" text-anchor="end" font-size="12">${i}</text>`;
+    }
+
+    for (let i = 0; i <= 80; i++) {
+      const I = i / 100;
+      const sample = pulleyAt(I);
+      if (issue(sample)) continue;
+
+      path +=
+        `${i ? 'L' : 'M'}${X(I)} ` +
+        `${Y(sample.acceleration_m_s2)}`;
+    }
+
+    $('plot').innerHTML =
+      grid +
+      `<path d="M58 44V226H418" stroke="#111" stroke-width="3" fill="none"/>` +
+      `<path d="${path}" stroke="#1F66E5" stroke-width="4" fill="none"/>` +
+      `<circle cx="${X(task.I)}" cy="${Y(r.acceleration_m_s2)}" r="7" fill="#FF8FB8" stroke="#111" stroke-width="2"/>` +
+      `<text x="239" y="276" font-size="13" text-anchor="middle">Pulley inertia (kg m²)</text>` +
+      `<text x="14" y="140" transform="rotate(-90 14 140)" text-anchor="middle" font-size="12">Acceleration (m/s²)</text>`;
+
+    $('plot').setAttribute(
+      'aria-label',
+      'Atwood machine acceleration versus pulley inertia'
+    );
+  }
+
+  function drawSkater() {
+    const r = skaterAt(task.I2);
+    if (issue(r)) return;
+
+    $('scene').innerHTML =
+      `<circle cx="239" cy="65" r="30" fill="#FFC83D" stroke="#111" stroke-width="4"/>` +
+      `<path d="M239 95V202M168 137H310M239 202L192 276M239 202L286 276" stroke="#111" stroke-width="12" stroke-linecap="round" fill="none"/>` +
+      `<path d="M111 121Q74 58 120 26M365 121Q404 59 361 26" stroke="#1F66E5" stroke-width="5" fill="none"/>` +
+      `<path d="M108 39l12 -13 5 19M360 45l1 -19 18 8" stroke="#1F66E5" stroke-width="3" fill="none"/>` +
+      `<text x="20" y="21" font-size="13">Initial ω ${task.omega1} rad/s</text>` +
+      `<text x="297" y="21" font-size="13">Final ω ?</text>` +
+      `<text x="16" y="299" font-size="13">I₁ ${task.I1} kg m²</text>` +
+      `<text x="316" y="299" font-size="13">I₂ ${task.I2} kg m²</text>`;
+
+    $('scene').setAttribute(
+      'aria-label',
+      `Skater changes inertia from ${task.I1} to ${task.I2} kg m² while rotating`
+    );
+
+    const X = i => 57 + (i - 1) / 5 * 360;
+    const max = Math.max(25, r.KE2_J * 2.2);
+    const Y = energy => 226 - energy / max * 182;
+    let grid = '';
+    let path = '';
+
+    for (let i = 0; i <= 5; i++) {
+      grid +=
+        `<line x1="${X(i + 1)}" y1="44" x2="${X(i + 1)}" y2="226" stroke="#ddd"/>` +
+        `<text x="${X(i + 1)}" y="244" text-anchor="middle" font-size="12">${i + 1}</text>`;
+    }
+
+    for (let i = 0; i <= 4; i++) {
+      const energy = max * i / 4;
+      grid +=
+        `<line x1="57" y1="${Y(energy)}" x2="417" y2="${Y(energy)}" stroke="#ddd"/>` +
+        `<text x="45" y="${Y(energy) + 4}" text-anchor="end" font-size="11">${fmt(energy)}</text>`;
+    }
+
+    for (let i = 0; i <= 100; i++) {
+      const I = 1 + i * .05;
+      const sample = skaterAt(I);
+      if (issue(sample)) continue;
+
+      path +=
+        `${i ? 'L' : 'M'}${X(I)} ${Y(sample.KE2_J)}`;
+    }
+
+    $('plot').innerHTML =
+      grid +
+      `<path d="M57 44V226H417" stroke="#111" stroke-width="3" fill="none"/>` +
+      `<path d="${path}" stroke="#1F66E5" stroke-width="4" fill="none"/>` +
+      `<circle cx="${X(task.I2)}" cy="${Y(r.KE2_J)}" r="7" fill="#FF8FB8" stroke="#111" stroke-width="2"/>` +
+      `<text x="239" y="276" font-size="13" text-anchor="middle">Moment of inertia (kg m²)</text>` +
+      `<text x="14" y="140" transform="rotate(-90 14 140)" text-anchor="middle" font-size="12">Kinetic energy (J)</text>`;
+
+    $('plot').setAttribute(
+      'aria-label',
+      'Kinetic energy against moment of inertia at conserved angular momentum'
+    );
+  }
+
+  function check() {
+    if (solved) return;
+
+    let correct = false;
+    let why = '';
+    let wrong = '';
+
+    if (task.kind === 'rolling') {
+      if (task.mode === 'rank') {
+        const ranked = shapes.map(s => ({
+          id: s.id,
+          result: roll(s.id)
+        }));
+        if (ranked.some(a => issue(a.result))) return;
+
+        ranked.sort(
+          (a, b) => a.result.time_s - b.result.time_s
+        );
+
+        correct =
+          order.length === shapes.length &&
+          order.every(
+            (id, i) => id === ranked[i].id
+          );
+
+        why =
+          'Correct order: ' +
+          ranked.map(a =>
+            shapes.find(s => s.id === a.id).name
+          ).join(' → ') +
+          '. Smaller k means greater acceleration.';
+
+        wrong = order.length < 5
+          ? 'Choose all five shapes.'
+          : 'The shapes are not correctly ordered. Compare their values of k.';
+      } else if (task.mode === 'time') {
+        const r = roll(task.shape);
+        if (issue(r)) return;
+
+        correct =
+          Math.abs(value - r.time_s) <= .006;
+        why =
+          `Arrival time ${fmt(r.time_s)} s. ` +
+          `Mass and radius cancel in ideal rolling.`;
+        wrong = value < r.time_s
+          ? 'Your time is too short. Some energy goes into rotation.'
+          : 'Your time is too long. Use the acceleration of a rolling sphere.';
+      } else {
+        correct =
+          massChanged &&
+          radiusChanged &&
+          !shapeChanged;
+
+        why =
+          'Mass and radius cancel, but changing shape changes the inertia factor k.';
+        wrong =
+          'Select the two properties which cancel in the ideal rolling model.';
+      }
+    } else if (task.kind === 'axis') {
+      const r = axisAt(value);
+      if (issue(r)) return;
+
+      correct =
+        Math.abs(r.alpha_rad_s2 - task.target) <= .041;
+      why =
+        `Offset ${fmt(value)} m gives I = ` +
+        `${fmt(r.I_kg_m2)} kg m² and α = ` +
+        `${fmt(r.alpha_rad_s2)} rad/s².`;
+      wrong = r.alpha_rad_s2 > task.target
+        ? 'Acceleration is too high. Move the axle farther from the centre.'
+        : 'Acceleration is too low. Move the axle closer to the centre.';
+    } else if (task.kind === 'pulley') {
+      const r = pulleyAt(task.I);
+      if (issue(r)) return;
+
+      correct =
+        Math.abs(value - r.acceleration_m_s2) <= .006;
+      why =
+        `Acceleration ${fmt(r.acceleration_m_s2)} m/s²; ` +
+        `tensions ${fmt(r.T1_N)} N and ${fmt(r.T2_N)} N.`;
+      wrong = value < r.acceleration_m_s2
+        ? 'Acceleration is too small for the specified inertia.'
+        : 'Acceleration is too large; the pulley must also rotate.';
+    } else {
+      const r = skaterAt(task.I2);
+      if (issue(r)) return;
+
+      correct =
+        Math.abs(value - r.omega2_rad_s) <= .051 &&
+        choice === 'muscles';
+
+      why =
+        `Final angular speed ${fmt(r.omega2_rad_s)} rad/s. ` +
+        `Kinetic energy rises from ${fmt(r.KE1_J)} J ` +
+        `to ${fmt(r.KE2_J)} J through work by the skater.`;
+
+      wrong = Math.abs(value - r.omega2_rad_s) > .051
+        ? 'Conserve angular momentum rather than kinetic energy.'
+        : 'Without an external torque, the added energy comes from muscle work.';
+    }
+
+    tries++;
+    if (!correct) {
+      feedback(wrong, false);
+      return;
+    }
+
+    solved = true;
+    const earned = hinted
+      ? 50
+      : tries === 1 ? 100 : tries === 2 ? 75 : 50;
+
+    score += earned;
+    $('hud').textContent = `Round ${round + 1}/6 · Score ${score}`;
+    feedback(`★ ${earned} points! ${why}`, true);
+    $('check').disabled = true;
+    $('hint').disabled = true;
+    $('next').hidden = false;
+    $('next').textContent =
+      round === 5 ? 'See your stars →' : 'Next round →';
+  }
+
+  $('check').onclick = check;
+
+  $('hint').onclick = () => {
+    if (solved) return;
+
+    hinted = true;
+    $('hint').disabled = true;
+
+    const text = task.kind === 'rolling'
+      ? 'Smaller rotational-inertia factor means a faster descent. Mass and radius cancel for the ideal shapes.'
+      : task.kind === 'axis'
+        ? 'Use the parallel-axis theorem first, followed by torque divided by inertia.'
+        : task.kind === 'pulley'
+          ? 'The pulley contributes I/r² to the acceleration denominator.'
+          : 'Angular momentum stays fixed, but internal muscle work can increase kinetic energy.';
+
+    feedback(
+      `Hint: ${text} This round is now worth 50 points.`,
+      null
+    );
+  };
+
+  $('next').onclick = () => {
+    if (!solved) return;
+
+    if (round < 5) {
+      round++;
+      begin();
+      return;
+    }
+
+    $('game').hidden = true;
+    $('end').hidden = false;
+    const stars = score >= 500 ? 3 : score >= 350 ? 2 : 1;
+    $('stars').textContent =
+      '★'.repeat(stars) + '☆'.repeat(3 - stars);
+    $('total').textContent = `${score}/600 points.`;
+  };
+
+  $('again').onclick = () => {
+    replay++;
+    round = 0;
+    score = 0;
+    $('game').hidden = false;
+    $('end').hidden = true;
+    begin();
+  };
+
+  begin();
+})();
+</script>
+</body>
+</html>

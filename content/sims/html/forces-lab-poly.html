@@ -1,0 +1,2068 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Beam and Crane Check | Fix It Today</title>
+<style>
+:root {
+  --fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;
+  --fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;
+  --fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;
+  --fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;
+  --fit-danger:#D92D20;--lvl-primary:#FFC83D;
+  --lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;
+  --lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;
+  --lvl-secondary-on:#111111;--lvl-jc:#6A45F5;
+  --lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;
+  --lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;
+  --lvl-poly-on:#111111;--lvl-uni:#1F66E5;
+  --lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+  --r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;
+  --r-pill:999px;--bw:2px;--bw-strong:3px;
+  --sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;
+  --sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);
+  --dur-1:120ms;--dur-2:180ms;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1260px;margin:auto;padding:16px}
+header{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.badge,.hud{border:2px solid #111;border-radius:999px;min-height:37px;padding:8px 13px;font-size:12px;font-weight:800}
+.badge{background:var(--lvl-poly);color:var(--lvl-poly-on);text-transform:uppercase}
+.hud{background:#fff;font-size:14px}
+h1{font-size:clamp(28px,5vw,44px);font-weight:800;line-height:1.1;margin:17px 0 8px}
+h2{font-size:21px;font-weight:800;margin:0 0 12px}
+p{margin:7px 0 13px}
+.layout{display:grid;gap:18px;align-items:start;margin-top:19px}
+.card{min-width:0;background:#fff;border:2px solid #111;border-radius:26px;box-shadow:var(--sh-2);padding:17px}
+.stage{background:var(--lvl-poly-tint)}
+svg{width:100%;height:auto;display:block}
+.scene{aspect-ratio:480/310}
+.plot{aspect-ratio:480/290}
+button,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{min-height:46px;background:#fff;border:2px solid #111;border-radius:999px;padding:9px 14px;box-shadow:var(--sh-1);font:800 14px Inter,system-ui,sans-serif;cursor:pointer}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.5}
+button.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
+button.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button:focus:not(:focus-visible),input:focus:not(:focus-visible){outline:none}
+button:focus-visible,input:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+input[type=range]{width:100%;min-height:48px;accent-color:#111}
+label{font-weight:800}
+.controls{display:grid;gap:12px}
+.stepper,.actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.stepper button{min-width:44px;padding:7px}
+.read{min-width:92px;text-align:center;font-weight:800;font-size:19px;background:var(--lvl-poly-tint);border:2px solid #111;border-radius:13px;padding:7px}
+.actions{margin-top:16px}
+.feedback{border:2px dashed #888;border-radius:15px;min-height:75px;padding:13px;margin-top:14px;font-weight:600}
+.feedback.good{border:2px solid var(--fit-success);background:#edfff4}
+.feedback.bad{border:2px solid var(--fit-danger);background:#fff1ee}
+.legend{font-size:12px;font-weight:700;display:flex;gap:12px;flex-wrap:wrap}
+.swatch{display:inline-block;width:11px;height:11px;border:1px solid #111;margin-right:4px}
+.concept{display:flex;align-items:center;gap:12px;background:#fff;border:2px solid #111;border-radius:15px;padding:9px;margin-top:13px;font-size:13px;font-weight:600}
+.concept svg{width:100px;max-width:34%;flex:none}
+details{margin-top:18px;border:2px solid #111;border-radius:17px;background:#fff;padding:12px}
+summary{font-weight:800;cursor:pointer}
+.end{text-align:center;padding:36px 12px}
+.stars{font-size:44px;color:#ae8000;letter-spacing:5px}
+footer{text-align:center;margin:26px;color:#666}
+[hidden]{display:none!important}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.08fr) minmax(0,1fr)}}
+@media(max-width:410px){main{padding:10px}.card{padding:12px}.stepper{gap:4px}.stepper button{padding:7px 9px}}
+@media(prefers-reduced-motion:no-preference){button{transition:transform var(--dur-1),box-shadow var(--dur-1)}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<span class="badge">Poly · Engineering</span>
+<span id="hud" class="hud">Round 1/6 · Score 0</span>
+</header>
+<h1>Beam and Crane Check</h1>
+<p>Find support reactions, protect beams from excessive bending and check a crane against forward and backward tipping. Gravity is 9.81 m/s².</p>
+<div id="game">
+<div class="layout">
+<section class="card stage">
+<h2 id="sceneTitle">Supported beam</h2>
+<svg id="scene" class="scene" viewBox="0 0 480 310" role="img" aria-label="Supported beam with force arrows"></svg>
+<div class="concept">
+<svg viewBox="0 0 110 70" role="img" aria-label="Simply supported beam under a downward load">
+<path d="M9 28H101" stroke="#111" stroke-width="6"/>
+<path d="M15 33L5 57H25ZM95 33L85 57H105Z" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+<path d="M54 4v22m-7 -9 7 9 7 -9" stroke="#D92D20" stroke-width="3" fill="none"/>
+</svg>
+<span>Pin and roller supports provide reactions. A load causes an internal bending moment that varies along the beam.</span>
+</div>
+</section>
+<div>
+<section class="card">
+<h2 id="plotTitle">Bending moment M (N m) vs x (m)</h2>
+<svg id="plot" class="plot" viewBox="0 0 480 290" role="img" aria-label="Live bending-moment diagram"></svg>
+<div id="legend" class="legend"></div>
+</section>
+<section class="card" style="margin-top:18px">
+<h2 id="question">Engineering check</h2>
+<div id="controls" class="controls"></div>
+<div class="actions">
+<button id="check" class="check">Check</button>
+<button id="hint">Hint (costs points)</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Position the load, then check.</div>
+</section>
+</div>
+</div>
+<details>
+<summary>The physics</summary>
+<p><b>Beam reactions:</b> RA + RB equals the total downward force. Moment equilibrium about A determines RB. A whole-span UDL acts through the midpoint of the span.</p>
+<p><b>Bending:</b> M(x) = RA x − wx²/2 − Σ P(x − a) for loads to the left of x. The maximum is found at a support, point load, or section with zero shear.</p>
+<p><b>Crane:</b> check the loaded crane about its front edge and the unloaded crane about its rear edge. The crane's own weight and the counterweight both act downwards. The crane and beam are treated as rigid in static equilibrium.</p>
+</details>
+</div>
+<section class="card end" id="end" hidden>
+<h2>All checks complete!</h2>
+<div id="stars" class="stars"></div>
+<p id="total"></p>
+<button id="again" class="check">Play again</button>
+</section>
+<footer>Fix It Today</footer>
+</main>
+<script>
+/* FIT-CALC-BEGIN forces */
+const FITCalcForces = (function () {
+  'use strict';
+
+  const EPS = 1e-9;
+  const SNAP = 1e-12;
+  const RAD = Math.PI / 180;
+
+  function err(error, reason) {
+    const e = new Error(reason);
+    e.fitError = error;
+    e.reason = reason;
+    throw e;
+  }
+
+  function num(v) {
+    if (typeof v !== 'number' || !Number.isFinite(v)) {
+      err('ConstraintViolation', 'invalid_number');
+    }
+    return v;
+  }
+
+  function obj(v) {
+    if (!v || typeof v !== 'object' || Array.isArray(v)) {
+      err('ConstraintViolation', 'invalid_input');
+    }
+    return v;
+  }
+
+  function opt(v, fallback) {
+    return v == null ? fallback : num(v);
+  }
+
+  function nonneg(v, reason) {
+    if (v == null) err('ConstraintViolation', reason);
+    v = num(v);
+    if (v < 0) err('ConstraintViolation', reason);
+    return v;
+  }
+
+  function pos(v, reason) {
+    if (v == null) err('ConstraintViolation', reason);
+    v = num(v);
+    if (v <= 0) err('ConstraintViolation', reason);
+    return v;
+  }
+
+  function range(v, lo, hi, reason) {
+    v = num(v);
+    if (v < lo || v > hi) err('ConstraintViolation', reason);
+    return v;
+  }
+
+  function grav(v) {
+    v = opt(v, 9.81);
+    if (v <= 0) err('MathError', 'gravity_must_be_positive');
+    return v;
+  }
+
+  function arr(v, max, reason, min) {
+    if (!Array.isArray(v)) {
+      err('ConstraintViolation', 'invalid_array');
+    }
+    if (v.length > max || v.length < (min || 0)) {
+      err('ConstraintViolation', reason);
+    }
+    return v;
+  }
+
+  function snap(v, tolerance) {
+    return Math.abs(v) < tolerance ? 0 : v;
+  }
+
+  function finite(v) {
+    if (typeof v === 'number' && !Number.isFinite(v)) {
+      err('MathError', 'non_finite_result');
+    }
+    if (v && typeof v === 'object') {
+      Object.keys(v).forEach(k => finite(v[k]));
+    }
+    return v;
+  }
+
+  function safe(fn) {
+    try {
+      return finite(fn());
+    } catch (e) {
+      return e && e.fitError
+        ? { error: e.fitError, reason: e.reason }
+        : { error: 'RuntimeError', reason: 'calculation_failed' };
+    }
+  }
+
+  function loadsOf(v) {
+    return arr(v, 10, 'loads_exceed_10').map(a => {
+      obj(a);
+      return {
+        force_N: nonneg(a.force_N, 'negative_load'),
+        position_m: num(a.position_m)
+      };
+    });
+  }
+
+  function balanceCore(o) {
+    obj(o);
+    const p = num(o.pivot_m);
+    const loads = loadsOf(o.loads);
+    const w = nonneg(opt(o.beam_weight_N, 0), 'negative_load');
+    const cg = opt(o.cg_m, p);
+
+    let cw = 0;
+    let acw = 0;
+    let reaction = 0;
+
+    function add(force, x) {
+      const m = force * (x - p);
+      if (m >= 0) cw += m;
+      else acw -= m;
+      reaction += force;
+    }
+
+    loads.forEach(a => add(a.force_N, a.position_m));
+    add(w, cg);
+
+    const net = snap(cw - acw, EPS);
+    const tips = net > 0
+      ? 'clockwise'
+      : net < 0
+        ? 'anticlockwise'
+        : 'none';
+
+    return {
+      clockwise_N_m: cw,
+      anticlockwise_N_m: acw,
+      net_N_m: net,
+      balanced: tips === 'none',
+      tips,
+      reaction_N: reaction
+    };
+  }
+
+  function beamCore(o) {
+    obj(o);
+    const span = pos(o.span_m, 'span_not_positive');
+    const points = arr(o.point_loads, 10, 'loads_exceed_10')
+      .map(a => {
+        obj(a);
+        const force = nonneg(a.force_N, 'negative_load');
+        const x = num(a.position_m);
+
+        if (x < 0 || x > span) {
+          err('ConstraintViolation', 'load_outside_span');
+        }
+
+        return { force_N: force, position_m: x };
+      })
+      .sort((a, b) => a.position_m - b.position_m);
+
+    const udl = nonneg(opt(o.udl_N_per_m, 0), 'negative_load');
+
+    let total = udl * span;
+    let aboutA = udl * span * span / 2;
+
+    points.forEach(a => {
+      total += a.force_N;
+      aboutA += a.force_N * a.position_m;
+    });
+
+    const RB = aboutA / span;
+    const RA = total - RB;
+
+    function momentAt(x) {
+      let m = RA * x - udl * x * x / 2;
+
+      points.forEach(a => {
+        if (a.position_m < x) {
+          m -= a.force_N * (x - a.position_m);
+        }
+      });
+
+      return snap(m, EPS);
+    }
+
+    return {
+      span,
+      points,
+      udl,
+      RA,
+      RB,
+      momentAt
+    };
+  }
+
+  const K = Object.freeze({
+    solid_disc: 0.5,
+    hoop: 1,
+    solid_sphere: 0.4,
+    hollow_sphere: 2 / 3
+  });
+
+  function shapeK(shape, canSlide) {
+    if (canSlide && shape === 'block_frictionless') {
+      return 0;
+    }
+
+    if (canSlide && shape === 'rod_centre') {
+      err('NotSupported', 'shape_cannot_roll');
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(K, shape)) {
+      err('NotSupported', 'shape_not_supported');
+    }
+
+    return K[shape];
+  }
+
+  /**
+   * Weight in a uniform gravitational field.
+   *
+   * Input:
+   *   mass_kg >= 0
+   *   g_m_s2 > 0 (optional, default 9.81)
+   *
+   * Output:
+   *   weight_N
+   *
+   * Errors:
+   *   ConstraintViolation / negative_mass
+   *   MathError / gravity_must_be_positive
+   *
+   * Hand check:
+   *   2.5 kg at g = 10 m/s2 gives 25 N.
+   */
+  function weight(o) {
+    return safe(() => {
+      obj(o);
+      const g = grav(o.g_m_s2);
+
+      return {
+        weight_N: nonneg(o.mass_kg, 'negative_mass') * g
+      };
+    });
+  }
+
+  /**
+   * Ideal Hooke's-law spring within its proportionality limit.
+   *
+   * Inputs:
+   *   k_N_per_m > 0
+   *   load_N >= 0
+   *   limit_N >= 0 (optional)
+   *
+   * Outputs:
+   *   extension_m
+   *   within_limit
+   *
+   * Above the specified limit, within_limit is false and
+   * extension_m is null; linear extrapolation is not valid.
+   *
+   * Errors:
+   *   ConstraintViolation / spring_constant_not_positive
+   *   ConstraintViolation / negative_load
+   *   ConstraintViolation / negative_limit
+   *
+   * Hand check:
+   *   30 N / 200 N/m = 0.15 m.
+   */
+  function spring(o) {
+    return safe(() => {
+      obj(o);
+
+      const k = pos(
+        o.k_N_per_m,
+        'spring_constant_not_positive'
+      );
+      const f = nonneg(o.load_N, 'negative_load');
+      const limit = o.limit_N == null
+        ? null
+        : nonneg(o.limit_N, 'negative_limit');
+
+      if (limit !== null && f > limit) {
+        return {
+          extension_m: null,
+          within_limit: false
+        };
+      }
+
+      return {
+        extension_m: f / k,
+        within_limit: true
+      };
+    });
+  }
+
+  /**
+   * Sum of 1–10 coplanar force vectors.
+   *
+   * Inputs:
+   *   forces: array of { magnitude_N, direction_deg }
+   *   magnitude_N >= 0
+   *   direction_deg measured anticlockwise from +x
+   *
+   * Outputs:
+   *   Rx_N
+   *   Ry_N
+   *   magnitude_N
+   *   direction_deg: [0,360), or null if balanced
+   *   balanced
+   *
+   * Errors:
+   *   ConstraintViolation / forces_out_of_range_1_10
+   *   ConstraintViolation / negative_magnitude
+   *
+   * Hand check:
+   *   3 N east + 4 N north -> 5 N at 53.1301023542 degrees.
+   */
+  function resultant(o) {
+    return safe(() => {
+      obj(o);
+
+      const forces = arr(
+        o.forces,
+        10,
+        'forces_out_of_range_1_10',
+        1
+      );
+
+      let x = 0;
+      let y = 0;
+
+      forces.forEach(a => {
+        obj(a);
+
+        const f = nonneg(
+          a.magnitude_N,
+          'negative_magnitude'
+        );
+        const t = num(a.direction_deg) * RAD;
+
+        x += f * Math.cos(t);
+        y += f * Math.sin(t);
+      });
+
+      x = snap(x, SNAP);
+      y = snap(y, SNAP);
+
+      const magnitude = Math.hypot(x, y);
+
+      if (magnitude < EPS) {
+        return {
+          Rx_N: x,
+          Ry_N: y,
+          magnitude_N: 0,
+          direction_deg: null,
+          balanced: true
+        };
+      }
+
+      const direction = (
+        Math.atan2(y, x) / RAD + 360
+      ) % 360;
+
+      return {
+        Rx_N: x,
+        Ry_N: y,
+        magnitude_N: magnitude,
+        direction_deg: snap(direction, SNAP),
+        balanced: false
+      };
+    });
+  }
+
+  /**
+   * Horizontal motion from rest with limiting static friction.
+   *
+   * Assumption:
+   *   Once moving, friction has the same magnitude as the
+   *   limiting static friction. All forces are horizontal.
+   *
+   * Inputs:
+   *   mass_kg > 0
+   *   applied_N >= 0
+   *   friction_max_N >= 0
+   *
+   * Outputs:
+   *   friction_N
+   *   net_N
+   *   acceleration_m_s2
+   *   moves
+   *
+   * Errors:
+   *   ConstraintViolation / mass_not_positive
+   *   ConstraintViolation / negative_force
+   *
+   * Hand check:
+   *   12 N push, 4 N friction, 2 kg -> 4 m/s2.
+   */
+  function dynamics(o) {
+    return safe(() => {
+      obj(o);
+
+      const m = pos(o.mass_kg, 'mass_not_positive');
+      const applied = nonneg(
+        o.applied_N,
+        'negative_force'
+      );
+      const limit = nonneg(
+        o.friction_max_N,
+        'negative_force'
+      );
+
+      if (applied - limit <= EPS) {
+        return {
+          friction_N: applied,
+          net_N: 0,
+          acceleration_m_s2: 0,
+          moves: false
+        };
+      }
+
+      const net = applied - limit;
+
+      return {
+        friction_N: limit,
+        net_N: net,
+        acceleration_m_s2: net / m,
+        moves: true
+      };
+    });
+  }
+
+  /**
+   * Magnitude of a force's moment about a point.
+   *
+   * Formula:
+   *   M = F d sin(angle)
+   *
+   * Inputs:
+   *   force_N >= 0
+   *   distance_m >= 0
+   *   angle_deg in [0,180] (optional, default 90)
+   *
+   * Angle is between the force and the moment arm.
+   *
+   * Output:
+   *   moment_N_m
+   *
+   * Errors:
+   *   ConstraintViolation / negative_force
+   *   ConstraintViolation / negative_distance
+   *   ConstraintViolation / angle_out_of_range_0_180
+   *
+   * Hand check:
+   *   10 N x 0.4 m x sin(30 degrees) = 2 N m.
+   */
+  function moment(o) {
+    return safe(() => {
+      obj(o);
+
+      const f = nonneg(
+        o.force_N,
+        'negative_force'
+      );
+      const d = nonneg(
+        o.distance_m,
+        'negative_distance'
+      );
+      const a = range(
+        opt(o.angle_deg, 90),
+        0,
+        180,
+        'angle_out_of_range_0_180'
+      );
+
+      return {
+        moment_N_m: snap(
+          f * d * Math.sin(a * RAD),
+          SNAP
+        )
+      };
+    });
+  }
+
+  /**
+   * Moments of downward loads on a rigid horizontal beam.
+   *
+   * Inputs:
+   *   pivot_m
+   *   loads: up to 10 { force_N >= 0, position_m }
+   *   beam_weight_N >= 0 (optional, default 0)
+   *   cg_m (optional, default pivot position)
+   *
+   * Outputs:
+   *   clockwise_N_m
+   *   anticlockwise_N_m
+   *   net_N_m
+   *   balanced
+   *   tips
+   *   reaction_N
+   *
+   * Positive net moment is clockwise. reaction_N is the
+   * total downward load, including the beam weight ONCE.
+   *
+   * Errors:
+   *   ConstraintViolation / loads_exceed_10
+   *   ConstraintViolation / negative_load
+   *
+   * Hand check:
+   *   Pivot=1 m, 10 N at x=0 m, 5 N at x=3 m:
+   *   clockwise=10 N m, anticlockwise=10 N m,
+   *   reaction=15 N.
+   */
+  function balance(o) {
+    return safe(() => balanceCore(o));
+  }
+
+  /**
+   * Find the additional downward load needed for equilibrium.
+   *
+   * Inputs:
+   *   All balance inputs
+   *   unknown_position_m
+   *
+   * Outputs:
+   *   force_N
+   *   feasible
+   *
+   * A negative force_N means an upward force is required.
+   * In that case, feasible is false for a downward load.
+   *
+   * Errors:
+   *   MathError / unknown_at_pivot
+   *   ConstraintViolation / loads_exceed_10
+   *   ConstraintViolation / negative_load
+   *
+   * Hand check:
+   *   10 N at x=0, pivot=1, unknown x=3 -> 5 N.
+   */
+  function balance_unknown(o) {
+    return safe(() => {
+      obj(o);
+
+      const b = balanceCore(o);
+      const arm =
+        num(o.unknown_position_m) - num(o.pivot_m);
+
+      if (Math.abs(arm) < SNAP) {
+        err('MathError', 'unknown_at_pivot');
+      }
+
+      const force = snap(
+        -b.net_N_m / arm,
+        SNAP
+      );
+
+      return {
+        force_N: force,
+        feasible: force >= -EPS
+      };
+    });
+  }
+
+  /**
+   * Tipping of a uniform rigid block about its lower edge.
+   *
+   * Inputs:
+   *   base_width_m > 0
+   *   cg_height_m > 0
+   *   tilt_deg in [0,90]
+   *
+   * Outputs:
+   *   critical_tilt_deg
+   *   state: 'stable', 'balanced_on_edge', or 'topples'
+   *
+   * Assumption:
+   *   The centre of gravity initially lies over the centre
+   *   of the rectangular supporting base. Positive tilt
+   *   means rotation towards the potential tipping edge.
+   *
+   * Errors:
+   *   ConstraintViolation / base_width_not_positive
+   *   ConstraintViolation / cg_height_not_positive
+   *   ConstraintViolation / angle_out_of_range_0_90
+   *
+   * Hand check:
+   *   Base width=2 m, CG height=1 m -> critical tilt=45°.
+   */
+  function tilt(o) {
+    return safe(() => {
+      obj(o);
+
+      const b = pos(
+        o.base_width_m,
+        'base_width_not_positive'
+      );
+      const h = pos(
+        o.cg_height_m,
+        'cg_height_not_positive'
+      );
+      const t = range(
+        o.tilt_deg,
+        0,
+        90,
+        'angle_out_of_range_0_90'
+      );
+
+      const critical =
+        Math.atan((b / 2) / h) / RAD;
+      const delta = t - critical;
+
+      return {
+        critical_tilt_deg: critical,
+        state: Math.abs(delta) <= EPS
+          ? 'balanced_on_edge'
+          : delta < 0
+            ? 'stable'
+            : 'topples'
+      };
+    });
+  }
+
+  /**
+   * Limiting slope angle for a static-friction coefficient.
+   *
+   * Formula:
+   *   angle = atan(mu_s)
+   *
+   * Input:
+   *   mu_s >= 0
+   *
+   * Output:
+   *   angle_deg
+   *
+   * Error:
+   *   ConstraintViolation / negative_friction_coefficient
+   *
+   * Hand check:
+   *   mu_s=1 -> 45°.
+   */
+  function slip_angle(o) {
+    return safe(() => {
+      obj(o);
+
+      const mu = nonneg(
+        o.mu_s,
+        'negative_friction_coefficient'
+      );
+
+      return {
+        angle_deg: Math.atan(mu) / RAD
+      };
+    });
+  }
+
+  /**
+   * Block initially at rest on a rough inclined plane.
+   *
+   * Inputs:
+   *   mass_kg > 0
+   *   angle_deg in [0,90]
+   *   mu_s >= 0
+   *   mu_k >= 0 and mu_k <= mu_s
+   *   g_m_s2 > 0 (optional, default 9.81)
+   *
+   * Outputs:
+   *   normal_N
+   *   parallel_N
+   *   friction_max_N
+   *   slips
+   *   friction_N
+   *   acceleration_m_s2
+   *
+   * Positive acceleration is down the slope. If the
+   * static-friction limit is not exceeded, the body remains
+   * at rest and friction balances the downhill force.
+   *
+   * Errors:
+   *   MathError / gravity_must_be_positive
+   *   ConstraintViolation / mass_not_positive
+   *   ConstraintViolation / angle_out_of_range_0_90
+   *   ConstraintViolation / negative_friction_coefficient
+   *   ConstraintViolation / kinetic_exceeds_static
+   *
+   * Hand check:
+   *   m=2 kg, g=10, angle=30°, mu_s=.4, mu_k=.3:
+   *   normal=17.3205081 N
+   *   parallel=10 N
+   *   acceleration=2.40192379 m/s2.
+   */
+  function incline(o) {
+    return safe(() => {
+      obj(o);
+
+      const g = grav(o.g_m_s2);
+      const m = pos(
+        o.mass_kg,
+        'mass_not_positive'
+      );
+      const a = range(
+        o.angle_deg,
+        0,
+        90,
+        'angle_out_of_range_0_90'
+      );
+      const mus = nonneg(
+        o.mu_s,
+        'negative_friction_coefficient'
+      );
+      const muk = nonneg(
+        o.mu_k,
+        'negative_friction_coefficient'
+      );
+
+      if (muk > mus) {
+        err(
+          'ConstraintViolation',
+          'kinetic_exceeds_static'
+        );
+      }
+
+      const normal = snap(
+        m * g * Math.cos(a * RAD),
+        SNAP
+      );
+      const parallel = snap(
+        m * g * Math.sin(a * RAD),
+        SNAP
+      );
+      const limit = mus * normal;
+      const slips = parallel - limit > EPS;
+      const friction = slips
+        ? muk * normal
+        : parallel;
+
+      return {
+        normal_N: normal,
+        parallel_N: parallel,
+        friction_max_N: limit,
+        slips,
+        friction_N: friction,
+        acceleration_m_s2: slips
+          ? (parallel - friction) / m
+          : 0
+      };
+    });
+  }
+
+  /**
+   * Two light strings supporting a vertical weight.
+   *
+   * Inputs:
+   *   weight_N >= 0
+   *   angle1_deg in [0,90]
+   *   angle2_deg in [0,90]
+   *
+   * Angles are measured upwards from the horizontal.
+   * Strings and knot are massless and in static equilibrium.
+   *
+   * Outputs:
+   *   T1_N
+   *   T2_N
+   *
+   * The case 90°/90° is statically indeterminate because
+   * both strings are vertical and load sharing is unknown.
+   * Two horizontal strings cannot support a positive weight.
+   *
+   * Errors:
+   *   ConstraintViolation / negative_load
+   *   ConstraintViolation / angle_out_of_range_0_90
+   *   MathError / strings_horizontal_no_solution
+   *   MathError / strings_vertical_indeterminate
+   *
+   * Hand check:
+   *   Weight=10 N, angles=30° and 60°:
+   *   T1=5 N and T2=8.660254 N.
+   */
+  function two_strings(o) {
+    return safe(() => {
+      obj(o);
+
+      const w = nonneg(
+        o.weight_N,
+        'negative_load'
+      );
+      const a = range(
+        o.angle1_deg,
+        0,
+        90,
+        'angle_out_of_range_0_90'
+      );
+      const b = range(
+        o.angle2_deg,
+        0,
+        90,
+        'angle_out_of_range_0_90'
+      );
+
+      if (a === 90 && b === 90) {
+        err(
+          'MathError',
+          'strings_vertical_indeterminate'
+        );
+      }
+
+      const denominator =
+        Math.sin((a + b) * RAD);
+
+      if (Math.abs(denominator) < SNAP) {
+        err(
+          'MathError',
+          'strings_horizontal_no_solution'
+        );
+      }
+
+      const threshold =
+        SNAP * Math.max(1, w);
+
+      return {
+        T1_N: snap(
+          w * Math.cos(b * RAD) / denominator,
+          threshold
+        ),
+        T2_N: snap(
+          w * Math.cos(a * RAD) / denominator,
+          threshold
+        )
+      };
+    });
+  }
+
+  /**
+   * Reactions and maximum sagging moment of a simply
+   * supported beam under downward loads.
+   *
+   * Inputs:
+   *   span_m > 0
+   *   point_loads: up to 10 objects
+   *     { force_N >= 0, position_m in [0,span_m] }
+   *   udl_N_per_m >= 0 (optional, default 0)
+   *
+   * Outputs:
+   *   RA_N
+   *   RB_N
+   *   max_moment_N_m
+   *   max_moment_at_m
+   *
+   * A uniformly distributed load acts across the full span.
+   * The moment maximum is sought at the supports, at point
+   * loads, and wherever shear vanishes within a load-free
+   * interval. Repeated load positions are counted once
+   * when constructing interval boundaries, but every
+   * point-load force contributes to equilibrium and moment.
+   * Tied maxima use the smallest x. If maximum moment is
+   * zero, max_moment_at_m is null.
+   *
+   * Errors:
+   *   ConstraintViolation / span_not_positive
+   *   ConstraintViolation / loads_exceed_10
+   *   ConstraintViolation / negative_load
+   *   ConstraintViolation / load_outside_span
+   *
+   * Hand check:
+   *   4 m span, 10 N central point load:
+   *   RA=5 N, RB=5 N,
+   *   maximum moment=10 N m at x=2 m.
+   */
+  function beam_reactions(o) {
+    return safe(() => {
+      const b = beamCore(o);
+
+      const xs = [0, b.span];
+
+      b.points.forEach(p => {
+        xs.push(p.position_m);
+      });
+
+      if (b.udl > 0) {
+        const boundaries = [
+          ...new Set(xs)
+        ].sort((a, c) => a - c);
+
+        let passed = 0;
+
+        for (
+          let i = 0;
+          i < boundaries.length - 1;
+          i++
+        ) {
+          const left = boundaries[i];
+          const right = boundaries[i + 1];
+
+          b.points.forEach(p => {
+            if (p.position_m === left) {
+              passed += p.force_N;
+            }
+          });
+
+          const root =
+            (b.RA - passed) / b.udl;
+
+          if (root >= left && root <= right) {
+            xs.push(root);
+          }
+        }
+      }
+
+      xs.sort((a, c) => a - c);
+
+      let best = 0;
+      let at = null;
+
+      xs.forEach(x => {
+        const m = b.momentAt(x);
+
+        if (m > best + EPS) {
+          best = m;
+          at = x;
+        } else if (
+          m > EPS &&
+          Math.abs(m - best) <= EPS &&
+          (at === null || x < at)
+        ) {
+          at = x;
+        }
+      });
+
+      if (best < EPS) {
+        best = 0;
+        at = null;
+      }
+
+      return {
+        RA_N: b.RA,
+        RB_N: b.RB,
+        max_moment_N_m: best,
+        max_moment_at_m: at
+      };
+    });
+  }
+
+  /**
+   * Bending moment at a specified section of the same beam.
+   *
+   * Inputs:
+   *   All beam_reactions inputs
+   *   x_m in [0,span_m]
+   *
+   * Output:
+   *   moment_N_m
+   *
+   * Sagging moment is positive. A point load at the section
+   * makes no contribution to its own lever arm.
+   *
+   * Errors:
+   *   All beam_reactions errors
+   *   ConstraintViolation / position_outside_span
+   *
+   * Hand check:
+   *   4 m span, 10 N load at x=2 m:
+   *   bending moment at x=1 m = 5 N m.
+   */
+  function beam_moment(o) {
+    return safe(() => {
+      const b = beamCore(o);
+
+      const x = range(
+        o.x_m,
+        0,
+        b.span,
+        'position_outside_span'
+      );
+
+      return {
+        moment_N_m: b.momentAt(x)
+      };
+    });
+  }
+
+  /**
+   * Moment of inertia of ideal, uniformly dense rigid shapes.
+   *
+   * Supported shapes:
+   *   solid_disc
+   *   hoop
+   *   solid_sphere
+   *   hollow_sphere
+   *   rod_centre
+   *
+   * Inputs:
+   *   shape
+   *   mass_kg > 0
+   *   radius_m > 0 for round shapes
+   *   length_m > 0 for rod_centre
+   *   axis_offset_m >= 0 (optional, default 0)
+   *
+   * The parallel-axis theorem adds mass_kg*axis_offset_m^2.
+   *
+   * Output:
+   *   I_kg_m2
+   *
+   * Errors:
+   *   ConstraintViolation / mass_not_positive
+   *   ConstraintViolation / size_not_positive
+   *   ConstraintViolation / negative_distance
+   *   NotSupported / shape_not_supported
+   *
+   * Missing radius_m or length_m is classified as
+   * ConstraintViolation / size_not_positive.
+   *
+   * Hand check:
+   *   2 kg solid disc with radius 0.5 m:
+   *   I = (1/2)(2)(0.5^2) = 0.25 kg m2.
+   */
+  function inertia(o) {
+    return safe(() => {
+      obj(o);
+
+      const m = pos(
+        o.mass_kg,
+        'mass_not_positive'
+      );
+
+      let central;
+
+      if (o.shape === 'rod_centre') {
+        const L = pos(
+          o.length_m,
+          'size_not_positive'
+        );
+        central = m * L * L / 12;
+      } else {
+        const k = shapeK(o.shape, false);
+        const r = pos(
+          o.radius_m,
+          'size_not_positive'
+        );
+        central = k * m * r * r;
+      }
+
+      const d = nonneg(
+        opt(o.axis_offset_m, 0),
+        'negative_distance'
+      );
+
+      return {
+        I_kg_m2: central + m * d * d
+      };
+    });
+  }
+
+  /**
+   * Rolling without slipping or frictionless sliding.
+   *
+   * Supported shapes:
+   *   solid_disc, hoop, solid_sphere, hollow_sphere,
+   *   block_frictionless
+   *
+   * Inputs:
+   *   shape
+   *   angle_deg in (0,90]
+   *   height_m >= 0
+   *   g_m_s2 > 0 (optional, default 9.81)
+   *
+   * Outputs:
+   *   k
+   *   acceleration_m_s2
+   *   speed_at_bottom_m_s
+   *   distance_m
+   *   time_s
+   *
+   * For rolling bodies k = I/(mr^2), and acceleration is
+   * g sin(angle)/(1+k). For a frictionless block k=0.
+   * All bodies start from rest at the given vertical height.
+   * Mass and radius cancel for each ideal shape.
+   *
+   * Errors:
+   *   MathError / gravity_must_be_positive
+   *   NotSupported / shape_cannot_roll
+   *   NotSupported / shape_not_supported
+   *   ConstraintViolation / angle_out_of_range_0_90
+   *   ConstraintViolation / negative_distance
+   *
+   * Hand check:
+   *   Solid sphere, g=10, angle=30°, height=1 m:
+   *   k=0.4, acceleration=3.57142857 m/s2,
+   *   speed=3.77964473 m/s.
+   */
+  function rolling(o) {
+    return safe(() => {
+      obj(o);
+
+      const g = grav(o.g_m_s2);
+      const k = shapeK(o.shape, true);
+      const a = num(o.angle_deg);
+
+      if (a <= 0 || a > 90) {
+        err(
+          'ConstraintViolation',
+          'angle_out_of_range_0_90'
+        );
+      }
+
+      const h = nonneg(
+        o.height_m,
+        'negative_distance'
+      );
+
+      const sine = Math.sin(a * RAD);
+      const acceleration =
+        g * sine / (1 + k);
+      const distance = h / sine;
+
+      return {
+        k,
+        acceleration_m_s2: acceleration,
+        speed_at_bottom_m_s: Math.sqrt(
+          2 * g * h / (1 + k)
+        ),
+        distance_m: distance,
+        time_s: h === 0
+          ? 0
+          : Math.sqrt(
+              2 * distance / acceleration
+            )
+      };
+    });
+  }
+
+  /**
+   * Conservation of angular momentum about a fixed axis.
+   *
+   * Assumption:
+   *   External torque is zero.
+   *
+   * Inputs:
+   *   I1_kg_m2 > 0
+   *   omega1_rad_s (signed)
+   *   I2_kg_m2 > 0
+   *
+   * Outputs:
+   *   omega2_rad_s
+   *   L_kg_m2_s
+   *   KE1_J
+   *   KE2_J
+   *
+   * Energy need not be conserved because internal work
+   * may be performed when changing the inertia.
+   *
+   * Error:
+   *   ConstraintViolation / inertia_not_positive
+   *
+   * Hand check:
+   *   I1=4, omega1=3, I2=2:
+   *   omega2=6 rad/s, L=12 kg m2/s,
+   *   KE1=18 J, KE2=36 J.
+   */
+  function angular_momentum(o) {
+    return safe(() => {
+      obj(o);
+
+      const i1 = pos(
+        o.I1_kg_m2,
+        'inertia_not_positive'
+      );
+      const w1 = num(o.omega1_rad_s);
+      const i2 = pos(
+        o.I2_kg_m2,
+        'inertia_not_positive'
+      );
+
+      const L = i1 * w1;
+      const w2 = L / i2;
+
+      return {
+        omega2_rad_s: w2,
+        L_kg_m2_s: L,
+        KE1_J: i1 * w1 * w1 / 2,
+        KE2_J: i2 * w2 * w2 / 2
+      };
+    });
+  }
+
+  /**
+   * Angular acceleration under a net fixed-axis torque.
+   *
+   * Formula:
+   *   alpha = torque/I
+   *
+   * Inputs:
+   *   torque_N_m (signed)
+   *   I_kg_m2 > 0
+   *
+   * Output:
+   *   alpha_rad_s2
+   *
+   * Error:
+   *   ConstraintViolation / inertia_not_positive
+   *
+   * Hand check:
+   *   12 N m / 3 kg m2 = 4 rad/s2.
+   */
+  function angular_acceleration(o) {
+    return safe(() => {
+      obj(o);
+
+      const torque = num(o.torque_N_m);
+      const i = pos(
+        o.I_kg_m2,
+        'inertia_not_positive'
+      );
+
+      return {
+        alpha_rad_s2: torque / i
+      };
+    });
+  }
+
+  /**
+   * Atwood machine with optional rotational pulley inertia.
+   *
+   * Assumptions:
+   *   Light, inextensible string; no slip; frictionless axle.
+   *
+   * Inputs:
+   *   m1_kg > 0
+   *   m2_kg > 0
+   *   pulley_I_kg_m2 >= 0 (optional, default 0)
+   *   pulley_radius_m > 0 when pulley inertia is positive
+   *   g_m_s2 > 0 (optional, default 9.81)
+   *
+   * Outputs:
+   *   acceleration_m_s2 (positive when m2 descends)
+   *   T1_N
+   *   T2_N
+   *
+   * Errors:
+   *   MathError / gravity_must_be_positive
+   *   ConstraintViolation / mass_not_positive
+   *   ConstraintViolation / inertia_not_positive
+   *   ConstraintViolation / radius_not_positive
+   *
+   * If pulley_I_kg_m2 > 0 and pulley_radius_m is absent
+   * or null, the documented error is radius_not_positive,
+   * not invalid_number.
+   *
+   * Hand check:
+   *   m1=2 kg, m2=3 kg, g=10, light pulley:
+   *   a=2 m/s2, T1=T2=24 N.
+   */
+  function atwood(o) {
+    return safe(() => {
+      obj(o);
+
+      const g = grav(o.g_m_s2);
+      const m1 = pos(
+        o.m1_kg,
+        'mass_not_positive'
+      );
+      const m2 = pos(
+        o.m2_kg,
+        'mass_not_positive'
+      );
+      const i = nonneg(
+        opt(o.pulley_I_kg_m2, 0),
+        'inertia_not_positive'
+      );
+
+      let effective = 0;
+
+      if (i > 0) {
+        const r = pos(
+          o.pulley_radius_m,
+          'radius_not_positive'
+        );
+        effective = i / (r * r);
+      }
+
+      const a =
+        (m2 - m1) * g /
+        (m1 + m2 + effective);
+
+      return {
+        acceleration_m_s2: snap(a, SNAP),
+        T1_N: m1 * (g + a),
+        T2_N: m2 * (g - a)
+      };
+    });
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    weight,
+    spring,
+    resultant,
+    dynamics,
+    moment,
+    balance,
+    balance_unknown,
+    tilt,
+    slip_angle,
+    incline,
+    two_strings,
+    beam_reactions,
+    beam_moment,
+    inertia,
+    rolling,
+    angular_momentum,
+    angular_acceleration,
+    atwood
+  });
+})();
+/* FIT-CALC-END forces */
+</script>
+<script>
+(function () {
+  'use strict';
+
+  const C = FITCalcForces;
+  const $ = id => document.getElementById(id);
+  const fmt = n => Number.isFinite(n)
+    ? Number(n.toPrecision(4)).toString()
+    : '—';
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const swatch = (colour, text) =>
+    `<span><i class="swatch" style="background:${colour}"></i>${text}</span>`;
+
+  let round = 0;
+  let score = 0;
+  let tries = 0;
+  let hinted = false;
+  let solved = false;
+  let replay = 0;
+  let task;
+  let value = 0;
+
+  function random(n) {
+    let s = (81111 + n * 2003 + replay * 3137) >>> 0;
+    return () => {
+      s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+  }
+
+  function feedback(message, good) {
+    $('feedback').className = 'feedback ' +
+      (good === null ? '' : good ? 'good' : 'bad');
+    $('feedback').textContent = message;
+  }
+
+  function issue(r) {
+    if (!r || !r.error) return false;
+    feedback(
+      `Cannot calculate: ${r.reason.replace(/_/g, ' ')}.`,
+      false
+    );
+    return true;
+  }
+
+  function beamInput() {
+    const point_loads = [];
+
+    if (task.fixedLoad) {
+      point_loads.push({
+        force_N: task.fixedLoad,
+        position_m: task.fixedAt
+      });
+    }
+
+    point_loads.push({
+      force_N: task.load,
+      position_m: task.mode === 'design'
+        ? value
+        : task.fixedAt
+    });
+
+    return {
+      span_m: task.span,
+      point_loads,
+      udl_N_per_m: task.udl
+    };
+  }
+
+  function beamResult() {
+    return C.beam_reactions(beamInput());
+  }
+
+  function craneResult(counter) {
+    const known = [
+      {
+        force_N: task.base,
+        position_m: task.cg
+      },
+      {
+        force_N: counter,
+        position_m: task.counterAt
+      }
+    ];
+
+    const loaded = C.balance({
+      pivot_m: task.front,
+      loads: [
+        ...known,
+        {
+          force_N: task.load,
+          position_m: task.loadAt
+        }
+      ]
+    });
+
+    const empty = C.balance({
+      pivot_m: task.rear,
+      loads: known
+    });
+
+    return {
+      loaded,
+      empty,
+      safeLoaded:
+        !loaded.error && loaded.net_N_m <= 1e-9,
+      safeEmpty:
+        !empty.error && empty.net_N_m >= -1e-9
+    };
+  }
+
+  function begin() {
+    tries = 0;
+    hinted = false;
+    solved = false;
+
+    const v = random(round)() < .5 ? 0 : 1;
+
+    if (round === 0) {
+      task = {
+        kind: 'beam', mode: 'maximum',
+        span: 6, load: 12 + 4 * v,
+        fixedAt: 3, udl: 0,
+        rating: 30, limit: 35
+      };
+      value = 1;
+    } else if (round === 1) {
+      task = {
+        kind: 'beam', mode: 'design',
+        span: 6, load: 12, udl: 2,
+        rating: 13, limit: 28
+      };
+      value = 1;
+    } else if (round === 2) {
+      task = {
+        kind: 'crane', mode: 'safe',
+        base: 50 + 5 * v,
+        load: 100 + 10 * v,
+        front: 3, rear: 1, cg: 2,
+        loadAt: 4, counterAt: 0
+      };
+      value = 5;
+    } else if (round === 3) {
+      task = {
+        kind: 'beam', mode: 'maximum',
+        span: 6, load: 12,
+        fixedAt: 2, udl: 2,
+        rating: 25, limit: 35
+      };
+      value = 5;
+    } else if (round === 4) {
+      task = {
+        kind: 'beam', mode: 'design',
+        span: 8, load: 12,
+        fixedLoad: 16, fixedAt: 2,
+        udl: 1, rating: 20, limit: 50
+      };
+      value = 2;
+    } else {
+      task = {
+        kind: 'crane', mode: 'minimum',
+        base: 50, load: 100,
+        front: 3, rear: 1, cg: 2,
+        loadAt: 4, counterAt: 0
+      };
+      value = 8;
+    }
+
+    $('hud').textContent = `Round ${round + 1}/6 · Score ${score}`;
+    $('check').disabled = false;
+    $('hint').disabled = false;
+    $('next').hidden = true;
+
+    feedback('Adjust the design, then press Check.', null);
+    makeControls();
+    draw();
+  }
+
+  function numeric(label, lo, hi, step, unit) {
+    task.unit = unit;
+
+    $('controls').innerHTML =
+      `<label for="range">${label}</label>` +
+      `<div class="stepper">` +
+      `<button data-n="-10" aria-label="Coarse decrease">−−</button>` +
+      `<button data-n="-1" aria-label="Fine decrease">−</button>` +
+      `<output id="read" class="read"></output>` +
+      `<button data-n="1" aria-label="Fine increase">+</button>` +
+      `<button data-n="10" aria-label="Coarse increase">++</button>` +
+      `</div>` +
+      `<input id="range" type="range" min="${lo}" max="${hi}" ` +
+      `step="${step}" value="${value}">`;
+
+    $('range').oninput = e => {
+      value = Number(e.target.value);
+      draw();
+    };
+
+    document.querySelectorAll('[data-n]').forEach(b => {
+      b.onclick = () => {
+        value =
+          Math.round(
+            clamp(
+              value + Number(b.dataset.n) * step,
+              lo,
+              hi
+            ) / step
+          ) * step;
+        draw();
+      };
+    });
+  }
+
+  function makeControls() {
+    if (task.kind === 'beam') {
+      $('sceneTitle').textContent =
+        'Supported beam and loads';
+      $('plotTitle').textContent =
+        'Bending moment M (N m) vs x (m)';
+      $('legend').innerHTML =
+        swatch('#FF6B3D', 'Bending moment') +
+        swatch('#D92D20', 'Design limit') +
+        swatch('#111', 'Maximum');
+
+      if (task.mode === 'maximum') {
+        $('question').textContent =
+          `On a ${task.span} m span, a ${task.load} N ` +
+          `load acts at x = ${task.fixedAt} m, with a ` +
+          `uniform load of ${task.udl} N/m. Select the ` +
+          `position of maximum bending moment.`;
+
+        numeric(
+          'Location x (m)',
+          0, task.span, .1, 'm'
+        );
+      } else {
+        $('question').textContent =
+          `Move the ${task.load} N load so RA and RB ` +
+          `are each at most ${task.rating} N and maximum ` +
+          `moment is at most ${task.limit} N m. ` +
+          `Uniform load: ${task.udl} N/m.` +
+          (task.fixedLoad
+            ? ` Another ${task.fixedLoad} N acts permanently at x = ${task.fixedAt} m.`
+            : '');
+
+        numeric(
+          'Moving load position x (m)',
+          0, task.span, .5, 'm'
+        );
+      }
+    } else {
+      $('sceneTitle').textContent =
+        'Crane with two outriggers';
+      $('plotTitle').textContent =
+        'Restoring and overturning moments (N m)';
+      $('legend').innerHTML =
+        swatch('#FF6B3D', 'Restoring') +
+        swatch('#D92D20', 'Overturning');
+
+      $('question').textContent =
+        task.mode === 'safe'
+          ? `The crane has self-weight ${task.base} N and ` +
+            `lifts ${task.load} N. Choose a counterweight ` +
+            `which prevents forward tipping while loaded ` +
+            `and backward tipping when empty.`
+          : `Find the lightest whole-newton counterweight ` +
+            `that prevents both forward tipping with the ` +
+            `${task.load} N load and backward tipping without it.`;
+
+      numeric('Counterweight (N)', 0, 80, 1, 'N');
+    }
+  }
+
+  function draw() {
+    if (task.kind === 'beam') drawBeam();
+    else drawCrane();
+
+    if ($('range')) {
+      $('range').value = String(value);
+      $('read').textContent =
+        `${fmt(value)} ${task.unit}`;
+    }
+  }
+
+  function drawBeam() {
+    const input = beamInput();
+    const r = beamResult();
+    if (issue(r)) return;
+
+    const X = x => 48 + x / task.span * 386;
+
+    const loads = input.point_loads.map((a, i) => {
+      const x = X(a.position_m);
+      const length = Math.min(
+        78, 15 + a.force_N * 2.8
+      );
+      const colour = i ? '#D92D20' : '#FF6B3D';
+
+      return (
+        `<path d="M${x} ${141 - length}v${length}m-7 -9 7 9 7 -9" ` +
+        `stroke="${colour}" stroke-width="4" fill="none"/>` +
+        `<text x="${x}" y="${127 - length}" font-size="13" ` +
+        `text-anchor="middle">${a.force_N} N</text>`
+      );
+    }).join('');
+
+    let udl = '';
+    if (task.udl) {
+      for (let x = 58; x <= 424; x += 32) {
+        udl +=
+          `<path d="M${x} 52v28m-5 -7 5 7 5 -7" ` +
+          `stroke="#1F66E5" stroke-width="2" fill="none"/>`;
+      }
+      udl +=
+        `<text x="240" y="29" text-anchor="middle" font-size="13">` +
+        `UDL ${task.udl} N/m</text>`;
+    }
+
+    function reaction(x, force, label) {
+      const length = Math.min(
+        75, 20 + force * 3
+      );
+      return (
+        `<path d="M${x} 241v-${length}m-7 10 7 -10 7 10" ` +
+        `stroke="#2D7D53" stroke-width="4" fill="none"/>` +
+        `<text x="${x}" y="284" font-size="12" ` +
+        `text-anchor="middle">${label} ${fmt(force)} N</text>`
+      );
+    }
+
+    $('scene').innerHTML =
+      udl +
+      loads +
+      `<rect x="48" y="144" width="386" height="20" rx="5" ` +
+      `fill="#FF6B3D" stroke="#111" stroke-width="3"/>` +
+      `<path d="M48 164l-22 35h44Z M434 164l-22 35h44Z" ` +
+      `fill="#FFC83D" stroke="#111" stroke-width="3"/>` +
+      reaction(48, r.RA_N, 'RA') +
+      reaction(434, r.RB_N, 'RB') +
+      `<text x="241" y="301" font-size="13" ` +
+      `text-anchor="middle">Span ${task.span} m · A to B</text>`;
+
+    $('scene').setAttribute(
+      'aria-label',
+      `Beam with support A reaction ${fmt(r.RA_N)} N ` +
+      `and B reaction ${fmt(r.RB_N)} N`
+    );
+
+    drawMoment(input, r);
+  }
+
+  function drawMoment(input, r) {
+    const upper = Math.max(
+      5,
+      task.limit * 1.4,
+      r.max_moment_N_m * 1.2
+    );
+    const X = x => 57 + x / task.span * 364;
+    const Y = m => 228 - m / upper * 182;
+
+    let grid = '';
+    let path = '';
+
+    for (let i = 0; i <= 5; i++) {
+      const x = task.span * i / 5;
+      grid +=
+        `<line x1="${X(x)}" y1="46" x2="${X(x)}" y2="228" stroke="#ddd"/>` +
+        `<text x="${X(x)}" y="246" text-anchor="middle" font-size="12">${fmt(x)}</text>`;
+    }
+
+    for (let i = 0; i <= 4; i++) {
+      const v = upper * i / 4;
+      grid +=
+        `<line x1="57" y1="${Y(v)}" x2="421" y2="${Y(v)}" stroke="#ddd"/>` +
+        `<text x="44" y="${Y(v) + 4}" text-anchor="end" font-size="11">${fmt(v)}</text>`;
+    }
+
+    for (let i = 0; i <= 100; i++) {
+      const x = task.span * i / 100;
+      const rAt = C.beam_moment({
+        ...input,
+        x_m: x
+      });
+      if (issue(rAt)) return;
+
+      path +=
+        `${i ? 'L' : 'M'}${X(x)} ${Y(rAt.moment_N_m)}`;
+    }
+
+    const marker = r.max_moment_at_m == null
+      ? ''
+      : `<circle cx="${X(r.max_moment_at_m)}" ` +
+        `cy="${Y(r.max_moment_N_m)}" r="7" ` +
+        `fill="#111" stroke="#fff" stroke-width="2"/>`;
+
+    const selection = task.mode === 'maximum'
+      ? `<line x1="${X(value)}" y1="46" x2="${X(value)}" ` +
+        `y2="228" stroke="#1F66E5" stroke-width="2" ` +
+        `stroke-dasharray="5 4"/>`
+      : '';
+
+    $('plot').innerHTML =
+      grid +
+      `<path d="M57 46V228H421" stroke="#111" stroke-width="3" fill="none"/>` +
+      `<line x1="57" y1="${Y(task.limit)}" x2="421" y2="${Y(task.limit)}" stroke="#D92D20" stroke-width="2" stroke-dasharray="6 4"/>` +
+      `<path d="${path}" stroke="#FF6B3D" stroke-width="4" fill="none"/>` +
+      marker +
+      selection +
+      `<text x="416" y="${Y(task.limit) - 6}" text-anchor="end" font-size="12">Limit ${task.limit} N m</text>` +
+      `<text x="239" y="277" text-anchor="middle" font-size="13">Position x (m)</text>` +
+      `<text x="14" y="140" text-anchor="middle" transform="rotate(-90 14 140)" font-size="12">Moment (N m)</text>`;
+
+    $('plot').setAttribute(
+      'aria-label',
+      'Bending-moment diagram with its maximum, design limit and load position'
+    );
+  }
+
+  function drawCrane() {
+    const c = craneResult(value);
+    if (issue(c.loaded) || issue(c.empty)) return;
+
+    const X = x => 61 + x / 4 * 355;
+
+    function arrow(x, force, label, colour) {
+      const px = X(x);
+      const length = Math.min(75, 20 + force * .5);
+      return (
+        `<path d="M${px} ${157 - length}v${length}m-7 -9 7 9 7 -9" ` +
+        `fill="none" stroke="${colour}" stroke-width="4"/>` +
+        `<text x="${px}" y="${141 - length}" text-anchor="middle" font-size="12">${label}</text>`
+      );
+    }
+
+    $('scene').innerHTML =
+      `<path d="M24 245H460" stroke="#111" stroke-width="4"/>` +
+      `<rect x="${X(0)}" y="191" width="${X(4) - X(0)}" height="23" rx="5" fill="#FF6B3D" stroke="#111" stroke-width="4"/>` +
+      `<path d="M${X(1)} 214l-20 27h40Z M${X(3)} 214l-20 27h40Z" fill="#FFC83D" stroke="#111" stroke-width="3"/>` +
+      `<path d="M${X(2)} 191V52L${X(4)} 90" stroke="#111" stroke-width="8" fill="none"/>` +
+      arrow(0, value, '? N', '#1F66E5') +
+      arrow(2, task.base, `${task.base} N`, '#FF6B3D') +
+      arrow(4, task.load, `${task.load} N`, '#D92D20') +
+      `<text x="${X(1)}" y="270" text-anchor="middle" font-size="12">Rear</text>` +
+      `<text x="${X(3)}" y="270" text-anchor="middle" font-size="12">Front</text>` +
+      `<text x="240" y="301" text-anchor="middle" font-size="12">Rear edge x=1 m · Front edge x=3 m</text>`;
+
+    $('scene').setAttribute(
+      'aria-label',
+      `Crane with ${value} N counterweight and ${task.load} N lifted load`
+    );
+
+    function bars(y, name, restore, overturn) {
+      const maximum = Math.max(
+        1, restore, overturn
+      ) * 1.1;
+
+      return (
+        `<text x="45" y="${y - 13}" font-size="14" font-weight="800">${name}</text>` +
+        `<rect x="45" y="${y}" width="370" height="21" rx="6" fill="#eee" stroke="#111"/>` +
+        `<rect x="45" y="${y}" width="${370 * restore / maximum}" height="21" rx="6" fill="#FF6B3D"/>` +
+        `<rect x="45" y="${y + 25}" width="${370 * overturn / maximum}" height="21" rx="6" fill="#D92D20"/>` +
+        `<text x="45" y="${y + 62}" font-size="12">Upper = restoring · lower = overturning</text>`
+      );
+    }
+
+    $('plot').innerHTML =
+      bars(
+        53,
+        'Loaded · front edge',
+        c.loaded.anticlockwise_N_m,
+        c.loaded.clockwise_N_m
+      ) +
+      bars(
+        184,
+        'Empty · rear edge',
+        c.empty.clockwise_N_m,
+        c.empty.anticlockwise_N_m
+      );
+
+    $('plot').setAttribute(
+      'aria-label',
+      'Two pairs of restoring and overturning moment bars'
+    );
+  }
+
+  function check() {
+    if (solved) return;
+
+    let correct = false;
+    let why = '';
+    let wrong = '';
+
+    if (task.kind === 'crane') {
+      const c = craneResult(value);
+      if (issue(c.loaded) || issue(c.empty)) return;
+      const safe = c.safeLoaded && c.safeEmpty;
+
+      if (task.mode === 'safe') {
+        correct = safe;
+        why =
+          `${value} N counterweight passes both tipping checks.`;
+      } else {
+        const smaller = value > 0
+          ? craneResult(value - 1)
+          : null;
+        correct =
+          safe &&
+          smaller &&
+          !(smaller.safeLoaded && smaller.safeEmpty);
+
+        why =
+          `${value} N is the lightest whole-newton safe counterweight.`;
+      }
+
+      wrong = !c.safeLoaded
+        ? 'Forward overturning moment is too large.'
+        : !c.safeEmpty
+          ? 'The crane tips backwards when empty.'
+          : 'This counterweight works, but a lighter whole-newton choice also works.';
+    } else {
+      const r = beamResult();
+      if (issue(r)) return;
+
+      if (task.mode === 'maximum') {
+        correct =
+          r.max_moment_at_m !== null &&
+          Math.abs(value - r.max_moment_at_m) <= .051;
+
+        why =
+          `Maximum moment ${fmt(r.max_moment_N_m)} N m ` +
+          `occurs at x = ${fmt(r.max_moment_at_m)} m.`;
+
+        wrong =
+          'Check where the bending-moment curve reaches its highest point.';
+      } else {
+        correct =
+          r.RA_N <= task.rating + 1e-9 &&
+          r.RB_N <= task.rating + 1e-9 &&
+          r.max_moment_N_m <= task.limit + 1e-9;
+
+        why =
+          `RA=${fmt(r.RA_N)} N, RB=${fmt(r.RB_N)} N, ` +
+          `maximum moment=${fmt(r.max_moment_N_m)} N m.`;
+
+        wrong = r.RA_N > task.rating
+          ? `Support A exceeds its rating by ${fmt(r.RA_N - task.rating)} N.`
+          : r.RB_N > task.rating
+            ? `Support B exceeds its rating by ${fmt(r.RB_N - task.rating)} N.`
+            : `Bending moment is ${fmt(r.max_moment_N_m - task.limit)} N m over the limit.`;
+      }
+    }
+
+    tries++;
+    if (!correct) {
+      feedback(wrong, false);
+      return;
+    }
+
+    solved = true;
+    const earned = hinted
+      ? 50
+      : tries === 1 ? 100 : tries === 2 ? 75 : 50;
+
+    score += earned;
+    $('hud').textContent = `Round ${round + 1}/6 · Score ${score}`;
+    feedback(`★ ${earned} points! ${why}`, true);
+    $('check').disabled = true;
+    $('hint').disabled = true;
+    $('next').hidden = false;
+    $('next').textContent =
+      round === 5 ? 'See your stars →' : 'Next round →';
+  }
+
+  $('check').onclick = check;
+
+  $('hint').onclick = () => {
+    if (solved) return;
+
+    hinted = true;
+    $('hint').disabled = true;
+
+    const text = task.kind === 'crane'
+      ? 'Take moments separately about the front and rear edges. The counterweight helps one case but can harm the other.'
+      : task.mode === 'maximum'
+        ? 'The peak occurs where shear changes from positive to negative; it can be directly below a point load.'
+        : 'Keep both reactions within their ratings before checking the bending-moment limit.';
+
+    feedback(
+      `Hint: ${text} This round is worth 50 points.`,
+      null
+    );
+  };
+
+  $('next').onclick = () => {
+    if (!solved) return;
+
+    if (round < 5) {
+      round++;
+      begin();
+      return;
+    }
+
+    $('game').hidden = true;
+    $('end').hidden = false;
+    const stars = score >= 500 ? 3 : score >= 350 ? 2 : 1;
+    $('stars').textContent =
+      '★'.repeat(stars) + '☆'.repeat(3 - stars);
+    $('total').textContent = `${score}/600 points.`;
+  };
+
+  $('again').onclick = () => {
+    replay++;
+    round = 0;
+    score = 0;
+    $('game').hidden = false;
+    $('end').hidden = true;
+    begin();
+  };
+
+  begin();
+})();
+</script>
+</body>
+</html>
