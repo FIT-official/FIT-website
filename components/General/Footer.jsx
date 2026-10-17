@@ -79,7 +79,7 @@ function Footer() {
                     <span className='opacity-60'>Website created by</span> <a href="https://www.linkedin.com/in/sabaxazad/" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity ease-in-out duration-300 ml-1">Saba Azad</a>
                 </div>
                 <div className='flex text-sm tracking-tight opacity-60'>
-                    © {new Date().getFullYear()} Fix It Today. All rights reserved.
+                    © {new Date().getFullYear()} Fix It Today Pte. Ltd., UEN 53370270D. All rights reserved.
                 </div>
             </div>
         </footer>
