@@ -20,7 +20,7 @@ const curveFit = { subject: 'Maths', concept: 'curve-fitting', accent: '#2EC4A6'
 // Tier-1 X5 (raster grids / image processing): live, FITCalcX5 fix1 passes all 20 KATs in tier1/raster_grid.json.
 const rasterGrid = { subject: 'Engineering', concept: 'raster-grids', accent: '#1F66E5', minutes: '15–20', status: 'live' }
 // Optics family: FITCalcOptics (module + each game's embedded copy) passes all 44 cases of kat_cases/families/optics.json (tests/families).
-// optics-s, optics-jc and optics-u stay draft: their 390 px CSS shrinks the stepper buttons to 43 px wide (FIX_REQUEST.md).
+// All five live: optics-s, optics-jc and optics-u fix1 (ChatGPT) widen the 390 px stepper buttons to 44 x 46 px; calc unchanged.
 const optics = { subject: 'Physics', concept: 'optics', accent: '#FFC83D', minutes: '10–15', status: 'live' }
 // Tier-1 X2 seeded random simulation (calc: lib/sims/tier1/x2_random_sim.calc.js, inlined in each file). Live: fix2 passes all 30 Tier-1 KATs.
 const randomSim = { subject: 'Maths', concept: 'random-simulation', accent: '#8B5CF6', minutes: '10–15', status: 'live' }
@@ -249,11 +249,11 @@ export const htmlSims = [
     syllabusRef: 'MOE Primary Science: Light and Shadows',
     approach: 'Rotate mirrors to guide light towards a target, then investigate how the position of an opaque object changes its shadow.',
     activityPrompt: 'Play all rounds, then explain why a shadow grows when an object moves closer to a torch.', tags: ['optics', 'Primary', 'Science', 'light', 'reflection', 'mirrors', 'shadows'] },
-  { ...optics, id: 'optics-s', status: 'draft', title: 'Ray Box Lab', level: 'Secondary', topic: 'Reflection, Refraction and Lenses', symbol: '🌈', height: 2700,
+  { ...optics, id: 'optics-s', title: 'Ray Box Lab', level: 'Secondary', topic: 'Reflection, Refraction and Lenses', symbol: '🌈', height: 2700,
     syllabusRef: 'MOE Secondary Physics: Light (reflection, refraction, total internal reflection and lenses)',
     approach: 'Measure incident and refracted rays, investigate critical angles and optical fibres, and construct converging-lens ray diagrams.',
     activityPrompt: 'Play all rounds, then explain the conditions required for total internal reflection and how two principal rays locate an image.', tags: ['optics', 'Secondary', 'Physics', 'Snell law', 'refraction', 'critical angle', 'total internal reflection', 'optical fibre', 'ray diagrams'] },
-  { ...optics, id: 'optics-jc', status: 'draft', title: 'Lens Bench', level: 'JC', topic: 'Geometrical Optics and Lens Equations', symbol: '🔬', height: 2700,
+  { ...optics, id: 'optics-jc', title: 'Lens Bench', level: 'JC', topic: 'Geometrical Optics and Lens Equations', symbol: '🔬', height: 2700,
     syllabusRef: 'Pre-university physics enrichment: geometrical optics',
     approach: 'Adjust an optical bench to focus real and virtual images, apply signed lens equations and magnification, calculate optical power, and investigate refraction through parallel layers.',
     activityPrompt: 'Play all rounds, then explain the real-is-positive sign convention and why a virtual image cannot be projected onto a screen.', tags: ['optics', 'JC', 'Physics', 'geometrical optics', 'thin lens', 'magnification', 'dioptres', 'Snell law', 'layered media'] },
@@ -261,7 +261,7 @@ export const htmlSims = [
     syllabusRef: 'Polytechnic applied optics and optometry fundamentals: optical instruments and corrective lenses',
     approach: 'Select focal lengths and instrument dimensions to build magnifiers, astronomical telescopes and compound microscopes, then choose a corrective lens for a short-sighted eye.',
     activityPrompt: 'Play all rounds, then explain how objective and eyepiece focal lengths affect magnification and instrument length.', tags: ['optics', 'Poly', 'Engineering', 'magnifier', 'telescope', 'microscope', 'optometry', 'lens power', 'corrective lenses'] },
-  { ...optics, id: 'optics-u', status: 'draft', title: 'Lensmaker Lab', level: 'University', topic: 'Lensmaker Equation and Optical Systems', symbol: '🧪', height: 2900,
+  { ...optics, id: 'optics-u', title: 'Lensmaker Lab', level: 'University', topic: 'Lensmaker Equation and Optical Systems', symbol: '🧪', height: 2900,
     syllabusRef: 'University, Optics',
     approach: 'Design thin lenses with Cartesian surface radii, compare optical power in air and water, analyse two-lens systems with virtual intermediate objects, and calculate longitudinal chromatic aberration.',
     activityPrompt: 'Play all rounds, then explain how surface curvature, surrounding refractive index and dispersion influence focal length.', tags: ['University', 'Optics', 'lensmaker', 'two-lens systems', 'Cartesian radii', 'refractive index', 'dispersion', 'chromatic aberration'] },
