@@ -10,6 +10,7 @@ export default function RepairEstimates({ className = '' }) {
         <li>{REPAIR_ESTIMATES.home_visit}</li>
       </ul>
       <p className="mt-2">{REPAIR_ESTIMATES.note}</p>
+      <p className="mt-2" data-repair-terms="">{REPAIR_ESTIMATES.diagnosis} {REPAIR_ESTIMATES.not_serviceable}</p>
     </aside>
   )
 }

@@ -100,6 +100,8 @@ const nextConfig = {
             ['tft-ili9341-240-x-320-28-inch-2', 'tft-ili9341-240-x-320-28-inch'],
         ].map(([from, to]) => ({ source: `/products/${from}`, destination: `/products/${to}`, permanent: true }));
         return [
+            // No standalone contact page or form exists; the printer-repair request form is the site's contact form.
+            { source: '/contact', destination: '/printer-repair', statusCode: 301 },
             { source: '/classes', destination: '/class', statusCode: 301 },
             { source: '/classes/:path*', destination: '/class/:path*', statusCode: 301 },
             ...productRedirects,
