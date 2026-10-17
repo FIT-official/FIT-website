@@ -1,0 +1,919 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tank and Decay Lab</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input{font:inherit}
+button,input{-webkit-tap-highlight-color:transparent;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{min-height:44px;border:2px solid #111;border-radius:999px;padding:10px 18px;background:white;font-weight:800;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+button:active:not(:disabled){transform:translateY(2px)}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-poly);cursor:pointer}
+main{max-width:1240px;margin:auto;padding:18px 14px 50px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+h1{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.1;margin:18px 0 10px;font-weight:800}
+h2{font-size:1.12rem;margin:0 0 12px;font-weight:800}
+p{margin:8px 0}
+.badge{background:var(--lvl-poly);color:var(--lvl-poly-on);font-size:12px;font-weight:800;text-transform:uppercase;border:2px solid #111;border-radius:999px;padding:8px 12px}
+.hud{display:flex;align-items:center;gap:9px;font-weight:800;flex-wrap:wrap}
+.hud span:not(.badge){border:2px solid #111;border-radius:999px;padding:7px 12px}
+.layout{display:grid;gap:16px;margin-top:17px}
+.card{border:2px solid #111;border-radius:28px;padding:18px;background:white;box-shadow:var(--sh-2);min-width:0}
+.stage{background:var(--lvl-poly-tint)}
+.question{font-size:1.13rem;font-weight:600;min-height:60px}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.plot{background:white;border:2px solid var(--fit-line-soft);border-radius:16px;padding:7px}
+.controls{margin-top:16px}
+.control-title{display:flex;justify-content:space-between;gap:10px;align-items:center;font-weight:800}
+.value{font-variant-numeric:tabular-nums}
+.steppers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:9px 0}
+.steppers button{padding:6px;min-width:0}
+.legend{font-size:12px;color:var(--fit-ink-2);font-weight:600}
+.legend b{margin:0 5px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2);flex:1}
+.check:active{box-shadow:var(--sh-1)}
+.feedback{border-radius:14px;padding:12px 14px;background:var(--fit-sunken);margin-top:14px;min-height:50px;font-weight:600}
+.feedback.good{background:#ddf7e8}
+.feedback.bad{background:#ffe8e3}
+details{border:2px solid #111;border-radius:16px;padding:12px;margin-top:14px;background:white}
+summary{cursor:pointer;font-weight:800;min-height:32px}
+.concept{margin-top:14px;border-top:2px dashed #111;padding-top:14px}
+.concept svg{max-width:320px}
+.concept p{font-size:.85rem;color:var(--fit-ink-2)}
+#end{display:none;text-align:center}
+.stars{font-size:3rem;color:#c08b00;letter-spacing:.15em}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1.12fr)}.card{padding:24px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="badge">Polytechnic</div>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score 0</span></div>
+</header>
+<h1>Tank and Decay Lab</h1>
+<p>Guide a system as it changes towards a steady value.</p>
+<div id="play" class="layout">
+<section class="card stage">
+<h2 id="sceneTitle">System diagram</h2>
+<p id="question" class="question"></p>
+<svg id="scene" viewBox="0 0 440 240" role="img" aria-label="Tank and decay system diagram"></svg>
+<div class="concept">
+<h2>Concept figure</h2>
+<svg viewBox="0 0 310 78" role="img" aria-label="A changing quantity approaches its steady value">
+<path d="M20 8V64H294" stroke="#111" stroke-width="3" fill="none"/>
+<path d="M22 55 C85 16 136 12 288 12" stroke="#FF6B3D" stroke-width="5" stroke-linecap="round" fill="none"/>
+<path d="M22 12H289" stroke="#111" stroke-dasharray="6 5" stroke-width="2"/>
+<text x="171" y="72" font-size="11">Time →</text>
+</svg>
+<p>Many first-order systems approach an equilibrium exponentially.</p>
+</div>
+</section>
+<section class="card">
+<h2 id="plotTitle">Live model</h2>
+<div class="plot">
+<svg id="plot" viewBox="0 0 440 280" role="img" aria-label="Live model curve with player marker"></svg>
+</div>
+<p class="legend" id="legend"></p>
+<div class="controls">
+<div class="control-title"><label id="controlLabel" for="slider">Control</label><span class="value" id="value"></span></div>
+<input id="slider" type="range">
+<div class="steppers">
+<button type="button" data-step="-10" aria-label="Decrease by ten steps">−−</button>
+<button type="button" data-step="-1" aria-label="Decrease by one step">−</button>
+<button type="button" data-step="1" aria-label="Increase by one step">+</button>
+<button type="button" data-step="10" aria-label="Increase by ten steps">++</button>
+</div>
+</div>
+<div class="actions">
+<button id="hint" type="button">Hint (−25)</button>
+<button id="check" class="check" type="button">Check</button>
+<button id="next" type="button" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Adjust the control, then select Check.</div>
+<details><summary>The maths</summary><p id="maths"></p></details>
+</section>
+</div>
+<section id="end" class="card">
+<h2>Lab complete!</h2>
+<div class="stars" id="stars" aria-label="Stars earned"></div>
+<p id="finalScore"></p>
+<button id="again" class="check" type="button">Play again</button>
+</section>
+</main>
+<script>
+/* FIT-CALC-BEGIN x1_compartment */
+const FITCalcX1 = (function () {
+  'use strict';
+
+  const R = 8.314;
+  const own = (o, k) => o && Object.prototype.hasOwnProperty.call(o, k);
+  const finite = x => typeof x === 'number' && Number.isFinite(x);
+  const valid = (o, keys) => o && typeof o === 'object' &&
+    keys.every(k => own(o, k) && finite(o[k]));
+  const safe = o => Object.values(o).every(v => v === null || typeof v === 'boolean' || finite(v)) ? o :
+    { error: 'MathError', reason: 'undefined_result' };
+  const REASONS = {
+    HALF_LIFE_MUST_BE_POSITIVE: ['MathError', 'half_life_must_be_positive'],
+    TIME_CONSTANT_MUST_BE_POSITIVE: ['MathError', 'tau_must_be_positive'],
+    INVALID_ORDER: ['NotSupported', 'order_or_reactor_outside_scope'],
+    TOO_MANY_STATES: ['NotSupported', 'too_many_states'],
+    MathError: ['MathError', 'undefined_result']
+  };
+  const bad = code => {
+    if (REASONS[code]) return { error: REASONS[code][0], reason: REASONS[code][1] };
+    if (/NEGATIVE|MUST_BE_NONNEGATIVE/.test(code))
+      return { error: 'ConstraintViolation', reason: 'negative_input' };
+    return { error: 'ConstraintViolation', reason: code.toLowerCase() };
+  };
+  const pos = x => x > 0;
+  const nonneg = x => x >= 0;
+
+  /**
+   * Integrated zero-, first- and second-order rate law.
+   * Inputs: order (0, 1, 2), C0_mol_L >= 0, k >= 0,
+   * t_s >= 0. k units: mol L^-1 s^-1 (zero),
+   * s^-1 (first), L mol^-1 s^-1 (second).
+   * Outputs: C_mol_L, halfLife_s; also tZero_s and depleted
+   * for order 0.
+   */
+  function integratedRateLaw(p) {
+    if (!valid(p, ['order', 'C0_mol_L', 'k', 't_s']))
+      return bad('INVALID_INPUT');
+    const { order, C0_mol_L: c, k, t_s: t } = p;
+    if (![0, 1, 2].includes(order)) return bad('INVALID_ORDER');
+    if (c < 0) return bad('NEGATIVE_CONCENTRATION');
+    if (k < 0) return bad('NEGATIVE_RATE');
+    if (!nonneg(t)) return bad('TIME_MUST_BE_NONNEGATIVE');
+    if (order === 0) {
+      const tZero_s = k === 0 ? null : c / k;
+      return safe({
+        C_mol_L: Math.max(0, c - k * t),
+        halfLife_s: k === 0 ? null : c / (2 * k),
+        tZero_s, depleted: k > 0 && t >= tZero_s
+      });
+    }
+    if (order === 1)
+      return safe({
+        C_mol_L: c * Math.exp(-k * t),
+        halfLife_s: k === 0 ? null : Math.LN2 / k
+      });
+    return safe({
+      C_mol_L: c / (1 + k * c * t),
+      halfLife_s: k === 0 || c === 0 ? null : 1 / (k * c)
+    });
+  }
+
+  /**
+   * First-order exponential decay, dC/dt=-kC.
+   * Inputs: C0 >= 0 (arbitrary consistent concentration unit),
+   * k_per_s >= 0 (s^-1), t_s >= 0 (s).
+   * Output: C (same unit as C0).
+   */
+  function firstOrderDecay(p) {
+    if (!valid(p, ['C0', 'k_per_s', 't_s']))
+      return bad('INVALID_INPUT');
+    const { C0, k_per_s: k, t_s: t } = p;
+    if (C0 < 0) return bad('NEGATIVE_CONCENTRATION');
+    if (k < 0) return bad('NEGATIVE_RATE');
+    if (t < 0) return bad('TIME_MUST_BE_NONNEGATIVE');
+    return safe({ C: C0 * Math.exp(-k * t) });
+  }
+
+  /**
+   * Arrhenius law k=A exp(-Ea/RT).
+   * Inputs: A > 0 (units of k), Ea_J_mol >= 0,
+   * T_K > 0. Outputs: k, lnk, invT_per_K.
+   */
+  function arrhenius(p) {
+    if (!valid(p, ['A', 'Ea_J_mol', 'T_K']))
+      return bad('INVALID_INPUT');
+    const { A, Ea_J_mol: E, T_K: T } = p;
+    if (!pos(T)) return bad('MathError');
+    if (!pos(A)) return bad('PREFACTOR_MUST_BE_POSITIVE');
+    if (E < 0) return bad('NEGATIVE_ACTIVATION_ENERGY');
+    const lnk = Math.log(A) - E / (R * T);
+    return safe({ k: Math.exp(lnk), lnk, invT_per_K: 1 / T });
+  }
+
+  /**
+   * Two-point Arrhenius parameter identification.
+   * Inputs: k1,k2 > 0 (same rate units), T1_K,T2_K > 0.
+   * Outputs: Ea_J_mol, A (same units as k).
+   */
+  function arrheniusTwoPoint(p) {
+    if (!valid(p, ['k1', 'T1_K', 'k2', 'T2_K']))
+      return bad('INVALID_INPUT');
+    const { k1, k2, T1_K: T1, T2_K: T2 } = p;
+    if (!pos(T1) || !pos(T2) || T1 === T2)
+      return bad('MathError');
+    if (!pos(k1) || !pos(k2))
+      return bad('RATE_MUST_BE_POSITIVE');
+    const E = -R * (Math.log(k2) - Math.log(k1)) /
+      (1 / T2 - 1 / T1);
+    const A = Math.exp(Math.log(k1) + E / (R * T1));
+    return safe({ Ea_J_mol: E, A });
+  }
+
+  /**
+   * Radioactive decay and instantaneous activity.
+   * Inputs: N0 >= 0 (nuclei), halfLife_s > 0, t_s >= 0.
+   * Outputs: N, lambda_per_s, activity_Bq.
+   */
+  function radioactiveDecay(p) {
+    if (!valid(p, ['N0', 'halfLife_s', 't_s']))
+      return bad('INVALID_INPUT');
+    const { N0, halfLife_s: h, t_s: t } = p;
+    if (N0 < 0) return bad('NEGATIVE_INITIAL_COUNT');
+    if (!pos(h)) return bad('HALF_LIFE_MUST_BE_POSITIVE');
+    if (t < 0) return bad('TIME_MUST_BE_NONNEGATIVE');
+    const lambda_per_s = Math.LN2 / h;
+    const N = N0 * Math.exp(-lambda_per_s * t);
+    return safe({ N, lambda_per_s, activity_Bq: lambda_per_s * N });
+  }
+
+  /**
+   * First-order batch conversion.
+   * Inputs: k_per_s >= 0, t_s >= 0.
+   * Output: X (dimensionless fraction).
+   */
+  function batchFirstOrder(p) {
+    if (!valid(p, ['k_per_s', 't_s']))
+      return bad('INVALID_INPUT');
+    if (p.k_per_s < 0) return bad('NEGATIVE_RATE');
+    if (p.t_s < 0) return bad('TIME_MUST_BE_NONNEGATIVE');
+    return safe({ X: -Math.expm1(-p.k_per_s * p.t_s) });
+  }
+
+  /**
+   * Steady-state first-order CSTR conversion.
+   * Inputs: k_per_s >= 0, tau_s >= 0.
+   * Output: X.
+   */
+  function cstrFirstOrder(p) {
+    if (!valid(p, ['k_per_s', 'tau_s']))
+      return bad('INVALID_INPUT');
+    if (p.k_per_s < 0) return bad('NEGATIVE_RATE');
+    if (p.tau_s < 0) return bad('NEGATIVE_RESIDENCE_TIME');
+    const z = p.k_per_s * p.tau_s;
+    return safe({ X: z / (1 + z) });
+  }
+
+  /**
+   * Steady-state ideal PFR first-order conversion.
+   * Inputs: k_per_s >= 0, tau_s >= 0.
+   * Output: X.
+   */
+  function pfrFirstOrder(p) {
+    if (!valid(p, ['k_per_s', 'tau_s']))
+      return bad('INVALID_INPUT');
+    if (p.k_per_s < 0) return bad('NEGATIVE_RATE');
+    if (p.tau_s < 0) return bad('NEGATIVE_RESIDENCE_TIME');
+    return safe({ X: -Math.expm1(-p.k_per_s * p.tau_s) });
+  }
+
+  /**
+   * Hydraulic residence time tau=V/Q.
+   * Inputs: V_m3 >= 0, Q_m3_s > 0.
+   * Output: tau_s.
+   */
+  function residenceTime(p) {
+    if (!valid(p, ['V_m3', 'Q_m3_s']))
+      return bad('INVALID_INPUT');
+    if (p.V_m3 < 0) return bad('NEGATIVE_VOLUME');
+    if (!pos(p.Q_m3_s)) return bad('FLOW_MUST_BE_POSITIVE');
+    return safe({ tau_s: p.V_m3 / p.Q_m3_s });
+  }
+
+  /**
+   * Linear tank level response.
+   * Model: A dh/dt=qin-h/R, tau=AR.
+   */
+  function linearTank(p) {
+    if (!valid(p, ['A_m2', 'R_s_per_m2', 'qin_m3_s', 'h0_m', 't_s']))
+      return bad('INVALID_INPUT');
+    const { A_m2: A, R_s_per_m2: Rr, qin_m3_s: q,
+      h0_m: h0, t_s: t } = p;
+    if (!pos(A)) return bad('AREA_MUST_BE_POSITIVE');
+    if (!pos(Rr)) return bad('RESISTANCE_MUST_BE_POSITIVE');
+    if (q < 0) return bad('NEGATIVE_FLOW');
+    if (h0 < 0) return bad('NEGATIVE_HEIGHT');
+    if (t < 0) return bad('TIME_MUST_BE_NONNEGATIVE');
+    const tau_s = A * Rr, hss_m = q * Rr;
+    return safe({
+      h_m: hss_m + (h0 - hss_m) * Math.exp(-t / tau_s),
+      tau_s, hss_m
+    });
+  }
+
+  /**
+   * First-order-plus-dead-time response.
+   * Inputs: K, tau_s > 0, theta_s >= 0, du, t_s >= 0.
+   */
+  function fopdtStep(p) {
+    if (!valid(p, ['K', 'tau_s', 'theta_s', 'du', 't_s']))
+      return bad('INVALID_INPUT');
+    if (!pos(p.tau_s)) return bad('TIME_CONSTANT_MUST_BE_POSITIVE');
+    if (p.theta_s < 0) return bad('NEGATIVE_DEAD_TIME');
+    if (p.t_s < 0) return bad('TIME_MUST_BE_NONNEGATIVE');
+    return safe({ y: p.t_s <= p.theta_s ? 0 :
+      p.K * p.du * -Math.expm1(-(p.t_s - p.theta_s) / p.tau_s) });
+  }
+
+  /**
+   * Well-mixed lake concentration.
+   * Inputs: V_m3 > 0, Q_m3_s >= 0, Cin_mg_L >= 0,
+   * C0_mg_L >= 0, k_per_s >= 0, t_s >= 0.
+   */
+  function wellMixedLake(p) {
+    if (!valid(p, ['V_m3', 'Q_m3_s', 'Cin_mg_L',
+      'C0_mg_L', 'k_per_s', 't_s'])) return bad('INVALID_INPUT');
+    const { V_m3: V, Q_m3_s: Q, Cin_mg_L: Cin,
+      C0_mg_L: C0, k_per_s: k, t_s: t } = p;
+    if (!pos(V)) return bad('VOLUME_MUST_BE_POSITIVE');
+    if (Q < 0) return bad('NEGATIVE_FLOW');
+    if (Cin < 0 || C0 < 0) return bad('NEGATIVE_CONCENTRATION');
+    if (k < 0) return bad('NEGATIVE_RATE');
+    if (t < 0) return bad('TIME_MUST_BE_NONNEGATIVE');
+    const a = Q / V + k;
+    if (a === 0) return { C_mg_L: C0, Css_mg_L: null };
+    const Css_mg_L = (Q / V * Cin) / a;
+    return safe({
+      C_mg_L: Css_mg_L + (C0 - Css_mg_L) * Math.exp(-a * t),
+      Css_mg_L
+    });
+  }
+
+  /**
+   * Monod specific microbial growth rate.
+   * Inputs: muMax_per_h >= 0, Ks_g_L > 0, S_g_L >= 0.
+   * Outputs: mu_per_h and doubling_time.
+   */
+  function monod(p) {
+    if (!valid(p, ['muMax_per_h', 'Ks_g_L', 'S_g_L']))
+      return bad('INVALID_INPUT');
+    if (p.muMax_per_h < 0) return bad('NEGATIVE_GROWTH_RATE');
+    if (!pos(p.Ks_g_L))
+      return bad('SATURATION_CONSTANT_MUST_BE_POSITIVE');
+    if (p.S_g_L < 0) return bad('NEGATIVE_SUBSTRATE');
+    const mu_per_h = p.muMax_per_h * p.S_g_L /
+      (p.Ks_g_L + p.S_g_L);
+    return safe({ mu_per_h,
+      doubling_time: mu_per_h === 0 ? null : Math.LN2 / mu_per_h });
+  }
+
+  /**
+   * Exponential population growth.
+   * Inputs: N0 >= 0, r_per_day, t_day >= 0.
+   */
+  function exponentialGrowth(p) {
+    if (!valid(p, ['N0', 'r_per_day', 't_day']))
+      return bad('INVALID_INPUT');
+    if (p.N0 < 0) return bad('NEGATIVE_POPULATION');
+    if (p.t_day < 0) return bad('NEGATIVE_TIME');
+    return safe({ N: p.N0 * Math.exp(p.r_per_day * p.t_day) });
+  }
+
+  /**
+   * Logistic population growth.
+   * Inputs: N0 >= 0, r_per_day >= 0, K > 0, t_day >= 0.
+   * N0=0 is an equilibrium.
+   */
+  function logistic(p) {
+    if (!valid(p, ['N0', 'r_per_day', 'K', 't_day']))
+      return bad('INVALID_INPUT');
+    if (p.N0 < 0) return bad('NEGATIVE_POPULATION');
+    if (!pos(p.K)) return bad('CARRYING_CAPACITY_MUST_BE_POSITIVE');
+    if (p.r_per_day < 0) return bad('NEGATIVE_GROWTH_RATE');
+    if (p.t_day < 0) return bad('NEGATIVE_TIME');
+    if (p.N0 === 0) return { N: 0 };
+    const e = Math.exp(-p.r_per_day * p.t_day);
+    return safe({ N: p.K / (1 + (p.K / p.N0 - 1) * e) });
+  }
+
+  /**
+   * Shared fixed-step fourth-order Runge-Kutta integrator.
+   * Supports 1-3 finite states and 0-5000 steps.
+   */
+  function rk4(p) {
+    if (!p || typeof p.f !== 'function' || !Array.isArray(p.y0) ||
+      !finite(p.t0) || !finite(p.dt) || !finite(p.steps))
+      return bad('INVALID_INPUT');
+    if (p.y0.length > 3) return bad('TOO_MANY_STATES');
+    if (p.y0.length < 1 || !p.y0.every(finite))
+      return bad('INVALID_INPUT');
+    if (!Number.isInteger(p.steps) || p.steps < 0 || p.steps > 5000)
+      return bad('INVALID_STEP_COUNT');
+    if (!pos(p.dt)) return bad('INVALID_STEP_SIZE');
+    const t = [p.t0], y = [p.y0.slice()], n = p.y0.length;
+    let state = p.y0.slice(), time = p.t0;
+    const derivative = (tt, yy) => {
+      let v;
+      try { v = p.f(tt, yy.slice()); }
+      catch (_) { return null; }
+      return Array.isArray(v) && v.length === n && v.every(finite)
+        ? v : null;
+    };
+    for (let i = 0; i < p.steps; i++) {
+      const h = p.dt;
+      const k1 = derivative(time, state);
+      if (!k1) return bad('MathError');
+      const k2 = derivative(time + h / 2,
+        state.map((v, j) => v + h * k1[j] / 2));
+      if (!k2) return bad('MathError');
+      const k3 = derivative(time + h / 2,
+        state.map((v, j) => v + h * k2[j] / 2));
+      if (!k3) return bad('MathError');
+      const k4 = derivative(time + h,
+        state.map((v, j) => v + h * k3[j]));
+      if (!k4) return bad('MathError');
+      state = state.map((v, j) => v +
+        h * (k1[j] + 2 * k2[j] + 2 * k3[j] + k4[j]) / 6);
+      time = p.t0 + (i + 1) * h;
+      if (!finite(time) || !state.every(finite))
+        return bad('MathError');
+      t.push(time);
+      y.push(state.slice());
+    }
+    return { t, y };
+  }
+
+  /**
+   * Predator-prey Lotka-Volterra model integrated with RK4.
+   * x'=alpha*x-beta*x*y; y'=delta*x*y-gamma*y.
+   */
+  function lotkaVolterra(p) {
+    if (!valid(p, ['x0', 'y0', 'alpha', 'beta', 'delta',
+      'gamma', 'dt', 'steps'])) return bad('INVALID_INPUT');
+    if (p.x0 < 0 || p.y0 < 0) return bad('NEGATIVE_POPULATION');
+    if (['alpha', 'beta', 'delta', 'gamma'].some(k => p[k] < 0))
+      return bad('NEGATIVE_RATE');
+    const result = rk4({
+      f: (t, s) => [
+        p.alpha * s[0] - p.beta * s[0] * s[1],
+        p.delta * s[0] * s[1] - p.gamma * s[1]
+      ],
+      y0: [p.x0, p.y0],
+      t0: 0, dt: p.dt, steps: p.steps
+    });
+    if (result.error) return result;
+    return {
+      t: result.t,
+      x: result.y.map(v => v[0]),
+      y: result.y.map(v => v[1])
+    };
+  }
+
+  /**
+   * Stock-and-flow with linear feedback, integrated by RK4.
+   */
+  function stockAndFlow(p) {
+    if (!valid(p, ['S0', 'inflow', 'outflowRate_per_s',
+      'feedbackGain', 'target', 'dt_s', 'steps']))
+      return bad('INVALID_INPUT');
+    if (p.S0 < 0) return bad('NEGATIVE_STOCK');
+    if (p.inflow < 0) return bad('NEGATIVE_FLOW');
+    if (p.outflowRate_per_s < 0 || p.feedbackGain < 0)
+      return bad('NEGATIVE_RATE');
+    if (p.target < 0) return bad('NEGATIVE_TARGET');
+    const r = rk4({
+      f: (t, s) => [p.inflow - p.outflowRate_per_s * s[0] +
+        p.feedbackGain * (p.target - s[0])],
+      y0: [p.S0], t0: 0, dt: p.dt_s, steps: p.steps
+    });
+    if (r.error) return r;
+    return { t: r.t, S: r.y.map(a => a[0]) };
+  }
+
+  // FIT KAT-facing aliases use the concise parameter and output names.
+  function decay(p) {
+    if (!valid(p, ['order', 'C0', 'k', 't'])) return bad('INVALID_INPUT');
+    const r = integratedRateLaw({ order: p.order, C0_mol_L: p.C0, k: p.k, t_s: p.t });
+    if (r.error) return r;
+    const out = { C: r.C_mol_L, half_life: r.halfLife_s };
+    if (p.order === 0) out.depleted = r.depleted;
+    return out;
+  }
+
+  // Constant-density ideal reactor with first- or second-order kinetics.
+  function reactor(p) {
+    if (!p || !['CSTR', 'PFR'].includes(p.type) || ![1, 2].includes(p.order))
+      return bad('INVALID_ORDER');
+    const keys = p.order === 2 ? ['k', 'tau', 'C0'] : ['k', 'tau'];
+    if (!valid(p, keys)) return bad('INVALID_INPUT');
+    if (keys.some(key => p[key] < 0)) return bad('NEGATIVE_RATE');
+    const Da = p.k * p.tau * (p.order === 2 ? p.C0 : 1);
+    if (!finite(Da)) return bad('MathError');
+    let X;
+    if (p.type === 'PFR') X = p.order === 1 ? -Math.expm1(-Da) : Da / (1 + Da);
+    else if (p.order === 1) X = Da / (1 + Da);
+    else X = Da === 0 ? 0 : 2 * Da / (2 * Da + 1 + Math.sqrt(1 + 4 * Da));
+    return safe({ X, Da });
+  }
+
+  function lake(p) {
+    if (!valid(p, ['W_g_per_s', 'Q_m3_per_s', 'k_per_s', 'V_m3']))
+      return bad('INVALID_INPUT');
+    if (Object.values(p).some(v => typeof v === 'number' && v < 0))
+      return bad('NEGATIVE_RATE');
+    const denominator = p.Q_m3_per_s + p.k_per_s * p.V_m3;
+    if (denominator <= 0) return bad('MathError');
+    return safe({ C_ss: p.W_g_per_s / denominator,
+      tau_response: p.V_m3 / denominator });
+  }
+
+  function tankStep(p) {
+    if (!valid(p, ['K', 'du', 'tau', 't'])) return bad('INVALID_INPUT');
+    if (p.tau === 0) return bad('TIME_CONSTANT_MUST_BE_POSITIVE');
+    if (p.tau < 0 || p.t < 0) return bad('NEGATIVE_TIME');
+    const fraction = -Math.expm1(-p.t / p.tau);
+    return safe({ y: p.K * p.du * fraction, fraction });
+  }
+
+  function growth(p) {
+    if (!p || !['logistic', 'exponential'].includes(p.model)) return bad('INVALID_INPUT');
+    const keys = p.model === 'logistic' ? ['N0', 'r', 'K', 't'] : ['N0', 'r', 't'];
+    if (!valid(p, keys)) return bad('INVALID_INPUT');
+    return p.model === 'logistic'
+      ? logistic({ N0: p.N0, r_per_day: p.r, K: p.K, t_day: p.t })
+      : exponentialGrowth({ N0: p.N0, r_per_day: p.r, t_day: p.t });
+  }
+
+  function monodRate(p) {
+    if (!valid(p, ['mu_max', 'Ks', 'S'])) return bad('INVALID_INPUT');
+    const r = monod({ muMax_per_h: p.mu_max, Ks_g_L: p.Ks, S_g_L: p.S });
+    return r.error ? r : { mu: r.mu_per_h, doubling_time: r.doubling_time };
+  }
+
+  function lvEquilibrium(p) {
+    if (!valid(p, ['alpha', 'beta', 'delta', 'gamma'])) return bad('INVALID_INPUT');
+    if (Object.values(p).some(v => v < 0)) return bad('NEGATIVE_RATE');
+    if (p.beta === 0 || p.delta === 0 || p.alpha === 0 || p.gamma === 0)
+      return bad('MathError');
+    return safe({ prey_eq: p.gamma / p.delta, pred_eq: p.alpha / p.beta,
+      small_osc_period: 2 * Math.PI / Math.sqrt(p.alpha * p.gamma) });
+  }
+
+  function stockFlow(p) {
+    if (!valid(p, ['S0', 'inflow', 'k', 't'])) return bad('INVALID_INPUT');
+    if (Object.values(p).some(v => v < 0)) return bad('NEGATIVE_STOCK');
+    const S_eq = p.k === 0 ? null : p.inflow / p.k;
+    const S = p.k === 0 ? p.S0 + p.inflow * p.t :
+      p.S0 * Math.exp(-p.k * p.t) + p.inflow * -Math.expm1(-p.k * p.t) / p.k;
+    return safe({ S, S_eq });
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    decay, reactor, lake, tankStep, growth, monodRate, lvEquilibrium, stockFlow,
+    integratedRateLaw,
+    firstOrderDecay,
+    arrhenius,
+    arrheniusTwoPoint,
+    radioactiveDecay,
+    batchFirstOrder,
+    cstrFirstOrder,
+    pfrFirstOrder,
+    residenceTime,
+    linearTank,
+    fopdtStep,
+    wellMixedLake,
+    monod,
+    exponentialGrowth,
+    logistic,
+    lotkaVolterra,
+    stockAndFlow,
+    rk4
+  });
+})();
+/* FIT-CALC-END x1_compartment */
+
+(() => {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const svgNS = 'http:' + String.fromCharCode(47,47) + 'www.w3.org/2000/svg';
+const fmt = x => Number.isFinite(x) ? Number(x.toPrecision(3)).toString() : '—';
+let seed = 1731;
+const rand = () => {
+  seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+  return seed / 4294967296;
+};
+const pick = a => a[Math.floor(rand() * a.length)];
+let round = 0, score = 0, attempts = 0, hinted = false;
+let solved = false, config = null, current = 0;
+
+function node(tag, attrs, parent, text) {
+  const e = document.createElementNS(svgNS, tag);
+  Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k]));
+  if (text !== undefined) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+function line(parent, x1, y1, x2, y2, colour = '#111', dash = '') {
+  return node('line', {
+    x1, y1, x2, y2, stroke: colour, 'stroke-width': 2,
+    'stroke-dasharray': dash
+  }, parent);
+}
+function text(parent, x, y, s, size = 13) {
+  return node('text', {
+    x, y, fill: '#111', 'font-size': size, 'font-weight': 600
+  }, parent, s);
+}
+function path(parent, d, colour, dash = '') {
+  node('path', { d, fill: 'none', stroke: colour,
+    'stroke-width': 3, 'stroke-linecap': 'round',
+    'stroke-linejoin': 'round', 'stroke-dasharray': dash }, parent);
+}
+function setup() {
+  const type = round % 3;
+  attempts = 0; hinted = false; solved = false;
+  $('feedback').className = 'feedback';
+  $('feedback').textContent = 'Adjust the control, then select Check.';
+  $('next').hidden = true;
+  $('check').hidden = false;
+  $('hint').disabled = false;
+  const slider = $('slider');
+  if (type === 0) {
+    const A = pick([2, 3, 4]);
+    const R = pick([4, 5, 6]);
+    const q = pick([0.4, 0.6, 0.8, 1.0, 1.2]);
+    const t = pick([8, 12, 16]);
+    const h0 = pick([0.5, 1]);
+    const target = FITCalcX1.linearTank({
+      A_m2: A, R_s_per_m2: R, qin_m3_s: q, h0_m: h0,
+      t_s: t
+    }).h_m;
+    config = { type, A, R, q, t, h0, target, min: 0.1,
+      max: 2, step: 0.1, unit: 'm³/s',
+      label: 'Inflow q', tolerance: 0.04,
+      question: `Area ${A} m², resistance ${R} s/m², initial height ${h0} m. Set the inflow so the tank reaches ${fmt(target)} m after ${t} s.`,
+      maths: 'A dh/dt = q − h/R; τ = AR; h(t) = qR + (h₀ − qR)e^(−t/τ). Units: A in m², q in m³/s, R in s/m², h in m.' };
+    current = q < 1 ? 1.6 : 0.2;
+  } else if (type === 1) {
+    const half = pick([4, 6, 8, 10]);
+    const multiples = pick([1, 2, 3]);
+    const t = half * multiples;
+    const N0 = 800;
+    const target = FITCalcX1.radioactiveDecay({
+      N0, halfLife_s: half, t_s: t
+    }).activity_Bq;
+    config = { type, half, t, N0, target, min: 0,
+      max: 40, step: 1, unit: 's',
+      label: 'Elapsed time', tolerance: 0.01,
+      question: `A sample starts with ${N0} radioactive nuclei and has a half-life of ${half} s. Set the elapsed time for an activity of ${fmt(target)} Bq.`,
+      maths: 'λ = ln(2)/t½ (s⁻¹); N(t) = N₀ e^(−λt); activity = λN, measured in Bq.' };
+    current = t === 1 ? 6 : 1;
+  } else {
+    const order = pick([0, 1, 2]);
+    const k = pick([0.02, 0.04, 0.06, 0.08]);
+    const t = 10;
+    const C0 = 1;
+    const target = FITCalcX1.integratedRateLaw({
+      order, C0_mol_L: C0, k, t_s: t
+    }).C_mol_L;
+    config = { type, order, k, t, C0, target, min: 0.01,
+      max: 0.1, step: 0.01, unit: ['', 's⁻¹',
+        'L mol⁻¹ s⁻¹'][order] || 'mol L⁻¹ s⁻¹',
+      label: `${['Zero','First','Second'][order]}-order rate constant`,
+      tolerance: 0.003,
+      question: `For a ${['zero','first','second'][order]}-order reaction starting at 1 mol/L, adjust k so C(${t} s) = ${fmt(target)} mol/L.`,
+      maths: 'Zero order: C = max(0,C₀ − kt). First order: C = C₀e^(−kt). Second order: 1/C = 1/C₀ + kt. The units of k differ by order.' };
+    current = k === 0.02 ? 0.09 : 0.01;
+  }
+  Object.assign(slider, {
+    min: config.min, max: config.max, step: config.step,
+    value: current
+  });
+  $('question').textContent = config.question;
+  $('maths').textContent = config.maths;
+  $('controlLabel').textContent = config.label;
+  $('sceneTitle').textContent = [
+    'Linear tank', 'Radioactive sample', 'Reaction vessel'
+  ][type];
+  $('plotTitle').textContent = [
+    'Liquid level vs time', 'Remaining activity vs time',
+    'Reaction orders compared'
+  ][type];
+  $('round').textContent = `Round ${round + 1}/6`;
+  $('score').textContent = `Score ${score}`;
+  draw();
+}
+function evaluate(v, t) {
+  const c = config;
+  if (c.type === 0)
+    return FITCalcX1.linearTank({
+      A_m2: c.A, R_s_per_m2: c.R,
+      qin_m3_s: v, h0_m: c.h0, t_s: t
+    }).h_m;
+  if (c.type === 1)
+    return FITCalcX1.radioactiveDecay({
+      N0: c.N0, halfLife_s: c.half, t_s: t
+    }).activity_Bq;
+  return FITCalcX1.integratedRateLaw({
+    order: c.order, C0_mol_L: c.C0, k: v, t_s: t
+  }).C_mol_L;
+}
+function drawScene() {
+  const s = $('scene'), c = config;
+  s.replaceChildren();
+  if (c.type === 0) {
+    const h = evaluate(current, c.t);
+    const fill = Math.max(0, Math.min(1, h / 12));
+    node('rect', { x: 122, y: 34, width: 180, height: 165,
+      rx: 12, stroke: '#111', 'stroke-width': 4,
+      fill: 'white' }, s);
+    node('rect', { x: 126, y: 195 - fill * 156, width: 172,
+      height: fill * 156, fill: '#7ac9ed' }, s);
+    path(s, 'M25 41 H178 V34', '#111');
+    node('path', { d: 'M170 23 L187 34 L170 45 Z',
+      fill: '#111' }, s);
+    path(s, 'M302 183 H411', '#111');
+    text(s, 14, 22, `In: ${fmt(current)} m³/s`);
+    text(s, 315, 174, 'Out: h/R');
+    text(s, 137, 221, `Area ${c.A} m²`);
+    text(s, 155, 90, `h = ${fmt(h)} m`);
+    text(s, 12, 239, `R = ${c.R} s/m²   •   t = ${c.t} s`);
+  } else {
+    node('rect', { x: 70, y: 38, width: 300, height: 160,
+      rx: 24, fill: '#fff', stroke: '#111',
+      'stroke-width': 4 }, s);
+    const v = c.type === 1 ?
+      FITCalcX1.radioactiveDecay({
+        N0: c.N0, halfLife_s: c.half, t_s: current
+      }).N : evaluate(current, c.t);
+    const fraction = c.type === 1 ? v / c.N0 : v / c.C0;
+    for (let i = 0; i < 32; i++) {
+      const x = 90 + (i % 8) * 35;
+      const y = 61 + Math.floor(i / 8) * 36;
+      node('circle', { cx: x, cy: y, r: 8,
+        fill: i / 32 < fraction ? '#FF6B3D' : '#E4E2DB',
+        stroke: '#111', 'stroke-width': 2 }, s);
+    }
+    text(s, 86, 222, c.type === 1 ?
+      `Half-life ${c.half} s • elapsed ${fmt(current)} s` :
+      `${['Zero', 'First', 'Second'][c.order]} order • t = ${c.t} s`);
+  }
+  s.setAttribute('aria-label', c.type === 0 ?
+    `Tank current liquid level ${fmt(evaluate(current, c.t))} metres` :
+    `Reaction or radioactive sample, current control ${fmt(current)}`);
+}
+function drawPlot() {
+  const s = $('plot'), c = config;
+  s.replaceChildren();
+  const x0 = 57, x1 = 421, y0 = 219, y1 = 35;
+  const tMax = c.type === 1 ? 40 : c.type === 0 ? 36 : 30;
+  const yMax = c.type === 0 ? 12 :
+    c.type === 1 ? c.N0 * Math.LN2 / c.half * 1.05 : 1.05;
+  const x = t => x0 + (x1 - x0) * t / tMax;
+  const y = v => y0 - (y0 - y1) *
+    Math.max(0, Math.min(1, v / yMax));
+  line(s, x0, y1, x0, y0);
+  line(s, x0, y0, x1, y0);
+  for (let i = 0; i <= 4; i++) {
+    const tx = tMax * i / 4;
+    const yy = y0 - (y0 - y1) * i / 4;
+    line(s, x(tx), y0, x(tx), y0 + 5);
+    text(s, x(tx) - 11, y0 + 22, fmt(tx), 11);
+    line(s, x0 - 5, yy, x0, yy);
+    text(s, 4, yy + 4, fmt(yMax * i / 4), 10);
+  }
+  text(s, 203, 261, 'Time (s)', 13);
+  text(s, 6, 15, c.type === 0 ? 'h (m)' :
+    c.type === 1 ? 'Activity (Bq)' : 'C (mol/L)', 12);
+  const series = c.type === 2 ? [
+    { order: 0, colour: '#FF6B3D' },
+    { order: 1, colour: '#1F66E5' },
+    { order: 2, colour: '#168751' }
+  ] : [{ order: null, colour: '#FF6B3D' }];
+  for (const ser of series) {
+    let d = '';
+    for (let i = 0; i <= 100; i++) {
+      const t = tMax * i / 100;
+      const val = c.type === 2 ?
+        FITCalcX1.integratedRateLaw({
+          order: ser.order, C0_mol_L: c.C0,
+          k: current, t_s: t
+        }).C_mol_L : evaluate(current, t);
+      d += `${i === 0 ? 'M' : 'L'}${x(t).toFixed(2)} ${y(val).toFixed(2)} `;
+    }
+    path(s, d, ser.colour, c.type === 2 && ser.order !== c.order ?
+      '5 4' : '');
+  }
+  if (c.type === 0) {
+    const ss = FITCalcX1.linearTank({
+      A_m2: c.A, R_s_per_m2: c.R,
+      qin_m3_s: current, h0_m: c.h0, t_s: 0
+    }).hss_m;
+    line(s, x0, y(ss), x1, y(ss), '#555', '7 5');
+    text(s, x1 - 107, y(ss) - 7, 'Steady level', 11);
+  }
+  const markT = c.type === 1 ? current : c.t;
+  const markV = c.type === 1 ? evaluate(current, current) :
+    evaluate(current, markT);
+  node('circle', { cx: x(markT), cy: y(markV), r: 7,
+    stroke: '#111', 'stroke-width': 3, fill: '#FFDD00' }, s);
+  text(s, x0 + 5, 278, `Current: ${fmt(markV)} ${
+    c.type === 0 ? 'm' : c.type === 1 ? 'Bq' : 'mol/L'}`, 12);
+  $('legend').textContent = c.type === 2 ?
+    'Solid: chosen order • Dashed: other orders • Yellow marker: current outcome' :
+    'Orange: model • Yellow marker: current outcome' +
+    (c.type === 0 ? ' • Grey dashed: steady level' : '');
+  s.setAttribute('aria-label',
+    `Live plot, current result ${fmt(markV)}, target ${fmt(c.target)}`);
+}
+function draw() {
+  $('value').textContent = `${fmt(current)} ${config.unit}`;
+  drawScene();
+  drawPlot();
+}
+function update(v) {
+  if (solved) return;
+  current = Math.max(config.min, Math.min(config.max,
+    Number(v)));
+  current = Math.round(current / config.step) * config.step;
+  $('slider').value = String(current);
+  draw();
+}
+$('slider').addEventListener('input', e => update(e.target.value));
+document.querySelectorAll('[data-step]').forEach(b => {
+  b.addEventListener('click', () =>
+    update(current + Number(b.dataset.step) * config.step));
+});
+$('hint').addEventListener('click', () => {
+  if (solved) return;
+  hinted = true;
+  $('hint').disabled = true;
+  $('feedback').textContent = config.type === 0 ?
+    'The time constant is area × resistance. Increasing inflow raises both the transient and steady level.' :
+    config.type === 1 ?
+    'Each half-life halves both the remaining nuclei and the activity.' :
+    'Choose the correct integrated rate law before adjusting k.';
+});
+$('check').addEventListener('click', () => {
+  if (solved) return;
+  attempts++;
+  const actual = config.type === 1 ?
+    evaluate(current, current) : evaluate(current, config.t);
+  const diff = actual - config.target;
+  if (Math.abs(diff) <= config.tolerance) {
+    solved = true;
+    const pts = hinted ? 50 : attempts === 1 ? 100 :
+      attempts === 2 ? 75 : 50;
+    score += pts;
+    $('score').textContent = `Score ${score}`;
+    $('feedback').className = 'feedback good';
+    $('feedback').textContent =
+      `✓ Correct! ${fmt(actual)} ${
+        config.type === 0 ? 'm' : config.type === 1 ?
+        'Bq' : 'mol/L'}. First-order changes follow an exponential law. +${pts} points.`;
+    $('hint').disabled = true;
+    $('check').hidden = true;
+    $('next').hidden = false;
+    $('next').textContent = round === 5 ? 'See results →' :
+      'Next round →';
+  } else {
+    $('feedback').className = 'feedback bad';
+    $('feedback').textContent = `Not yet: your result is ${fmt(Math.abs(diff))} ${
+      config.type === 0 ? 'm' : config.type === 1 ? 'Bq' :
+      'mol/L'} ${diff < 0 ? 'too low' : 'too high'}.`;
+  }
+});
+$('next').addEventListener('click', () => {
+  round++;
+  if (round < 6) setup();
+  else {
+    $('play').style.display = 'none';
+    $('end').style.display = 'block';
+    const n = score >= 525 ? 3 : score >= 375 ? 2 : 1;
+    $('stars').textContent = '★'.repeat(n) + '☆'.repeat(3 - n);
+    $('finalScore').textContent = `You scored ${score} out of 600 points.`;
+  }
+});
+$('again').addEventListener('click', () => {
+  round = 0; score = 0;
+  seed = (seed + 7907) >>> 0;
+  $('play').style.display = 'grid';
+  $('end').style.display = 'none';
+  setup();
+});
+setup();
+})();
+</script>
+</body>
+</html>
+

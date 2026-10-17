@@ -1,0 +1,479 @@
+{
+  "tool": "lumped_models",
+  "owner": "FIT Stock Strategy",
+  "version": "2026-10-17",
+  "tolerance": {
+    "rel": 1e-06,
+    "abs_when_expected_zero": 1e-09,
+    "note": "numbers relative 1e-6 (expected given to 7 s.f.); booleans exact; null = quantity undefined (e.g. half-life when k=0); errors compared exactly as {error: schema class, reason: lower_snake_case code} (KAT_SCHEMA 17:46)"
+  },
+  "convention": "Units are whatever the user supplies, consistently (rate constants per time unit of t). decay: order 0/1/2 integrated rate laws, C clamped at 0 for zero order with depleted=true once t>=C0/k; half_life null when k=0. radioactive: lambda=ln2/T1/2, activity=lambda N. reactor: isothermal, constant density, liquid phase; Da=k tau C0^(order-1); CSTR X from the steady design equation, PFR from the integrated plug-flow equation; orders 1 and 2 only (scope cap). lake: completely mixed, first-order loss, steady C=W/(Q+kV), response time V/(Q+kV). tank_step: first-order lag y=K du (1-e^(-t/tau)) from rest. growth: exponential N0 e^(rt); logistic closed form. monod: mu=mu_max S/(Ks+S), doubling time ln2/mu. lv_*: dx/dt=alpha x-beta x y, dy/dt=delta x y-gamma y (x prey, y predator); lv_state uses fixed-step RK4 with the given h and must agree with the high-accuracy reference to 1e-6. stock_flow: dS/dt=inflow-kS. Max 3 state variables and 2 reactions (scope cap). Arrhenius k(T) and Arrhenius fits are covered by mse_property_plots.json and are not repeated. MathError for division by zero / undefined; NotSupported outside the scope cap.",
+  "oracle": "script-verified (textbook formulae); ChatGPT Chat cross-check pending. Closed-form expected values from P. Atkins & J. de Paula, Physical Chemistry (textbook); H. S. Fogler, Elements of Chemical Reaction Engineering (textbook); O. Levenspiel, Chemical Reaction Engineering (textbook); D. E. Seborg et al., Process Dynamics and Control (textbook); J. D. Murray, Mathematical Biology (textbook); K. S. Krane, Introductory Nuclear Physics (textbook); S. C. Chapra, Surface Water-Quality Modeling (textbook); J. D. Sterman, Business Dynamics (textbook); M. L. Shuler & F. Kargi, Bioprocess Engineering (textbook); recomputed independently by numerical ODE integration (scipy solve_ivp DOP853, rtol 1e-12), brentq root-finding of steady-state balances and Jacobian eigenvalues",
+  "cases": [
+    {
+      "id": "dec1-must",
+      "desc": "first-order decay C0=1.000 mol/L, k=0.1 s^-1, t=10 s",
+      "op": "decay",
+      "input": {
+        "order": 1,
+        "C0": 1.0,
+        "k": 0.1,
+        "t": 10
+      },
+      "expected": {
+        "C": 0.3678794,
+        "half_life": 6.931472
+      },
+      "edge": false,
+      "hand_check": "P. Atkins & J. de Paula, Physical Chemistry (textbook), integrated first-order rate law C=C0 e^(-kt)=e^-1=0.3679 mol/L; t1/2=ln2/k=6.931 s (map must-reproduce)"
+    },
+    {
+      "id": "dec0",
+      "desc": "zero-order C0=1, k=0.05, t=10",
+      "op": "decay",
+      "input": {
+        "order": 0,
+        "C0": 1.0,
+        "k": 0.05,
+        "t": 10
+      },
+      "expected": {
+        "C": 0.5,
+        "half_life": 10.0,
+        "depleted": false
+      },
+      "edge": false,
+      "hand_check": "P. Atkins & J. de Paula, Physical Chemistry (textbook): C=C0-kt=0.5; t1/2=C0/2k=10 s"
+    },
+    {
+      "id": "dec0-depleted",
+      "desc": "zero-order past depletion clamps at 0 (never negative)",
+      "op": "decay",
+      "input": {
+        "order": 0,
+        "C0": 1.0,
+        "k": 0.05,
+        "t": 30
+      },
+      "expected": {
+        "C": 0.0,
+        "half_life": 10.0,
+        "depleted": true
+      },
+      "edge": true,
+      "hand_check": "C0/k=20 s < 30 s -> C=0, depleted=true"
+    },
+    {
+      "id": "dec2",
+      "desc": "second-order C0=1, k=0.1, t=10",
+      "op": "decay",
+      "input": {
+        "order": 2,
+        "C0": 1.0,
+        "k": 0.1,
+        "t": 10
+      },
+      "expected": {
+        "C": 0.5,
+        "half_life": 10.0
+      },
+      "edge": false,
+      "hand_check": "P. Atkins & J. de Paula, Physical Chemistry (textbook): 1/C=1/C0+kt=2 -> C=0.5; t1/2=1/(kC0)=10 s"
+    },
+    {
+      "id": "dec1-k0",
+      "desc": "k=0: nothing decays, half-life shown as none (never Infinity)",
+      "op": "decay",
+      "input": {
+        "order": 1,
+        "C0": 2.0,
+        "k": 0,
+        "t": 5
+      },
+      "expected": {
+        "C": 2.0,
+        "half_life": null
+      },
+      "edge": true,
+      "hand_check": "e^0=1; t1/2 undefined -> null"
+    },
+    {
+      "id": "dec-negk",
+      "desc": "negative rate constant refused",
+      "op": "decay",
+      "input": {
+        "order": 1,
+        "C0": 1.0,
+        "k": -0.1,
+        "t": 5
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "negative_input"
+      },
+      "edge": true,
+      "hand_check": "input validation"
+    },
+    {
+      "id": "rad-two-halflives",
+      "desc": "N0=1000, T1/2=5 s, t=10 s",
+      "op": "radioactive",
+      "input": {
+        "N0": 1000,
+        "half_life": 5,
+        "t": 10
+      },
+      "expected": {
+        "N": 250.0,
+        "lambda": 0.1386294,
+        "activity": 34.65736
+      },
+      "edge": false,
+      "hand_check": "K. S. Krane, Introductory Nuclear Physics (textbook): N=N0(1/2)^(t/T)=250; lambda=ln2/5=0.1386 s^-1; A=lambda N=34.66 Bq"
+    },
+    {
+      "id": "rad-th0",
+      "desc": "zero half-life is undefined",
+      "op": "radioactive",
+      "input": {
+        "N0": 1000,
+        "half_life": 0,
+        "t": 1
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "half_life_must_be_positive"
+      },
+      "edge": true,
+      "hand_check": "lambda=ln2/0 -> MathError"
+    },
+    {
+      "id": "cstr1-must",
+      "desc": "first-order CSTR k=0.1 s^-1, tau=10 s",
+      "op": "reactor",
+      "input": {
+        "type": "CSTR",
+        "order": 1,
+        "k": 0.1,
+        "tau": 10
+      },
+      "expected": {
+        "X": 0.5,
+        "Da": 1.0
+      },
+      "edge": false,
+      "hand_check": "H. S. Fogler, Elements of Chemical Reaction Engineering (textbook), CSTR design equation X=k tau/(1+k tau)=0.5 (map must-reproduce)"
+    },
+    {
+      "id": "pfr1-must",
+      "desc": "first-order PFR same Da",
+      "op": "reactor",
+      "input": {
+        "type": "PFR",
+        "order": 1,
+        "k": 0.1,
+        "tau": 10
+      },
+      "expected": {
+        "X": 0.6321206,
+        "Da": 1.0
+      },
+      "edge": false,
+      "hand_check": "H. S. Fogler, Elements of Chemical Reaction Engineering (textbook): X=1-e^(-k tau)=0.6321 (map must-reproduce)"
+    },
+    {
+      "id": "cstr2",
+      "desc": "second-order CSTR, k=0.1 L/(mol s), C0=1 mol/L, tau=10 s",
+      "op": "reactor",
+      "input": {
+        "type": "CSTR",
+        "order": 2,
+        "k": 0.1,
+        "tau": 10,
+        "C0": 1.0
+      },
+      "expected": {
+        "X": 0.381966,
+        "Da": 1.0
+      },
+      "edge": false,
+      "hand_check": "O. Levenspiel, Chemical Reaction Engineering (textbook): Da(1-X)^2=X with Da=1 -> X=(3-sqrt5)/2=0.3820"
+    },
+    {
+      "id": "pfr2",
+      "desc": "second-order PFR Da=1",
+      "op": "reactor",
+      "input": {
+        "type": "PFR",
+        "order": 2,
+        "k": 0.1,
+        "tau": 10,
+        "C0": 1.0
+      },
+      "expected": {
+        "X": 0.5,
+        "Da": 1.0
+      },
+      "edge": false,
+      "hand_check": "O. Levenspiel, Chemical Reaction Engineering (textbook): X=Da/(1+Da)=0.5"
+    },
+    {
+      "id": "cstr-tau0",
+      "desc": "zero residence time gives no conversion",
+      "op": "reactor",
+      "input": {
+        "type": "CSTR",
+        "order": 1,
+        "k": 0.1,
+        "tau": 0
+      },
+      "expected": {
+        "X": 0.0,
+        "Da": 0.0
+      },
+      "edge": true,
+      "hand_check": "Da=0 -> X=0"
+    },
+    {
+      "id": "reactor-order3",
+      "desc": "third order outside scope cap",
+      "op": "reactor",
+      "input": {
+        "type": "CSTR",
+        "order": 3,
+        "k": 0.1,
+        "tau": 10
+      },
+      "expected": {
+        "error": "NotSupported",
+        "reason": "order_or_reactor_outside_scope"
+      },
+      "edge": true,
+      "hand_check": "scope cap: orders 1 and 2 only"
+    },
+    {
+      "id": "lake-ss",
+      "desc": "well-mixed lake steady state with first-order decay",
+      "op": "lake",
+      "input": {
+        "W_g_per_s": 100,
+        "Q_m3_per_s": 10,
+        "k_per_s": 1e-06,
+        "V_m3": 10000000.0
+      },
+      "expected": {
+        "C_ss": 5.0,
+        "tau_response": 500000.0
+      },
+      "edge": false,
+      "hand_check": "S. C. Chapra, Surface Water-Quality Modeling (textbook), completely mixed lake: C=W/(Q+kV)=100/(10+10)=5 g/m^3; response time V/(Q+kV)=5e5 s"
+    },
+    {
+      "id": "tank-tau",
+      "desc": "first-order step response at t=tau",
+      "op": "tank_step",
+      "input": {
+        "K": 2.0,
+        "du": 1.5,
+        "tau": 4.0,
+        "t": 4.0
+      },
+      "expected": {
+        "y": 1.896362,
+        "fraction": 0.6321206
+      },
+      "edge": false,
+      "hand_check": "D. E. Seborg et al., Process Dynamics and Control (textbook): y=K du(1-e^(-t/tau)); at t=tau fraction 0.6321 -> y=1.896"
+    },
+    {
+      "id": "tank-t0",
+      "desc": "at t=0 output has not moved",
+      "op": "tank_step",
+      "input": {
+        "K": 2.0,
+        "du": 1.5,
+        "tau": 4.0,
+        "t": 0
+      },
+      "expected": {
+        "y": 0.0,
+        "fraction": 0.0
+      },
+      "edge": true,
+      "hand_check": "1-e^0=0"
+    },
+    {
+      "id": "tank-tau0",
+      "desc": "tau=0 is undefined",
+      "op": "tank_step",
+      "input": {
+        "K": 2.0,
+        "du": 1.5,
+        "tau": 0,
+        "t": 1
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "tau_must_be_positive"
+      },
+      "edge": true,
+      "hand_check": "t/tau division by zero"
+    },
+    {
+      "id": "logistic-must",
+      "desc": "logistic N0=100, r=0.5/day, K=1000, t=2 days",
+      "op": "growth",
+      "input": {
+        "model": "logistic",
+        "N0": 100,
+        "r": 0.5,
+        "K": 1000,
+        "t": 2
+      },
+      "expected": {
+        "N": 231.9693
+      },
+      "edge": false,
+      "hand_check": "J. D. Murray, Mathematical Biology (textbook), logistic solution N=K/(1+((K-N0)/N0)e^(-rt))=231.97 (map must-reproduce)"
+    },
+    {
+      "id": "exp-growth",
+      "desc": "exponential N0=100, r=0.5, t=2",
+      "op": "growth",
+      "input": {
+        "model": "exponential",
+        "N0": 100,
+        "r": 0.5,
+        "t": 2
+      },
+      "expected": {
+        "N": 271.8282
+      },
+      "edge": false,
+      "hand_check": "N0 e^(rt)=100e=271.8"
+    },
+    {
+      "id": "logistic-atK",
+      "desc": "start at carrying capacity stays there",
+      "op": "growth",
+      "input": {
+        "model": "logistic",
+        "N0": 1000,
+        "r": 0.5,
+        "K": 1000,
+        "t": 7
+      },
+      "expected": {
+        "N": 1000.0
+      },
+      "edge": true,
+      "hand_check": "K-N0=0 -> N=K"
+    },
+    {
+      "id": "logistic-N0zero",
+      "desc": "zero initial population stays zero",
+      "op": "growth",
+      "input": {
+        "model": "logistic",
+        "N0": 0,
+        "r": 0.5,
+        "K": 1000,
+        "t": 7
+      },
+      "expected": {
+        "N": 0.0
+      },
+      "edge": true,
+      "hand_check": "N=0 is an equilibrium"
+    },
+    {
+      "id": "monod-halfsat",
+      "desc": "Monod at S=Ks gives mu_max/2",
+      "op": "monod",
+      "input": {
+        "mu_max": 0.6,
+        "Ks": 2.0,
+        "S": 2.0
+      },
+      "expected": {
+        "mu": 0.3,
+        "doubling_time": 2.310491
+      },
+      "edge": false,
+      "hand_check": "M. L. Shuler & F. Kargi, Bioprocess Engineering (textbook), Monod mu=mu_max S/(Ks+S)=0.3 h^-1; td=ln2/mu=2.310 h"
+    },
+    {
+      "id": "lv-equilibrium",
+      "desc": "Lotka-Volterra coexistence equilibrium and small-oscillation period",
+      "op": "lv_equilibrium",
+      "input": {
+        "alpha": 1.0,
+        "beta": 0.1,
+        "delta": 0.075,
+        "gamma": 1.5
+      },
+      "expected": {
+        "prey_eq": 20.0,
+        "pred_eq": 10.0,
+        "small_osc_period": 5.130199
+      },
+      "edge": false,
+      "hand_check": "J. D. Murray, Mathematical Biology (textbook): x*=gamma/delta=20, y*=alpha/beta=10; linearised period 2pi/sqrt(alpha gamma)=5.130"
+    },
+    {
+      "id": "lv-state",
+      "desc": "Lotka-Volterra state at t=5 from (10,5), RK4 h=0.001",
+      "op": "lv_state",
+      "input": {
+        "alpha": 1.0,
+        "beta": 0.1,
+        "delta": 0.075,
+        "gamma": 1.5,
+        "x0": 10,
+        "y0": 5,
+        "t": 5,
+        "h": 0.001
+      },
+      "expected": {
+        "prey": 8.293329,
+        "pred": 7.418822
+      },
+      "edge": false,
+      "hand_check": "fixed-step RK4 (scope cap: RK4 checked against a high-accuracy reference); dx/dt=ax-bxy, dy/dt=dxy-gy"
+    },
+    {
+      "id": "stock-flow",
+      "desc": "stock with constant inflow and proportional outflow",
+      "op": "stock_flow",
+      "input": {
+        "S0": 0,
+        "inflow": 10,
+        "k": 0.2,
+        "t": 5
+      },
+      "expected": {
+        "S": 31.60603,
+        "S_eq": 50.0
+      },
+      "edge": false,
+      "hand_check": "J. D. Sterman, Business Dynamics (textbook): dS/dt=I-kS -> S=I/k+(S0-I/k)e^(-kt)=50(1-e^-1)=31.61"
+    },
+    {
+      "id": "stock-k0",
+      "desc": "no outflow: stock grows linearly, no equilibrium",
+      "op": "stock_flow",
+      "input": {
+        "S0": 3,
+        "inflow": 10,
+        "k": 0,
+        "t": 5
+      },
+      "expected": {
+        "S": 53,
+        "S_eq": null
+      },
+      "edge": true,
+      "hand_check": "S=S0+It=53; S_eq null"
+    }
+  ]
+}

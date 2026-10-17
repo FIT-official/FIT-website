@@ -1,0 +1,1033 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Compartment Dynamics</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+main{max-width:1250px;margin:auto;padding:18px 14px 48px}
+header,.hud{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.hud{justify-content:flex-start;font-weight:800}
+.hud span,.badge{border:2px solid #111;border-radius:999px;padding:7px 12px}
+.badge{background:var(--lvl-uni);color:#fff;font-weight:800;text-transform:uppercase;font-size:12px}
+h1{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.1;font-weight:800;margin:18px 0 8px}
+h2{font-weight:800;font-size:1.08rem;margin:0 0 12px}
+p{margin:8px 0}
+.layout{display:grid;gap:17px;margin-top:18px}
+.card{border:2px solid #111;border-radius:28px;box-shadow:var(--sh-2);background:#fff;padding:18px;min-width:0}
+.stage{background:var(--lvl-uni-tint)}
+.question{font-weight:600;font-size:1.08rem;min-height:88px}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.plot{border:2px solid var(--fit-line-soft);background:white;border-radius:16px;padding:7px}
+button,input{-webkit-tap-highlight-color:transparent;user-select:none;font:inherit}
+button{min-height:44px;border:2px solid #111;border-radius:999px;padding:9px 16px;background:#fff;font-weight:800;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+button:active:not(:disabled){transform:translateY(2px)}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-uni);cursor:pointer}
+.control-head{display:flex;justify-content:space-between;gap:8px;font-weight:800;margin-top:14px}
+.value{font-variant-numeric:tabular-nums}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
+.steps button{padding:8px 2px;min-width:0}
+.legend{font-size:12px;color:#3D3D3D;font-weight:600}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.check{border:3px solid #111;background:var(--fit-sun);box-shadow:var(--sh-2);flex:1}
+.check:active{box-shadow:var(--sh-1)}
+.feedback{min-height:54px;background:var(--fit-sunken);border-radius:14px;padding:12px;margin:14px 0;font-weight:600}
+.feedback.good{background:#def5e7}
+.feedback.bad{background:#ffe7e4}
+details{border:2px solid #111;border-radius:16px;padding:13px}
+summary{font-weight:800;cursor:pointer}
+.concept{border-top:2px dashed #111;padding-top:13px;margin-top:17px}
+.concept p{font-size:.85rem;color:#3D3D3D}
+.concept svg{max-width:300px}
+#end{display:none;text-align:center}
+#stars{font-size:3rem;letter-spacing:.15em;color:#bd8700}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1.16fr)}.card{padding:24px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<span class="badge">University (later years)</span>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score 0</span></div>
+</header>
+<h1>Compartment Dynamics</h1>
+<p>Control transport, growth and coupled nonlinear systems.</p>
+<div class="layout" id="play">
+<section class="card stage">
+<h2 id="systemTitle">System diagram</h2>
+<p class="question" id="question"></p>
+<svg id="scene" viewBox="0 0 440 240" role="img" aria-label="Compartment model diagram"></svg>
+<div class="concept">
+<h2>Concept figure</h2>
+<svg viewBox="0 0 310 100" role="img" aria-label="Two stocks linked by flows">
+<rect x="17" y="19" width="97" height="58" rx="15" fill="#b5cffd" stroke="#111" stroke-width="3"/>
+<rect x="198" y="19" width="97" height="58" rx="15" fill="#c2eac4" stroke="#111" stroke-width="3"/>
+<path d="M114 38H198M198 59H114" fill="none" stroke="#111" stroke-width="3"/>
+<path d="M187 32 L198 38 L187 44 M125 53 L114 59 L125 65" fill="none" stroke="#111" stroke-width="3"/>
+<text x="42" y="52" font-size="14" font-weight="800">Stock 1</text>
+<text x="221" y="52" font-size="14" font-weight="800">Stock 2</text>
+</svg>
+<p>Compartment models track how stocks change through flows and interactions.</p>
+</div>
+</section>
+<section class="card">
+<h2 id="plotTitle">Live dynamics</h2>
+<div class="plot">
+<svg id="plot" viewBox="0 0 440 288" role="img" aria-label="Live calculated dynamics"></svg>
+</div>
+<p class="legend" id="legend"></p>
+<div class="control-head"><label for="slider" id="controlLabel">Parameter</label><span class="value" id="value"></span></div>
+<input id="slider" type="range">
+<div class="steps">
+<button data-step="-10" type="button" aria-label="Decrease ten steps">−−</button>
+<button data-step="-1" type="button" aria-label="Decrease one step">−</button>
+<button data-step="1" type="button" aria-label="Increase one step">+</button>
+<button data-step="10" type="button" aria-label="Increase ten steps">++</button>
+</div>
+<div class="actions">
+<button id="hint" type="button">Hint (−25)</button>
+<button id="check" class="check" type="button">Check</button>
+<button id="next" type="button" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Adjust the parameter and select Check.</div>
+<details><summary>The maths</summary><p id="maths"></p></details>
+</section>
+</div>
+<section id="end" class="card">
+<h2>Dynamics mastered!</h2>
+<div id="stars"></div>
+<p id="finalScore"></p>
+<button id="again" class="check" type="button">Play again</button>
+</section>
+</main>
+<script>
+/* FIT-CALC-BEGIN x1_compartment */
+const FITCalcX1 = (function () {
+  'use strict';
+
+  const R = 8.314;
+  const own = (o, k) => o && Object.prototype.hasOwnProperty.call(o, k);
+  const finite = x => typeof x === 'number' && Number.isFinite(x);
+  const valid = (o, keys) => o && typeof o === 'object' &&
+    keys.every(k => own(o, k) && finite(o[k]));
+  const safe = o => Object.values(o).every(v => v === null || typeof v === 'boolean' || finite(v)) ? o :
+    { error: 'MathError', reason: 'undefined_result' };
+  const REASONS = {
+    HALF_LIFE_MUST_BE_POSITIVE: ['MathError', 'half_life_must_be_positive'],
+    TIME_CONSTANT_MUST_BE_POSITIVE: ['MathError', 'tau_must_be_positive'],
+    INVALID_ORDER: ['NotSupported', 'order_or_reactor_outside_scope'],
+    TOO_MANY_STATES: ['NotSupported', 'too_many_states'],
+    MathError: ['MathError', 'undefined_result']
+  };
+  const bad = code => {
+    if (REASONS[code]) return { error: REASONS[code][0], reason: REASONS[code][1] };
+    if (/NEGATIVE|MUST_BE_NONNEGATIVE/.test(code))
+      return { error: 'ConstraintViolation', reason: 'negative_input' };
+    return { error: 'ConstraintViolation', reason: code.toLowerCase() };
+  };
+  const pos = x => x > 0;
+  const nonneg = x => x >= 0;
+
+  /**
+   * Integrated zero-, first- and second-order rate law.
+   * Inputs: order (0, 1, 2), C0_mol_L >= 0, k >= 0,
+   * t_s >= 0. k units: mol L^-1 s^-1 (zero),
+   * s^-1 (first), L mol^-1 s^-1 (second).
+   * Outputs: C_mol_L, halfLife_s; also tZero_s and depleted
+   * for order 0.
+   */
+  function integratedRateLaw(p) {
+    if (!valid(p, ['order', 'C0_mol_L', 'k', 't_s']))
+      return bad('INVALID_INPUT');
+    const { order, C0_mol_L: c, k, t_s: t } = p;
+    if (![0, 1, 2].includes(order)) return bad('INVALID_ORDER');
+    if (c < 0) return bad('NEGATIVE_CONCENTRATION');
+    if (k < 0) return bad('NEGATIVE_RATE');
+    if (!nonneg(t)) return bad('TIME_MUST_BE_NONNEGATIVE');
+    if (order === 0) {
+      const tZero_s = k === 0 ? null : c / k;
+      return safe({
+        C_mol_L: Math.max(0, c - k * t),
+        halfLife_s: k === 0 ? null : c / (2 * k),
+        tZero_s, depleted: k > 0 && t >= tZero_s
+      });
+    }
+    if (order === 1)
+      return safe({
+        C_mol_L: c * Math.exp(-k * t),
+        halfLife_s: k === 0 ? null : Math.LN2 / k
+      });
+    return safe({
+      C_mol_L: c / (1 + k * c * t),
+      halfLife_s: k === 0 || c === 0 ? null : 1 / (k * c)
+    });
+  }
+
+  /**
+   * First-order exponential decay, dC/dt=-kC.
+   * Inputs: C0 >= 0 (arbitrary consistent concentration unit),
+   * k_per_s >= 0 (s^-1), t_s >= 0 (s).
+   * Output: C (same unit as C0).
+   */
+  function firstOrderDecay(p) {
+    if (!valid(p, ['C0', 'k_per_s', 't_s']))
+      return bad('INVALID_INPUT');
+    const { C0, k_per_s: k, t_s: t } = p;
+    if (C0 < 0) return bad('NEGATIVE_CONCENTRATION');
+    if (k < 0) return bad('NEGATIVE_RATE');
+    if (t < 0) return bad('TIME_MUST_BE_NONNEGATIVE');
+    return safe({ C: C0 * Math.exp(-k * t) });
+  }
+
+  /**
+   * Arrhenius law k=A exp(-Ea/RT).
+   * Inputs: A > 0 (units of k), Ea_J_mol >= 0,
+   * T_K > 0. Outputs: k, lnk, invT_per_K.
+   */
+  function arrhenius(p) {
+    if (!valid(p, ['A', 'Ea_J_mol', 'T_K']))
+      return bad('INVALID_INPUT');
+    const { A, Ea_J_mol: E, T_K: T } = p;
+    if (!pos(T)) return bad('MathError');
+    if (!pos(A)) return bad('PREFACTOR_MUST_BE_POSITIVE');
+    if (E < 0) return bad('NEGATIVE_ACTIVATION_ENERGY');
+    const lnk = Math.log(A) - E / (R * T);
+    return safe({ k: Math.exp(lnk), lnk, invT_per_K: 1 / T });
+  }
+
+  /**
+   * Two-point Arrhenius parameter identification.
+   * Inputs: k1,k2 > 0 (same rate units), T1_K,T2_K > 0.
+   * Outputs: Ea_J_mol, A (same units as k).
+   */
+  function arrheniusTwoPoint(p) {
+    if (!valid(p, ['k1', 'T1_K', 'k2', 'T2_K']))
+      return bad('INVALID_INPUT');
+    const { k1, k2, T1_K: T1, T2_K: T2 } = p;
+    if (!pos(T1) || !pos(T2) || T1 === T2)
+      return bad('MathError');
+    if (!pos(k1) || !pos(k2))
+      return bad('RATE_MUST_BE_POSITIVE');
+    const E = -R * (Math.log(k2) - Math.log(k1)) /
+      (1 / T2 - 1 / T1);
+    const A = Math.exp(Math.log(k1) + E / (R * T1));
+    return safe({ Ea_J_mol: E, A });
+  }
+
+  /**
+   * Radioactive decay and instantaneous activity.
+   * Inputs: N0 >= 0 (nuclei), halfLife_s > 0, t_s >= 0.
+   * Outputs: N, lambda_per_s, activity_Bq.
+   */
+  function radioactiveDecay(p) {
+    if (!valid(p, ['N0', 'halfLife_s', 't_s']))
+      return bad('INVALID_INPUT');
+    const { N0, halfLife_s: h, t_s: t } = p;
+    if (N0 < 0) return bad('NEGATIVE_INITIAL_COUNT');
+    if (!pos(h)) return bad('HALF_LIFE_MUST_BE_POSITIVE');
+    if (t < 0) return bad('TIME_MUST_BE_NONNEGATIVE');
+    const lambda_per_s = Math.LN2 / h;
+    const N = N0 * Math.exp(-lambda_per_s * t);
+    return safe({ N, lambda_per_s, activity_Bq: lambda_per_s * N });
+  }
+
+  /**
+   * First-order batch conversion.
+   * Inputs: k_per_s >= 0, t_s >= 0.
+   * Output: X (dimensionless fraction).
+   */
+  function batchFirstOrder(p) {
+    if (!valid(p, ['k_per_s', 't_s']))
+      return bad('INVALID_INPUT');
+    if (p.k_per_s < 0) return bad('NEGATIVE_RATE');
+    if (p.t_s < 0) return bad('TIME_MUST_BE_NONNEGATIVE');
+    return safe({ X: -Math.expm1(-p.k_per_s * p.t_s) });
+  }
+
+  /**
+   * Steady-state first-order CSTR conversion.
+   * Inputs: k_per_s >= 0, tau_s >= 0.
+   * Output: X.
+   */
+  function cstrFirstOrder(p) {
+    if (!valid(p, ['k_per_s', 'tau_s']))
+      return bad('INVALID_INPUT');
+    if (p.k_per_s < 0) return bad('NEGATIVE_RATE');
+    if (p.tau_s < 0) return bad('NEGATIVE_RESIDENCE_TIME');
+    const z = p.k_per_s * p.tau_s;
+    return safe({ X: z / (1 + z) });
+  }
+
+  /**
+   * Steady-state ideal PFR first-order conversion.
+   * Inputs: k_per_s >= 0, tau_s >= 0.
+   * Output: X.
+   */
+  function pfrFirstOrder(p) {
+    if (!valid(p, ['k_per_s', 'tau_s']))
+      return bad('INVALID_INPUT');
+    if (p.k_per_s < 0) return bad('NEGATIVE_RATE');
+    if (p.tau_s < 0) return bad('NEGATIVE_RESIDENCE_TIME');
+    return safe({ X: -Math.expm1(-p.k_per_s * p.tau_s) });
+  }
+
+  /**
+   * Hydraulic residence time tau=V/Q.
+   * Inputs: V_m3 >= 0, Q_m3_s > 0.
+   * Output: tau_s.
+   */
+  function residenceTime(p) {
+    if (!valid(p, ['V_m3', 'Q_m3_s']))
+      return bad('INVALID_INPUT');
+    if (p.V_m3 < 0) return bad('NEGATIVE_VOLUME');
+    if (!pos(p.Q_m3_s)) return bad('FLOW_MUST_BE_POSITIVE');
+    return safe({ tau_s: p.V_m3 / p.Q_m3_s });
+  }
+
+  /**
+   * Linear tank level response.
+   * Model: A dh/dt=qin-h/R, tau=AR.
+   */
+  function linearTank(p) {
+    if (!valid(p, ['A_m2', 'R_s_per_m2', 'qin_m3_s', 'h0_m', 't_s']))
+      return bad('INVALID_INPUT');
+    const { A_m2: A, R_s_per_m2: Rr, qin_m3_s: q,
+      h0_m: h0, t_s: t } = p;
+    if (!pos(A)) return bad('AREA_MUST_BE_POSITIVE');
+    if (!pos(Rr)) return bad('RESISTANCE_MUST_BE_POSITIVE');
+    if (q < 0) return bad('NEGATIVE_FLOW');
+    if (h0 < 0) return bad('NEGATIVE_HEIGHT');
+    if (t < 0) return bad('TIME_MUST_BE_NONNEGATIVE');
+    const tau_s = A * Rr, hss_m = q * Rr;
+    return safe({
+      h_m: hss_m + (h0 - hss_m) * Math.exp(-t / tau_s),
+      tau_s, hss_m
+    });
+  }
+
+  /**
+   * First-order-plus-dead-time response.
+   * Inputs: K, tau_s > 0, theta_s >= 0, du, t_s >= 0.
+   */
+  function fopdtStep(p) {
+    if (!valid(p, ['K', 'tau_s', 'theta_s', 'du', 't_s']))
+      return bad('INVALID_INPUT');
+    if (!pos(p.tau_s)) return bad('TIME_CONSTANT_MUST_BE_POSITIVE');
+    if (p.theta_s < 0) return bad('NEGATIVE_DEAD_TIME');
+    if (p.t_s < 0) return bad('TIME_MUST_BE_NONNEGATIVE');
+    return safe({ y: p.t_s <= p.theta_s ? 0 :
+      p.K * p.du * -Math.expm1(-(p.t_s - p.theta_s) / p.tau_s) });
+  }
+
+  /**
+   * Well-mixed lake concentration.
+   * Inputs: V_m3 > 0, Q_m3_s >= 0, Cin_mg_L >= 0,
+   * C0_mg_L >= 0, k_per_s >= 0, t_s >= 0.
+   */
+  function wellMixedLake(p) {
+    if (!valid(p, ['V_m3', 'Q_m3_s', 'Cin_mg_L',
+      'C0_mg_L', 'k_per_s', 't_s'])) return bad('INVALID_INPUT');
+    const { V_m3: V, Q_m3_s: Q, Cin_mg_L: Cin,
+      C0_mg_L: C0, k_per_s: k, t_s: t } = p;
+    if (!pos(V)) return bad('VOLUME_MUST_BE_POSITIVE');
+    if (Q < 0) return bad('NEGATIVE_FLOW');
+    if (Cin < 0 || C0 < 0) return bad('NEGATIVE_CONCENTRATION');
+    if (k < 0) return bad('NEGATIVE_RATE');
+    if (t < 0) return bad('TIME_MUST_BE_NONNEGATIVE');
+    const a = Q / V + k;
+    if (a === 0) return { C_mg_L: C0, Css_mg_L: null };
+    const Css_mg_L = (Q / V * Cin) / a;
+    return safe({
+      C_mg_L: Css_mg_L + (C0 - Css_mg_L) * Math.exp(-a * t),
+      Css_mg_L
+    });
+  }
+
+  /**
+   * Monod specific microbial growth rate.
+   * Inputs: muMax_per_h >= 0, Ks_g_L > 0, S_g_L >= 0.
+   * Outputs: mu_per_h and doubling_time.
+   */
+  function monod(p) {
+    if (!valid(p, ['muMax_per_h', 'Ks_g_L', 'S_g_L']))
+      return bad('INVALID_INPUT');
+    if (p.muMax_per_h < 0) return bad('NEGATIVE_GROWTH_RATE');
+    if (!pos(p.Ks_g_L))
+      return bad('SATURATION_CONSTANT_MUST_BE_POSITIVE');
+    if (p.S_g_L < 0) return bad('NEGATIVE_SUBSTRATE');
+    const mu_per_h = p.muMax_per_h * p.S_g_L /
+      (p.Ks_g_L + p.S_g_L);
+    return safe({ mu_per_h,
+      doubling_time: mu_per_h === 0 ? null : Math.LN2 / mu_per_h });
+  }
+
+  /**
+   * Exponential population growth.
+   * Inputs: N0 >= 0, r_per_day, t_day >= 0.
+   */
+  function exponentialGrowth(p) {
+    if (!valid(p, ['N0', 'r_per_day', 't_day']))
+      return bad('INVALID_INPUT');
+    if (p.N0 < 0) return bad('NEGATIVE_POPULATION');
+    if (p.t_day < 0) return bad('NEGATIVE_TIME');
+    return safe({ N: p.N0 * Math.exp(p.r_per_day * p.t_day) });
+  }
+
+  /**
+   * Logistic population growth.
+   * Inputs: N0 >= 0, r_per_day >= 0, K > 0, t_day >= 0.
+   * N0=0 is an equilibrium.
+   */
+  function logistic(p) {
+    if (!valid(p, ['N0', 'r_per_day', 'K', 't_day']))
+      return bad('INVALID_INPUT');
+    if (p.N0 < 0) return bad('NEGATIVE_POPULATION');
+    if (!pos(p.K)) return bad('CARRYING_CAPACITY_MUST_BE_POSITIVE');
+    if (p.r_per_day < 0) return bad('NEGATIVE_GROWTH_RATE');
+    if (p.t_day < 0) return bad('NEGATIVE_TIME');
+    if (p.N0 === 0) return { N: 0 };
+    const e = Math.exp(-p.r_per_day * p.t_day);
+    return safe({ N: p.K / (1 + (p.K / p.N0 - 1) * e) });
+  }
+
+  /**
+   * Shared fixed-step fourth-order Runge-Kutta integrator.
+   * Supports 1-3 finite states and 0-5000 steps.
+   */
+  function rk4(p) {
+    if (!p || typeof p.f !== 'function' || !Array.isArray(p.y0) ||
+      !finite(p.t0) || !finite(p.dt) || !finite(p.steps))
+      return bad('INVALID_INPUT');
+    if (p.y0.length > 3) return bad('TOO_MANY_STATES');
+    if (p.y0.length < 1 || !p.y0.every(finite))
+      return bad('INVALID_INPUT');
+    if (!Number.isInteger(p.steps) || p.steps < 0 || p.steps > 5000)
+      return bad('INVALID_STEP_COUNT');
+    if (!pos(p.dt)) return bad('INVALID_STEP_SIZE');
+    const t = [p.t0], y = [p.y0.slice()], n = p.y0.length;
+    let state = p.y0.slice(), time = p.t0;
+    const derivative = (tt, yy) => {
+      let v;
+      try { v = p.f(tt, yy.slice()); }
+      catch (_) { return null; }
+      return Array.isArray(v) && v.length === n && v.every(finite)
+        ? v : null;
+    };
+    for (let i = 0; i < p.steps; i++) {
+      const h = p.dt;
+      const k1 = derivative(time, state);
+      if (!k1) return bad('MathError');
+      const k2 = derivative(time + h / 2,
+        state.map((v, j) => v + h * k1[j] / 2));
+      if (!k2) return bad('MathError');
+      const k3 = derivative(time + h / 2,
+        state.map((v, j) => v + h * k2[j] / 2));
+      if (!k3) return bad('MathError');
+      const k4 = derivative(time + h,
+        state.map((v, j) => v + h * k3[j]));
+      if (!k4) return bad('MathError');
+      state = state.map((v, j) => v +
+        h * (k1[j] + 2 * k2[j] + 2 * k3[j] + k4[j]) / 6);
+      time = p.t0 + (i + 1) * h;
+      if (!finite(time) || !state.every(finite))
+        return bad('MathError');
+      t.push(time);
+      y.push(state.slice());
+    }
+    return { t, y };
+  }
+
+  /**
+   * Predator-prey Lotka-Volterra model integrated with RK4.
+   * x'=alpha*x-beta*x*y; y'=delta*x*y-gamma*y.
+   */
+  function lotkaVolterra(p) {
+    if (!valid(p, ['x0', 'y0', 'alpha', 'beta', 'delta',
+      'gamma', 'dt', 'steps'])) return bad('INVALID_INPUT');
+    if (p.x0 < 0 || p.y0 < 0) return bad('NEGATIVE_POPULATION');
+    if (['alpha', 'beta', 'delta', 'gamma'].some(k => p[k] < 0))
+      return bad('NEGATIVE_RATE');
+    const result = rk4({
+      f: (t, s) => [
+        p.alpha * s[0] - p.beta * s[0] * s[1],
+        p.delta * s[0] * s[1] - p.gamma * s[1]
+      ],
+      y0: [p.x0, p.y0],
+      t0: 0, dt: p.dt, steps: p.steps
+    });
+    if (result.error) return result;
+    return {
+      t: result.t,
+      x: result.y.map(v => v[0]),
+      y: result.y.map(v => v[1])
+    };
+  }
+
+  /**
+   * Stock-and-flow with linear feedback, integrated by RK4.
+   */
+  function stockAndFlow(p) {
+    if (!valid(p, ['S0', 'inflow', 'outflowRate_per_s',
+      'feedbackGain', 'target', 'dt_s', 'steps']))
+      return bad('INVALID_INPUT');
+    if (p.S0 < 0) return bad('NEGATIVE_STOCK');
+    if (p.inflow < 0) return bad('NEGATIVE_FLOW');
+    if (p.outflowRate_per_s < 0 || p.feedbackGain < 0)
+      return bad('NEGATIVE_RATE');
+    if (p.target < 0) return bad('NEGATIVE_TARGET');
+    const r = rk4({
+      f: (t, s) => [p.inflow - p.outflowRate_per_s * s[0] +
+        p.feedbackGain * (p.target - s[0])],
+      y0: [p.S0], t0: 0, dt: p.dt_s, steps: p.steps
+    });
+    if (r.error) return r;
+    return { t: r.t, S: r.y.map(a => a[0]) };
+  }
+
+  // FIT KAT-facing aliases use the concise parameter and output names.
+  function decay(p) {
+    if (!valid(p, ['order', 'C0', 'k', 't'])) return bad('INVALID_INPUT');
+    const r = integratedRateLaw({ order: p.order, C0_mol_L: p.C0, k: p.k, t_s: p.t });
+    if (r.error) return r;
+    const out = { C: r.C_mol_L, half_life: r.halfLife_s };
+    if (p.order === 0) out.depleted = r.depleted;
+    return out;
+  }
+
+  // Constant-density ideal reactor with first- or second-order kinetics.
+  function reactor(p) {
+    if (!p || !['CSTR', 'PFR'].includes(p.type) || ![1, 2].includes(p.order))
+      return bad('INVALID_ORDER');
+    const keys = p.order === 2 ? ['k', 'tau', 'C0'] : ['k', 'tau'];
+    if (!valid(p, keys)) return bad('INVALID_INPUT');
+    if (keys.some(key => p[key] < 0)) return bad('NEGATIVE_RATE');
+    const Da = p.k * p.tau * (p.order === 2 ? p.C0 : 1);
+    if (!finite(Da)) return bad('MathError');
+    let X;
+    if (p.type === 'PFR') X = p.order === 1 ? -Math.expm1(-Da) : Da / (1 + Da);
+    else if (p.order === 1) X = Da / (1 + Da);
+    else X = Da === 0 ? 0 : 2 * Da / (2 * Da + 1 + Math.sqrt(1 + 4 * Da));
+    return safe({ X, Da });
+  }
+
+  function lake(p) {
+    if (!valid(p, ['W_g_per_s', 'Q_m3_per_s', 'k_per_s', 'V_m3']))
+      return bad('INVALID_INPUT');
+    if (Object.values(p).some(v => typeof v === 'number' && v < 0))
+      return bad('NEGATIVE_RATE');
+    const denominator = p.Q_m3_per_s + p.k_per_s * p.V_m3;
+    if (denominator <= 0) return bad('MathError');
+    return safe({ C_ss: p.W_g_per_s / denominator,
+      tau_response: p.V_m3 / denominator });
+  }
+
+  function tankStep(p) {
+    if (!valid(p, ['K', 'du', 'tau', 't'])) return bad('INVALID_INPUT');
+    if (p.tau === 0) return bad('TIME_CONSTANT_MUST_BE_POSITIVE');
+    if (p.tau < 0 || p.t < 0) return bad('NEGATIVE_TIME');
+    const fraction = -Math.expm1(-p.t / p.tau);
+    return safe({ y: p.K * p.du * fraction, fraction });
+  }
+
+  function growth(p) {
+    if (!p || !['logistic', 'exponential'].includes(p.model)) return bad('INVALID_INPUT');
+    const keys = p.model === 'logistic' ? ['N0', 'r', 'K', 't'] : ['N0', 'r', 't'];
+    if (!valid(p, keys)) return bad('INVALID_INPUT');
+    return p.model === 'logistic'
+      ? logistic({ N0: p.N0, r_per_day: p.r, K: p.K, t_day: p.t })
+      : exponentialGrowth({ N0: p.N0, r_per_day: p.r, t_day: p.t });
+  }
+
+  function monodRate(p) {
+    if (!valid(p, ['mu_max', 'Ks', 'S'])) return bad('INVALID_INPUT');
+    const r = monod({ muMax_per_h: p.mu_max, Ks_g_L: p.Ks, S_g_L: p.S });
+    return r.error ? r : { mu: r.mu_per_h, doubling_time: r.doubling_time };
+  }
+
+  function lvEquilibrium(p) {
+    if (!valid(p, ['alpha', 'beta', 'delta', 'gamma'])) return bad('INVALID_INPUT');
+    if (Object.values(p).some(v => v < 0)) return bad('NEGATIVE_RATE');
+    if (p.beta === 0 || p.delta === 0 || p.alpha === 0 || p.gamma === 0)
+      return bad('MathError');
+    return safe({ prey_eq: p.gamma / p.delta, pred_eq: p.alpha / p.beta,
+      small_osc_period: 2 * Math.PI / Math.sqrt(p.alpha * p.gamma) });
+  }
+
+  function stockFlow(p) {
+    if (!valid(p, ['S0', 'inflow', 'k', 't'])) return bad('INVALID_INPUT');
+    if (Object.values(p).some(v => v < 0)) return bad('NEGATIVE_STOCK');
+    const S_eq = p.k === 0 ? null : p.inflow / p.k;
+    const S = p.k === 0 ? p.S0 + p.inflow * p.t :
+      p.S0 * Math.exp(-p.k * p.t) + p.inflow * -Math.expm1(-p.k * p.t) / p.k;
+    return safe({ S, S_eq });
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    decay, reactor, lake, tankStep, growth, monodRate, lvEquilibrium, stockFlow,
+    integratedRateLaw,
+    firstOrderDecay,
+    arrhenius,
+    arrheniusTwoPoint,
+    radioactiveDecay,
+    batchFirstOrder,
+    cstrFirstOrder,
+    pfrFirstOrder,
+    residenceTime,
+    linearTank,
+    fopdtStep,
+    wellMixedLake,
+    monod,
+    exponentialGrowth,
+    logistic,
+    lotkaVolterra,
+    stockAndFlow,
+    rk4
+  });
+})();
+/* FIT-CALC-END x1_compartment */
+
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const NS = 'http:' + String.fromCharCode(47,47) + 'www.w3.org/2000/svg';
+const fmt = v => Number.isFinite(v) ?
+  Number(v.toPrecision(3)).toString() : '—';
+let seed = 87751;
+const rand = () => {
+  seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+  return seed / 4294967296;
+};
+const pick = a => a[Math.floor(rand() * a.length)];
+let round = 0, score = 0, attempts = 0, hinted = false;
+let solved = false, cfg, current;
+
+function element(root, name, props, content) {
+  const n = document.createElementNS(NS, name);
+  Object.entries(props).forEach(([k, v]) => n.setAttribute(k, v));
+  if (content !== undefined) n.textContent = content;
+  root.appendChild(n);
+  return n;
+}
+function text(root, x, y, value, size = 12) {
+  element(root, 'text', { x, y, fill: '#111',
+    'font-size': size, 'font-weight': 600 }, value);
+}
+function line(root, d, col = '#111', dash = '') {
+  element(root, 'path', {
+    d, fill: 'none', stroke: col, 'stroke-width': 3,
+    'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+    'stroke-dasharray': dash
+  });
+}
+function lake(k, t) {
+  return FITCalcX1.wellMixedLake({
+    V_m3: cfg.V, Q_m3_s: cfg.Q,
+    Cin_mg_L: cfg.Cin, C0_mg_L: cfg.C0,
+    k_per_s: k, t_s: t
+  }).C_mg_L;
+}
+function population(r, t) {
+  if (cfg.model === 'exponential')
+    return FITCalcX1.exponentialGrowth({
+      N0: cfg.N0, r_per_day: r, t_day: t
+    }).N;
+  return FITCalcX1.logistic({
+    N0: cfg.N0, r_per_day: r, K: cfg.K, t_day: t
+  }).N;
+}
+function trajectory(alpha) {
+  return FITCalcX1.lotkaVolterra({
+    x0: 30, y0: 8,
+    alpha, beta: 0.016, delta: 0.012, gamma: 0.3,
+    dt: 0.04, steps: 1000
+  });
+}
+function preyPeak(a) {
+  const tr = trajectory(a);
+  let j = 0;
+  for (let i = 1; i < tr.x.length; i++) {
+    if (tr.x[i] > tr.x[j]) j = i;
+  }
+  return { time: tr.t[j], x: tr.x[j], tr };
+}
+function stepResponse(K, t) {
+  return FITCalcX1.fopdtStep({
+    K, tau_s: cfg.tau, theta_s: cfg.theta,
+    du: 1, t_s: t
+  }).y;
+}
+function setup() {
+  attempts = 0; hinted = false; solved = false;
+  $('feedback').className = 'feedback';
+  $('feedback').textContent = 'Adjust the parameter and select Check.';
+  $('next').hidden = true;
+  $('check').hidden = false;
+  $('hint').disabled = false;
+  const type = round % 6;
+  if (type === 0 || type === 3) {
+    const V = pick([80, 100, 120]);
+    const Q = 11;
+    const Cin = (10 * 2 + 1 * 20) / 11;
+    const C0 = pick([6, 8]);
+    const k = pick([0, 0.02, 0.04, 0.06]);
+    const t = pick([10, 15, 20]);
+    const target = FITCalcX1.wellMixedLake({
+      V_m3: V, Q_m3_s: Q, Cin_mg_L: Cin,
+      C0_mg_L: C0, k_per_s: k, t_s: t
+    }).C_mg_L;
+    cfg = { type, V, Q, Cin, C0, k, t, target,
+      min: 0, max: 0.1, step: 0.01, unit: 's⁻¹',
+      question: `A lake of volume ${V} m³ starts at ${C0} mg/L. River flow is 10 m³/s at 2 mg/L; an effluent adds 1 m³/s at 20 mg/L. The combined outflow is 11 m³/s. Set the pollutant decay constant so the lake reaches ${fmt(target)} mg/L after ${t} s.`,
+      maths: 'Inlet mixing: Cᵢₙ = (QᵣCᵣ + QₑCₑ)/(Qᵣ+Qₑ). Lake: V dC/dt = Q(Cᵢₙ − C) − kVC. Thus C(t)=Cₛₛ+(C₀−Cₛₛ)exp[−(Q/V+k)t]. Assumption: perfectly mixed, fixed V.' };
+    current = k === 0.01 ? 0.08 : (k === 0 ? 0.09 : 0);
+  } else if (type === 1 || type === 4) {
+    const model = type === 1 ? 'logistic' : 'exponential';
+    const N0 = 100;
+    const K = pick([700, 900, 1100]);
+    const r = pick([0.2, 0.3, 0.4, 0.5]);
+    const t = pick([3, 4, 5]);
+    const target = model === 'logistic' ?
+      FITCalcX1.logistic({
+        N0, r_per_day: r, K, t_day: t
+      }).N : FITCalcX1.exponentialGrowth({
+        N0, r_per_day: r, t_day: t
+      }).N;
+    cfg = { type, model, N0, K, r, t, target,
+      min: 0.1, max: 0.8, step: 0.01, unit: 'day⁻¹',
+      question: `For ${model} population growth, N₀ = ${N0} individuals${model === 'logistic' ? ` and K = ${K} individuals` : ''}. Set the intrinsic growth rate so N(${t} days) = ${fmt(target)} individuals.`,
+      maths: model === 'logistic' ?
+        'dN/dt = rN(1 − N/K), N(t)=K/[1+(K/N₀−1)e^(−rt)]. Compare this with exponential growth N=N₀e^(rt). Monod: μ=μₘₐₓS/(Kₛ+S) for a fixed limiting substrate.' :
+        'dN/dt=rN; N=N₀e^(rt). This assumes unlimited resources and a fixed per-capita growth rate. Logistic growth limits population using carrying capacity K.' };
+    current = r === 0.1 ? 0.6 : 0.1;
+  } else if (type === 2) {
+    const alpha = pick([0.2, 0.3, 0.4, 0.5]);
+    const peak = preyPeak(alpha);
+    cfg = { type, alpha, peak,
+      min: 0.1, max: 0.8, step: 0.01,
+      unit: 'day⁻¹',
+      question: `Predator–prey populations begin at 30 prey and 8 predators. Tune the prey birth rate α until the time of the largest prey peak over 40 days is within ${fmt(peak.time - 0.2)}–${fmt(peak.time + 0.2)} days. β = 0.016, δ = 0.012, γ = 0.3 in consistent population/day units.`,
+      maths: 'dx/dt=αx−βxy, dy/dt=δxy−γy. β and δ carry individual⁻¹ day⁻¹; α and γ carry day⁻¹. Fourth-order Runge–Kutta advances both populations in fixed 0.04-day steps. The phase plane plots prey x against predators y.' };
+    current = alpha === 0.1 ? 0.7 : 0.1;
+  } else {
+    const K = pick([1, 1.5, 2, 2.5]);
+    const tau = pick([4, 6, 8]);
+    const theta = pick([2, 3, 4]);
+    cfg = { type, K, tau, theta,
+      min: 0.5, max: 4, step: 0.1,
+      unit: 'output units/input unit',
+      question: `A first-order-plus-dead-time system receives a step of 1 input unit. Its observed response begins after ${theta} s and has time constant ${tau} s. Adjust static gain K until the response fits the blue observations.`,
+      maths: 'y(t)=0 for t≤θ; y(t)=KΔu[1−exp(−(t−θ)/τ)] for t>θ. K is the static gain, θ the transport delay in s, and τ the time constant in s. The response at t=θ+τ is about 63.2% of the final change.' };
+    current = K === 0.5 ? 3.5 : 0.5;
+  }
+  $('question').textContent = cfg.question;
+  $('maths').textContent = cfg.maths;
+  $('systemTitle').textContent = [
+    'River–lake compartment', 'Population dynamics',
+    'Predator–prey interaction', 'Lake pollutant balance',
+    'Exponential population', 'Delayed process response'
+  ][type];
+  $('plotTitle').textContent = type === 2 ?
+    'Predator–prey phase plane' : type === 5 ?
+    'Step-response identification' :
+    type === 0 || type === 3 ?
+    'Lake concentration: analytical vs RK4' :
+    'Population: analytical vs RK4';
+  $('controlLabel').textContent = type === 0 || type === 3 ?
+    'Decay constant k' : type === 1 || type === 4 ?
+    'Growth rate r' : type === 2 ? 'Prey birth rate α' : 'Gain K';
+  Object.assign($('slider'), {
+    min: cfg.min, max: cfg.max, step: cfg.step,
+    value: current
+  });
+  $('round').textContent = `Round ${round + 1}/6`;
+  $('score').textContent = `Score ${score}`;
+  draw();
+}
+function scene() {
+  const s = $('scene');
+  s.replaceChildren();
+  if (cfg.type === 0 || cfg.type === 3) {
+    element(s, 'path', {
+      d: 'M95 60V183Q95 199 112 199H332Q348 199 348 183V60',
+      fill: 'none', stroke: '#111', 'stroke-width': 4
+    });
+    element(s, 'path', {
+      d: 'M99 95H344V183Q344 195 330 195H113Q99 195 99 183Z',
+      fill: '#aeddf2'
+    });
+    line(s, 'M18 39H125V90 M315 187H424', '#111');
+    line(s, 'M18 12H160V90', '#FF6B3D');
+    text(s, 6, 30, 'River: 10 m³/s');
+    text(s, 6, 8, 'Effluent: 1 m³/s', 11);
+    text(s, 117, 125, `Lake C=${fmt(lake(current, cfg.t))} mg/L`);
+    text(s, 152, 147, `V=${cfg.V} m³`);
+    text(s, 322, 176, 'Q=11 m³/s', 11);
+    text(s, 111, 225, `k=${fmt(current)} s⁻¹`);
+  } else if (cfg.type === 1 || cfg.type === 4) {
+    element(s, 'rect', { x: 39, y: 26, width: 362,
+      height: 180, rx: 20, fill: '#fff',
+      stroke: '#111', 'stroke-width': 3 });
+    const n = population(current, cfg.t);
+    for (let i = 0; i < 30; i++) {
+      const x = 69 + i % 10 * 32;
+      const y = 61 + Math.floor(i / 10) * 50;
+      element(s, 'circle', { cx: x, cy: y, r: 10,
+        stroke: '#111', 'stroke-width': 2,
+        fill: '#93c4fa' });
+    }
+    text(s, 75, 226, `N=${fmt(n)} individuals • t=${cfg.t} days`);
+  } else if (cfg.type === 2) {
+    element(s, 'ellipse', { cx: 130, cy: 118, rx: 91,
+      ry: 70, fill: '#c8edcc', stroke: '#111',
+      'stroke-width': 3 });
+    element(s, 'ellipse', { cx: 330, cy: 118, rx: 85,
+      ry: 70, fill: '#f3c7a5', stroke: '#111',
+      'stroke-width': 3 });
+    text(s, 80, 111, 'Prey x');
+    text(s, 272, 111, 'Predator y');
+    text(s, 91, 139, '30 initially');
+    text(s, 295, 139, '8 initially');
+    line(s, 'M221 108H245M245 128H221', '#111');
+    text(s, 100, 217, `α=${fmt(current)} day⁻¹`);
+  } else {
+    element(s, 'rect', { x: 116, y: 52, width: 210,
+      height: 135, rx: 28, stroke: '#111',
+      'stroke-width': 4, fill: '#c9d9ff' });
+    text(s, 157, 100, 'Process');
+    text(s, 135, 129, `τ = ${cfg.tau} s`);
+    text(s, 135, 151, `θ = ${cfg.theta} s`);
+    line(s, 'M14 121H116M326 121H425');
+    text(s, 11, 109, 'Δu = 1');
+    text(s, 333, 108, 'Output');
+    text(s, 137, 216, `K = ${fmt(current)}`);
+  }
+  s.setAttribute('aria-label',
+    `${$('systemTitle').textContent}; selected control ${fmt(current)}`);
+}
+function plot() {
+  const s = $('plot');
+  s.replaceChildren();
+  const left = 60, right = 418, top = 31, bottom = 232;
+  let series = [], secondary = [], marker = null;
+  let xmin = 0, xmax = 1, ymin = 0, ymax = 1;
+  let xlabel = 'Time', ylabel = 'Value';
+  const c = cfg;
+  if (c.type === 0 || c.type === 3) {
+    xmax = 40;
+    ymax = Math.max(8, c.C0 + 1);
+    xlabel = 'Time (s)'; ylabel = 'C (mg/L)';
+    for (let i = 0; i <= 100; i++) {
+      const t = xmax * i / 100;
+      series.push({ x: t, y: lake(current, t) });
+    }
+    const numerical = FITCalcX1.rk4({
+      f: (t, y) => [
+        (c.Q / c.V) * (c.Cin - y[0]) - current * y[0]
+      ],
+      y0: [c.C0], t0: 0, dt: xmax / 200, steps: 200
+    });
+    secondary = numerical.t.map((t, i) => ({
+      x: t, y: numerical.y[i][0]
+    }));
+    marker = { x: c.t, y: lake(current, c.t) };
+  } else if (c.type === 1 || c.type === 4) {
+    xmax = Math.max(8, c.t + 2);
+    xlabel = 'Time (day)';
+    ylabel = 'N (individuals)';
+    for (let i = 0; i <= 100; i++) {
+      const t = xmax * i / 100;
+      series.push({ x: t, y: population(current, t) });
+    }
+    ymax = Math.max(...series.map(p => p.y), c.target) * 1.12;
+    const numerical = FITCalcX1.rk4({
+      f: (t, y) => [
+        c.model === 'logistic' ?
+          current * y[0] * (1 - y[0] / c.K) :
+          current * y[0]
+      ],
+      y0: [c.N0], t0: 0, dt: xmax / 200, steps: 200
+    });
+    secondary = numerical.t.map((t, i) => ({
+      x: t, y: numerical.y[i][0]
+    }));
+    marker = { x: c.t, y: population(current, c.t) };
+  } else if (c.type === 2) {
+    const tr = trajectory(current);
+    const ref = trajectory(c.alpha);
+    xmax = Math.max(...tr.x, ...ref.x) * 1.1;
+    ymax = Math.max(...tr.y, ...ref.y) * 1.1;
+    xlabel = 'Prey x (individuals)';
+    ylabel = 'Predators y (individuals)';
+    series = tr.x.map((x, i) => ({ x, y: tr.y[i] }));
+    secondary = ref.x.map((x, i) => ({ x, y: ref.y[i] }));
+    marker = series[series.length - 1];
+  } else {
+    xmax = 35;
+    ymax = Math.max(c.K, current) * 1.12;
+    xlabel = 'Time (s)';
+    ylabel = 'Output y (units)';
+    for (let i = 0; i <= 140; i++) {
+      const t = xmax * i / 140;
+      series.push({ x: t, y: stepResponse(current, t) });
+      secondary.push({
+        x: t,
+        y: FITCalcX1.fopdtStep({
+          K: c.K, tau_s: c.tau,
+          theta_s: c.theta, du: 1, t_s: t
+        }).y
+      });
+    }
+    marker = series[Math.min(series.length - 1,
+      Math.round((c.theta + c.tau) / xmax * 140))];
+  }
+  if (!Number.isFinite(xmax) || xmax <= xmin) xmax = 1;
+  if (!Number.isFinite(ymax) || ymax <= ymin) ymax = 1;
+  const X = v => left + (right - left) * (v - xmin) / (xmax - xmin);
+  const Y = v => bottom - (bottom - top) * (v - ymin) / (ymax - ymin);
+  line(s, `M${left} ${top}V${bottom}H${right}`, '#111');
+  for (let i = 0; i <= 4; i++) {
+    text(s, X(xmin + (xmax - xmin) * i / 4) - 9,
+      bottom + 19, fmt(xmin + (xmax - xmin) * i / 4), 10);
+    text(s, 3, Y(ymin + (ymax - ymin) * i / 4) + 3,
+      fmt(ymin + (ymax - ymin) * i / 4), 10);
+  }
+  text(s, 158, 275, xlabel);
+  text(s, 6, 15, ylabel);
+  const drawSeries = (arr, colour, dash) => {
+    const d = arr.filter(p => Number.isFinite(p.x) &&
+      Number.isFinite(p.y)).map((p, i) =>
+      `${i === 0 ? 'M' : 'L'}${X(p.x).toFixed(2)} ${Y(p.y).toFixed(2)}`
+    ).join(' ');
+    line(s, d, colour, dash);
+  };
+  drawSeries(secondary, '#ff6b3d', '6 5');
+  drawSeries(series, '#1F66E5');
+  if (marker) {
+    element(s, 'circle', { cx: X(marker.x), cy: Y(marker.y),
+      r: 7, fill: '#FFDD00', stroke: '#111', 'stroke-width': 3 });
+  }
+  $('legend').textContent = c.type === 2 ?
+    'Blue: current RK4 trajectory • Orange dashed: observed phase trajectory • Yellow: final point' :
+    c.type === 5 ?
+    'Blue: current gain • Orange dashed: observed response • Yellow: current response point' :
+    'Blue: closed-form model • Orange dashed: RK4 integration • Yellow: current value';
+  s.setAttribute('aria-label',
+    `${ylabel} against ${xlabel}; two calculated curves and a player marker`);
+}
+function draw() {
+  $('value').textContent = `${fmt(current)} ${cfg.unit}`;
+  scene();
+  plot();
+}
+function update(v) {
+  if (solved) return;
+  current = Math.max(cfg.min, Math.min(cfg.max,
+    Math.round(Number(v) / cfg.step) * cfg.step));
+  $('slider').value = current;
+  draw();
+}
+$('slider').addEventListener('input', e => update(e.target.value));
+document.querySelectorAll('[data-step]').forEach(b => {
+  b.addEventListener('click', () =>
+    update(current + Number(b.dataset.step) * cfg.step));
+});
+$('hint').addEventListener('click', () => {
+  if (solved) return;
+  hinted = true;
+  $('hint').disabled = true;
+  $('feedback').textContent = cfg.type === 0 || cfg.type === 3 ?
+    'Mix the river and effluent concentrations first. Both flushing and decay remove material.' :
+    cfg.type === 1 || cfg.type === 4 ?
+    'Use the model form in The maths. Greater r increases the population at the specified time.' :
+    cfg.type === 2 ?
+    'Increasing prey birth rate changes both predator response and the timing of prey maxima.' :
+    'The response starts after θ; at θ + τ it reaches about 63.2% of its eventual change.';
+});
+$('check').addEventListener('click', () => {
+  if (solved) return;
+  attempts++;
+  let success = false, message = '';
+  if (cfg.type === 0 || cfg.type === 3) {
+    const delta = lake(current, cfg.t) - cfg.target;
+    success = Math.abs(delta) < 0.025;
+    message = `Lake concentration is ${fmt(Math.abs(delta))} mg/L ${
+      delta < 0 ? 'too low' : 'too high'}.`;
+  } else if (cfg.type === 1 || cfg.type === 4) {
+    const delta = population(current, cfg.t) - cfg.target;
+    success = Math.abs(delta) / cfg.target < 0.008;
+    message = `Population differs by ${fmt(Math.abs(delta))} individuals.`;
+  } else if (cfg.type === 2) {
+    const peak = preyPeak(current);
+    const delta = peak.time - cfg.peak.time;
+    success = Math.abs(delta) <= 0.2;
+    message = `Peak timing differs by ${fmt(Math.abs(delta))} days.`;
+  } else {
+    const estimate = stepResponse(current, cfg.theta + cfg.tau);
+    const observed = FITCalcX1.fopdtStep({
+      K: cfg.K, tau_s: cfg.tau,
+      theta_s: cfg.theta, du: 1,
+      t_s: cfg.theta + cfg.tau
+    }).y;
+    success = Math.abs(estimate - observed) < 0.035;
+    message = `Your response differs by ${
+      fmt(Math.abs(estimate - observed))} output units at θ+τ.`;
+  }
+  if (!success) {
+    $('feedback').className = 'feedback bad';
+    $('feedback').textContent = `Not yet. ${message}`;
+    return;
+  }
+  solved = true;
+  const pts = hinted ? 50 : attempts === 1 ? 100 :
+    attempts === 2 ? 75 : 50;
+  score += pts;
+  $('score').textContent = `Score ${score}`;
+  $('feedback').className = 'feedback good';
+  $('feedback').textContent = `✓ Correct. ${
+    cfg.type === 2 ?
+      'Your parameter reproduces the target peak timing.' :
+    cfg.type === 5 ?
+      'The step-response gain matches the observation.' :
+      'The chosen parameter reproduces the required model outcome.'
+  } +${pts} points.`;
+  $('hint').disabled = true;
+  $('check').hidden = true;
+  $('next').hidden = false;
+  $('next').textContent = round === 5 ? 'See results →' :
+    'Next round →';
+});
+$('next').addEventListener('click', () => {
+  round++;
+  if (round < 6) setup();
+  else {
+    $('play').style.display = 'none';
+    $('end').style.display = 'block';
+    const stars = score >= 525 ? 3 : score >= 375 ? 2 : 1;
+    $('stars').textContent = '★'.repeat(stars) +
+      '☆'.repeat(3 - stars);
+    $('finalScore').textContent = `Final score: ${score}/600`;
+  }
+});
+$('again').addEventListener('click', () => {
+  round = 0; score = 0;
+  seed = (seed + 1709) >>> 0;
+  $('play').style.display = 'grid';
+  $('end').style.display = 'none';
+  setup();
+});
+setup();
+})();
+</script>
+</body>
+</html>

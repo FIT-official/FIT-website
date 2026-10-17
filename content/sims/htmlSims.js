@@ -11,6 +11,8 @@ const probability = { subject: 'Maths', concept: 'probability', accent: '#8B5CF6
 const integration = { subject: 'Maths', concept: 'integration', accent: '#2EC4A6', minutes: '10–15', status: 'live' }
 const gases = { subject: 'Physics', concept: 'gases', accent: '#FF8FB8', minutes: '10–15', status: 'live' }
 const kinematics = { subject: 'Physics', concept: 'kinematics', accent: '#FF6B3D', minutes: '10–15', status: 'live' }
+// Tier-1 X1 (compartment / lumped models): live, FITCalcX1 fix1 passes all 27 KATs in tier1/lumped_models.json.
+const compartment = { subject: 'Engineering', concept: 'compartment-models', accent: '#2EC4A6', minutes: '15–20', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -172,4 +174,16 @@ export const htmlSims = [
     syllabusRef: 'University, Mechanics',
     approach: 'Differentiate position vectors, control circular motion with tangential and centripetal acceleration, and navigate a boat across a current.',
     activityPrompt: 'Play all rounds, then explain why total acceleration in circular motion is not just v²/r when speed changes.', tags: ['University', 'Mechanics', 'vector kinematics', 'circular motion', 'relative velocity'] },
+  { ...compartment, id: 'x1-compartment-poly', title: 'Tank and Decay Lab', level: 'Poly', topic: 'First-order systems: tank levels, decay and rate laws', symbol: '🛢️', height: 1504,
+    syllabusRef: 'Poly engineering science: first-order systems, tank level, radioactive decay and reaction order (generic)',
+    approach: 'Adjust inflow, resistance and rate constants so tank levels, activity and concentration curves hit their targets as they settle exponentially.',
+    activityPrompt: 'Play all rounds, then explain why a first-order system covers about 63% of its change in one time constant.', tags: ['compartment models', 'time constant', 'radioactive decay', 'rate laws'] },
+  { ...compartment, id: 'x1-compartment-u1', title: 'Reactor and Rate Lab', level: 'University', topic: 'Integrated rate laws, Arrhenius and ideal reactors', symbol: '⚗️', height: 1697,
+    syllabusRef: 'University, Reaction engineering',
+    approach: 'Fit integrated rate laws to concentration data, read activation energy from an Arrhenius plot, then size CSTR and PFR residence times for a target conversion.',
+    activityPrompt: 'Play all rounds, then explain why an ideal PFR beats an ideal CSTR at the same first-order kτ.', tags: ['University', 'Reaction engineering', 'Arrhenius', 'CSTR', 'PFR'] },
+  { ...compartment, id: 'x1-compartment-u2', title: 'Compartment Dynamics', level: 'University', topic: 'Transport, population and delayed-response models', symbol: '🦊', height: 1680,
+    syllabusRef: 'University, Process modelling',
+    approach: 'Tune well-mixed lake, logistic, predator–prey and first-order-plus-dead-time models, solved analytically and with RK4, to match target responses.',
+    activityPrompt: 'Play all rounds, then explain how the predator–prey phase plane shows the two populations cycling.', tags: ['University', 'Process modelling', 'RK4', 'Lotka–Volterra', 'FOPDT'] },
 ]
