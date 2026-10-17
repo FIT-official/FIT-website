@@ -1,0 +1,815 @@
+{
+ "tool": "optics",
+ "owner": "FIT Printers",
+ "version": "2026-10-17",
+ "tolerance": {
+  "rel": 1e-06,
+  "abs": 1e-09,
+  "note": "pass if |got-expected| <= rel*|expected| (abs when expected is 0); integers, booleans, strings, nulls, regimes and error objects exact (contract 1e-6 / 1e-9)"
+ },
+ "calc_module": "lib/sims/families/optics.calc.js (global FITCalcOptics, API_VERSION 1); each case calls FITCalcOptics.<op>(input)",
+ "levels": {
+  "1": "reflection",
+  "2": "snell",
+  "3": "critical_angle_tir",
+  "4": "thin_lens",
+  "5": "layered_instruments_lensmaker_two_lens"
+ },
+ "convention": "Angles in degrees, measured from the NORMAL; lengths in cm unless the field name says otherwise; refractive indices n >= 1 (n < 1 -> ConstraintViolation refractive_index_below_1, checked first); angle of incidence 0 <= theta <= 90 inclusive (else ConstraintViolation angle_out_of_range_0_90). THIN-LENS SIGN CONVENTION: REAL-IS-POSITIVE (per the contract): f > 0 converging, f < 0 diverging; u > 0 real object; v > 0 real image, v < 0 virtual; 1/f = 1/u + 1/v; m = -v/u (m < 0 inverted). Lensmaker radii use the CARTESIAN convention (R > 0 when the centre of curvature is on the outgoing side; flat face R = null), 1/f = (n_lens/n_medium - 1)(1/R1 - 1/R2), f returned in the real-is-positive sense. P in dioptres = 1/f with f in metres. Speed of light c = 3.00e8 m/s. Two lenses: u2 = d - v1 (may be negative: virtual object), m_total = m1 m2. Telescope: normal adjustment, M = -f_obj/f_eye (negative = inverted image). Microscope: standard approximation M = -(L/f_obj)(D/f_eye). Magnifier and microscope near point D default to 25 cm (ruling 19:41). TIR test (ruling 19:41): TIR iff n1 sin(theta1) - n2 > 1e-9 (absolute), so theta1 = C is not TIR. two_lens with u = f1 (within 1e-9) -> RESULT {v1_cm: null, u2_cm: null, v2_cm: f2_cm, m_total: null, at_infinity: true}; all other two_lens results carry at_infinity: false. Regimes are RESULTS (rulings 16:44, 17:46, 19:31): TIR -> {refraction_deg: null, tir: true, critical_deg}; incidence exactly at C -> refraction_deg 90, tir false; object at F -> {v_cm, m, real, upright: null, at_infinity: true}. Errors (17:46): schema classes only, contract reason codes in expected.reason, error object = error/reason only. 'level' (1-5, see 'levels') is an informational tag.",
+ "oracle": "Hand formulas from Hecht, Optics; Young and Freedman, University Physics; Pedrotti, Introduction to Optics. Recomputed in _build_optics_kats.py by (A) plain-float textbook formulas and (B) 40-digit mpmath with different formulations (vector Snell, Newtonian x x' = f^2, ABCD ray-transfer matrices, surface-power lensmaker); never the module under test.",
+ "cases": [
+  {
+   "id": "opt-001",
+   "desc": "Law of reflection, 30 deg",
+   "op": "reflect",
+   "input": {
+    "incidence_deg": 30
+   },
+   "expected": {
+    "reflection_deg": 30.0
+   },
+   "edge": false,
+   "level": 1,
+   "hand_check": "theta_r = theta_i = 30 deg (angles from the normal). Hecht, Optics (5th ed.), law of reflection.",
+   "sim_hook": "FITCalcOptics.reflect"
+  },
+  {
+   "id": "opt-002",
+   "desc": "Normal incidence reflects straight back",
+   "op": "reflect",
+   "input": {
+    "incidence_deg": 0
+   },
+   "expected": {
+    "reflection_deg": 0.0
+   },
+   "edge": true,
+   "level": 1,
+   "hand_check": "Boundary 0 deg: theta_r = 0. Hecht, Optics (5th ed.).",
+   "sim_hook": "FITCalcOptics.reflect"
+  },
+  {
+   "id": "opt-003",
+   "desc": "Grazing incidence 90 deg (upper bound, inclusive)",
+   "op": "reflect",
+   "input": {
+    "incidence_deg": 90
+   },
+   "expected": {
+    "reflection_deg": 90.0
+   },
+   "edge": true,
+   "level": 1,
+   "hand_check": "0 <= theta <= 90 is inclusive, so 90 is valid: theta_r = 90. Hecht, Optics (5th ed.).",
+   "sim_hook": "FITCalcOptics.reflect"
+  },
+  {
+   "id": "opt-004",
+   "desc": "Angle of incidence above 90 deg",
+   "op": "reflect",
+   "input": {
+    "incidence_deg": 95
+   },
+   "expected": {
+    "error": "ConstraintViolation",
+    "reason": "angle_out_of_range_0_90"
+   },
+   "edge": true,
+   "level": 1,
+   "hand_check": "95 > 90 violates the shared 0-90 convention -> ConstraintViolation, reason angle_out_of_range_0_90 (contract code).",
+   "sim_hook": "FITCalcOptics.reflect"
+  },
+  {
+   "id": "opt-005",
+   "desc": "Negative angle of incidence",
+   "op": "reflect",
+   "input": {
+    "incidence_deg": -10
+   },
+   "expected": {
+    "error": "ConstraintViolation",
+    "reason": "angle_out_of_range_0_90"
+   },
+   "edge": true,
+   "level": 1,
+   "hand_check": "-10 < 0 -> ConstraintViolation, reason angle_out_of_range_0_90.",
+   "sim_hook": "FITCalcOptics.reflect"
+  },
+  {
+   "id": "opt-006",
+   "desc": "Air to glass, 30 deg",
+   "op": "refract",
+   "input": {
+    "n1": 1.0,
+    "n2": 1.5,
+    "incidence_deg": 30
+   },
+   "expected": {
+    "refraction_deg": 19.4712206344907,
+    "tir": false,
+    "critical_deg": null
+   },
+   "edge": false,
+   "level": 2,
+   "hand_check": "sin r = 1.0 sin30/1.5 = 1/3; r = 19.4712 deg. n1 <= n2 so critical_deg null, tir false. Hecht, Optics (5th ed.), Snell's law.",
+   "sim_hook": "FITCalcOptics.refract"
+  },
+  {
+   "id": "opt-007",
+   "desc": "Air to water, 45 deg",
+   "op": "refract",
+   "input": {
+    "n1": 1.0,
+    "n2": 1.33,
+    "incidence_deg": 45
+   },
+   "expected": {
+    "refraction_deg": 32.1176312779912,
+    "tir": false,
+    "critical_deg": null
+   },
+   "edge": false,
+   "level": 2,
+   "hand_check": "sin r = sin45/1.33 = 0.531659; r = 32.1176 deg. Young and Freedman, University Physics (15th ed.), refraction.",
+   "sim_hook": "FITCalcOptics.refract"
+  },
+  {
+   "id": "opt-008",
+   "desc": "Glass to air below the critical angle, 30 deg",
+   "op": "refract",
+   "input": {
+    "n1": 1.5,
+    "n2": 1.0,
+    "incidence_deg": 30
+   },
+   "expected": {
+    "refraction_deg": 48.5903778907291,
+    "tir": false,
+    "critical_deg": 41.8103148957786
+   },
+   "edge": false,
+   "level": 2,
+   "hand_check": "sin r = 1.5 sin30 = 0.75; r = 48.5904 deg; C = asin(1/1.5) = 41.8103 deg reported because n1 > n2. Hecht, Optics (5th ed.).",
+   "sim_hook": "FITCalcOptics.refract"
+  },
+  {
+   "id": "opt-009",
+   "desc": "Normal incidence passes undeviated",
+   "op": "refract",
+   "input": {
+    "n1": 1.0,
+    "n2": 1.5,
+    "incidence_deg": 0
+   },
+   "expected": {
+    "refraction_deg": 0.0,
+    "tir": false,
+    "critical_deg": null
+   },
+   "edge": true,
+   "level": 2,
+   "hand_check": "sin r = 0 -> r = 0. Hecht, Optics (5th ed.).",
+   "sim_hook": "FITCalcOptics.refract"
+  },
+  {
+   "id": "opt-010",
+   "desc": "Refractive index from i and r (light from air)",
+   "op": "refractive_index",
+   "input": {
+    "incidence_deg": 40,
+    "refraction_deg": 25
+   },
+   "expected": {
+    "n": 1.5209650596711
+   },
+   "edge": false,
+   "level": 2,
+   "hand_check": "n = sin40/sin25 = 0.642788/0.422618 = 1.52097. Young and Freedman, University Physics (15th ed.).",
+   "sim_hook": "FITCalcOptics.refractive_index"
+  },
+  {
+   "id": "opt-011",
+   "desc": "Refractive index, normal incidence 0/0",
+   "op": "refractive_index",
+   "input": {
+    "incidence_deg": 0,
+    "refraction_deg": 0
+   },
+   "expected": {
+    "error": "MathError",
+    "reason": "indeterminate_normal_incidence"
+   },
+   "edge": true,
+   "level": 2,
+   "hand_check": "sin0/sin0 = 0/0 is indeterminate -> MathError, reason indeterminate_normal_incidence (contract code).",
+   "sim_hook": "FITCalcOptics.refractive_index"
+  },
+  {
+   "id": "opt-012",
+   "desc": "Refractive index, r = 0 with i > 0",
+   "op": "refractive_index",
+   "input": {
+    "incidence_deg": 30,
+    "refraction_deg": 0
+   },
+   "expected": {
+    "error": "MathError",
+    "reason": "division_by_zero"
+   },
+   "edge": true,
+   "level": 2,
+   "hand_check": "sin30/sin0 = 0.5/0 -> MathError, reason division_by_zero (contract code).",
+   "sim_hook": "FITCalcOptics.refractive_index"
+  },
+  {
+   "id": "opt-013",
+   "desc": "Speed of light in glass",
+   "op": "speed_in_medium",
+   "input": {
+    "n": 1.5
+   },
+   "expected": {
+    "v_m_s": 200000000.0
+   },
+   "edge": false,
+   "level": 2,
+   "hand_check": "v = c/n = 3.00e8/1.5 = 2.00e8 m/s (contract fixes c = 3.00e8 m/s). Young and Freedman, University Physics (15th ed.).",
+   "sim_hook": "FITCalcOptics.speed_in_medium"
+  },
+  {
+   "id": "opt-014",
+   "desc": "Refractive index below 1",
+   "op": "refract",
+   "input": {
+    "n1": 0.9,
+    "n2": 1.5,
+    "incidence_deg": 30
+   },
+   "expected": {
+    "error": "ConstraintViolation",
+    "reason": "refractive_index_below_1"
+   },
+   "edge": true,
+   "level": 2,
+   "hand_check": "n1 = 0.9 < 1 -> ConstraintViolation, reason refractive_index_below_1 (contract code).",
+   "sim_hook": "FITCalcOptics.refract"
+  },
+  {
+   "id": "opt-015",
+   "desc": "Critical angle, glass to air",
+   "op": "critical_angle",
+   "input": {
+    "n1": 1.5,
+    "n2": 1.0
+   },
+   "expected": {
+    "critical_deg": 41.8103148957786
+   },
+   "edge": false,
+   "level": 3,
+   "hand_check": "sin C = n2/n1 = 2/3; C = 41.8103 deg. Hecht, Optics (5th ed.), total internal reflection.",
+   "sim_hook": "FITCalcOptics.critical_angle"
+  },
+  {
+   "id": "opt-016",
+   "desc": "Critical angle, glass to water",
+   "op": "critical_angle",
+   "input": {
+    "n1": 1.5,
+    "n2": 1.33
+   },
+   "expected": {
+    "critical_deg": 62.4573248455412
+   },
+   "edge": false,
+   "level": 3,
+   "hand_check": "sin C = 1.33/1.5 = 0.886667; C = 62.4573 deg. Pedrotti, Pedrotti and Pedrotti, Introduction to Optics.",
+   "sim_hook": "FITCalcOptics.critical_angle"
+  },
+  {
+   "id": "opt-017",
+   "desc": "No critical angle when n1 < n2",
+   "op": "critical_angle",
+   "input": {
+    "n1": 1.0,
+    "n2": 1.5
+   },
+   "expected": {
+    "error": "MathError",
+    "reason": "no_critical_angle"
+   },
+   "edge": true,
+   "level": 3,
+   "hand_check": "sin C = 1.5 > 1 has no solution -> MathError, reason no_critical_angle (contract code).",
+   "sim_hook": "FITCalcOptics.critical_angle"
+  },
+  {
+   "id": "opt-018",
+   "desc": "TIR at 60 deg, glass to air (regime result)",
+   "op": "refract",
+   "input": {
+    "n1": 1.5,
+    "n2": 1.0,
+    "incidence_deg": 60
+   },
+   "expected": {
+    "refraction_deg": null,
+    "tir": true,
+    "critical_deg": 41.8103148957786
+   },
+   "edge": true,
+   "level": 3,
+   "hand_check": "1.5 sin60 = 1.299 > 1 and 60 > C: total internal reflection is a RESULT (rulings 16:44/19:31 pattern), refraction_deg null, tir true. Hecht, Optics (5th ed.).",
+   "sim_hook": "FITCalcOptics.refract"
+  },
+  {
+   "id": "opt-019",
+   "desc": "Incidence exactly at the critical angle (n1 = 2, C = 30 deg)",
+   "op": "refract",
+   "input": {
+    "n1": 2.0,
+    "n2": 1.0,
+    "incidence_deg": 30
+   },
+   "expected": {
+    "refraction_deg": 90.0,
+    "tir": false,
+    "critical_deg": 30.0
+   },
+   "edge": true,
+   "level": 3,
+   "hand_check": "sin C = 1/2, C = 30 deg exactly; contract: theta1 = C gives refraction_deg 90, tir false. In binary floats 2 sin30 = 0.9999999999999999, so asin gives 89.9999991 deg (rel 9e-9, inside 1e-6); a module must not flag TIR from a 1-ulp difference.",
+   "sim_hook": "FITCalcOptics.refract"
+  },
+  {
+   "id": "opt-020",
+   "desc": "Grazing 90 deg from glass to air is TIR",
+   "op": "refract",
+   "input": {
+    "n1": 1.5,
+    "n2": 1.0,
+    "incidence_deg": 90
+   },
+   "expected": {
+    "refraction_deg": null,
+    "tir": true,
+    "critical_deg": 41.8103148957786
+   },
+   "edge": true,
+   "level": 3,
+   "hand_check": "90 > C = 41.81 deg -> TIR regime result. Hecht, Optics (5th ed.).",
+   "sim_hook": "FITCalcOptics.refract"
+  },
+  {
+   "id": "opt-021",
+   "desc": "Diamond to air, below critical",
+   "op": "refract",
+   "input": {
+    "n1": 2.42,
+    "n2": 1.0,
+    "incidence_deg": 20
+   },
+   "expected": {
+    "refraction_deg": 55.8620433075359,
+    "tir": false,
+    "critical_deg": 24.4074689179866
+   },
+   "edge": false,
+   "level": 3,
+   "hand_check": "sin r = 2.42 sin20 = 0.827693; r = 55.8620 deg; C = asin(1/2.42) = 24.4075 deg. Young and Freedman, University Physics (15th ed.).",
+   "sim_hook": "FITCalcOptics.refract"
+  },
+  {
+   "id": "opt-022",
+   "desc": "Converging lens, object beyond 2F",
+   "op": "thin_lens",
+   "input": {
+    "f_cm": 10,
+    "u_cm": 30
+   },
+   "expected": {
+    "v_cm": 15.0,
+    "m": -0.5,
+    "real": true,
+    "upright": false,
+    "at_infinity": false
+   },
+   "edge": false,
+   "level": 4,
+   "hand_check": "1/v = 1/10 - 1/30 = 1/15 -> v = 15 cm (real); m = -v/u = -0.5 (inverted, diminished). Real-is-positive. Young and Freedman, University Physics (15th ed.), thin lenses.",
+   "sim_hook": "FITCalcOptics.thin_lens"
+  },
+  {
+   "id": "opt-023",
+   "desc": "Converging lens, object at 2F",
+   "op": "thin_lens",
+   "input": {
+    "f_cm": 10,
+    "u_cm": 20
+   },
+   "expected": {
+    "v_cm": 20.0,
+    "m": -1.0,
+    "real": true,
+    "upright": false,
+    "at_infinity": false
+   },
+   "edge": false,
+   "level": 4,
+   "hand_check": "1/v = 1/10 - 1/20 = 1/20 -> v = 20 cm; m = -1 (same size, inverted). Young and Freedman, University Physics (15th ed.).",
+   "sim_hook": "FITCalcOptics.thin_lens"
+  },
+  {
+   "id": "opt-024",
+   "desc": "Converging lens, object inside F (magnifier)",
+   "op": "thin_lens",
+   "input": {
+    "f_cm": 10,
+    "u_cm": 5
+   },
+   "expected": {
+    "v_cm": -10.0,
+    "m": 2.0,
+    "real": false,
+    "upright": true,
+    "at_infinity": false
+   },
+   "edge": false,
+   "level": 4,
+   "hand_check": "1/v = 1/10 - 1/5 = -1/10 -> v = -10 cm (virtual); m = -(-10)/5 = +2 (upright, magnified). Young and Freedman, University Physics (15th ed.).",
+   "sim_hook": "FITCalcOptics.thin_lens"
+  },
+  {
+   "id": "opt-025",
+   "desc": "Diverging lens",
+   "op": "thin_lens",
+   "input": {
+    "f_cm": -10,
+    "u_cm": 20
+   },
+   "expected": {
+    "v_cm": -6.66666666666667,
+    "m": 0.333333333333333,
+    "real": false,
+    "upright": true,
+    "at_infinity": false
+   },
+   "edge": false,
+   "level": 4,
+   "hand_check": "1/v = -1/10 - 1/20 = -3/20 -> v = -6.6667 cm (virtual); m = +1/3 (upright, diminished). Hecht, Optics (5th ed.).",
+   "sim_hook": "FITCalcOptics.thin_lens"
+  },
+  {
+   "id": "opt-026",
+   "desc": "Object at the focal point (regime result)",
+   "op": "thin_lens",
+   "input": {
+    "f_cm": 10,
+    "u_cm": 10
+   },
+   "expected": {
+    "v_cm": null,
+    "m": null,
+    "real": null,
+    "upright": null,
+    "at_infinity": true
+   },
+   "edge": true,
+   "level": 4,
+   "hand_check": "u = f: 1/v = 0, image at infinity. Contract makes this a RESULT (at_infinity true, other fields null), not MathError.",
+   "sim_hook": "FITCalcOptics.thin_lens"
+  },
+  {
+   "id": "opt-027",
+   "desc": "Object distance zero",
+   "op": "thin_lens",
+   "input": {
+    "f_cm": 10,
+    "u_cm": 0
+   },
+   "expected": {
+    "error": "ConstraintViolation",
+    "reason": "object_distance_not_positive"
+   },
+   "edge": true,
+   "level": 4,
+   "hand_check": "u <= 0 -> ConstraintViolation, reason object_distance_not_positive (contract code).",
+   "sim_hook": "FITCalcOptics.thin_lens"
+  },
+  {
+   "id": "opt-028",
+   "desc": "Zero focal length",
+   "op": "thin_lens",
+   "input": {
+    "f_cm": 0,
+    "u_cm": 20
+   },
+   "expected": {
+    "error": "MathError",
+    "reason": "zero_focal_length"
+   },
+   "edge": true,
+   "level": 4,
+   "hand_check": "1/f with f = 0 is undefined -> MathError, reason zero_focal_length (contract code).",
+   "sim_hook": "FITCalcOptics.thin_lens"
+  },
+  {
+   "id": "opt-029",
+   "desc": "Power of a 50 cm converging lens",
+   "op": "lens_power",
+   "input": {
+    "f_cm": 50
+   },
+   "expected": {
+    "P_dioptre": 2.0
+   },
+   "edge": false,
+   "level": 4,
+   "hand_check": "P = 1/(0.50 m) = +2.0 D. Young and Freedman, University Physics (15th ed.).",
+   "sim_hook": "FITCalcOptics.lens_power"
+  },
+  {
+   "id": "opt-030",
+   "desc": "Power of a -25 cm diverging lens",
+   "op": "lens_power",
+   "input": {
+    "f_cm": -25
+   },
+   "expected": {
+    "P_dioptre": -4.0
+   },
+   "edge": false,
+   "level": 4,
+   "hand_check": "P = 1/(-0.25 m) = -4.0 D. Young and Freedman, University Physics (15th ed.).",
+   "sim_hook": "FITCalcOptics.lens_power"
+  },
+  {
+   "id": "opt-031",
+   "desc": "Lensmaker: symmetric biconvex in air",
+   "op": "lensmaker",
+   "input": {
+    "n_lens": 1.5,
+    "n_medium": 1.0,
+    "R1_cm": 20,
+    "R2_cm": -20
+   },
+   "expected": {
+    "f_cm": 20.0,
+    "P_dioptre": 5.0
+   },
+   "edge": false,
+   "level": 5,
+   "hand_check": "1/f = (1.5-1)(1/20 + 1/20) = 0.05 -> f = 20 cm, P = 5 D. Cartesian radii (R2 < 0 for a biconvex lens). Hecht, Optics (5th ed.), lensmaker's formula.",
+   "sim_hook": "FITCalcOptics.lensmaker"
+  },
+  {
+   "id": "opt-032",
+   "desc": "Lensmaker: plano-convex, flat face R2 = null",
+   "op": "lensmaker",
+   "input": {
+    "n_lens": 1.5,
+    "n_medium": 1.0,
+    "R1_cm": 15,
+    "R2_cm": null
+   },
+   "expected": {
+    "f_cm": 30.0,
+    "P_dioptre": 3.33333333333333
+   },
+   "edge": true,
+   "level": 5,
+   "hand_check": "Flat face: 1/R2 = 0; 1/f = 0.5/15 -> f = 30 cm, P = 3.333 D. Hecht, Optics (5th ed.).",
+   "sim_hook": "FITCalcOptics.lensmaker"
+  },
+  {
+   "id": "opt-033",
+   "desc": "Lensmaker: biconcave in air",
+   "op": "lensmaker",
+   "input": {
+    "n_lens": 1.5,
+    "n_medium": 1.0,
+    "R1_cm": -20,
+    "R2_cm": 20
+   },
+   "expected": {
+    "f_cm": -20.0,
+    "P_dioptre": -5.0
+   },
+   "edge": false,
+   "level": 5,
+   "hand_check": "1/f = 0.5(-1/20 - 1/20) = -0.05 -> f = -20 cm (diverging). Hecht, Optics (5th ed.).",
+   "sim_hook": "FITCalcOptics.lensmaker"
+  },
+  {
+   "id": "opt-034",
+   "desc": "Layered media: same glass lens immersed in water",
+   "op": "lensmaker",
+   "input": {
+    "n_lens": 1.5,
+    "n_medium": 1.33,
+    "R1_cm": 20,
+    "R2_cm": -20
+   },
+   "expected": {
+    "f_cm": 78.2352941176471,
+    "P_dioptre": 1.2781954887218
+   },
+   "edge": false,
+   "level": 5,
+   "hand_check": "1/f = (1.5/1.33 - 1)(0.1) = 0.0127820 -> f = 78.235 cm, P = 1.2782 D (vs 20 cm in air). Pedrotti, Pedrotti and Pedrotti, Introduction to Optics, lens in a medium.",
+   "sim_hook": "FITCalcOptics.lensmaker"
+  },
+  {
+   "id": "opt-035",
+   "desc": "Lensmaker: lens index equals medium index",
+   "op": "lensmaker",
+   "input": {
+    "n_lens": 1.33,
+    "n_medium": 1.33,
+    "R1_cm": 20,
+    "R2_cm": -20
+   },
+   "expected": {
+    "error": "MathError",
+    "reason": "infinite_focal_length"
+   },
+   "edge": true,
+   "level": 5,
+   "hand_check": "Bracket (n_lens/n_medium - 1) = 0 -> 1/f = 0 -> MathError, reason infinite_focal_length (contract code).",
+   "sim_hook": "FITCalcOptics.lensmaker"
+  },
+  {
+   "id": "opt-036",
+   "desc": "Two lenses: real intermediate image",
+   "op": "two_lens",
+   "input": {
+    "f1_cm": 10,
+    "f2_cm": 15,
+    "d_cm": 40,
+    "u_cm": 20
+   },
+   "expected": {
+    "v1_cm": 20.0,
+    "u2_cm": 20.0,
+    "v2_cm": 60.0,
+    "m_total": 3.0,
+    "at_infinity": false
+   },
+   "edge": false,
+   "level": 5,
+   "hand_check": "v1 = 20; u2 = 40 - 20 = 20; 1/v2 = 1/15 - 1/20 -> v2 = 60; m = (-20/20)(-60/20) = 3. Young and Freedman, University Physics (15th ed.), lens combinations.",
+   "sim_hook": "FITCalcOptics.two_lens"
+  },
+  {
+   "id": "opt-037",
+   "desc": "Two lenses: virtual object for the second lens (u2 < 0)",
+   "op": "two_lens",
+   "input": {
+    "f1_cm": 10,
+    "f2_cm": 20,
+    "d_cm": 5,
+    "u_cm": 30
+   },
+   "expected": {
+    "v1_cm": 15.0,
+    "u2_cm": -10.0,
+    "v2_cm": 6.66666666666667,
+    "m_total": -0.333333333333333,
+    "at_infinity": false
+   },
+   "edge": true,
+   "level": 5,
+   "hand_check": "v1 = 15; u2 = 5 - 15 = -10 (virtual object, allowed); 1/v2 = 1/20 + 1/10 -> v2 = 6.667; m = (-15/30)(-6.667/-10) = -1/3. Hecht, Optics (5th ed.).",
+   "sim_hook": "FITCalcOptics.two_lens"
+  },
+  {
+   "id": "opt-038",
+   "desc": "Simple magnifier, near point 25 cm",
+   "op": "magnifier",
+   "input": {
+    "f_cm": 5,
+    "near_point_cm": 25
+   },
+   "expected": {
+    "M_relaxed": 5.0,
+    "M_near": 6.0
+   },
+   "edge": false,
+   "level": 5,
+   "hand_check": "M = D/f = 5 (relaxed eye); M = 1 + D/f = 6 (image at near point). Young and Freedman, University Physics (15th ed.), the magnifier.",
+   "sim_hook": "FITCalcOptics.magnifier"
+  },
+  {
+   "id": "opt-039",
+   "desc": "Simple magnifier, near point omitted (default 25 cm)",
+   "op": "magnifier",
+   "input": {
+    "f_cm": 10
+   },
+   "expected": {
+    "M_relaxed": 2.5,
+    "M_near": 3.5
+   },
+   "edge": true,
+   "level": 5,
+   "hand_check": "D defaults to 25 cm when near_point_cm is omitted: 25/10 = 2.5, 1 + 2.5 = 3.5.",
+   "sim_hook": "FITCalcOptics.magnifier"
+  },
+  {
+   "id": "opt-040",
+   "desc": "Astronomical telescope, normal adjustment",
+   "op": "telescope",
+   "input": {
+    "f_obj_cm": 100,
+    "f_eye_cm": 5
+   },
+   "expected": {
+    "M_angular": -20.0,
+    "length_cm": 105.0
+   },
+   "edge": false,
+   "level": 5,
+   "hand_check": "M = -f_obj/f_eye = -20 (inverted); length = 100 + 5 = 105 cm. Young and Freedman, University Physics (15th ed.), telescopes.",
+   "sim_hook": "FITCalcOptics.telescope"
+  },
+  {
+   "id": "opt-041",
+   "desc": "Compound microscope (standard approximation)",
+   "op": "microscope",
+   "input": {
+    "f_obj_cm": 1.0,
+    "f_eye_cm": 2.5,
+    "tube_cm": 16,
+    "near_point_cm": 25
+   },
+   "expected": {
+    "M_total": -160.0
+   },
+   "edge": false,
+   "level": 5,
+   "hand_check": "M = -(L/f_obj)(D/f_eye) = -(16/1)(25/2.5) = -160. Young and Freedman, University Physics (15th ed.), microscopes.",
+   "sim_hook": "FITCalcOptics.microscope"
+  },
+  {
+   "id": "opt-042",
+   "desc": "Two lenses: object at lens 1's focus, v1 at infinity (regime result)",
+   "op": "two_lens",
+   "input": {
+    "f1_cm": 10,
+    "f2_cm": 15,
+    "d_cm": 40,
+    "u_cm": 10
+   },
+   "expected": {
+    "v1_cm": null,
+    "u2_cm": null,
+    "v2_cm": 15.0,
+    "m_total": null,
+    "at_infinity": true
+   },
+   "edge": true,
+   "level": 5,
+   "hand_check": "u = f1 (within 1e-9) -> v1 = infinity; parallel rays reach lens 2 and focus at v2 = f2 = 15 cm, independent of d. Ruling 19:41: RESULT {v1_cm, u2_cm, m_total: null, v2_cm: f2_cm, at_infinity: true}, not an error. Hecht, Optics (5th ed.).",
+   "sim_hook": "FITCalcOptics.two_lens"
+  },
+  {
+   "id": "opt-043",
+   "desc": "Two lenses: object at lens 1's focus, diverging second lens",
+   "op": "two_lens",
+   "input": {
+    "f1_cm": 20,
+    "f2_cm": -10,
+    "d_cm": 5,
+    "u_cm": 20
+   },
+   "expected": {
+    "v1_cm": null,
+    "u2_cm": null,
+    "v2_cm": -10.0,
+    "m_total": null,
+    "at_infinity": true
+   },
+   "edge": true,
+   "level": 5,
+   "hand_check": "u = f1 -> collimated beam into a diverging lens: virtual image at v2 = f2 = -10 cm (ruling 19:41 regime result).",
+   "sim_hook": "FITCalcOptics.two_lens"
+  },
+  {
+   "id": "opt-044",
+   "desc": "Compound microscope, near point omitted (default 25 cm)",
+   "op": "microscope",
+   "input": {
+    "f_obj_cm": 0.5,
+    "f_eye_cm": 2.5,
+    "tube_cm": 16
+   },
+   "expected": {
+    "M_total": -320.0
+   },
+   "edge": true,
+   "level": 5,
+   "hand_check": "Ruling 19:41: near_point_cm defaults to 25 cm. M = -(16/0.5)(25/2.5) = -(32)(10) = -320.",
+   "sim_hook": "FITCalcOptics.microscope"
+  }
+ ]
+}

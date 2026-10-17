@@ -1,0 +1,2682 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Instrument Builder — Poly Engineering</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input,.tap-part{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+button{font:inherit;min-height:46px;border:2px solid #111;border-radius:var(--r-pill);background:white;color:#111;font-weight:800;cursor:pointer;padding:9px 15px;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:default}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-poly);cursor:pointer}
+input[type=number]{font-size:16px;min-height:44px;border:2px solid #111;border-radius:12px;padding:8px;width:95px}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(1.8rem,5vw,2.7rem);font-weight:800;line-height:1.13;margin-bottom:8px}
+h2{font-size:1.19rem;font-weight:800;margin-bottom:11px}
+h3{font-size:1rem;font-weight:800;margin-bottom:8px}
+main{max-width:1310px;margin:auto;padding:16px 13px 30px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:start;gap:14px;margin-bottom:20px}
+.badge{display:inline-block;border:2px solid #111;border-radius:999px;background:var(--lvl-poly);color:var(--lvl-poly-on);padding:5px 12px;text-transform:uppercase;font-size:12px;font-weight:800;margin-bottom:12px}
+.hud{display:flex;gap:8px;flex-wrap:wrap}
+.hud span{border:2px solid #111;border-radius:999px;padding:9px 12px;background:var(--lvl-poly-tint);font-size:14px;font-weight:800}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:19px;align-items:start}
+.card{background:#fff;border:2px solid #111;border-radius:24px;padding:16px;box-shadow:var(--sh-2);min-width:0}
+.stage{background:var(--lvl-poly-tint);border:2px solid #111;border-radius:32px;box-shadow:var(--sh-3);padding:13px;min-width:0}
+svg{display:block;width:100%;height:auto;max-width:100%}
+#scene{background:#fff;border:2px solid #111;border-radius:16px}
+.question{background:var(--lvl-poly-tint);border:2px solid #111;border-radius:16px;padding:13px;font-weight:800;font-size:1.04rem;margin-bottom:14px}
+.note{color:var(--fit-ink-2);font-size:13px;font-weight:600;margin:9px 0 0}
+.field{margin:13px 0 17px}
+.field label{display:block;font-weight:800;margin-bottom:7px}
+.choices{display:flex;flex-wrap:wrap;gap:8px}
+.choices button{font-size:14px;padding:9px 12px;min-width:65px}
+.choices button[aria-pressed=true]{background:var(--lvl-poly);box-shadow:var(--sh-2)}
+.stepper{display:flex;gap:6px;align-items:center}
+.stepper button{width:46px;height:48px;padding:0;flex-shrink:0;font-size:1.2rem}
+.stepper output{flex:1;text-align:center;min-width:61px;font-size:1.04rem;font-weight:800;font-variant-numeric:tabular-nums}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2);flex:1}
+.feedback{background:var(--fit-sunken);border:2px solid #111;border-radius:16px;min-height:65px;padding:13px;margin-top:14px;font-weight:600}
+.feedback.good{background:#DDF7E8}
+.feedback.bad{background:#FFE6E2}
+.feedback.info{background:#E2ECFD}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;font-weight:700;margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.swatch{display:inline-block;width:15px;height:6px;border:1px solid #111;border-radius:2px;background:#FF6B3D}
+.swatch.red{background:#D92D20}
+.swatch.blue{background:#1F66E5}
+.swatch.band{background:#FFE6DC;height:12px}
+details{border-top:2px solid var(--fit-line-soft);padding-top:11px;margin-top:17px}
+summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:800}
+.physics{font-size:14px;color:var(--fit-ink-2)}
+.physics p{margin-bottom:10px}
+.hidden{display:none!important}
+#ending{text-align:center;padding:30px 12px}
+.stars{font-size:clamp(3rem,12vw,5rem);color:#D39800;letter-spacing:5px}
+footer{text-align:center;color:#6B6B6B;font-size:12px;margin-top:28px}
+.metric-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.metric{background:var(--fit-sunken);border:2px solid #111;border-radius:12px;padding:10px}
+.metric strong{display:block;font-size:17px;font-variant-numeric:tabular-nums}
+.metric span{font-size:11px;font-weight:700;color:#3D3D3D}
+.tray-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:#3D3D3D}
+@media(min-width:900px){main{padding:26px}.layout{grid-template-columns:minmax(0,1.13fr) minmax(355px,.87fr)}.stage{padding:18px}.card{padding:20px}}
+@media(max-width:390px){main{padding:12px 9px 24px}.card{padding:12px}.stage{padding:9px}.stepper{gap:4px}.stepper button{width:43px;height:46px}.choices{gap:6px}.choices button{padding:9px 11px}}
+@media(prefers-reduced-motion:no-preference){button{transition:transform var(--dur-1) var(--ease-out),box-shadow var(--dur-1)}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div>
+<div class="badge">Poly · Engineering</div>
+<h1>Instrument Builder</h1>
+<p style="max-width:590px;margin-bottom:0">Select lenses, design simple optical instruments and solve corrective-lens challenges.</p>
+</div>
+<div class="hud">
+<span id="roundHud">Round 1/6</span>
+<span id="scoreHud">Score: 0</span>
+</div>
+</header>
+
+<div id="game" class="layout">
+<section>
+<div class="stage">
+<h2 id="sceneTitle">Instrument assembly bench</h2>
+<svg id="scene" viewBox="0 0 640 435" role="img" aria-label="Optical instrument with labelled lenses, focal points and light rays"></svg>
+<p id="sceneHelp" class="note">Select a lens from the tray and examine the light path.</p>
+<div class="metric-strip" aria-live="off">
+<div class="metric"><strong id="metric1">—</strong><span id="metricName1">Magnification</span></div>
+<div class="metric"><strong id="metric2">—</strong><span id="metricName2">Instrument length</span></div>
+</div>
+</div>
+
+<div class="card" style="margin-top:19px">
+<h3>Concept figure</h3>
+<svg id="concept" viewBox="0 0 440 135" role="img" aria-label="An objective lens and eyepiece forming an astronomical telescope">
+<rect x="2" y="2" width="436" height="131" rx="16" fill="#FFE6DC" stroke="#111" stroke-width="2"/>
+<path d="M12 67H425" stroke="#6B6B6B" stroke-width="2" stroke-dasharray="6 5"/>
+<path d="M126 17Q105 67 126 117Q147 67 126 17Z" fill="#F7BB9F" stroke="#111" stroke-width="3"/>
+<path d="M333 32Q317 67 333 103Q349 67 333 32Z" fill="#F7BB9F" stroke="#111" stroke-width="3"/>
+<path d="M18 23L126 23L333 87L420 66" fill="none" stroke="#1F66E5" stroke-width="3"/>
+<path d="M18 111L126 111L333 47L420 68" fill="none" stroke="#FF6B3D" stroke-width="3"/>
+<text x="126" y="130" text-anchor="middle" font-size="11" font-weight="800">Objective</text>
+<text x="333" y="123" text-anchor="middle" font-size="11" font-weight="800">Eyepiece</text>
+</svg>
+<p class="note">A telescope objective collects light; an eyepiece changes its angular size for the observer.</p>
+</div>
+</section>
+
+<aside>
+<div class="card">
+<h2 id="challengeTitle">Instrument challenge</h2>
+<p class="question" id="question"></p>
+<div id="controls"></div>
+<div class="actions">
+<button id="hintBtn" type="button">Hint (−50 max)</button>
+<button id="checkBtn" type="button" class="check">Check</button>
+<button id="nextBtn" type="button" class="hidden">Next round →</button>
+</div>
+<div id="feedback" class="feedback" role="status" aria-live="polite">Choose a component to begin.</div>
+<details>
+<summary>The physics</summary>
+<div class="physics">
+<p><strong>Real-is-positive lens convention:</strong> f &gt; 0 for a converging lens, f &lt; 0 for a diverging lens. Real objects have u &gt; 0. Real images have v &gt; 0 and virtual images have v &lt; 0. The thin-lens equation is 1/f = 1/u + 1/v, and m = −v/u.</p>
+<p><strong>Simple magnifier:</strong> Relaxed viewing M = D/f. Near-point viewing M = 1 + D/f, where D is the near point, normally 25 cm.</p>
+<p><strong>Astronomical telescope:</strong> At normal adjustment, M = −f_obj/f_eye, and length = f_obj + f_eye. Negative M indicates an inverted image. The objective and eyepiece are converging lenses.</p>
+<p><strong>Compound microscope:</strong> M ≈ −(L/f_obj)(D/f_eye), the standard approximation, with tube length L and near point D. This model assumes a suitable intermediate image and paraxial rays.</p>
+<p><strong>Corrective lenses:</strong> Lens power P = 1/f in metres, measured in dioptres (D). A negative lens corrects myopia for distant viewing by forming a virtual image at the eye's far point, under the spectacle-at-eye approximation.</p>
+<p><strong>Assumptions:</strong> Ideal thin lenses, paraxial rays, monochromatic light and negligible lens thickness. Lengths are in cm unless marked otherwise.</p>
+</div>
+</details>
+</div>
+
+<div class="card" style="margin-top:19px">
+<h2 id="plotTitle">Live magnification plot</h2>
+<svg id="plot" viewBox="0 0 450 300" role="img" aria-label="Angular magnification against eyepiece focal length in centimetres"></svg>
+<div class="legend">
+<span><i class="swatch"></i>Model curve</span>
+<span><i class="swatch red"></i>Selected lens</span>
+<span><i class="swatch band"></i>Target band</span>
+<span><i class="swatch blue"></i>Length limit</span>
+</div>
+<p id="plotNote" class="note">Magnification changes as the focal length is adjusted.</p>
+</div>
+</aside>
+</div>
+
+<section id="ending" class="card hidden">
+<h2>Instrument Builder completed!</h2>
+<div id="starDisplay" class="stars" aria-label="Stars earned">★★★</div>
+<p id="finalScore" style="font-size:1.4rem;font-weight:800"></p>
+<p id="endNote"></p>
+<button id="againBtn" class="check" type="button">Play again ↻</button>
+</section>
+<footer>Fix It Today</footer>
+</main>
+
+<script>
+/* FIT-CALC-BEGIN optics */
+const FITCalcOptics = (function () {
+  'use strict';
+
+  /*
+   * LIGHT AND OPTICS — PURE CALCULATION ENGINE
+   * API_VERSION: 1
+   *
+   * Angles are measured from the normal, in degrees.
+   * Lengths are in centimetres unless the field name says otherwise.
+   * Refractive indices must be at least 1.
+   * Speed of light in vacuum: 3.00e8 m/s.
+   *
+   * THIN-LENS SIGN CONVENTION — REAL IS POSITIVE
+   * f > 0: converging lens; f < 0: diverging lens.
+   * u > 0: real object; u < 0: virtual object.
+   * v > 0: real image; v < 0: virtual image.
+   * 1/f = 1/u + 1/v.
+   * m = -v/u; negative means inverted, positive upright.
+   *
+   * LENSMAKER CARTESIAN RADIUS CONVENTION
+   * Light travels from left to right.
+   * R > 0 when the centre of curvature lies on the outgoing side.
+   * R < 0 when it lies on the incoming side.
+   * A plane surface is represented by null.
+   *
+   * Models assume geometrical optics, ideal interfaces, thin lenses,
+   * paraxial rays where applicable, and monochromatic illumination
+   * unless dispersion is explicitly modelled by separate indices.
+   *
+   * Every API function accepts one plain object and returns one.
+   * Invalid calls return {error, reason}; errors are never thrown.
+   * No calculation returns NaN or Infinity.
+   */
+
+  const PI = Math.PI;
+  const C = 300000000;
+  const EPS = 1e-9;
+
+  function err(error, reason) {
+    return { error: error, reason: reason };
+  }
+
+  function number(x) {
+    return typeof x === 'number' && Number.isFinite(x);
+  }
+
+  function object(x) {
+    return x !== null &&
+      typeof x === 'object' &&
+      !Array.isArray(x);
+  }
+
+  function input(x) {
+    return object(x)
+      ? null
+      : err('ConstraintViolation', 'invalid_input');
+  }
+
+  function finiteFields(x, names) {
+    for (const name of names) {
+      if (!number(x[name])) {
+        return err('ConstraintViolation', 'invalid_number');
+      }
+    }
+    return null;
+  }
+
+  function positive(x, reason) {
+    return x > 0
+      ? null
+      : err('ConstraintViolation', reason);
+  }
+
+  function index(n) {
+    if (!number(n)) {
+      return err('ConstraintViolation', 'invalid_number');
+    }
+    return n >= 1
+      ? null
+      : err('ConstraintViolation', 'refractive_index_below_1');
+  }
+
+  function angle(a) {
+    if (!number(a)) {
+      return err('ConstraintViolation', 'invalid_number');
+    }
+    return a >= 0 && a <= 90
+      ? null
+      : err('ConstraintViolation', 'angle_out_of_range_0_90');
+  }
+
+  function deg(a) {
+    return a * 180 / PI;
+  }
+
+  function rad(a) {
+    return a * PI / 180;
+  }
+
+  function safeResult(fields) {
+    for (const value of Object.values(fields)) {
+      if (typeof value === 'number' && !Number.isFinite(value)) {
+        return err('MathError', 'non_finite_result');
+      }
+    }
+    return fields;
+  }
+
+  function nearZero(x, scale) {
+    return Math.abs(x) <= EPS * (scale || 1);
+  }
+
+  function nearPoint(x) {
+    if (x === undefined) return 25;
+    return x;
+  }
+
+  /*
+   * reflect({incidence_deg})
+   * Input: incidence angle, degrees from the normal, 0–90.
+   * Output: reflection_deg, degrees from the normal.
+   * Assumes a stationary, plane, specular mirror.
+   * Errors: invalid_input, invalid_number, angle_out_of_range_0_90.
+   *
+   * Hand check: incidence = 37°; reflection = 37°.
+   */
+  function reflect(x) {
+    const e = input(x) || angle(x.incidence_deg);
+    if (e) return e;
+    return { reflection_deg: x.incidence_deg };
+  }
+
+  /*
+   * refract({n1,n2,incidence_deg})
+   * Inputs: incident and transmitted refractive indices, angle in degrees.
+   * Outputs: refraction_deg (degrees or null), tir (boolean),
+   *          critical_deg (degrees or null).
+   * Assumes a plane interface and Snell's law.
+   * TIR is a valid result. Exact critical incidence gives 90°.
+   * Absolute tolerance on n1*sin(i)-n2: 1e-9.
+   * Errors: invalid_input, invalid_number,
+   *         refractive_index_below_1, angle_out_of_range_0_90.
+   *
+   * Hand check: n1=1, n2=1.5, i=30°.
+   * sin(r)=sin(30°)/1.5=1/3;
+   * r=19.4712206345°; critical_deg=null; tir=false.
+   */
+  function refract(x) {
+    const e = input(x) ||
+      index(x.n1) ||
+      index(x.n2) ||
+      angle(x.incidence_deg);
+    if (e) return e;
+
+    const critical = x.n1 > x.n2
+      ? deg(Math.asin(x.n2 / x.n1))
+      : null;
+
+    const numerator = x.n1 * Math.sin(rad(x.incidence_deg));
+    const difference = numerator - x.n2;
+
+    if (difference > EPS) {
+      return {
+        refraction_deg: null,
+        tir: true,
+        critical_deg: critical
+      };
+    }
+
+    if (Math.abs(difference) <= EPS) {
+      return {
+        refraction_deg: 90,
+        tir: false,
+        critical_deg: critical
+      };
+    }
+
+    const ratio = Math.max(0, Math.min(1, numerator / x.n2));
+
+    return safeResult({
+      refraction_deg: deg(Math.asin(ratio)),
+      tir: false,
+      critical_deg: critical
+    });
+  }
+
+  /*
+   * critical_angle({n1,n2})
+   * Inputs: indices, dimensionless, n1>n2>=1.
+   * Output: critical_deg, degrees from normal.
+   * Assumes propagation from optically denser to rarer material.
+   * Errors: refractive_index_below_1, invalid_number,
+   *         invalid_input; no_critical_angle (MathError).
+   *
+   * Hand check: n1=1.5, n2=1.
+   * sin(C)=2/3; C=41.8103148958°.
+   */
+  function critical_angle(x) {
+    const e = input(x) || index(x.n1) || index(x.n2);
+    if (e) return e;
+
+    if (x.n1 <= x.n2) {
+      return err('MathError', 'no_critical_angle');
+    }
+
+    return safeResult({
+      critical_deg: deg(Math.asin(x.n2 / x.n1))
+    });
+  }
+
+  /*
+   * refractive_index({incidence_deg,refraction_deg})
+   * Inputs: incident and refracted angles in degrees, each 0–90.
+   * Output: n, dimensionless.
+   * Assumes incidence from air (n_air=1), into material n>=1.
+   * Errors: division_by_zero, indeterminate_normal_incidence
+   *         (MathError), refractive_index_below_1,
+   *         invalid_input, invalid_number, angle_out_of_range_0_90.
+   *
+   * Hand check: i=30°, r=19.4712206345°.
+   * n=sin(30°)/sin(19.4712206345°)=1.5.
+   */
+  function refractive_index(x) {
+    const e = input(x) ||
+      angle(x.incidence_deg) ||
+      angle(x.refraction_deg);
+    if (e) return e;
+
+    if (x.refraction_deg === 0) {
+      return x.incidence_deg === 0
+        ? err('MathError', 'indeterminate_normal_incidence')
+        : err('MathError', 'division_by_zero');
+    }
+
+    const n = Math.sin(rad(x.incidence_deg)) /
+      Math.sin(rad(x.refraction_deg));
+
+    if (n < 1 - EPS) {
+      return err('ConstraintViolation', 'refractive_index_below_1');
+    }
+
+    return safeResult({ n: Math.max(1, n) });
+  }
+
+  /*
+   * speed_in_medium({n})
+   * Input: refractive index >=1, dimensionless.
+   * Output: v_m_s, metres per second.
+   * Assumes c=3.00e8 m/s.
+   * Errors: invalid_input, invalid_number, refractive_index_below_1.
+   *
+   * Hand check: n=1.5; v=300000000/1.5=200000000 m/s.
+   */
+  function speed_in_medium(x) {
+    const e = input(x) || index(x.n);
+    if (e) return e;
+    return safeResult({ v_m_s: C / x.n });
+  }
+
+  /*
+   * thin_lens({f_cm,u_cm})
+   * Inputs: signed focal length and signed object distance, cm.
+   * For this public operation the object must be real (u>0).
+   * Outputs: v_cm, m, real, upright, at_infinity.
+   * Infinity regime returns null for the undefined quantities.
+   * Assumes a thin paraxial lens in one surrounding medium.
+   * Errors: invalid_input, invalid_number,
+   *         object_distance_not_positive (ConstraintViolation),
+   *         zero_focal_length (MathError).
+   *
+   * Hand check: f=10 cm, u=30 cm.
+   * 1/v=1/10-1/30=1/15; v=15 cm;
+   * m=-15/30=-0.5, real=true, upright=false.
+   */
+  function thin_lens(x) {
+    const e = input(x) ||
+      finiteFields(x, ['f_cm', 'u_cm']);
+    if (e) return e;
+
+    if (x.u_cm <= 0) {
+      return err('ConstraintViolation', 'object_distance_not_positive');
+    }
+    if (x.f_cm === 0) {
+      return err('MathError', 'zero_focal_length');
+    }
+
+    const difference = x.u_cm - x.f_cm;
+
+    if (nearZero(difference, Math.max(1, Math.abs(x.f_cm)))) {
+      return {
+        v_cm: null,
+        m: null,
+        real: null,
+        upright: null,
+        at_infinity: true
+      };
+    }
+
+    const v = x.f_cm * x.u_cm / difference;
+    const m = -v / x.u_cm;
+
+    return safeResult({
+      v_cm: v,
+      m: m,
+      real: v > 0,
+      upright: m > 0,
+      at_infinity: false
+    });
+  }
+
+  /*
+   * lens_power({f_cm})
+   * Input: signed focal length, cm, nonzero.
+   * Output: P_dioptre, dioptres (D).
+   * Uses P=1/f_m=100/f_cm.
+   * Errors: zero_focal_length (MathError),
+   *         invalid_input, invalid_number.
+   *
+   * Hand check: f=-50 cm; P=-2 D.
+   */
+  function lens_power(x) {
+    const e = input(x) || finiteFields(x, ['f_cm']);
+    if (e) return e;
+
+    if (x.f_cm === 0) {
+      return err('MathError', 'zero_focal_length');
+    }
+
+    return safeResult({ P_dioptre: 100 / x.f_cm });
+  }
+
+  /*
+   * lensmaker({n_lens,n_medium,R1_cm,R2_cm})
+   * Inputs: refractive indices >=1 and Cartesian surface radii, cm.
+   * A radius null denotes a plane face (zero curvature).
+   * Output: f_cm and P_dioptre, signed focal length and power.
+   * Cartesian radius: positive when centre of curvature is on the
+   * outgoing side, negative when on the incoming side.
+   * Positive f denotes converging power (real-is-positive).
+   * Assumes a thin lens immersed in a uniform medium; ignores thickness.
+   * Errors: zero_radius (ConstraintViolation), invalid_number,
+   *         refractive_index_below_1, invalid_input,
+   *         infinite_focal_length (MathError).
+   *
+   * Hand check: n_lens=1.5, n_medium=1,
+   * R1=20 cm, R2=-20 cm.
+   * P in cm^-1=(1.5-1)(1/20+1/20)=0.05;
+   * f=20 cm; P_dioptre=5 D.
+   */
+  function lensmaker(x) {
+    const e = input(x) ||
+      index(x.n_lens) ||
+      index(x.n_medium);
+    if (e) return e;
+
+    for (const key of ['R1_cm', 'R2_cm']) {
+      if (x[key] !== null && !number(x[key])) {
+        return err('ConstraintViolation', 'invalid_number');
+      }
+      if (x[key] === 0) {
+        return err('ConstraintViolation', 'zero_radius');
+      }
+    }
+
+    const c1 = x.R1_cm === null ? 0 : 1 / x.R1_cm;
+    const c2 = x.R2_cm === null ? 0 : 1 / x.R2_cm;
+    const relative = x.n_lens / x.n_medium - 1;
+    const powerInverseCm = relative * (c1 - c2);
+
+    if (powerInverseCm === 0) {
+      return err('MathError', 'infinite_focal_length');
+    }
+
+    return safeResult({
+      f_cm: 1 / powerInverseCm,
+      P_dioptre: 100 * powerInverseCm
+    });
+  }
+
+  /*
+   * two_lens({f1_cm,f2_cm,d_cm,u_cm})
+   * Inputs: two signed focal lengths, separation and real-object
+   * distance, all in cm. f1,f2!=0, d>=0, u>0.
+   * Outputs: v1_cm, u2_cm, v2_cm, m_total, at_infinity.
+   * u2=d-v1 may be negative: a virtual object at lens 2.
+   * The final distance is measured from lens 2.
+   * If u=f1, lens 2 receives collimated rays and v2=f2.
+   * If u2=f2, final image is at infinity: v2,m_total=null.
+   * Assumes exactly two thin paraxial lenses in one medium.
+   * Errors: zero_focal_length, zero_intermediate_object_distance
+   *         (MathError), invalid_input, invalid_number,
+   *         object_distance_not_positive, negative_separation
+   *         (ConstraintViolation), element_not_supported
+   *         (NotSupported for an explicit unsupported element).
+   *
+   * Hand check: f1=10, f2=20, d=40, u=30 cm.
+   * v1=15; u2=25; v2=100;
+   * m1=-15/30=-0.5; m2=-100/25=-4;
+   * m_total=2.
+   */
+  function two_lens(x) {
+    const e = input(x) ||
+      finiteFields(x, ['f1_cm', 'f2_cm', 'd_cm', 'u_cm']);
+    if (e) return e;
+
+    if (x.element_kind !== undefined &&
+        x.element_kind !== 'thin_lens') {
+      return err('NotSupported', 'element_not_supported');
+    }
+    if (x.element_count !== undefined && x.element_count !== 2) {
+      return err('ConstraintViolation', 'too_many_elements');
+    }
+    if (x.u_cm <= 0) {
+      return err('ConstraintViolation', 'object_distance_not_positive');
+    }
+    if (x.d_cm < 0) {
+      return err('ConstraintViolation', 'negative_separation');
+    }
+    if (x.f1_cm === 0 || x.f2_cm === 0) {
+      return err('MathError', 'zero_focal_length');
+    }
+
+    if (Math.abs(x.u_cm - x.f1_cm) <= EPS) {
+      return {
+        v1_cm: null,
+        u2_cm: null,
+        v2_cm: x.f2_cm,
+        m_total: null,
+        at_infinity: true
+      };
+    }
+
+    const v1 = x.f1_cm * x.u_cm / (x.u_cm - x.f1_cm);
+    const u2 = x.d_cm - v1;
+
+    if (Math.abs(u2) <= EPS) {
+      return err('MathError', 'zero_intermediate_object_distance');
+    }
+
+    if (Math.abs(u2 - x.f2_cm) <= EPS) {
+      return {
+        v1_cm: v1,
+        u2_cm: u2,
+        v2_cm: null,
+        m_total: null,
+        at_infinity: true
+      };
+    }
+
+    const v2 = x.f2_cm * u2 / (u2 - x.f2_cm);
+    const m1 = -v1 / x.u_cm;
+    const m2 = -v2 / u2;
+
+    return safeResult({
+      v1_cm: v1,
+      u2_cm: u2,
+      v2_cm: v2,
+      m_total: m1 * m2,
+      at_infinity: false
+    });
+  }
+
+  /*
+   * magnifier({f_cm,near_point_cm?})
+   * Inputs: positive focal length and optional positive near point, cm.
+   * Default near point D=25 cm.
+   * Outputs: M_relaxed and M_near, dimensionless angular magnifications.
+   * Assumes a simple magnifier, relaxed viewing and near-point viewing.
+   * Errors: invalid_input, invalid_number, focal_length_not_positive,
+   *         near_point_not_positive (ConstraintViolation).
+   *
+   * Hand check: f=5 cm, D=25 cm.
+   * M_relaxed=25/5=5; M_near=1+25/5=6.
+   */
+  function magnifier(x) {
+    const e = input(x) || finiteFields(x, ['f_cm']);
+    if (e) return e;
+
+    const D = nearPoint(x.near_point_cm);
+    if (!number(D)) {
+      return err('ConstraintViolation', 'invalid_number');
+    }
+    if (x.f_cm <= 0) {
+      return err('ConstraintViolation', 'focal_length_not_positive');
+    }
+    if (D <= 0) {
+      return err('ConstraintViolation', 'near_point_not_positive');
+    }
+
+    return safeResult({
+      M_relaxed: D / x.f_cm,
+      M_near: 1 + D / x.f_cm
+    });
+  }
+
+  /*
+   * telescope({f_obj_cm,f_eye_cm})
+   * Inputs: positive objective and eyepiece focal lengths, cm.
+   * Outputs: signed M_angular and length_cm.
+   * Normal adjustment, afocal astronomical refractor.
+   * M_angular=-f_obj/f_eye: negative denotes an inverted image.
+   * length_cm=f_obj+f_eye.
+   * Errors: invalid_input, invalid_number,
+   *         focal_length_not_positive (ConstraintViolation).
+   *
+   * Hand check: objective=80 cm, eyepiece=10 cm;
+   * M_angular=-8; length=90 cm.
+   */
+  function telescope(x) {
+    const e = input(x) ||
+      finiteFields(x, ['f_obj_cm', 'f_eye_cm']);
+    if (e) return e;
+
+    if (x.f_obj_cm <= 0 || x.f_eye_cm <= 0) {
+      return err('ConstraintViolation', 'focal_length_not_positive');
+    }
+
+    return safeResult({
+      M_angular: -x.f_obj_cm / x.f_eye_cm,
+      length_cm: x.f_obj_cm + x.f_eye_cm
+    });
+  }
+
+  /*
+   * microscope({f_obj_cm,f_eye_cm,tube_cm,near_point_cm?})
+   * Inputs: positive objective, eyepiece focal lengths and tube length,
+   * cm; optional positive near point in cm (default 25 cm).
+   * Output: M_total, signed approximate angular magnification.
+   * Uses standard approximation M=-(L/f_obj)(D/f_eye).
+   * Negative sign indicates an inverted final image.
+   * Errors: invalid_input, invalid_number, focal_length_not_positive,
+   *         tube_length_not_positive, near_point_not_positive
+   *         (ConstraintViolation).
+   *
+   * Hand check: f_obj=2 cm, f_eye=5 cm, tube=16 cm, D=25 cm.
+   * M=-(16/2)(25/5)=-40.
+   */
+  function microscope(x) {
+    const e = input(x) ||
+      finiteFields(x, ['f_obj_cm', 'f_eye_cm', 'tube_cm']);
+    if (e) return e;
+
+    const D = nearPoint(x.near_point_cm);
+    if (!number(D)) {
+      return err('ConstraintViolation', 'invalid_number');
+    }
+    if (x.f_obj_cm <= 0 || x.f_eye_cm <= 0) {
+      return err('ConstraintViolation', 'focal_length_not_positive');
+    }
+    if (x.tube_cm <= 0) {
+      return err('ConstraintViolation', 'tube_length_not_positive');
+    }
+    if (D <= 0) {
+      return err('ConstraintViolation', 'near_point_not_positive');
+    }
+
+    return safeResult({
+      M_total: -(x.tube_cm / x.f_obj_cm) * (D / x.f_eye_cm)
+    });
+  }
+
+  /*
+   * shadow({object_height_cm,object_distance_cm,screen_distance_cm})
+   * Inputs: positive object height, object distance from point source,
+   * and screen distance from the same source, in cm.
+   * Output: shadow_height_cm, cm.
+   * Assumes a point source, straight rays, perpendicular flat screen
+   * and opaque object parallel to the screen.
+   * Errors: invalid_input, invalid_number,
+   *         distance_not_positive, screen_before_object,
+   *         object_height_not_positive (ConstraintViolation).
+   *
+   * Hand check: object height=4 cm, object at 20 cm,
+   * screen at 60 cm. Shadow=4*(60/20)=12 cm.
+   */
+  function shadow(x) {
+    const e = input(x) ||
+      finiteFields(x, [
+        'object_height_cm',
+        'object_distance_cm',
+        'screen_distance_cm'
+      ]);
+    if (e) return e;
+
+    if (x.object_height_cm <= 0) {
+      return err('ConstraintViolation', 'object_height_not_positive');
+    }
+    if (x.object_distance_cm <= 0 || x.screen_distance_cm <= 0) {
+      return err('ConstraintViolation', 'distance_not_positive');
+    }
+    if (x.screen_distance_cm <= x.object_distance_cm) {
+      return err('ConstraintViolation', 'screen_before_object');
+    }
+
+    return safeResult({
+      shadow_height_cm:
+        x.object_height_cm * x.screen_distance_cm /
+        x.object_distance_cm
+    });
+  }
+
+  /*
+   * layered_ray({indices,incidence_deg})
+   * Inputs: indices array containing 2–3 refractive indices >=1;
+   * incident angle in degrees from the first interface normal.
+   * Outputs: angles_deg array (degrees or null), tir, tir_interface,
+   * conserved_n_sin, all in order of propagation.
+   * Assumes parallel plane interfaces and a common normal.
+   * Conservation: n*sin(theta) is constant until TIR.
+   * Errors: invalid_input, invalid_number, refractive_index_below_1,
+   *         angle_out_of_range_0_90, invalid_layer_count
+   *         (ConstraintViolation).
+   *
+   * Hand check: indices=[1,1.5,1.33], incidence=30°.
+   * conserved=0.5; angles=[30,19.4712206345,22.082413° approx];
+   * no total internal reflection.
+   */
+  function layered_ray(x) {
+    const e = input(x) || angle(x.incidence_deg);
+    if (e) return e;
+
+    if (!Array.isArray(x.indices) ||
+        x.indices.length < 2 ||
+        x.indices.length > 3) {
+      return err('ConstraintViolation', 'invalid_layer_count');
+    }
+
+    for (const n of x.indices) {
+      const failure = index(n);
+      if (failure) return failure;
+    }
+
+    const values = [x.incidence_deg];
+    const conserved =
+      x.indices[0] * Math.sin(rad(x.incidence_deg));
+
+    for (let j = 1; j < x.indices.length; j++) {
+      const next = refract({
+        n1: x.indices[j - 1],
+        n2: x.indices[j],
+        incidence_deg: values[j - 1]
+      });
+
+      if (next.error) return next;
+
+      if (next.tir) {
+        values.push(null);
+        return {
+          angles_deg: values,
+          tir: true,
+          tir_interface: j,
+          conserved_n_sin: conserved
+        };
+      }
+
+      values.push(next.refraction_deg);
+    }
+
+    return {
+      angles_deg: values,
+      tir: false,
+      tir_interface: null,
+      conserved_n_sin: conserved
+    };
+  }
+
+  /*
+   * dispersion({n_red,n_blue,n_medium,R1_cm,R2_cm})
+   * Inputs: red and blue lens indices, surrounding index, and Cartesian
+   * surface radii; indices dimensionless, radii cm or null.
+   * Outputs: f_red_cm, f_blue_cm, delta_f_cm=f_red-f_blue.
+   * Assumes thin paraxial lenses with wavelength-dependent indices.
+   * Errors: invalid_input, invalid_number, refractive_index_below_1,
+   *         zero_radius, infinite_focal_length.
+   *
+   * Hand check: red=1.50, blue=1.52, medium=1,
+   * R1=20, R2=-20 cm.
+   * f_red=20 cm, f_blue=19.2307692308 cm;
+   * delta_f=0.7692307692 cm.
+   */
+  function dispersion(x) {
+    const e = input(x) ||
+      index(x.n_red) ||
+      index(x.n_blue) ||
+      index(x.n_medium);
+    if (e) return e;
+
+    const common = {
+      n_medium: x.n_medium,
+      R1_cm: x.R1_cm,
+      R2_cm: x.R2_cm
+    };
+
+    const red = lensmaker({
+      ...common,
+      n_lens: x.n_red
+    });
+    if (red.error) return red;
+
+    const blue = lensmaker({
+      ...common,
+      n_lens: x.n_blue
+    });
+    if (blue.error) return blue;
+
+    return safeResult({
+      f_red_cm: red.f_cm,
+      f_blue_cm: blue.f_cm,
+      delta_f_cm: red.f_cm - blue.f_cm
+    });
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    reflect: reflect,
+    refract: refract,
+    critical_angle: critical_angle,
+    refractive_index: refractive_index,
+    speed_in_medium: speed_in_medium,
+    thin_lens: thin_lens,
+    lens_power: lens_power,
+    lensmaker: lensmaker,
+    two_lens: two_lens,
+    magnifier: magnifier,
+    telescope: telescope,
+    microscope: microscope,
+    shadow: shadow,
+    layered_ray: layered_ray,
+    dispersion: dispersion
+  });
+})();
+/* FIT-CALC-END optics */
+
+/*
+ * INSTRUMENT BUILDER
+ *
+ * Six deterministic rounds:
+ * 1. Simple magnifier, relaxed viewing.
+ * 2. Astronomical telescope, normal adjustment.
+ * 3. Compound microscope, standard approximation.
+ * 4. Corrective lens for myopia.
+ * 5. Telescope design subject to a stricter length constraint.
+ * 6. Microscope with lens selection and tube length.
+ *
+ * All optical numerical quantities come from FITCalcOptics.
+ * Geometric drawing coordinates are presentation-only.
+ * Plot labels conceal answer-bearing values before checking.
+ */
+
+(function () {
+  'use strict';
+
+  const C = FITCalcOptics;
+  const $ = id => document.getElementById(id);
+  const NS = 'http:' + '/' + '/' + 'www.w3.org/2000/svg';
+
+  const scene = $('scene');
+  const plot = $('plot');
+  const controls = $('controls');
+
+  const OBJECTIVES = [2, 4, 5, 10, 20, 40, 60, 80, 100];
+  const EYEPIECES = [2, 4, 5, 8, 10, 12.5, 20, 25];
+  const CORRECTIONS = [-100, -80, -50, -40, -25, 25, 40, 50, 80, 100];
+  const TUBES = [12, 16, 20, 24, 30];
+
+  let seed = 718491;
+  let round = 0;
+  let score = 0;
+  let attempts = 0;
+  let hinted = false;
+  let solved = false;
+  let state = null;
+  let refreshers = [];
+
+  const rounds = [
+    { type: 'magnifier', title: 'Build a magnifier' },
+    { type: 'telescope', title: 'Astronomical telescope' },
+    { type: 'microscope', title: 'Compound microscope' },
+    { type: 'eye', title: 'Correct a distant view' },
+    { type: 'telescopeHard', title: 'Compact telescope design' },
+    { type: 'microscopeHard', title: 'Precision microscope' }
+  ];
+
+  function randomFactory(seedValue) {
+    let value = seedValue >>> 0;
+    return function () {
+      value = (Math.imul(value, 1664525) + 1013904223) >>> 0;
+      return value / 4294967296;
+    };
+  }
+
+  function pick(rng, values) {
+    return values[Math.floor(rng() * values.length)];
+  }
+
+  function clamp(value, low, high) {
+    return Math.max(low, Math.min(high, value));
+  }
+
+  function fmt(value, places = 2) {
+    return typeof value === 'number' && Number.isFinite(value)
+      ? value.toFixed(places)
+      : '—';
+  }
+
+  function bad(result) {
+    return !!(result && result.error);
+  }
+
+  function errorMessage(result) {
+    if (!bad(result)) return '';
+
+    const messages = {
+      invalid_input: 'Some information is missing.',
+      invalid_number: 'Select a valid number.',
+      focal_length_not_positive: 'Select positive focal lengths for this instrument.',
+      tube_length_not_positive: 'The tube length must be positive.',
+      near_point_not_positive: 'The near point must be positive.',
+      zero_focal_length: 'A lens cannot have zero focal length.',
+      object_distance_not_positive: 'The object distance must be positive.'
+    };
+
+    return messages[result.reason] ||
+      'This optical setting is not supported. Adjust the components.';
+  }
+
+  function notify(message, kind = '') {
+    const feedback = $('feedback');
+    feedback.className = 'feedback' + (kind ? ' ' + kind : '');
+    feedback.textContent = message;
+  }
+
+  function add(root, tag, attributes = {}, textValue) {
+    const node = document.createElementNS(NS, tag);
+
+    for (const [key, value] of Object.entries(attributes)) {
+      node.setAttribute(key, String(value));
+    }
+
+    if (textValue !== undefined) {
+      node.textContent = String(textValue);
+    }
+
+    root.appendChild(node);
+    return node;
+  }
+
+  function clear(root) {
+    root.replaceChildren();
+  }
+
+  function ln(root, x1, y1, x2, y2, colour = '#111',
+              width = 2, dash = '') {
+    return add(root, 'line', {
+      x1, y1, x2, y2,
+      stroke: colour,
+      'stroke-width': width,
+      'stroke-linecap': 'round',
+      ...(dash ? { 'stroke-dasharray': dash } : {})
+    });
+  }
+
+  function rectangle(root, x, y, width, height,
+                     colour = 'white', radius = 8) {
+    return add(root, 'rect', {
+      x, y, width, height,
+      rx: radius,
+      fill: colour,
+      stroke: '#111',
+      'stroke-width': 2
+    });
+  }
+
+  function text(root, x, y, content, size = 13,
+                anchor = 'middle', colour = '#111') {
+    return add(root, 'text', {
+      x, y,
+      'font-family': 'Inter,system-ui,sans-serif',
+      'font-size': size,
+      'font-weight': 700,
+      'text-anchor': anchor,
+      fill: colour
+    }, content);
+  }
+
+  function path(root, d, colour = '#111', width = 2,
+                dash = '', fill = 'none') {
+    return add(root, 'path', {
+      d,
+      stroke: colour,
+      'stroke-width': width,
+      fill,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+      ...(dash ? { 'stroke-dasharray': dash } : {})
+    });
+  }
+
+  function circle(root, x, y, radius,
+                  fill = 'white', stroke = '#111') {
+    return add(root, 'circle', {
+      cx: x,
+      cy: y,
+      r: radius,
+      fill,
+      stroke,
+      'stroke-width': 2
+    });
+  }
+
+  function arrow(root, x1, y1, x2, y2,
+                 colour = '#FF6B3D', width = 3.5) {
+    if (![x1, y1, x2, y2].every(Number.isFinite)) return;
+
+    ln(root, x1, y1, x2, y2, colour, width);
+
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const length = Math.hypot(dx, dy);
+
+    if (length < 7) return;
+
+    const ux = dx / length;
+    const uy = dy / length;
+    const bx = x2 - 12 * ux;
+    const by = y2 - 12 * uy;
+
+    add(root, 'polygon', {
+      points:
+        `${x2},${y2} ` +
+        `${bx - 5 * uy},${by + 5 * ux} ` +
+        `${bx + 5 * uy},${by - 5 * ux}`,
+      fill: colour,
+      stroke: colour,
+      'stroke-width': 1
+    });
+  }
+
+  function drawLens(root, x, y, radius, positive, labelText) {
+    const top = y - radius;
+    const bottom = y + radius;
+
+    const d = positive
+      ? `M${x} ${top} Q${x - 23} ${y} ${x} ${bottom} ` +
+        `Q${x + 23} ${y} ${x} ${top}Z`
+      : `M${x} ${top} Q${x + 17} ${y} ${x} ${bottom} ` +
+        `Q${x - 17} ${y} ${x} ${top}Z`;
+
+    path(root, d, '#111', 3, '', '#F7BB9F');
+    text(root, x, bottom + 23, labelText, 12);
+  }
+
+  function caption(message) {
+    const paragraph = document.createElement('p');
+    paragraph.className = 'note';
+    paragraph.textContent = message;
+    controls.appendChild(paragraph);
+  }
+
+  function choices(title, options, getter, setter) {
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+
+    const label = document.createElement('label');
+    label.textContent = title;
+
+    const row = document.createElement('div');
+    row.className = 'choices';
+
+    const buttons = options.map(option => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = option.label;
+
+      button.addEventListener('click', () => {
+        if (solved) return;
+        setter(option.value);
+        redraw();
+      });
+
+      row.appendChild(button);
+
+      return {
+        button,
+        value: option.value
+      };
+    });
+
+    function refresh() {
+      buttons.forEach(entry => {
+        entry.button.setAttribute(
+          'aria-pressed',
+          String(entry.value === getter())
+        );
+        entry.button.disabled = solved;
+      });
+    }
+
+    wrap.append(label, row);
+    controls.appendChild(wrap);
+    refreshers.push(refresh);
+  }
+
+  function stepper(title, getter, setter,
+                   min, max, fine, coarse,
+                   suffix, places = 0) {
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+
+    const label = document.createElement('label');
+    label.textContent = title;
+
+    const row = document.createElement('div');
+    row.className = 'stepper';
+
+    const output = document.createElement('output');
+
+    const changes = [-coarse, -fine, fine, coarse];
+    const names = ['−−', '−', '+', '++'];
+
+    const buttons = changes.map((change, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = names[index];
+
+      button.setAttribute(
+        'aria-label',
+        `${change < 0 ? 'Decrease' : 'Increase'} ` +
+        `${title} by ${Math.abs(change)}`
+      );
+
+      button.addEventListener('click', () => {
+        if (solved) return;
+
+        setter(
+          Math.round(
+            clamp(getter() + change, min, max) * 10000
+          ) / 10000
+        );
+
+        redraw();
+      });
+
+      return button;
+    });
+
+    function refresh() {
+      output.textContent = `${fmt(getter(), places)} ${suffix}`;
+
+      buttons.forEach((button, index) => {
+        button.disabled = solved ||
+          clamp(getter() + changes[index], min, max) === getter();
+      });
+    }
+
+    row.append(
+      buttons[0],
+      buttons[1],
+      output,
+      buttons[2],
+      buttons[3]
+    );
+
+    wrap.append(label, row);
+    controls.appendChild(wrap);
+    refreshers.push(refresh);
+  }
+
+  function slider(title, getter, setter,
+                  min, max, step, unit) {
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+
+    const label = document.createElement('label');
+    const output = document.createElement('output');
+    const input = document.createElement('input');
+
+    input.type = 'range';
+    input.min = min;
+    input.max = max;
+    input.step = step;
+    input.setAttribute('aria-label', `${title} in ${unit}`);
+
+    label.textContent = title + ': ';
+    label.appendChild(output);
+
+    input.addEventListener('input', () => {
+      if (solved) return;
+      setter(Number(input.value));
+      redraw();
+    });
+
+    function refresh() {
+      input.value = getter();
+      input.disabled = solved;
+      output.textContent = `${fmt(getter(), step < 1 ? 1 : 0)} ${unit}`;
+    }
+
+    wrap.append(label, input);
+    controls.appendChild(wrap);
+    refreshers.push(refresh);
+  }
+
+  function lensTray(title, values, getter, setter, unit = 'cm') {
+    choices(
+      title,
+      values.map(value => ({
+        label: `${value} ${unit}`,
+        value
+      })),
+      getter,
+      setter
+    );
+  }
+
+  function makeRound() {
+    const rng = randomFactory(seed + round * 9173);
+    const type = rounds[round].type;
+
+    if (type === 'magnifier') {
+      const f = pick(rng, [5, 8, 10, 12.5]);
+      const target = C.magnifier({
+        f_cm: f,
+        near_point_cm: 25
+      });
+
+      return {
+        type,
+        f: 20,
+        targetF: f,
+        viewing: 'relaxed',
+        targetM: target.M_relaxed,
+        nearPoint: 25,
+        targetMin: target.M_relaxed - 0.01,
+        targetMax: target.M_relaxed + 0.01
+      };
+    }
+
+    if (type === 'telescope') {
+      const fObj = pick(rng, [60, 80, 100]);
+      const fEye = pick(rng, [5, 10, 20]);
+
+      const result = C.telescope({
+        f_obj_cm: fObj,
+        f_eye_cm: fEye
+      });
+
+      return {
+        type,
+        objective: 40,
+        eyepiece: 25,
+        targetObj: fObj,
+        targetEye: fEye,
+        targetM: Math.abs(result.M_angular),
+        lengthLimit: result.length_cm,
+        targetMin: Math.abs(result.M_angular) - 0.01,
+        targetMax: Math.abs(result.M_angular) + 0.01
+      };
+    }
+
+    if (type === 'microscope') {
+      const fObj = pick(rng, [2, 4]);
+      const fEye = pick(rng, [5, 10]);
+      const tube = pick(rng, [12, 16, 20]);
+
+      const result = C.microscope({
+        f_obj_cm: fObj,
+        f_eye_cm: fEye,
+        tube_cm: tube,
+        near_point_cm: 25
+      });
+
+      return {
+        type,
+        objective: fObj === 2 ? 5 : 2,
+        eyepiece: fEye === 5 ? 10 : 5,
+        tube,
+        targetObj: fObj,
+        targetEye: fEye,
+        targetTube: tube,
+        targetM: Math.abs(result.M_total),
+        lengthLimit: tube,
+        targetMin: Math.abs(result.M_total) - 0.01,
+        targetMax: Math.abs(result.M_total) + 0.01,
+        nearPoint: 25
+      };
+    }
+
+    if (type === 'eye') {
+      const farPoint = pick(rng, [25, 40, 50, 80, 100]);
+      const target = C.lens_power({
+        f_cm: -farPoint
+      });
+
+      return {
+        type,
+        farPoint,
+        lensF: 50,
+        targetF: -farPoint,
+        targetPower: target.P_dioptre,
+        choice: 'converging'
+      };
+    }
+
+    if (type === 'telescopeHard') {
+      const targetObj = pick(rng, [60, 80, 100]);
+      const targetEye = pick(rng, [4, 5, 8]);
+
+      const result = C.telescope({
+        f_obj_cm: targetObj,
+        f_eye_cm: targetEye
+      });
+
+      return {
+        type,
+        objective: 40,
+        eyepiece: 20,
+        targetObj,
+        targetEye,
+        targetM: Math.abs(result.M_angular),
+        lengthLimit: result.length_cm,
+        targetMin: Math.abs(result.M_angular) - 0.01,
+        targetMax: Math.abs(result.M_angular) + 0.01
+      };
+    }
+
+    const targetObj = pick(rng, [2, 4]);
+    const targetEye = pick(rng, [4, 5, 8]);
+    const targetTube = pick(rng, [16, 20, 24]);
+
+    const result = C.microscope({
+      f_obj_cm: targetObj,
+      f_eye_cm: targetEye,
+      tube_cm: targetTube,
+      near_point_cm: 25
+    });
+
+    return {
+      type,
+      objective: targetObj === 2 ? 5 : 2,
+      eyepiece: targetEye === 4 ? 10 : 4,
+      tube: targetTube === 16 ? 24 : 16,
+      targetObj,
+      targetEye,
+      targetTube,
+      nearPoint: 25,
+      targetM: Math.abs(result.M_total),
+      lengthLimit: targetTube,
+      targetMin: Math.abs(result.M_total) - 0.01,
+      targetMax: Math.abs(result.M_total) + 0.01
+    };
+  }
+
+  function start() {
+    state = makeRound();
+
+    attempts = 0;
+    hinted = false;
+    solved = false;
+
+    $('roundHud').textContent = `Round ${round + 1}/6`;
+    $('scoreHud').textContent = `Score: ${score}`;
+    $('challengeTitle').textContent = rounds[round].title;
+
+    $('hintBtn').disabled = false;
+    $('checkBtn').disabled = false;
+    $('nextBtn').classList.add('hidden');
+
+    notify('Choose a component to begin.');
+
+    buildControls();
+    redraw();
+  }
+
+  function buildControls() {
+    controls.replaceChildren();
+    refreshers = [];
+
+    if (state.type === 'magnifier') {
+      $('question').textContent =
+        `Build a simple magnifier with relaxed-eye angular ` +
+        `magnification ${fmt(state.targetM, 2)}×. ` +
+        `The conventional near point is 25 cm. ` +
+        `Choose the correct lens and viewing condition.`;
+
+      lensTray(
+        'Magnifying-lens tray',
+        [5, 8, 10, 12.5, 20, 25],
+        () => state.f,
+        value => { state.f = value; }
+      );
+
+      choices(
+        'Viewing adjustment',
+        [
+          { label: 'Relaxed eye', value: 'relaxed' },
+          { label: 'Near point', value: 'near' }
+        ],
+        () => state.viewing,
+        value => { state.viewing = value; }
+      );
+
+      caption(
+        'A simple magnifier has one lens. The observer views the ' +
+        'virtual image through it.'
+      );
+    }
+
+    if (state.type === 'telescope' ||
+        state.type === 'telescopeHard') {
+      const hard = state.type === 'telescopeHard';
+
+      $('question').textContent =
+        `Build an astronomical telescope with angular ` +
+        `magnification magnitude ${fmt(state.targetM, 2)}× ` +
+        `and overall length not exceeding ` +
+        `${fmt(state.lengthLimit, 1)} cm. ` +
+        `Choose the objective and eyepiece. ` +
+        (hard
+          ? 'Several lenses appear suitable: both constraints must hold.'
+          : 'The system operates at normal adjustment.');
+
+      lensTray(
+        'Objective lens tray',
+        [40, 60, 80, 100],
+        () => state.objective,
+        value => { state.objective = value; }
+      );
+
+      lensTray(
+        'Eyepiece lens tray',
+        hard
+          ? [4, 5, 8, 10, 20]
+          : [5, 10, 20, 25],
+        () => state.eyepiece,
+        value => { state.eyepiece = value; }
+      );
+
+      caption(
+        'Both lenses are converging. The signed angular ' +
+        'magnification is negative because the image is inverted.'
+      );
+    }
+
+    if (state.type === 'microscope' ||
+        state.type === 'microscopeHard') {
+      const hard = state.type === 'microscopeHard';
+
+      $('question').textContent =
+        `Design a compound microscope with approximate ` +
+        `angular magnification magnitude ${fmt(state.targetM, 2)}×. ` +
+        `The near point is 25 cm and the permitted tube length ` +
+        `is at most ${state.lengthLimit} cm. ` +
+        `Choose the objective, eyepiece and tube length.`;
+
+      lensTray(
+        'Objective lens tray',
+        [2, 4, 5, 10],
+        () => state.objective,
+        value => { state.objective = value; }
+      );
+
+      lensTray(
+        'Eyepiece lens tray',
+        hard ? [4, 5, 8, 10] : [5, 10, 20],
+        () => state.eyepiece,
+        value => { state.eyepiece = value; }
+      );
+
+      lensTray(
+        'Tube-length settings',
+        hard ? [12, 16, 20, 24, 30] : [12, 16, 20, 24],
+        () => state.tube,
+        value => { state.tube = value; }
+      );
+
+      caption(
+        'Use the standard microscope approximation. ' +
+        'Longer tubes and shorter focal lengths increase the ' +
+        'magnitude of magnification.'
+      );
+    }
+
+    if (state.type === 'eye') {
+      $('question').textContent =
+        `A short-sighted eye has a far point ` +
+        `${state.farPoint} cm in front of the eye. ` +
+        `Choose a corrective lens so distant objects can be ` +
+        `seen clearly. Treat the spectacle lens as being at the eye. ` +
+        `Select the lens type and focal length.`;
+
+      choices(
+        'Corrective lens type',
+        [
+          { label: 'Converging (+)', value: 'converging' },
+          { label: 'Diverging (−)', value: 'diverging' }
+        ],
+        () => state.choice,
+        value => { state.choice = value; }
+      );
+
+      lensTray(
+        'Lens focal-length tray',
+        CORRECTIONS,
+        () => state.lensF,
+        value => { state.lensF = value; }
+      );
+
+      caption(
+        'For a distant object, incoming light is approximately ' +
+        'parallel. A corrective lens must form the required ' +
+        'virtual image at the far point.'
+      );
+    }
+  }
+
+  function calculateCurrent() {
+    switch (state.type) {
+      case 'magnifier':
+        return C.magnifier({
+          f_cm: state.f,
+          near_point_cm: state.nearPoint
+        });
+
+      case 'telescope':
+      case 'telescopeHard':
+        return C.telescope({
+          f_obj_cm: state.objective,
+          f_eye_cm: state.eyepiece
+        });
+
+      case 'microscope':
+      case 'microscopeHard':
+        return C.microscope({
+          f_obj_cm: state.objective,
+          f_eye_cm: state.eyepiece,
+          tube_cm: state.tube,
+          near_point_cm: state.nearPoint
+        });
+
+      case 'eye':
+        return C.lens_power({
+          f_cm: state.lensF
+        });
+
+      default:
+        return {
+          error: 'NotSupported',
+          reason: 'element_not_supported'
+        };
+    }
+  }
+
+  function magnitude(result) {
+    if (bad(result)) return null;
+
+    if (state.type === 'magnifier') {
+      return state.viewing === 'relaxed'
+        ? result.M_relaxed
+        : result.M_near;
+    }
+
+    if (state.type === 'telescope' ||
+        state.type === 'telescopeHard') {
+      return Math.abs(result.M_angular);
+    }
+
+    if (state.type === 'microscope' ||
+        state.type === 'microscopeHard') {
+      return Math.abs(result.M_total);
+    }
+
+    return Math.abs(result.P_dioptre);
+  }
+
+  function instrumentLength(result) {
+    if (bad(result)) return null;
+
+    if (state.type === 'telescope' ||
+        state.type === 'telescopeHard') {
+      return result.length_cm;
+    }
+
+    if (state.type === 'microscope' ||
+        state.type === 'microscopeHard') {
+      return state.tube;
+    }
+
+    return null;
+  }
+
+  function updateMetrics() {
+    const result = calculateCurrent();
+
+    if (bad(result)) {
+      $('metric1').textContent = '—';
+      $('metric2').textContent = '—';
+      return;
+    }
+
+    if (state.type === 'eye') {
+      $('metricName1').textContent = 'Selected lens power';
+      $('metricName2').textContent = 'Signed focal length';
+      $('metric1').textContent =
+        `${fmt(result.P_dioptre, 2)} D`;
+      $('metric2').textContent =
+        `${fmt(state.lensF, 1)} cm`;
+
+      return;
+    }
+
+    $('metricName1').textContent =
+      'Angular magnification magnitude';
+
+    if (state.type === 'magnifier') {
+      $('metricName2').textContent = 'Selected focal length';
+      $('metric2').textContent = `${fmt(state.f, 2)} cm`;
+    } else {
+      $('metricName2').textContent = 'Instrument length';
+      $('metric2').textContent =
+        `${fmt(instrumentLength(result), 2)} cm`;
+    }
+
+    $('metric1').textContent =
+      `${fmt(magnitude(result), 2)}×`;
+  }
+
+  function frame() {
+    clear(scene);
+    rectangle(scene, 12, 17, 616, 397, '#fff', 16);
+    ln(scene, 28, 220, 611, 220, '#6B6B6B', 2, '7 6');
+    text(scene, 510, 243, 'Principal axis', 12);
+  }
+
+  function drawMagnifier() {
+    frame();
+
+    const cx = 320;
+    const cy = 220;
+    const scale = 4.5;
+
+    const objDistance = state.f * 0.8;
+
+    const image = C.thin_lens({
+      f_cm: state.f,
+      u_cm: objDistance
+    });
+
+    if (bad(image)) {
+      notify(errorMessage(image), 'bad');
+      return;
+    }
+
+    const objX = cx - objDistance * scale;
+    const objY = cy - 30;
+
+    drawLens(scene, cx, cy, 125, true, 'Magnifier');
+
+    arrow(scene, objX, cy, objX, objY, '#D39800', 5);
+    text(scene, objX, objY - 13, 'Object', 13);
+
+    const focusX = cx - state.f * scale;
+    ln(scene, focusX, cy - 8, focusX, cy + 8, '#111', 2);
+    text(scene, focusX, cy + 32, 'F', 12);
+
+    const xImage = cx + image.v_cm * scale;
+    const yImage = cy - image.m * 30;
+
+    arrow(scene, xImage, cy, xImage, yImage, '#1F66E5', 4);
+    text(scene, xImage, yImage - 15, 'Virtual image', 12);
+
+    arrow(scene, objX, objY, cx, objY, '#FF6B3D', 3.5);
+
+    const f2 = cx + state.f * scale;
+    const farX = 555;
+    const slope = (cy - objY) / (f2 - cx);
+
+    arrow(
+      scene,
+      cx, objY,
+      farX, objY + slope * (farX - cx),
+      '#FF6B3D', 3.5
+    );
+
+    arrow(scene, objX, objY, cx, cy, '#1F66E5', 3.5);
+
+    const centreSlope = (cy - objY) / (cx - objX);
+
+    arrow(
+      scene,
+      cx, cy,
+      farX, cy + centreSlope * (farX - cx),
+      '#1F66E5', 3.5
+    );
+
+    ln(scene, cx, objY, xImage, yImage,
+      '#FF6B3D', 2, '6 5');
+    ln(scene, cx, cy, xImage, yImage,
+      '#1F66E5', 2, '6 5');
+
+    text(scene, 320, 401,
+      'Simple magnifier: ideal thin lens and virtual image', 13);
+
+    scene.setAttribute(
+      'aria-label',
+      `Magnifier with focal length ${state.f} cm. ` +
+      'An object inside the focal point produces an enlarged virtual image.'
+    );
+
+    $('sceneTitle').textContent = 'Simple magnifier';
+    $('sceneHelp').textContent =
+      'The dashed ray extensions meet at the virtual image on the object side.';
+  }
+
+  function drawTelescope() {
+    frame();
+
+    const result = calculateCurrent();
+
+    if (bad(result)) {
+      notify(errorMessage(result), 'bad');
+      return;
+    }
+
+    const cx1 = 140;
+    const cx2 = 490;
+    const cy = 220;
+
+    drawLens(scene, cx1, cy, 125, true, 'Objective');
+    drawLens(scene, cx2, cy, 95, true, 'Eyepiece');
+
+    text(scene, cx1, 72,
+      `f = ${fmt(state.objective, 1)} cm`, 13);
+    text(scene, cx2, 72,
+      `f = ${fmt(state.eyepiece, 1)} cm`, 13);
+
+    const d = result.length_cm;
+    const scale = (cx2 - cx1) / d;
+    const intermediateX = cx1 + state.objective * scale;
+    const intermediateY = cy + 18;
+
+    const incomingHeights = [135, 175, 265, 305];
+    const slopes = [-0.05, -0.025, 0.025, 0.05];
+    const colours = ['#FF6B3D', '#1F66E5', '#FF6B3D', '#1F66E5'];
+
+    for (let i = 0; i < incomingHeights.length; i++) {
+      const h = incomingHeights[i];
+      const yAtObjective = h + slopes[i] * 100;
+
+      arrow(scene, 28, h, cx1, yAtObjective,
+        colours[i], 3);
+
+      const focalY = cy + (yAtObjective - cy) * 0.16;
+
+      arrow(
+        scene,
+        cx1, yAtObjective,
+        intermediateX, focalY,
+        colours[i], 3
+      );
+
+      const endY = focalY +
+        (focalY - yAtObjective) * 0.55;
+
+      arrow(
+        scene,
+        intermediateX, focalY,
+        cx2, endY,
+        colours[i], 3
+      );
+
+      const outputY = endY + slopes[i] * 95;
+
+      arrow(
+        scene,
+        cx2, endY,
+        608, outputY,
+        colours[i], 3
+      );
+    }
+
+    ln(scene, intermediateX, 165, intermediateX, 275,
+      '#6B6B6B', 2, '6 5');
+
+    text(scene, intermediateX, 156,
+      'Common focal plane', 12);
+
+    ln(scene, cx1, 372, cx2, 372, '#111', 2);
+    ln(scene, cx1, 364, cx1, 380, '#111', 2);
+    ln(scene, cx2, 364, cx2, 380, '#111', 2);
+
+    text(scene, 315, 398,
+      'Lens separation at normal adjustment (cm)', 12);
+
+    scene.setAttribute(
+      'aria-label',
+      `Two-lens telescope with an objective of ${state.objective} cm ` +
+      `and an eyepiece of ${state.eyepiece} cm. ` +
+      `Normal-adjustment length is ${fmt(result.length_cm, 2)} cm.`
+    );
+
+    $('sceneTitle').textContent = 'Astronomical telescope';
+    $('sceneHelp').textContent =
+      'The diagram shows the objective, shared focal plane and eyepiece. The model assumes normal adjustment.';
+  }
+
+  function drawMicroscope() {
+    frame();
+
+    const result = calculateCurrent();
+
+    if (bad(result)) {
+      notify(errorMessage(result), 'bad');
+      return;
+    }
+
+    const cx1 = 180;
+    const cx2 = 490;
+    const cy = 220;
+
+    drawLens(scene, cx1, cy, 115, true, 'Objective');
+    drawLens(scene, cx2, cy, 110, true, 'Eyepiece');
+
+    text(scene, cx1, 76,
+      `f = ${fmt(state.objective, 1)} cm`, 13);
+    text(scene, cx2, 76,
+      `f = ${fmt(state.eyepiece, 1)} cm`, 13);
+
+    const objectX = 95;
+
+    arrow(scene, objectX, cy, objectX, cy - 42,
+      '#D39800', 5);
+
+    text(scene, objectX, 158, 'Specimen', 12);
+
+    const intermediateX = 380;
+
+    arrow(scene, objectX, cy - 42,
+      cx1, cy - 42, '#FF6B3D', 3.5);
+
+    arrow(scene, cx1, cy - 42,
+      intermediateX, cy + 44, '#FF6B3D', 3.5);
+
+    arrow(scene, objectX, cy - 42,
+      cx1, cy, '#1F66E5', 3.5);
+
+    arrow(scene, cx1, cy,
+      intermediateX, cy + 44, '#1F66E5', 3.5);
+
+    arrow(scene, intermediateX, cy,
+      intermediateX, cy + 44, '#A4499A', 5);
+
+    text(scene, intermediateX, 287,
+      'Intermediate image', 12);
+
+    arrow(scene, intermediateX, cy + 44,
+      cx2, cy + 44, '#FF6B3D', 3.5);
+
+    arrow(scene, cx2, cy + 44,
+      605, cy + 12, '#FF6B3D', 3.5);
+
+    arrow(scene, intermediateX, cy + 44,
+      cx2, cy, '#1F66E5', 3.5);
+
+    arrow(scene, cx2, cy,
+      605, cy - 24, '#1F66E5', 3.5);
+
+    ln(scene, cx1, 367, cx2, 367, '#111', 2);
+    ln(scene, cx1, 359, cx1, 375, '#111', 2);
+    ln(scene, cx2, 359, cx2, 375, '#111', 2);
+
+    text(scene, 335, 390,
+      `Tube setting: ${fmt(state.tube, 1)} cm`, 13);
+
+    text(scene, 318, 414,
+      'Standard approximate magnification model', 12);
+
+    scene.setAttribute(
+      'aria-label',
+      `Compound microscope with objective ${state.objective} cm, ` +
+      `eyepiece ${state.eyepiece} cm and tube setting ${state.tube} cm. ` +
+      'The conceptual ray path illustrates an intermediate image.'
+    );
+
+    $('sceneTitle').textContent = 'Compound microscope';
+    $('sceneHelp').textContent =
+      'The specimen first forms an intermediate image. The eyepiece magnifies its apparent angular size.';
+  }
+
+  function drawEye() {
+    frame();
+
+    const result = calculateCurrent();
+
+    if (bad(result)) {
+      notify(errorMessage(result), 'bad');
+      return;
+    }
+
+    const lensX = 275;
+    const cy = 220;
+
+    drawLens(
+      scene, lensX, cy, 118,
+      state.lensF > 0,
+      'Corrective lens'
+    );
+
+    text(scene, lensX, 72,
+      `P = ${fmt(result.P_dioptre, 2)} D`, 14);
+
+    add(scene, 'ellipse', {
+      cx: 510, cy,
+      rx: 80, ry: 119,
+      fill: '#FFF4D6',
+      stroke: '#111',
+      'stroke-width': 3
+    });
+
+    add(scene, 'ellipse', {
+      cx: 450, cy,
+      rx: 21, ry: 48,
+      fill: '#DDF7F1',
+      stroke: '#111',
+      'stroke-width': 3
+    });
+
+    path(
+      scene,
+      'M570 143 Q605 220 570 297',
+      '#D92D20', 4
+    );
+
+    text(scene, 560, 340, 'Retina', 12);
+    text(scene, 508, 88, 'Eye', 13);
+
+    const rays = [-50, 0, 50];
+
+    for (let j = 0; j < rays.length; j++) {
+      const offset = rays[j];
+
+      arrow(
+        scene,
+        29, cy + offset,
+        lensX, cy + offset,
+        '#D39800', 3.5
+      );
+
+      const image = C.thin_lens({
+        f_cm: state.lensF,
+        u_cm: 1000000
+      });
+
+      if (bad(image) || image.at_infinity) continue;
+
+      const focalScale = 1.2;
+      const targetX = lensX + image.v_cm * focalScale;
+
+      const slope =
+        (cy - (cy + offset)) /
+        (targetX - lensX);
+
+      const yAtEye =
+        cy + offset + slope * (430 - lensX);
+
+      arrow(
+        scene,
+        lensX, cy + offset,
+        430, yAtEye,
+        '#1F66E5', 3.5
+      );
+
+      if (image.v_cm < 0) {
+        ln(
+          scene,
+          lensX, cy + offset,
+          targetX, cy,
+          '#1F66E5', 1.5, '6 5'
+        );
+      }
+    }
+
+    text(scene, 142, 115, 'Distant light', 13);
+    text(scene, 325, 405,
+      'Idealised spectacle-at-eye approximation', 12);
+
+    scene.setAttribute(
+      'aria-label',
+      `Corrective lens with focal length ${state.lensF} cm ` +
+      `and power ${fmt(result.P_dioptre, 2)} dioptres, placed before an eye.`
+    );
+
+    $('sceneTitle').textContent = 'Corrective lens and eye';
+    $('sceneHelp').textContent =
+      'Parallel light from distant objects enters the corrective lens before reaching the eye.';
+  }
+
+  function drawScene() {
+    if (state.type === 'magnifier') {
+      drawMagnifier();
+    } else if (state.type === 'telescope' ||
+               state.type === 'telescopeHard') {
+      drawTelescope();
+    } else if (state.type === 'microscope' ||
+               state.type === 'microscopeHard') {
+      drawMicroscope();
+    } else {
+      drawEye();
+    }
+  }
+
+  function modelAtEye(fEye) {
+    if (state.type === 'magnifier') {
+      const result = C.magnifier({
+        f_cm: fEye,
+        near_point_cm: state.nearPoint
+      });
+
+      if (bad(result)) return null;
+
+      return {
+        M: state.viewing === 'relaxed'
+          ? result.M_relaxed
+          : result.M_near,
+        length: null
+      };
+    }
+
+    if (state.type === 'telescope' ||
+        state.type === 'telescopeHard') {
+      const result = C.telescope({
+        f_obj_cm: state.objective,
+        f_eye_cm: fEye
+      });
+
+      return bad(result) ? null : {
+        M: Math.abs(result.M_angular),
+        length: result.length_cm
+      };
+    }
+
+    if (state.type === 'microscope' ||
+        state.type === 'microscopeHard') {
+      const result = C.microscope({
+        f_obj_cm: state.objective,
+        f_eye_cm: fEye,
+        tube_cm: state.tube,
+        near_point_cm: state.nearPoint
+      });
+
+      return bad(result) ? null : {
+        M: Math.abs(result.M_total),
+        length: state.tube
+      };
+    }
+
+    return null;
+  }
+
+  function graphFrame(title, xTitle, yTitle) {
+    clear(plot);
+
+    rectangle(plot, 1, 1, 448, 298, '#fff', 15);
+    text(plot, 225, 24, title, 15);
+
+    const a = {
+      left: 63,
+      right: 422,
+      top: 45,
+      bottom: 250
+    };
+
+    ln(plot, a.left, a.top, a.left, a.bottom, '#111', 2);
+    ln(plot, a.left, a.bottom, a.right, a.bottom, '#111', 2);
+
+    text(plot, 235, 290, xTitle, 12);
+
+    add(plot, 'text', {
+      x: 15, y: 150,
+      transform: 'rotate(-90 15 150)',
+      'font-size': 12,
+      'font-weight': 800,
+      'text-anchor': 'middle'
+    }, yTitle);
+
+    return a;
+  }
+
+  function drawInstrumentPlot() {
+    const a = graphFrame(
+      'Angular magnification versus eyepiece',
+      'Eyepiece focal length (cm)',
+      'Magnitude |M| (×)'
+    );
+
+    const xs = state.type === 'magnifier'
+      ? [5, 8, 10, 12.5, 20, 25]
+      : [2, 4, 5, 8, 10, 12.5, 20, 25];
+
+    const xmin = 2;
+    const xmax = 25;
+
+    const maxValues = [];
+
+    for (const x of xs) {
+      const result = modelAtEye(x);
+      if (result) maxValues.push(result.M);
+    }
+
+    const target = state.targetM;
+    const ymax = Math.max(
+      5,
+      Math.ceil(
+        Math.max(target, ...maxValues) * 1.16 / 5
+      ) * 5
+    );
+
+    const X = x =>
+      a.left + (x - xmin) / (xmax - xmin) *
+      (a.right - a.left);
+
+    const Y = y =>
+      a.bottom - y / ymax * (a.bottom - a.top);
+
+    for (let j = 0; j <= 5; j++) {
+      const y = ymax * j / 5;
+
+      ln(
+        plot,
+        a.left, Y(y),
+        a.right, Y(y),
+        '#F0EFEC', 1
+      );
+
+      text(plot, a.left - 8, Y(y) + 4,
+        fmt(y, 0), 10, 'end');
+    }
+
+    for (const x of [2, 5, 10, 15, 20, 25]) {
+      ln(
+        plot,
+        X(x), a.top,
+        X(x), a.bottom,
+        '#F0EFEC', 1
+      );
+
+      text(plot, X(x), a.bottom + 16,
+        String(x), 10);
+    }
+
+    if (target <= ymax) {
+      const yUpper = Y(
+        Math.min(ymax, state.targetMax)
+      );
+      const yLower = Y(
+        Math.max(0, state.targetMin)
+      );
+
+      add(plot, 'rect', {
+        x: a.left + 1,
+        y: yUpper,
+        width: a.right - a.left - 2,
+        height: Math.max(2, yLower - yUpper),
+        fill: '#FFE6DC',
+        stroke: 'none'
+      });
+
+      ln(
+        plot,
+        a.left, Y(target),
+        a.right, Y(target),
+        '#D92D20', 1.5, '5 5'
+      );
+    }
+
+    let curve = '';
+
+    for (let j = 0; j <= 230; j++) {
+      const fEye = xmin + j / 230 * (xmax - xmin);
+      const result = modelAtEye(fEye);
+
+      if (!result) continue;
+
+      const y = result.M;
+
+      if (!Number.isFinite(y) ||
+          y < 0 || y > ymax) {
+        if (curve) {
+          path(plot, curve, '#FF6B3D', 3.5);
+          curve = '';
+        }
+        continue;
+      }
+
+      curve +=
+        `${curve ? 'L' : 'M'}` +
+        `${X(fEye)} ${Y(y)} `;
+    }
+
+    if (curve) {
+      path(plot, curve, '#FF6B3D', 3.5);
+    }
+
+    if (state.type === 'telescope' ||
+        state.type === 'telescopeHard') {
+      const cutoff =
+        state.lengthLimit - state.objective;
+
+      if (cutoff > xmin && cutoff < xmax) {
+        ln(
+          plot,
+          X(cutoff), a.top,
+          X(cutoff), a.bottom,
+          '#1F66E5', 2, '6 5'
+        );
+      }
+    }
+
+    if (state.type === 'microscope' ||
+        state.type === 'microscopeHard') {
+      if (state.tube > state.lengthLimit) {
+        rectangle(
+          plot, 290, 48, 119, 26,
+          '#FFE6E2', 6
+        );
+        text(plot, 349, 65, 'Length exceeded', 11);
+      } else {
+        rectangle(
+          plot, 304, 48, 106, 26,
+          '#DDF7E8', 6
+        );
+        text(plot, 357, 65, 'Length allowed', 11);
+      }
+    }
+
+    const currentF = state.type === 'magnifier'
+      ? state.f
+      : state.eyepiece;
+
+    const current = modelAtEye(currentF);
+
+    if (current &&
+        current.M >= 0 &&
+        current.M <= ymax &&
+        currentF >= xmin &&
+        currentF <= xmax) {
+      circle(
+        plot,
+        X(currentF),
+        Y(current.M),
+        6,
+        '#D92D20'
+      );
+    }
+
+    plot.setAttribute(
+      'aria-label',
+      `Angular magnification magnitude against eyepiece ` +
+      `focal length from ${xmin} to ${xmax} cm. ` +
+      `The target band and current component are marked.`
+    );
+
+    $('plotTitle').textContent =
+      'Live angular-magnification plot';
+
+    $('plotNote').textContent =
+      'The target band shows the required magnification. ' +
+      'For telescopes, the blue boundary marks the maximum ' +
+      'allowed eyepiece focal length from the length constraint.';
+  }
+
+  function drawEyePlot() {
+    const a = graphFrame(
+      'Corrective lens power',
+      'Lens focal length (cm)',
+      'Power (dioptres D)'
+    );
+
+    const xmin = -110;
+    const xmax = 110;
+    const ymin = -6;
+    const ymax = 6;
+
+    const X = x =>
+      a.left + (x - xmin) / (xmax - xmin) *
+      (a.right - a.left);
+
+    const Y = y =>
+      a.bottom - (y - ymin) / (ymax - ymin) *
+      (a.bottom - a.top);
+
+    for (let j = 0; j <= 6; j++) {
+      const p = ymin + j / 6 * (ymax - ymin);
+
+      ln(
+        plot,
+        a.left, Y(p),
+        a.right, Y(p),
+        '#F0EFEC', 1
+      );
+
+      text(plot, a.left - 7, Y(p) + 4,
+        fmt(p, 0), 10, 'end');
+    }
+
+    for (const f of [-100, -50, 0, 50, 100]) {
+      ln(
+        plot,
+        X(f), a.top,
+        X(f), a.bottom,
+        '#F0EFEC', 1
+      );
+
+      text(
+        plot,
+        X(f), a.bottom + 16,
+        String(f), 10
+      );
+    }
+
+    ln(
+      plot,
+      X(0), a.top,
+      X(0), a.bottom,
+      '#111', 2, '6 5'
+    );
+
+    for (const sign of [-1, 1]) {
+      let d = '';
+
+      for (let j = 0; j <= 160; j++) {
+        const f = sign < 0
+          ? -110 + j / 160 * 90
+          : 20 + j / 160 * 90;
+
+        const result = C.lens_power({
+          f_cm: f
+        });
+
+        if (bad(result)) continue;
+
+        const p = result.P_dioptre;
+
+        if (p < ymin || p > ymax) continue;
+
+        d +=
+          `${d ? 'L' : 'M'}` +
+          `${X(f)} ${Y(p)} `;
+      }
+
+      if (d) {
+        path(plot, d, '#FF6B3D', 3.5);
+      }
+    }
+
+    const current = C.lens_power({
+      f_cm: state.lensF
+    });
+
+    if (!bad(current)) {
+      circle(
+        plot,
+        X(state.lensF),
+        Y(current.P_dioptre),
+        6,
+        '#D92D20'
+      );
+    }
+
+    $('plotTitle').textContent = 'Live corrective-lens plot';
+
+    $('plotNote').textContent =
+      'A negative focal length produces negative power. ' +
+      'The graph separates diverging and converging lenses.';
+
+    plot.setAttribute(
+      'aria-label',
+      'Lens power in dioptres versus signed focal length ' +
+      'in centimetres. The current lens is marked with a red dot.'
+    );
+  }
+
+  function redraw() {
+    refreshers.forEach(fn => fn());
+
+    const result = calculateCurrent();
+
+    if (bad(result)) {
+      notify(errorMessage(result), 'bad');
+    }
+
+    updateMetrics();
+    drawScene();
+
+    if (state.type === 'eye') {
+      drawEyePlot();
+    } else {
+      drawInstrumentPlot();
+    }
+  }
+
+  function checkAnswer() {
+    if (solved) return;
+
+    const result = calculateCurrent();
+
+    if (bad(result)) {
+      notify(errorMessage(result), 'bad');
+      return;
+    }
+
+    let correct = false;
+    let explanation = '';
+
+    if (state.type === 'magnifier') {
+      const M = magnitude(result);
+
+      correct =
+        state.viewing === 'relaxed' &&
+        Math.abs(M - state.targetM) < 0.011;
+
+      explanation = correct
+        ? `Correct. Relaxed magnification is ` +
+          `${fmt(result.M_relaxed, 2)}×; at the near point ` +
+          `it would be ${fmt(result.M_near, 2)}×.`
+        : state.viewing !== 'relaxed'
+          ? 'Check the requested viewing condition: the eye should be relaxed.'
+          : `Your magnification is ${fmt(Math.abs(M - state.targetM), 2)}× ` +
+            'from the target. Try another focal length.';
+    }
+
+    if (state.type === 'telescope' ||
+        state.type === 'telescopeHard') {
+      const M = Math.abs(result.M_angular);
+      const match = Math.abs(M - state.targetM) < 0.011;
+      const fits = result.length_cm <=
+        state.lengthLimit + 1e-9;
+
+      correct = match && fits;
+
+      explanation = !match
+        ? `Your angular magnification is ` +
+          `${fmt(Math.abs(M - state.targetM), 2)}× from the target. ` +
+          'Compare objective and eyepiece focal lengths.'
+        : !fits
+          ? `The magnification matches, but the telescope is ` +
+            `${fmt(result.length_cm - state.lengthLimit, 2)} cm ` +
+            'too long.'
+          : `Excellent. Signed M = ${fmt(result.M_angular, 2)}× ` +
+            `and length = ${fmt(result.length_cm, 2)} cm. ` +
+            'The minus sign indicates an inverted image.';
+    }
+
+    if (state.type === 'microscope' ||
+        state.type === 'microscopeHard') {
+      const M = Math.abs(result.M_total);
+      const match = Math.abs(M - state.targetM) < 0.011;
+      const fits = state.tube <=
+        state.lengthLimit + 1e-9;
+
+      correct = match && fits;
+
+      explanation = !match
+        ? `Your magnification magnitude differs by ` +
+          `${fmt(Math.abs(M - state.targetM), 2)}×. ` +
+          'Adjust the objective, eyepiece or tube length.'
+        : !fits
+          ? `Magnification matches, but the tube is ` +
+            `${fmt(state.tube - state.lengthLimit, 2)} cm ` +
+            'beyond the length limit.'
+          : `Correct. Approximate signed magnification is ` +
+            `${fmt(result.M_total, 2)}×, with tube length ` +
+            `${fmt(state.tube, 1)} cm.`;
+    }
+
+    if (state.type === 'eye') {
+      const typeCorrect =
+        state.choice === 'diverging';
+
+      const powerCorrect =
+        Math.abs(
+          result.P_dioptre - state.targetPower
+        ) < 0.011;
+
+      correct = typeCorrect && powerCorrect;
+
+      explanation = !typeCorrect
+        ? 'Short-sightedness requires a diverging corrective lens for distant viewing.'
+        : !powerCorrect
+          ? `Your lens power differs by ` +
+            `${fmt(Math.abs(result.P_dioptre - state.targetPower), 2)} D. ` +
+            'Choose a focal length corresponding to the eye’s far point.'
+          : `Correct. The focal length is ` +
+            `${fmt(state.lensF, 1)} cm and the power is ` +
+            `${fmt(result.P_dioptre, 2)} D. ` +
+            'The distant object appears at the far point.';
+    }
+
+    attempts++;
+
+    if (!correct) {
+      notify(explanation, 'bad');
+      return;
+    }
+
+    solved = true;
+
+    const points = hinted
+      ? 50
+      : attempts === 1
+        ? 100
+        : attempts === 2
+          ? 75
+          : 50;
+
+    score += points;
+
+    $('scoreHud').textContent = `Score: ${score}`;
+
+    notify(
+      `★ ${explanation} You earned ${points} points.`,
+      'good'
+    );
+
+    $('hintBtn').disabled = true;
+    $('checkBtn').disabled = true;
+    $('nextBtn').classList.remove('hidden');
+    $('nextBtn').textContent =
+      round === 5 ? 'See my stars ★' : 'Next round →';
+
+    redraw();
+  }
+
+  function hint() {
+    if (solved || hinted) return;
+
+    hinted = true;
+    $('hintBtn').disabled = true;
+
+    const hints = {
+      magnifier:
+        'For relaxed viewing, divide the near point of 25 cm by the focal length.',
+      telescope:
+        'Use the magnitude of objective focal length divided by eyepiece focal length. Their sum gives the length.',
+      microscope:
+        'Use |M| ≈ (tube length ÷ objective focal length) × (25 cm ÷ eyepiece focal length).',
+      eye:
+        'A myopic eye needs a diverging lens with a negative focal length matching the far-point distance in magnitude.',
+      telescopeHard:
+        'Try a longer objective with a shorter eyepiece, but check that their sum still fits the length limit.',
+      microscopeHard:
+        'Both lens focal lengths and the tube length affect approximate microscope magnification. Check the tube limit independently.'
+    };
+
+    notify(`Hint: ${hints[state.type]}`, 'info');
+  }
+
+  function finish() {
+    $('game').classList.add('hidden');
+    $('ending').classList.remove('hidden');
+
+    const stars =
+      score >= 510 ? 3 :
+      score >= 390 ? 2 : 1;
+
+    $('starDisplay').textContent =
+      '★'.repeat(stars) +
+      '☆'.repeat(3 - stars);
+
+    $('starDisplay').setAttribute(
+      'aria-label',
+      `${stars} out of 3 stars`
+    );
+
+    $('finalScore').textContent =
+      `${score} / 600 points`;
+
+    $('endNote').textContent =
+      stars === 3
+        ? 'Excellent instrument design. You balanced magnification, focal length and size.'
+        : 'All six optical challenges completed. Replay to improve your design accuracy.';
+  }
+
+  function next() {
+    if (!solved) return;
+
+    if (round === 5) {
+      finish();
+      return;
+    }
+
+    round++;
+    start();
+  }
+
+  function restart() {
+    seed = (seed + 104729) >>> 0;
+    round = 0;
+    score = 0;
+
+    $('game').classList.remove('hidden');
+    $('ending').classList.add('hidden');
+
+    start();
+  }
+
+  $('hintBtn').addEventListener('click', hint);
+  $('checkBtn').addEventListener('click', checkAnswer);
+  $('nextBtn').addEventListener('click', next);
+  $('againBtn').addEventListener('click', restart);
+
+  start();
+})();
+</script>
+</body>
+</html>
