@@ -21,6 +21,8 @@ vi.mock('@/lib/requireCreator', () => ({
     requireCreator: vi.fn(async () => state.isCreator !== false),
 }))
 vi.mock('@/lib/db', () => ({ connectToDatabase: vi.fn(async () => { }) }))
+// Buyer records are read only for shipping on jobs in a fulfilment state (see creatorShippingPrivacy.test.js).
+vi.mock('@/models/User', () => ({ default: { find: vi.fn(() => ({ lean: async () => [] })) } }))
 vi.mock('@/lib/notifications/creatorPrint', () => ({
     notifyCustomerCreatorQuote: vi.fn(async (args) => {
         state.notifyCalls.push(args)

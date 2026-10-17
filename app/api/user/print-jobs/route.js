@@ -3,6 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { connectToDatabase } from "@/lib/db";
 import CustomPrintRequest from "@/models/CustomPrintRequest";
 import { requireCreator } from "@/lib/requireCreator";
+import User from "@/models/User";
+import { creatorMayShip, creatorShippingFields } from "@/lib/privacy/creatorShipping";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +16,7 @@ const JOB_PROJECTION = {
     _id: 0,
     requestId: 1,
     userId: 1,
+    creatorUserId: 1,
     userEmail: 1,
     userName: 1,
     status: 1,
@@ -45,7 +48,15 @@ export async function GET() {
         const jobs = await CustomPrintRequest.find({ creatorUserId: userId }, JOB_PROJECTION)
             .sort({ createdAt: -1 })
             .lean();
-        return NextResponse.json({ jobs });
+        // Buyer shipping details only for my own jobs in a fulfilment state (see lib/privacy/creatorShipping.js).
+        const shipIds = [...new Set(jobs.filter(job => creatorMayShip(job, userId)).map(job => job.userId))];
+        const buyers = shipIds.length ? await User.find({ userId: { $in: shipIds } }, { userId: 1, contact: 1, guestContact: 1, _id: 0 }).lean() : [];
+        const byId = new Map(buyers.map(buyer => [buyer.userId, buyer]));
+        const visible = jobs.map(({ creatorUserId, ...job }) => {
+            const shipping = creatorShippingFields({ ...job, creatorUserId }, userId, byId.get(job.userId));
+            return shipping ? { ...job, shipping } : job;
+        });
+        return NextResponse.json({ jobs: visible });
     } catch (error) {
         console.error("Error listing creator print jobs:", error);
         return NextResponse.json({ error: "Failed to load print jobs" }, { status: 500 });

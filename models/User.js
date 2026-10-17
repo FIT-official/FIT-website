@@ -152,6 +152,8 @@ const UserSchema = new mongoose.Schema({
         address: { type: mongoose.Schema.Types.Mixed },
     }, { _id: false }), default: undefined },
     contact: { type: ContactSchema, required: false, default: undefined },
+    // Optional account area (URA planning area). Server-only: returned to the owner and FIT admin tools, never to creators or public pages.
+    profile: { type: new mongoose.Schema({ area: { type: String, maxlength: 60 } }, { _id: false }), default: undefined },
     usedPromoCodes: { type: [String], default: [] },
     metadata: {
         role: { type: String, default: "Customer", required: true },

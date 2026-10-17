@@ -37,6 +37,7 @@ function PrivacyPage() {
                     <h4 className="font-semibold mt-2">Primary Uses of Personal Information</h4>
                     <ul className="list-disc ml-6">
                         <li>Provide Services: To create/manage your account, process orders, and fulfil requests.</li>
+                        <li>We use your area and address to process orders and assess repair service coverage.</li>
                         <li>Process Payments: To process and confirm payments for products/services.</li>
                         <li>Communicate with You: To send emails about your account, orders, and updates. You may also receive newsletters/promotions if opted-in.</li>
                         <li>Customer Support: To respond to inquiries and provide support.</li>

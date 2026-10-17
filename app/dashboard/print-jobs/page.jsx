@@ -249,6 +249,12 @@ function PrintJobs() {
                             <DottedRow label="Email">{job.userEmail}</DottedRow>
                             <DottedRow label="Requested">{fmtDate(job.createdAt) || 'n/a'}</DottedRow>
                         </section>
+                        {job.shipping && <section>
+                            <h4 className="dash-label mb-1">Ship to</h4>
+                            <DottedRow label="Name">{job.shipping.name || 'n/a'}</DottedRow>
+                            {job.shipping.phone && <DottedRow label="Phone">{job.shipping.phone}</DottedRow>}
+                            <DottedRow label="Address">{[job.shipping.address.street, job.shipping.address.unitNumber, job.shipping.address.city, job.shipping.address.postalCode, job.shipping.address.country].filter(Boolean).join(', ')}</DottedRow>
+                        </section>}
 
                         <section>
                             <h4 className="dash-label mb-1">Model</h4>

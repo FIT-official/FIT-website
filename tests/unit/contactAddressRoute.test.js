@@ -14,7 +14,7 @@ import {
     NO_ADDRESS_DELIVERY_TYPES,
 } from '@/lib/checkoutAddressGate'
 
-const state = vi.hoisted(() => ({ userId: 'user_1', update: null, stripeUpdate: null }))
+const state = vi.hoisted(() => ({ userId: 'user_1', update: null, stripeUpdate: null, areaUpdate: null }))
 
 vi.mock('@clerk/nextjs/server', () => ({
     auth: vi.fn(async () => ({ userId: state.userId })),
@@ -27,6 +27,7 @@ vi.mock('@/models/User', () => ({
             state.update = update
             return { contact: { address: update.$set['contact.address'] } }
         }),
+        updateOne: vi.fn(async (filter, update) => { state.areaUpdate = { filter, update }; return {} }),
     },
 }))
 vi.mock('stripe', () => ({
@@ -45,6 +46,7 @@ beforeEach(() => {
     state.userId = 'user_1'
     state.update = null
     state.stripeUpdate = null
+    state.areaUpdate = null
 })
 
 describe('POST /api/user/contact/address', () => {
@@ -121,5 +123,21 @@ describe('checkoutAddressGate helpers', () => {
         expect(deliveryMismatchReason([{ name: 'A' }, { name: 'Custom 3D Print', deliveryTypeMismatch: true }]))
             .toBe('Pick a delivery option for Custom 3D Print in the cart.')
         expect(deliveryMismatchReason([{ name: 'A' }])).toBeNull()
+    })
+})
+
+describe('POST /api/user/contact/address: account area from the postal code', () => {
+    it('fills an empty account area from a Singapore postal code (approximate, never overwrites)', async () => {
+        const res = await post({ address: { street: '10 Example Road', city: 'Singapore', postalCode: '560123', country: 'Singapore' } })
+        expect(res.status).toBe(200)
+        expect(state.areaUpdate.update).toEqual({ $set: { 'profile.area': 'Ang Mo Kio' } })
+        expect(state.areaUpdate.filter).toEqual({ userId: 'user_1', 'profile.area': { $in: [null, ''] } })
+    })
+    it('does not guess an area for a non-Singapore address', async () => {
+        expect((await post({ address: { street: '1 Main St', city: 'Kuala Lumpur', postalCode: '560123', country: 'Malaysia' } })).status).toBe(200)
+        expect(state.areaUpdate).toBeNull()
+    })
+    it('still rejects an incomplete delivery address (checkout requires one)', async () => {
+        expect((await post({ address: { street: '10 Example Road', country: 'Singapore' } })).status).toBe(400)
     })
 })

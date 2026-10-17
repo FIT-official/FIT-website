@@ -11,6 +11,7 @@ import AccountShell, { ACCOUNT_SECTIONS } from '@/components/Account/AccountShel
 import AccountIdentityHero from '@/components/Account/AccountIdentityHero'
 import AccountOverview from '@/components/Account/AccountOverview'
 import ContactSection from '@/components/Account/ContactSection'
+import AreaSetting from '@/components/Account/AreaSetting'
 import OrderSection from '@/components/Account/OrderSection'
 import ProfileSettings from '@/components/Account/ProfileSettings'
 import SecuritySettings from '@/components/Account/SecuritySettings'
@@ -77,7 +78,7 @@ function Account() {
             {tab === 'security' && (
                 <SecuritySettings user={user} devices={devices} currentSession={currentSession} />
             )}
-            {tab === 'billing' && <ContactSection />}
+            {tab === 'billing' && <><AreaSetting /><ContactSection /></>}
             {tab === 'orders' && <OrderSection />}
             {tab === 'downloads' && <DownloadsSection user={user} isLoaded={isLoaded} />}
         </AccountShell>

@@ -1,4 +1,5 @@
 import FitAddressLine from '@/components/General/FitAddressLine'
+import SoftSignInPrompt from '@/components/General/SoftSignInPrompt'
 import Cart from "./Cart";
 
 export const metadata = {
@@ -24,7 +25,7 @@ export const metadata = {
 
 function CartLayout() {
     return (
-        <><Cart /><FitAddressLine /></>
+        <><SoftSignInPrompt /><Cart /><FitAddressLine /></>
     )
 }
 

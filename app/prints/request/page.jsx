@@ -1,5 +1,6 @@
 'use client'
 import FitAddressLine from '@/components/General/FitAddressLine'
+import SoftSignInPrompt from '@/components/General/SoftSignInPrompt'
 import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import PrintRequestFlow from '@/components/PrintRequestFlow'
@@ -10,5 +11,5 @@ function RequestEntry() {
     ? <PrintRequestFlow /> : <GuidedPrintRequest />
 }
 export default function CustomPrintRequestPage() {
-  return <><Suspense fallback={<p className="p-8 text-sm">Loading…</p>}><RequestEntry /></Suspense><FitAddressLine /></>
+  return <><SoftSignInPrompt /><Suspense fallback={<p className="p-8 text-sm">Loading…</p>}><RequestEntry /></Suspense><FitAddressLine /></>
 }

@@ -2,8 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { SignInButton, useUser } from '@clerk/nextjs'
-import { EMPTY_REPAIR_BRIEF, REPAIR_AUDIENCES, REPAIR_PHOTO_LIMIT, repairPhotoError, singaporeToday, validateRepairBrief, validateRepairSubmission } from '@/lib/printerRepair/validate'
+import { EMPTY_REPAIR_BRIEF, REPAIR_AUDIENCES, REPAIR_HANDOVERS, REPAIR_PHOTO_LIMIT, repairPhotoError, singaporeToday, validateRepairBrief, validateRepairSubmission } from '@/lib/printerRepair/validate'
 import { REPAIR_BRANDS, REPAIR_FEEDERS, REPAIR_GUIDANCE, REPAIR_MODELS, reconcileRepairSelection, repairIssueOptions, repairSpecificOptions } from '@/lib/printerRepair/options'
+import { PLANNING_AREAS, areaFromPostalCode, isSgPostalCode } from '@/lib/location/sgAreas'
+import SoftSignInPrompt from '@/components/General/SoftSignInPrompt'
+import useAccountProfile from '@/components/General/useAccountProfile'
+import RepairEstimates from './RepairEstimates'
 import styles from './PrinterRepairFlow.module.css'
 
 const STEPS = ['Your printer', 'Photos & checks', 'Contact & review']
@@ -63,6 +67,21 @@ export default function PrinterRepairFlow() {
   const account = useRef(null)
   account.current = isSignedIn ? user?.id : null
   const locked = Boolean(pending || busy)
+  // Signed-in prefill (own profile only): phone, saved area and a saved Singapore address. Never overwrites typed values.
+  const profile = useAccountProfile(), autoArea = useRef('')
+  useEffect(() => {
+    if (!profile) return
+    const saved = profile.address && isSgPostalCode(profile.address.postalCode) ? profile.address : {}
+    setBrief(current => ({ ...current, phone: current.phone || profile.phone || '', area: current.area || profile.area || '', street: current.street || saved.street || '', unitNumber: current.unitNumber || saved.unitNumber || '', postalCode: current.postalCode || saved.postalCode || '' }))
+  }, [profile])
+  // A postal code fills the area from the offline sector table (approximate). A typed or chosen area always wins.
+  function withPostalArea(next, field, current) {
+    if (field === 'area') { autoArea.current = ''; return next }
+    if (field !== 'postalCode') return next
+    const derived = areaFromPostalCode(next.postalCode)
+    if (derived && (!current.area || current.area === autoArea.current)) { autoArea.current = derived; return { ...next, area: derived } }
+    return next
+  }
 
   useEffect(() => {
     const reference = new URL(window.location.href).searchParams.get('request')
@@ -117,7 +136,7 @@ export default function PrinterRepairFlow() {
     if (['brandChoice', 'brandOther', 'modelChoice', 'model', 'feeder', 'issue'].includes(field)) {
       const result = reconcileRepairSelection(brief, field, value)
       setBrief(result.brief); setSelectionNotice(result.notice); setErrors({})
-    } else setBrief(current => ({ ...current, [field]: value })); setErrors(current => ({ ...current, [field]: undefined })); setMessage('') }
+    } else setBrief(current => withPostalArea({ ...current, [field]: value }, field, current)); setErrors(current => ({ ...current, [field]: undefined })); setMessage('') }
   function showErrors(next) { setErrors(next); requestAnimationFrame(() => errorSummary.current?.focus()) }
   function nextStep(event) {
     // React can reuse this button as the final submit control. Prevent the
@@ -270,6 +289,7 @@ export default function PrinterRepairFlow() {
         {receipt.status !== 'withdrawn' && (!withdrawing ? <button className={styles.secondary} onClick={() => setWithdrawing(true)}>Withdraw request</button> : <div className={styles.confirm}><p>Withdraw this assessment request?</p><div className={styles.actions}><button disabled={Boolean(busy) || !isSignedIn} className={styles.primary} onClick={withdraw}>{busy ? 'Withdrawing…' : 'Yes, withdraw request'}</button><button disabled={Boolean(busy)} className={styles.secondary} onClick={() => setWithdrawing(false)}>Keep request</button></div></div>)}
         {message && <p role="alert" className={styles.error}>{message}</p>}
       </div> : <form onSubmit={submit} noValidate>
+        {!savedReference && <SoftSignInPrompt onBeforeSignIn={keepDraftForSignIn} className={styles.signIn} />}
         {savedReference && isLoaded && !isSignedIn && <div className={styles.signIn}><p>Sign in to view this assessment request.</p><SignInButton mode="modal" forceRedirectUrl={signInReturnUrl} signUpForceRedirectUrl={signInReturnUrl}><button type="button" className={styles.secondary}>Sign in to view request</button></SignInButton></div>}
         <p className={styles.stepCount}>Step {step + 1} of 3</p><ol className={styles.steps} aria-label="Request steps">{STEPS.map((title, index) => <li key={title} aria-current={index === step ? 'step' : undefined}><p>{title}</p></li>)}</ol>
         <h2 className={styles.stepHeading} ref={heading} tabIndex={-1}>{STEPS[step]}</h2>
@@ -291,8 +311,12 @@ export default function PrinterRepairFlow() {
         {step === 2 && <div className={styles.fields}>
           <div className={styles.twoColumns}>{field('contactName', 'Your name', { required: true, maxLength: 100, autoComplete: 'name' })}{field('email', 'Email', { required: true, type: 'email', maxLength: 254, autoComplete: 'email' })}</div>
           {field('phone', 'Phone', { type: 'tel', maxLength: 40, autoComplete: 'tel' })}{field('audience', 'Who is the printer for?', { required: true, select: REPAIR_AUDIENCES })}{field('organisation', 'School or organisation', { maxLength: 120, autoComplete: 'organization' })}
-          {field('preferredDate', 'Preferred assessment date', { type: 'date', hint: 'A preference only. FIT will discuss availability; no slot is reserved.' })}{field('handover', 'Handover arrangement', { required: true, select: [['discuss_with_fit', 'Discuss with FIT']], hint: 'Agree the location and method with FIT before bringing or sending a printer.' })}
-          <div className={styles.review}><h3>Check your request</h3><dl className={styles.summary}><div><dt>Printer</dt><dd>{brief.brand} {brief.model}</dd></div><div><dt>Issue</dt><dd>{issueLabel}</dd></div><div><dt>Symptoms</dt><dd className={styles.multiline}>{brief.details}</dd></div>{brief.errorCode && <div><dt>Error message</dt><dd>{brief.errorCode}</dd></div>}{brief.troubleshooting && <div><dt>Already tried</dt><dd className={styles.multiline}>{brief.troubleshooting}</dd></div>}<div><dt>Photos</dt><dd>{pending ? pending.photoAssetIds.length : photos.length}</dd></div></dl>{photos.length > 0 && <div className={styles.reviewPhotos}>{photos.map(photo => <div key={photo.id} className={styles.thumbnail} style={{ backgroundImage: `url("${photo.preview}")` }} role="img" aria-label={`Review photo ${photo.file.name}`} />)}<button type="button" className={styles.secondary} disabled={locked} onClick={() => { setStep(1); requestAnimationFrame(() => heading.current?.focus()) }}>Edit photos</button></div>}</div>
+          {field('preferredDate', 'Preferred assessment date', { type: 'date', hint: 'A preference only. FIT will discuss availability; no slot is reserved.' })}
+          <RepairEstimates />
+          {field('handover', 'Drop-off or home visit?', { required: true, select: REPAIR_HANDOVERS, hint: 'A home visit needs your full address and postal code. FIT confirms the arrangement with you before any drop-off or visit.' })}
+          {brief.handover === 'home_visit' && <div className={styles.twoColumns}>{field('street', 'Street address', { required: true, maxLength: 200, autoComplete: 'street-address' })}{field('unitNumber', 'Unit number', { maxLength: 20, hint: 'For example #05-12.' })}</div>}
+          <div className={styles.twoColumns}>{field('postalCode', 'Postal code', { required: brief.handover === 'home_visit', maxLength: 10, autoComplete: 'postal-code', hint: 'A Singapore postal code fills in your area (approximate; change it if needed).' })}{field('area', 'Where do you live?', { select: PLANNING_AREAS.map(area => [area, area]), placeholder: 'Choose an area', hint: 'Helps FIT assess repair coverage. Seen by FIT only.' })}</div>
+          <div className={styles.review}><h3>Check your request</h3><dl className={styles.summary}><div><dt>Printer</dt><dd>{brief.brand} {brief.model}</dd></div><div><dt>Issue</dt><dd>{issueLabel}</dd></div><div><dt>Symptoms</dt><dd className={styles.multiline}>{brief.details}</dd></div>{brief.errorCode && <div><dt>Error message</dt><dd>{brief.errorCode}</dd></div>}{brief.troubleshooting && <div><dt>Already tried</dt><dd className={styles.multiline}>{brief.troubleshooting}</dd></div>}<div><dt>Photos</dt><dd>{pending ? pending.photoAssetIds.length : photos.length}</dd></div><div><dt>Drop-off or visit</dt><dd>{REPAIR_HANDOVERS.find(([key]) => key === brief.handover)?.[1]}</dd></div>{brief.handover === 'home_visit' && <div><dt>Visit address</dt><dd>{[brief.street, brief.unitNumber, brief.postalCode].filter(Boolean).join(', ')}</dd></div>}</dl>{photos.length > 0 && <div className={styles.reviewPhotos}>{photos.map(photo => <div key={photo.id} className={styles.thumbnail} style={{ backgroundImage: `url("${photo.preview}")` }} role="img" aria-label={`Review photo ${photo.file.name}`} />)}<button type="button" className={styles.secondary} disabled={locked} onClick={() => { setStep(1); requestAnimationFrame(() => heading.current?.focus()) }}>Edit photos</button></div>}</div>
           <p className={styles.hint}>We will use your contact details to respond to this request. Photos are uploaded privately after you choose to send. <a href="/privacy">Read our privacy policy</a>.</p>
           {!isLoaded ? <p role="status">Loading your account…</p> : !isSignedIn && <div className={styles.signIn}><p>Sign in to send your request and keep its photos private. Your draft stays here while you sign in.</p><SignInButton mode="modal" forceRedirectUrl={signInReturnUrl} signUpForceRedirectUrl={signInReturnUrl}><button type="button" className={styles.secondary} onClick={keepDraftForSignIn}>Sign in to continue</button></SignInButton></div>}
         </div>}

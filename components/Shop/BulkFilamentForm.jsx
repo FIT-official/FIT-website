@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import FilamentColourPreview from './FilamentColourPreview'
+import AreaSelect from '@/components/Location/AreaSelect'
 import { bulkEmailCopy } from '@/lib/bulkEmailCopy'
 import { BAMBU_PRICE_NOTICE, bulkPricingContext, bulkListUnitCents, BULK_BANDS, BULK_LADDERS, BULK_PRICE_NOTICE, BULK_CONSENT, bulkTier, priceBulkLines } from '@/lib/bulkFilamentConfig'
 import { filamentOptionLabel } from '@/lib/filamentLabels'
@@ -24,12 +25,14 @@ function selection(product, options) {
   const ladder = selected.find(o => o?.ladder)?.ladder
   return { stock: bulkSelectionStock(product, options), limit: bulkSelectionLimit(product, options), ladder, listUnitCents: bulkListUnitCents(product, options), colour: selected.find(o => product?.types.find(t => t.id === product.colourTypeId)?.options.includes(o)) }
 }
-export default function BulkFilamentForm() {
+export default function BulkFilamentForm({ prefill } = {}) {
   const [catalogue, setCatalogue] = useState([]), [checkedAt, setCheckedAt] = useState(''), [stockSource, setStockSource] = useState('')
   const [loading, setLoading] = useState(true), [error, setError] = useState(''), [busy, setBusy] = useState(false)
   const [productId, setProductId] = useState(''), [options, setOptions] = useState({})
   const [lines, setLines] = useState([]), [pending, setPending] = useState(null), [receipt, setReceipt] = useState(null)
-  const [customer, setCustomer] = useState({ name: '', email: '', phone: '', organisation: '' })
+  const [customer, setCustomer] = useState({ name: '', email: '', phone: '', organisation: '', area: '' })
+  const profile = prefill || null // signed-in prefill from BulkFilamentFormWithProfile
+  useEffect(() => { if (profile) setCustomer(c => ({ ...c, name: c.name || profile.name || '', email: c.email || profile.email || '', phone: c.phone || profile.phone || '', area: c.area || profile.area || '' })) }, [profile])
   const [fulfilment, setFulfilment] = useState('collection'), [address, setAddress] = useState(''), [notes, setNotes] = useState('')
   const [consent, setConsent] = useState(false)
   const [confirmReview, setConfirmReview] = useState(false), [clientRequestId, setClientRequestId] = useState('')
@@ -245,6 +248,7 @@ export default function BulkFilamentForm() {
         <h2 className="mt-9">2. Your contact and fulfilment preference</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {[['name','Name','text'],['email','Email','email'],['phone','Phone (optional)','tel'],['organisation','Organisation (optional)','text']].map(([key,label,type]) => <label key={key} className="block text-sm font-medium">{label}<input className={inputClass + ' mt-2'} type={type} required={key === 'name' || key === 'email'} autoComplete={key === 'name' ? 'name' : key === 'phone' ? 'tel' : key === 'email' ? 'email' : 'organization'} maxLength={key === 'email' ? 254 : key === 'phone' ? 40 : key === 'organisation' ? 160 : 120} value={customer[key]} onChange={e => setCustomer({ ...customer, [key]: e.target.value })}/></label>)}
+          <AreaSelect id="bulk-area" label="Where do you live?" value={customer.area} onChange={area => setCustomer({ ...customer, area })} className="block text-sm font-medium" selectClassName={inputClass + ' mt-2'} hint="Seen by FIT only." />
         </div>
         <label className="mt-5 block text-sm font-medium">One fulfilment preference for this request<select className={inputClass + ' mt-2'} value={fulfilment} onChange={e => setFulfilment(e.target.value)}><option value="collection">Collection — details to confirm</option><option value="delivery">Delivery enquiry — charge and timing to confirm</option></select></label>
         {fulfilment === 'delivery' && <label className="mt-4 block text-sm font-medium">Delivery address<textarea className={inputClass + ' mt-2'} required maxLength={1000} value={address} onChange={e => setAddress(e.target.value)}/></label>}

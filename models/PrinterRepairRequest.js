@@ -9,7 +9,10 @@ const briefSchema = new mongoose.Schema({
   errorCode: { type: String, maxlength: 200 }, troubleshooting: { type: String, maxlength: 2000 },
   contactName: { type: String, required: true, maxlength: 100 }, email: { type: String, required: true, maxlength: 254 },
   phone: { type: String, maxlength: 40 }, audience: { type: String, required: true }, organisation: { type: String, maxlength: 120 },
-  preferredDate: { type: String, default: '' }, handover: { type: String, enum: ['discuss_with_fit'], required: true },
+  preferredDate: { type: String, default: '' }, handover: { type: String, enum: ['discuss_with_fit', 'drop_off', 'home_visit'], required: true },
+  // Optional location (required server-side only for home visits). FIT admin only; never shown to creators.
+  area: { type: String, maxlength: 60, default: '' }, street: { type: String, maxlength: 200, default: '' },
+  unitNumber: { type: String, maxlength: 20, default: '' }, postalCode: { type: String, maxlength: 10, default: '' },
 }, { _id: false })
 const emailSchema = new mongoose.Schema({
   status: { type: String, enum: ['pending', 'sending', 'accepted', 'failed', 'uncertain', 'not_configured'], required: true },

@@ -4,6 +4,7 @@ import User from "@/models/User";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import Stripe from "stripe";
 import { isAddressComplete, pickAddressFields } from "@/lib/checkoutAddressGate";
+import { areaFromPostalCode } from "@/lib/location/sgAreas";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -36,6 +37,12 @@ export async function POST(req) {
             { $set: { "contact.address": address } },
             { new: true, upsert: true }
         );
+        // Fill the optional account area from the postal code (offline sector table, approximate) only when none is saved.
+        const derivedArea = /^(sg|singapore)$/i.test(address.country) ? areaFromPostalCode(address.postalCode) : "";
+        if (derivedArea && !user?.profile?.area) {
+            try { await User.updateOne({ userId, "profile.area": { $in: [null, ""] } }, { $set: { "profile.area": derivedArea } }); }
+            catch (error) { console.error("Area auto-fill skipped:", error?.message); }
+        }
 
         const client = await clerkClient();
         const clerkUser = await client.users.getUser(userId);

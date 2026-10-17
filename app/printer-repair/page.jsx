@@ -1,5 +1,6 @@
 import FitAddressLine from '@/components/General/FitAddressLine'
 import PrinterRepairFlow from '@/components/Services/PrinterRepairFlow'
+import RepairEstimates from '@/components/Services/RepairEstimates'
 import Link from 'next/link'
 import { buildPageMetadata, PRIVATE_PAGE_ROBOTS } from '@/lib/seo/metadata'
 import { absoluteUrl } from '@/lib/seo/site'
@@ -45,6 +46,7 @@ export default function PrinterRepairPage() {
         <div><h3>What details should I include?</h3><p>Describe when the fault occurs, the error message and any checks you have tried. Tell us whether an external filament feeder is installed. You do not need to diagnose the failed part.</p></div>
         <div><h3>Can I send a request without photos?</h3><p>Yes. Photos are optional. If photo uploads are unavailable, describe the fault and discuss photos with FIT.</p></div>
         <div><h3>Does sending a request book a repair?</h3><p>Sending creates an assessment request. Your preferred date is a preference, not a reserved slot. Agree support, handover, proposed work and any fee with FIT before proceeding.</p></div>
+        <div><h3>How much does a repair cost?</h3><RepairEstimates className="mt-2" /></div>
       </div>
       <p className={styles.links}><Link href="/blog/3d-printer-repair">Read the 3D printer repair and maintenance guide</Link><Link href="/blog/3d-printing-filament-types-guide">Compare filament materials</Link></p>
     </section>

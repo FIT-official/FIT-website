@@ -28,7 +28,7 @@ export async function POST(req) {
         }
         const users = await User.find(
             { "orderHistory.cartItem.productId": { $in: productIds } },
-            { userId: 1, orderHistory: 1, contact: 1, _id: 0 }
+            { userId: 1, orderHistory: 1, contact: 1, profile: 1, _id: 0 }
         );
 
         const client = await clerkClient()
@@ -41,6 +41,7 @@ export async function POST(req) {
                     firstName: clerkUser.firstName,
                     emailAddresses: clerkUser.emailAddresses,
                     contact: u.contact,
+                    area: u.profile?.area || '', // admin-only route
                 };
             } catch (e) {
                 return {
@@ -48,6 +49,7 @@ export async function POST(req) {
                     firstName: null,
                     emailAddresses: [],
                     contact: u.contact,
+                    area: u.profile?.area || '', // admin-only route
                 };
             }
         }));
