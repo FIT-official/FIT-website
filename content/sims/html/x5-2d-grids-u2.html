@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Remote Sensing Unmix | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms;--accent:var(--lvl-uni);--tint:var(--lvl-uni-tint);--on:var(--lvl-uni-on)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font:16px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.shell{max-width:1300px;margin:auto;padding:16px}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin:14px 0;font-weight:800}
+h2{font-size:20px;margin:0 0 10px}
+p{margin:8px 0}
+.top,.hud,.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:space-between}
+.badge,.chip{border:2px solid #111;border-radius:999px;padding:6px 12px;font-weight:800}
+.badge{background:var(--accent);color:var(--on);font-size:12px;text-transform:uppercase}
+.chip{background:white}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:18px}
+.stack{display:grid;gap:14px;align-content:start;min-width:0}
+.card{border:2px solid #111;border-radius:24px;padding:14px;background:white;box-shadow:var(--sh-2);min-width:0}
+button,input,select{font:inherit;min-height:44px;min-width:44px;border:2px solid #111;border-radius:999px;padding:8px 13px;background:white;color:#111;user-select:none;-webkit-tap-highlight-color:transparent}
+button{font-weight:750;cursor:pointer}
+button:active{transform:translateY(2px)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button:focus:not(:focus-visible),input:focus:not(:focus-visible),select:focus:not(:focus-visible){outline:none}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+input[type=number]{width:105px;font-size:16px}
+input[type=range]{min-height:44px;cursor:pointer;accent-color:var(--accent)}
+select{min-height:44px;max-width:100%;padding:9px 13px}
+#minus,#plus{min-width:48px;min-height:44px;padding:8px 12px}
+.gridwrap{overflow:auto;max-width:100%}
+.heat{display:grid;gap:4px;width:max-content}
+.cell{width:48px;height:48px;min-width:48px;min-height:48px;padding:0;border-radius:8px;display:grid;place-items:center;font-size:13px}
+.cell:focus-visible{outline:3px solid #1F66E5}
+.feedback{min-height:28px;font-weight:750}
+.good{color:#1E9E5A}
+.bad{color:#D92D20}
+.muted{color:#6B6B6B}
+svg{width:100%;height:auto;display:block;max-height:280px}
+details{border:2px solid #111;border-radius:16px;padding:12px;background:var(--fit-sunken)}
+summary{cursor:pointer;font-weight:800;min-height:44px;display:flex;align-items:center}
+.hidden{display:none}
+.end{text-align:center;padding:30px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(360px,.9fr)}}
+@media(max-width:390px){.shell{padding:12px}.card{padding:12px}.controls{gap:8px}#minus,#plus{min-width:48px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="top"><span class="badge">University (later years)</span><div class="hud"><span class="chip" id="round">Round 1/6</span><span class="chip" id="score">Score: 0</span></div></header>
+<h1>Remote Sensing Unmix</h1>
+<p>Estimate channel contributions and assess feature area across resolutions.</p>
+<section id="play">
+<div class="layout">
+<div class="stack">
+<article class="card"><h2 id="title">RGB luma</h2><p id="question"></p><p class="muted" id="assumption"></p><div class="gridwrap"><div id="scene" class="heat"></div></div></article>
+<article class="card"><h2>Two-channel feature space</h2><svg id="space" viewBox="0 0 390 235" role="img" aria-label="Endmember vectors, measured pixel and player mixture point"></svg><p class="muted" id="spaceinfo"></p></article>
+<article class="card"><h2>Current-resolution scene</h2><div class="gridwrap"><div id="coarse" class="heat"></div></div><p id="resolution"></p></article>
+<article class="card"><h2>Channel values</h2><svg id="channels" viewBox="0 0 310 175" role="img" aria-label="Input RGB channel levels and output luma"></svg></article>
+</div>
+<div class="stack">
+<article class="card"><h2>Set your estimate</h2><div class="controls"><label for="a" id="alabel">Luma Y</label><button id="minus" aria-label="Decrease estimate">−</button><input id="a" type="number" step="0.1" value="80"><button id="plus" aria-label="Increase estimate">+</button><button id="check" class="check">Check</button><button id="hint">Hint −10 points</button></div><div class="controls"><label for="b">Second abundance</label><input id="b" type="range" min="0" max="1" step="0.01" value="0.2"><span id="bv">0.20</span></div><div class="controls"><label for="factor">Resolution factor</label><select id="factor"><option value="1">1 × 1</option><option value="2">2 × 2</option><option value="3">3 × 3</option></select><label for="pixel">Pixel width (m)</label><select id="pixel"><option value="0.5">0.50 m</option><option value="1">1.00 m</option><option value="2">2.00 m</option></select></div><p id="feedback" class="feedback" aria-live="polite"></p><p id="tries" class="muted">First try: 100 points</p></article>
+<article class="card"><h2>Computed values</h2><p id="detail"></p><p id="result"></p><p class="muted">Area uses the number of foreground pixels multiplied by the square of pixel width.</p></article>
+<article class="card"><svg viewBox="0 0 320 90" role="img" aria-label="Two materials contribute to a measured pixel"><g stroke="#111" stroke-width="3" stroke-linejoin="round"><rect x="5" y="12" width="55" height="48" fill="#FFC83D"/><rect x="5" y="12" width="27" height="48" fill="#2EC4A6"/><path d="M67 36h25l-5-5m5 5-5 5" fill="none"/><rect x="100" y="12" width="55" height="48" fill="#E2ECFD"/><path d="M127 12v48" fill="none"/></g><text x="177" y="28" font-size="12" fill="#111">mixed</text><text x="177" y="45" font-size="12" fill="#111">measurement</text></svg><p class="muted">Concept: a mixed pixel can contain several endmembers.</p></article>
+<details><summary>The maths</summary><p>BT.601 luma: Y = 0.299R + 0.587G + 0.114B. R, G and B are channel levels; Y uses the same level scale.</p><p>Linear mixture: s = M a. For a 2 × 2 matrix, solve a = M⁻¹s. When the determinant is near zero, the endmembers are indistinguishable numerically.</p><p>Ground area: A = N f², where N is foreground pixel count and f is pixel width in metres.</p><p>Assumption: pixels are square and the classified scene represents the mapped ground surface.</p></details>
+</div>
+</div>
+</section>
+<section id="end" class="card end hidden"><h2>Session complete</h2><p id="stars"></p><p id="final"></p><button class="check" id="again">Play again</button></section>
+</main>
+<script>
+/* FIT-CALC-BEGIN x5_2d_grids */
+const FITCalcX5 = (function () {
+  'use strict';
+
+  // FIT integration: preserve error schema and lower_snake_case reasons.
+  const fail = (error, reason) => ({
+    error,
+    reason: /^[A-Z][A-Z0-9_]*$/.test(reason)
+      ? reason.toLowerCase()
+      : reason
+  });
+  const mathError = reason => fail('MathError', reason);
+  const constraint = reason => fail('ConstraintViolation', reason);
+  const unsupported = reason => fail('NotSupported', reason);
+
+  function validImage(image) {
+    if (!Array.isArray(image) || image.length > 128) return false;
+    if (image.length === 0) return true;
+    if (!Array.isArray(image[0]) || image[0].length > 128) return false;
+    const width = image[0].length;
+    return image.every(row => Array.isArray(row) &&
+      row.length === width &&
+      row.every(v => typeof v === 'number' && Number.isFinite(v)));
+  }
+
+  function imageError(image) {
+    if (!validImage(image)) {
+      return constraint('image_exceeds_128x128');
+    }
+    return null;
+  }
+
+  function finite(value) {
+    return typeof value === 'number' && Number.isFinite(value);
+  }
+
+  function rectangular(image) {
+    return image.length > 0 && image[0].length > 0;
+  }
+
+  function cloneGrid(image) {
+    return image.map(row => row.slice());
+  }
+
+  /**
+   * True 2-D convolution.
+   * Inputs: image, a rectangular numeric row-major grid; kernel, an odd
+   * rectangular numeric grid no larger than 5 x 5; mode, valid,
+   * same_zero or same_replicate. Grid values are dimensionless unless
+   * the caller defines their physical units.
+   * Outputs: {out}, the convolved numeric grid at full precision.
+   * Errors: ConstraintViolation/image_exceeds_128x128,
+   * ConstraintViolation/kernel_must_be_odd_max_5x5,
+   * NotSupported/unsupported_convolution_mode.
+   * Hand check: [[1,2,3],[4,5,6],[7,8,9]] convolved with the
+   * 1 x 1 kernel [[2]] in valid mode gives [[2,4,6],[8,10,12],[14,16,18]].
+   */
+  function convolve(input) {
+    const image = input && input.image;
+    const kernel = input && input.kernel;
+    const mode = input && input.mode;
+    const ie = imageError(image);
+    if (ie) return ie;
+    if (!Array.isArray(kernel) || !kernel.length ||
+        !kernel.every(row => Array.isArray(row) && row.length === kernel[0].length) ||
+        kernel.length > 5 || kernel[0].length > 5 ||
+        kernel.length % 2 === 0 || kernel[0].length % 2 === 0 ||
+        !kernel.every(row => row.every(finite))) {
+      return constraint('kernel_must_be_odd_max_5x5');
+    }
+    if (!['valid', 'same_zero', 'same_replicate'].includes(mode)) {
+      return unsupported('unsupported_convolution_mode');
+    }
+    if (!rectangular(image)) return { out: [] };
+    const h = image.length, w = image[0].length;
+    const kh = kernel.length, kw = kernel[0].length;
+    const py = Math.floor(kh / 2), px = Math.floor(kw / 2);
+    const oh = mode === 'valid' ? Math.max(0, h - kh + 1) : h;
+    const ow = mode === 'valid' ? Math.max(0, w - kw + 1) : w;
+    const out = [];
+    for (let y = 0; y < oh; y++) {
+      const row = [];
+      for (let x = 0; x < ow; x++) {
+        let sum = 0;
+        for (let ky = 0; ky < kh; ky++) {
+          for (let kx = 0; kx < kw; kx++) {
+            let iy = y + ky - (mode === 'valid' ? 0 : py);
+            let ix = x + kx - (mode === 'valid' ? 0 : px);
+            if (mode === 'same_replicate') {
+              iy = Math.max(0, Math.min(h - 1, iy));
+              ix = Math.max(0, Math.min(w - 1, ix));
+            }
+            if (iy >= 0 && iy < h && ix >= 0 && ix < w) {
+              sum += image[iy][ix] * kernel[kh - 1 - ky][kw - 1 - kx];
+            }
+          }
+        }
+        if (!finite(sum)) return mathError('non_finite_result');
+        row.push(sum);
+      }
+      out.push(row);
+    }
+    return { out };
+  }
+
+  /**
+   * Binary thresholding, with equality assigned to the foreground.
+   * Inputs: image (numeric grid), T (threshold in the same units as pixels).
+   * Outputs: {binary, count_on}; binary values are exact integers 0 or 1.
+   * Errors: ConstraintViolation/image_exceeds_128x128,
+   * MathError/threshold_not_finite.
+   * Hand check: [[0,2],[2,3]], T=2 gives [[0,1],[1,1]], count_on=3.
+   */
+  function threshold(input) {
+    const image = input && input.image, T = input && input.T;
+    const ie = imageError(image);
+    if (ie) return ie;
+    if (!finite(T)) return mathError('threshold_not_finite');
+    let count_on = 0;
+    const binary = image.map(row => row.map(v => {
+      const b = v >= T ? 1 : 0;
+      count_on += b;
+      return b;
+    }));
+    return { binary, count_on };
+  }
+
+  /**
+   * Otsu threshold for an 8-bit grayscale image.
+   * Inputs: image, integer pixel levels 0..255.
+   * Outputs: {T, between_class_var}; T is the smallest threshold attaining
+   * the maximum variance, with class 0 defined as levels <= t.
+   * Errors: ConstraintViolation/image_exceeds_128x128,
+   * ConstraintViolation/pixel_level_out_of_range,
+   * MathError/empty_image.
+   * Hand check: [[0,0,255,255]] has a maximum between-class variance
+   * of 16256.25; the smallest maximising threshold is 0.
+   */
+  function otsu(input) {
+    const image = input && input.image;
+    const ie = imageError(image);
+    if (ie) return ie;
+    if (!rectangular(image)) return mathError('empty_image');
+    const hist = Array(256).fill(0);
+    let n = 0, total = 0;
+    for (const row of image) for (const v of row) {
+      if (!Number.isInteger(v) || v < 0 || v > 255) {
+        return constraint('pixel_level_out_of_range');
+      }
+      hist[v]++; n++; total += v;
+    }
+    if (hist.filter(Boolean).length === 1) {
+      return { T: 0, between_class_var: 0 };
+    }
+    let leftN = 0, leftSum = 0, best = -1, bestT = 0;
+    for (let t = 0; t < 255; t++) {
+      leftN += hist[t];
+      leftSum += t * hist[t];
+      const rightN = n - leftN;
+      if (!leftN || !rightN) continue;
+      const delta = leftSum / leftN - (total - leftSum) / rightN;
+      const variance = (leftN / n) * (rightN / n) * delta * delta;
+      if (variance > best) {
+        best = variance;
+        bestT = t;
+      }
+    }
+    return { T: bestT, between_class_var: Math.max(0, best) };
+  }
+
+  /**
+   * Connected-component labelling of non-zero pixels.
+   * Inputs: image (numeric grid), connectivity (4 or 8 neighbours).
+   * Outputs: {components, areas, labels}.
+   * components is an integer count of distinct foreground components.
+   * areas contains component sizes sorted largest first.
+   * labels is a row-major labelled grid with 0 as background and
+   * positive integer labels assigned in row-major discovery order.
+   * Errors: ConstraintViolation/image_exceeds_128x128,
+   * ConstraintViolation/connectivity_must_be_4_or_8,
+   * RuntimeError/too_many_states.
+   * Hand check: [[1,0],[0,1]] gives components=2 and areas=[1,1]
+   * with 4-connectivity; components=1 and areas=[2] with
+   * 8-connectivity.
+   */
+  function segment(input) {
+    const image = input && input.image;
+    const connectivity = input && input.connectivity;
+    const ie = imageError(image);
+    if (ie) return ie;
+    if (connectivity !== 4 && connectivity !== 8) {
+      return constraint('connectivity_must_be_4_or_8');
+    }
+
+    const h = image.length;
+    const w = h ? image[0].length : 0;
+    const labels = Array.from({ length: h }, () => Array(w).fill(0));
+    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+    if (connectivity === 8) {
+      dirs.push([-1, -1], [-1, 1], [1, -1], [1, 1]);
+    }
+
+    const areas = [];
+    let label = 0;
+    let visits = 0;
+
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (!image[y][x] || labels[y][x]) continue;
+
+        label++;
+        let area = 0;
+        const queue = [[y, x]];
+        labels[y][x] = label;
+
+        for (let q = 0; q < queue.length; q++) {
+          if (++visits > 16384) {
+            return fail('RuntimeError', 'too_many_states');
+          }
+
+          const [cy, cx] = queue[q];
+          area++;
+
+          for (const [dy, dx] of dirs) {
+            const ny = cy + dy;
+            const nx = cx + dx;
+
+            if (ny >= 0 && ny < h &&
+                nx >= 0 && nx < w &&
+                image[ny][nx] &&
+                !labels[ny][nx]) {
+              labels[ny][nx] = label;
+              queue.push([ny, nx]);
+            }
+          }
+        }
+
+        areas.push(area);
+      }
+    }
+
+    areas.sort((a, b) => b - a);
+    return { components: label, areas, labels };
+  }
+
+  /**
+   * Mean-pool non-overlapping square blocks.
+   * Inputs: image (numeric grid), factor (positive integer), pixel_size_m
+   * (positive input pixel width in metres).
+   * Outputs: {out, pixel_size_m}; each output value is the block mean.
+   * Errors: ConstraintViolation/image_exceeds_128x128,
+   * ConstraintViolation/factor_must_be_positive_integer,
+   * ConstraintViolation/size_not_divisible_by_factor,
+   * ConstraintViolation/pixel_size_must_be_positive.
+   * Hand check: [[1,3],[5,7]], factor=2, pixel_size_m=0.5 gives
+   * out=[[4]], pixel_size_m=1.
+   */
+  function downsample(input) {
+    const image = input && input.image;
+    const factor = input && input.factor;
+    const pixel_size_m = input && input.pixel_size_m;
+    const ie = imageError(image);
+    if (ie) return ie;
+    if (!Number.isInteger(factor) || factor < 1) {
+      return constraint('factor_must_be_positive_integer');
+    }
+    if (!finite(pixel_size_m) || pixel_size_m <= 0) {
+      return constraint('pixel_size_must_be_positive');
+    }
+    if (!rectangular(image)) return { out: [], pixel_size_m: pixel_size_m * factor };
+    const h = image.length, w = image[0].length;
+    if (h % factor || w % factor) return constraint('size_not_divisible_by_factor');
+    const out = [];
+    for (let y = 0; y < h; y += factor) {
+      const row = [];
+      for (let x = 0; x < w; x += factor) {
+        let sum = 0;
+        for (let dy = 0; dy < factor; dy++) {
+          for (let dx = 0; dx < factor; dx++) sum += image[y + dy][x + dx];
+        }
+        const mean = sum / (factor * factor);
+        if (!finite(mean)) return mathError('non_finite_result');
+        row.push(mean);
+      }
+      out.push(row);
+    }
+    return { out, pixel_size_m: pixel_size_m * factor };
+  }
+
+  /**
+   * Convert one RGB pixel to BT.601 luma.
+   * Inputs: mode ('bt601'), rgb [R,G,B], channel levels in the same
+   * numeric scale (normally 0..255).
+   * Outputs: {Y}, in that same scale.
+   * Errors: NotSupported/unsupported_channel_mix_mode,
+   * ConstraintViolation/rgb_must_have_three_finite_channels.
+   * Hand check: [100,150,200] gives Y=140.75.
+   */
+  function channel_mix(input) {
+    if (!input || input.mode !== 'bt601') {
+      return unsupported('unsupported_channel_mix_mode');
+    }
+    const rgb = input.rgb;
+    if (!Array.isArray(rgb) || rgb.length !== 3 || !rgb.every(finite)) {
+      return constraint('rgb_must_have_three_finite_channels');
+    }
+    const Y = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+    return finite(Y) ? { Y } : mathError('non_finite_result');
+  }
+
+  /**
+   * Solve the exact 2 x 2 linear mixture measured = M * abundance.
+   * Inputs: M, a finite 2 x 2 matrix; measured, two finite measurements.
+   * Outputs: {abundance:[a1,a2]}; no abundance bounds are imposed.
+   * Errors: ConstraintViolation/matrix_must_be_2x2,
+   * ConstraintViolation/measured_must_have_two_finite_channels,
+   * MathError/singular_mixing_matrix.
+   * Hand check: M=[[1,0],[0,1]], measured=[0.25,0.75] gives
+   * abundance=[0.25,0.75].
+   */
+  function unmix(input) {
+    const M = input && input.M, measured = input && input.measured;
+    if (!Array.isArray(M) || M.length !== 2 ||
+        !M.every(row => Array.isArray(row) && row.length === 2 && row.every(finite))) {
+      return constraint('matrix_must_be_2x2');
+    }
+    if (!Array.isArray(measured) || measured.length !== 2 || !measured.every(finite)) {
+      return constraint('measured_must_have_two_finite_channels');
+    }
+    const det = M[0][0] * M[1][1] - M[0][1] * M[1][0];
+    if (Math.abs(det) < 1e-12) return mathError('singular_mixing_matrix');
+    const a1 = (measured[0] * M[1][1] - M[0][1] * measured[1]) / det;
+    const a2 = (M[0][0] * measured[1] - measured[0] * M[1][0]) / det;
+    if (!finite(a1) || !finite(a2)) return mathError('non_finite_result');
+    return { abundance: [a1, a2] };
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    convolve,
+    threshold,
+    otsu,
+    segment,
+    downsample,
+    channel_mix,
+    unmix
+  });
+})();
+/* FIT-CALC-END x5_2d_grids */
+</script>
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+let n = 0, score = 0, tries = 0, hinted = false, d, seed = 314159;
+
+function rnd() {
+  seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+  return seed / 4294967296;
+}
+
+function fmt(x) {
+  return Number.isFinite(x) ? Number(x.toFixed(3)).toString() : '—';
+}
+
+function draw(id, g) {
+  const e = $(id);
+  e.innerHTML = '';
+  e.style.gridTemplateColumns = `repeat(${g[0]?.length || 1},48px)`;
+  g.forEach((r, y) => r.forEach((v, x) => {
+    const b = document.createElement('button');
+    b.className = 'cell';
+    b.textContent = fmt(v);
+    b.setAttribute('aria-label', `Row ${y + 1}, column ${x + 1}: ${fmt(v)}`);
+    b.title = b.getAttribute('aria-label');
+    e.appendChild(b);
+  }));
+}
+
+function graph() {
+  const svg = $('space');
+  const x1 = 45, y1 = 190, x2 = 320, y2 = 20;
+  let p = `<title>Feature-space plot with endmembers, measured pixel and estimated mixture</title>
+    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y1}" stroke="#111" stroke-width="2"/>
+    <line x1="${x1}" y1="${y1}" x2="${x1}" y2="${y2}" stroke="#111" stroke-width="2"/>
+    <text x="180" y="220" text-anchor="middle" font-size="11">Channel 1 (a.u.)</text>
+    <text x="12" y="110" transform="rotate(-90 12 110)" text-anchor="middle" font-size="11">Channel 2 (a.u.)</text>
+    <text x="40" y="205" font-size="10">0</text>
+    <text x="320" y="205" font-size="10">1</text>
+    <text x="20" y="24" font-size="10">1</text>`;
+
+  const pt = (a, b) => [
+    x1 + a * (x2 - x1),
+    y1 - b * (y1 - y2)
+  ];
+
+  const a = Number($('a').value);
+  const b = Number($('b').value);
+  const estimate = [
+    d.M[0][0] * a + d.M[0][1] * b,
+    d.M[1][0] * a + d.M[1][1] * b
+  ];
+
+  [
+    [d.M[0][0], d.M[1][0], '#2EC4A6', 'Endmember A'],
+    [d.M[0][1], d.M[1][1], '#FFC83D', 'Endmember B'],
+    [d.measured[0], d.measured[1], '#D92D20', 'Measured pixel'],
+    [estimate[0], estimate[1], '#1F66E5', 'Your mixture']
+  ].forEach(([u, v, c, label]) => {
+    const [x, y] = pt(
+      Math.max(0, Math.min(1, u)),
+      Math.max(0, Math.min(1, v))
+    );
+    p += `<circle cx="${x}" cy="${y}" r="6" fill="${c}" stroke="#111" stroke-width="2"/>
+      <text x="${x + 8}" y="${y - 8}" font-size="10">${label}</text>`;
+  });
+
+  svg.innerHTML = p;
+  svg.setAttribute(
+    'aria-label',
+    'Feature space plot showing endmembers, measured pixel and player mixture'
+  );
+}
+
+function render() {
+  const rgb = d.rgb;
+  const mix = FITCalcX5.channel_mix({ mode: 'bt601', rgb });
+  const fac = Number($('factor').value);
+  const pixel = Number($('pixel').value);
+
+  draw('scene', d.scene);
+
+  const r = FITCalcX5.downsample({
+    image: d.scene,
+    factor: fac,
+    pixel_size_m: pixel
+  });
+
+  if (!r.error) {
+    draw('coarse', r.out);
+    $('resolution').textContent =
+      `Pixel width ${fmt(r.pixel_size_m)} m; pixel area ${fmt(r.pixel_size_m * r.pixel_size_m)} m².`;
+  }
+
+  const fine = FITCalcX5.segment({
+    image: d.scene,
+    connectivity: 4
+  });
+  const fineCount = fine.areas.reduce((s, v) => s + v, 0);
+  const areaFine = fineCount * pixel * pixel;
+
+  if (!r.error) {
+    const coarse = FITCalcX5.segment({
+      image: r.out,
+      connectivity: 4
+    });
+    const coarseCount = coarse.areas.reduce((s, v) => s + v, 0);
+    const areaCoarse =
+      coarseCount * r.pixel_size_m * r.pixel_size_m;
+
+    $('detail').textContent =
+      `Classified pixels: ${fineCount}. Fine-grid area: ${fmt(areaFine)} m²; coarse-grid area: ${fmt(areaCoarse)} m².`;
+    $('result').textContent =
+      `Coarse-grid positive-mean area: ${fmt(areaCoarse)} m². Non-zero block means are treated as foreground; this can overestimate feature area.`;
+  } else {
+    $('detail').textContent = `Fine-grid area: ${fmt(areaFine)} m².`;
+    $('result').textContent = r.reason;
+  }
+
+  $('channels').innerHTML =
+    `<title>RGB channel values and luma</title>
+    <text x="5" y="18" font-size="12">Red ${rgb[0]} (level)</text>
+    <rect x="5" y="25" width="${rgb[0] / 255 * 270}" height="14" fill="#D92D20" stroke="#111"/>
+    <text x="5" y="59" font-size="12">Green ${rgb[1]} (level)</text>
+    <rect x="5" y="66" width="${rgb[1] / 255 * 270}" height="14" fill="#3DBE6B" stroke="#111"/>
+    <text x="5" y="105" font-size="12">Blue ${rgb[2]} (level)</text>
+    <rect x="5" y="112" width="${rgb[2] / 255 * 270}" height="14" fill="#1F66E5" stroke="#111"/>
+    <text x="5" y="151" font-size="12">BT.601 luma Y = ${fmt(mix.Y)} (level)</text>`;
+
+  $('bv').textContent = fmt(Number($('b').value));
+  graph();
+}
+
+function next() {
+  if (n >= 6) {
+    $('play').classList.add('hidden');
+    $('end').classList.remove('hidden');
+    $('stars').textContent =
+      '★'.repeat(score >= 450 ? 3 : score >= 275 ? 2 : score >= 100 ? 1 : 0);
+    $('final').textContent = `Final score: ${score}/600`;
+    return;
+  }
+
+  n++;
+  tries = 0;
+  hinted = false;
+  const type = (n - 1) % 3;
+
+  d = {
+    type,
+    rgb: [
+      80 + Math.floor(rnd() * 100),
+      60 + Math.floor(rnd() * 130),
+      40 + Math.floor(rnd() * 160)
+    ],
+    M: [[0.8, 0.2], [0.25, 0.75]],
+    ab: [0.35, 0.65],
+    measured: [0.41, 0.61],
+    scene: [
+      [1, 1, 0, 0, 0, 1],
+      [1, 1, 0, 1, 1, 1],
+      [0, 0, 0, 1, 1, 0],
+      [1, 0, 0, 0, 0, 1],
+      [1, 1, 0, 0, 1, 1],
+      [0, 1, 0, 1, 1, 1]
+    ]
+  };
+
+  d.measured = [
+    d.M[0][0] * d.ab[0] + d.M[0][1] * d.ab[1],
+    d.M[1][0] * d.ab[0] + d.M[1][1] * d.ab[1]
+  ];
+
+  if (type === 0) {
+    $('title').textContent = 'RGB luma';
+    $('question').textContent =
+      'Calculate the BT.601 luma for the displayed RGB pixel.';
+    $('alabel').textContent = 'Luma Y (level)';
+    $('a').value = '100';
+    $('a').step = '.1';
+    $('b').disabled = true;
+    $('assumption').textContent =
+      'Assumption: BT.601 coefficients; channels and luma share a 0–255 level scale.';
+    $('spaceinfo').textContent =
+      'Each axis represents a normalised channel measurement.';
+  } else if (type === 1) {
+    $('title').textContent = 'Solve the mixed pixel';
+    $('question').textContent =
+      'Set the first and second abundance so the model reproduces the measured pixel.';
+    $('alabel').textContent = 'First abundance';
+    $('a').value = '.8';
+    $('a').step = '.01';
+    $('b').disabled = false;
+    $('assumption').textContent =
+      'Assumption: linear mixing of two endmembers, with no nonlinear interaction.';
+    $('spaceinfo').textContent =
+      'If the endmember vectors become linearly dependent, the mixture cannot be uniquely resolved.';
+
+    if (n === 5) {
+      d.M = [[0.5, 0.5000000000001], [0.4, 0.40000000000008]];
+      d.measured = [
+        d.M[0][0] * d.ab[0] + d.M[0][1] * d.ab[1],
+        d.M[1][0] * d.ab[0] + d.M[1][1] * d.ab[1]
+      ];
+      $('question').textContent =
+        'This matrix is nearly singular. Check whether a stable unique abundance estimate is justified.';
+    }
+  } else {
+    $('title').textContent = 'Area at two resolutions';
+    $('question').textContent =
+      'Compare fine and coarse area estimates, then enter the estimate you trust for this classified scene.';
+    $('alabel').textContent = 'Trusted area (m²)';
+    $('a').value = '10';
+    $('a').step = '.25';
+    $('b').disabled = true;
+    $('assumption').textContent =
+      'Assumption: square pixels; every non-zero cell belongs to the mapped feature.';
+    $('spaceinfo').textContent =
+      'Area uncertainty increases when a small feature is represented by only a few large pixels.';
+  }
+
+  $('round').textContent = `Round ${n}/6`;
+  $('score').textContent = `Score: ${score}`;
+  $('feedback').className = 'feedback';
+  $('feedback').textContent = '';
+  $('tries').textContent = 'First try: 100 points';
+  $('check').disabled = false;
+  $('hint').disabled = false;
+  render();
+}
+
+function check() {
+  const raw = $('a').value;
+  const v = Number(raw);
+
+  if (raw.trim() === '' || !Number.isFinite(v)) {
+    $('feedback').className = 'feedback bad';
+    $('feedback').textContent = 'Enter a finite number.';
+    return;
+  }
+
+  let ok = false;
+  let msg = '';
+
+  if (d.type === 0) {
+    const r = FITCalcX5.channel_mix({
+      mode: 'bt601',
+      rgb: d.rgb
+    });
+    ok = Math.abs(v - r.Y) <= 0.15;
+    msg = `BT.601 luma is ${fmt(r.Y)}.`;
+  } else if (d.type === 1) {
+    const r = FITCalcX5.unmix({
+      M: d.M,
+      measured: d.measured
+    });
+
+    if (r.error) {
+      ok = true;
+      msg =
+        'The matrix is singular or too ill-conditioned for a trustworthy unique estimate.';
+    } else {
+      const a = Number($('a').value);
+      const b = Number($('b').value);
+      ok = Math.abs(a - r.abundance[0]) < 0.02 &&
+        Math.abs(b - r.abundance[1]) < 0.02;
+      msg =
+        `Calculated abundances are ${fmt(r.abundance[0])} and ${fmt(r.abundance[1])}.`;
+    }
+  } else {
+    const p = Number($('pixel').value);
+    const fine = FITCalcX5.segment({
+      image: d.scene,
+      connectivity: 4
+    });
+    const fineArea =
+      fine.areas.reduce((s, x) => s + x, 0) * p * p;
+    ok = Math.abs(v - fineArea) < 0.01;
+    msg =
+      `The fine-grid classified area is ${fmt(fineArea)} m²; coarse estimates can omit or overcount small features, depending on classification rules.`;
+  }
+
+  if (ok) {
+    const pts = hinted ? 50 : tries ? 75 : 100;
+    score += pts;
+    $('score').textContent = `Score: ${score}`;
+    $('feedback').className = 'feedback good';
+    $('feedback').textContent = `Correct. ${msg} +${pts} points.`;
+    $('check').disabled = true;
+    $('hint').disabled = true;
+    setTimeout(next, 1300);
+  } else {
+    tries++;
+    $('feedback').className = 'feedback bad';
+    $('feedback').textContent = `Not yet. ${msg}`;
+    $('tries').textContent =
+      'Second try: 75 points; after hint: 50 points.';
+  }
+}
+
+$('check').addEventListener('click', check);
+
+$('hint').addEventListener('click', () => {
+  if (hinted) return;
+  hinted = true;
+  score = Math.max(0, score - 10);
+  $('score').textContent = `Score: ${score}`;
+  $('feedback').textContent = d.type === 0
+    ? 'Multiply each RGB channel by its BT.601 coefficient, then add.'
+    : d.type === 1
+      ? 'Substitute both abundances into both measurement equations. A nearly singular matrix amplifies small errors.'
+      : 'Count foreground pixels and multiply by the square of the pixel width.';
+  $('hint').disabled = true;
+});
+
+$('minus').addEventListener('click', () => {
+  $('a').value = fmt(
+    Number($('a').value) - Number($('a').step)
+  );
+  render();
+});
+
+$('plus').addEventListener('click', () => {
+  $('a').value = fmt(
+    Number($('a').value) + Number($('a').step)
+  );
+  render();
+});
+
+['a', 'b', 'factor', 'pixel'].forEach(id =>
+  $(id).addEventListener('input', render)
+);
+
+$('again').addEventListener('click', () => {
+  n = 0;
+  score = 0;
+  seed = 314159;
+  $('end').classList.add('hidden');
+  $('play').classList.remove('hidden');
+  next();
+});
+
+next();
+</script>
+</body>
+</html>

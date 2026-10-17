@@ -17,6 +17,8 @@ const compartment = { subject: 'Engineering', concept: 'compartment-models', acc
 const massBalance = { subject: 'Chemistry', concept: 'mass-balance', accent: '#2EC4A6', minutes: '15–20', status: 'live' }
 // Tier-1 X4 estimation and curve fitting (calc: lib/sims/tier1/x4_curve_fit.calc.js, inlined in each file). Live: all 19 Tier-1 KATs pass.
 const curveFit = { subject: 'Maths', concept: 'curve-fitting', accent: '#2EC4A6', minutes: '10–15', status: 'live' }
+// Tier-1 X5 (raster grids / image processing): live, FITCalcX5 fix1 passes all 20 KATs in tier1/raster_grid.json.
+const rasterGrid = { subject: 'Engineering', concept: 'raster-grids', accent: '#1F66E5', minutes: '15–20', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -214,4 +216,16 @@ export const htmlSims = [
     syllabusRef: 'University, Chemical Kinetics',
     approach: 'Fit exponential decays on a log scale, find a reaction order and rate constant from a log–log plot, and build an uncertainty budget for a derived result.',
     activityPrompt: 'Play all rounds, then explain why plotting ln(rate) against ln(C) gives the reaction order as the gradient.', tags: ['University', 'Chemical Kinetics', 'rate law', 'exponential fit', 'uncertainty budget'] },
+  { ...rasterGrid, id: 'x5-2d-grids-poly', title: 'Pixel Filter Lab', level: 'Poly', topic: 'Thresholding, box blurring and block downsampling', symbol: '🖼️', height: 2180,
+    syllabusRef: 'Poly engineering: digital image processing, thresholding, filtering and resolution (generic)',
+    approach: 'Set a threshold, blur with zero or replicated edges and downsample by block means so the output grid matches each target.',
+    activityPrompt: 'Play all rounds, then explain why zero padding darkens the border of a blurred image.', tags: ['raster grids', 'thresholding', 'box filter', 'downsampling'] },
+  { ...rasterGrid, id: 'x5-2d-grids-u1', title: 'Edges and Segments', level: 'University', topic: 'Convolution, Otsu thresholding and connected components', symbol: '🔲', height: 2590,
+    syllabusRef: 'University, Image processing',
+    approach: 'Build a true-convolution edge kernel, find the Otsu threshold from the histogram and count connected components under 4- and 8-connectivity.',
+    activityPrompt: 'Play all rounds, then explain why a diagonal line is one component under 8-connectivity but several under 4-connectivity.', tags: ['University', 'Image processing', 'convolution', 'Otsu', 'segmentation'] },
+  { ...rasterGrid, id: 'x5-2d-grids-u2', title: 'Remote Sensing Unmix', level: 'University', topic: 'Luma, linear unmixing and resolution effects on area', symbol: '🛰️', height: 2780,
+    syllabusRef: 'University, Remote sensing',
+    approach: 'Compute BT.601 luma, solve a two-endmember linear mixture and compare classified areas across pixel sizes.',
+    activityPrompt: 'Play all rounds, then explain why a coarser pixel size changes the estimated area of a feature.', tags: ['University', 'Remote sensing', 'luma', 'linear unmixing', 'resolution'] },
 ]

@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Edges and Segments | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms;--accent:var(--lvl-uni);--tint:var(--lvl-uni-tint);--on:var(--lvl-uni-on)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font:16px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.shell{max-width:1300px;margin:auto;padding:16px}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin:14px 0;font-weight:800}
+h2{font-size:20px;margin:0 0 10px}
+p{margin:8px 0}
+.top,.hud,.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:space-between}
+.badge,.chip{border:2px solid #111;border-radius:999px;padding:6px 12px;font-weight:800}
+.badge{background:var(--accent);color:var(--on);font-size:12px;text-transform:uppercase}
+.chip{background:white}
+.layout{display:grid;gap:16px;margin-top:18px;grid-template-columns:minmax(0,1fr)}
+.stack{display:grid;gap:14px;align-content:start;min-width:0}
+.card{border:2px solid #111;border-radius:24px;padding:14px;background:white;box-shadow:var(--sh-2);min-width:0}
+button,input,select{font:inherit;min-height:44px;min-width:44px;border:2px solid #111;border-radius:999px;padding:8px 13px;background:white;color:#111;user-select:none;-webkit-tap-highlight-color:transparent}
+button{font-weight:750;cursor:pointer}
+button:active{transform:translateY(2px)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button:focus:not(:focus-visible),input:focus:not(:focus-visible),select:focus:not(:focus-visible){outline:none}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+input[type=number]{width:108px;font-size:16px}
+input[type=range]{min-height:44px;cursor:pointer;accent-color:var(--accent)}
+select{min-height:44px;padding:9px 13px;max-width:100%}
+#minus,#plus{min-width:48px;min-height:44px;padding:8px 12px}
+.gridwrap{overflow:auto;max-width:100%}
+.heat{display:grid;gap:4px;width:max-content}
+.cell{width:48px;height:48px;min-width:48px;min-height:48px;padding:0;border-radius:8px;display:grid;place-items:center;font-size:13px}
+.cell:focus-visible{outline:3px solid #1F66E5}
+.feedback{min-height:28px;font-weight:750}
+.good{color:#1E9E5A}
+.bad{color:#D92D20}
+.muted{color:#6B6B6B}
+svg{width:100%;height:auto;display:block;max-height:260px}
+details{border:2px solid #111;border-radius:16px;padding:12px;background:var(--fit-sunken)}
+summary{cursor:pointer;font-weight:800;min-height:44px;display:flex;align-items:center}
+.hidden{display:none}
+.end{text-align:center;padding:30px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(360px,.9fr)}}
+@media(max-width:390px){.shell{padding:12px}.card{padding:12px}.controls{gap:8px}#minus,#plus{min-width:48px}#conn,#mode{min-height:44px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="top"><span class="badge">University (Years 1–2)</span><div class="hud"><span class="chip" id="round">Round 1/6</span><span class="chip" id="score">Score: 0</span></div></header>
+<h1>Edges and Segments</h1>
+<p>Build filters, find an automatic threshold and analyse connected regions.</p>
+<section id="play">
+<div class="layout">
+<div class="stack">
+<article class="card"><h2 id="title">Build the edge filter</h2><p id="question"></p><p class="muted" id="assumption"></p><div class="gridwrap"><div id="input" class="heat"></div></div></article>
+<article class="card"><h2>Kernel weights</h2><div class="gridwrap"><div id="kernel" class="heat"></div></div><p class="muted">Select a weight and use the stepper. True convolution flips the kernel horizontally and vertically before multiplying.</p></article>
+<article class="card"><h2>Live output</h2><div class="gridwrap"><div id="output" class="heat"></div></div><p class="muted" id="outnote"></p></article>
+<article class="card"><h2>Histogram and Otsu variance</h2><svg id="plot" role="img" aria-label="Pixel histogram and between-class variance curve" viewBox="0 0 390 235"></svg><div class="controls"><label for="marker">Threshold marker</label><input id="marker" type="range" min="0" max="255" value="80"><span id="markertext">80</span></div></article>
+</div>
+<div class="stack">
+<article class="card"><h2>Your controls</h2><div class="controls"><label for="answer" id="anslabel">Selected kernel weight</label><button id="minus" aria-label="Decrease answer">−</button><input id="answer" type="number" step="1" value="1"><button id="plus" aria-label="Increase answer">+</button><button id="check" class="check">Check</button><button id="hint">Hint −10 points</button></div><div class="controls"><label for="conn">Connectivity</label><select id="conn"><option value="4">4-neighbour</option><option value="8">8-neighbour</option></select><label for="mode">Convolution mode</label><select id="mode"><option value="same_zero">Zero padding</option><option value="same_replicate">Repeat edge</option></select></div><p id="feedback" class="feedback" aria-live="polite"></p><p id="tries" class="muted">First try: 100 points</p></article>
+<article class="card"><h2>Round result</h2><p id="details"></p><p id="result"></p></article>
+<article class="card"><svg viewBox="0 0 320 85" role="img" aria-label="A kernel slides over a pixel grid"><g stroke="#111" stroke-width="3"><rect x="5" y="8" width="68" height="52" fill="#DDF7F1"/><path d="M27 8v52M50 8v52M5 25h68M5 43h68" fill="none"/><rect x="98" y="8" width="68" height="52" fill="#FFC83D"/><path d="M120 8v52M143 8v52M98 25h68M98 43h68" fill="none"/><path d="M77 34h18l-5-5m5 5-5 5" fill="none"/></g><text x="190" y="30" font-size="12" fill="#111">Local window</text><text x="190" y="47" font-size="12" fill="#111">→ output pixel</text></svg><p class="muted">Concept: each filter output combines a local neighbourhood.</p></article>
+<details><summary>The maths</summary><p>True convolution: g(y,x) = ΣΣ f(y+i,x+j)k(−i,−j).</p><p>Otsu: maximise w₀w₁(μ₀−μ₁)²; class 0 contains levels ≤ t. Choose the smallest threshold on ties.</p><p>Connected components: foreground pixels are non-zero. Diagonal neighbours connect only under 8-connectivity.</p><p>Assumption: grayscale pixels are integer levels from 0 to 255 for Otsu.</p></details>
+</div>
+</div>
+</section>
+<section id="end" class="card end hidden"><h2>Session complete</h2><p id="stars"></p><p id="final"></p><button class="check" id="again">Play again</button></section>
+</main>
+<script>
+/* FIT-CALC-BEGIN x5_2d_grids */
+const FITCalcX5 = (function () {
+  'use strict';
+
+  // FIT integration: preserve error schema and lower_snake_case reasons.
+  const fail = (error, reason) => ({
+    error,
+    reason: /^[A-Z][A-Z0-9_]*$/.test(reason)
+      ? reason.toLowerCase()
+      : reason
+  });
+  const mathError = reason => fail('MathError', reason);
+  const constraint = reason => fail('ConstraintViolation', reason);
+  const unsupported = reason => fail('NotSupported', reason);
+
+  function validImage(image) {
+    if (!Array.isArray(image) || image.length > 128) return false;
+    if (image.length === 0) return true;
+    if (!Array.isArray(image[0]) || image[0].length > 128) return false;
+    const width = image[0].length;
+    return image.every(row => Array.isArray(row) &&
+      row.length === width &&
+      row.every(v => typeof v === 'number' && Number.isFinite(v)));
+  }
+
+  function imageError(image) {
+    if (!validImage(image)) {
+      return constraint('image_exceeds_128x128');
+    }
+    return null;
+  }
+
+  function finite(value) {
+    return typeof value === 'number' && Number.isFinite(value);
+  }
+
+  function rectangular(image) {
+    return image.length > 0 && image[0].length > 0;
+  }
+
+  function cloneGrid(image) {
+    return image.map(row => row.slice());
+  }
+
+  /**
+   * True 2-D convolution.
+   * Inputs: image, a rectangular numeric row-major grid; kernel, an odd
+   * rectangular numeric grid no larger than 5 x 5; mode, valid,
+   * same_zero or same_replicate. Grid values are dimensionless unless
+   * the caller defines their physical units.
+   * Outputs: {out}, the convolved numeric grid at full precision.
+   * Errors: ConstraintViolation/image_exceeds_128x128,
+   * ConstraintViolation/kernel_must_be_odd_max_5x5,
+   * NotSupported/unsupported_convolution_mode.
+   * Hand check: [[1,2,3],[4,5,6],[7,8,9]] convolved with the
+   * 1 x 1 kernel [[2]] in valid mode gives [[2,4,6],[8,10,12],[14,16,18]].
+   */
+  function convolve(input) {
+    const image = input && input.image;
+    const kernel = input && input.kernel;
+    const mode = input && input.mode;
+    const ie = imageError(image);
+    if (ie) return ie;
+    if (!Array.isArray(kernel) || !kernel.length ||
+        !kernel.every(row => Array.isArray(row) && row.length === kernel[0].length) ||
+        kernel.length > 5 || kernel[0].length > 5 ||
+        kernel.length % 2 === 0 || kernel[0].length % 2 === 0 ||
+        !kernel.every(row => row.every(finite))) {
+      return constraint('kernel_must_be_odd_max_5x5');
+    }
+    if (!['valid', 'same_zero', 'same_replicate'].includes(mode)) {
+      return unsupported('unsupported_convolution_mode');
+    }
+    if (!rectangular(image)) return { out: [] };
+    const h = image.length, w = image[0].length;
+    const kh = kernel.length, kw = kernel[0].length;
+    const py = Math.floor(kh / 2), px = Math.floor(kw / 2);
+    const oh = mode === 'valid' ? Math.max(0, h - kh + 1) : h;
+    const ow = mode === 'valid' ? Math.max(0, w - kw + 1) : w;
+    const out = [];
+    for (let y = 0; y < oh; y++) {
+      const row = [];
+      for (let x = 0; x < ow; x++) {
+        let sum = 0;
+        for (let ky = 0; ky < kh; ky++) {
+          for (let kx = 0; kx < kw; kx++) {
+            let iy = y + ky - (mode === 'valid' ? 0 : py);
+            let ix = x + kx - (mode === 'valid' ? 0 : px);
+            if (mode === 'same_replicate') {
+              iy = Math.max(0, Math.min(h - 1, iy));
+              ix = Math.max(0, Math.min(w - 1, ix));
+            }
+            if (iy >= 0 && iy < h && ix >= 0 && ix < w) {
+              sum += image[iy][ix] * kernel[kh - 1 - ky][kw - 1 - kx];
+            }
+          }
+        }
+        if (!finite(sum)) return mathError('non_finite_result');
+        row.push(sum);
+      }
+      out.push(row);
+    }
+    return { out };
+  }
+
+  /**
+   * Binary thresholding, with equality assigned to the foreground.
+   * Inputs: image (numeric grid), T (threshold in the same units as pixels).
+   * Outputs: {binary, count_on}; binary values are exact integers 0 or 1.
+   * Errors: ConstraintViolation/image_exceeds_128x128,
+   * MathError/threshold_not_finite.
+   * Hand check: [[0,2],[2,3]], T=2 gives [[0,1],[1,1]], count_on=3.
+   */
+  function threshold(input) {
+    const image = input && input.image, T = input && input.T;
+    const ie = imageError(image);
+    if (ie) return ie;
+    if (!finite(T)) return mathError('threshold_not_finite');
+    let count_on = 0;
+    const binary = image.map(row => row.map(v => {
+      const b = v >= T ? 1 : 0;
+      count_on += b;
+      return b;
+    }));
+    return { binary, count_on };
+  }
+
+  /**
+   * Otsu threshold for an 8-bit grayscale image.
+   * Inputs: image, integer pixel levels 0..255.
+   * Outputs: {T, between_class_var}; T is the smallest threshold attaining
+   * the maximum variance, with class 0 defined as levels <= t.
+   * Errors: ConstraintViolation/image_exceeds_128x128,
+   * ConstraintViolation/pixel_level_out_of_range,
+   * MathError/empty_image.
+   * Hand check: [[0,0,255,255]] has a maximum between-class variance
+   * of 16256.25; the smallest maximising threshold is 0.
+   */
+  function otsu(input) {
+    const image = input && input.image;
+    const ie = imageError(image);
+    if (ie) return ie;
+    if (!rectangular(image)) return mathError('empty_image');
+    const hist = Array(256).fill(0);
+    let n = 0, total = 0;
+    for (const row of image) for (const v of row) {
+      if (!Number.isInteger(v) || v < 0 || v > 255) {
+        return constraint('pixel_level_out_of_range');
+      }
+      hist[v]++; n++; total += v;
+    }
+    if (hist.filter(Boolean).length === 1) {
+      return { T: 0, between_class_var: 0 };
+    }
+    let leftN = 0, leftSum = 0, best = -1, bestT = 0;
+    for (let t = 0; t < 255; t++) {
+      leftN += hist[t];
+      leftSum += t * hist[t];
+      const rightN = n - leftN;
+      if (!leftN || !rightN) continue;
+      const delta = leftSum / leftN - (total - leftSum) / rightN;
+      const variance = (leftN / n) * (rightN / n) * delta * delta;
+      if (variance > best) {
+        best = variance;
+        bestT = t;
+      }
+    }
+    return { T: bestT, between_class_var: Math.max(0, best) };
+  }
+
+  /**
+   * Connected-component labelling of non-zero pixels.
+   * Inputs: image (numeric grid), connectivity (4 or 8 neighbours).
+   * Outputs: {components, areas, labels}.
+   * components is an integer count of distinct foreground components.
+   * areas contains component sizes sorted largest first.
+   * labels is a row-major labelled grid with 0 as background and
+   * positive integer labels assigned in row-major discovery order.
+   * Errors: ConstraintViolation/image_exceeds_128x128,
+   * ConstraintViolation/connectivity_must_be_4_or_8,
+   * RuntimeError/too_many_states.
+   * Hand check: [[1,0],[0,1]] gives components=2 and areas=[1,1]
+   * with 4-connectivity; components=1 and areas=[2] with
+   * 8-connectivity.
+   */
+  function segment(input) {
+    const image = input && input.image;
+    const connectivity = input && input.connectivity;
+    const ie = imageError(image);
+    if (ie) return ie;
+    if (connectivity !== 4 && connectivity !== 8) {
+      return constraint('connectivity_must_be_4_or_8');
+    }
+
+    const h = image.length;
+    const w = h ? image[0].length : 0;
+    const labels = Array.from({ length: h }, () => Array(w).fill(0));
+    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+    if (connectivity === 8) {
+      dirs.push([-1, -1], [-1, 1], [1, -1], [1, 1]);
+    }
+
+    const areas = [];
+    let label = 0;
+    let visits = 0;
+
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (!image[y][x] || labels[y][x]) continue;
+
+        label++;
+        let area = 0;
+        const queue = [[y, x]];
+        labels[y][x] = label;
+
+        for (let q = 0; q < queue.length; q++) {
+          if (++visits > 16384) {
+            return fail('RuntimeError', 'too_many_states');
+          }
+
+          const [cy, cx] = queue[q];
+          area++;
+
+          for (const [dy, dx] of dirs) {
+            const ny = cy + dy;
+            const nx = cx + dx;
+
+            if (ny >= 0 && ny < h &&
+                nx >= 0 && nx < w &&
+                image[ny][nx] &&
+                !labels[ny][nx]) {
+              labels[ny][nx] = label;
+              queue.push([ny, nx]);
+            }
+          }
+        }
+
+        areas.push(area);
+      }
+    }
+
+    areas.sort((a, b) => b - a);
+    return { components: label, areas, labels };
+  }
+
+  /**
+   * Mean-pool non-overlapping square blocks.
+   * Inputs: image (numeric grid), factor (positive integer), pixel_size_m
+   * (positive input pixel width in metres).
+   * Outputs: {out, pixel_size_m}; each output value is the block mean.
+   * Errors: ConstraintViolation/image_exceeds_128x128,
+   * ConstraintViolation/factor_must_be_positive_integer,
+   * ConstraintViolation/size_not_divisible_by_factor,
+   * ConstraintViolation/pixel_size_must_be_positive.
+   * Hand check: [[1,3],[5,7]], factor=2, pixel_size_m=0.5 gives
+   * out=[[4]], pixel_size_m=1.
+   */
+  function downsample(input) {
+    const image = input && input.image;
+    const factor = input && input.factor;
+    const pixel_size_m = input && input.pixel_size_m;
+    const ie = imageError(image);
+    if (ie) return ie;
+    if (!Number.isInteger(factor) || factor < 1) {
+      return constraint('factor_must_be_positive_integer');
+    }
+    if (!finite(pixel_size_m) || pixel_size_m <= 0) {
+      return constraint('pixel_size_must_be_positive');
+    }
+    if (!rectangular(image)) return { out: [], pixel_size_m: pixel_size_m * factor };
+    const h = image.length, w = image[0].length;
+    if (h % factor || w % factor) return constraint('size_not_divisible_by_factor');
+    const out = [];
+    for (let y = 0; y < h; y += factor) {
+      const row = [];
+      for (let x = 0; x < w; x += factor) {
+        let sum = 0;
+        for (let dy = 0; dy < factor; dy++) {
+          for (let dx = 0; dx < factor; dx++) sum += image[y + dy][x + dx];
+        }
+        const mean = sum / (factor * factor);
+        if (!finite(mean)) return mathError('non_finite_result');
+        row.push(mean);
+      }
+      out.push(row);
+    }
+    return { out, pixel_size_m: pixel_size_m * factor };
+  }
+
+  /**
+   * Convert one RGB pixel to BT.601 luma.
+   * Inputs: mode ('bt601'), rgb [R,G,B], channel levels in the same
+   * numeric scale (normally 0..255).
+   * Outputs: {Y}, in that same scale.
+   * Errors: NotSupported/unsupported_channel_mix_mode,
+   * ConstraintViolation/rgb_must_have_three_finite_channels.
+   * Hand check: [100,150,200] gives Y=140.75.
+   */
+  function channel_mix(input) {
+    if (!input || input.mode !== 'bt601') {
+      return unsupported('unsupported_channel_mix_mode');
+    }
+    const rgb = input.rgb;
+    if (!Array.isArray(rgb) || rgb.length !== 3 || !rgb.every(finite)) {
+      return constraint('rgb_must_have_three_finite_channels');
+    }
+    const Y = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+    return finite(Y) ? { Y } : mathError('non_finite_result');
+  }
+
+  /**
+   * Solve the exact 2 x 2 linear mixture measured = M * abundance.
+   * Inputs: M, a finite 2 x 2 matrix; measured, two finite measurements.
+   * Outputs: {abundance:[a1,a2]}; no abundance bounds are imposed.
+   * Errors: ConstraintViolation/matrix_must_be_2x2,
+   * ConstraintViolation/measured_must_have_two_finite_channels,
+   * MathError/singular_mixing_matrix.
+   * Hand check: M=[[1,0],[0,1]], measured=[0.25,0.75] gives
+   * abundance=[0.25,0.75].
+   */
+  function unmix(input) {
+    const M = input && input.M, measured = input && input.measured;
+    if (!Array.isArray(M) || M.length !== 2 ||
+        !M.every(row => Array.isArray(row) && row.length === 2 && row.every(finite))) {
+      return constraint('matrix_must_be_2x2');
+    }
+    if (!Array.isArray(measured) || measured.length !== 2 || !measured.every(finite)) {
+      return constraint('measured_must_have_two_finite_channels');
+    }
+    const det = M[0][0] * M[1][1] - M[0][1] * M[1][0];
+    if (Math.abs(det) < 1e-12) return mathError('singular_mixing_matrix');
+    const a1 = (measured[0] * M[1][1] - M[0][1] * measured[1]) / det;
+    const a2 = (M[0][0] * measured[1] - measured[0] * M[1][0]) / det;
+    if (!finite(a1) || !finite(a2)) return mathError('non_finite_result');
+    return { abundance: [a1, a2] };
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    convolve,
+    threshold,
+    otsu,
+    segment,
+    downsample,
+    channel_mix,
+    unmix
+  });
+})();
+/* FIT-CALC-END x5_2d_grids */
+</script>
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+let n = 0, score = 0, tries = 0, hinted = false, d, seed = 271828;
+
+function rnd() {
+  seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+  return seed / 4294967296;
+}
+
+function fmt(x) {
+  return Number.isFinite(x) ? Number(x.toFixed(3)).toString() : '—';
+}
+
+function draw(id, g) {
+  const e = $(id);
+  e.innerHTML = '';
+  e.style.gridTemplateColumns = `repeat(${g[0]?.length || 1},48px)`;
+  g.forEach((r, y) => r.forEach((v, x) => {
+    const b = document.createElement('button');
+    b.className = 'cell';
+    b.textContent = fmt(v);
+    b.setAttribute('aria-label', `Row ${y + 1}, column ${x + 1}: ${fmt(v)}`);
+    b.title = b.getAttribute('aria-label');
+    e.appendChild(b);
+  }));
+}
+
+function variance(t) {
+  const im = d.image.flat();
+  const a = im.filter(v => v <= t);
+  const b = im.filter(v => v > t);
+  if (!a.length || !b.length) return 0;
+  const mean = x => x.reduce((s, v) => s + v, 0) / x.length;
+  return (a.length / im.length) * (b.length / im.length) *
+    (mean(a) - mean(b)) ** 2;
+}
+
+function plot() {
+  const svg = $('plot');
+  const hist = Array(16).fill(0);
+  const vals = d.image.flat();
+  vals.forEach(v => {
+    hist[Math.min(15, Math.floor(v / 16))]++;
+  });
+  const ots = FITCalcX5.otsu({ image: d.image });
+  let s = '<title>Pixel histogram and Otsu variance curve</title>' +
+    '<line x1="25" y1="190" x2="370" y2="190" stroke="#111" stroke-width="2"/>' +
+    '<line x1="25" y1="20" x2="25" y2="190" stroke="#111" stroke-width="2"/>';
+
+  hist.forEach((v, i) => {
+    s += `<rect x="${30 + i * 21}" y="${190 - v * 14}" width="16" height="${v * 14}" fill="#2EC4A6" stroke="#111"/>` +
+      `<text x="${38 + i * 21}" y="204" font-size="9" text-anchor="middle">${i * 16}</text>`;
+  });
+
+  if (!ots.error) {
+    const x = 30 + ots.T / 16 * 21;
+    s += `<line x1="${x}" y1="20" x2="${x}" y2="190" stroke="#D92D20" stroke-width="3"/>` +
+      '<text x="28" y="12" font-size="10">Pixel count (pixels); level (a.u.)</text>' +
+      '<text x="200" y="225" font-size="10" text-anchor="middle">Pixel intensity (0–255)</text>';
+  }
+
+  svg.innerHTML = s;
+  svg.setAttribute('aria-label', 'Pixel histogram with Otsu threshold marker and variance summary');
+}
+
+function render() {
+  if (d.type === 0) {
+    const k = d.k.slice();
+    k[d.sel] = Number($('answer').value);
+    const ker = [k.slice(0, 3), k.slice(3, 6), k.slice(6, 9)];
+    draw('kernel', ker);
+    const r = FITCalcX5.convolve({
+      image: d.image,
+      kernel: ker,
+      mode: $('mode').value
+    });
+    if (!r.error) draw('output', r.out);
+    $('outnote').textContent = 'Live convolution output; values are in a.u.';
+  } else if (d.type === 1) {
+    const r = FITCalcX5.otsu({ image: d.image });
+    draw('kernel', [[r.T, r.between_class_var]]);
+    const t = Number($('marker').value);
+    const b = FITCalcX5.threshold({ image: d.image, T: t });
+    draw('output', b.binary);
+    $('markertext').textContent =
+      `${t}; variance at this threshold is ${fmt(variance(t))}`;
+    $('outnote').textContent =
+      'The marker changes the binary image and the variance readout.';
+  } else {
+    const r = FITCalcX5.segment({
+      image: d.image,
+      connectivity: Number($('conn').value)
+    });
+    draw('kernel', [r.areas]);
+    draw('output', r.labels);
+    $('outnote').textContent =
+      `${r.components} components; areas sorted largest first.`;
+  }
+
+  draw('input', d.image);
+  plot();
+}
+
+function next() {
+  if (n >= 6) {
+    $('play').classList.add('hidden');
+    $('end').classList.remove('hidden');
+    $('stars').textContent =
+      '★'.repeat(score >= 450 ? 3 : score >= 275 ? 2 : score >= 100 ? 1 : 0);
+    $('final').textContent = `Final score: ${score}/600`;
+    return;
+  }
+
+  n++;
+  tries = 0;
+  hinted = false;
+  const type = (n - 1) % 3;
+
+  d = {
+    type,
+    image: [
+      [0, 20, 20, 210, 220],
+      [0, 25, 200, 220, 230],
+      [15, 20, 215, 225, 235],
+      [10, 30, 205, 230, 240],
+      [0, 20, 210, 235, 255]
+    ],
+    k: [-1, 0, 1, -2, 0, 2, -1, 0, 1],
+    sel: Math.floor(rnd() * 9)
+  };
+
+  if (type === 0) {
+    $('title').textContent = 'Build a convolution filter';
+    $('question').textContent =
+      'Adjust the selected weight to match the required marked edge response.';
+    $('anslabel').textContent = 'Selected weight';
+    $('answer').step = '1';
+    $('answer').value = '0';
+    $('assumption').textContent =
+      'Assumption: grayscale values are linear and the kernel uses true convolution.';
+    $('details').textContent =
+      'A Sobel-style kernel measures local intensity change. The flipped weights distinguish convolution from correlation.';
+    $('result').textContent =
+      'Target output at the marked pixel is fixed for this round.';
+  } else if (type === 1) {
+    d.image = [
+      [10, 10, 12, 14, 200],
+      [11, 13, 14, 205, 220],
+      [10, 12, 15, 210, 230],
+      [8, 11, 200, 220, 240],
+      [9, 10, 205, 235, 250]
+    ];
+    $('title').textContent = 'Find the Otsu threshold';
+    $('question').textContent =
+      'Move the histogram marker to the threshold that maximises between-class variance.';
+    $('anslabel').textContent = 'Threshold marker';
+    $('answer').value = '80';
+    $('assumption').textContent =
+      'Assumption: levels are integers from 0 to 255; class 0 is level ≤ t.';
+    $('details').textContent =
+      'Compare the separation of the two classes and choose the smallest threshold on ties.';
+    $('result').textContent =
+      'The variance curve and threshold marker update as you move the slider.';
+  } else {
+    d.image = [
+      [1, 1, 0, 0, 1],
+      [1, 0, 0, 1, 1],
+      [0, 0, 1, 0, 0],
+      [1, 1, 0, 0, 1],
+      [1, 1, 0, 0, 1]
+    ];
+    $('title').textContent = 'Count connected components';
+    $('question').textContent =
+      'Choose the connectivity and determine the number of distinct foreground components.';
+    $('anslabel').textContent = 'Component count';
+    $('answer').value = '2';
+    $('assumption').textContent =
+      'Assumption: every non-zero pixel is foreground; background is zero.';
+    $('details').textContent =
+      'Under 4-connectivity only shared edges connect pixels; 8-connectivity also includes diagonals.';
+    $('result').textContent =
+      'Compare the 4-neighbour and 8-neighbour interpretations.';
+  }
+
+  $('round').textContent = `Round ${n}/6`;
+  $('score').textContent = `Score: ${score}`;
+  $('feedback').className = 'feedback';
+  $('feedback').textContent = '';
+  $('tries').textContent = 'First try: 100 points';
+  $('check').disabled = false;
+  $('hint').disabled = false;
+  draw('kernel', [[0]]);
+  render();
+}
+
+function check() {
+  const raw = $('answer').value;
+  const val = Number(raw);
+  if (raw.trim() === '' || !Number.isFinite(val)) {
+    $('feedback').className = 'feedback bad';
+    $('feedback').textContent = 'Enter a finite number.';
+    return;
+  }
+
+  let ok = false;
+  let why = '';
+
+  if (d.type === 0) {
+    const k = d.k.slice();
+    k[d.sel] = val;
+    const r = FITCalcX5.convolve({
+      image: d.image,
+      kernel: [k.slice(0, 3), k.slice(3, 6), k.slice(6, 9)],
+      mode: $('mode').value
+    });
+    const target = FITCalcX5.convolve({
+      image: d.image,
+      kernel: [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]],
+      mode: $('mode').value
+    });
+    ok = !r.error && !target.error &&
+      Math.abs(r.out[1][1] - target.out[1][1]) < 0.01;
+    why = 'The selected weight changes the flipped-kernel sum.';
+  } else if (d.type === 1) {
+    const r = FITCalcX5.otsu({ image: d.image });
+    ok = Number($('marker').value) === r.T;
+    why = `Maximum variance threshold is ${r.T}.`;
+  } else {
+    const r = FITCalcX5.segment({
+      image: d.image,
+      connectivity: Number($('conn').value)
+    });
+    ok = val === r.components;
+    why = `This connectivity gives ${r.components} components.`;
+  }
+
+  if (ok) {
+    const p = hinted ? 50 : tries ? 75 : 100;
+    score += p;
+    $('score').textContent = `Score: ${score}`;
+    $('feedback').className = 'feedback good';
+    $('feedback').textContent = `Correct. ${why} +${p} points.`;
+    $('check').disabled = true;
+    $('hint').disabled = true;
+    setTimeout(next, 1100);
+  } else {
+    tries++;
+    $('feedback').className = 'feedback bad';
+    $('feedback').textContent = `Not yet. ${why}`;
+    $('tries').textContent =
+      'Second try: 75 points; after hint: 50 points.';
+  }
+}
+
+$('check').addEventListener('click', check);
+
+$('hint').addEventListener('click', () => {
+  if (hinted) return;
+  hinted = true;
+  score = Math.max(0, score - 10);
+  $('score').textContent = `Score: ${score}`;
+  $('feedback').textContent = d.type === 1
+    ? 'Inspect the largest separation between the low and high intensity groups.'
+    : d.type === 2
+      ? 'Check whether diagonal-only contact should count.'
+      : 'Compare the marked response with the flipped kernel.';
+  $('hint').disabled = true;
+});
+
+$('minus').addEventListener('click', () => {
+  $('answer').value = Number($('answer').value) - 1;
+  render();
+});
+
+$('plus').addEventListener('click', () => {
+  $('answer').value = Number($('answer').value) + 1;
+  render();
+});
+
+['answer', 'conn', 'mode', 'marker'].forEach(id =>
+  $(id).addEventListener('input', render)
+);
+
+$('again').addEventListener('click', () => {
+  n = 0;
+  score = 0;
+  seed = 271828;
+  $('end').classList.add('hidden');
+  $('play').classList.remove('hidden');
+  next();
+});
+
+next();
+</script>
+</body>
+</html>

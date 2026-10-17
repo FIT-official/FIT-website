@@ -1,0 +1,998 @@
+{
+  "tool": "raster_grid",
+  "owner": "FIT Stock Strategy",
+  "version": "2026-10-17",
+  "tolerance": {
+    "rel": 1e-06,
+    "abs_when_expected_zero": 1e-09,
+    "note": "numbers relative 1e-6 (7 s.f.), zero compared abs 1e-9; integer outputs (T, counts, binary) exact; errors compared exactly as {error: schema class, reason: lower_snake_case code} (KAT_SCHEMA 17:46)"
+  },
+  "convention": "Images are row-major lists, row 0 at top, x to the right; at most 128 x 128, kernels odd and at most 5 x 5, at most 3 channels (scope cap). convolve is TRUE convolution (kernel rotated 180 deg, as in the textbook); modes: valid (only where the whole kernel fits, may be empty), same_zero (zero padding), same_replicate (edge pixels repeated). threshold: value >= T -> 1. otsu: 8-bit integer levels, class 0 = levels <= t, maximise between-class variance w0 w1 (mu0-mu1)^2, smallest t on ties; a one-level image reports T=0, variance 0. segment: connected components of non-zero pixels, 4- or 8-connectivity, areas sorted largest first. downsample: non-overlapping f x f block mean; output pixel size = input x f. channel_mix bt601: Y=0.299R+0.587G+0.114B. unmix: measured = M a for 2 channels, solved exactly; singular M -> MathError.",
+  "oracle": "script-verified (textbook formulae); ChatGPT Chat cross-check pending. Expected values from plain-loop implementations of R. C. Gonzalez & R. E. Woods, Digital Image Processing (textbook); N. Otsu (1979), A threshold selection method from gray-level histograms, IEEE Trans. SMC 9:62; T. M. Lillesand et al., Remote Sensing and Image Interpretation (textbook); ITU-R BT.601 luma weights 0.299/0.587/0.114, https://www.itu.int/rec/R-REC-BT.601; T. Zimmermann et al. (2003), Spectral imaging and linear unmixing, FEBS Lett. 546:87; recomputed independently with scipy.signal.convolve2d, scipy.ndimage (convolve, label), numpy block reshaping, numpy.linalg.solve and a brute-force Otsu search over raw pixel lists",
+  "cases": [
+    {
+      "id": "box-const-must",
+      "desc": "normalised 3x3 box on a constant image of 100 (valid)",
+      "op": "convolve",
+      "input": {
+        "image": [
+          [
+            100,
+            100,
+            100,
+            100,
+            100
+          ],
+          [
+            100,
+            100,
+            100,
+            100,
+            100
+          ],
+          [
+            100,
+            100,
+            100,
+            100,
+            100
+          ],
+          [
+            100,
+            100,
+            100,
+            100,
+            100
+          ],
+          [
+            100,
+            100,
+            100,
+            100,
+            100
+          ]
+        ],
+        "kernel": [
+          [
+            0.1111111111111111,
+            0.1111111111111111,
+            0.1111111111111111
+          ],
+          [
+            0.1111111111111111,
+            0.1111111111111111,
+            0.1111111111111111
+          ],
+          [
+            0.1111111111111111,
+            0.1111111111111111,
+            0.1111111111111111
+          ]
+        ],
+        "mode": "valid"
+      },
+      "expected": {
+        "out": [
+          [
+            100.0,
+            100.0,
+            100.0
+          ],
+          [
+            100.0,
+            100.0,
+            100.0
+          ],
+          [
+            100.0,
+            100.0,
+            100.0
+          ]
+        ]
+      },
+      "edge": false,
+      "hand_check": "R. C. Gonzalez & R. E. Woods, Digital Image Processing (textbook), spatial filtering: weights sum to 1 -> 100 wherever the kernel fits (map must-reproduce); valid output 3x3"
+    },
+    {
+      "id": "box-same-zero",
+      "desc": "box filter, zero padding darkens the border",
+      "op": "convolve",
+      "input": {
+        "image": [
+          [
+            9,
+            9,
+            9
+          ],
+          [
+            9,
+            9,
+            9
+          ],
+          [
+            9,
+            9,
+            9
+          ]
+        ],
+        "kernel": [
+          [
+            0.1111111111111111,
+            0.1111111111111111,
+            0.1111111111111111
+          ],
+          [
+            0.1111111111111111,
+            0.1111111111111111,
+            0.1111111111111111
+          ],
+          [
+            0.1111111111111111,
+            0.1111111111111111,
+            0.1111111111111111
+          ]
+        ],
+        "mode": "same_zero"
+      },
+      "expected": {
+        "out": [
+          [
+            4.0,
+            6.0,
+            4.0
+          ],
+          [
+            6.0,
+            9.0,
+            6.0
+          ],
+          [
+            4.0,
+            6.0,
+            4.0
+          ]
+        ]
+      },
+      "edge": true,
+      "hand_check": "corner sees 4 of 9 pixels -> 4; edge 6; centre 9"
+    },
+    {
+      "id": "box-same-rep",
+      "desc": "box filter, replicate padding keeps a constant image",
+      "op": "convolve",
+      "input": {
+        "image": [
+          [
+            9,
+            9,
+            9
+          ],
+          [
+            9,
+            9,
+            9
+          ],
+          [
+            9,
+            9,
+            9
+          ]
+        ],
+        "kernel": [
+          [
+            0.1111111111111111,
+            0.1111111111111111,
+            0.1111111111111111
+          ],
+          [
+            0.1111111111111111,
+            0.1111111111111111,
+            0.1111111111111111
+          ],
+          [
+            0.1111111111111111,
+            0.1111111111111111,
+            0.1111111111111111
+          ]
+        ],
+        "mode": "same_replicate"
+      },
+      "expected": {
+        "out": [
+          [
+            9.0,
+            9.0,
+            9.0
+          ],
+          [
+            9.0,
+            9.0,
+            9.0
+          ],
+          [
+            9.0,
+            9.0,
+            9.0
+          ]
+        ]
+      },
+      "edge": false,
+      "hand_check": "replicated border -> 9 everywhere"
+    },
+    {
+      "id": "conv-flip",
+      "desc": "asymmetric kernel shows convolution flips the kernel (output = image shifted left)",
+      "op": "convolve",
+      "input": {
+        "image": [
+          [
+            1,
+            2,
+            3
+          ],
+          [
+            4,
+            5,
+            6
+          ],
+          [
+            7,
+            8,
+            9
+          ]
+        ],
+        "kernel": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ]
+        ],
+        "mode": "same_zero"
+      },
+      "expected": {
+        "out": [
+          [
+            2.0,
+            3.0,
+            0.0
+          ],
+          [
+            5.0,
+            6.0,
+            0.0
+          ],
+          [
+            8.0,
+            9.0,
+            0.0
+          ]
+        ]
+      },
+      "edge": true,
+      "hand_check": "R. C. Gonzalez & R. E. Woods, Digital Image Processing (textbook): convolution rotates the kernel 180 deg; weight at offset m=-1 (left of centre) -> out(x)=sum k(m) in(x-m)=in(x+1): rows [2,3,0],[5,6,0],[8,9,0]; correlation would give [0,1,2],[0,4,5],[0,7,8]"
+    },
+    {
+      "id": "sobel-step",
+      "desc": "Sobel x on a vertical step edge (valid)",
+      "op": "convolve",
+      "input": {
+        "image": [
+          [
+            0,
+            0,
+            10,
+            10
+          ],
+          [
+            0,
+            0,
+            10,
+            10
+          ],
+          [
+            0,
+            0,
+            10,
+            10
+          ]
+        ],
+        "kernel": [
+          [
+            1,
+            0,
+            -1
+          ],
+          [
+            2,
+            0,
+            -2
+          ],
+          [
+            1,
+            0,
+            -1
+          ]
+        ],
+        "mode": "valid"
+      },
+      "expected": {
+        "out": [
+          [
+            40.0,
+            40.0
+          ]
+        ]
+      },
+      "edge": false,
+      "hand_check": "flipped Sobel = [[-1,0,1],[-2,0,2],[-1,0,1]] correlation: 40 at both columns straddling the edge"
+    },
+    {
+      "id": "kernel-even",
+      "desc": "even kernel refused",
+      "op": "convolve",
+      "input": {
+        "image": [
+          [
+            100,
+            100,
+            100,
+            100,
+            100
+          ],
+          [
+            100,
+            100,
+            100,
+            100,
+            100
+          ],
+          [
+            100,
+            100,
+            100,
+            100,
+            100
+          ],
+          [
+            100,
+            100,
+            100,
+            100,
+            100
+          ],
+          [
+            100,
+            100,
+            100,
+            100,
+            100
+          ]
+        ],
+        "kernel": [
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "mode": "valid"
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "kernel_must_be_odd_max_5x5"
+      },
+      "edge": true,
+      "hand_check": "no centre pixel"
+    },
+    {
+      "id": "kernel-too-big-valid",
+      "desc": "kernel larger than image in valid mode gives an empty output",
+      "op": "convolve",
+      "input": {
+        "image": [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "kernel": [
+          [
+            0.1111111111111111,
+            0.1111111111111111,
+            0.1111111111111111
+          ],
+          [
+            0.1111111111111111,
+            0.1111111111111111,
+            0.1111111111111111
+          ],
+          [
+            0.1111111111111111,
+            0.1111111111111111,
+            0.1111111111111111
+          ]
+        ],
+        "mode": "valid"
+      },
+      "expected": {
+        "out": []
+      },
+      "edge": true,
+      "hand_check": "kernel never fits"
+    },
+    {
+      "id": "thresh",
+      "desc": "fixed threshold 128 (>= T is foreground)",
+      "op": "threshold",
+      "input": {
+        "image": [
+          [
+            10,
+            12,
+            200
+          ],
+          [
+            11,
+            198,
+            205
+          ],
+          [
+            9,
+            13,
+            202
+          ]
+        ],
+        "T": 128
+      },
+      "expected": {
+        "binary": [
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "count_on": 4
+      },
+      "edge": false,
+      "hand_check": "pixels >= 128 -> 1: 4 on"
+    },
+    {
+      "id": "thresh-eq",
+      "desc": "pixel equal to T counts as foreground",
+      "op": "threshold",
+      "input": {
+        "image": [
+          [
+            127,
+            128,
+            129
+          ]
+        ],
+        "T": 128
+      },
+      "expected": {
+        "binary": [
+          [
+            0,
+            1,
+            1
+          ]
+        ],
+        "count_on": 2
+      },
+      "edge": true,
+      "hand_check": "boundary: 128>=128"
+    },
+    {
+      "id": "otsu",
+      "desc": "Otsu threshold on a bimodal 3x3 image",
+      "op": "otsu",
+      "input": {
+        "image": [
+          [
+            10,
+            12,
+            200
+          ],
+          [
+            11,
+            198,
+            205
+          ],
+          [
+            9,
+            13,
+            202
+          ]
+        ]
+      },
+      "expected": {
+        "T": 13,
+        "between_class_var": 8937.052
+      },
+      "edge": false,
+      "hand_check": "N. Otsu (1979), A threshold selection method from gray-level histograms, IEEE Trans. SMC 9:62: maximise w0 w1 (mu0-mu1)^2 over t, class 0 = levels <= t, smallest t on ties -> any t in 13..197 separates; smallest = 13"
+    },
+    {
+      "id": "otsu-flat",
+      "desc": "single grey level has no threshold",
+      "op": "otsu",
+      "input": {
+        "image": [
+          [
+            50,
+            50
+          ],
+          [
+            50,
+            50
+          ]
+        ]
+      },
+      "expected": {
+        "T": 0,
+        "between_class_var": 0
+      },
+      "edge": true,
+      "hand_check": "every split leaves one class empty -> T reported 0 with variance 0 (convention)"
+    },
+    {
+      "id": "seg-diag-4",
+      "desc": "diagonal pixels, 4-connectivity: 3 objects",
+      "op": "segment",
+      "input": {
+        "image": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "connectivity": 4
+      },
+      "expected": {
+        "components": 3,
+        "areas": [
+          1,
+          1,
+          1
+        ]
+      },
+      "edge": true,
+      "hand_check": "R. C. Gonzalez & R. E. Woods, Digital Image Processing (textbook), connected components: diagonal neighbours not 4-adjacent"
+    },
+    {
+      "id": "seg-diag-8",
+      "desc": "diagonal pixels, 8-connectivity: 1 object",
+      "op": "segment",
+      "input": {
+        "image": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "connectivity": 8
+      },
+      "expected": {
+        "components": 1,
+        "areas": [
+          3
+        ]
+      },
+      "edge": true,
+      "hand_check": "8-adjacency joins diagonals"
+    },
+    {
+      "id": "seg-blobs",
+      "desc": "three blobs plus a single pixel",
+      "op": "segment",
+      "input": {
+        "image": [
+          [
+            1,
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            1,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            1,
+            1,
+            1
+          ]
+        ],
+        "connectivity": 4
+      },
+      "expected": {
+        "components": 4,
+        "areas": [
+          4,
+          3,
+          2,
+          1
+        ]
+      },
+      "edge": false,
+      "hand_check": "2x2 blob (4), column (2), single (1), row of 3 (3)"
+    },
+    {
+      "id": "pool2",
+      "desc": "2x2 block-average resampling (coarser resolution)",
+      "op": "downsample",
+      "input": {
+        "image": [
+          [
+            1,
+            2,
+            3,
+            4
+          ],
+          [
+            5,
+            6,
+            7,
+            8
+          ],
+          [
+            9,
+            10,
+            11,
+            12
+          ],
+          [
+            13,
+            14,
+            15,
+            16
+          ]
+        ],
+        "factor": 2,
+        "pixel_size_m": 10
+      },
+      "expected": {
+        "out": [
+          [
+            3.5,
+            5.5
+          ],
+          [
+            11.5,
+            13.5
+          ]
+        ],
+        "pixel_size_m": 20
+      },
+      "edge": false,
+      "hand_check": "T. M. Lillesand et al., Remote Sensing and Image Interpretation (textbook): aggregate 2x2 cells -> 20 m pixels; means 3.5, 5.5, 11.5, 13.5"
+    },
+    {
+      "id": "pool-bad",
+      "desc": "3x3 blocks do not tile a 4x4 image",
+      "op": "downsample",
+      "input": {
+        "image": [
+          [
+            1,
+            2,
+            3,
+            4
+          ],
+          [
+            5,
+            6,
+            7,
+            8
+          ],
+          [
+            9,
+            10,
+            11,
+            12
+          ],
+          [
+            13,
+            14,
+            15,
+            16
+          ]
+        ],
+        "factor": 3,
+        "pixel_size_m": 10
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "size_not_divisible_by_factor"
+      },
+      "edge": true,
+      "hand_check": "4 mod 3 != 0"
+    },
+    {
+      "id": "luma",
+      "desc": "RGB (200,100,50) to luma",
+      "op": "channel_mix",
+      "input": {
+        "mode": "bt601",
+        "rgb": [
+          200,
+          100,
+          50
+        ]
+      },
+      "expected": {
+        "Y": 124.2
+      },
+      "edge": false,
+      "hand_check": "ITU-R BT.601 luma weights 0.299/0.587/0.114, https://www.itu.int/rec/R-REC-BT.601: 59.8+58.7+5.7=124.2"
+    },
+    {
+      "id": "unmix",
+      "desc": "two-fluorophore linear unmixing",
+      "op": "unmix",
+      "input": {
+        "M": [
+          [
+            0.8,
+            0.3
+          ],
+          [
+            0.2,
+            0.7
+          ]
+        ],
+        "measured": [
+          110,
+          90
+        ]
+      },
+      "expected": {
+        "abundance": [
+          100.0,
+          100.0
+        ]
+      },
+      "edge": false,
+      "hand_check": "T. Zimmermann et al. (2003), Spectral imaging and linear unmixing, FEBS Lett. 546:87: measured = M a -> a=M^-1 m=(100,100)"
+    },
+    {
+      "id": "unmix-singular",
+      "desc": "identical spectra cannot be separated",
+      "op": "unmix",
+      "input": {
+        "M": [
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.5,
+            0.5
+          ]
+        ],
+        "measured": [
+          10,
+          10
+        ]
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "singular_mixing_matrix"
+      },
+      "edge": true,
+      "hand_check": "det M=0"
+    },
+    {
+      "id": "too-big",
+      "desc": "image larger than scope cap",
+      "op": "threshold",
+      "input": {
+        "image": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "T": 1
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "image_exceeds_128x128"
+      },
+      "edge": true,
+      "hand_check": "scope cap 128 x 128"
+    }
+  ]
+}
