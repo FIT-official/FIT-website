@@ -1,0 +1,2536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recycle and Purge | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,summary{-webkit-tap-highlight-color:transparent;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{min-height:48px;border:2px solid #111;background:#fff;border-radius:999px;font:800 15px Inter,system-ui,sans-serif;padding:10px 14px;color:#111;cursor:pointer}
+button:active{transform:translateY(2px)}
+button:disabled{opacity:.5;cursor:not-allowed}
+input[type=range]{width:100%;height:48px;accent-color:var(--lvl-uni);cursor:pointer}
+input[type=number]{font-size:16px;min-height:48px;border:2px solid #111;border-radius:12px;padding:9px;width:100%}
+.shell{max-width:1260px;margin:auto;padding:16px 15px 45px}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.logo{font-size:24px;font-weight:900;letter-spacing:-1px}
+.hud{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:800}
+.hud span{border:2px solid #111;border-radius:999px;padding:8px 12px}
+.badge{background:var(--lvl-uni);color:var(--lvl-uni-on);text-transform:uppercase;font-weight:800;font-size:12px}
+h1{font-size:clamp(30px,4vw,46px);font-weight:800;line-height:1.1;letter-spacing:-1.3px;margin:8px 0}
+h2{font-size:21px;font-weight:800;margin:0 0 12px}
+p{line-height:1.55;margin:8px 0}
+.sub{font-weight:600;color:var(--fit-ink-2)}
+.layout{display:grid;gap:18px;margin-top:19px}
+.card{border:2px solid #111;border-radius:26px;box-shadow:var(--sh-2);padding:18px;background:white;min-width:0}
+.stage{background:var(--lvl-uni-tint)}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:#194da5}
+figure{margin:0}
+figure svg{display:block;width:100%;height:auto}
+figcaption{font-size:13px;font-weight:600;color:var(--fit-ink-2);margin-top:7px}
+.diagram{max-height:350px}
+.concept{background:#fff;border:2px solid #111;border-radius:18px;padding:12px;margin-top:15px}
+.concept svg{max-height:76px}
+.controls{display:grid;gap:12px}
+.control{padding:13px;background:var(--fit-sunken);border:2px solid #111;border-radius:17px}
+.control label{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-weight:800}
+.steppers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.steppers button{min-width:0;padding:5px}
+.plot{border:2px solid #111;border-radius:18px;padding:8px;background:#fff;margin:13px 0}
+.plot svg{width:100%;height:auto;display:block}
+.metrics{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.metrics span{border:2px solid #111;border-radius:999px;padding:7px 10px;background:white;font-weight:800;font-size:13px}
+.feedback{min-height:63px;border:2px dashed #777;border-radius:14px;padding:13px;margin:14px 0 10px;font-weight:700;background:white}
+.feedback.correct{border:2px solid #1E9E5A;background:#eafbf0}
+.feedback.wrong{border:2px solid #D92D20;background:#fff0ef}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2);font-size:17px}
+.check:active{box-shadow:var(--sh-1);transform:translateY(2px)}
+details{margin-top:15px;background:#fff;border:2px solid #111;border-radius:16px;padding:12px}
+summary{cursor:pointer;font-weight:800;min-height:44px;display:flex;align-items:center}
+details p{font-size:14px}
+.hidden{display:none!important}
+.end{text-align:center;padding:35px 18px}
+.stars{font-size:clamp(48px,12vw,85px);color:#d7a000;letter-spacing:5px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.12fr) minmax(0,1fr)}.shell{padding:24px 26px 50px}.card{padding:22px}}
+@media(prefers-reduced-motion:no-preference){button{transition:transform .12s,box-shadow .12s}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header>
+<div class="logo">FIT <span aria-hidden="true">●</span></div>
+<div class="hud">
+<span class="badge">University (Years 1–2)</span>
+<span id="round">Round 1/6</span><span id="score">Score 0</span>
+</div>
+</header>
+<main id="game">
+<h1>Recycle and Purge</h1>
+<p class="sub">Close a steady-state balance across every stream.</p>
+<div class="layout">
+<section class="card stage">
+<div class="eyebrow" id="type"></div>
+<h2 id="title"></h2>
+<p id="question"></p>
+<figure>
+<svg id="diagram" class="diagram" role="img" viewBox="0 0 580 330" aria-label="Process flow diagram"></svg>
+<figcaption id="caption">Steady operation · no accumulation</figcaption>
+</figure>
+<div class="metrics" id="metrics"></div>
+<div class="concept">
+<figure>
+<svg viewBox="0 0 360 72" role="img" aria-label="A process stream splits and returns through a recycle line">
+<rect x="107" y="15" width="112" height="42" rx="12" fill="#FFC83D" stroke="#111" stroke-width="4"/>
+<path d="M12 36h94m113 0h128M273 36v29H162V57" fill="none" stroke="#111" stroke-width="4" stroke-linejoin="round"/>
+<path d="M96 28l12 8-12 8m239-16l12 8-12 8m-181 36l-8-13h16" fill="#111"/>
+<text x="163" y="42" text-anchor="middle" font-weight="800" font-size="14">PROCESS</text>
+</svg>
+<figcaption>Recycle returns uncollected material to the inlet; purge removes a controlled share.</figcaption>
+</figure>
+</div>
+</section>
+<section class="card">
+<h2>Operating controls</h2>
+<div id="controls" class="controls"></div>
+<div class="plot"><svg id="flowPlot" role="img" aria-label="Live labelled mass flow chart" viewBox="0 0 500 250"></svg></div>
+<div class="plot"><svg id="curvePlot" role="img" aria-label="Inert fraction against purge fraction, with player marker" viewBox="0 0 500 278"></svg></div>
+<div class="feedback" id="feedback" aria-live="polite">Set the controls and check the process.</div>
+<div class="actions">
+<button id="hint">Hint (−25 points)</button>
+<button id="check" class="check">Check ✓</button>
+</div>
+<details><summary>The maths</summary><p id="maths"></p></details>
+</section>
+</div>
+</main>
+<section id="end" class="card end hidden" aria-live="polite">
+<h1>Balances complete!</h1>
+<div id="stars" class="stars"></div>
+<h2 id="finalScore"></h2>
+<p id="message"></p>
+<button id="again" class="check">Play again ↻</button>
+</section>
+</div>
+<script>
+/* FIT-CALC-BEGIN x3_mass_balance */
+const FITCalcX3 = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+  const EPS = 1e-9;
+  const MAX_SPECIES = 5;
+  const MAX_STREAMS = 10;
+  const MAX_STAGES = 10;
+
+  function finite(v) {
+    return typeof v === 'number' && Number.isFinite(v);
+  }
+
+  function nonnegative(v) {
+    return finite(v) && v >= 0;
+  }
+
+  function positive(v) {
+    return finite(v) && v > 0;
+  }
+
+  function fraction(v) {
+    return finite(v) && v >= 0 && v <= 1;
+  }
+
+  const REASONS = {
+    FRACTIONS_MUST_SUM_TO_1: 'fractions_must_sum_to_1',
+    INVALID_CAPACITY: 'invalid_capacity',
+    INVALID_CELL_COUNT: 'invalid_cell_count',
+    INVALID_COEFFICIENT: 'invalid_coefficient',
+    INVALID_CONCENTRATION: 'invalid_concentration',
+    INVALID_CONVERSION: 'conversion_out_of_range',
+    INVALID_DURATION: 'invalid_duration',
+    INVALID_FACTOR: 'invalid_factor',
+    INVALID_FEED: 'invalid_feed',
+    INVALID_FLOW: 'invalid_flow',
+    INVALID_GROWTH_RATE: 'invalid_growth_rate',
+    INVALID_HARVEST_DAY: 'invalid_harvest_day',
+    INVALID_HEAT_CAPACITY: 'invalid_heat_capacity',
+    INVALID_IMPURITY_REMOVAL: 'impurity_removal_out_of_range',
+    INVALID_INERT_FRACTION: 'inert_fraction_out_of_range',
+    INVALID_ITEMS: 'invalid_items',
+    INVALID_LABEL: 'invalid_label',
+    INVALID_LEDGER: 'invalid_ledger',
+    INVALID_MASS: 'invalid_mass',
+    INVALID_MASS_FLOW: 'invalid_mass_flow',
+    INVALID_MOLAR_MASS: 'invalid_molar_mass',
+    INVALID_POWER: 'invalid_power',
+    INVALID_PRODUCT: 'invalid_product',
+    INVALID_PURGE_FRACTION: 'purge_fraction_out_of_range',
+    INVALID_QUANTITY: 'invalid_quantity',
+    INVALID_REACTANTS: 'invalid_reactants',
+    INVALID_RECOVERY: 'step_yield_out_of_range',
+    INVALID_RECYCLE_FRACTION: 'recycle_fraction_out_of_range',
+    INVALID_SPECIES: 'invalid_species',
+    INVALID_STAGES: 'invalid_stages',
+    INVALID_STAGE_NAME: 'invalid_stage_name',
+    INVALID_STREAMS: 'invalid_streams',
+    INVALID_TEMPERATURE: 'below_absolute_zero',
+    INVALID_UNIT: 'invalid_unit',
+    INVALID_YIELD: 'yield_out_of_range',
+    PRODUCT_EXCEEDS_INPUT: 'product_exceeds_input',
+    TOO_MANY_ITEMS: 'too_many_items',
+    TOO_MANY_REACTANTS: 'too_many_reactants',
+    TOO_MANY_SPECIES: 'too_many_species',
+    TOO_MANY_STAGES: 'too_many_stages',
+    TOO_MANY_STREAMS: 'too_many_streams'
+  };
+
+  /**
+   * All errors follow the FIT schema:
+   *
+   * ConstraintViolation:
+   * { error: 'ConstraintViolation', reason: 'lower_snake' }
+   *
+   * MathError:
+   * { error: 'MathError', reason: 'lower_snake' }
+   */
+  function err(code, reason) {
+    if (code === 'MathError') {
+      return {
+        error: 'MathError',
+        reason: reason || 'undefined_calculation'
+      };
+    }
+
+    if (Object.prototype.hasOwnProperty.call(REASONS, code)) {
+      return {
+        error: 'ConstraintViolation',
+        reason: REASONS[code]
+      };
+    }
+
+    return {
+      error: 'ConstraintViolation',
+      reason: String(code)
+        .replace(/([a-z])([A-Z])/g, '$1_$2')
+        .toLowerCase()
+    };
+  }
+
+  function clean(v) {
+    return Math.abs(v) < 1e-12 ? 0 : v;
+  }
+
+  function safeResult(o) {
+    function scan(v) {
+      if (typeof v === 'number') {
+        return Number.isFinite(v);
+      }
+
+      if (Array.isArray(v)) {
+        return v.every(scan);
+      }
+
+      if (v && typeof v === 'object') {
+        return Object.keys(v).every(k => scan(v[k]));
+      }
+
+      return true;
+    }
+
+    return scan(o)
+      ? o
+      : err('MathError', 'non_finite_result');
+  }
+
+  function validArray(a, cap) {
+    return Array.isArray(a) &&
+      a.length > 0 &&
+      a.length <= cap;
+  }
+
+  /**
+   * Return the first defined value.
+   *
+   * Used to support the existing HTML game interface and the
+   * teaching/KAT interface without changing existing outputs.
+   */
+  function firstDefined() {
+    for (let i = 0; i < arguments.length; i++) {
+      if (arguments[i] !== undefined) {
+        return arguments[i];
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Steady, adiabatic, non-reacting mixer.
+   *
+   * Maximum 10 streams and 5 species.
+   *
+   * Original inputs:
+   * streams [{
+   *   m_kg_s,
+   *   x,
+   *   T_C,
+   *   cp_kJ_kgK
+   * }]
+   *
+   * The original output fields are preserved.
+   *
+   * Assumptions:
+   * - Steady state
+   * - No chemical reaction
+   * - No heat loss
+   * - Constant specific heat capacities
+   * - No phase change
+   *
+   * Temperature:
+   * T_out = sum(m_i cp_i T_i) / sum(m_i cp_i)
+   *
+   * Example:
+   * 1 kg/s at 20 C and 1 kg/s at 60 C, equal cp:
+   * T_out = 40 C.
+   */
+  function mixStreams({ streams } = {}) {
+    if (!Array.isArray(streams) || !streams.length) {
+      return err('INVALID_STREAMS');
+    }
+
+    if (streams.length > MAX_STREAMS) {
+      return err('TOO_MANY_STREAMS');
+    }
+
+    if (!streams.every(
+      s => s && s.x && typeof s.x === 'object' &&
+        !Array.isArray(s.x)
+    )) {
+      return err('INVALID_STREAMS');
+    }
+
+    const names = Object.keys(streams[0].x).sort();
+
+    if (!names.length) {
+      return err('INVALID_SPECIES');
+    }
+
+    if (names.length > MAX_SPECIES) {
+      return err('TOO_MANY_SPECIES');
+    }
+
+    if (names.some(n => !n.trim())) {
+      return err('INVALID_SPECIES');
+    }
+
+    let mass = 0;
+    let heatCapacityFlow = 0;
+    let enthalpyFlow = 0;
+
+    const speciesMass = Object.fromEntries(
+      names.map(n => [n, 0])
+    );
+
+    for (const s of streams) {
+      if (!nonnegative(s.m_kg_s)) {
+        return err('INVALID_MASS_FLOW');
+      }
+
+      if (!finite(s.T_C) || s.T_C < -273.15) {
+        return err('INVALID_TEMPERATURE');
+      }
+
+      if (!positive(s.cp_kJ_kgK)) {
+        return err('INVALID_HEAT_CAPACITY');
+      }
+
+      const keys = Object.keys(s.x).sort();
+
+      if (
+        keys.length !== names.length ||
+        keys.some((k, i) => k !== names[i])
+      ) {
+        return err('INVALID_SPECIES');
+      }
+
+      if (!names.every(n => fraction(s.x[n]))) {
+        return err('INVALID_SPECIES');
+      }
+
+      const sum = names.reduce(
+        (a, n) => a + s.x[n],
+        0
+      );
+
+      if (Math.abs(sum - 1) > EPS) {
+        return err('FRACTIONS_MUST_SUM_TO_1');
+      }
+
+      mass += s.m_kg_s;
+
+      heatCapacityFlow +=
+        s.m_kg_s * s.cp_kJ_kgK;
+
+      enthalpyFlow +=
+        s.m_kg_s * s.cp_kJ_kgK * s.T_C;
+
+      for (const n of names) {
+        speciesMass[n] +=
+          s.m_kg_s * s.x[n];
+      }
+    }
+
+    if (heatCapacityFlow === 0) {
+      return err(
+        'MathError',
+        'zero_total_heat_capacity_flow'
+      );
+    }
+
+    const x = {};
+
+    for (const n of names) {
+      x[n] = speciesMass[n] / mass;
+    }
+
+    const out = {
+      m_kg_s: mass,
+      x,
+      T_C: enthalpyFlow / heatCapacityFlow,
+      residual_kg_s: clean(mass - mass)
+    };
+
+    return safeResult(out);
+  }
+
+  /**
+   * KAT-compatible temperature mixing interface.
+   *
+   * Input:
+   * {
+   *   streams: [
+   *     { m: 1, cp: 4.18, T: 20 },
+   *     { m: 1, cp: 4.18, T: 60 }
+   *   ]
+   * }
+   *
+   * The original mixStreams interface remains available.
+   */
+  function mixTemperature({ streams } = {}) {
+    if (!Array.isArray(streams) || !streams.length) {
+      return err('INVALID_STREAMS');
+    }
+
+    if (streams.length > MAX_STREAMS) {
+      return err('TOO_MANY_STREAMS');
+    }
+
+    const converted = [];
+
+    for (const s of streams) {
+      if (!s || typeof s !== 'object') {
+        return err('INVALID_STREAMS');
+      }
+
+      const m = firstDefined(s.m, s.m_kg_s);
+      const cp = firstDefined(s.cp, s.cp_kJ_kgK);
+      const T = firstDefined(s.T, s.T_C);
+
+      converted.push({
+        m_kg_s: m,
+        cp_kJ_kgK: cp,
+        T_C: T,
+        x: { mixture: 1 }
+      });
+    }
+
+    const result = mixStreams({
+      streams: converted
+    });
+
+    if (result.error) {
+      return result;
+    }
+
+    return safeResult({
+      T_mixed: result.T_C,
+      T_out: result.T_C,
+      T_C: result.T_C,
+      m_total: result.m_kg_s,
+      m_kg_s: result.m_kg_s,
+      residual_kg_s: result.residual_kg_s
+    });
+  }
+
+  /**
+   * Steady conservative concentration mixing.
+   *
+   * Inputs:
+   * streams [{Q_m3_s >= 0, C_mg_L >= 0}]
+   *
+   * Maximum 10 streams.
+   *
+   * Outputs:
+   * Q_m3_s
+   * C_mg_L
+   * residual in mg/s
+   *
+   * 1 cubic metre = 1000 litres.
+   *
+   * No decay, reaction or accumulation.
+   */
+  function mixConcentrations({ streams } = {}) {
+    if (!Array.isArray(streams) || !streams.length) {
+      return err('INVALID_STREAMS');
+    }
+
+    if (streams.length > MAX_STREAMS) {
+      return err('TOO_MANY_STREAMS');
+    }
+
+    let q = 0;
+    let load = 0;
+
+    for (const s of streams) {
+      if (!s || !nonnegative(s.Q_m3_s)) {
+        return err('INVALID_FLOW');
+      }
+
+      if (!nonnegative(s.C_mg_L)) {
+        return err('INVALID_CONCENTRATION');
+      }
+
+      q += s.Q_m3_s;
+
+      load +=
+        s.Q_m3_s * s.C_mg_L * 1000;
+    }
+
+    if (!positive(q)) {
+      return err('MathError', 'zero_total_flow');
+    }
+
+    const C = load / (q * 1000);
+
+    return safeResult({
+      Q_m3_s: q,
+      C_mg_L: C,
+      residual: clean(
+        load - q * C * 1000
+      )
+    });
+  }
+
+  /**
+   * Single-loop steady mixer/splitter mass balance.
+   *
+   * Inputs:
+   * F_kg_s >= 0
+   * 0 <= recycleFraction < 1
+   *
+   * M = F / (1-r)
+   * R = rM
+   * P = (1-r)M
+   *
+   * Outputs:
+   * mixer_kg_s
+   * recycle_kg_s
+   * product_kg_s
+   * residual_kg_s
+   *
+   * A recycle fraction >= 1 is a constraint violation.
+   */
+  function recycleLoop({
+    F_kg_s,
+    recycleFraction
+  } = {}) {
+    if (!nonnegative(F_kg_s)) {
+      return err('INVALID_FEED');
+    }
+
+    if (
+      !finite(recycleFraction) ||
+      recycleFraction < 0 ||
+      recycleFraction >= 1
+    ) {
+      return err('INVALID_RECYCLE_FRACTION');
+    }
+
+    const M = F_kg_s / (1 - recycleFraction);
+    const R = M * recycleFraction;
+    const P = M * (1 - recycleFraction);
+
+    return safeResult({
+      mixer_kg_s: M,
+      recycle_kg_s: R,
+      product_kg_s: P,
+      residual_kg_s: clean(F_kg_s - P)
+    });
+  }
+
+  /**
+   * KAT-compatible recycle interface.
+   *
+   * Input:
+   * {
+   *   fresh: 10,
+   *   recycle_fraction: 0.5
+   * }
+   */
+  function recycle(args = {}) {
+    const F = firstDefined(
+      args.fresh,
+      args.F_kg_s
+    );
+
+    const r = firstDefined(
+      args.recycle_fraction,
+      args.recycleFraction
+    );
+
+    const result = recycleLoop({
+      F_kg_s: F,
+      recycleFraction: r
+    });
+
+    if (result.error) {
+      return result;
+    }
+
+    return safeResult({
+      ...result,
+      mixer: result.mixer_kg_s,
+      recycle: result.recycle_kg_s,
+      product: result.product_kg_s,
+      residual: result.residual_kg_s
+    });
+  }
+
+  /**
+   * Exact steady-state recycle and purge balance.
+   *
+   * Single reactant A and single inert I.
+   *
+   * Reaction:
+   * A -> P
+   *
+   * Molar stoichiometry:
+   * 1:1
+   *
+   * Inputs:
+   * F_mol_s >= 0
+   * yInert in [0,1]
+   * conversionPerPass in [0,1]
+   * purgeFraction in [0,1]
+   *
+   * Fresh reactant:
+   * Af = F(1-yInert)
+   *
+   * Fresh inert:
+   * If = F*yInert
+   *
+   * Mixer reactant:
+   * Am = Af / [1-(1-c)(1-p)]
+   *
+   * Mixer inert for p>0:
+   * Im = If/p
+   *
+   * The separator removes all product P.
+   *
+   * The remaining A/I stream is divided between purge and
+   * recycle.
+   *
+   * Product, purge and fresh feed close the external balance.
+   */
+  function recyclePurge({
+    F_mol_s,
+    yInert,
+    conversionPerPass,
+    purgeFraction
+  } = {}) {
+    if (!nonnegative(F_mol_s)) {
+      return err('INVALID_FEED');
+    }
+
+    if (!fraction(yInert)) {
+      return err('INVALID_INERT_FRACTION');
+    }
+
+    if (!fraction(conversionPerPass)) {
+      return err('INVALID_CONVERSION');
+    }
+
+    if (!fraction(purgeFraction)) {
+      return err('INVALID_PURGE_FRACTION');
+    }
+
+    const p = purgeFraction;
+    const c = conversionPerPass;
+
+    const Af = F_mol_s * (1 - yInert);
+    const If = F_mol_s * yInert;
+
+    if (p === 0 && If > 0) {
+      return err(
+        'MathError',
+        'zero_purge_with_positive_inert_feed'
+      );
+    }
+
+    const d = 1 - (1 - c) * (1 - p);
+
+    if (d === 0 && Af > 0) {
+      return err(
+        'MathError',
+        'undefined_reactant_steady_state'
+      );
+    }
+
+    const Am = d === 0 ? 0 : Af / d;
+    const Im = p === 0 ? 0 : If / p;
+
+    const Ao = Am * (1 - c);
+    const P = Am * c;
+
+    const Ap = Ao * p;
+    const Ip = Im * p;
+
+    const Ar = Ao * (1 - p);
+    const Ir = Im * (1 - p);
+
+    function stream(A, I, product) {
+      return {
+        A_mol_s: A,
+        I_mol_s: I,
+        P_mol_s: product,
+        total_mol_s: A + I + product
+      };
+    }
+
+    const out = {
+      mixer: stream(Am, Im, 0),
+      reactorOut: stream(Ao, Im, P),
+      recycle: stream(Ar, Ir, 0),
+      purge: stream(Ap, Ip, 0),
+      product: stream(0, 0, P),
+
+      inertInLoopFraction:
+        Am + Im === 0
+          ? 0
+          : Im / (Am + Im),
+
+      overallConversion:
+        Af === 0
+          ? 0
+          : P / Af,
+
+      residual: clean(
+        F_mol_s - P - Ap - Ip
+      )
+    };
+
+    return safeResult(out);
+  }
+
+  /**
+   * Sequential target-mass recovery.
+   *
+   * Original inputs:
+   * {
+   *   input_kg,
+   *   stages: [
+   *     {
+   *       name,
+   *       recovery,
+   *       impurityRemoval
+   *     }
+   *   ],
+   *   impurity_kg
+   * }
+   *
+   * A zero-length stage list is valid.
+   *
+   * Empty cascade:
+   * - overallYield = 1
+   * - stageOut_kg = []
+   * - losses_kg = []
+   * - residual_kg = 0
+   *
+   * Existing outputs and purity calculations are preserved.
+   */
+  function recoveryCascade({
+    input_kg,
+    stages,
+    impurity_kg
+  } = {}) {
+    if (
+      !nonnegative(input_kg) ||
+      (
+        impurity_kg !== undefined &&
+        !nonnegative(impurity_kg)
+      )
+    ) {
+      return err('INVALID_MASS');
+    }
+
+    if (!Array.isArray(stages)) {
+      return err('INVALID_STAGES');
+    }
+
+    if (stages.length > MAX_STAGES) {
+      return err('TOO_MANY_STAGES');
+    }
+
+    let current = input_kg;
+
+    let impurity =
+      impurity_kg === undefined
+        ? 0
+        : impurity_kg;
+
+    const stageOut_kg = [];
+    const losses_kg = [];
+
+    for (const s of stages) {
+      if (
+        !s ||
+        typeof s.name !== 'string' ||
+        !s.name.trim()
+      ) {
+        return err('INVALID_STAGE_NAME');
+      }
+
+      if (!fraction(s.recovery)) {
+        return err('INVALID_RECOVERY');
+      }
+
+      if (
+        s.impurityRemoval !== undefined &&
+        !fraction(s.impurityRemoval)
+      ) {
+        return err('INVALID_IMPURITY_REMOVAL');
+      }
+
+      const next = current * s.recovery;
+
+      losses_kg.push(current - next);
+      stageOut_kg.push(next);
+
+      current = next;
+
+      impurity *= 1 - (
+        s.impurityRemoval === undefined
+          ? 0
+          : s.impurityRemoval
+      );
+    }
+
+    const yieldFraction = stages.reduce(
+      (a, s) => a * s.recovery,
+      1
+    );
+
+    const totalLoss = losses_kg.reduce(
+      (a, b) => a + b,
+      0
+    );
+
+    const out = {
+      stageOut_kg,
+      losses_kg,
+      overallYield: yieldFraction,
+      residual_kg: clean(
+        input_kg - current - totalLoss
+      )
+    };
+
+    if (impurity_kg !== undefined) {
+      out.purity =
+        current + impurity === 0
+          ? 0
+          : current / (current + impurity);
+    }
+
+    return safeResult(out);
+  }
+
+  /**
+   * KAT-compatible recovery cascade.
+   *
+   * Input:
+   * {
+   *   mass_in: 1000,
+   *   step_yields: [0.9, 0.8]
+   * }
+   *
+   * Output includes:
+   * overall_yield
+   * mass_after_each
+   * lost
+   *
+   * Original recoveryCascade output fields are retained.
+   */
+  function recoveryCascadeKAT(args = {}) {
+    const mass = firstDefined(
+      args.mass_in,
+      args.input_kg
+    );
+
+    let stages;
+
+    if (args.step_yields !== undefined) {
+      if (!Array.isArray(args.step_yields)) {
+        return err('INVALID_STAGES');
+      }
+
+      stages = args.step_yields.map((recovery, i) => ({
+        name: 'Stage ' + (i + 1),
+        recovery
+      }));
+    } else {
+      stages = args.stages;
+    }
+
+    const result = recoveryCascade({
+      input_kg: mass,
+      stages,
+      impurity_kg: args.impurity_kg
+    });
+
+    if (result.error) {
+      return result;
+    }
+
+    const lost = result.losses_kg.reduce(
+      (a, b) => a + b,
+      0
+    );
+
+    return safeResult({
+      overall_yield: result.overallYield,
+      mass_after_each: result.stageOut_kg,
+      lost,
+      overallYield: result.overallYield,
+      stageOut_kg: result.stageOut_kg,
+      losses_kg: result.losses_kg,
+      residual_kg: result.residual_kg,
+      ...(result.purity === undefined
+        ? {}
+        : { purity: result.purity })
+    });
+  }
+
+  /**
+   * Stoichiometric atom economy.
+   *
+   * Atom economy is not isolated product yield.
+   *
+   * Inputs:
+   * product: {M_g_mol>0, coeff>0}
+   * reactants: [{M_g_mol>0, coeff>0}]
+   *
+   * Maximum 10 reactants.
+   *
+   * Atom economy (%) =
+   * 100 * product stoichiometric mass /
+   * total reactant stoichiometric mass.
+   *
+   * Assumes the supplied equation is balanced.
+   */
+  function atomEconomy({
+    product,
+    reactants
+  } = {}) {
+    if (!product || typeof product !== 'object') {
+      return err('INVALID_PRODUCT');
+    }
+
+    if (!Array.isArray(reactants) || !reactants.length) {
+      return err('INVALID_REACTANTS');
+    }
+
+    if (reactants.length > MAX_STREAMS) {
+      return err('TOO_MANY_REACTANTS');
+    }
+
+    const all = [product, ...reactants];
+
+    if (all.some(v => !v || !positive(v.M_g_mol))) {
+      return err('INVALID_MOLAR_MASS');
+    }
+
+    if (all.some(v => !positive(v.coeff))) {
+      return err('INVALID_COEFFICIENT');
+    }
+
+    const denominator = reactants.reduce(
+      (a, v) => a + v.M_g_mol * v.coeff,
+      0
+    );
+
+    if (!positive(denominator)) {
+      return err(
+        'MathError',
+        'zero_reactant_stoichiometric_mass'
+      );
+    }
+
+    return safeResult({
+      atomEconomy_pct:
+        100 *
+        product.M_g_mol *
+        product.coeff /
+        denominator
+    });
+  }
+
+  /**
+   * Environmental factor.
+   *
+   * E-factor = counted waste mass / isolated product mass.
+   *
+   * Inputs:
+   * waste_g >= 0
+   * product_g >= 0
+   *
+   * Zero product mass is mathematically undefined.
+   */
+  function eFactor({
+    waste_g,
+    product_g
+  } = {}) {
+    if (
+      !nonnegative(waste_g) ||
+      !nonnegative(product_g)
+    ) {
+      return err('INVALID_MASS');
+    }
+
+    if (product_g === 0) {
+      return err(
+        'MathError',
+        'zero_product_mass'
+      );
+    }
+
+    return safeResult({
+      eFactor: waste_g / product_g,
+      residual_g: 0
+    });
+  }
+
+  /**
+   * Process mass intensity.
+   *
+   * PMI = total counted input mass / product mass.
+   */
+  function processMassIntensity({
+    totalInput_g,
+    product_g
+  } = {}) {
+    if (
+      !nonnegative(totalInput_g) ||
+      !nonnegative(product_g)
+    ) {
+      return err('INVALID_MASS');
+    }
+
+    if (product_g === 0) {
+      return err(
+        'MathError',
+        'zero_product_mass'
+      );
+    }
+
+    if (product_g > totalInput_g) {
+      return err('PRODUCT_EXCEEDS_INPUT');
+    }
+
+    return safeResult({
+      pmi: totalInput_g / product_g,
+
+      residual_g: clean(
+        totalInput_g -
+        product_g -
+        (totalInput_g - product_g)
+      )
+    });
+  }
+
+  /**
+   * Reaction mass efficiency.
+   *
+   * RME (%) =
+   * 100 * product mass / counted reactant mass.
+   */
+  function reactionMassEfficiency({
+    product_g,
+    reactants_g
+  } = {}) {
+    if (
+      !nonnegative(product_g) ||
+      !nonnegative(reactants_g)
+    ) {
+      return err('INVALID_MASS');
+    }
+
+    if (reactants_g === 0) {
+      return err(
+        'MathError',
+        'zero_reactant_mass'
+      );
+    }
+
+    if (product_g > reactants_g) {
+      return err('PRODUCT_EXCEEDS_INPUT');
+    }
+
+    return safeResult({
+      rme_pct: 100 * product_g / reactants_g,
+
+      residual_g: clean(
+        reactants_g -
+        product_g -
+        (reactants_g - product_g)
+      )
+    });
+  }
+
+  /**
+   * Static-factor carbon inventory.
+   *
+   * Original input:
+   * items [{
+   *   label,
+   *   quantity,
+   *   unit,
+   *   factor_kgCO2e_per_unit
+   * }]
+   *
+   * Maximum 10 items.
+   *
+   * Each factor is user-supplied.
+   *
+   * Outputs:
+   * bySource [{label,kgCO2e,share}]
+   * total_kgCO2e
+   * shares[]
+   * residual_kgCO2e
+   *
+   * The share of each source is:
+   * source kgCO2e / total kgCO2e.
+   *
+   * If total emissions are zero, each share is null.
+   *
+   * An empty inventory returns zero total and empty arrays.
+   */
+  function carbonAccounting({ items } = {}) {
+    if (!Array.isArray(items)) {
+      return err('INVALID_ITEMS');
+    }
+
+    if (items.length > MAX_STREAMS) {
+      return err('TOO_MANY_ITEMS');
+    }
+
+    const bySource = [];
+
+    for (const v of items) {
+      if (
+        !v ||
+        typeof v.label !== 'string' ||
+        !v.label.trim()
+      ) {
+        return err('INVALID_LABEL');
+      }
+
+      if (
+        typeof v.unit !== 'string' ||
+        !v.unit.trim()
+      ) {
+        return err('INVALID_UNIT');
+      }
+
+      if (!nonnegative(v.quantity)) {
+        return err('INVALID_QUANTITY');
+      }
+
+      if (!nonnegative(v.factor_kgCO2e_per_unit)) {
+        return err('INVALID_FACTOR');
+      }
+
+      bySource.push({
+        label: v.label,
+        kgCO2e:
+          v.quantity *
+          v.factor_kgCO2e_per_unit
+      });
+    }
+
+    const total = bySource.reduce(
+      (a, v) => a + v.kgCO2e,
+      0
+    );
+
+    const shares = bySource.map(
+      v => total === 0
+        ? null
+        : v.kgCO2e / total
+    );
+
+    bySource.forEach((source, i) => {
+      source.share = shares[i];
+    });
+
+    return safeResult({
+      bySource,
+      total_kgCO2e: total,
+      shares,
+
+      residual_kgCO2e: clean(
+        total -
+        bySource.reduce(
+          (a, v) => a + v.kgCO2e,
+          0
+        )
+      )
+    });
+  }
+
+  /**
+   * KAT-compatible carbon accounting.
+   *
+   * Input:
+   * {
+   *   activities: [
+   *     {name:'electricity',qty:1000,factor:0.4},
+   *     {name:'diesel',qty:100,factor:2.68}
+   *   ]
+   * }
+   *
+   * Expected:
+   * total = 668 kgCO2e
+   * shares = [400/668,268/668]
+   */
+  function carbonAccountingKAT(args = {}) {
+    if (args.activities === undefined) {
+      return carbonAccounting(args);
+    }
+
+    if (!Array.isArray(args.activities)) {
+      return err('INVALID_ITEMS');
+    }
+
+    const items = args.activities.map(v => {
+      if (!v || typeof v !== 'object') {
+        return null;
+      }
+
+      return {
+        label: firstDefined(v.name, v.label),
+        quantity: firstDefined(v.qty, v.quantity),
+        unit: firstDefined(v.unit, 'activity_unit'),
+        factor_kgCO2e_per_unit: firstDefined(
+          v.factor,
+          v.factor_kgCO2e_per_unit
+        )
+      };
+    });
+
+    return carbonAccounting({ items });
+  }
+
+  /**
+   * Population growth followed by sequential recovery.
+   *
+   * Exponential model:
+   * N(t) = N0 exp(rt)
+   *
+   * Logistic model:
+   * N(t) = K/[1+(K/N0-1)exp(-rt)]
+   *
+   * Inputs:
+   * N0 >= 0 cells
+   * r_per_day >= 0
+   * K optional > 0
+   * harvestDay >= 0
+   * stageRecoveries[]
+   *
+   * Original outputs are preserved.
+   */
+  function cellProduction({
+    N0,
+    r_per_day,
+    K,
+    harvestDay,
+    stageRecoveries
+  } = {}) {
+    if (!nonnegative(N0)) {
+      return err('INVALID_CELL_COUNT');
+    }
+
+    if (!nonnegative(r_per_day)) {
+      return err('INVALID_GROWTH_RATE');
+    }
+
+    if (!nonnegative(harvestDay)) {
+      return err('INVALID_HARVEST_DAY');
+    }
+
+    if (
+      K !== undefined &&
+      (!positive(K) || N0 > K)
+    ) {
+      return err('INVALID_CAPACITY');
+    }
+
+    if (
+      !Array.isArray(stageRecoveries) ||
+      stageRecoveries.length === 0
+    ) {
+      return err('INVALID_STAGES');
+    }
+
+    if (stageRecoveries.length > MAX_STAGES) {
+      return err('TOO_MANY_STAGES');
+    }
+
+    if (!stageRecoveries.every(fraction)) {
+      return err('INVALID_RECOVERY');
+    }
+
+    const a = r_per_day * harvestDay;
+
+    let N;
+
+    if (N0 === 0) {
+      N = 0;
+    } else if (K === undefined) {
+      N = N0 * Math.exp(a);
+    } else {
+      const z = Math.exp(-a);
+
+      N = K / (
+        1 + (K / N0 - 1) * z
+      );
+    }
+
+    const overallYield = stageRecoveries.reduce(
+      (v, f) => v * f,
+      1
+    );
+
+    const final = N * overallYield;
+
+    let balance = N;
+    let losses = 0;
+
+    for (const f of stageRecoveries) {
+      const next = balance * f;
+
+      losses += balance - next;
+      balance = next;
+    }
+
+    return safeResult({
+      N_harvest: N,
+      N_final: final,
+      overallYield,
+
+      residual_cells: clean(
+        N - final - losses
+      )
+    });
+  }
+
+  /**
+   * Generic scalar mass ledger.
+   *
+   * Inputs:
+   * inputs[]
+   * outputs[]
+   * accumulation = 0
+   *
+   * All inputs and outputs are nonnegative.
+   * Accumulation may be signed.
+   *
+   * residual =
+   * total input - total output - accumulation.
+   */
+  function balanceLedger({
+    inputs,
+    outputs,
+    accumulation = 0
+  } = {}) {
+    if (
+      !Array.isArray(inputs) ||
+      !Array.isArray(outputs) ||
+      !inputs.length ||
+      !outputs.length
+    ) {
+      return err('INVALID_LEDGER');
+    }
+
+    if (
+      inputs.length > MAX_STREAMS ||
+      outputs.length > MAX_STREAMS
+    ) {
+      return err('TOO_MANY_STREAMS');
+    }
+
+    if (
+      ![...inputs, ...outputs].every(nonnegative) ||
+      !finite(accumulation)
+    ) {
+      return err('INVALID_MASS');
+    }
+
+    const totalIn = inputs.reduce(
+      (a, b) => a + b,
+      0
+    );
+
+    const totalOut = outputs.reduce(
+      (a, b) => a + b,
+      0
+    );
+
+    return safeResult({
+      totalIn,
+      totalOut,
+      accumulation,
+      residual: clean(
+        totalIn - totalOut - accumulation
+      )
+    });
+  }
+
+  /**
+   * Workshop electricity comparison.
+   *
+   * All carbon factors are user-supplied.
+   *
+   * Energy (kWh) = power (kW) * hours (h)
+   *
+   * Emissions (kgCO2e) =
+   * energy (kWh) * factor (kgCO2e/kWh)
+   *
+   * Saving = old emissions - new emissions.
+   */
+  function electricityComparison({
+    oldPower_kW,
+    newPower_kW,
+    hours,
+    factor_kgCO2e_per_kWh
+  } = {}) {
+    if (
+      !nonnegative(oldPower_kW) ||
+      !nonnegative(newPower_kW)
+    ) {
+      return err('INVALID_POWER');
+    }
+
+    if (!nonnegative(hours)) {
+      return err('INVALID_DURATION');
+    }
+
+    if (!nonnegative(factor_kgCO2e_per_kWh)) {
+      return err('INVALID_FACTOR');
+    }
+
+    const oldEnergy = oldPower_kW * hours;
+    const newEnergy = newPower_kW * hours;
+
+    const carbon = carbonAccounting({
+      items: [
+        {
+          label: 'Before',
+          quantity: oldEnergy,
+          unit: 'kWh',
+          factor_kgCO2e_per_unit:
+            factor_kgCO2e_per_kWh
+        },
+        {
+          label: 'After',
+          quantity: newEnergy,
+          unit: 'kWh',
+          factor_kgCO2e_per_unit:
+            factor_kgCO2e_per_kWh
+        }
+      ]
+    });
+
+    if (carbon.error) {
+      return carbon;
+    }
+
+    const oldC = carbon.bySource[0].kgCO2e;
+    const newC = carbon.bySource[1].kgCO2e;
+
+    const saving = oldC - newC;
+
+    return safeResult({
+      oldEnergy_kWh: oldEnergy,
+      newEnergy_kWh: newEnergy,
+      old_kgCO2e: oldC,
+      new_kgCO2e: newC,
+      saving_kgCO2e: saving,
+
+      residual_kgCO2e: clean(
+        oldC - newC - saving
+      )
+    });
+  }
+
+  /**
+   * Integrated product and process-waste accounting.
+   *
+   * Inputs:
+   * reactantInput_g > 0
+   * theoreticalProduct_g > 0
+   * isolatedYield in [0,1]
+   * countedOtherInput_g >= 0
+   * product and reactants for atom economy
+   *
+   * Product =
+   * theoretical product * isolated yield.
+   *
+   * Waste =
+   * total counted input - product.
+   *
+   * Outputs:
+   * product_g
+   * waste_g
+   * atomEconomy_pct
+   * eFactor
+   * pmi
+   * rme_pct
+   * residual_g
+   */
+  function processMetrics({
+    reactantInput_g,
+    theoreticalProduct_g,
+    isolatedYield,
+    countedOtherInput_g,
+    product,
+    reactants
+  } = {}) {
+    if (
+      !positive(reactantInput_g) ||
+      !positive(theoreticalProduct_g) ||
+      !nonnegative(countedOtherInput_g)
+    ) {
+      return err('INVALID_MASS');
+    }
+
+    if (!fraction(isolatedYield)) {
+      return err('INVALID_YIELD');
+    }
+
+    if (theoreticalProduct_g > reactantInput_g) {
+      return err('PRODUCT_EXCEEDS_INPUT');
+    }
+
+    const productMass =
+      theoreticalProduct_g * isolatedYield;
+
+    const totalInput =
+      reactantInput_g + countedOtherInput_g;
+
+    const waste =
+      totalInput - productMass;
+
+    const ae = atomEconomy({
+      product,
+      reactants
+    });
+
+    if (ae.error) {
+      return ae;
+    }
+
+    const ef = eFactor({
+      waste_g: waste,
+      product_g: productMass
+    });
+
+    if (ef.error) {
+      return ef;
+    }
+
+    const pmi = processMassIntensity({
+      totalInput_g: totalInput,
+      product_g: productMass
+    });
+
+    if (pmi.error) {
+      return pmi;
+    }
+
+    const rme = reactionMassEfficiency({
+      product_g: productMass,
+      reactants_g: reactantInput_g
+    });
+
+    if (rme.error) {
+      return rme;
+    }
+
+    return safeResult({
+      product_g: productMass,
+      waste_g: waste,
+      atomEconomy_pct: ae.atomEconomy_pct,
+      eFactor: ef.eFactor,
+      pmi: pmi.pmi,
+      rme_pct: rme.rme_pct,
+
+      residual_g: clean(
+        totalInput - productMass - waste
+      )
+    });
+  }
+
+  /**
+   * Cell production converted to recovered biomolecule mass.
+   *
+   * Inputs:
+   * N0
+   * r_per_day
+   * K (optional)
+   * harvestDay
+   * stageRecoveries[]
+   * massPerCell_kg
+   * initialImpurity_kg
+   * impurityRemovals[]
+   *
+   * Each model cell contributes massPerCell_kg of target.
+   *
+   * Stage recoveries affect wanted material.
+   * Impurity removals affect impurities independently.
+   *
+   * Original outputs and residual fields are preserved.
+   */
+  function bioprocessBalance({
+    N0,
+    r_per_day,
+    K,
+    harvestDay,
+    stageRecoveries,
+    massPerCell_kg,
+    initialImpurity_kg,
+    impurityRemovals
+  } = {}) {
+    if (
+      !positive(massPerCell_kg) ||
+      !nonnegative(initialImpurity_kg)
+    ) {
+      return err('INVALID_MASS');
+    }
+
+    if (
+      !Array.isArray(stageRecoveries) ||
+      !Array.isArray(impurityRemovals) ||
+      stageRecoveries.length !== impurityRemovals.length ||
+      !stageRecoveries.length
+    ) {
+      return err('INVALID_STAGES');
+    }
+
+    if (!impurityRemovals.every(fraction)) {
+      return err('INVALID_IMPURITY_REMOVAL');
+    }
+
+    const cells = cellProduction({
+      N0,
+      r_per_day,
+      K,
+      harvestDay,
+      stageRecoveries
+    });
+
+    if (cells.error) {
+      return cells;
+    }
+
+    const harvestMass =
+      cells.N_harvest * massPerCell_kg;
+
+    const cascade = recoveryCascade({
+      input_kg: harvestMass,
+      impurity_kg: initialImpurity_kg,
+
+      stages: stageRecoveries.map(
+        (recovery, i) => ({
+          name: 'Stage ' + (i + 1),
+          recovery,
+          impurityRemoval: impurityRemovals[i]
+        })
+      )
+    });
+
+    if (cascade.error) {
+      return cascade;
+    }
+
+    const finalMass =
+      cascade.stageOut_kg[
+        cascade.stageOut_kg.length - 1
+      ];
+
+    return safeResult({
+      N_harvest: cells.N_harvest,
+      N_final: cells.N_final,
+      harvest_kg: harvestMass,
+      final_kg: finalMass,
+      purity: cascade.purity,
+      overallYield: cascade.overallYield,
+      stageOut_kg: cascade.stageOut_kg,
+      losses_kg: cascade.losses_kg,
+      residual_kg: cascade.residual_kg
+    });
+  }
+
+  /**
+   * Biomass yield from consumed substrate.
+   *
+   * X_formed = Y_X/S * S_consumed.
+   *
+   * Inputs:
+   * Y_xs >= 0
+   * S_consumed >= 0
+   *
+   * Example:
+   * Y_xs = 0.5 g/g
+   * S_consumed = 20 g/L
+   * X_formed = 10 g/L
+   *
+   * For compatible dimensional units, the product has
+   * the same concentration or mass basis as S_consumed.
+   */
+  function biomassYield(args = {}) {
+    const Y = firstDefined(
+      args.Y_xs,
+      args.Y_XS,
+      args.Y_X_per_S,
+      args.Y_X_S,
+      args.yield_XS
+    );
+
+    const S = firstDefined(
+      args.S_consumed,
+      args.substrateConsumed_g,
+      args.substrate_consumed_g,
+      args.substrateConsumed,
+      args.S
+    );
+
+    if (!nonnegative(Y)) {
+      return err('INVALID_YIELD');
+    }
+
+    if (!nonnegative(S)) {
+      return err('INVALID_MASS');
+    }
+
+    const X = Y * S;
+
+    return safeResult({
+      X_formed: X,
+      X_formed_g: X,
+      biomass_formed_g: X,
+      residual_g: clean(X - Y * S)
+    });
+  }
+
+  /**
+   * Sequential manufacturing yield.
+   *
+   * Rolled throughput yield is the product of step yields.
+   *
+   * overall_yield = product(step_yields)
+   *
+   * input_needed =
+   * target_output / overall_yield
+   *
+   * Inputs:
+   * step_yields[] with fractions in [0,1]
+   * target_output >= 0
+   *
+   * Zero stages give overall yield 1.
+   *
+   * A zero-yield step produces a MathError because
+   * a positive production target cannot be attained by
+   * finite input under this model.
+   */
+  function manufacturingYield(args = {}) {
+    const steps = firstDefined(
+      args.step_yields,
+      args.stepYields,
+      args.yields
+    );
+
+    const target = firstDefined(
+      args.target_output,
+      args.targetOutput,
+      args.target_output_g
+    );
+
+    if (!Array.isArray(steps)) {
+      return err('INVALID_STAGES');
+    }
+
+    if (steps.length > MAX_STAGES) {
+      return err('TOO_MANY_STAGES');
+    }
+
+    if (!steps.every(fraction)) {
+      return err('INVALID_RECOVERY');
+    }
+
+    if (!nonnegative(target)) {
+      return err('INVALID_MASS');
+    }
+
+    if (steps.some(v => v === 0)) {
+      return err(
+        'MathError',
+        'zero_step_yield'
+      );
+    }
+
+    const overall = steps.reduce(
+      (a, v) => a * v,
+      1
+    );
+
+    if (overall === 0) {
+      return err(
+        'MathError',
+        'zero_step_yield'
+      );
+    }
+
+    const input = target / overall;
+
+    return safeResult({
+      overall_yield: overall,
+      overallYield: overall,
+      input_needed: input,
+      inputNeeded: input,
+      residual: clean(
+        input * overall - target
+      )
+    });
+  }
+
+  /**
+   * Unified calculation API.
+   *
+   * Existing browser game methods remain unchanged.
+   *
+   * Additional snake_case aliases support the KAT input
+   * conventions without requiring the games to change.
+   */
+  return Object.freeze({
+    API_VERSION,
+
+    // Original FIT game interfaces.
+    mixStreams,
+    mixConcentrations,
+    recycleLoop,
+    recyclePurge,
+    recoveryCascade,
+    atomEconomy,
+    eFactor,
+    processMassIntensity,
+    reactionMassEfficiency,
+    carbonAccounting,
+    cellProduction,
+    balanceLedger,
+    electricityComparison,
+    processMetrics,
+    bioprocessBalance,
+
+    // Additional calculation methods.
+    biomassYield,
+    manufacturingYield,
+
+    // KAT-compatible interfaces.
+    mix_temperature: mixTemperature,
+    mixTemperature,
+
+    recycle,
+
+    recovery_cascade: recoveryCascadeKAT,
+    recoveryCascadeKAT,
+
+    e_factor: eFactor,
+
+    carbon_accounting: carbonAccountingKAT,
+    carbonAccountingKAT,
+
+    biomass_yield: biomassYield,
+
+    manufacturing_yield: manufacturingYield
+  });
+})();
+/* FIT-CALC-END x3_mass_balance */
+
+(function () {
+  'use strict';
+
+  const $ = s => document.getElementById(s);
+  const fmt = v => Number.isFinite(v) ?
+    Number(v.toPrecision(3)).toLocaleString('en-SG', {
+      maximumFractionDigits: 7
+    }) : '—';
+  const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+
+  let seed = 37191, n = 0, score = 0, attempts = 0;
+  let hinted = false, locked = false, current, values;
+
+  function random() {
+    seed = (Math.imul(seed,1664525)+1013904223)>>>0;
+    return seed/4294967296;
+  }
+
+  function choose(a) {
+    return a[Math.floor(random()*a.length)];
+  }
+
+  function text(x,y,s,sz=13,anchor='middle') {
+    return `<text x="${x}" y="${y}" text-anchor="${anchor}"
+      font-family="Inter,system-ui,sans-serif" font-size="${sz}"
+      font-weight="700" fill="#111">${s}</text>`;
+  }
+
+  function rect(x,y,w,h,colour) {
+    return `<rect x="${x}" y="${y}" width="${Math.max(0,w)}"
+      height="${Math.max(0,h)}" rx="8" fill="${colour}"
+      stroke="#111" stroke-width="2"/>`;
+  }
+
+  function create(i) {
+    const kind = ['loop','purge','river','purge','river','loop'][i];
+
+    if (kind === 'loop') {
+      const F = choose([6,8,10,12]);
+      const r = choose([20,30,40,50,60,70]);
+      const target = FITCalcX3.recycleLoop({
+        F_kg_s:F,recycleFraction:r/100
+      });
+
+      return {
+        kind,F,r,target:target.mixer_kg_s,
+        title:'Recycle ratio design',
+        question:`Fresh feed enters at ${F} kg/s. Choose the recycle fraction that delivers a mixer throughput of ${fmt(target.mixer_kg_s)} kg/s. Also track the net product and circulating load.`,
+        specs:[{
+          label:'Recycle fraction',
+          unit:'%',
+          min:0,max:90,
+          step:1,coarse:10,
+          start:r===20?65:10
+        }]
+      };
+    }
+
+    if (kind === 'purge') {
+      const F = choose([80,100,120]);
+      const y = choose([5,10,15])/100;
+      const c = choose([40,50,60])/100;
+      const p = choose([15,20,25,30,35,40]);
+
+      const desired = FITCalcX3.recyclePurge({
+        F_mol_s:F,
+        yInert:y,
+        conversionPerPass:c,
+        purgeFraction:p/100
+      });
+
+      return {
+        kind,F,y,c,p,
+        inertLimit:desired.inertInLoopFraction+0.000001,
+        conversionMinimum:desired.overallConversion-0.000001,
+        title:'Inert purge optimisation',
+        question:`A ${F} mol/s feed contains ${fmt(y*100)}% inert. Per-pass conversion of reactant A to product P is ${fmt(c*100)}%. Find a purge setting with inert fraction at most ${fmt(desired.inertInLoopFraction*100)}% and overall conversion at least ${fmt(desired.overallConversion*100)}%. Both limits must hold.`,
+        specs:[{
+          label:'Purge fraction',
+          unit:'%',
+          min:1,max:90,
+          step:1,coarse:10,
+          start:p<40?75:5
+        }]
+      };
+    }
+
+    const river = 10;
+    const riverC = 2;
+    const fixedFlow = choose([1,2,3]);
+    const fixedConc = choose([12,16,20,24]);
+    const edit = i===2?'flow':'concentration';
+    const sought = edit==='flow'?fixedFlow:fixedConc;
+
+    const goal = FITCalcX3.mixConcentrations({
+      streams:[
+        {Q_m3_s:river,C_mg_L:riverC},
+        {Q_m3_s:fixedFlow,C_mg_L:fixedConc}
+      ]
+    });
+
+    return {
+      kind,edit,river,riverC,fixedFlow,fixedConc,
+      limit:goal.C_mg_L,
+      title:'River receiving water',
+      question:edit==='flow' ?
+        `A river carries ${river} m³/s at ${riverC} mg/L. Effluent concentration is ${fixedConc} mg/L. Find the largest whole-number effluent flow that keeps the mixed river concentration at or below ${fmt(goal.C_mg_L)} mg/L.` :
+        `A river carries ${river} m³/s at ${riverC} mg/L. Effluent flow is ${fixedFlow} m³/s. Set the largest whole-number effluent concentration that meets a downstream limit of ${fmt(goal.C_mg_L)} mg/L.`,
+      specs:[edit==='flow' ?
+        {
+          label:'Effluent flow',
+          unit:'m³/s',
+          min:0,max:8,
+          step:1,coarse:2,
+          start:fixedFlow===1?6:0
+        } :
+        {
+          label:'Effluent concentration',
+          unit:'mg/L',
+          min:0,max:40,
+          step:1,coarse:5,
+          start:fixedConc===12?30:4
+        }]
+    };
+  }
+
+  function evaluate(v=values[0]) {
+    if (current.kind==='loop') {
+      return FITCalcX3.recycleLoop({
+        F_kg_s:current.F,
+        recycleFraction:v/100
+      });
+    }
+
+    if (current.kind==='purge') {
+      return FITCalcX3.recyclePurge({
+        F_mol_s:current.F,
+        yInert:current.y,
+        conversionPerPass:current.c,
+        purgeFraction:v/100
+      });
+    }
+
+    return FITCalcX3.mixConcentrations({
+      streams:[
+        {
+          Q_m3_s:current.river,
+          C_mg_L:current.riverC
+        },
+        {
+          Q_m3_s:current.edit==='flow'?v:current.fixedFlow,
+          C_mg_L:current.edit==='concentration'?v:current.fixedConc
+        }
+      ]
+    });
+  }
+
+  function actual(r) {
+    return current.kind==='loop' ?
+      r.mixer_kg_s :
+      current.kind==='purge' ?
+        r.inertInLoopFraction :
+        r.C_mg_L;
+  }
+
+  function residual(r) {
+    return current.kind==='loop' ?
+      r.residual_kg_s :
+      r.residual;
+  }
+
+  function diagram(r) {
+    let svg='';
+
+    if (current.kind==='loop') {
+      svg = `
+        <rect x="180" y="70" width="125" height="88" rx="19"
+          fill="#FFC83D" stroke="#111" stroke-width="5"/>
+        <rect x="392" y="70" width="115" height="88" rx="19"
+          fill="#3DBE6B" stroke="#111" stroke-width="5"/>
+        <path d="M15 116h165m125 0h87m115 0h54M451 159v111H239V158"
+          fill="none" stroke="#111" stroke-width="6"
+          stroke-linejoin="round"/>
+        <path d="M170 106l12 10-12 10m211-20l12 10-12 10m157-20l12 10-12 10m-319 43l-10-13h20"
+          fill="#111"/>
+        ${text(240,103,'MIXER',18)}
+        ${text(240,128,`${fmt(r.mixer_kg_s)} kg/s`,14)}
+        ${text(448,103,'SPLITTER',16)}
+        ${text(448,128,`${fmt(values[0])}% recycle`,13)}
+        ${text(88,78,'FRESH FEED',13)}
+        ${text(88,96,`${current.F} kg/s`,15)}
+        ${text(448,250,'RECYCLE',14)}
+        ${text(448,270,`${fmt(r.recycle_kg_s)} kg/s`,15)}
+        ${text(523,78,'PRODUCT',13)}
+        ${text(524,94,`${fmt(r.product_kg_s)} kg/s`,13)}`;
+    } else if (current.kind==='purge') {
+      svg = `
+        <rect x="118" y="92" width="115" height="81" rx="17"
+          fill="#FFC83D" stroke="#111" stroke-width="4"/>
+        <rect x="301" y="92" width="126" height="81" rx="17"
+          fill="#FF8FB8" stroke="#111" stroke-width="4"/>
+        <path d="M10 132h108m115 0h68m126 0h115M365 173v99H175V173M485 132v92"
+          stroke="#111" stroke-width="6" fill="none"
+          stroke-linejoin="round"/>
+        <path d="M107 122l12 10-12 10m181-20l12 10-12 10m228 0l12 10-12 10m-365 41l-10-13h20m310 37l10 13 10-13"
+          fill="#111"/>
+        ${text(175,121,'REACTOR',15)}
+        ${text(175,145,`c = ${fmt(current.c*100)}%`,13)}
+        ${text(364,121,'SEPARATOR',15)}
+        ${text(364,145,'P removed',13)}
+        ${text(62,90,'Fresh',14)}
+        ${text(62,109,`${current.F} mol/s`,13)}
+        ${text(275,82,`Mixer ${fmt(r.mixer.total_mol_s)} mol/s`,13)}
+        ${text(484,90,`P ${fmt(r.product.total_mol_s)}`,13)}
+        ${text(483,108,'mol/s',13)}
+        ${text(476,245,`Purge ${fmt(r.purge.total_mol_s)}`,13)}
+        ${text(476,263,'mol/s',13)}
+        ${text(275,292,`Recycle ${fmt(r.recycle.total_mol_s)} mol/s`,14)}
+        ${text(275,312,`Inert ${fmt(r.inertInLoopFraction*100)}%`,14)}`;
+    } else {
+      const Q=current.edit==='flow'?values[0]:current.fixedFlow;
+      const C=current.edit==='concentration'?values[0]:current.fixedConc;
+
+      svg = `
+        <path d="M20 132h525" stroke="#1F66E5" stroke-width="24"
+          stroke-linecap="round"/>
+        <path d="M245 19v113" stroke="#FF6B3D" stroke-width="16"
+          stroke-linecap="round"/>
+        <path d="M530 120l18 12-18 12" fill="#111"/>
+        <circle cx="245" cy="132" r="21" fill="#FFC83D"
+          stroke="#111" stroke-width="4"/>
+        ${text(108,88,'RIVER',17)}
+        ${text(108,107,`${current.river} m³/s`,15)}
+        ${text(108,181,`${current.riverC} mg/L`,15)}
+        ${text(245,18,'EFFLUENT',15)}
+        ${text(355,44,`${fmt(Q)} m³/s`,15)}
+        ${text(355,66,`${fmt(C)} mg/L`,15)}
+        ${text(424,181,'DOWNSTREAM',16)}
+        ${text(424,204,`${fmt(r.Q_m3_s)} m³/s`,15)}
+        ${text(424,227,`${fmt(r.C_mg_L)} mg/L`,17)}
+        ${text(275,275,`Solute residual ${fmt(r.residual)} mg/s`,14)}`;
+    }
+
+    $('diagram').innerHTML = svg;
+    $('diagram').setAttribute(
+      'aria-label',
+      `${current.title}, current result ${fmt(actual(r))}, residual ${fmt(residual(r))}.`
+    );
+  }
+
+  function flowPlot(r) {
+    let labels,data,unit;
+
+    if (current.kind==='loop') {
+      labels=['Fresh','Mixer','Recycle','Product'];
+      data=[current.F,r.mixer_kg_s,r.recycle_kg_s,r.product_kg_s];
+      unit='kg/s';
+    } else if (current.kind==='purge') {
+      labels=['Fresh','Mixer','Reactor','Recycle','Purge','Product'];
+      data=[
+        current.F,
+        r.mixer.total_mol_s,
+        r.reactorOut.total_mol_s,
+        r.recycle.total_mol_s,
+        r.purge.total_mol_s,
+        r.product.total_mol_s
+      ];
+      unit='mol/s';
+    } else {
+      labels=['River','Effluent','Combined'];
+      data=[
+        current.river,
+        current.edit==='flow'?values[0]:current.fixedFlow,
+        r.Q_m3_s
+      ];
+      unit='m³/s';
+    }
+
+    const max=Math.max(1,...data)*1.15;
+    const left=80,right=476;
+    const gap=29,top=53,width=right-left;
+
+    let s=text(250,20,`Stream throughput (${unit})`,17);
+
+    s+=`<line x1="${left}" y1="38" x2="${left}" y2="222"
+      stroke="#111" stroke-width="2"/>`;
+
+    data.forEach((v,i)=>{
+      const y=top+i*gap;
+      s+=text(73,y+13,labels[i],12,'end');
+      s+=rect(left,y,width*v/max,19,i%2?'#FFC83D':'#1F66E5');
+      s+=text(
+        Math.min(470,left+width*v/max+7),
+        y+14,
+        fmt(v),
+        12,
+        'end'
+      );
+    });
+
+    s+=`<line x1="${left}" y1="225" x2="${right}" y2="225"
+      stroke="#111" stroke-width="2"/>`;
+
+    for(let i=0;i<=4;i++){
+      const x=left+width*i/4;
+      s+=text(x,242,fmt(max*i/4),11);
+    }
+
+    s+=text(250,249,`Scale: ${unit}`,11);
+
+    $('flowPlot').innerHTML=s;
+    $('flowPlot').setAttribute(
+      'aria-label',
+      labels.map((l,i)=>`${l} ${fmt(data[i])} ${unit}`).join('; ')
+    );
+  }
+
+  function curvePlot(r) {
+    const purge=current.kind==='purge';
+
+    const unit=purge?'Inert in mixer (%)':
+      current.kind==='loop'?'Mixer flow (kg/s)':
+      'Downstream concentration (mg/L)';
+
+    const xUnit=purge?'Purge fraction (%)':
+      current.kind==='loop'?'Recycle fraction (%)':
+      current.edit==='flow'?'Effluent flow (m³/s)':
+      'Effluent concentration (mg/L)';
+
+    const c=current.specs[0];
+    const points=[];
+
+    for(let v=c.min;v<=c.max+1e-9;v+=c.step){
+      const item=evaluate(v);
+      if(!item.error){
+        points.push({
+          x:v,
+          y:purge?item.inertInLoopFraction*100:actual(item)
+        });
+      }
+    }
+
+    const player=purge?r.inertInLoopFraction*100:actual(r);
+    const maxY=Math.max(1,...points.map(p=>p.y))*1.12;
+    const x0=65,x1=464,y0=211,y1=41;
+
+    const px=v=>x0+(v-c.min)/(c.max-c.min)*(x1-x0);
+    const py=v=>y0-clamp(v/maxY,0,1)*(y0-y1);
+
+    let s=text(250,20,`Sensitivity: ${unit}`,16);
+
+    s+=`<line x1="${x0}" y1="${y1}" x2="${x0}" y2="${y0}"
+      stroke="#111" stroke-width="2"/>
+    <line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}"
+      stroke="#111" stroke-width="2"/>`;
+
+    for(let i=0;i<=4;i++){
+      const y=py(maxY*i/4);
+      const x=px(c.min+(c.max-c.min)*i/4);
+
+      s+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"
+        stroke="#ddd"/>`;
+      s+=text(57,y+4,fmt(maxY*i/4),11,'end');
+      s+=text(x,229,fmt(c.min+(c.max-c.min)*i/4),11);
+    }
+
+    s+=`<polyline fill="none" stroke="#1F66E5" stroke-width="4"
+      stroke-linejoin="round"
+      points="${points.map(p=>`${px(p.x)},${py(p.y)}`).join(' ')}"/>`;
+
+    if(purge){
+      const targetY=current.inertLimit*100;
+
+      s+=`<line x1="${x0}" y1="${py(targetY)}" x2="${x1}"
+        y2="${py(targetY)}" stroke="#D92D20"
+        stroke-dasharray="7 5" stroke-width="2"/>`;
+
+      s+=text(370,39,'Blue: inert · dashed: limit',11);
+    }
+
+    s+=`<circle cx="${px(values[0])}" cy="${py(player)}" r="8"
+      fill="#FFC83D" stroke="#111" stroke-width="3"/>`;
+
+    s+=text(250,252,xUnit,13);
+
+    s+=text(
+      250,
+      270,
+      `● Player: ${fmt(player)} ${
+        purge?'%':current.kind==='loop'?'kg/s':'mg/L'
+      }`,
+      12
+    );
+
+    $('curvePlot').innerHTML=s;
+
+    $('curvePlot').setAttribute(
+      'aria-label',
+      `${unit} versus ${xUnit}. Player x=${fmt(values[0])}, y=${fmt(player)}.`
+    );
+  }
+
+  function render() {
+    const r=evaluate();
+
+    if(r.error){
+      $('feedback').textContent=
+        'Calculation error: '+r.error+
+        (r.reason?' ('+r.reason+')':'');
+      return;
+    }
+
+    current.specs.forEach((c,i)=>{
+      $('range'+i).value=values[i];
+      $('value'+i).textContent=fmt(values[i])+' '+c.unit;
+    });
+
+    diagram(r);
+    flowPlot(r);
+    curvePlot(r);
+
+    $('metrics').innerHTML=current.kind==='loop'?
+      `<span>Mixer ${fmt(r.mixer_kg_s)} kg/s</span><span>Net product ${fmt(r.product_kg_s)} kg/s</span><span>Balance residual ${fmt(r.residual_kg_s)} kg/s</span>`:
+      current.kind==='purge'?
+      `<span>Inert ${fmt(r.inertInLoopFraction*100)}%</span><span>Overall conversion ${fmt(r.overallConversion*100)}%</span><span>Balance residual ${fmt(r.residual)} mol/s</span>`:
+      `<span>Downstream ${fmt(r.C_mg_L)} mg/L</span><span>Combined ${fmt(r.Q_m3_s)} m³/s</span><span>Solute residual ${fmt(r.residual)} mg/s</span>`;
+  }
+
+  function buildControls(){
+    $('controls').innerHTML=current.specs.map((c,i)=>`
+      <div class="control">
+        <label for="range${i}">${c.label}
+          <strong id="value${i}"></strong>
+        </label>
+        <input type="range" id="range${i}" min="${c.min}"
+          max="${c.max}" step="${c.step}" value="${values[i]}"
+          aria-label="${c.label}">
+        <div class="steppers">
+          <button data-i="${i}" data-d="-${c.coarse}"
+            aria-label="Large decrease ${c.label}">−−</button>
+          <button data-i="${i}" data-d="-${c.step}"
+            aria-label="Small decrease ${c.label}">−</button>
+          <button data-i="${i}" data-d="${c.step}"
+            aria-label="Small increase ${c.label}">+</button>
+          <button data-i="${i}" data-d="${c.coarse}"
+            aria-label="Large increase ${c.label}">++</button>
+        </div>
+      </div>`).join('');
+
+    current.specs.forEach((c,i)=>{
+      $('range'+i).addEventListener('input',e=>{
+        if(locked)return;
+        values[i]=Number(e.target.value);
+        render();
+      });
+    });
+
+    $('controls').querySelectorAll('[data-i]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        if(locked)return;
+
+        const i=Number(b.dataset.i);
+        const c=current.specs[i];
+
+        values[i]=clamp(
+          values[i]+Number(b.dataset.d),
+          c.min,
+          c.max
+        );
+
+        render();
+      });
+    });
+  }
+
+  function start(){
+    if(n>=6){
+      $('game').classList.add('hidden');
+      $('end').classList.remove('hidden');
+
+      const stars=score>=525?3:score>=350?2:1;
+
+      $('stars').textContent=
+        '★'.repeat(stars)+'☆'.repeat(3-stars);
+
+      $('finalScore').textContent=`${score}/600 points`;
+
+      $('message').textContent=
+        'You balanced process flows, constrained inert build-up and protected receiving water.';
+
+      $('round').textContent='Complete';
+      return;
+    }
+
+    current=create(n);
+    values=current.specs.map(s=>s.start);
+    attempts=0;
+    hinted=false;
+    locked=false;
+
+    $('round').textContent=`Round ${n+1}/6`;
+    $('score').textContent=`Score ${score}`;
+
+    $('type').textContent=
+      current.kind==='loop'?'Recycle loop':
+      current.kind==='purge'?'Reactor and purge':
+      'Environmental mixing';
+
+    $('title').textContent=current.title;
+    $('question').textContent=current.question;
+
+    $('feedback').className='feedback';
+    $('feedback').textContent=
+      'Change a control; the flow diagram and plots respond live.';
+
+    $('hint').disabled=false;
+    $('check').textContent='Check ✓';
+
+    $('maths').textContent=current.kind==='loop'?
+      'Assumptions: steady, single recycle loop, no reaction. Mixer M = F + R, R = rM, so M = F/(1 − r) in kg/s. Net product = F. Across the whole plant, fresh feed − net product = 0.':
+      current.kind==='purge'?
+      'Assumptions: steady 1:1 A → P, constant per-pass conversion c, unchanged inert I, complete separation of P, purge fraction p applied to remaining A and I. A_mixer = A_fresh/[1 − (1−c)(1−p)], I_mixer = I_fresh/p. Overall conversion = P/A_fresh. Fresh feed − product − purge = 0 mol/s.':
+      'Assumptions: steady, fully mixed, conservative solute with no decay. Q_total = Q_river + Q_effluent (m³/s). C_downstream = (Q_river C_river + Q_effluent C_effluent)/Q_total (mg/L). Solute residual = 0 mg/s.';
+
+    buildControls();
+    render();
+  }
+
+  function check(){
+    if(locked){
+      n++;
+      start();
+      return;
+    }
+
+    const r=evaluate();
+
+    if(r.error)return;
+
+    attempts++;
+
+    let ok=false;
+    let feedback='';
+
+    if(current.kind==='loop'){
+      const difference=r.mixer_kg_s-current.target;
+
+      ok=Math.abs(difference)<=0.02;
+
+      feedback=ok?
+        'M = F/(1 − r), and the external product equals fresh feed.':
+        `Mixer flow is ${fmt(Math.abs(difference))} kg/s ${
+          difference<0?'too low':'too high'
+        }.`;
+    } else if(current.kind==='purge'){
+      const inertGap=r.inertInLoopFraction-current.inertLimit;
+      const conversionGap=
+        current.conversionMinimum-r.overallConversion;
+
+      ok=inertGap<=0&&conversionGap<=0;
+
+      feedback=ok?
+        'The inert constraint and conversion constraint both hold; purge plus product accounts for the feed.':
+        `${
+          inertGap>0?
+            'Inert fraction exceeds its limit by '+
+            fmt(inertGap*100)+' percentage points. ':
+            ''
+        }${
+          conversionGap>0?
+            'Overall conversion is short by '+
+            fmt(conversionGap*100)+' percentage points.':
+            ''
+        }`;
+    } else {
+      const gap=r.C_mg_L-current.limit;
+
+      const atMaximum=Math.abs(
+        values[0]-
+        (
+          current.edit==='flow'?
+            current.fixedFlow:
+            current.fixedConc
+        )
+      )<1e-9;
+
+      ok=gap<=0.000001&&atMaximum;
+
+      feedback=ok?
+        'The largest permissible setting meets the receiving-water limit.':
+        gap>0?
+          `Downstream concentration exceeds the limit by ${
+            fmt(gap)
+          } mg/L.`:
+          'Safe, but the task asks for the largest whole-number setting that remains safe.';
+    }
+
+    if(ok){
+      const gained=hinted?50:attempts===1?100:75;
+
+      score+=gained;
+      locked=true;
+
+      $('score').textContent='Score '+score;
+      $('feedback').className='feedback correct';
+      $('feedback').textContent=
+        `✓ Correct! ${gained} points. ${feedback}`;
+
+      $('check').textContent=
+        n===5?'See stars ★':'Next round →';
+
+      $('hint').disabled=true;
+    } else {
+      $('feedback').className='feedback wrong';
+      $('feedback').textContent='Not yet. '+feedback;
+    }
+  }
+
+  $('check').addEventListener('click',check);
+
+  $('hint').addEventListener('click',()=>{
+    if(hinted||locked)return;
+
+    hinted=true;
+    $('hint').disabled=true;
+    $('feedback').className='feedback';
+
+    $('feedback').textContent=current.kind==='loop'?
+      'Hint: recycling increases internal throughput without increasing net product.':
+      current.kind==='purge'?
+      'Hint: more purge removes more inert, but also discards unconverted reactant. Locate the operating boundary on the sensitivity curve.':
+      'Hint: the outlet concentration is a flow-weighted average. A compliant setting below the largest one does not finish this design task.';
+  });
+
+  $('again').addEventListener('click',()=>{
+    seed=(seed+27011)>>>0;
+    n=0;
+    score=0;
+
+    $('game').classList.remove('hidden');
+    $('end').classList.add('hidden');
+
+    start();
+  });
+
+  start();
+})();
+</script>
+</body>
+</html>

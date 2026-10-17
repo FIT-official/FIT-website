@@ -13,6 +13,8 @@ const gases = { subject: 'Physics', concept: 'gases', accent: '#FF8FB8', minutes
 const kinematics = { subject: 'Physics', concept: 'kinematics', accent: '#FF6B3D', minutes: '10–15', status: 'live' }
 // Tier-1 X1 (compartment / lumped models): live, FITCalcX1 fix1 passes all 27 KATs in tier1/lumped_models.json.
 const compartment = { subject: 'Engineering', concept: 'compartment-models', accent: '#2EC4A6', minutes: '15–20', status: 'live' }
+// Tier-1 X3: FITCalcX3 (module + each game's embedded copy) passes all 22 cases of kat_cases/tier1/balance_accounting.json (tests/tier1).
+const massBalance = { subject: 'Chemistry', concept: 'mass-balance', accent: '#2EC4A6', minutes: '15–20', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -186,4 +188,16 @@ export const htmlSims = [
     syllabusRef: 'University, Process modelling',
     approach: 'Tune well-mixed lake, logistic, predator–prey and first-order-plus-dead-time models, solved analytically and with RK4, to match target responses.',
     activityPrompt: 'Play all rounds, then explain how the predator–prey phase plane shows the two populations cycling.', tags: ['University', 'Process modelling', 'RK4', 'Lotka–Volterra', 'FOPDT'] },
+  { ...massBalance, id: 'x3-mass-balance-poly', title: 'Mixing Tank Balance', level: 'Poly', topic: 'Mixing and staged recovery balances', symbol: '🛢️', height: 1700,
+    syllabusRef: 'Poly chemical and process engineering: steady-state mass and energy balances, staged recovery, emissions accounting (generic)',
+    approach: 'Solve mixing-tank, staged-recovery and workshop emissions problems so every input is accounted for in the outputs.',
+    activityPrompt: 'Play all rounds, then explain why inputs must equal outputs plus accumulation in a steady process.', tags: ['mass balance', 'mixing', 'recovery', 'emissions'] },
+  { ...massBalance, id: 'x3-mass-balance-u1', title: 'Recycle and Purge', level: 'University', topic: 'Recycle, purge and mixing balances', symbol: '♻️', height: 1850,
+    syllabusRef: 'University, Process Engineering',
+    approach: 'Design steady recycle loops, control inert build-up with a purge and meet a receiving-water concentration limit.',
+    activityPrompt: 'Play all rounds, then explain why a purge is needed when the feed carries an inert.', tags: ['University', 'Process Engineering', 'recycle', 'purge', 'mass balance'] },
+  { ...massBalance, id: 'x3-mass-balance-u2', title: 'Yield, Waste and Carbon', level: 'University', topic: 'Yield, green metrics and carbon accounting', symbol: '🌱', height: 2250,
+    syllabusRef: 'University, Process Engineering',
+    approach: 'Improve process yield, atom economy and E-factor, recover a biomolecule through staged steps and build a carbon inventory from user-supplied factors.',
+    activityPrompt: 'Play all rounds, then explain why a high-yield step can still have a poor E-factor.', tags: ['University', 'Process Engineering', 'atom economy', 'E-factor', 'carbon accounting'] },
 ]
