@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Data Integrator | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+header,main,footer{max-width:1180px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.badge{border:2px solid #111;border-radius:999px;padding:8px 13px;background:var(--lvl-poly);color:var(--lvl-poly-on);font-size:12px;font-weight:800;text-transform:uppercase}
+.hud{display:flex;gap:8px;flex-wrap:wrap;font-size:14px;font-weight:800}
+.hud span{border:2px solid #111;border-radius:999px;padding:7px 12px}
+h1{font-size:clamp(30px,5vw,50px);font-weight:800;line-height:1.1;margin:10px 0 4px}
+h2{font-size:20px;font-weight:800;margin:0 0 12px}
+h3{font-size:16px;margin:16px 0 9px;font-weight:800}
+p{line-height:1.5}.sub{color:#666}
+.layout{display:grid;gap:18px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.14fr) minmax(0,1fr);align-items:start}}
+.card{border:2px solid #111;background:#fff;border-radius:26px;box-shadow:var(--sh-2);padding:16px;min-width:0}
+.stage{background:var(--lvl-poly-tint)}
+.plot{width:100%;height:auto;display:block;background:#fff;border:2px solid #111;border-radius:16px}
+.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:12px;font-weight:800;margin:8px 0}
+.key{display:inline-block;width:14px;height:12px;border:2px solid #111;vertical-align:middle;margin-right:5px}
+.controls{display:grid;gap:12px}
+.control{padding:12px;border:2px solid #111;border-radius:16px;background:#fff}
+.control label{display:block;font-weight:800;margin-bottom:8px}
+input[type="range"]{width:100%;accent-color:var(--lvl-poly);min-height:44px;cursor:pointer}
+input[type="number"],select{width:100%;border:2px solid #111;border-radius:12px;min-height:48px;padding:10px;background:#fff}
+select{font-weight:700}
+.step{display:flex;gap:6px;align-items:center;justify-content:space-between}
+.step button{min-width:44px;min-height:44px;border:2px solid #111;border-radius:12px;background:#fff;font-weight:900}
+.step strong{font-variant-numeric:tabular-nums}
+.metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.metric{border:2px solid #111;border-radius:16px;background:#fff;padding:12px;min-width:0}
+.metric small{display:block;color:#555;font-weight:700}
+.metric strong{display:block;font-size:20px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.data-wrap{max-height:238px;overflow:auto;border:2px solid #111;border-radius:14px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 11px;text-align:right;border-bottom:1px solid #ddd}
+th{position:sticky;top:0;background:var(--lvl-poly-tint);font-weight:800}
+th:first-child,td:first-child{text-align:left}
+tr.active{background:#FFF4D6;font-weight:800}
+.btnbar{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+.btn{min-height:48px;border:2px solid #111;border-radius:999px;background:#fff;padding:11px 19px;font-weight:800;box-shadow:var(--sh-1)}
+.btn.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.btn:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.5;cursor:not-allowed}
+.feedback{min-height:48px;margin:13px 0;font-weight:700;line-height:1.5}
+details{border:2px solid #111;border-radius:16px;background:#fff;padding:13px;margin-top:16px}
+summary{font-weight:800;cursor:pointer}
+.concept{display:block;width:100%;max-width:350px;margin:auto}
+.end{text-align:center;padding:38px 14px}
+.stars{font-size:50px;letter-spacing:5px;color:#ccc}.stars .earned{color:#e9a600}
+footer{font-size:12px;color:#666}
+@media(max-width:420px){header,main,footer{padding:12px}.card{padding:12px}}
+@media(prefers-reduced-motion:no-preference){.feedback.good{animation:pop .22s ease-out}@keyframes pop{50%{transform:scale(1.025)}}}
+</style>
+</head>
+<body>
+<header><span class="badge">Polytechnic · Engineering Mathematics</span>
+<div class="hud"><span id="roundHUD">Round 1/6</span><span id="scoreHUD">Score 0</span></div></header>
+<main>
+<h1>Data Integrator</h1>
+<p class="sub">Turn noisy sensor readings into distance, electrical energy and fluid volume.</p>
+<div id="game" class="layout">
+<section class="card stage">
+<h2 id="heading"></h2>
+<p id="question"></p>
+<svg id="graph" class="plot" viewBox="0 0 540 330" role="img" aria-label="Measured data, interval strips and accumulated area"></svg>
+<div class="legend"><span><i class="key" style="background:#FF6B3D"></i>Measurements</span><span><i class="key" style="background:#FFE6DC"></i>Integrated strips</span><span><i class="key" style="background:#1F66E5"></i>Running total</span></div>
+<div class="controls" id="controls" style="margin-top:14px"></div>
+<h3>Sensor log</h3>
+<div class="data-wrap">
+<table aria-label="Measured time-series data">
+<thead><tr><th>Sample</th><th id="timeHeading">Time</th><th id="readingHeading">Reading</th></tr></thead>
+<tbody id="dataBody"></tbody>
+</table>
+</div>
+</section>
+<section class="card">
+<h2>Engineering dashboard</h2>
+<div class="metric-grid">
+<div class="metric"><small>Intervals included</small><strong id="intervalCount">0 / 8</strong></div>
+<div class="metric"><small>Running integrated total</small><strong id="running">0</strong></div>
+</div>
+<svg id="accumulation" class="plot" viewBox="0 0 480 285" role="img" aria-label="Running integrated quantity against time"></svg>
+<div class="metric" style="margin-top:12px"><small>Selected numerical method</small><strong id="methodDisplay">Trapezium</strong></div>
+<div class="btnbar">
+<button class="btn" id="hint">Hint −50</button>
+<button class="btn check" id="check">Check ✓</button>
+<button class="btn" id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite"></div>
+<details>
+<summary>The maths</summary>
+<p><strong>Trapezium rule:</strong> I ≈ h[½y₀ + y₁ + ⋯ + yₙ₋₁ + ½yₙ]. It integrates the straight-line interpolation between adjacent measured samples.</p>
+<p><strong>Composite Simpson's ⅓ rule:</strong> I ≈ (h/3)[y₀ + yₙ + 4(y₁ + y₃ + ⋯) + 2(y₂ + y₄ + ⋯)]. It requires equally spaced samples and an even number of intervals.</p>
+<p>The sensor values displayed in the table, rounded to 3 decimal places, are the authoritative data for computing a numerical answer.</p>
+<p>For method comparisons, an ideal continuous calibration signal is used as reference. Random measurement noise means Simpson's rule is not automatically more accurate.</p>
+<p>Velocity (m/s) × seconds gives metres. Power (kW) × seconds gives kJ. Flow (L/min) × minutes gives litres.</p>
+</details>
+<h2 style="margin-top:20px">One measurement interval</h2>
+<svg class="concept" viewBox="0 0 350 137" role="img" aria-label="A trapezium approximates the area below measured data points">
+<path d="M26 114H328M35 119V14" stroke="#111" fill="none" stroke-width="3"/>
+<polygon points="102,114 102,53 224,30 224,114" fill="#FFE6DC" stroke="#111" stroke-width="2.5"/>
+<path d="M102 53L224 30" stroke="#FF6B3D" stroke-width="4"/>
+<circle cx="102" cy="53" r="5" fill="#fff" stroke="#111" stroke-width="2"/>
+<circle cx="224" cy="30" r="5" fill="#fff" stroke="#111" stroke-width="2"/>
+<g font-size="13" font-weight="700"><text x="101" y="132" text-anchor="middle">tᵢ</text><text x="224" y="132" text-anchor="middle">tᵢ₊₁</text><text x="239" y="66">yᵢ₊₁</text><text x="56" y="58">yᵢ</text><text x="162" y="92" text-anchor="middle">Area</text></g>
+</svg>
+<p class="sub">Each trapezium contributes to the running total.</p>
+</section>
+</div>
+<div id="ending" class="card end" hidden>
+<h2>Measurement engineer!</h2><div id="stars" class="stars"></div>
+<p id="finalScore"></p><button class="btn check" id="again">Play again ↻</button>
+</div>
+</main><footer>FIT · Integration · Data Integrator</footer>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+let round=0,score=0,tries=0,hinted=false,locked=false,seed=90231,task={},s={};
+function rng(){seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;}
+function pick(a){return a[Math.floor(rng()*a.length)];}
+function fmt(x){return Number.isFinite(x)?Number(x.toPrecision(6)).toString():"—";}
+function unit(){return task.kind===0?"m":task.kind===1?"kJ":"L";}
+function baseSignal(t){
+const z=t/task.T;
+if(task.family===0)return task.base+task.amp*Math.sin(Math.PI*z)+task.slope*z;
+if(task.family===1)return task.base+task.amp*z*z+task.slope*z;
+return task.base+task.amp*Math.sin(2*Math.PI*z)+task.slope*z*z;
+}
+function reference(){
+let b=task.base*T(),a=task.amp,s=task.slope;
+if(task.family===0)return b+a*2*T()/Math.PI+s*T()/2;
+if(task.family===1)return b+a*T()/3+s*T()/2;
+return b+s*T()/3;
+}
+function T(){return task.T;}
+function integrate(method,last=task.n){
+const h=task.h,y=task.data,n=Math.min(task.n,Math.max(0,last));
+if(n===0)return 0;
+if(method==="trap"){
+let sum=0;for(let i=0;i<n;i++)sum+=h*(y[i]+y[i+1])/2;
+return sum;
+}
+if(n%2!==0)return NaN;
+let sum=y[0]+y[n];
+for(let i=1;i<n;i++)sum+=(i%2?4:2)*y[i];
+return sum*h/3;
+}
+function runningTotals(){
+let values=[0];
+if(s.method==="trap"){
+for(let i=1;i<=s.count;i++)values.push(integrate("trap",i));
+}else{
+for(let i=1;i<=s.count;i++)values.push(i%2===0?integrate("simpson",i):NaN);
+}
+return values;
+}
+function controlHTML(){
+const host=$("controls");host.replaceChildren();
+let method=document.createElement("div");method.className="control";
+method.innerHTML=`<label for="method">Numerical method</label>
+<select id="method"><option value="trap">Composite trapezium rule</option><option value="simpson">Composite Simpson's ⅓ rule</option></select>`;
+host.appendChild(method);
+$("method").value=s.method;
+$("method").addEventListener("change",e=>{if(locked)return;s.method=e.target.value;update();});
+let range=document.createElement("div");range.className="control";
+range.innerHTML=`<label for="count">Show first <strong id="countText">0</strong> intervals</label>
+<input id="count" type="range" min="0" max="${task.n}" step="1" value="${s.count}">`;
+host.appendChild(range);
+$("count").addEventListener("input",e=>{s.count=+e.target.value;update();});
+if(task.compare){
+let box=document.createElement("div");box.className="control";
+box.innerHTML=`<label for="choice">Which method is more accurate against the ideal calibration signal?</label>
+<select id="choice"><option value="">Choose a method</option><option value="trap">Trapezium rule</option><option value="simpson">Simpson's rule</option></select>`;
+host.appendChild(box);$("choice").value=s.choice;
+$("choice").addEventListener("change",e=>{s.choice=e.target.value;update();});
+}else{
+let box=document.createElement("div");box.className="control";
+box.innerHTML=`<label for="answer">Your integrated result (${unit()})</label>
+<input id="answer" type="number" step="any" inputmode="decimal" placeholder="Calculate from all 9 readings">`;
+host.appendChild(box);
+$("answer").value=s.answer;
+$("answer").addEventListener("input",e=>{s.answer=e.target.value;});
+}
+}
+function setup(){
+tries=0;hinted=false;locked=false;
+let kind=round%3;
+task={
+kind,
+n:8,
+h:kind===2?1:.5,
+family:round>=3?(round%2?2:1):0,
+base:pick([2,3,4,5]),
+amp:pick([1.2,1.6,2.0,2.4]),
+slope:pick([.4,.8,1.2]),
+compare:round===2||round===5
+};
+task.T=task.n*task.h;
+task.data=Array.from({length:task.n+1},(_,i)=>{
+let signal=baseSignal(i*task.h);
+const noise=(rng()-.5)*(task.compare?.035:.12);
+return Number((signal+noise).toFixed(3));
+});
+if(task.compare){
+let ref=reference();
+let et=Math.abs(integrate("trap")-ref),es=Math.abs(integrate("simpson")-ref);
+task.best=et<es?"trap":"simpson";
+if(Math.abs(et-es)<.0001){
+task.data[4]=Number((task.data[4]+.09).toFixed(3));
+let nt=Math.abs(integrate("trap")-ref),ns=Math.abs(integrate("simpson")-ref);
+task.best=nt<ns?"trap":"simpson";
+}
+}
+s={method:"trap",count:0,answer:"",choice:""};
+$("heading").textContent=[
+"Motion sensor: velocity log",
+"Power meter: energy log",
+"Flow sensor: water volume"
+][kind];
+const measure=["velocity","power","flow rate"][kind];
+$("question").textContent=task.compare?
+`Compare two numerical rules for these nine noisy ${measure} readings. Select the method whose integrated result is closer to the ideal calibration signal. The reference result is not displayed until Check.`:
+`Integrate all nine ${measure} readings using your selected numerical rule. Enter the resulting ${unit()} to within ±1% of the value obtained by that rule.`;
+$("timeHeading").textContent=kind===2?"Time (min)":"Time (s)";
+$("readingHeading").textContent=[
+"v (m/s)","P (kW)","Q (L/min)"
+][kind];
+$("roundHUD").textContent=`Round ${round+1}/6`;
+$("scoreHUD").textContent="Score "+score;
+$("check").hidden=false;$("next").hidden=true;$("hint").disabled=false;
+$("feedback").textContent="";
+controlHTML();update();
+}
+function update(){
+$("countText").textContent=s.count;
+$("intervalCount").textContent=`${s.count} / ${task.n}`;
+$("methodDisplay").textContent=s.method==="trap"?"Trapezium":"Simpson's ⅓";
+let total=integrate(s.method,s.count);
+$("running").textContent=(!task.compare&&!locked&&s.count===task.n)?"Hidden until Check: work out the full total":Number.isFinite(total)?`${fmt(total)} ${unit()}`:"Requires an even interval count";
+let rows="";
+task.data.forEach((v,i)=>{
+rows+=`<tr class="${i===s.count?"active":""}"><td>${i}</td><td>${fmt(i*task.h)}</td><td>${v.toFixed(3)}</td></tr>`;
+});
+$("dataBody").innerHTML=rows;
+drawMeasured();drawRunning();
+}
+function drawMeasured(){
+const svg=$("graph"),L=56,R=510,T=48,B=280;
+let ymax=Math.ceil(Math.max(...task.data)*1.18),X=x=>L+x/task.T*(R-L),Y=y=>B-y/ymax*(B-T);
+let h=`<rect width="540" height="330" fill="#fff"/><text x="14" y="24" font-size="17" font-weight="800">Measured ${["velocity","power","flow rate"][task.kind]} vs time</text>`;
+for(let i=0;i<=4;i++){
+let yy=ymax*i/4;
+h+=`<line x1="${L}" x2="${R}" y1="${Y(yy)}" y2="${Y(yy)}" stroke="#e5e5e5"/>
+<text x="48" y="${Y(yy)+4}" font-size="11" text-anchor="end">${fmt(yy)}</text>`;
+}
+for(let i=0;i<=task.n;i++){
+let x=i*task.h;
+h+=`<line x1="${X(x)}" x2="${X(x)}" y1="${T}" y2="${B}" stroke="#f0f0f0"/>
+<text x="${X(x)}" y="299" font-size="11" text-anchor="middle">${fmt(x)}</text>`;
+}
+h+=`<path d="M${L} ${T}V${B}H${R}" stroke="#111" stroke-width="2" fill="none"/>`;
+for(let i=0;i<s.count;i++){
+let y0=task.data[i],y1=task.data[i+1];
+h+=`<polygon points="${X(i*task.h)},${B} ${X(i*task.h)},${Y(y0)} ${X((i+1)*task.h)},${Y(y1)} ${X((i+1)*task.h)},${B}" fill="#FFE6DC" stroke="#FF6B3D" stroke-width="1"/>`;
+}
+if(s.method==="simpson"){
+for(let i=0;i+2<=s.count;i+=2){
+let a=i*task.h,ym=task.data[i+1],y0=task.data[i],y2=task.data[i+2];
+let d="";
+for(let j=0;j<=24;j++){
+let u=j/12,yy=y0*(u-1)*(u-2)/2-ym*u*(u-2)+y2*u*(u-1)/2;
+d+=(j?"L":"M")+X(a+u*task.h)+" "+Y(yy);
+}
+h+=`<path d="${d}" stroke="#6A45F5" stroke-width="2.5" fill="none"/>`;
+}
+}
+let d=task.data.map((v,i)=>(i?"L":"M")+X(i*task.h)+" "+Y(v)).join("");
+h+=`<path d="${d}" stroke="#FF6B3D" fill="none" stroke-width="3"/>`;
+task.data.forEach((v,i)=>h+=`<circle cx="${X(i*task.h)}" cy="${Y(v)}" r="4.5" fill="#fff" stroke="#111" stroke-width="2"/>`);
+h+=`<line x1="${X(s.count*task.h)}" x2="${X(s.count*task.h)}" y1="${T}" y2="${B}" stroke="#1F66E5" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="510" y="322" text-anchor="end" font-size="13">Time t (${task.kind===2?"min":"s"})</text>
+<text x="14" y="172" transform="rotate(-90 14 172)" text-anchor="middle" font-size="12">${["Velocity v (m/s)","Power P (kW)","Flow Q (L/min)"][task.kind]}</text>`;
+svg.innerHTML=h;
+svg.setAttribute("aria-label",`Nine measured readings, ${s.count} shaded intervals, selected ${s.method} method. Horizontal axis time, vertical axis ${["velocity","power","flow rate"][task.kind]}.`);
+}
+function drawRunning(){
+const svg=$("accumulation"),L=61,R=451,T=41,B=237;
+let vals=runningTotals(),full=integrate(s.method,task.n),max=Math.max(1,full)*1.13;
+const X=x=>L+x/task.T*(R-L),Y=y=>B-y/max*(B-T);
+let h=`<rect width="480" height="285" fill="#fff"/><text x="13" y="23" font-size="16" font-weight="800">Accumulated ${["distance","energy","volume"][task.kind]}</text>`;
+for(let i=0;i<=4;i++){
+let y=max*i/4;
+h+=`<line x1="${L}" x2="${R}" y1="${Y(y)}" y2="${Y(y)}" stroke="#e8e8e8"/><text x="53" y="${Y(y)+4}" font-size="11" text-anchor="end">${fmt(y)}</text>`;
+}
+for(let i=0;i<=4;i++){
+let x=task.T*i/4;
+h+=`<text x="${X(x)}" y="255" text-anchor="middle" font-size="11">${fmt(x)}</text>`;
+}
+h+=`<path d="M${L} ${T}V${B}H${R}" fill="none" stroke="#111" stroke-width="2"/>`;
+let valid=vals.map((v,i)=>({v,i})).filter(p=>Number.isFinite(p.v)&&(task.compare||locked||p.i<task.n));
+let d=valid.map((p,i)=>(i?"L":"M")+X(p.i*task.h)+" "+Y(p.v)).join("");
+h+=`<path d="${d}" stroke="#1F66E5" stroke-width="4" fill="none"/>`;
+valid.forEach(p=>h+=`<circle cx="${X(p.i*task.h)}" cy="${Y(p.v)}" r="3.5" fill="#1F66E5" stroke="#111" stroke-width="1"/>`);
+let last=valid[valid.length-1];
+if(last)h+=`<circle cx="${X(last.i*task.h)}" cy="${Y(last.v)}" r="7" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+if(s.method==="simpson"&&s.count%2)h+=`<text x="239" y="57" font-size="12" font-weight="800" text-anchor="middle">Odd interval: awaiting a pair</text>`;
+h+=`<text x="453" y="277" font-size="12" text-anchor="end">Time (${task.kind===2?"min":"s"})</text>
+<text x="14" y="155" transform="rotate(-90 14 155)" text-anchor="middle" font-size="12">Total (${unit()})</text>`;
+svg.innerHTML=h;
+svg.setAttribute("aria-label",`Running integrated total versus time. Current displayed total ${fmt(last?last.v:0)} ${unit()}.`);
+}
+function feedback(t,good){$("feedback").textContent=t;$("feedback").className="feedback"+(good?" good":"");}
+$("hint").addEventListener("click",()=>{
+if(locked)return;hinted=true;$("hint").disabled=true;
+feedback(task.compare?"Compare each result with an ideal smooth signal. Noise can favour either rule. Try inspecting the difference between quadratic interpolation and straight segments.":"For trapezia, multiply the time step by the mean of each adjacent pair. For Simpson, use weights 1,4,2,4,2,4,2,4,1 and multiply by h/3.",false);
+});
+$("check").addEventListener("click",()=>{
+if(locked)return;tries++;
+let good=false,msg="";
+if(task.compare){
+good=s.choice===task.best;
+let ref=reference(),eT=Math.abs(integrate("trap")-ref),eS=Math.abs(integrate("simpson")-ref);
+msg=good?`✓ Against the calibration integral, trapezium error = ${fmt(eT)} ${unit()} and Simpson error = ${fmt(eS)} ${unit()}.`:
+`Not yet. Compare errors with the smooth calibration signal. Measurement noise can change which method wins.`;
+}else{
+let answer=s.answer.trim()===""?NaN:Number(s.answer);
+let expected=integrate(s.method,task.n);
+good=Number.isFinite(answer)&&Math.abs(answer-expected)<=Math.abs(expected)*.01+1e-9;
+msg=good?`✓ ${s.method==="trap"?"Trapezium":"Simpson"} integration of the recorded readings gives ${fmt(expected)} ${unit()}.`:
+!Number.isFinite(answer)?"Enter a finite numerical result.":
+`Your result is ${fmt(Math.abs(answer-expected))} ${unit()} ${answer>expected?"too high":"too low"}. Use all eight intervals.`;
+}
+if(good){
+locked=true;let pts=hinted?50:tries===1?100:tries===2?75:50;
+score+=pts;$("scoreHUD").textContent="Score "+score;
+feedback(msg+` +${pts} points.`,true);update();
+$("check").hidden=true;$("hint").disabled=true;$("next").hidden=false;
+$("next").textContent=round===5?"See stars ★":"Next round →";
+}else feedback(msg,false);
+});
+$("next").addEventListener("click",()=>{
+round++;
+if(round===6){
+$("game").hidden=true;$("ending").hidden=false;$("roundHUD").textContent="Complete";
+let n=score>=520?3:score>=380?2:score>=220?1:0;
+$("stars").innerHTML=Array.from({length:3},(_,i)=>`<span class="${i<n?"earned":""}">★</span>`).join("");
+$("finalScore").textContent=`${score} / 600 points · ${n} out of 3 stars`;
+}else setup();
+});
+$("again").addEventListener("click",()=>{
+round=0;score=0;seed=(seed+81281)>>>0;
+$("game").hidden=false;$("ending").hidden=true;setup();
+});
+setup();
+})();
+</script>
+</body>
+</html>

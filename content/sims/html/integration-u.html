@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Double Integral Lab | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+header,main,footer{max-width:1180px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.badge{background:var(--lvl-uni);color:var(--lvl-uni-on);border:2px solid #111;border-radius:999px;padding:8px 13px;text-transform:uppercase;font-size:12px;font-weight:800}
+.hud{display:flex;gap:8px;flex-wrap:wrap;font-size:14px;font-weight:800}
+.hud span{border:2px solid #111;border-radius:999px;padding:7px 12px}
+h1{font-size:clamp(30px,5vw,50px);font-weight:800;line-height:1.1;margin:10px 0 5px}
+h2{font-size:20px;font-weight:800;margin:0 0 12px}
+h3{font-size:16px;font-weight:800;margin:17px 0 10px}
+.sub{color:#666;line-height:1.5}
+.layout{display:grid;gap:18px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.13fr) minmax(0,1fr);align-items:start}}
+.card{border:2px solid #111;border-radius:26px;background:#fff;box-shadow:var(--sh-2);padding:16px;min-width:0}
+.stage{background:var(--lvl-uni-tint)}
+.plot{width:100%;height:auto;display:block;background:#fff;border:2px solid #111;border-radius:16px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;font-weight:800;margin:9px 0}
+.key{display:inline-block;width:14px;height:13px;border:2px solid #111;vertical-align:middle;margin-right:4px}
+.controls{display:grid;gap:11px;margin-top:15px}
+.control{border:2px solid #111;border-radius:16px;padding:11px;background:#fff;min-width:0}
+.control label{display:block;font-weight:800;margin-bottom:8px}
+.control select,.control input[type="text"]{width:100%;border:2px solid #111;border-radius:12px;padding:10px;min-height:48px;background:#fff}
+.control select{font-weight:700}
+input[type="range"]{width:100%;accent-color:var(--lvl-uni);min-height:44px;cursor:pointer}
+.step{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.step button{min-width:44px;min-height:44px;border:2px solid #111;border-radius:12px;background:#fff;font-weight:900}
+.step button:active{background:var(--lvl-uni-tint)}
+.readout{font-weight:800;font-variant-numeric:tabular-nums;min-width:50px;text-align:center}
+.metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:13px 0}
+.metric{border:2px solid #111;border-radius:16px;padding:12px;background:#fff;min-width:0}
+.metric small{display:block;color:#555;font-weight:700}
+.metric strong{display:block;font-size:21px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.btnbar{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+.btn{min-height:48px;border:2px solid #111;border-radius:999px;background:#fff;padding:11px 19px;font-weight:800;box-shadow:var(--sh-1)}
+.btn.check{border-width:3px;background:var(--fit-sun);box-shadow:var(--sh-2)}
+.btn:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.5;cursor:not-allowed}
+.feedback{min-height:48px;font-weight:700;line-height:1.5;margin:12px 0}
+details{border:2px solid #111;border-radius:16px;background:#fff;padding:13px;margin-top:16px}
+summary{font-weight:800;cursor:pointer}
+.concept{width:100%;max-width:340px;display:block;margin:auto}
+.end{text-align:center;padding:40px 14px}
+.stars{font-size:50px;letter-spacing:5px;color:#ccc}.stars .earned{color:#e9a600}
+footer{font-size:12px;color:#666}
+@media(max-width:420px){header,main,footer{padding:12px}.card{padding:12px}.step{flex-wrap:wrap;justify-content:center}}
+@media(prefers-reduced-motion:no-preference){.feedback.good{animation:pop .24s ease-out}@keyframes pop{50%{transform:scale(1.025)}}}
+</style>
+</head>
+<body>
+<header><span class="badge">University · Calculus</span>
+<div class="hud"><span id="roundHUD">Round 1/6</span><span id="scoreHUD">Score 0</span></div></header>
+<main>
+<h1>Double Integral Lab</h1>
+<p class="sub">Change integration order, transform circular regions and explore improper integrals.</p>
+<div id="game" class="layout">
+<section class="card stage">
+<h2 id="heading"></h2>
+<p id="question"></p>
+<svg id="region" class="plot" viewBox="0 0 530 355" role="img" aria-label="Integration region with strips or partial integral"></svg>
+<div class="legend" id="legend"></div>
+<div class="controls" id="controls"></div>
+</section>
+<section class="card">
+<h2>Calculus dashboard</h2>
+<div class="metric-grid">
+<div class="metric"><small id="metricLabel1">Selected order</small><strong id="metric1">—</strong></div>
+<div class="metric"><small id="metricLabel2">Live quantity</small><strong id="metric2">—</strong></div>
+</div>
+<svg id="analysisPlot" class="plot" viewBox="0 0 480 320" role="img" aria-label="Live contour, height-map or improper-integral convergence plot"></svg>
+<div class="btnbar">
+<button class="btn" id="hint">Hint −50</button>
+<button class="btn check" id="check">Check ✓</button>
+<button class="btn" id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite"></div>
+<details>
+<summary>The maths</summary>
+<p><strong>Iterated integrals:</strong> ∫∫ᴅ f(x,y) dA can be evaluated using either dx dy or dy dx, provided the chosen bounds describe exactly the same region D.</p>
+<p><strong>Rectangles:</strong> constant inner and outer limits. <strong>Triangles:</strong> inner limits can depend on the outer variable.</p>
+<p><strong>Polar coordinates:</strong> x = r cos θ, y = r sin θ, and dA = r dr dθ. The Jacobian factor r is essential.</p>
+<p><strong>Improper integrals:</strong> ∫₁^∞ x^(−p) dx converges for p &gt; 1, with value 1/(p − 1); otherwise it diverges. The partial integral is (R^(1−p) − 1)/(1−p), for p ≠ 1, and ln R for p = 1.</p>
+<p>Area has units²; a double integral of a height function over an area has units³.</p>
+</details>
+<h2 style="margin-top:22px">A double-integral cell</h2>
+<svg class="concept" viewBox="0 0 340 140" role="img" aria-label="A rectangular base of area delta x times delta y supporting a height f(x,y)">
+<g stroke="#111" stroke-width="2.5" stroke-linejoin="round">
+<path d="M87 98L169 126L248 86L166 58Z" fill="#E2ECFD"/>
+<path d="M87 98V42L166 10L248 42V86L169 126V70Z" fill="#AFCBFF" opacity=".9"/>
+<path d="M87 42L169 70L248 42L166 10Z" fill="#1F66E5"/>
+<path d="M169 70V126M87 42V98M248 42V86" fill="none"/>
+</g>
+<g fill="#111" font-size="12" font-weight="700">
+<text x="73" y="120">Δx</text><text x="224" y="115">Δy</text><text x="258" y="65">f(x,y)</text>
+</g>
+</svg>
+<p class="sub">Small volume ≈ height × Δx × Δy.</p>
+</section>
+</div>
+<div id="ending" class="card end" hidden>
+<h2>Multivariable mastery!</h2><div id="stars" class="stars"></div>
+<p id="finalScore"></p><button class="btn check" id="again">Play again ↻</button>
+</div>
+</main><footer>FIT · Integration · Double Integral Lab</footer>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+let round=0,score=0,tries=0,hinted=false,locked=false,seed=183761,task={},s={};
+function rng(){seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;}
+function pick(a){return a[Math.floor(rng()*a.length)];}
+function fmt(v){return Number.isFinite(v)?Number(v.toPrecision(6)).toString():"—";}
+function parseExpression(str){
+let source=String(str).toLowerCase().replace(/\s/g,"").replace(/π/g,"pi").replace(/−/g,"-");
+if(!source||source.length>100)return NaN;
+const tokens=source.match(/(?:\d+(?:\.\d*)?|\.\d+)|[a-z]+|[()+*/^-]/g)||[];
+if(tokens.join("")!==source)return NaN;
+let i=0;
+function atom(){
+let t=tokens[i++];
+if(t==="("){let v=expr();if(tokens[i++]!==")")throw Error();return v;}
+if(t==="-")return -atom();
+if(t==="+")return atom();
+if(t==="e")return Math.E;
+if(t==="pi")return Math.PI;
+if(t==="ln"||t==="log"){
+if(tokens[i++]!=="(")throw Error();
+let v=expr();if(tokens[i++]!==")"||v<=0)throw Error();
+return Math.log(v);
+}
+let n=Number(t);if(!Number.isFinite(n))throw Error();return n;
+}
+function power(){let v=atom();if(tokens[i]==="^"){i++;v=Math.pow(v,power());}return v;}
+function mult(){
+let v=power();
+while(tokens[i]==="*"||tokens[i]==="/"){
+let op=tokens[i++],z=power();v=op==="*"?v*z:v/z;
+}
+return v;
+}
+function expr(){
+let v=mult();
+while(tokens[i]==="+"||tokens[i]==="-"){
+let op=tokens[i++],z=mult();v+=op==="+"?z:-z;
+}
+return v;
+}
+try{let v=expr();return i===tokens.length&&Number.isFinite(v)?v:NaN;}
+catch(_){return NaN;}
+}
+function selected(label,id,options){
+const box=document.createElement("div");box.className="control";
+const lab=document.createElement("label");lab.textContent=label;
+const sel=document.createElement("select");sel.id="sel-"+id;
+options.forEach(([v,t])=>{
+let opt=document.createElement("option");opt.value=v;opt.textContent=t;sel.appendChild(opt);
+});
+sel.value=String(s[id]);
+sel.addEventListener("change",()=>{if(locked)return;s[id]=sel.value;update();});
+box.append(lab,sel);$("controls").appendChild(box);
+}
+function answerField(label){
+const box=document.createElement("div");box.className="control";
+const lab=document.createElement("label");lab.textContent=label;
+const inp=document.createElement("input");
+inp.type="text";inp.id="exact";inp.value=s.answer;inp.placeholder="e.g. 3/2, pi/2, 2*ln(3)";
+inp.autocomplete="off";
+inp.addEventListener("input",()=>{s.answer=inp.value;update();});
+box.append(lab,inp);$("controls").appendChild(box);
+}
+function slider(label,id,min,max,step){
+const box=document.createElement("div");box.className="control";
+box.innerHTML=`<label for="range-${id}">${label}: <strong id="read-${id}"></strong></label><input type="range" id="range-${id}" min="${min}" max="${max}" step="${step}" value="${s[id]}">`;
+$("controls").appendChild(box);
+$("range-"+id).addEventListener("input",e=>{s[id]=+e.target.value;update();});
+}
+function stepper(label,id,min,max,step){
+const box=document.createElement("div");box.className="control";
+box.innerHTML=`<label>${label}</label><div class="step"><button data-d="${-step*4}" aria-label="Large decrease">−−</button><button data-d="${-step}" aria-label="Decrease">−</button><span class="readout" id="read-${id}"></span><button data-d="${step}" aria-label="Increase">+</button><button data-d="${step*4}" aria-label="Large increase">++</button></div>`;
+$("controls").appendChild(box);
+box.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+if(locked)return;
+s[id]=Math.max(min,Math.min(max,Math.round((s[id]+Number(b.dataset.d))*100)/100));update();
+}));
+}
+function doubleAnswer(){
+if(task.triangle)return task.size**3/2;
+const a=task.a,b=task.b;
+return a*a*b/2+a*b*b/2;
+}
+function doubleCorrectBounds(){
+// order = inner differential: "x" means dx first (horizontal strips, outer variable y); "y" means dy first (vertical strips, outer variable x).
+if(!task.triangle){
+return s.order==="x"&&s.lo==="0"&&s.hi===String(task.a)&&s.outerLow==="0"&&s.outerHigh===String(task.b)
+||s.order==="y"&&s.lo==="0"&&s.hi===String(task.b)&&s.outerLow==="0"&&s.outerHigh===String(task.a);
+}
+return s.order==="y"&&s.lo==="0"&&s.hi==="x"&&s.outerLow==="0"&&s.outerHigh===String(task.size)
+||s.order==="x"&&s.lo==="y"&&s.hi===String(task.size)&&s.outerLow==="0"&&s.outerHigh===String(task.size);
+}
+function setup(){
+tries=0;hinted=false;locked=false;
+const type=round%3;
+$("controls").replaceChildren();
+if(type===0){
+if(round===0){
+task={type,triangle:false,a:pick([2,3]),b:pick([1,2,3])};
+$("heading").textContent="Double integral · rectangular domain";
+$("question").textContent=`Evaluate ∬ᴅ (x + y) dA, where D is the rectangle 0 ≤ x ≤ ${task.a}, 0 ≤ y ≤ ${task.b}. Choose a valid order and all four limits, then give the exact value in units³.`;
+}else{
+task={type,triangle:true,size:pick([2,3,4])};
+$("heading").textContent="Double integral · triangular domain";
+$("question").textContent=`Evaluate ∬ᴅ (x + y) dA, where D is the triangle 0 ≤ y ≤ x ≤ ${task.size}. Choose a valid order and the variable-dependent bounds, then give the exact value in units³.`;
+}
+s={order:"y",outerLow:"0",outerHigh:"1",lo:"0",hi:"1",answer:""};
+selected("Inner differential (the variable integrated first)","order",[["x","dx first (horizontal strips)"],["y","dy first (vertical strips)"]]);
+const opts=[["0","0"],["1","1"],["2","2"],["3","3"],["4","4"],["x","x"],["y","y"]];
+selected("Outer lower bound","outerLow",opts);
+selected("Outer upper bound","outerHigh",opts);
+selected("Inner lower bound","lo",opts);
+selected("Inner upper bound","hi",opts);
+answerField("Exact double-integral value (units³)");
+}else if(type===1){
+task={type,radius:round===1?pick([1,2]):pick([1,2,3])};
+$("heading").textContent="Change to polar coordinates";
+$("question").textContent=`Evaluate ∬ᴅ (x² + y²) dA over the full disc x² + y² ≤ ${task.radius**2}. Select coordinates, the correct Jacobian and polar limits; then enter the exact result in units⁴.`;
+s={coords:"cart",jac:"1",rlo:"0",rhi:"1",thetaLo:"0",thetaHi:"pi",answer:""};
+selected("Coordinate system","coords",[["cart","Cartesian x and y"],["polar","Polar r and θ"]]);
+selected("Area-element Jacobian","jac",[["1","1"],["r","r"],["r2","r²"],["2r","2r"]]);
+const radii=[["0","0"],["1","1"],["2","2"],["3","3"],["r","r"],["theta","θ"]];
+selected("Radial lower bound","rlo",radii);
+selected("Radial upper bound","rhi",radii);
+selected("Angular lower bound","thetaLo",[["0","0"],["pi","π"],["2pi","2π"]]);
+selected("Angular upper bound","thetaHi",[["pi","π"],["2pi","2π"],["0","0"],["pi/2","π/2"]]);
+answerField("Exact integral value (units⁴)");
+}else{
+const divergence=round===5;
+task={type,divergence,target:divergence?null:pick([.5,1,2,4]),fixedP:divergence?pick([.5,.75,1]):null};
+s={p:divergence?task.fixedP:.5,R:4,decision:"converges"};
+$("heading").textContent=divergence?"Improper integral · convergence test":"Improper integral · tune the exponent";
+$("question").textContent=divergence?
+`Determine whether ∫₁^∞ x^(−${fmt(task.fixedP)}) dx converges or diverges. Use the live partial-integral plot to justify your choice.`:
+`Choose p so that ∫₁^∞ x^(−p) dx converges to ${fmt(task.target)}. The limiting value is hidden until Check; explore the partial integral as R increases.`;
+if(!divergence)stepper("Exponent p","p",.5,5,.25);
+else selected("Classification","decision",[["converges","Converges to a finite value"],["diverges","Diverges"]]);
+slider("Partial upper limit R","R",2,32,1);
+}
+$("roundHUD").textContent=`Round ${round+1}/6`;
+$("scoreHUD").textContent="Score "+score;
+$("hint").disabled=false;$("check").hidden=false;$("next").hidden=true;
+$("feedback").textContent="";update();
+}
+function valueBound(v,outer){
+if(v==="x"||v==="y")return outer;
+let num=Number(v);
+return Number.isFinite(num)?num:NaN;
+}
+function partial(R,p){
+if(R<1||p<=0||!Number.isFinite(R)||!Number.isFinite(p))return NaN;
+return Math.abs(p-1)<1e-10?Math.log(R):Math.expm1((1-p)*Math.log(R))/(1-p);
+}
+function update(){
+if(task.type===0){
+$("metricLabel1").textContent="Inner differential";
+$("metric1").textContent=s.order==="x"?"dx first":"dy first";
+$("metricLabel2").textContent="Selected bounds";
+$("metric2").textContent=doubleCorrectBounds()?"Valid region ✓":"Inspect region";
+}else if(task.type===1){
+$("metricLabel1").textContent="Area element";
+$("metric1").textContent=s.jac==="r"?"r dr dθ":s.jac+" dr dθ";
+$("metricLabel2").textContent="Coordinate system";
+$("metric2").textContent=s.coords==="polar"?"Polar":"Cartesian";
+}else{
+let p=s.p,part=partial(s.R,p);
+$("metricLabel1").textContent="Exponent p";
+$("metric1").textContent=fmt(p);
+$("metricLabel2").textContent=`Partial integral to R = ${s.R}`;
+$("metric2").textContent=fmt(part);
+$("read-R").textContent=s.R;
+if(!task.divergence)$("read-p").textContent=fmt(s.p);
+}
+drawRegion();drawAnalysis();
+}
+function drawRegion(){
+const svg=$("region"),L=60,R=488,T=45,B=300;
+let h=`<rect width="530" height="355" fill="#fff"/>`;
+if(task.type===2){
+let p=s.p,xmax=Math.max(6,s.R),ymax=1;
+const X=x=>L+(x-1)/(xmax-1)*(R-L),Y=y=>B-y/ymax*(B-T);
+h+=`<text x="15" y="24" font-size="17" font-weight="800">Area under x^(−p)</text>`;
+for(let i=0;i<=4;i++){
+let yy=i/4;
+h+=`<line x1="${L}" x2="${R}" y1="${Y(yy)}" y2="${Y(yy)}" stroke="#eee"/>
+<text x="51" y="${Y(yy)+4}" font-size="11" text-anchor="end">${fmt(yy)}</text>`;
+}
+for(let i=0;i<=4;i++){
+let x=1+(xmax-1)*i/4;
+h+=`<text x="${X(x)}" y="319" font-size="11" text-anchor="middle">${fmt(x)}</text>`;
+}
+for(let i=0;i<100;i++){
+let x=1+(s.R-1)*i/100,x2=1+(s.R-1)*(i+1)/100,y=Math.pow(x,-p);
+h+=`<rect x="${X(x)}" y="${Y(y)}" width="${Math.max(.5,X(x2)-X(x))}" height="${B-Y(y)}" fill="#E2ECFD" stroke="none"/>`;
+}
+let d="";
+for(let i=0;i<=240;i++){
+let x=1+(xmax-1)*i/240;
+d+=(i?"L":"M")+X(x)+" "+Y(Math.pow(x,-p));
+}
+h+=`<path d="${d}" stroke="#1F66E5" stroke-width="3.5" fill="none"/>
+<line x1="${X(s.R)}" y1="${T}" x2="${X(s.R)}" y2="${B}" stroke="#FF6B3D" stroke-width="3" stroke-dasharray="6 4"/>
+<path d="M${L} ${T}V${B}H${R}" fill="none" stroke="#111" stroke-width="2"/>
+<text x="491" y="344" font-size="13" text-anchor="end">x (units)</text>
+<text x="14" y="170" transform="rotate(-90 14 170)" font-size="13" text-anchor="middle">f(x)</text>`;
+$("legend").innerHTML=`<span><i class="key" style="background:#E2ECFD"></i>Partial area</span><span>Orange: R = ${s.R}</span>`;
+}else{
+let size=task.type===1?task.radius:task.triangle?task.size:Math.max(task.a,task.b);
+let M=size+1,X=x=>L+x/M*(R-L),Y=y=>B-y/M*(B-T);
+h+=`<text x="15" y="24" font-size="17" font-weight="800">${task.type===1?"Circular domain":"Integration domain and strips"}</text>`;
+for(let i=0;i<=size;i++){
+h+=`<line x1="${X(i)}" x2="${X(i)}" y1="${T}" y2="${B}" stroke="#eee"/>
+<line x1="${L}" x2="${R}" y1="${Y(i)}" y2="${Y(i)}" stroke="#eee"/>
+<text x="${X(i)}" y="318" font-size="11" text-anchor="middle">${i}</text>
+<text x="51" y="${Y(i)+4}" font-size="11" text-anchor="end">${i}</text>`;
+}
+h+=`<path d="M${L} ${T}V${B}H${R}" fill="none" stroke="#111" stroke-width="2"/>`;
+if(task.type===1){
+const a=task.radius;
+h+=`<circle cx="${X(0)}" cy="${Y(0)}" r="${a/M*(R-L)}" fill="#E2ECFD" stroke="#1F66E5" stroke-width="3" clip-path="url(#quadrantClip)"/>`;
+h+=`<defs><clipPath id="quadrantClip"><rect x="${L}" y="${T}" width="${R-L}" height="${B-T}"/></clipPath></defs>`;
+let step=a/10;
+for(let r=step;r<=a+1e-8;r+=step){
+h+=`<path d="M${X(r)} ${Y(0)}A${r/M*(R-L)} ${r/M*(B-T)} 0 0 0 ${X(0)} ${Y(r)}" stroke="#7FA9FF" stroke-width="1" fill="none"/>`;
+}
+for(let i=0;i<=9;i++){
+let theta=Math.PI*i/18;
+h+=`<line x1="${L}" y1="${B}" x2="${X(a*Math.cos(theta))}" y2="${Y(a*Math.sin(theta))}" stroke="#92B7FF" stroke-width="1"/>`;
+}
+h+=`<text x="${X(a/1.45)}" y="${Y(a/1.45)}" font-size="14" font-weight="800">D</text>`;
+$("legend").innerHTML=`<span><i class="key" style="background:#E2ECFD"></i>First-quadrant portion shown</span><span>Full disc includes all four quadrants</span>`;
+}else{
+if(task.triangle){
+let a=task.size;
+h+=`<polygon points="${X(0)},${Y(0)} ${X(a)},${Y(0)} ${X(a)},${Y(a)}" fill="#E2ECFD" stroke="#1F66E5" stroke-width="3"/>`;
+}else{
+h+=`<rect x="${X(0)}" y="${Y(task.b)}" width="${X(task.a)-X(0)}" height="${Y(0)-Y(task.b)}" fill="#E2ECFD" stroke="#1F66E5" stroke-width="3"/>`;
+}
+let outerLo=valueBound(s.outerLow,0),outerHi=valueBound(s.outerHigh,0);
+const variable=s.order==="y"?"x":"y";
+if(Number.isFinite(outerLo)&&Number.isFinite(outerHi)&&outerHi>outerLo){
+for(let i=0;i<14;i++){
+let outer=outerLo+(outerHi-outerLo)*(i+.5)/14;
+let lo=valueBound(s.lo,outer),hi=valueBound(s.hi,outer);
+if(!Number.isFinite(lo)||!Number.isFinite(hi)||hi<=lo)continue;
+if(s.order==="y"){
+h+=`<line x1="${X(outer)}" x2="${X(outer)}" y1="${Y(lo)}" y2="${Y(hi)}" stroke="#FF6B3D" stroke-width="3" opacity=".8"/>`;
+}else{
+h+=`<line x1="${X(lo)}" x2="${X(hi)}" y1="${Y(outer)}" y2="${Y(outer)}" stroke="#FF6B3D" stroke-width="3" opacity=".8"/>`;
+}
+}
+}
+$("legend").innerHTML=`<span><i class="key" style="background:#E2ECFD"></i>True domain D</span><span><i class="key" style="background:#FF6B3D"></i>Selected ${variable==="x"?"vertical":"horizontal"} limits</span>`;
+}
+h+=`<text x="489" y="344" text-anchor="end" font-size="13">x (units)</text>
+<text x="14" y="160" transform="rotate(-90 14 160)" text-anchor="middle" font-size="13">y (units)</text>`;
+}
+svg.innerHTML=h;
+svg.setAttribute("aria-label",task.type===2?`Curve x to the power minus ${s.p}, with area from 1 to ${s.R} shaded`:task.type===1?"Circular integration domain with radial and angular coordinate grid":"Rectangle or triangle with selected integration strips");
+}
+function drawAnalysis(){
+if(task.type===2)drawConvergence();else drawHeight();
+}
+function drawHeight(){
+const svg=$("analysisPlot"),L=56,R=445,T=46,B=273;
+const size=task.type===1?task.radius:task.triangle?task.size:Math.max(task.a,task.b);
+const M=size+1,X=x=>L+x/M*(R-L),Y=y=>B-y/M*(B-T);
+let h=`<rect width="480" height="320" fill="#fff"/>
+<text x="13" y="24" font-weight="800" font-size="16">Height-map samples</text>`;
+const N=22,step=M/N;
+for(let i=0;i<N;i++)for(let j=0;j<N;j++){
+let x=(i+.5)*step,y=(j+.5)*step;
+let inside=task.type===1?x*x+y*y<=task.radius**2:
+task.triangle?y<=x&&x<=task.size:x<=task.a&&y<=task.b;
+if(!inside)continue;
+let z=task.type===1?x*x+y*y:x+y;
+let intensity=Math.max(.08,Math.min(.95,z/(task.type===1?2*task.radius**2:2*size)));
+let alpha=(.18+.75*intensity).toFixed(3);
+h+=`<rect x="${X(i*step)}" y="${Y((j+1)*step)}" width="${X(step)-X(0)+.4}" height="${Y(0)-Y(step)+.4}" fill="#1F66E5" opacity="${alpha}"/>`;
+}
+for(let k=0;k<=4;k++){
+let z=size*k/4;
+h+=`<text x="${X(z)}" y="290" font-size="11" text-anchor="middle">${fmt(z)}</text>
+<text x="47" y="${Y(z)+4}" font-size="11" text-anchor="end">${fmt(z)}</text>`;
+}
+h+=`<path d="M${L} ${T}V${B}H${R}" fill="none" stroke="#111" stroke-width="2"/>
+<text x="445" y="312" font-size="12" text-anchor="end">x (units)</text>
+<text x="14" y="171" transform="rotate(-90 14 171)" text-anchor="middle" font-size="12">y (units)</text>
+<text x="285" y="35" font-size="11">Darker = greater integrand</text>`;
+svg.innerHTML=h;
+svg.setAttribute("aria-label","Sampled height map of the integrand, with darker blue cells representing larger values inside the selected domain");
+}
+function drawConvergence(){
+const svg=$("analysisPlot"),L=64,R=452,T=48,B=273;
+let p=s.p,maxR=32,peak=Math.max(1,partial(maxR,p))*1.15;
+const X=x=>L+(x-1)/(maxR-1)*(R-L),Y=y=>B-y/peak*(B-T);
+let h=`<rect width="480" height="320" fill="#fff"/>
+<text x="14" y="23" font-size="16" font-weight="800">Partial integral I(R) versus R</text>`;
+for(let i=0;i<=4;i++){
+let yy=peak*i/4;
+h+=`<line x1="${L}" y1="${Y(yy)}" x2="${R}" y2="${Y(yy)}" stroke="#eee"/>
+<text x="56" y="${Y(yy)+4}" font-size="11" text-anchor="end">${fmt(yy)}</text>`;
+}
+for(let i=0;i<=4;i++){
+let xx=1+31*i/4;
+h+=`<text x="${X(xx)}" y="293" text-anchor="middle" font-size="11">${fmt(xx)}</text>`;
+}
+h+=`<path d="M${L} ${T}V${B}H${R}" fill="none" stroke="#111" stroke-width="2"/>`;
+let d="";
+for(let i=0;i<=180;i++){
+let r=1+31*i/180;
+d+=(i?"L":"M")+X(r)+" "+Y(partial(r,p));
+}
+h+=`<path d="${d}" fill="none" stroke="#1F66E5" stroke-width="4"/>
+<circle cx="${X(s.R)}" cy="${Y(partial(s.R,p))}" r="7" fill="#FFC83D" stroke="#111" stroke-width="2"/>
+<line x1="${X(s.R)}" y1="${T}" x2="${X(s.R)}" y2="${B}" stroke="#FF6B3D" stroke-width="2" stroke-dasharray="5 4"/>`;
+if(p>1){
+let limit=1/(p-1);
+if(limit<=peak){
+h+=`<line x1="${L}" x2="${R}" y1="${Y(limit)}" y2="${Y(limit)}" stroke="#3DBE6B" stroke-width="2" stroke-dasharray="7 5"/>`;
+}
+}
+h+=`<text x="451" y="315" font-size="12" text-anchor="end">Upper limit R</text>
+<text x="15" y="171" transform="rotate(-90 15 171)" text-anchor="middle" font-size="12">I(R) (units²)</text>`;
+svg.innerHTML=h;
+svg.setAttribute("aria-label",`Partial integral versus upper limit R for exponent ${p}. Player's point is R ${s.R}, integral ${fmt(partial(s.R,p))}.`);
+}
+function feedback(msg,good){
+$("feedback").textContent=msg;
+$("feedback").className="feedback"+(good?" good":"");
+}
+$("hint").addEventListener("click",()=>{
+if(locked)return;hinted=true;$("hint").disabled=true;
+feedback(task.type===0?"Sketch a line at fixed outer variable. Its two endpoints determine the inner bounds. Then integrate the outer variable.":task.type===1?"The disc requires r from the centre to the circumference and a complete turn in θ. Multiply the transformed integrand by r.":task.divergence?"Inspect p relative to 1. At p = 1 the partial integral grows like ln R.":"Use an antiderivative of x^(−p), then take R → ∞. The finite limit exists only when p > 1.",false);
+});
+$("check").addEventListener("click",()=>{
+if(locked)return;tries++;
+let good=false,msg="";
+if(task.type===0){
+let val=parseExpression(s.answer),correctValue=doubleAnswer();
+good=doubleCorrectBounds()&&Number.isFinite(val)&&Math.abs(val-correctValue)<1e-7;
+if(good)msg=`✓ The bounds cover D exactly. The integral of x + y is ${fmt(correctValue)} units³.`;
+else msg=`${doubleCorrectBounds()?"Your limits describe D, but the numerical integral is incorrect.":"Your chosen integration limits do not describe the complete domain."} ${Number.isFinite(val)?"Review the order and inner antiderivative.":"Enter a valid exact numerical expression."}`;
+}else if(task.type===1){
+let valid=s.coords==="polar"&&s.jac==="r"&&s.rlo==="0"&&s.rhi===String(task.radius)&&s.thetaLo==="0"&&s.thetaHi==="2pi";
+let val=parseExpression(s.answer),exact=Math.PI*task.radius**4/2;
+good=valid&&Number.isFinite(val)&&Math.abs(val-exact)<1e-7;
+msg=good?`✓ The transformed integrand is r³; integrating over the full disc gives ${fmt(task.radius**4/2)}π units⁴.`:
+`${valid?"The coordinate choices are correct, but your integral value differs.":"Check the coordinate system, Jacobian and radial/angular limits."} ${!Number.isFinite(val)?"Enter a valid numerical expression.":""}`;
+}else if(task.divergence){
+good=s.decision==="diverges";
+msg=good?`✓ For p = ${fmt(task.fixedP)} ≤ 1, the partial integral increases without a finite limit.`:
+`The partial integral does not approach a finite value for this exponent.`;
+}else{
+const expected=1+1/task.target;
+good=Math.abs(s.p-expected)<1e-9;
+msg=good?`✓ For p > 1, the improper integral equals 1/(p − 1) = ${fmt(task.target)}.`:
+(s.p<=1?"This exponent does not produce a convergent integral.":`Your chosen p produces a limit ${fmt(1/(s.p-1))}, not ${fmt(task.target)}.`);
+}
+if(good){
+locked=true;let pts=hinted?50:tries===1?100:tries===2?75:50;
+score+=pts;$("scoreHUD").textContent="Score "+score;
+feedback(msg+` +${pts} points.`,true);
+$("check").hidden=true;$("hint").disabled=true;$("next").hidden=false;
+$("next").textContent=round===5?"See stars ★":"Next round →";
+}else feedback(msg,false);
+});
+$("next").addEventListener("click",()=>{
+round++;
+if(round===6){
+$("game").hidden=true;$("ending").hidden=false;
+$("roundHUD").textContent="Complete";
+let stars=score>=520?3:score>=380?2:score>=220?1:0;
+$("stars").innerHTML=Array.from({length:3},(_,i)=>`<span class="${i<stars?"earned":""}">★</span>`).join("");
+$("finalScore").textContent=`${score} / 600 points · ${stars} out of 3 stars`;
+}else setup();
+});
+$("again").addEventListener("click",()=>{
+round=0;score=0;seed=(seed+981127)>>>0;
+$("game").hidden=false;$("ending").hidden=true;setup();
+});
+setup();
+})();
+</script>
+</body>
+</html>

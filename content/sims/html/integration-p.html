@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Square Counter | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit}
+button{cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+header,main,footer{max-width:1150px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.badge{display:inline-block;background:var(--lvl-primary);color:var(--lvl-primary-on);border:2px solid #111;border-radius:999px;padding:7px 13px;font-size:12px;font-weight:800;text-transform:uppercase}
+.hud{display:flex;gap:9px;align-items:center;flex-wrap:wrap;font-size:14px;font-weight:800}
+.hud span:not(.badge){border:2px solid #111;border-radius:999px;padding:7px 12px}
+h1{font-size:clamp(29px,5vw,49px);line-height:1.08;margin:10px 0 5px;font-weight:800}
+h2{font-size:20px;margin:0 0 12px;font-weight:800}
+p{line-height:1.5}
+.sub{color:var(--fit-ink-3);margin:0 0 16px}
+.layout{display:grid;gap:18px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.18fr) minmax(0,1fr);align-items:start}}
+.card{border:2px solid #111;border-radius:26px;box-shadow:var(--sh-2);background:#fff;padding:17px;min-width:0}
+.stage{background:var(--lvl-primary-tint)}
+.grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));width:100%;max-width:550px;margin:auto;aspect-ratio:8/6;border:2px solid #111;border-radius:12px;overflow:hidden;touch-action:none;background:#fff}
+.cell{position:relative;min-width:0;min-height:0;background:#fff;border:1px solid #aaa;padding:0;border-radius:0;overflow:hidden}
+.cell svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cell .mark{position:absolute;right:1px;top:1px;font-size:clamp(9px,2.4vw,18px);font-weight:900;background:#fff;border-radius:4px;min-width:17px}
+.cell[data-mark="1"]{outline:3px solid #111;outline-offset:-4px}
+.cell[data-mark="2"]{outline:3px dashed #111;outline-offset:-4px}
+.cell:focus-visible{outline:3px solid var(--fit-focus);outline-offset:-4px;z-index:2}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.pill{border:2px solid #111;border-radius:999px;background:#fff;padding:11px 15px;min-height:44px;font-weight:800}
+.pill[aria-pressed="true"]{background:var(--lvl-primary);box-shadow:var(--sh-1)}
+.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.metric{background:#fff;border:2px solid #111;border-radius:16px;padding:12px}
+.metric strong{display:block;font-size:25px;font-variant-numeric:tabular-nums}
+.metric small{font-weight:700;color:var(--fit-ink-3)}
+.btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{border:2px solid #111;border-radius:999px;min-height:48px;padding:12px 20px;font-weight:800;background:#fff;box-shadow:var(--sh-1)}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.btn.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button:disabled{opacity:.48;cursor:not-allowed}
+.feedback{min-height:48px;margin-top:12px;font-weight:700}
+.plot{width:100%;height:auto;display:block}
+details{border:2px solid #111;border-radius:16px;padding:12px;margin-top:16px;background:#fff}
+summary{font-weight:800;cursor:pointer;min-height:30px}
+.legend{display:flex;gap:14px;font-size:13px;font-weight:700;flex-wrap:wrap}
+.dot{width:13px;height:13px;border:2px solid #111;display:inline-block;vertical-align:middle;margin-right:5px}
+.concept{width:100%;max-width:320px;display:block;margin:auto}
+.end{text-align:center;padding:35px 12px}
+.stars{font-size:50px;color:#d4d4d4;letter-spacing:5px}
+.stars .earned{color:#e9a600}
+footer{font-size:12px;color:var(--fit-ink-3)}
+@media(prefers-reduced-motion:no-preference){.feedback.good{animation:pop .22s ease-out}@keyframes pop{50%{transform:scale(1.025)}}}
+@media(max-width:420px){header,main,footer{padding:12px}.card{padding:12px}.tools .pill{padding:9px 11px}}
+</style>
+</head>
+<body>
+<header>
+<span class="badge">Primary · Mathematics</span>
+<div class="hud"><span id="roundHUD">Round 1/6</span><span id="scoreHUD">Score 0</span></div>
+</header>
+<main>
+<h1>Square Counter</h1>
+<p class="sub">Count whole squares and half squares to measure a curved shape.</p>
+<div id="game" class="layout">
+<section class="card stage">
+<h2 id="sceneTitle">The leaf</h2>
+<p id="question">Mark the squares covered by the shape.</p>
+<div id="squareGrid" class="grid" role="group" aria-label="One-centimetre square grid"></div>
+<p class="sub" style="margin:12px 0 0">Each grid square measures 1 cm × 1 cm.</p>
+<div class="tools" role="group" aria-label="Painting tools">
+<button class="pill" data-tool="2" aria-pressed="true">■ Whole</button>
+<button class="pill" data-tool="1" aria-pressed="false">◩ Half</button>
+<button class="pill" data-tool="0" aria-pressed="false">× Empty</button>
+</div>
+<p class="sub">Choose a tool, then tap or drag over squares. Tap a square again to clear it.</p>
+<div class="metrics">
+<div class="metric"><small>Whole squares</small><strong id="whole">0</strong></div>
+<div class="metric"><small>Half squares</small><strong id="half">0</strong></div>
+</div>
+</section>
+<section class="card">
+<h2>Area lab</h2>
+<div class="metric"><small>Your estimate</small><strong id="estimate">0 cm²</strong></div>
+<svg id="chart" class="plot" viewBox="0 0 400 280" role="img" aria-label="Bar chart of estimated area and true area after checking"></svg>
+<div class="legend"><span><i class="dot" style="background:#FFC83D"></i>Your estimate</span><span><i class="dot" style="background:#3DBE6B"></i>True area (after Check)</span></div>
+<div class="btnbar">
+<button id="hint" class="btn">Hint −50 points</button>
+<button id="check" class="btn check">Check ✓</button>
+<button id="next" class="btn" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite"></div>
+<details>
+<summary>The maths</summary>
+<p>Estimated area = number of whole squares + ½ × number of half squares.</p>
+<p>One square is 1 cm². When the shape covers roughly half a square, count ½ cm². For this game, an estimate within 10% of the actual area counts as correct.</p>
+<p>The true area is calculated using many tiny sample squares, not guessed from the large grid.</p>
+</details>
+<h2 style="margin-top:22px">A tiny square</h2>
+<svg class="concept" viewBox="0 0 320 115" role="img" aria-label="A full square and a half square, each one centimetre wide">
+<rect x="30" y="18" width="65" height="65" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+<rect x="177" y="18" width="65" height="65" fill="#fff" stroke="#111" stroke-width="3"/>
+<path d="M177 18H242L177 83Z" fill="#FFC83D" stroke="#111" stroke-width="2"/>
+<g font-size="13" font-weight="700" fill="#111" text-anchor="middle"><text x="62" y="103">1 cm²</text><text x="209" y="103">½ cm²</text><text x="111" y="51">→</text></g>
+</svg>
+<p class="sub">Two half squares make one whole square.</p>
+</section>
+</div>
+<div id="ending" class="card end" hidden>
+<h2>Shape expert!</h2><div id="stars" class="stars"></div>
+<p id="finalScore"></p><button id="again" class="btn check">Play again ↻</button>
+</div>
+</main>
+<footer>FIT · Integration · Square Counter</footer>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const W=8,H=6,COUNT=W*H;
+let round=0,score=0,tries=0,hinted=false,locked=false,tool=2,marks=[],samples=[],actual=0,seed=314159,down=false,painted=new Set();
+const shapes=[
+{name:"Leaf",colour:"#3DBE6B",cx:4,cy:3,rx:3.35,ry:2.15,k:.17,phase:0},
+{name:"Pond",colour:"#5EA8E7",cx:4,cy:3,rx:3.05,ry:2.38,k:.11,phase:1.1},
+{name:"Puddle",colour:"#FF8FB8",cx:4,cy:3,rx:3.35,ry:2.08,k:.23,phase:2.6}
+];
+let shape;
+function rng(){seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;}
+function within(x,y){
+let dx=(x-shape.cx)/shape.rx,dy=(y-shape.cy)/shape.ry;
+let theta=Math.atan2(dy,dx),r=Math.hypot(dx,dy);
+let edge=1+shape.k*Math.cos((shape.id===0?2:shape.id===1?3:5)*theta+shape.phase)
++ .055*Math.sin(4*theta+shape.phase);
+return r<=edge;
+}
+function coverage(col,row,n){
+let hit=0;
+for(let yy=0;yy<n;yy++)for(let xx=0;xx<n;xx++)
+if(within(col+(xx+.5)/n,row+(yy+.5)/n))hit++;
+return hit/(n*n);
+}
+function chooseTool(t){
+tool=t;
+document.querySelectorAll("[data-tool]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.tool===t)));
+}
+function renderGrid(){
+const host=$("squareGrid");host.replaceChildren();
+for(let i=0;i<COUNT;i++){
+let b=document.createElement("button"),c=i%W,r=Math.floor(i/W);
+b.className="cell";b.type="button";b.dataset.index=i;b.dataset.mark=marks[i];
+b.setAttribute("aria-label",`Column ${c+1}, row ${r+1}, ${["empty","half","whole"][marks[i]]}`);
+const fraction=samples[i],pixel=14;
+let squares="";
+for(let yy=0;yy<pixel;yy++)for(let xx=0;xx<pixel;xx++){
+let x=c+(xx+.5)/pixel,y=r+(yy+.5)/pixel;
+if(within(x,y))squares+=`<rect x="${xx}" y="${yy}" width="1.08" height="1.08" fill="${shape.colour}"/>`;
+}
+b.innerHTML=`<svg viewBox="0 0 14 14" preserveAspectRatio="none" aria-hidden="true">${squares}</svg><span class="mark">${marks[i]===2?"1":marks[i]===1?"½":""}</span>`;
+host.appendChild(b);
+}
+}
+function area(){return marks.reduce((sum,m)=>sum+m*.5,0);}
+function refresh(){
+const full=marks.filter(x=>x===2).length,half=marks.filter(x=>x===1).length;
+$("whole").textContent=full;$("half").textContent=half;
+$("estimate").textContent=area().toFixed(1)+" cm²";
+plot();
+}
+function plot(){
+const svg=$("chart"),value=area(),show=locked;
+let max=Math.max(value,show?actual:25,5)*1.2,base=223,scale=158/max;
+let html=`<rect x="0" y="0" width="400" height="280" rx="14" fill="#fff"/><text x="18" y="23" font-size="17" font-weight="800">Area (cm²)</text>`;
+for(let k=0;k<=4;k++){
+let v=max*k/4,y=base-v*scale;
+html+=`<line x1="55" y1="${y}" x2="378" y2="${y}" stroke="#DDD" />
+<text x="48" y="${y+4}" text-anchor="end" font-size="12">${v.toFixed(1)}</text>`;
+}
+html+=`<line x1="55" y1="65" x2="55" y2="${base}" stroke="#111" stroke-width="2"/>
+<rect x="96" y="${base-value*scale}" width="93" height="${value*scale}" fill="#FFC83D" stroke="#111" stroke-width="2"/>
+<text x="143" y="${base+20}" text-anchor="middle" font-size="13" font-weight="700">Your estimate</text>
+<text x="143" y="${Math.max(52,base-value*scale-8)}" text-anchor="middle" font-size="13" font-weight="800">${value.toFixed(1)}</text>`;
+if(show)html+=`<rect x="240" y="${base-actual*scale}" width="93" height="${actual*scale}" fill="#3DBE6B" stroke="#111" stroke-width="2"/>
+<text x="286" y="${base+20}" text-anchor="middle" font-size="13" font-weight="700">True area</text>
+<text x="286" y="${Math.max(52,base-actual*scale-8)}" text-anchor="middle" font-size="13" font-weight="800">${actual.toFixed(2)}</text>`;
+else html+=`<rect x="240" y="83" width="93" height="140" fill="#F4F3EF" stroke="#999" stroke-dasharray="5 4"/><text x="286" y="157" text-anchor="middle" font-size="24">?</text><text x="286" y="243" text-anchor="middle" font-size="13">True area</text>`;
+html+=`<text x="15" y="145" transform="rotate(-90 15 145)" text-anchor="middle" font-size="12">Area (cm²)</text>`;
+svg.innerHTML=html;
+svg.setAttribute("aria-label",`Your estimate ${value.toFixed(1)} square centimetres. ${show?"True area "+actual.toFixed(2):"True area hidden until Check"}.`);
+}
+function markCell(i){
+if(locked||i<0||i>=COUNT||painted.has(i))return;
+painted.add(i);
+marks[i]=marks[i]===tool?0:tool;
+const b=$("squareGrid").children[i];b.dataset.mark=marks[i];
+b.querySelector(".mark").textContent=marks[i]===2?"1":marks[i]===1?"½":"";
+b.setAttribute("aria-label",`Column ${i%W+1}, row ${Math.floor(i/W)+1}, ${["empty","half","whole"][marks[i]]}`);
+refresh();
+}
+const host=$("squareGrid");
+host.addEventListener("pointerdown",e=>{
+const b=e.target.closest(".cell");if(!b)return;
+down=true;painted.clear();markCell(+b.dataset.index);e.preventDefault();
+});
+host.addEventListener("pointermove",e=>{
+if(!down)return;
+const el=document.elementFromPoint(e.clientX,e.clientY);
+const b=el&&el.closest(".cell");if(b&&host.contains(b))markCell(+b.dataset.index);
+});
+document.addEventListener("pointerup",()=>{down=false;painted.clear();});
+host.addEventListener("click",e=>{
+if(e.detail!==0)return;
+const b=e.target.closest(".cell");if(b){painted.clear();markCell(+b.dataset.index);}
+});
+document.querySelectorAll("[data-tool]").forEach(b=>b.addEventListener("click",()=>chooseTool(+b.dataset.tool)));
+function feedback(message,good){
+$("feedback").textContent=message;
+$("feedback").className="feedback"+(good?" good":"");
+}
+function load(){
+tries=0;hinted=false;locked=false;marks=Array(COUNT).fill(0);
+const id=(round+Math.floor(rng()*2))%3,base=shapes[id];
+shape={...base,id,phase:base.phase+(rng()-.5)*.6,rx:base.rx+Math.round((rng()-.5)*4)*.12,ry:base.ry+(rng()-.5)*.3};
+{const reach=1+shape.k+.055;shape.rx=Math.min(shape.rx,3.9/reach);shape.ry=Math.min(shape.ry,2.9/reach);}
+samples=Array.from({length:COUNT},(_,i)=>coverage(i%W,Math.floor(i/W),9));
+actual=0;
+for(let y=0;y<H;y++)for(let x=0;x<W;x++)actual+=coverage(x,y,70);
+$("sceneTitle").textContent=["The leaf","The pond","The puddle"][id];
+$("question").textContent=`Round ${round+1}: estimate the area of this ${base.name.toLowerCase()}. Get within 10%.`;
+$("roundHUD").textContent=`Round ${round+1}/6`;
+$("scoreHUD").textContent="Score "+score;
+$("hint").disabled=false;$("check").hidden=false;$("next").hidden=true;
+feedback("",false);chooseTool(2);renderGrid();refresh();
+}
+$("hint").addEventListener("click",()=>{
+if(locked)return;
+hinted=true;$("hint").disabled=true;
+feedback("Tip: colour whole squares when almost covered. For edge squares, try the half tool. Count two halves as one.",false);
+});
+$("check").addEventListener("click",()=>{
+if(locked)return;
+tries++;
+let difference=area()-actual,relative=Math.abs(difference)/actual;
+if(relative<=.1){
+locked=true;
+let points=hinted?50:tries===1?100:tries===2?75:50;
+score+=points;$("scoreHUD").textContent="Score "+score;
+feedback(`✓ Great counting! Your estimate is ${Math.abs(difference).toFixed(2)} cm² ${difference>=0?"above":"below"} the measured area. +${points} points.`,true);
+$("check").hidden=true;$("hint").disabled=true;$("next").hidden=false;
+$("next").textContent=round===5?"See stars ★":"Next round →";
+}else{
+feedback(`Not quite. Your estimate is ${Math.abs(difference).toFixed(2)} cm² too ${difference>0?"high":"low"}. Try adjusting the edge squares.`,false);
+}
+plot();
+});
+$("next").addEventListener("click",()=>{
+round++;
+if(round===6){
+$("game").hidden=true;$("ending").hidden=false;
+$("roundHUD").textContent="Complete";
+const earned=score>=520?3:score>=380?2:score>=220?1:0;
+$("stars").innerHTML=Array.from({length:3},(_,i)=>`<span class="${i<earned?"earned":""}">★</span>`).join("");
+$("finalScore").textContent=`${score} / 600 points · ${earned} out of 3 stars`;
+}else load();
+});
+$("again").addEventListener("click",()=>{
+round=0;score=0;seed=(seed+987654321)>>>0;
+$("game").hidden=false;$("ending").hidden=true;load();
+});
+load();
+})();
+</script>
+</body>
+</html>

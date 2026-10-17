@@ -8,6 +8,7 @@ const energy = { subject: 'Physics', concept: 'energy', accent: '#3DBE6B', minut
 const waves = { subject: 'Physics', concept: 'waves', accent: '#1F66E5', minutes: '10–15', status: 'live' }
 const reactions = { subject: 'Chemistry', concept: 'chemical-reactions', accent: '#FF8FB8', minutes: '10–15', status: 'live' }
 const probability = { subject: 'Maths', concept: 'probability', accent: '#8B5CF6', minutes: '10–15', status: 'live' }
+const integration = { subject: 'Maths', concept: 'integration', accent: '#2EC4A6', minutes: '10–15', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -89,10 +90,10 @@ export const htmlSims = [
     syllabusRef: 'University, Physical Chemistry',
     approach: 'Set temperature and initial amounts to hit an equilibrium conversion from ΔH° and ΔS°, then use Q and K to restore equilibrium by pressure.',
     activityPrompt: 'Play all rounds, then explain how the sign of Q − K decides the direction of shift.', tags: ['University', 'Physical Chemistry', 'equilibrium', 'Gibbs energy'] },
-  { ...probability, id: 'probability-p', title: 'Spinner Maker', level: 'Primary', topic: 'Chance', symbol: '🎡', height: 1120,
+  { ...probability, id: 'probability-p', title: 'Spinner Maker', level: 'Primary', topic: 'Chance', symbol: '🎡', height: 1210,
     syllabusRef: 'Primary Mathematics: chance and likelihood (impossible, unlikely, even chance, likely, certain)',
-    approach: 'Colour an 8-sector spinner to match a chance word or an exact chance, then spin to compare with what happens.',
-    activityPrompt: 'Play all rounds, then explain what makes a spinner fair.', tags: ['probability', 'chance', 'fair', 'spinner'] },
+    approach: 'Build spinners with 2 to 12 equal slices or uneven slices, read a hidden spinner from its results, change a bag of counters, compare two spinners and repair an unfair game, then spin to compare with what happens.',
+    activityPrompt: 'Play all rounds, then explain what makes a spinner or a game fair.', tags: ['probability', 'chance', 'fair', 'spinner', 'bag of counters'] },
   { ...probability, id: 'probability-s', title: 'Tree Diagram Trials', level: 'Secondary', topic: 'Probability of combined events', symbol: '🌳', height: 1520,
     syllabusRef: 'MOE Secondary Mathematics: Probability (combined events, tree and possibility diagrams, expected frequency)',
     approach: 'Complete tree diagrams with and without replacement, shade possibility diagrams, and compare expected and simulated frequencies.',
@@ -109,4 +110,24 @@ export const htmlSims = [
     syllabusRef: 'University, Probability and Statistics',
     approach: 'Set prevalence to hit a target positive predictive value, then choose a Beta prior so the posterior mean and credible interval match.',
     activityPrompt: 'Play all rounds, then explain why a positive test can still mean a low chance of disease.', tags: ['University', 'Probability and Statistics', 'Bayes', 'Beta–Binomial'] },
+  { ...integration, id: 'integration-p', title: 'Square Counter', level: 'Primary', topic: 'Area by counting squares', symbol: '🟩', height: 1100,
+    syllabusRef: 'Primary Mathematics: area (estimating the area of a shape on a square grid)',
+    approach: 'Mark whole and half squares under an irregular leaf, pond or puddle to estimate its area within 10%.',
+    activityPrompt: 'Play all rounds, then explain how you counted the squares at the edge of the shape.', tags: ['area', 'estimation', 'square grid', 'integration'] },
+  { ...integration, id: 'integration-s', title: 'Area Under Curves', level: 'Secondary', topic: 'Integration as reverse differentiation and area', symbol: '📈', height: 1160,
+    syllabusRef: 'Secondary Additional Mathematics: integration (reverse of differentiation, definite integrals, area under a curve)',
+    approach: 'Build f(x) from a given f′(x) and a point, then choose limits so the total area above and below the x-axis hits a target.',
+    activityPrompt: 'Play all rounds, then explain why the region below the x-axis must be counted separately for total area.', tags: ['integration', 'definite integral', 'area under a curve', 'antiderivative'] },
+  { ...integration, id: 'integration-jc', title: 'Volume Spinner', level: 'JC', topic: 'Numerical integration, volumes and techniques', symbol: '🌀', height: 1140,
+    syllabusRef: 'H2 Mathematics: Integration and applications (trapezium rule, volumes of revolution, substitution and by parts)',
+    approach: 'Pick enough trapezia to meet an error bound, tune a cone-like solid of revolution to a target volume, and choose u and dv to evaluate integrals exactly.',
+    activityPrompt: 'Play all rounds, then explain why the trapezium rule overestimates the area under a concave-up curve.', tags: ['integration', 'trapezium rule', 'volume of revolution', 'substitution', 'by parts'] },
+  { ...integration, id: 'integration-poly', title: 'Data Integrator', level: 'Poly', topic: 'Numerical integration of measured data', symbol: '📊', height: 1370,
+    syllabusRef: 'Poly engineering mathematics: numerical integration (trapezium and Simpson’s rules) of sampled data (generic)',
+    approach: 'Integrate nine sensor readings with the trapezium or Simpson’s rule to get distance, energy or volume, and compare both rules against a calibration signal.',
+    activityPrompt: 'Play all rounds, then explain when Simpson’s rule needs an even number of intervals.', tags: ['integration', 'trapezium rule', 'Simpson’s rule', 'sensor data'] },
+  { ...integration, id: 'integration-u', title: 'Double Integral Lab', level: 'University', topic: 'Multiple and improper integrals', symbol: '∬', height: 1430,
+    syllabusRef: 'University, Calculus',
+    approach: 'Set the order and limits of a double integral over a rectangle or triangle, switch a disc to polar coordinates with the Jacobian, and tune p so an improper integral converges to a target.',
+    activityPrompt: 'Play all rounds, then explain why the polar area element is r dr dθ.', tags: ['University', 'Calculus', 'double integrals', 'polar coordinates', 'improper integrals'] },
 ]

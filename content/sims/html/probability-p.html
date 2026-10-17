@@ -3,286 +3,1790 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Spinner Maker | FIT</title>
+<title>Spinner Maker | Fix It Today</title>
 <style>
 :root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
---lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;
 --r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+
 *{box-sizing:border-box}
-body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
-button,input{font:inherit}
-button{cursor:pointer;min-height:44px;border:2px solid #111;border-radius:999px;padding:10px 18px;background:white;color:#111;font-weight:800;box-shadow:var(--sh-1);transition:transform var(--dur-1) var(--ease-out),box-shadow var(--dur-1)}
-button:active{transform:translateY(2px);box-shadow:none}
-button:disabled{opacity:.45;cursor:default}
-button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
-button.primary{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
-button.primary:active{transform:translateY(3px);box-shadow:var(--sh-1)}
-button.secondary{background:var(--lvl-primary-tint)}
-.wrap{max-width:1200px;margin:auto;padding:18px 16px 48px}
-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-.brand{font-size:13px;font-weight:900;letter-spacing:.1em}
-.badge{display:inline-flex;border:2px solid #111;border-radius:999px;background:var(--lvl-primary);color:var(--lvl-primary-on);padding:7px 13px;font-size:12px;font-weight:800;text-transform:uppercase}
-.hud{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;font-weight:800}
-.stat{padding:8px 12px;border:2px solid #111;border-radius:999px;background:white}
-h1{font-size:clamp(30px,5vw,48px);line-height:1.08;letter-spacing:-.045em;margin:12px 0 20px;font-weight:800}
-h2{font-size:20px;line-height:1.2;margin:0 0 12px;font-weight:800}
-h3{margin:0 0 10px;font-size:16px;font-weight:800}
-p{margin:0 0 12px}
+html{scroll-behavior:smooth}
+body{
+ margin:0;background:var(--fit-paper);color:var(--fit-ink);
+ font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+ font-size:16px;line-height:1.5;
+}
+button,input,select,textarea{font:inherit;font-size:16px}
+button,[role="button"],input,select,textarea,.tap-target,.boundary{
+ touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+ user-select:none;-webkit-user-select:none;
+}
+button{cursor:pointer}
+button:disabled{cursor:default;opacity:.45}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+button:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+svg [role="button"]:focus{outline:none}
+svg [role="button"]:focus-visible{
+ outline:none;stroke:var(--fit-focus);stroke-width:5px;
+}
+[hidden]{display:none!important}
+main{max-width:1380px;margin:auto;padding:16px 14px 42px}
+h1,h2,h3,p{margin:0}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.12;font-weight:800}
+h2{font-size:21px;font-weight:800;line-height:1.25}
+h3{font-size:17px;font-weight:800}
+p{line-height:1.55}
+small{color:var(--fit-ink-3)}
+header{margin-bottom:18px}
+.topline,.hud,.flex,.action-row,.chip-row,.legend,.scoreline{
+ display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.topline{justify-content:space-between;margin-bottom:12px}
+.hud{justify-content:flex-end}
+.badge,.stat,.pill,.chip,.btn,.step{
+ border:2px solid var(--fit-ink);border-radius:999px;
+}
+.badge{
+ padding:5px 13px;background:var(--lvl-primary);
+ color:var(--lvl-primary-on);font-size:12px;font-weight:800;
+ letter-spacing:.6px;text-transform:uppercase;
+}
+.stat{background:white;padding:5px 12px;font-weight:800;font-size:13px}
 .layout{display:grid;grid-template-columns:1fr;gap:18px}
-.panel{border:2px solid #111;border-radius:var(--r-lg);padding:20px;background:white;box-shadow:var(--sh-2);min-width:0}
-.stage{background:var(--lvl-primary-tint)}
-.question{font-size:20px;font-weight:800;line-height:1.3;min-height:54px}
-.muted{color:var(--fit-ink-3);font-size:13px}
-.spinner-box{position:relative;max-width:360px;margin:18px auto 12px}
-#spinner{width:100%;display:block;overflow:visible}
-#spinner .sector{cursor:pointer;stroke:#111;stroke-width:3;transition:fill .15s}
-#spinner .sector:focus{outline:none;stroke:var(--fit-focus);stroke-width:6}
-.pointer{position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-top:29px solid #111;z-index:2}
-.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:18px;font-weight:800;font-size:14px}
-.dot{display:inline-block;width:13px;height:13px;border:2px solid #111;border-radius:50%;vertical-align:-2px;margin-right:5px}
-.red{background:#FF6681}.blue{background:#65B7F6}
-.readout{padding:12px;border:2px dashed #111;border-radius:var(--r-sm);background:#fff;font-size:15px;text-align:center}
-.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-.feedback{min-height:54px;margin-top:16px;padding:12px;border:2px solid var(--fit-line-soft);border-radius:var(--r-sm);background:white;font-weight:600}
-.feedback.good{border-color:var(--fit-success);background:#E7FAEF}
-.feedback.bad{border-color:var(--fit-danger);background:#FFF0EF}
-.plot svg{display:block;width:100%;height:auto}
-.controls{display:flex;flex-wrap:wrap;gap:10px}
-.control-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px}
-.control-row label{font-weight:800}
-.counter{min-width:56px;text-align:center;font-size:24px;font-weight:900}
-.small-button{min-width:48px;padding:7px}
-details{margin-top:16px;background:var(--fit-sunken);border:2px solid #111;border-radius:var(--r-md);padding:12px 16px}
-summary{cursor:pointer;font-weight:800;min-height:30px}
-.concept{margin-top:20px;padding-top:16px;border-top:2px solid var(--fit-line-soft)}
-.concept svg{display:block;width:100%;max-width:330px;margin:auto}
-footer{margin-top:24px;text-align:center;color:var(--fit-ink-3);font-size:12px}
-.end{display:none;text-align:center;padding:42px 20px}
-.stars{font-size:54px;letter-spacing:5px;color:#DD9700}
-@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
-@media(max-width:440px){.panel{padding:15px}.hud{gap:5px}.stat{font-size:12px;padding:6px 9px}.question{font-size:18px}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.card{
+ background:white;border:2px solid var(--fit-ink);
+ border-radius:var(--r-lg);box-shadow:var(--sh-2);
+ padding:18px;min-width:0;
+}
+.stage{background:var(--lvl-primary-tint);box-shadow:var(--sh-3)}
+.card-head{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.num{
+ display:inline-grid;place-items:center;border:2px solid #111;
+ background:var(--fit-sun);border-radius:50%;
+ width:31px;height:31px;font-weight:800;flex:none;
+}
+.eyebrow{
+ font-size:12px;letter-spacing:1px;text-transform:uppercase;
+ font-weight:800;color:var(--fit-ink-3);margin-bottom:6px;
+}
+.question{font-size:20px;font-weight:800;line-height:1.35;margin-bottom:9px}
+.mini-note{font-size:13px;color:var(--fit-ink-2);font-weight:600}
+.scene{
+ background:white;border:2px solid #111;border-radius:24px;
+ min-height:240px;padding:10px;display:flex;align-items:center;
+ justify-content:center;flex-wrap:wrap;gap:12px;overflow:hidden;
+}
+.scene svg{display:block;max-width:100%;height:auto}
+.scene-caption{font-size:13px;font-weight:700;margin-top:10px}
+.btn,.chip,.step{
+ background:white;color:#111;font-weight:800;
+ padding:10px 15px;min-height:44px;
+ box-shadow:var(--sh-1);transition:transform .12s,box-shadow .12s;
+}
+.btn:active,.chip:active,.step:active{
+ transform:translateY(2px);box-shadow:0 0 0 #111;
+}
+.btn.primary{
+ background:var(--fit-sun);border-width:3px;
+ box-shadow:var(--sh-2);padding:11px 23px;
+}
+.btn.primary:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.btn.secondary{background:var(--fit-sunken)}
+.btn.good{background:var(--fit-green)}
+.chip.active,.chip[aria-pressed="true"]{background:var(--fit-sun)}
+.chip{font-size:14px;padding:8px 14px}
+.step{min-width:48px;padding:8px 11px;font-size:19px}
+.controls{display:grid;gap:13px}
+.control-group{
+ border:2px solid var(--fit-line-soft);border-radius:16px;
+ padding:12px;min-width:0;
+}
+.control-label{font-weight:800;margin-bottom:9px}
+.counter-row{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:8px;flex-wrap:wrap;margin-bottom:9px;
+}
+.counter-row:last-child{margin-bottom:0}
+.counter-title{display:flex;gap:8px;align-items:center;font-weight:800}
+.counter-actions{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.counter-value{min-width:38px;text-align:center;font-weight:800}
+.dot{
+ display:inline-grid;place-items:center;width:27px;height:27px;
+ border:2px solid #111;border-radius:50%;font-size:12px;
+ font-weight:800;color:#111;
+}
+.dot.R{background:#FF7979}
+.dot.B{background:#86BAFF}
+.dot.G{background:#78D995}
+.dot.Y{background:#FFE36F}
+.dot.P{background:#D8A7F5}
+.dot.S{background:#eee}
+.color-note{font-size:12px;color:var(--fit-ink-3)}
+.palette{display:flex;gap:8px;flex-wrap:wrap}
+.palette .chip{min-width:52px}
+.palette .R{background:#FFB0B0}
+.palette .B{background:#ADCEFF}
+.palette .G{background:#A9E8BA}
+.palette .Y{background:#FFEB98}
+.palette .P{background:#E6C7FA}
+.palette .active{outline:3px solid var(--fit-focus);outline-offset:2px}
+.choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.choice{
+ min-height:125px;border:2px solid #111;border-radius:16px;
+ padding:8px;background:white;text-align:center;
+ touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+ user-select:none;
+}
+.choice.selected{background:var(--lvl-primary-tint);outline:3px solid var(--fit-focus)}
+.choice svg{width:100%;max-width:125px;height:auto;margin:auto}
+.choice strong{display:block;margin-top:3px}
+.chart-wrap{overflow:hidden}
+.chart-wrap svg{display:block;width:100%;height:auto}
+.chart-wrap svg text{font-family:inherit}
+.view-tabs{margin-bottom:12px}
+.feedback{
+ min-height:53px;padding:11px 13px;border:2px dashed var(--fit-line-soft);
+ border-radius:15px;font-weight:600;
+}
+.feedback.correct{background:#E8F9EF;border-color:var(--fit-success)}
+.feedback.wrong{background:#FFF0ED;border-color:var(--fit-danger)}
+.feedback.neutral{background:#F4F3EF}
+.bottom-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+.test-panel{
+ margin-top:14px;background:#F7F9FF;border:2px solid #111;
+ border-radius:18px;padding:13px;
+}
+.test-panel h3{margin-bottom:8px}
+.test-summary{font-size:14px;font-weight:700;margin-top:8px}
+.chance-panel{
+ margin-top:16px;padding:12px;background:white;border:2px solid #111;
+ border-radius:18px;
+}
+.chance-panel svg{width:100%;height:auto;display:block}
+.chance-panel figcaption{
+ font-size:12px;font-weight:600;color:var(--fit-ink-2);
+ margin-top:4px;
+}
+figure{margin:0}
+details{
+ margin-top:18px;background:var(--fit-sunken);border:2px solid #111;
+ border-radius:18px;padding:13px 16px;
+}
+summary{cursor:pointer;font-weight:800;touch-action:manipulation}
+details p{margin-top:10px;font-size:14px}
+details p+p{margin-top:7px}
+.scoreline{justify-content:center;margin:16px 0}
+.end-screen{text-align:center;padding:28px 20px}
+.end-stars{font-size:49px;letter-spacing:5px}
+.end-score{font-size:38px;font-weight:800}
+.summary-table{border-collapse:collapse;width:100%;margin:18px 0;text-align:left}
+.summary-table td,.summary-table th{padding:10px;border-bottom:1px solid #ddd}
+.summary-table th{font-size:13px}
+.spin-svg .sector{
+ cursor:pointer;touch-action:manipulation;
+ -webkit-tap-highlight-color:transparent;user-select:none;
+}
+.spin-svg .sector:focus{outline:none}
+.spin-svg .sector:focus-visible{
+ outline:none;stroke:var(--fit-focus);stroke-width:5;
+}
+.spin-svg .boundary{
+ cursor:ew-resize;touch-action:manipulation;
+ -webkit-tap-highlight-color:transparent;
+}
+.spin-svg .boundary:focus-visible{outline:none}
+.spin-svg .boundary:focus-visible .handle{
+ stroke:var(--fit-focus);stroke-width:5;
+}
+.spinner-caption{text-anchor:middle;font-weight:800;font-size:13px}
+.field-label{font-weight:800;font-size:13px;margin-bottom:7px}
+.status-tag{
+ display:inline-block;border:2px solid #111;border-radius:999px;
+ padding:3px 10px;font-size:12px;font-weight:800;background:#fff;
+}
+@media(min-width:900px){
+ main{padding:25px 27px 50px}
+ .layout{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start}
+ .card{padding:21px}
+ .scene{min-height:355px}
+ .question{font-size:23px}
+}
+@media(max-width:420px){
+ main{padding:12px 10px 30px}
+ .card{padding:13px;border-radius:22px}
+ .scene{padding:4px}
+ .hud{gap:5px}
+ .stat{padding:5px 8px;font-size:12px}
+ .step{min-width:44px;padding:8px}
+ .counter-actions{gap:3px}
+ .choice{min-height:112px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{
+  animation-duration:.01ms!important;transition-duration:.01ms!important;
+  scroll-behavior:auto!important;
+ }
+}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main>
 <header>
-<div class="brand">FIT / MATHS LAB</div>
-<div class="hud">
-<span class="badge">Primary</span>
-<span class="stat" id="round">Round 1/6</span>
-<span class="stat" id="score">Score 0</span>
-</div>
+ <div class="topline">
+  <span class="badge">PRIMARY</span>
+  <div class="hud">
+   <span class="stat" id="roundHUD">Round 1/6</span>
+   <span class="stat" id="scoreHUD">Score: 0</span>
+  </div>
+ </div>
+ <h1>Spinner Maker</h1>
+ <p class="mini-note">Build it. Predict it. Spin it. Discover chance.</p>
 </header>
-<h1>Spinner Maker</h1>
-<div id="game" class="layout">
-<section class="panel stage">
-<h2 id="mission">Build the chance</h2>
-<p class="question" id="question"></p>
-<div class="spinner-box">
-<div class="pointer" aria-hidden="true"></div>
-<svg id="spinner" viewBox="0 0 340 340" role="img" aria-label="Eight-sector spinner"></svg>
+
+<div id="game">
+ <div class="layout">
+  <section class="card stage" aria-label="Game stage">
+   <div class="card-head">
+    <span class="num">1</span>
+    <h2 id="roundType">Build a spinner</h2>
+   </div>
+   <div class="eyebrow" id="taskLabel">Your challenge</div>
+   <div class="question" id="question"></div>
+   <div class="scene" id="scene" aria-label="Interactive chance scene"></div>
+   <p class="scene-caption" id="sceneCaption"></p>
+   <figure class="chance-panel">
+    <svg id="chanceLine" viewBox="0 0 330 75" role="img"
+      aria-label="Chance line showing the current chance from impossible to certain"></svg>
+    <figcaption id="chanceCaption">Move the marker by changing your design.</figcaption>
+   </figure>
+  </section>
+
+  <div class="controls">
+   <section class="card">
+    <div class="card-head">
+     <span class="num">2</span>
+     <h2>Make your choice</h2>
+    </div>
+    <div id="controls"></div>
+    <div class="bottom-actions">
+     <button type="button" class="btn secondary" id="hintBtn">Hint</button>
+     <button type="button" class="btn primary" id="checkBtn">Check</button>
+    </div>
+    <div id="feedback" class="feedback neutral" aria-live="polite"
+      aria-atomic="true">Make your design, then press Check.</div>
+    <div class="test-panel" id="testPanel" hidden>
+     <h3>Spin / draw it!</h3>
+     <div class="chip-row">
+      <button class="chip" type="button" data-test="10">10 times</button>
+      <button class="chip" type="button" data-test="100">100 times</button>
+      <button class="chip" type="button" data-test="1000">1000 times</button>
+     </div>
+     <p class="test-summary" id="testSummary"></p>
+     <div class="bottom-actions">
+      <button type="button" class="btn good" id="nextBtn">Next round →</button>
+     </div>
+    </div>
+   </section>
+
+   <section class="card">
+    <div class="card-head">
+     <span class="num">3</span>
+     <h2>Live results</h2>
+    </div>
+    <div class="chip-row view-tabs" id="viewTabs">
+     <button type="button" class="chip active" data-view="bar"
+       aria-pressed="true">Bar chart</button>
+     <button type="button" class="chip" data-view="tally"
+       aria-pressed="false">Tally chart</button>
+     <button type="button" class="chip" data-view="compare"
+       aria-pressed="false" id="compareTab" hidden>Compare red</button>
+    </div>
+    <div class="chart-wrap" id="chart"
+      role="img" aria-label="Live chart of spin results"></div>
+    <p class="mini-note" id="chartNote"></p>
+   </section>
+  </div>
+ </div>
 </div>
-<div class="legend"><span><i class="dot red"></i>Red</span><span><i class="dot blue"></i>Blue</span></div>
-<p class="readout" id="readout"></p>
-<div class="actions">
-<button id="clear">All blue</button>
-<button id="balance" class="secondary">Make equal</button>
-</div>
-<div class="concept">
-<h3>Chance scale</h3>
-<svg viewBox="0 0 330 74" role="img" aria-label="Chance rises from impossible through even chance to certain">
-<rect x="5" y="15" width="64" height="22" rx="9" fill="#FF6681" stroke="#111" stroke-width="2"/>
-<rect x="69" y="15" width="64" height="22" fill="#FFB77C" stroke="#111" stroke-width="2"/>
-<rect x="133" y="15" width="64" height="22" fill="#FFC83D" stroke="#111" stroke-width="2"/>
-<rect x="197" y="15" width="64" height="22" fill="#91DCAC" stroke="#111" stroke-width="2"/>
-<rect x="261" y="15" width="64" height="22" rx="9" fill="#3DBE6B" stroke="#111" stroke-width="2"/>
-<g font-size="10" font-weight="800" text-anchor="middle" fill="#111">
-<text x="37" y="54">Impossible</text><text x="101" y="66">Unlikely</text><text x="165" y="54">Even</text><text x="229" y="66">Likely</text><text x="293" y="54">Certain</text>
-</g>
-</svg>
-<p class="muted">More red sectors mean a greater chance of red.</p>
-</div>
+
+<section id="endScreen" class="card end-screen" hidden>
+ <div class="badge">PRIMARY</div>
+ <h2 style="margin-top:14px">Spinner Maker complete!</h2>
+ <div class="end-stars" id="stars" aria-label="Stars earned"></div>
+ <div class="end-score" id="finalScore"></div>
+ <p id="endMessage"></p>
+ <table class="summary-table">
+  <thead><tr><th>Round</th><th>Challenge</th><th>Points</th></tr></thead>
+  <tbody id="summaryBody"></tbody>
+ </table>
+ <button type="button" class="btn primary" id="restartBtn">Play again</button>
 </section>
-<section class="panel">
-<h2>Spin experiment</h2>
-<div class="plot" id="plot"></div>
-<div class="control-row">
-<label for="batch">Spins per run</label>
-<button class="small-button" id="minus" aria-label="Fewer spins">−</button>
-<span class="counter" id="batchLabel">10</span>
-<button class="small-button" id="plus" aria-label="More spins">+</button>
-</div>
-<div class="actions">
-<button id="spin" class="secondary">Spin now</button>
-<button id="reset">Reset results</button>
-</div>
-<p class="muted" id="trials">No spins yet.</p>
-<div class="actions">
-<button id="hint">Hint − points</button>
-<button id="check" class="primary">Check spinner ✓</button>
-<button id="next" hidden>Next round →</button>
-</div>
-<div id="feedback" class="feedback" aria-live="polite">Tap sectors to swap red and blue.</div>
-<details>
-<summary>The maths</summary>
-<p>Chance of red = number of red sectors ÷ total number of sectors.</p>
-<p>Each sector has the same chance of being selected. A red and blue spinner is fair when both colours have equal chances.</p>
-<p>Expected red spins = number of spins × chance of red. The observed number may differ.</p>
+
+<details id="help">
+ <summary>How chance works</summary>
+ <p><strong>Impossible</strong> = 0. <strong>Certain</strong> = 1.
+ <strong>Even chance</strong> = exactly 1/2.
+ <strong>Unlikely</strong> = more than 0 but less than 1/2.
+ <strong>Likely</strong> = more than 1/2 but less than 1.</p>
+ <p>For equal slices, count the wanted slices out of all the slices.
+ For uneven slices, compare the sizes of the coloured regions.</p>
+ <p>Equivalent fractions describe the same chance:
+ 1/2, 3/6 and 5/10 are equal.</p>
+ <p>Experiments can give surprising results. The mathematical chance
+ is what decides the correct answer.</p>
+ <p>Use − and + for small changes. Use −− and ++ for larger changes.
+ On uneven spinners, you can also drag the boundary handles or use
+ arrow keys when a handle has keyboard focus.</p>
+ <p>Each correct first attempt earns 100 points, a second attempt
+ earns 75, and using a hint limits the round to 50 points.
+ A fair-game repair can earn a small bonus for few changes.</p>
 </details>
-</section>
-</div>
-<section class="panel end" id="end">
-<h2>Spinner champion!</h2>
-<div class="stars" id="stars"></div>
-<p id="result"></p>
-<button id="again" class="primary">Play again ↻</button>
-</section>
-<footer>FIX IT TODAY · PRIMARY MATHEMATICS</footer>
 </main>
+
 <script>
 (function(){
 "use strict";
-const $=id=>document.getElementById(id);
-const red="#FF6681",blue="#65B7F6",TAU=Math.PI*2;
-let seed=87123,round=0,score=0,tries=0,hinted=false,won=false;
-let sectors=[],target=0,kind="",batch=10,redSpins=0,blueSpins=0,spinning=false;
-function rand(){seed=(Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296}
-function pick(a){return a[Math.floor(rand()*a.length)]}
-function path(i){
-const a=-Math.PI/2+i*TAU/8,b=a+TAU/8,cx=170,cy=170,r=147;
-return "M "+cx+" "+cy+" L "+(cx+r*Math.cos(a))+" "+(cy+r*Math.sin(a))+
-" A "+r+" "+r+" 0 0 1 "+(cx+r*Math.cos(b))+" "+(cy+r*Math.sin(b))+" Z";
+
+const $ = id => document.getElementById(id);
+
+const COLOURS = {
+ R:{name:"Red",hex:"#FF7979",letter:"R"},
+ B:{name:"Blue",hex:"#86BAFF",letter:"B"},
+ G:{name:"Green",hex:"#78D995",letter:"G"},
+ Y:{name:"Yellow",hex:"#FFE36F",letter:"Y"},
+ P:{name:"Purple",hex:"#D8A7F5",letter:"P"}
+};
+
+const ORDER=["R","B","G","Y","P"];
+const TYPES=["A","B","C","D","E","F"];
+const TYPE_NAMES={
+ A:"Build a spinner",
+ B:"Uneven slices",
+ C:"Detective spinner",
+ D:"Bag of counters",
+ E:"Compare two spinners",
+ F:"Fair or unfair?"
+};
+
+const TAU=Math.PI*2;
+const reduced=window.matchMedia ?
+ window.matchMedia("(prefers-reduced-motion: reduce)") : {matches:false};
+
+let state=null;
+let spinFrame=0;
+let spinAngle=0;
+let spinning=false;
+let drag=null;
+let nextAnimationToken=0;
+
+function rand(n){return Math.floor(Math.random()*n);}
+function pick(a){return a[rand(a.length)];}
+function clamp(n,lo,hi){return Math.max(lo,Math.min(hi,n));}
+function sum(a){return a.reduce((x,y)=>x+y,0);}
+function gcd(a,b){
+ a=Math.abs(a);b=Math.abs(b);
+ while(b){let t=a%b;a=b;b=t;}
+ return a||1;
 }
-function count(){return sectors.filter(Boolean).length}
-function chance(k){return k===0?"impossible":k===8?"certain":k===4?"even chance":k<4?"unlikely":"likely"}
-function fraction(a,b){let x=a,y=b;while(y){let z=x%y;x=y;y=z}return (a/x)+"/"+(b/x)}
-function renderSpinner(){
-$("spinner").innerHTML=sectors.map((s,i)=>{
-const a=-Math.PI/2+(i+.5)*TAU/8;
-return '<path class="sector" tabindex="0" role="button" aria-label="Sector '+(i+1)+', '+(s?"red":"blue")+
-'" data-i="'+i+'" d="'+path(i)+'" fill="'+(s?red:blue)+'"/>'+
-'<text x="'+(170+96*Math.cos(a))+'" y="'+(175+96*Math.sin(a))+
-'" font-size="15" text-anchor="middle" font-weight="800" pointer-events="none">'+(i+1)+'</text>';
-}).join("")+'<circle cx="170" cy="170" r="15" fill="#FFC83D" stroke="#111" stroke-width="4"/>';
-$("spinner").setAttribute("aria-label",count()+" red sectors and "+(8-count())+" blue sectors; tap sectors to change colour");
-$("readout").textContent=count()+" red out of 8 sectors · "+fraction(count(),8)+" chance of red";
+function fraction(a,b){
+ if(!b)return "0/1";
+ const d=gcd(a,b);
+ return (a/d)+"/"+(b/d);
 }
-function plot(){
-const max=Math.max(10,Math.ceil(Math.max(redSpins,blueSpins)*1.15));
-const ticks=[0,.25,.5,.75,1].map(v=>Math.round(v*max));
-const y=v=>205-150*v/max;
-let s='<svg viewBox="0 0 380 290" role="img" aria-label="Bar chart showing '+redSpins+
-' red spins and '+blueSpins+' blue spins.">';
-s+='<text x="190" y="18" text-anchor="middle" font-size="16" font-weight="800">Spin results</text>';
-s+='<text transform="translate(13 158) rotate(-90)" font-size="12" text-anchor="middle">Number of spins (count)</text>';
-for(let i=0;i<5;i++){let yy=y(ticks[i]);s+='<line x1="54" x2="353" y1="'+yy+'" y2="'+yy+'" stroke="#DDD" />'+
-'<text x="47" y="'+(yy+4)+'" font-size="11" text-anchor="end">'+ticks[i]+'</text>'}
-s+='<line x1="54" y1="205" x2="353" y2="205" stroke="#111" stroke-width="2"/>';
-[[redSpins,red,"Red",112],[blueSpins,blue,"Blue",249]].forEach(v=>{
-const h=150*v[0]/max;
-s+='<rect x="'+v[3]+'" y="'+(205-h)+'" width="64" height="'+h+'" rx="4" stroke="#111" stroke-width="2" fill="'+v[1]+'"/>';
-s+='<text x="'+(v[3]+32)+'" y="'+Math.max(33,198-h)+'" text-anchor="middle" font-weight="800">'+v[0]+'</text>';
-s+='<text x="'+(v[3]+32)+'" y="226" text-anchor="middle" font-weight="700">'+v[2]+'</text>';
+function fractionWords(a,b){
+ return a+" out of "+b+" ("+fraction(a,b)+")";
+}
+function equalFractions(a,b,c,d){
+ return b>0&&d>0&&a*d===c*b;
+}
+function chanceWord(a,b){
+ if(!b)return "impossible";
+ if(a<=0)return "impossible";
+ if(a>=b)return "certain";
+ if(a*2===b)return "even chance";
+ return a*2<b?"unlikely":"likely";
+}
+function escapeHTML(v){
+ return String(v).replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",
+  '"':"&quot;","'":"&#39;"
+ })[c]);
+}
+function seeded(seed){
+ let x=seed>>>0;
+ return function(){
+  x=(Math.imul(x,1664525)+1013904223)>>>0;
+  return x/4294967296;
+ };
+}
+function sample(weights,n,rng){
+ const result=weights.map(()=>0);
+ const total=sum(weights);
+ if(total<=0||n<=0)return result;
+ for(let i=0;i<n;i++){
+  let v=rng()*total;
+  for(let j=0;j<weights.length;j++){
+   v-=weights[j];
+   if(v<0||j===weights.length-1){
+    result[j]++;
+    break;
+   }
+  }
+ }
+ return result;
+}
+function svgEscape(v){return escapeHTML(v);}
+
+function polar(cx,cy,r,angle){
+ return {
+  x:cx+Math.sin(angle)*r,
+  y:cy-Math.cos(angle)*r
+ };
+}
+function sectorPath(cx,cy,r,start,end){
+ const gap=end-start;
+ if(gap>=TAU-.00001){
+  return "M "+cx+" "+(cy-r)+
+   " A "+r+" "+r+" 0 1 1 "+cx+" "+(cy+r)+
+   " A "+r+" "+r+" 0 1 1 "+cx+" "+(cy-r)+" Z";
+ }
+ const p=polar(cx,cy,r,start);
+ const q=polar(cx,cy,r,end);
+ return "M "+cx+" "+cy+
+  " L "+p.x.toFixed(3)+" "+p.y.toFixed(3)+
+  " A "+r+" "+r+" 0 "+(gap>Math.PI?1:0)+" 1 "+
+  q.x.toFixed(3)+" "+q.y.toFixed(3)+" Z";
+}
+function midPosition(cx,cy,r,start,end){
+ return polar(cx,cy,r,(start+end)/2);
+}
+
+function arrowPointer(cx,cy,r){
+ return '<path d="M '+(cx-11)+' '+(cy-r-15)+
+  ' L '+(cx+11)+' '+(cy-r-15)+
+  ' L '+cx+' '+(cy-r+2)+
+  ' Z" fill="#111" stroke="#111" stroke-width="2"/>';
+}
+function patterns(idPrefix){
+ let s="<defs>";
+ ORDER.forEach(k=>{
+  const c=COLOURS[k];
+  s+='<pattern id="'+idPrefix+k+
+   '" width="19" height="19" patternUnits="userSpaceOnUse">';
+  s+='<rect width="19" height="19" fill="'+c.hex+'"/>';
+  if(k==="R"){
+   s+='<path d="M0 19L19 0" stroke="#111" stroke-opacity=".18" stroke-width="3"/>';
+  }else if(k==="B"){
+   s+='<path d="M0 5H19M0 15H19" stroke="#111" stroke-opacity=".15" stroke-width="2"/>';
+  }else if(k==="G"){
+   s+='<circle cx="7" cy="7" r="2" fill="#111" opacity=".23"/>';
+  }else if(k==="Y"){
+   s+='<path d="M9 2V16M2 9H16" stroke="#111" stroke-opacity=".12" stroke-width="2"/>';
+  }else{
+   s+='<path d="M2 2L9 9L16 2M2 16L9 9L16 16" fill="none" stroke="#111" stroke-opacity=".14" stroke-width="2"/>';
+  }
+  s+="</pattern>";
+ });
+ return s+"</defs>";
+}
+
+function spinnerSVG(weights,keys,opt={}){
+ const size=opt.size||290;
+ const cx=size/2,cy=size/2+4,r=size*.375;
+ const total=sum(weights);
+ const prefix=opt.prefix||"wheel";
+ const interactive=!!opt.interactive;
+ const boundaries=!!opt.boundaries;
+ const showSize=!!opt.showSize;
+ let out='<svg class="spin-svg" viewBox="0 0 '+size+' '+size+
+  '" width="'+size+'" height="'+size+'" role="img" aria-label="'+
+  svgEscape(opt.label||"Spinner with coloured regions")+'">';
+ out+=patterns(prefix);
+ out+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(r+5)+
+  '" fill="#fff" stroke="#111" stroke-width="4"/>';
+ let pos=0;
+ weights.forEach((w,i)=>{
+  if(w<=0||total<=0)return;
+  const a=TAU*pos/total;
+  const b=TAU*(pos+w)/total;
+  const key=keys[i]||"R";
+  const p=midPosition(cx,cy,r*.59,a,b);
+  const click=interactive?
+   ' role="button" tabindex="0" data-slice="'+i+
+   '" aria-label="Colour this slice"':'';
+  out+='<path class="sector" d="'+sectorPath(cx,cy,r,a,b)+
+   '" fill="url(#'+prefix+key+')" stroke="#111" stroke-width="3"'+click+'/>';
+  out+='<text x="'+p.x.toFixed(2)+'" y="'+(p.y+5).toFixed(2)+
+   '" font-weight="800" font-size="'+(size<180?14:20)+
+   '" text-anchor="middle" fill="#111" pointer-events="none">'+
+   COLOURS[key].letter+'</text>';
+  if(showSize){
+   const q=midPosition(cx,cy,r*.80,a,b);
+   out+='<text x="'+q.x.toFixed(2)+'" y="'+(q.y+3).toFixed(2)+
+    '" text-anchor="middle" font-weight="800" font-size="11" '+
+    'paint-order="stroke" stroke="#fff" stroke-width="3" fill="#111" '+
+    'pointer-events="none">'+fraction(w,total)+'</text>';
+  }
+  pos+=w;
+ });
+ out+='<circle cx="'+cx+'" cy="'+cy+
+  '" r="10" fill="#111" stroke="#fff" stroke-width="3"/>';
+ out+=arrowPointer(cx,cy,r);
+ if(boundaries){
+  let running=0;
+  for(let i=0;i<weights.length-1;i++){
+   running+=weights[i];
+   const a=TAU*running/total;
+   const p=polar(cx,cy,r,a);
+   out+='<g class="boundary" role="button" tabindex="0" '+
+    'data-boundary="'+i+'" aria-label="Move boundary between '+
+    COLOURS[keys[i]].name+' and '+COLOURS[keys[i+1]].name+
+    ' using arrow keys or drag">';
+   out+='<circle cx="'+p.x.toFixed(2)+'" cy="'+p.y.toFixed(2)+
+    '" r="24" fill="transparent"/>';
+   out+='<circle class="handle" cx="'+p.x.toFixed(2)+
+    '" cy="'+p.y.toFixed(2)+
+    '" r="12" fill="#fff" stroke="#111" stroke-width="3"/>';
+   out+='<path d="M'+(p.x-5)+' '+p.y+'H'+(p.x+5)+
+    '" stroke="#111" stroke-width="2" pointer-events="none"/>';
+   out+='</g>';
+  }
+ }
+ out+='</svg>';
+ return out;
+}
+
+function bagSVG(counts,keys){
+ const total=sum(counts);
+ let s='<svg viewBox="0 0 290 270" width="290" role="img" aria-label="Bag holding '+
+  total+' coloured counters">';
+ s+='<path d="M107 22Q145 38 183 22L173 55Q225 73 235 130'+
+  'L242 211Q242 248 145 250Q48 248 48 211L55 130Q65 73 117 55Z" '+
+  'fill="#F0D6AB" stroke="#111" stroke-width="4"/>';
+ s+='<path d="M107 22Q145 40 183 22M117 55Q145 66 173 55" '+
+  'fill="none" stroke="#111" stroke-width="4"/>';
+ const arr=[];
+ counts.forEach((count,i)=>{
+  for(let j=0;j<count;j++)arr.push(keys[i]);
+ });
+ const perRow=5;
+ const rows=Math.ceil(arr.length/perRow);
+ const spacing=35;
+ const startY=128-Math.min(18,rows*5);
+ arr.forEach((k,i)=>{
+  const row=Math.floor(i/perRow);
+  const inRow=i%perRow;
+  const rowCount=Math.min(perRow,arr.length-row*perRow);
+  const x=145+(inRow-(rowCount-1)/2)*spacing;
+  const y=startY+row*34;
+  s+='<circle cx="'+x+'" cy="'+y+'" r="14" fill="'+
+   COLOURS[k].hex+'" stroke="#111" stroke-width="2.5"/>';
+  s+='<text x="'+x+'" y="'+(y+4)+
+   '" font-weight="800" text-anchor="middle" font-size="12">'+k+'</text>';
+ });
+ s+='</svg>';
+ return s;
+}
+
+function makeStartAway(test,make,maxAttempts=100){
+ for(let i=0;i<maxAttempts;i++){
+  const candidate=make();
+  if(!test(candidate))return candidate;
+ }
+ return null;
+}
+
+function makeRound(type){
+ if(type==="A"){
+  const n=pick([2,3,4,5,6,8,10,12]);
+  const choices=[];
+  for(let k=0;k<=n;k++){
+   choices.push({k,text:k+" out of "+n,mode:"fraction"});
+  }
+  const candidates=choices.filter(x=>x.k>0&&x.k<n);
+  const target=pick(candidates);
+  let text=target.text;
+  if(target.k*2===n&&rand(2))text="half";
+  else if(target.k*4===n&&rand(2))text="1 in 4";
+  else if(target.k*4===3*n&&rand(2))text="3 in 4";
+  else if(rand(3)===0){
+   text=chanceWord(target.k,n);
+   target.mode="word";
+  }
+  const initial=makeStartAway(
+   a=>target.mode==="word"?
+    chanceWord(a.filter(x=>x==="R").length,n)===text:
+    equalFractions(a.filter(x=>x==="R").length,n,target.k,n),
+   ()=>Array.from({length:n},()=>rand(3)===0?"R":"B")
+  );
+  return {
+   type,n,target,text,
+   slices:initial||Array.from({length:n},(_,i)=>i===0?"R":"B"),
+   palette:"R",
+   question:"Make the chance of landing on red "+text+".",
+   hint:"For equal slices, compare red slices with all "+n+" slices."
+  };
+ }
+ if(type==="B"){
+  const variant=rand(2);
+  const target=variant===0?"ratio":"likely";
+  const start=target==="ratio"?[4,4,4]:[3,6,3];
+  return {
+   type,target,units:12,sizes:start.slice(),
+   keys:["R","B","G"],
+   question:target==="ratio"?
+    "Make blue twice as likely as green. Every region must stay on the spinner.":
+    "Make red likely, but not certain. Keep every colour on the spinner.",
+   hint:target==="ratio"?
+    "Compare the angles. Blue needs twice the space of green, not twice the number of letters.":
+    "Likely means more than half the circle, but less than the whole circle."
+  };
+ }
+ if(type==="C"){
+  const n=pick([20,50,100]);
+  const candidates=[
+   [1,1,2],[2,1,1],[1,2,1],[1,1,1,1]
+  ];
+  const correct=rand(4);
+  const weights=candidates[correct];
+  const keys=weights.length===4?
+   ["R","B","G","Y"]:["R","B","G"];
+  const result=sample(weights,n,seeded(91731+n*13+correct*503));
+  return {
+   type,correct,options:candidates,
+   keys,results:result,
+   selected:-1,word:"",
+   n,
+   question:"A hidden spinner was spun "+n+
+    " times. Which spinner most likely made these results? "+
+    "Also choose a chance word for landing on red.",
+   hint:"Compare the relative heights of the bars. Choose the spinner whose areas best match the results."
+  };
+ }
+ if(type==="D"){
+  const variant=rand(3);
+  const cases=[
+   {target:"half",initial:[2,4,2],
+    question:"Change the counters so picking red has an even chance.",
+    hint:"Red needs to make up half of all counters, not just half of yellow."},
+   {target:"fraction",initial:[2,5,3],
+    question:"Change the bag so the chance of red is 3 out of 10.",
+    hint:"Make a fraction equivalent to 3/10. The total can change."},
+   {target:"order",initial:[4,2,3],
+    question:"Make red less likely than yellow but more likely than green.",
+    hint:"Compare the numbers of counters. Red must be between yellow and green."}
+  ];
+  const c=cases[variant];
+  return {
+   type,target:c.target,counts:c.initial.slice(),keys:["R","Y","G"],
+   question:c.question,hint:c.hint
+  };
+ }
+ if(type==="E"){
+  const pairs=[
+   [6,9,2,1],
+   [4,12,1,2],
+   [5,10,2,1],
+   [8,12,2,1]
+  ];
+  const p=pick(pairs);
+  const leftN=p[0],rightN=p[1],leftRed=p[2];
+  const rightStart=p[3];
+  return {
+   type,mode:"match",leftN,rightN,leftRed,
+   rightRed:rightStart,
+   question:"The two spinners have different numbers of slices. "+
+    "Change Spinner B so both have the same chance of red.",
+   hint:"Compare the fractions, not the counts. Multiply the top and bottom by the same number."
+  };
+ }
+ const useBag=rand(2)===0;
+ if(useBag){
+  return {
+   type,medium:"bag",counts:[2,4,4],keys:["R","B","G"],
+   initial:[2,4,4],
+   verdict:"",
+   repaired:false,
+   question:"Ali wins on red. Bala wins on blue or green. "+
+    "Is this game fair? Then repair it with as few counter changes as possible.",
+   hint:"For fairness, Ali and Bala must have equal chances. "+
+    "Count blue and green together."
+  };
+ }
+ return {
+  type,medium:"spinner",units:12,sizes:[4,5,3],
+  initial:[4,5,3],keys:["R","B","G"],
+  verdict:"",repaired:false,
+  question:"Ali wins on red. Bala wins on blue or green. "+
+   "Is this game fair? Then move the boundaries to make it fair.",
+  hint:"Both players need half the circle. Combine blue and green before comparing."
+ };
+}
+
+function roundSolved(r){
+ switch(r.type){
+  case "A":{
+   const k=r.slices.filter(c=>c==="R").length;
+   return r.target.mode==="word"?
+    chanceWord(k,r.n)===r.text:
+    equalFractions(k,r.n,r.target.k,r.n);
+  }
+  case "B":
+   return r.target==="ratio"?
+    r.sizes[1]===2*r.sizes[2]:
+    chanceWord(r.sizes[0],12)==="likely";
+  case "C":
+   return r.selected===r.correct&&
+    r.word===chanceWord(r.options[r.correct][0],
+     sum(r.options[r.correct]));
+  case "D":{
+   const a=r.counts,all=sum(a);
+   if(r.target==="half")return a[0]*2===all;
+   if(r.target==="fraction")return a[0]*10===3*all;
+   return a[0]<a[1]&&a[0]>a[2];
+  }
+  case "E":
+   return equalFractions(r.leftRed,r.leftN,r.rightRed,r.rightN);
+  case "F":
+   return r.verdict==="unfair"&&
+    (r.medium==="bag"?
+     r.counts[0]*2===sum(r.counts):
+     r.sizes[0]*2===sum(r.sizes));
+ }
+ return false;
+}
+
+function validateRound(r){
+ if(!r)return false;
+ if(r.type==="A"){
+  if(![2,3,4,5,6,8,10,12].includes(r.n))return false;
+  const reachable=Array.from({length:r.n+1},(_,k)=>{
+   return r.target.mode==="word"?
+    chanceWord(k,r.n)===r.text:
+    equalFractions(k,r.n,r.target.k,r.n);
+  });
+  return reachable.includes(true)&&!roundSolved(r);
+ }
+ if(r.type==="B"){
+  const reachable=r.target==="ratio"?
+   [6,4,2]:[7,3,2];
+  return sum(reachable)===12&&reachable.every(v=>v>=1)&&
+   !roundSolved(r);
+ }
+ if(r.type==="C"){
+  const trueW=r.options[r.correct];
+  if(!trueW||r.results.length!==trueW.length)return false;
+  const scores=r.options.map(w=>{
+   const total=sum(w);
+   const observed=r.results;
+   let error=0;
+   for(let i=0;i<4;i++){
+    const actual=observed[i]||0;
+    const expected=(w[i]||0)*r.n/total;
+    error+=(actual-expected)**2;
+   }
+   return error;
+  });
+  return sum(r.results)===r.n&&r.selected===-1&&
+   scores.indexOf(Math.min(...scores))===r.correct;
+ }
+ if(r.type==="D"){
+  if(roundSolved(r))return false;
+  if(r.target==="half")return true;
+  if(r.target==="fraction")return true;
+  return true;
+ }
+ if(r.type==="E"){
+  if(roundSolved(r))return false;
+  for(let k=0;k<=r.rightN;k++){
+   if(equalFractions(r.leftRed,r.leftN,k,r.rightN))return true;
+  }
+  return false;
+ }
+ if(r.type==="F"){
+  return !roundSolved(r)&&
+   (r.medium==="bag"?sum(r.counts)<=20:sum(r.sizes)===12);
+ }
+ return false;
+}
+
+function buildVerified(type){
+ for(let tries=0;tries<250;tries++){
+  const r=makeRound(type);
+  if(validateRound(r))return r;
+ }
+ // Fixed, verified fallback for a randomly generated chart.
+ if(type==="C"){
+  const r={
+   type:"C",correct:0,
+   options:[[1,1,2],[2,1,1],[1,2,1],[1,1,1,1]],
+   keys:["R","B","G"],results:[5,5,10],
+   selected:-1,word:"",n:20,
+   question:"A hidden spinner was spun 20 times. Which spinner most likely made these results? Also choose a chance word for red.",
+   hint:"Compare the proportions in the chart with the spinner areas."
+  };
+  if(validateRound(r))return r;
+ }
+ throw new Error("Unable to generate a solvable round");
+}
+
+function newGame(){
+ cancelAnimationFrame(spinFrame);
+ nextAnimationToken++;
+ spinning=false;
+ state={
+  index:0,score:0,rounds:[],
+  round:null,attempts:0,hinted:false,
+  checked:false,view:"bar",
+  observations:null,totalSpins:0,
+  awarded:0,seed:rand(100000)+1,
+  testNumber:0,spinOffset:0,feedback:""
+ };
+ TYPES.forEach(t=>state.rounds.push({type:t,points:0}));
+ loadRound(0);
+}
+
+function loadRound(index){
+ cancelAnimationFrame(spinFrame);
+ nextAnimationToken++;
+ spinning=false;
+ if(index>=6){showEnd();return;}
+ state.index=index;
+ state.round=buildVerified(TYPES[index]);
+ state.attempts=0;
+ state.hinted=false;
+ state.checked=false;
+ state.view="bar";
+ state.awarded=0;
+ state.testNumber=0;
+ state.spinOffset=0;
+ state.totalSpins=0;
+ state.observations=null;
+ if(state.round.type==="C"){
+  state.observations=state.round.results.slice();
+  state.totalSpins=state.round.n;
+ }
+ $("game").hidden=false;
+ $("endScreen").hidden=true;
+ $("testPanel").hidden=true;
+ $("hintBtn").disabled=false;
+ $("checkBtn").disabled=false;
+ $("hintBtn").textContent="Hint";
+ $("checkBtn").textContent="Check";
+ setFeedback("Make your design, then press Check.","neutral");
+ render();
+}
+
+function colourWeights(r){
+ if(r.type==="A"){
+  return {
+   keys:ORDER.filter(k=>r.slices.includes(k)),
+   weights:ORDER.filter(k=>r.slices.includes(k))
+    .map(k=>r.slices.filter(v=>v===k).length)
+  };
+ }
+ if(r.type==="B")return {keys:r.keys,weights:r.sizes};
+ if(r.type==="C")return {
+  keys:r.keys.slice(),
+  weights:r.options[r.correct].slice()
+ };
+ if(r.type==="D")return {keys:r.keys,weights:r.counts};
+ if(r.type==="E"){
+  return {
+   keys:["R","B"],
+   weights:[r.rightRed,r.rightN-r.rightRed]
+  };
+ }
+ return {
+  keys:r.keys,
+  weights:(r.medium==="bag"?r.counts:r.sizes)
+ };
+}
+
+function redChance(){
+ const r=state.round;
+ if(r.type==="A")return [
+  r.slices.filter(x=>x==="R").length,r.n
+ ];
+ if(r.type==="B")return [r.sizes[0],sum(r.sizes)];
+ if(r.type==="C")return [
+  r.selected<0?0:r.options[r.selected][0],
+  r.selected<0?0:sum(r.options[r.selected])
+ ];
+ if(r.type==="D")return [r.counts[0],sum(r.counts)];
+ if(r.type==="E")return [r.rightRed,r.rightN];
+ return [
+  r.medium==="bag"?r.counts[0]:r.sizes[0],
+  r.medium==="bag"?sum(r.counts):sum(r.sizes)
+ ];
+}
+
+function render(){
+ const r=state.round;
+ $("roundHUD").textContent="Round "+(state.index+1)+"/6";
+ $("scoreHUD").textContent="Score: "+state.score;
+ $("roundType").textContent=TYPE_NAMES[r.type];
+ document.querySelector(".stage .num").textContent=state.index+1;
+ $("question").textContent=r.question;
+ $("compareTab").hidden=r.type!=="E";
+ if(r.type!=="E"&&state.view==="compare")state.view="bar";
+ document.querySelectorAll("[data-view]").forEach(b=>{
+  const on=b.dataset.view===state.view;
+  b.classList.toggle("active",on);
+  b.setAttribute("aria-pressed",on?"true":"false");
+ });
+ renderScene();
+ renderControls();
+ renderChanceLine();
+ renderChart();
+}
+
+function renderScene(){
+ const r=state.round;
+ let html="",caption="";
+ if(r.type==="A"){
+  html=spinnerSVG(Array(r.n).fill(1),r.slices,{
+   interactive:!state.checked,prefix:"mainA",size:290,
+   label:"Editable spinner with "+r.n+" equal slices"
+  });
+  caption="Tap a slice to paint it with the selected colour.";
+ }else if(r.type==="B"){
+  html=spinnerSVG(r.sizes,r.keys,{
+   boundaries:!state.checked,prefix:"mainB",size:290,
+   showSize:state.checked,
+   label:"Uneven spinner. Move boundaries to change chances."
+  });
+  caption=state.checked?
+   "The fractions now show each region's share of one turn.":
+   "Drag a white boundary handle, or use its stepper controls.";
+ }else if(r.type==="C"){
+  html='<div style="width:100%;text-align:center">'+
+   '<div class="status-tag">Hidden spinner</div>'+
+   '<svg viewBox="0 0 300 160" width="300" role="img" aria-label="Unknown spinner covered by a question mark">'+
+   '<circle cx="150" cy="81" r="65" fill="#F4F3EF" stroke="#111" stroke-width="4"/>'+
+   '<text x="150" y="111" text-anchor="middle" font-size="91" font-weight="800">?</text>'+
+   '</svg><p class="mini-note">'+r.n+
+   ' spins have been recorded.</p></div>';
+  caption="Read the results chart, then choose the best matching spinner.";
+ }else if(r.type==="D"){
+  html=bagSVG(r.counts,r.keys);
+  caption="Every counter has the same chance of being picked.";
+ }else if(r.type==="E"){
+  const left=Array(r.leftN).fill("B");
+  const right=Array(r.rightN).fill("B");
+  for(let i=0;i<r.leftRed;i++)left[i]="R";
+  for(let i=0;i<r.rightRed;i++)right[i]="R";
+  html='<div style="text-align:center;flex:1;min-width:135px">'+
+   '<strong>Spinner A</strong>'+
+   spinnerSVG(Array(r.leftN).fill(1),left,{
+    size:205,prefix:"leftE",
+    label:"Spinner A has "+r.leftRed+" red slices out of "+r.leftN
+   })+'</div>'+
+   '<div style="text-align:center;flex:1;min-width:135px">'+
+   '<strong>Spinner B</strong>'+
+   spinnerSVG(Array(r.rightN).fill(1),right,{
+    size:205,prefix:"rightE",
+    label:"Spinner B has "+r.rightRed+" red slices out of "+r.rightN
+   })+'</div>';
+  caption="Two different denominators can describe the same chance.";
+ }else{
+  html=r.medium==="bag"?
+   bagSVG(r.counts,r.keys):
+   spinnerSVG(r.sizes,r.keys,{
+    size:290,prefix:"mainF",
+    boundaries:!state.checked,
+    showSize:state.checked,
+    label:"Game spinner with red, blue and green regions"
+   });
+  caption="Ali: red (R). Bala: blue (B) or green (G).";
+ }
+ $("scene").innerHTML=html;
+ $("sceneCaption").textContent=caption;
+ bindScene();
+}
+
+function renderControls(){
+ const r=state.round;
+ const disabled=state.checked?"disabled":"";
+ let html="";
+ if(r.type==="A"){
+  html='<div class="control-group"><div class="control-label">'+
+   'Paint colour</div><div class="palette">';
+  ORDER.forEach(k=>{
+   html+='<button type="button" class="chip '+k+
+    (r.palette===k?" active":"")+
+    '" data-palette="'+k+'" '+disabled+
+    ' aria-pressed="'+(r.palette===k)+
+    '" aria-label="Select '+COLOURS[k].name+'">'+k+'</button>';
+  });
+  html+='</div><p class="color-note" style="margin-top:9px">'+
+   'R = red, B = blue, G = green, Y = yellow, P = purple.</p></div>';
+  html+='<div class="control-group">'+
+   '<div class="control-label">Spinner</div>'+
+   '<strong>'+r.n+' equal slices</strong>'+
+   '<p class="mini-note">Select a colour, then tap the wheel.</p></div>';
+ }else if(r.type==="B"){
+  html='<div class="control-group"><div class="control-label">'+
+   'Move slice boundaries</div>';
+  for(let i=0;i<2;i++){
+   html+=boundaryStepper(i,r.keys[i],r.keys[i+1],disabled);
+  }
+  html+='<p class="mini-note">− / +: 1/12 turn. '+
+   '−− / ++: 1/4 turn. Each colour keeps at least 1/12.</p></div>';
+  html+='<div class="control-group"><div class="control-label">'+
+   'Slice-size chips</div><div class="chip-row">';
+  [["R",0],["B",1],["G",2]].forEach(entry=>{
+   html+='<button type="button" class="chip" data-size="'+entry[1]+
+    '" '+disabled+' aria-label="Add one twelfth to '+
+    COLOURS[entry[0]].name+'">'+entry[0]+' +</button>';
+  });
+  html+='</div></div>';
+ }else if(r.type==="C"){
+  html='<div class="control-group"><div class="control-label">'+
+   'Choose a spinner</div><div class="choice-grid">';
+  r.options.forEach((w,i)=>{
+   const keys=w.length===4?["R","B","G","Y"]:["R","B","G"];
+   html+='<button type="button" class="choice '+
+    (r.selected===i?"selected":"")+'" data-option="'+i+
+    '" '+disabled+' aria-pressed="'+(r.selected===i)+
+    '" aria-label="Choose spinner '+String.fromCharCode(65+i)+'">'+
+    spinnerSVG(w,keys,{
+     size:145,prefix:"opt"+i,
+     label:"Spinner option "+String.fromCharCode(65+i)
+    })+'<strong>'+String.fromCharCode(65+i)+'</strong></button>';
+  });
+  html+='</div></div><div class="control-group">'+
+   '<div class="control-label">Chance of red on your chosen spinner</div>'+
+   '<div class="chip-row">';
+  ["impossible","unlikely","even chance","likely","certain"].forEach(w=>{
+   html+='<button type="button" class="chip '+
+    (r.word===w?"active":"")+'" data-word="'+w+'" '+
+    disabled+' aria-pressed="'+(r.word===w)+'">'+
+    w+'</button>';
+  });
+  html+='</div></div>';
+ }else if(r.type==="D"){
+  html='<div class="control-group"><div class="control-label">'+
+   'Counters in the bag</div>';
+  r.keys.forEach((k,i)=>{
+   html+=counterStepper(k,i,r.counts[i],disabled);
+  });
+  html+='<p class="mini-note">Bag total: '+sum(r.counts)+
+   ' counters. Minimum 4, maximum 20.</p></div>';
+ }else if(r.type==="E"){
+  html='<div class="control-group">'+
+   '<div class="control-label">Spinner A — fixed</div>'+
+   '<p><strong>'+fractionWords(r.leftRed,r.leftN)+
+   '</strong> red</p></div>';
+  html+='<div class="control-group">'+
+   '<div class="control-label">Spinner B — editable</div>'+
+   counterStepper("R",0,r.rightRed,disabled,true);
+  html+='<p class="mini-note">Spinner B always has '+
+   r.rightN+' equal slices.</p></div>';
+ }else{
+  html='<div class="control-group">'+
+   '<div class="control-label">Step 1: Is the original game fair?</div>'+
+   '<div class="chip-row">';
+  ["fair","unfair"].forEach(w=>{
+   html+='<button type="button" class="chip '+
+    (r.verdict===w?"active":"")+'" data-verdict="'+w+'" '+
+    disabled+' aria-pressed="'+(r.verdict===w)+'">'+
+    (w==="fair"?"Fair":"Unfair")+'</button>';
+  });
+  html+='</div></div>';
+  html+='<div class="control-group"><div class="control-label">'+
+   'Step 2: Repair the game</div>';
+  if(r.medium==="bag"){
+   r.keys.forEach((k,i)=>{
+    html+=counterStepper(k,i,r.counts[i],disabled);
+   });
+   html+='<p class="mini-note">4 to 20 counters in the bag.</p>';
+  }else{
+   for(let i=0;i<2;i++){
+    html+=boundaryStepper(i,r.keys[i],r.keys[i+1],disabled);
+   }
+   html+='<p class="mini-note">Move the boundary between two colours.</p>';
+  }
+  html+='</div>';
+ }
+ $("controls").innerHTML=html;
+ bindControls();
+}
+
+function boundaryStepper(i,a,b,disabled){
+ return '<div class="counter-row">'+
+  '<div class="counter-title"><span class="dot '+a+'">'+a+'</span>'+
+  '<span class="dot '+b+'">'+b+'</span>'+
+  '<span style="font-size:13px">Boundary '+(i+1)+'</span></div>'+
+  '<div class="counter-actions">'+
+  stepButton("boundary",i,-3,"−−",disabled)+
+  stepButton("boundary",i,-1,"−",disabled)+
+  stepButton("boundary",i,1,"+",disabled)+
+  stepButton("boundary",i,3,"++",disabled)+
+  '</div></div>';
+}
+function counterStepper(k,i,value,disabled,eMode=false){
+ return '<div class="counter-row">'+
+  '<div class="counter-title"><span class="dot '+k+'">'+k+'</span>'+
+  '<span>'+COLOURS[k].name+'</span></div>'+
+  '<div class="counter-actions">'+
+  stepButton(eMode?"ered":"counter",i,-4,"−−",disabled)+
+  stepButton(eMode?"ered":"counter",i,-1,"−",disabled)+
+  '<span class="counter-value" aria-label="Current count">'+value+'</span>'+
+  stepButton(eMode?"ered":"counter",i,1,"+",disabled)+
+  stepButton(eMode?"ered":"counter",i,4,"++",disabled)+
+  '</div></div>';
+}
+function stepButton(kind,i,delta,label,disabled){
+ return '<button type="button" class="step" data-step="'+kind+
+  '" data-index="'+i+'" data-delta="'+delta+'" '+disabled+
+  ' aria-label="'+(delta<0?"Decrease":"Increase")+
+  ' '+(kind==="boundary"?"boundary":"count")+
+  ' by '+Math.abs(delta)+'">'+label+'</button>';
+}
+
+function updateBoundary(i,delta){
+ const r=state.round;
+ if(state.checked)return;
+ if(r.type!=="B"&&!(r.type==="F"&&r.medium==="spinner"))return;
+ const a=r.sizes;
+ if(i<0||i>=a.length-1)return;
+ if(!Number.isFinite(delta))return;
+ const steps=Math.trunc(delta);
+ if(steps===0)return;
+ const newLeft=a[i]+steps;
+ const newRight=a[i+1]-steps;
+ if(newLeft<1||newRight<1)return;
+ a[i]=newLeft;a[i+1]=newRight;
+ renderAfterChange();
+}
+function updateCounter(i,delta){
+ const r=state.round;
+ if(state.checked)return;
+ if(r.type!=="D"&&!(r.type==="F"&&r.medium==="bag"))return;
+ const a=r.counts;
+ if(i<0||i>=a.length)return;
+ const next=a[i]+delta;
+ const total=sum(a)+delta;
+ if(next<0||total<4||total>20)return;
+ a[i]=next;
+ renderAfterChange();
+}
+function updateERed(delta){
+ const r=state.round;
+ if(state.checked||r.type!=="E")return;
+ const next=r.rightRed+delta;
+ if(next<0||next>r.rightN)return;
+ r.rightRed=next;
+ renderAfterChange();
+}
+function bindControls(){
+ document.querySelectorAll("[data-palette]").forEach(b=>{
+  b.addEventListener("click",()=>{
+   state.round.palette=b.dataset.palette;
+   renderAfterChange();
+  });
+ });
+ document.querySelectorAll("[data-step]").forEach(b=>{
+  b.addEventListener("click",()=>{
+   const i=Number(b.dataset.index),delta=Number(b.dataset.delta);
+   if(b.dataset.step==="boundary")updateBoundary(i,delta);
+   else if(b.dataset.step==="counter")updateCounter(i,delta);
+   else updateERed(delta);
+  });
+ });
+ document.querySelectorAll("[data-size]").forEach(b=>{
+  b.addEventListener("click",()=>{
+   const index=Number(b.dataset.size),a=state.round.sizes;
+   if(state.checked||!a)return;
+   const donor=a.findIndex((v,i)=>i!==index&&v>1);
+   if(donor<0)return;
+   a[donor]--;a[index]++;
+   renderAfterChange();
+  });
+ });
+ document.querySelectorAll("[data-option]").forEach(b=>{
+  b.addEventListener("click",()=>{
+   if(state.checked)return;
+   state.round.selected=Number(b.dataset.option);
+   renderAfterChange();
+  });
+ });
+ document.querySelectorAll("[data-word]").forEach(b=>{
+  b.addEventListener("click",()=>{
+   if(state.checked)return;
+   state.round.word=b.dataset.word;
+   renderAfterChange();
+  });
+ });
+ document.querySelectorAll("[data-verdict]").forEach(b=>{
+  b.addEventListener("click",()=>{
+   if(state.checked)return;
+   state.round.verdict=b.dataset.verdict;
+   renderAfterChange();
+  });
+ });
+}
+function bindScene(){
+ document.querySelectorAll("[data-slice]").forEach(el=>{
+  function paint(){
+   if(state.checked||state.round.type!=="A")return;
+   state.round.slices[Number(el.dataset.slice)]=state.round.palette;
+   renderAfterChange();
+  }
+  el.addEventListener("click",paint);
+  el.addEventListener("keydown",e=>{
+   if(e.key==="Enter"||e.key===" "){
+    e.preventDefault();paint();
+   }
+  });
+ });
+ document.querySelectorAll("[data-boundary]").forEach(el=>{
+  el.addEventListener("keydown",e=>{
+   if(["ArrowLeft","ArrowDown","ArrowRight","ArrowUp"].includes(e.key)){
+    e.preventDefault();
+    const index=Number(el.dataset.boundary);
+    const delta=(e.key==="ArrowLeft"||e.key==="ArrowDown")?-1:1;
+    updateBoundary(index,delta);
+    const next=document.querySelector('[data-boundary="'+index+'"]');
+    if(next)next.focus({preventScroll:true});
+   }
+  });
+  el.addEventListener("pointerdown",e=>{
+   if(state.checked)return;
+   e.preventDefault();
+   const index=Number(el.dataset.boundary);
+   drag={index,pointer:e.pointerId,svg:el.ownerSVGElement,
+    lastAngle:null};
+   try{el.setPointerCapture(e.pointerId);}catch(err){}
+  });
+  el.addEventListener("pointermove",e=>{
+   if(!drag||drag.pointer!==e.pointerId||state.checked)return;
+   const svg=el.ownerSVGElement;
+   const rect=svg.getBoundingClientRect();
+   if(!rect.width||!rect.height)return;
+   const box=svg.viewBox.baseVal;
+   const x=(e.clientX-rect.left)*box.width/rect.width;
+   const y=(e.clientY-rect.top)*box.height/rect.height;
+   const cx=box.width/2,cy=box.height/2+4;
+   let angle=Math.atan2(x-cx,-(y-cy));
+   if(angle<0)angle+=TAU;
+   const units=state.round.units||12;
+   const target=Math.round(angle*units/TAU);
+   const a=state.round.sizes;
+   const i=drag.index;
+   const previous=sum(a.slice(0,i+1));
+   const low=sum(a.slice(0,i))+1;
+   const high=sum(a.slice(0,i+2))-1;
+   const bounded=clamp(target,low,high);
+   const delta=bounded-previous;
+   if(delta)updateBoundary(i,delta);
+  });
+  function end(e){
+   if(drag&&drag.pointer===e.pointerId)drag=null;
+  }
+  el.addEventListener("pointerup",end);
+  el.addEventListener("pointercancel",end);
+ });
+}
+function renderAfterChange(){
+ if(state.checked)return;
+ if(state.attempts>0){
+  setFeedback("Design updated. Check again when ready.","neutral");
+ }
+ render();
+}
+
+function renderChanceLine(){
+ const [a,b]=redChance();
+ const ratio=b>0?clamp(a/b,0,1):null;
+ const x=25+(ratio===null?.5:ratio)*280;
+ let s='<line x1="25" y1="29" x2="305" y2="29" stroke="#111" stroke-width="7" stroke-linecap="round"/>';
+ [25,95,165,235,305].forEach(v=>{
+  s+='<line x1="'+v+'" y1="19" x2="'+v+
+   '" y2="39" stroke="#111" stroke-width="2"/>';
+ });
+ s+='<text x="25" y="59" font-size="11" text-anchor="start">Impossible</text>'+
+  '<text x="165" y="59" font-size="11" text-anchor="middle">Even</text>'+
+  '<text x="305" y="59" font-size="11" text-anchor="end">Certain</text>';
+ if(ratio!==null){
+  s+='<circle cx="'+x+'" cy="29" r="11" fill="#FF7979" stroke="#111" stroke-width="3"/>';
+ }else{
+  s+='<text x="165" y="17" text-anchor="middle" font-size="12" font-weight="800">Choose a spinner</text>';
+ }
+ $("chanceLine").innerHTML=s;
+ const label=ratio===null?
+  "Choose a spinner to mark its red chance.":
+  "The marker shows the chance of red in the current design.";
+ $("chanceCaption").textContent=label;
+ $("chanceLine").setAttribute("aria-label",
+  ratio===null?"Chance line; no spinner chosen":
+  "Chance line, current red chance "+fractionWords(a,b));
+}
+
+function chartData(){
+ const r=state.round;
+ if(r.type==="C"){
+  return {
+   keys:r.keys,
+   weights:r.options[r.correct],
+   counts:state.observations||[],
+   n:state.totalSpins
+  };
+ }
+ const c=colourWeights(r);
+ let counts=c.weights.map(()=>0);
+ if(state.observations){
+  const stored=state.observations;
+  const map=state.observationKeys||[];
+  counts=c.keys.map(k=>stored[map.indexOf(k)]||0);
+ }
+ return {keys:c.keys,weights:c.weights,counts,n:state.totalSpins};
+}
+
+function renderChart(){
+ const data=chartData();
+ const showExpected=state.checked;
+ if(state.view==="compare"&&state.round.type==="E"){
+  renderComparison();
+ }else if(state.view==="tally"){
+  renderTally(data);
+ }else{
+  renderBar(data,showExpected);
+ }
+ $("chartNote").textContent=state.checked?
+  "Solid bars are actual results. Dashed marks show expected counts from mathematical chance.":
+  state.round.type==="C"?
+   "These are recorded spins. Look for the spinner with the closest proportions.":
+   "Test results appear after a correct Check. Chance comes from the design.";
+}
+
+function renderBar(data,showExpected){
+ const n=data.n;
+ const keys=data.keys;
+ const counts=data.counts;
+ const totalW=sum(data.weights);
+ const expected=data.weights.map(w=>
+  totalW>0?n*w/totalW:0
+ );
+ const maxObserved=Math.max(0,...counts);
+ const maxExpected=showExpected?Math.max(0,...expected):0;
+ const maxY=Math.max(5,Math.ceil(Math.max(maxObserved,maxExpected)*1.15));
+ const W=390,H=285,left=53,right=14,top=38,bottom=64;
+ const plotW=W-left-right,plotH=H-top-bottom;
+ const yy=v=>top+plotH-clamp(v/maxY,0,1)*plotH;
+ let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Bar chart of number of spins by colour">';
+ s+='<text x="'+W/2+'" y="18" font-size="15" font-weight="800" text-anchor="middle">Spin results</text>';
+ for(let i=0;i<=4;i++){
+  const val=maxY*i/4;
+  const y=yy(val);
+  s+='<line x1="'+left+'" y1="'+y+'" x2="'+(W-right)+
+   '" y2="'+y+'" stroke="#DDD" stroke-width="1"/>';
+  s+='<text x="'+(left-7)+'" y="'+(y+4)+
+   '" text-anchor="end" font-size="11">'+
+   (Number.isInteger(val)?val:val.toFixed(1))+'</text>';
+ }
+ s+='<line x1="'+left+'" y1="'+top+'" x2="'+left+
+  '" y2="'+(top+plotH)+'" stroke="#111" stroke-width="2"/>';
+ s+='<line x1="'+left+'" y1="'+(top+plotH)+'" x2="'+(W-right)+
+  '" y2="'+(top+plotH)+'" stroke="#111" stroke-width="2"/>';
+ const bw=Math.min(56,plotW/(keys.length*1.8));
+ keys.forEach((k,i)=>{
+  const cx=left+plotW*(i+.5)/keys.length;
+  const value=counts[i]||0;
+  const y=yy(value);
+  const base=top+plotH;
+  s+='<rect x="'+(cx-bw/2)+'" y="'+y+'" width="'+bw+
+   '" height="'+Math.max(0,base-y)+
+   '" fill="'+COLOURS[k].hex+'" stroke="#111" stroke-width="2"/>';
+  s+='<text x="'+cx+'" y="'+Math.max(32,y-6)+
+   '" font-weight="800" font-size="12" text-anchor="middle">'+value+'</text>';
+  s+='<text x="'+cx+'" y="'+(base+18)+
+   '" font-weight="800" font-size="12" text-anchor="middle">'+
+   COLOURS[k].name+'</text>';
+  if(showExpected){
+   const ey=yy(expected[i]);
+   s+='<line x1="'+(cx-bw/2-4)+'" x2="'+(cx+bw/2+4)+
+    '" y1="'+ey+'" y2="'+ey+
+    '" stroke="#111" stroke-width="3" stroke-dasharray="6 4"/>';
+  }
+ });
+ s+='<text x="'+W/2+'" y="'+(H-6)+
+  '" text-anchor="middle" font-size="12" font-weight="800">Colour</text>';
+ s+='<text transform="translate(13 '+(top+plotH/2)+
+  ') rotate(-90)" text-anchor="middle" font-weight="800" font-size="11">Number of spins</text>';
+ if(showExpected){
+  s+='<line x1="215" y1="29" x2="238" y2="29" stroke="#111" stroke-width="3" stroke-dasharray="5 3"/>'+
+   '<text x="243" y="33" font-size="10">Expected</text>';
+ }
+ s+='</svg>';
+ $("chart").innerHTML=s;
+ $("chart").setAttribute("aria-label",
+  "Bar chart. "+keys.map((k,i)=>COLOURS[k].name+
+  ": "+(counts[i]||0)+" spins").join(". "));
+}
+
+function tallyMarks(count,x,y){
+ let s="";
+ const full=Math.floor(count/5),rem=count%5;
+ const groups=Math.min(full,100);
+ for(let g=0;g<groups;g++){
+  const gx=x+(g%8)*31;
+  const gy=y+Math.floor(g/8)*29;
+  for(let j=0;j<4;j++){
+   s+='<line x1="'+(gx+j*5)+'" y1="'+gy+
+    '" x2="'+(gx+j*5)+'" y2="'+(gy+15)+
+    '" stroke="#111" stroke-width="2"/>';
+  }
+  s+='<line x1="'+(gx-2)+'" y1="'+(gy+15)+
+   '" x2="'+(gx+18)+'" y2="'+gy+
+   '" stroke="#111" stroke-width="2"/>';
+ }
+ const rx=x+(groups%8)*31;
+ const ry=y+Math.floor(groups/8)*29;
+ for(let j=0;j<rem&&full<=100;j++){
+  s+='<line x1="'+(rx+j*5)+'" y1="'+ry+
+   '" x2="'+(rx+j*5)+'" y2="'+(ry+15)+
+   '" stroke="#111" stroke-width="2"/>';
+ }
+ if(full>100){
+  s+='<text x="'+x+'" y="'+(y+Math.ceil(100/8)*29+12)+
+   '" font-size="12">More groups counted in the total</text>';
+ }
+ return s;
+}
+function renderTally(data){
+ const maxCount=Math.max(0,...data.counts);
+ const rows=Math.ceil(Math.min(100,Math.floor(maxCount/5))/8)+2;
+ const band=Math.max(65,rows*29+29);
+ const W=390,H=60+data.keys.length*band;
+ let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Tally chart of the recorded spins">';
+ s+='<text x="195" y="20" text-anchor="middle" font-size="16" font-weight="800">Tally chart</text>';
+ s+='<text x="9" y="42" font-size="12" font-weight="800">Colour</text>';
+ s+='<text x="114" y="42" font-size="12" font-weight="800">Number of spins</text>';
+ data.keys.forEach((k,i)=>{
+  const y=60+i*band;
+  s+='<line x1="5" y1="'+(y-12)+'" x2="385" y2="'+(y-12)+
+   '" stroke="#DDD"/>';
+  s+='<circle cx="20" cy="'+y+'" r="10" fill="'+
+   COLOURS[k].hex+'" stroke="#111" stroke-width="2"/>';
+  s+='<text x="35" y="'+(y+4)+'" font-size="12" font-weight="800">'+
+   COLOURS[k].name+'</text>';
+  s+=tallyMarks(data.counts[i]||0,114,y-7);
+  s+='<text x="76" y="'+(y+20)+
+   '" text-anchor="middle" font-size="14" font-weight="800">'+
+   (data.counts[i]||0)+'</text>';
+ });
+ s+='</svg>';
+ $("chart").innerHTML=s;
+ $("chart").setAttribute("aria-label",
+  "Tally chart. "+data.keys.map((k,i)=>COLOURS[k].name+
+   ": "+(data.counts[i]||0)).join(". "));
+}
+
+function renderComparison(){
+ const r=state.round;
+ const W=390,H=202,barX=120,barW=228;
+ let s='<svg viewBox="0 0 '+W+' '+H+
+  '" role="img" aria-label="Comparison of chances of red on two spinners">';
+ s+='<text x="195" y="20" font-size="15" font-weight="800" text-anchor="middle">Chance of red</text>';
+ const values=[
+  {name:"Spinner A",a:r.leftRed,b:r.leftN},
+  {name:"Spinner B",a:r.rightRed,b:r.rightN}
+ ];
+ [61,120].forEach((y,i)=>{
+  const v=values[i];
+  s+='<text x="7" y="'+(y+18)+'" font-size="12" font-weight="800">'+v.name+'</text>';
+  s+='<rect x="'+barX+'" y="'+y+'" width="'+barW+
+   '" height="30" fill="#86BAFF" stroke="#111" stroke-width="2"/>';
+  s+='<rect x="'+barX+'" y="'+y+'" width="'+
+   (barW*v.a/v.b)+'" height="30" fill="#FF7979"/>';
+  s+='<text x="'+barX+'" y="'+(y-7)+
+   '" font-size="12" font-weight="800">'+fraction(v.a,v.b)+'</text>';
+ });
+ [0,.25,.5,.75,1].forEach(v=>{
+  const x=barX+v*barW;
+  s+='<line x1="'+x+'" y1="154" x2="'+x+
+   '" y2="160" stroke="#111"/>';
+  s+='<text x="'+x+'" y="174" font-size="11" text-anchor="middle">'+
+   (v*100)+'%</text>';
+ });
+ s+='<text x="234" y="193" font-size="11" text-anchor="middle">Fraction of the whole spinner</text>';
+ s+='</svg>';
+ $("chart").innerHTML=s;
+ $("chart").setAttribute("aria-label",
+  "Spinner A red chance "+fractionWords(r.leftRed,r.leftN)+
+  ". Spinner B red chance "+fractionWords(r.rightRed,r.rightN));
+}
+
+function setFeedback(message,kind){
+ const el=$("feedback");
+ el.textContent=message;
+ el.className="feedback "+(kind||"neutral");
+}
+
+function diagnostic(r){
+ if(r.type==="A"){
+  const red=r.slices.filter(k=>k==="R").length;
+  if(r.target.mode==="word"){
+   return "Red is currently "+chanceWord(red,r.n)+
+    ". That does not match the requested chance.";
+  }
+  if(red*r.n<r.target.k*r.n)return "Red is still less likely than the target.";
+  return "Red is still more likely than the target.";
+ }
+ if(r.type==="B"){
+  if(r.target==="ratio"){
+   if(r.sizes[1]<2*r.sizes[2])
+    return "Blue is not yet twice as large as green.";
+   return "Blue is now more than twice as large as green.";
+  }
+  return "Red is "+chanceWord(r.sizes[0],12)+
+   ". It must be likely, but not certain.";
+ }
+ if(r.type==="C"){
+  if(r.selected<0)return "Choose one of the drawn spinners first.";
+  if(r.word==="")return "Choose a chance word as well.";
+  if(r.selected!==r.correct)
+   return "That spinner's regions do not match the pattern of results best.";
+  return "Look at the red region. Your chance word does not match its size.";
+ }
+ if(r.type==="D"){
+  const a=r.counts,n=sum(a);
+  if(r.target==="order"){
+   if(a[0]>=a[1])return "Red is not less likely than yellow yet.";
+   return "Red is not more likely than green yet.";
+  }
+  if(r.target==="half")
+   return a[0]*2<n?"Red is still less likely than an even chance.":
+    "Red is still more likely than an even chance.";
+  return a[0]*10<3*n?
+   "The red share is below the target fraction.":
+   "The red share is above the target fraction.";
+ }
+ if(r.type==="E"){
+  return r.rightRed*r.leftN<r.leftRed*r.rightN?
+   "Spinner B gives a smaller chance of red than Spinner A.":
+   "Spinner B gives a larger chance of red than Spinner A.";
+ }
+ if(r.verdict!=="unfair")
+  return "Compare Ali's original chance with Bala's before deciding.";
+ if(r.medium==="bag"){
+  return r.counts[0]*2<sum(r.counts)?
+   "Ali is still less likely to win than Bala.":
+   "Ali is still more likely to win than Bala.";
+ }
+ return r.sizes[0]*2<12?
+  "Ali's red region is still smaller than Bala's combined regions.":
+  "Ali's red region is still larger than Bala's combined regions.";
+}
+
+function explanation(r){
+ if(r.type==="A"){
+  const red=r.slices.filter(k=>k==="R").length;
+  return "Correct! "+fractionWords(red,r.n)+
+   " slices are red. This matches the requested chance.";
+ }
+ if(r.type==="B"){
+  if(r.target==="ratio")
+   return "Correct! Blue occupies "+fraction(r.sizes[1],12)+
+    " and green occupies "+fraction(r.sizes[2],12)+
+    " of a turn. Blue has twice the chance.";
+  return "Correct! Red takes "+fraction(r.sizes[0],12)+
+   " of the circle: more than half, but not all.";
+ }
+ if(r.type==="C"){
+  const w=r.options[r.correct];
+  return "Excellent! Spinner "+String.fromCharCode(65+r.correct)+
+   " has the closest theoretical proportions. Red has an "+
+   chanceWord(w[0],sum(w))+" chance. Experimental results can vary.";
+ }
+ if(r.type==="D"){
+  const a=r.counts;
+  return "Correct! Red has "+fractionWords(a[0],sum(a))+
+   " chance. The whole bag matters when comparing chances.";
+ }
+ if(r.type==="E"){
+  return "Great comparison! "+fraction(r.leftRed,r.leftN)+
+   " = "+fraction(r.rightRed,r.rightN)+
+   ". Different slice counts can give equal chances.";
+ }
+ return "Fair now! Ali and Bala each have exactly half the chance. "+
+  "A fair game gives both players equal mathematical chances.";
+}
+
+function repairChanges(r){
+ if(r.medium==="bag"){
+  return r.counts.reduce((acc,v,i)=>acc+Math.abs(v-r.initial[i]),0);
+ }
+ return r.sizes.reduce((acc,v,i)=>acc+Math.abs(v-r.initial[i]),0)/2;
+}
+
+function checkAnswer(){
+ if(!state||state.checked)return;
+ const r=state.round;
+ state.attempts++;
+ if(!roundSolved(r)){
+  setFeedback(diagnostic(r),"wrong");
+  return;
+ }
+ state.checked=true;
+ let points=state.hinted?50:(state.attempts===1?100:75);
+ let bonus=0;
+ if(r.type==="F"){
+  const changes=repairChanges(r);
+  // Fewest possible changes: bag = |others - red| counters; spinner = |half - red| units.
+  const init=r.initial,fewest=r.medium==="bag"?
+   Math.abs(init[1]+init[2]-init[0]):Math.abs(sum(init)/2-init[0]);
+  if(changes<=fewest)bonus=15;
+  else if(changes<=fewest+2)bonus=5;
+ }
+ points+=bonus;
+ state.awarded=points;
+ state.score+=points;
+ state.rounds[state.index].points=points;
+ $("hintBtn").disabled=true;
+ $("checkBtn").disabled=true;
+ $("testPanel").hidden=false;
+ setFeedback("★ "+explanation(r)+
+  (bonus?" Fewest-changes bonus: +"+bonus+"!":""),"correct");
+ $("testSummary").textContent="Choose a test size to see how experiments compare with chance.";
+ render();
+ startTest(10);
+}
+
+function hint(){
+ if(state.checked)return;
+ state.hinted=true;
+ $("hintBtn").disabled=true;
+ $("hintBtn").textContent="Hint used";
+ setFeedback("Hint: "+state.round.hint,"neutral");
+}
+
+function testWeights(){
+ const r=state.round;
+ if(r.type==="C"){
+  return {keys:r.keys.slice(),weights:r.options[r.correct].slice()};
+ }
+ return colourWeights(r);
+}
+
+function startTest(n){
+ if(!state.checked||spinning)return;
+ if(![10,100,1000].includes(n))return;
+ const source=testWeights();
+ const rng=seeded(state.seed+state.index*7919+state.testNumber*104729+n);
+ const result=sample(source.weights,n,rng);
+ state.testNumber++;
+ const existing=state.observations;
+ const oldKeys=state.observationKeys||[];
+ let baseline=source.keys.map(k=>{
+  if(!existing)return 0;
+  if(state.round.type==="C"){
+   return existing[state.round.keys.indexOf(k)]||0;
+  }
+  return existing[oldKeys.indexOf(k)]||0;
+ });
+ const totalOld=state.totalSpins;
+ const newCounts=baseline.map((v,i)=>v+result[i]);
+ const finish=()=>{
+  state.observations=newCounts;
+  state.observationKeys=source.keys.slice();
+  state.totalSpins=totalOld+n;
+  $("testSummary").textContent=experimentText(source,result,n);
+  renderChart();
+  spinning=false;
+ };
+ cancelAnimationFrame(spinFrame);
+ nextAnimationToken++;
+ if(reduced.matches){
+  finish();return;
+ }
+ spinning=true;
+ const token=nextAnimationToken;
+ const t0=performance.now();
+ const duration=650;
+ const wheel=$("scene").querySelector(".spin-svg");
+ function frame(now){
+  if(token!==nextAnimationToken){
+   spinning=false;return;
+  }
+  const t=clamp((now-t0)/duration,0,1);
+  const eased=1-Math.pow(1-t,3);
+  if(wheel){
+   wheel.style.transformOrigin="center";
+   wheel.style.transform="rotate("+(720*eased)+"deg)";
+  }
+  if(t<1){
+   spinFrame=requestAnimationFrame(frame);
+  }else{
+   if(wheel)wheel.style.transform="";
+   finish();
+  }
+ }
+ spinFrame=requestAnimationFrame(frame);
+}
+
+function experimentText(source,result,n){
+ const total=sum(source.weights);
+ const idx=source.keys.indexOf("R");
+ if(idx<0||total===0)
+  return n+" results recorded. Compare them with the expected marks.";
+ const actual=result[idx]||0;
+ const expected=n*source.weights[idx]/total;
+ const diff=Math.abs(actual-expected);
+ let comment;
+ if(diff<.5)comment="exactly the expected count";
+ else if(diff<=Math.max(2,n*.05))comment="close to the expected count";
+ else comment="different from the expected count";
+ return "This test: "+actual+" red out of "+n+
+  ". Theoretical expectation: "+formatExpected(expected)+
+  " red. The result is "+comment+".";
+}
+function formatExpected(v){
+ return Number.isInteger(v)?String(v):String(Number(v.toFixed(2)));
+}
+function showEnd(){
+ $("game").hidden=true;
+ $("endScreen").hidden=false;
+ const score=state.score;
+ const max=615;
+ const fractionScore=score/max;
+ const stars=fractionScore>=.85?3:fractionScore>=.55?2:1;
+ $("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
+ $("stars").setAttribute("aria-label",stars+" out of 3 stars");
+ $("finalScore").textContent=score+" points";
+ $("endMessage").textContent=stars===3?
+  "Brilliant! You can reason about chance in different ways.":
+  stars===2?"Well done! Keep comparing fractions and regions.":
+  "Good practice! Play again and try new numbers.";
+ $("summaryBody").innerHTML=state.rounds.map((r,i)=>
+  "<tr><td>"+(i+1)+"</td><td>"+TYPE_NAMES[r.type]+
+  "</td><td><strong>"+r.points+"</strong></td></tr>"
+ ).join("");
+ $("roundHUD").textContent="6/6 complete";
+ $("scoreHUD").textContent="Score: "+score;
+}
+
+$("checkBtn").addEventListener("click",checkAnswer);
+$("hintBtn").addEventListener("click",hint);
+$("nextBtn").addEventListener("click",()=>{
+ if(state.checked&&!spinning)loadRound(state.index+1);
 });
-s+='<text x="200" y="257" text-anchor="middle" font-size="12">Spinner colour (category)</text></svg>';
-$("plot").innerHTML=s;
-$("trials").textContent=redSpins+blueSpins?`Total ${redSpins+blueSpins} spins. Observed red: ${redSpins}/${redSpins+blueSpins}.`:"No spins yet.";
-}
-function feedback(msg,state){$("feedback").textContent=msg;$("feedback").className="feedback "+(state||"")}
-function makeRound(){
-tries=0;hinted=false;won=false;redSpins=0;blueSpins=0;batch=10;
-$("batchLabel").textContent=batch;
-kind=round%3===0?"word":round%3===1?"fraction":"fairness";
-if(kind==="word"){
-const w=pick(["impossible","unlikely","even chance","likely","certain"]);
-target=pick(w==="impossible"?[0]:w==="unlikely"?[1,2,3]:w==="even chance"?[4]:w==="likely"?[5,6,7]:[8]);
-$("question").textContent="Make landing on red "+w+".";
-}else if(kind==="fraction"){
-target=pick([1,2,3,5,6,7]);
-$("question").textContent="Make the chance of red exactly "+target+" out of 8.";
-}else{
-target=round===2?4:pick([1,2,3,5,6,7]);
-const fair=target===4;
-$("question").textContent=fair?"Make a fair red-and-blue spinner.":"Make an unfair spinner with both red and blue.";
-}
-let start=pick([1,2,3,4,5,6,7]);
-while((kind==="word"&&chance(start)===chance(target))||
-(kind==="fraction"&&start===target)||
-(kind==="fairness"&&(start===4)===(target===4)))start=pick([0,1,2,3,4,5,6,7,8]);
-sectors=Array.from({length:8},(_,i)=>i<start);
-$("round").textContent="Round "+(round+1)+"/6";
-$("score").textContent="Score "+score;
-$("next").hidden=true;$("check").hidden=false;$("hint").disabled=false;
-$("mission").textContent=kind==="word"?"Chance words":kind==="fraction"?"Exact chances":"Fair or unfair?";
-renderSpinner();plot();feedback("Tap a sector to change its colour.");
-}
-function success(){
-const k=count();
-if(kind==="word")return chance(k)===chance(target);
-if(kind==="fraction")return k===target;
-return round===2?k===4:k!==4&&k>0&&k<8;
-}
-function toggle(i){
-if(won||spinning)return;
-sectors[i]=!sectors[i];redSpins=0;blueSpins=0;renderSpinner();plot();
-feedback("Spinner updated. Try your design!");
-}
-$("spinner").addEventListener("click",e=>{
-let p=e.target.closest("[data-i]");if(p)toggle(Number(p.dataset.i));
+$("restartBtn").addEventListener("click",newGame);
+document.querySelectorAll("[data-view]").forEach(b=>{
+ b.addEventListener("click",()=>{
+  state.view=b.dataset.view;
+  render();
+ });
 });
-$("spinner").addEventListener("keydown",e=>{
-if(e.key==="Enter"||e.key===" "){const p=e.target.closest("[data-i]");if(p){e.preventDefault();toggle(Number(p.dataset.i))}}
+document.querySelectorAll("[data-test]").forEach(b=>{
+ b.addEventListener("click",()=>startTest(Number(b.dataset.test)));
 });
-$("clear").onclick=()=>{if(!won){sectors.fill(false);redSpins=blueSpins=0;renderSpinner();plot()}};
-$("balance").onclick=()=>{if(!won){sectors=sectors.map((_,i)=>i<4);redSpins=blueSpins=0;renderSpinner();plot()}};
-$("minus").onclick=()=>{batch=batch===100?10:batch===10?1:1;$("batchLabel").textContent=batch};
-$("plus").onclick=()=>{batch=batch===1?10:100;$("batchLabel").textContent=batch};
-$("reset").onclick=()=>{redSpins=blueSpins=0;plot()};
-$("spin").onclick=()=>{
-if(spinning)return;spinning=true;$("spin").disabled=true;
-let r=0;const k=count();
-for(let i=0;i<batch;i++)if(rand()<k/8)r++;
-redSpins+=r;blueSpins+=batch-r;
-const finish=()=>{plot();spinning=false;$("spin").disabled=false};
-if(matchMedia("(prefers-reduced-motion: reduce)").matches)finish();
-else setTimeout(finish,230);
-};
-$("hint").onclick=()=>{
-if(won)return;hinted=true;$("hint").disabled=true;
-let msg=kind==="word"?"Think about whether red covers none, fewer than half, half, more than half, or all of the wheel.":
-kind==="fraction"?"Each red sector counts as one eighth of the wheel.":
-"Fair means equal-sized chances for both colours. Unfair means unequal chances.";
-feedback(msg);
-};
-$("check").onclick=()=>{
-if(won)return;
-tries++;
-if(success()){
-won=true;let gain=hinted?50:tries===1?100:tries===2?75:50;
-score+=gain;$("score").textContent="Score "+score;
-feedback("★ Correct! "+(kind==="fairness"?(count()===4?"Both colours have the same chance.":"The colours have unequal chances."):"Red has "+fraction(count(),8)+" of the spinner.")+" +"+gain+" points.","good");
-$("next").hidden=false;$("next").textContent=round===5?"See results ★":"Next round →";
-$("check").hidden=true;$("hint").disabled=true;
-}else{
-let msg=kind==="word"?"Your design is "+chance(count())+", not the requested chance.":
-kind==="fraction"?"You have "+count()+" red sectors; that is "+Math.abs(count()-target)+" sector(s) "+(count()>target?"too many.":"too few."):
-round===2?"A fair spinner needs the same number of sectors in each colour.":
-count()===0||count()===8?"Use both colours so you can compare their chances.":"Both colours are equally likely. Make them unequal.";
-feedback(msg,"bad");
-}
-};
-$("next").onclick=()=>{
-round++;if(round<6)makeRound();
-else{
-$("game").hidden=true;$("end").style.display="block";
-$("round").textContent="Finished";const stars=score>=500?3:score>=350?2:1;
-$("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
-$("result").textContent="You earned "+score+" out of 600 points across six spinner challenges.";
-}
-};
-$("again").onclick=()=>{round=score=0;seed=(seed+73939)>>>0;$("game").hidden=false;$("end").style.display="none";makeRound()};
-makeRound();
+
+newGame();
+
 })();
 </script>
 </body>

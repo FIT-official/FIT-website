@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Volume Spinner | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+header,main,footer{max-width:1180px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.badge{background:var(--lvl-jc);color:var(--lvl-jc-on);border:2px solid #111;border-radius:999px;padding:8px 13px;text-transform:uppercase;font-size:12px;font-weight:800}
+.hud{display:flex;gap:8px;flex-wrap:wrap;font-size:14px;font-weight:800}.hud span{border:2px solid #111;padding:7px 12px;border-radius:999px}
+h1{font-size:clamp(30px,5vw,50px);font-weight:800;margin:10px 0 4px}
+h2{font-size:20px;font-weight:800;margin:0 0 12px}
+h3{font-size:15px;margin:15px 0 9px;font-weight:800}
+.sub{color:#666;line-height:1.5}.layout{display:grid;gap:18px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.13fr) minmax(0,1fr);align-items:start}}
+.card{background:#fff;border:2px solid #111;border-radius:26px;box-shadow:var(--sh-2);padding:16px;min-width:0}
+.stage{background:var(--lvl-jc-tint)}
+.plot{width:100%;height:auto;display:block;border:2px solid #111;border-radius:16px;background:#fff}
+.controls{display:grid;gap:12px}
+.control{padding:10px;border:2px solid #111;border-radius:16px;background:#fff;min-width:0}
+.control label{display:block;font-weight:800;margin-bottom:7px}
+.step{display:flex;gap:5px;align-items:center;justify-content:space-between}
+.step button{border:2px solid #111;border-radius:12px;min-width:44px;min-height:44px;font-weight:900;background:#fff}
+.step button:active{background:var(--lvl-jc-tint)}
+.readout{min-width:45px;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+input[type="range"]{width:100%;accent-color:var(--lvl-jc);min-height:44px;cursor:pointer}
+input[type="text"],select{width:100%;min-height:48px;border:2px solid #111;border-radius:12px;padding:9px;background:#fff}
+select{font-weight:700}
+.metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.metric{border:2px solid #111;border-radius:16px;padding:12px;background:#fff;min-width:0}
+.metric small{display:block;color:#666;font-weight:700}.metric strong{display:block;font-size:22px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;font-weight:800;margin:9px 0}
+.key{display:inline-block;width:13px;height:13px;border:2px solid #111;vertical-align:middle;margin-right:5px}
+.btnbar{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+.btn{min-height:48px;padding:11px 19px;border:2px solid #111;border-radius:999px;background:#fff;box-shadow:var(--sh-1);font-weight:800}
+.btn.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.btn:active{transform:translateY(2px);box-shadow:none}button:disabled{opacity:.5;cursor:not-allowed}
+.feedback{min-height:48px;font-weight:700;line-height:1.5;margin:12px 0}
+details{border:2px solid #111;border-radius:16px;background:#fff;padding:13px;margin-top:16px}
+summary{cursor:pointer;font-weight:800}
+.concept{display:block;width:100%;max-width:350px;margin:auto}
+.end{text-align:center;padding:40px 14px}
+.stars{font-size:50px;letter-spacing:5px;color:#ccc}.stars .earned{color:#e9a600}
+footer{font-size:12px;color:#666}
+@media(max-width:420px){header,main,footer{padding:12px}.card{padding:12px}.step{flex-wrap:wrap;justify-content:center}.step button{flex:0 0 44px}}
+@media(prefers-reduced-motion:no-preference){.feedback.good{animation:pop .24s ease-out}@keyframes pop{50%{transform:scale(1.025)}}}
+</style>
+</head>
+<body>
+<header><span class="badge">JC · H2 Mathematics</span><div class="hud"><span id="roundHUD">Round 1/6</span><span id="scoreHUD">Score 0</span></div></header>
+<main>
+<h1>Volume Spinner</h1>
+<p class="sub">Approximate integrals, rotate regions into solids, and master integration techniques.</p>
+<div id="game" class="layout">
+<section class="card stage">
+<h2 id="heading"></h2>
+<p id="question"></p>
+<svg id="graph" class="plot" viewBox="0 0 530 330" role="img" aria-label="Live graph and integrated strips"></svg>
+<div class="legend" id="legend"></div>
+<svg id="solid" class="plot" viewBox="0 0 530 172" role="img" aria-label="Oblique sketch of a disc or shell"></svg>
+<div id="controls" class="controls" style="margin-top:12px"></div>
+</section>
+<section class="card">
+<h2>Numerical laboratory</h2>
+<div class="metric-grid">
+<div class="metric"><small id="label1">Estimate</small><strong id="value1">—</strong></div>
+<div class="metric"><small id="label2">Error</small><strong id="value2">—</strong></div>
+</div>
+<svg id="errorPlot" class="plot" viewBox="0 0 480 300" role="img" aria-label="Log-log plot of integration error versus number of strips"></svg>
+<div class="legend">
+<span><i class="key" style="background:#FF8FB8"></i>Left</span>
+<span><i class="key" style="background:#3DBE6B"></i>Midpoint</span>
+<span><i class="key" style="background:#6A45F5"></i>Trapezium</span>
+</div>
+<div class="btnbar">
+<button id="hint" class="btn">Hint −50</button>
+<button id="check" class="btn check">Check ✓</button>
+<button id="next" class="btn" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite"></div>
+<details>
+<summary>The maths</summary>
+<p><strong>Numerical rules:</strong> left Lₙ = hΣf(a + ih); midpoint Mₙ = hΣf(a + (i + ½)h); trapezium Tₙ = h[f(a)/2 + Σf(a + ih) + f(b)/2], where h = (b − a)/n.</p>
+<p>For a concave-up graph, the trapezium rule overestimates the signed integral; for concave-down it underestimates.</p>
+<p><strong>Rotation about x:</strong> V = π∫[f(x)]² dx, using discs.</p>
+<p><strong>Rotation about y:</strong> V = 2π∫x f(x) dx for non-negative f(x), using cylindrical shells.</p>
+<p><strong>Substitution:</strong> replace a composite expression with u and transform du and the limits.</p>
+<p><strong>By parts:</strong> ∫u dv = uv − ∫v du. Volumes use units³; areas use units².</p>
+</details>
+<h2 style="margin-top:20px">A disc and a shell</h2>
+<svg class="concept" viewBox="0 0 350 126" role="img" aria-label="Cross-sectional disc of radius y and cylindrical shell of radius x">
+<g stroke="#111" stroke-width="2.5" fill="none">
+<ellipse cx="78" cy="62" rx="25" ry="43" fill="#ECE7FF"/>
+<path d="M78 62L101 40" stroke="#6A45F5"/><path d="M53 62H103" stroke-dasharray="4 4"/>
+<ellipse cx="249" cy="39" rx="42" ry="17" fill="#ECE7FF"/>
+<path d="M207 39V92A42 17 0 0 0 291 92V39" fill="#ECE7FF"/>
+<path d="M207 92A42 17 0 0 0 291 92" stroke-dasharray="4 3"/>
+</g>
+<g font-size="12" font-weight="700" text-anchor="middle"><text x="78" y="121">Disc: πy² dx</text><text x="249" y="121">Shell: 2πxy dx</text></g>
+</svg>
+<p class="sub">A solid is built from thin cross-sections.</p>
+</section>
+</div>
+<div class="card end" id="ending" hidden>
+<h2>Calculus mission completed!</h2><div class="stars" id="stars"></div>
+<p id="finalScore"></p><button class="btn check" id="again">Play again ↻</button>
+</div>
+</main><footer>FIT · Integration · Volume Spinner</footer>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+let round=0,score=0,tries=0,hinted=false,locked=false,seed=74119,task={},s={};
+const pi=Math.PI;
+function rng(){seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;}
+function pick(a){return a[Math.floor(rng()*a.length)];}
+function fmt(x){return Number.isFinite(x)?Number(x.toPrecision(5)).toString():"—";}
+function integralExact(){return task.k*(task.b**3-task.a**3)/3+task.c*(task.b-task.a);}
+function curve(x){return task.k*x*x+task.c;}
+function numerical(method,n){
+if(!Number.isInteger(n)||n<1)return NaN;
+let a=task.a,b=task.b,h=(b-a)/n,sum=0;
+for(let i=0;i<n;i++){
+let x=a+i*h;
+if(method==="left")sum+=curve(x);
+else if(method==="mid")sum+=curve(x+h/2);
+else sum+=(curve(x)+curve(x+h))/2;
+}
+return sum*h;
+}
+function volume(){
+const b=s.b,k=s.k;
+return task.axis==="x"?pi*k*k*b*b*b/3:2*pi*k*b*b*b/3;
+}
+function control(label,id,options){
+const box=document.createElement("div");box.className="control";
+let lab=document.createElement("label");lab.textContent=label;
+let sel=document.createElement("select");sel.id="input-"+id;
+options.forEach(([value,text])=>{
+let o=document.createElement("option");o.value=value;o.textContent=text;sel.appendChild(o);
+});
+sel.value=String(s[id]);
+sel.addEventListener("change",()=>{if(locked)return;s[id]=sel.value;update();});
+box.append(lab,sel);$("controls").appendChild(box);
+}
+function step(label,id,min,max,delta,coarse){
+const box=document.createElement("div");box.className="control";
+box.innerHTML=`<label>${label}</label><div class="step"><button data-d="${-coarse}" aria-label="Large decrease in ${label}">−−</button><button data-d="${-delta}" aria-label="Decrease ${label}">−</button><span class="readout" id="r-${id}"></span><button data-d="${delta}" aria-label="Increase ${label}">+</button><button data-d="${coarse}" aria-label="Large increase in ${label}">++</button></div>`;
+box.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+if(locked)return;
+s[id]=Math.max(min,Math.min(max,Math.round((s[id]+Number(b.dataset.d))*1000)/1000));update();
+}));
+$("controls").appendChild(box);
+}
+function textInput(label,id,placeholder){
+const box=document.createElement("div");box.className="control";
+const lab=document.createElement("label");lab.textContent=label;
+const inp=document.createElement("input");
+inp.type="text";inp.id="input-"+id;inp.autocomplete="off";inp.placeholder=placeholder;inp.value=s[id]||"";
+inp.addEventListener("input",()=>{s[id]=inp.value;update();});
+box.append(lab,inp);$("controls").appendChild(box);
+}
+function parseMath(str){
+const tokens=(str.toLowerCase().replace(/\s/g,"").replace(/π/g,"pi").match(/(?:\d+(?:\.\d*)?|\.\d+)|[a-z]+|[()+*/^−-]/g)||[]);
+if(tokens.join("")!==str.toLowerCase().replace(/\s/g,"").replace(/π/g,"pi").replace(/−/g,"-"))return NaN;
+let i=0;
+function atom(){
+let t=tokens[i++];
+if(t==="("){let v=expr();if(tokens[i++]!==")")throw Error();return v;}
+if(t==="-")return -atom();
+if(t==="+")return atom();
+if(t==="e")return Math.E;
+if(t==="pi")return Math.PI;
+if(t==="ln"||t==="log"){
+if(tokens[i++]!=="(")throw Error();
+let v=expr();if(tokens[i++]!==")"||v<=0)throw Error();
+return Math.log(v);
+}
+let v=Number(t);if(!Number.isFinite(v))throw Error();return v;
+}
+function power(){let v=atom();if(tokens[i]==="^"){i++;v=Math.pow(v,power());}return v;}
+function mult(){let v=power();while(tokens[i]==="*"||tokens[i]==="/"){let op=tokens[i++],r=power();v=op==="*"?v*r:v/r;}return v;}
+function expr(){let v=mult();while(tokens[i]==="+"||tokens[i]==="-"){let op=tokens[i++],r=mult();v+=op==="+"?r:-r;}return v;}
+try{let v=expr();return i===tokens.length&&Number.isFinite(v)?v:NaN;}catch(_){return NaN;}
+}
+const techniques=[
+{mode:"sub",expression:"∫₀¹ 2x e^(x²) dx",pick:"x²",options:["2x","x²","e^x","x"],answer:Math.E-1,exact:"e − 1",f:x=>2*x*Math.exp(x*x),lo:0,hi:1,why:"u = x², du = 2x dx; the limits become 0 and 1."},
+{mode:"parts",expression:"∫₀¹ x eˣ dx",pick:"x",dv:"eˣ dx",options:["x","eˣ","x eˣ","1"],answer:1,exact:"1",f:x=>x*Math.exp(x),lo:0,hi:1,why:"u = x and dv = eˣ dx; the boundary term and remaining integral cancel appropriately."},
+{mode:"sub",expression:"∫₁³ 2x/(x² + 1) dx",pick:"x² + 1",options:["x","2x","x² + 1","ln x"],answer:Math.log(5),exact:"ln(5)",f:x=>2*x/(x*x+1),lo:1,hi:3,why:"u = x² + 1 and du = 2x dx; the transformed limits are 2 and 10."},
+{mode:"parts",expression:"∫₁² ln(x) dx",pick:"ln(x)",dv:"dx",options:["x","ln(x)","1/x","x ln(x)"],answer:2*Math.log(2)-1,exact:"2 ln(2) − 1",f:x=>Math.log(x),lo:1,hi:2,why:"u = ln(x), dv = dx, du = dx/x and v = x."}
+];
+function setup(){
+tries=0;hinted=false;locked=false;
+let type=round%3;
+$("controls").replaceChildren();
+if(type===0){
+task={type,a:0,b:pick([2,3,4]),k:pick([.5,1,1.5]),c:pick([.5,1,2])};
+s={n:2,concavity:"down"};
+$("heading").textContent="Riemann & trapezium challenge";
+$("question").textContent=`Estimate ∫₀^${task.b} (${fmt(task.k)}x² + ${fmt(task.c)}) dx using the trapezium rule. Choose n between 2 and 64 so the absolute error is at most ${fmt(task.k*task.b**3/192)} units², and classify the trapezium estimate.`;
+let box=document.createElement("div");box.className="control";
+box.innerHTML=`<label for="strips">Number of strips n: <strong id="nText">2</strong></label><input id="strips" type="range" min="2" max="64" step="1" value="2">`;
+$("controls").appendChild(box);
+$("strips").addEventListener("input",e=>{s.n=+e.target.value;update();});
+control("Trapezium estimate is…","concavity",[["down","Below the exact integral"],["up","Above the exact integral"]]);
+}else if(type===1){
+task={type,axis:round===1?"x":"y",targetB:pick([2,2.5,3]),targetK:pick([.5,1,1.5])};
+task.target=task.axis==="x"?pi*task.targetK**2*task.targetB**3/3:2*pi*task.targetK*task.targetB**3/3;
+s={b:1,k:.5};
+if(s.b===task.targetB&&s.k===task.targetK)s.b=1.5;
+$("heading").textContent="Volume of revolution";
+$("question").textContent=`Rotate the region under y = kx, from x = 0 to x = b, about the ${task.axis}-axis. Set b and k to obtain V = ${fmt(task.target/pi)}π units³ (within 0.5%).`;
+step("Upper limit b", "b",.5,4,.5,1);
+step("Scale k","k",.5,2,.5,1);
+}else{
+task={type,...techniques[round===2?Math.floor(rng()*2):2+Math.floor(rng()*2)]};
+s={choice:task.options.find(x=>x!==task.pick),dv:task.mode==="parts"?"dx":"",answer:""};
+$("heading").textContent=task.mode==="parts"?"Integration by parts":"Integration by substitution";
+$("question").textContent=`Evaluate ${task.expression}. Select the appropriate ${task.mode==="parts"?"u and dv":"substitution u"}, then enter an exact value.`;
+control("Select u","choice",task.options.map(x=>[x,x]));
+if(task.mode==="parts")control("Select dv","dv",[["dx","dx"],["eˣ dx","eˣ dx"],["x dx","x dx"],["(1/x) dx","(1/x) dx"]]);
+textInput("Exact integral value","answer","e-1, 2*ln(2)-1, 1 …");
+}
+$("roundHUD").textContent=`Round ${round+1}/6`;
+$("scoreHUD").textContent="Score "+score;
+$("hint").disabled=false;$("check").hidden=false;$("next").hidden=true;
+$("feedback").textContent="";
+update();
+}
+function update(){
+if(task.type===0){$("nText").textContent=s.n;}
+if(task.type===1){$("r-b").textContent=fmt(s.b);$("r-k").textContent=fmt(s.k);}
+if(task.type===0){
+let exact=integralExact(),est=numerical("trap",s.n);
+$("label1").textContent="Trapezium estimate (units²)";
+$("value1").textContent=fmt(est);
+$("label2").textContent="Absolute error (units²)";
+$("value2").textContent=fmt(Math.abs(est-exact));
+}else if(task.type===1){
+$("label1").textContent="Current volume";
+$("value1").textContent=fmt(volume()/pi)+"π units³";
+$("label2").textContent="Disc / shell radius";
+$("value2").textContent=`${fmt(task.axis==="x"?s.k*s.b:s.b)} units`;
+}else{
+$("label1").textContent="Your exact entry";
+$("value1").textContent=s.answer||"—";
+$("label2").textContent="Numerical interpretation";
+$("value2").textContent=fmt(parseMath(s.answer));
+}
+drawGraph();drawSolid();drawErrors();
+}
+function drawGraph(){
+const svg=$("graph"),L=49,R=501,T=40,B=287;
+let xMax=task.type===0?task.b:task.type===1?Math.max(4,s.b):task.hi;
+let maxY=task.type===0?curve(task.b)*1.15:task.type===1?Math.max(1,s.k*xMax)*1.2:Math.max(...Array.from({length:41},(_,i)=>task.f(task.lo+(task.hi-task.lo)*i/40)))*1.15;
+const X=x=>L+x/xMax*(R-L),Y=y=>B-y/maxY*(B-T);
+let h=`<rect width="530" height="330" fill="#fff"/><text x="16" y="24" font-weight="800" font-size="17">${task.type===0?"Area approximation":task.type===1?"Region to be revolved":"Technique visualiser"}</text>`;
+for(let i=0;i<=5;i++){
+let x=xMax*i/5;
+h+=`<line x1="${X(x)}" x2="${X(x)}" y1="${T}" y2="${B}" stroke="#eee"/><text x="${X(x)}" y="310" font-size="11" text-anchor="middle">${fmt(x)}</text>`;
+}
+for(let i=0;i<=4;i++){
+let y=maxY*i/4;
+h+=`<line x1="${L}" y1="${Y(y)}" x2="${R}" y2="${Y(y)}" stroke="#eee"/><text x="42" y="${Y(y)+4}" font-size="11" text-anchor="end">${fmt(y)}</text>`;
+}
+h+=`<path d="M${L} ${T}V${B}H${R}" stroke="#111" stroke-width="2" fill="none"/>`;
+const yfun=task.type===0?curve:task.type===1?x=>s.k*x:task.f;
+const end=task.type===0?task.b:task.type===1?s.b:task.hi;
+const limit=Math.min(xMax,end);
+if(task.type===0){
+const step=(task.b-task.a)/s.n;
+for(let i=0;i<s.n;i++){
+let x=i*step,x2=x+step;
+h+=`<polygon points="${X(x)},${B} ${X(x)},${Y(curve(x))} ${X(x2)},${Y(curve(x2))} ${X(x2)},${B}" fill="#ECE7FF" stroke="#6A45F5" stroke-width="1.3"/>`;
+}
+}else if(task.type===1){
+for(let i=0;i<28;i++){
+let x=limit*i/28,x2=limit*(i+1)/28,y=yfun((x+x2)/2);
+h+=`<rect x="${X(x)}" y="${Y(y)}" width="${Math.max(1,X(x2)-X(x))}" height="${B-Y(y)}" fill="#ECE7FF" stroke="#6A45F5" stroke-width=".5"/>`;
+}
+}else{
+for(let i=0;i<50;i++){
+let w=(task.hi-task.lo)/50,x=task.lo+i*w,y=Math.max(0,Math.min(maxY,yfun(x+w/2)));
+h+=`<rect x="${X(x)}" y="${Y(y)}" width="${X(x+w)-X(x)+.3}" height="${B-Y(y)}" fill="#ECE7FF"/>`;
+}
+}
+let d="";
+for(let i=0;i<=160;i++){
+let x0=task.type===2?task.lo:0,x=x0+(limit-x0)*i/160,y=Math.min(maxY,yfun(x));
+d+=(i?"L":"M")+X(x).toFixed(2)+" "+Y(y).toFixed(2);
+}
+h+=`<path d="${d}" fill="none" stroke="#111" stroke-width="3.5"/>`;
+if(task.type===1)h+=`<line x1="${X(s.b)}" x2="${X(s.b)}" y1="${B}" y2="${Y(s.k*s.b)}" stroke="#FF8FB8" stroke-width="4"/>`;
+h+=`<text x="506" y="324" font-size="13" text-anchor="end">x (units)</text><text x="13" y="46" font-size="13">y</text>`;
+svg.innerHTML=h;
+svg.setAttribute("aria-label",`Graph with ${task.type===0?s.n+" trapezia":task.type===1?"the shaded rotation region":"shaded integrand"} and labelled x and y axes`);
+$("legend").innerHTML=task.type===0?
+`<span><i class="key" style="background:#ECE7FF"></i>${s.n} trapezia</span><span>Black curve: f(x)</span>`:
+task.type===1?`<span><i class="key" style="background:#ECE7FF"></i>Rotated region</span><span>Pink: selected limit</span>`:
+`<span><i class="key" style="background:#ECE7FF"></i>Integral region</span>`;
+}
+function drawSolid(){
+const svg=$("solid");
+let h=`<rect width="530" height="172" rx="14" fill="#fff"/>`;
+if(task.type===1){
+const shell=task.axis==="y";
+h+=`<text x="16" y="22" font-size="15" font-weight="800">${shell?"Cylindrical shells about y":"Discs about x"} · oblique sketch</text>`;
+if(shell){
+let radius=35+s.b*12,height=20+s.k*s.b*12;
+for(let j=4;j>=0;j--){
+let rx=Math.max(10,radius-j*8),cy=78+j*3,hh=height*(1-j*.13);
+h+=`<path d="M${260-rx} ${cy}V${cy+hh}A${rx} ${rx*.33} 0 0 0 ${260+rx} ${cy+hh}V${cy}" fill="#ECE7FF" stroke="#111" stroke-width="1.5"/>
+<ellipse cx="260" cy="${cy}" rx="${rx}" ry="${rx*.33}" fill="#CFC3FF" stroke="#111" stroke-width="2"/>`;
+}
+h+=`<text x="380" y="87" font-size="13">Radius x</text><text x="380" y="105" font-size="13">Height kx</text>`;
+}else{
+for(let j=0;j<9;j++){
+let x=122+j*28,rad=7+j*s.k*2.3;
+h+=`<ellipse cx="${x}" cy="86" rx="${5+s.b*.7}" ry="${rad}" fill="#CFC3FF" stroke="#111" stroke-width="2"/>`;
+}
+h+=`<path d="M120 86H390" stroke="#111" stroke-dasharray="4 4"/><text x="405" y="83" font-size="13">x-axis</text>`;
+}
+h+=`<text x="16" y="157" font-size="12">Illustrative cross-sections, not a perspective-accurate solid.</text>`;
+}else if(task.type===0){
+h+=`<text x="16" y="22" font-size="15" font-weight="800">A single trapezium</text>
+<polygon points="135,126 135,60 245,35 245,126" fill="#ECE7FF" stroke="#111" stroke-width="3"/>
+<text x="135" y="148" font-size="13" text-anchor="middle">xᵢ</text><text x="245" y="148" font-size="13" text-anchor="middle">xᵢ₊₁</text><text x="300" y="75" font-size="14">Area = ½h(yᵢ + yᵢ₊₁)</text>`;
+}else{
+h+=`<text x="16" y="22" font-size="15" font-weight="800">${task.mode==="sub"?"Substitution map":"Integration by parts"}</text>
+<rect x="30" y="49" width="180" height="77" rx="12" fill="#ECE7FF" stroke="#111" stroke-width="2"/>
+<rect x="310" y="49" width="185" height="77" rx="12" fill="#FFF4D6" stroke="#111" stroke-width="2"/>
+<path d="M217 87H298" stroke="#111" stroke-width="3"/><path d="M288 78L299 87L288 96" fill="none" stroke="#111" stroke-width="3"/>
+<text x="120" y="84" text-anchor="middle" font-weight="800">${task.mode==="sub"?"Original variable x":"Original product"}</text>
+<text x="400" y="84" text-anchor="middle" font-weight="800">${task.mode==="sub"?"New variable u":"uv − ∫v du"}</text>`;
+}
+svg.innerHTML=h;
+svg.setAttribute("aria-label",task.type===1?`Oblique ${task.axis==="x"?"disc":"shell"} drawing with current parameters`:task.type===0?"Trapezium construction":"Integration technique concept diagram");
+}
+function drawErrors(){
+const svg=$("errorPlot");
+let h=`<rect width="480" height="300" fill="#fff"/><text x="15" y="24" font-size="16" font-weight="800">Error versus strips · log–log</text>`;
+if(task.type!==0){
+h+=`<rect x="36" y="47" width="410" height="209" rx="12" fill="#F4F3EF" stroke="#E4E2DB"/>
+<text x="241" y="147" text-anchor="middle" font-size="15" font-weight="700">Numerical comparison</text>
+<text x="241" y="170" text-anchor="middle" font-size="13">appears in trapezium rounds</text>`;
+svg.innerHTML=h;svg.setAttribute("aria-label","Log-log numerical error chart appears during trapezium rounds");return;
+}
+const ns=[2,3,4,6,8,12,16,24,32,48,64],exact=integralExact();
+const points=["left","mid","trap"].map(m=>ns.map(n=>Math.abs(numerical(m,n)-exact)));
+const all=points.flat().filter(v=>v>1e-12),min=Math.min(...all),max=Math.max(...all);
+const L=72,R=454,T=51,B=253;
+const xx=n=>L+(Math.log(n)-Math.log(2))/(Math.log(64)-Math.log(2))*(R-L);
+const yy=e=>B-(Math.log(e)-Math.log(min/1.35))/(Math.log(max*1.35)-Math.log(min/1.35))*(B-T);
+[2,4,8,16,32,64].forEach(n=>{
+h+=`<line x1="${xx(n)}" x2="${xx(n)}" y1="${T}" y2="${B}" stroke="#e5e5e5"/><text x="${xx(n)}" y="270" font-size="11" text-anchor="middle">${n}</text>`;
+});
+for(let k=0;k<=4;k++){
+let v=Math.exp(Math.log(min/1.35)+(Math.log(max*1.35)-Math.log(min/1.35))*k/4);
+h+=`<line x1="${L}" x2="${R}" y1="${yy(v)}" y2="${yy(v)}" stroke="#eee"/><text x="65" y="${yy(v)+4}" font-size="10" text-anchor="end">${fmt(v)}</text>`;
+}
+["#FF8FB8","#3DBE6B","#6A45F5"].forEach((c,j)=>{
+let d=ns.map((n,i)=>(i?"L":"M")+xx(n)+" "+yy(points[j][i])).join("");
+h+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="3"/>`;
+ns.forEach((n,i)=>h+=`<circle cx="${xx(n)}" cy="${yy(points[j][i])}" r="3" fill="${c}" stroke="#111" stroke-width=".7"/>`);
+});
+let cx=xx(s.n),cy=yy(Math.abs(numerical("trap",s.n)-exact));
+h+=`<line x1="${cx}" x2="${cx}" y1="${T}" y2="${B}" stroke="#111" stroke-dasharray="4 4"/>
+<circle cx="${cx}" cy="${cy}" r="7" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+<text x="290" y="293" font-size="12">Number of strips n (log)</text>
+<text x="15" y="157" transform="rotate(-90 15 157)" text-anchor="middle" font-size="12">Absolute error (units², log)</text>`;
+svg.innerHTML=h;
+svg.setAttribute("aria-label",`Log-log error plot for left, midpoint and trapezium rules. Current trapezium error is ${fmt(Math.abs(numerical("trap",s.n)-exact))} at n=${s.n}`);
+}
+function feedback(t,good){$("feedback").textContent=t;$("feedback").className="feedback"+(good?" good":"");}
+$("hint").addEventListener("click",()=>{
+if(locked)return;hinted=true;$("hint").disabled=true;
+feedback(task.type===0?"Trapezium error on a quadratic is proportional to 1/n². Here the graph is concave up.":task.type===1?"For discs, square the height before integrating. For shells, multiply radius × height and use 2π.":"For substitution, differentiate your proposed u. For parts, choose u so that du simplifies the problem.",false);
+});
+$("check").addEventListener("click",()=>{
+if(locked)return;tries++;let good=false,msg="";
+if(task.type===0){
+const error=Math.abs(numerical("trap",s.n)-integralExact()),tol=task.k*task.b**3/192;
+good=error<=tol+1e-9&&s.concavity==="up";
+msg=good?`✓ ${s.n} trapezia give error ${fmt(error)} units²; the secants lie above this convex curve.`:
+`Error = ${fmt(error)} units²; tolerance = ${fmt(tol)}. ${s.concavity!=="up"?"Reconsider the sign of the trapezium bias.": "Adjust the number of strips."}`;
+}else if(task.type===1){
+let v=volume();good=Math.abs(v-task.target)/task.target<=.005;
+msg=good?`✓ V = ${fmt(v/Math.PI)}π units³. ${task.axis==="x"?"The disc area πy² was integrated.":"The shell circumference 2πx was multiplied by height."}`:
+`Your volume is ${fmt(Math.abs(v-task.target)/task.target*100)}% ${v>task.target?"above":"below"} the target.`;
+}else{
+let num=parseMath(s.answer),valueOk=Number.isFinite(num)&&Math.abs(num-task.answer)<1e-7;
+good=s.choice===task.pick&&(task.mode!=="parts"||s.dv===task.dv)&&valueOk;
+msg=good?`✓ ${task.why} The exact result is ${task.exact}.`:
+`${s.choice!==task.pick?"Check your choice of u. ":""}${task.mode==="parts"&&s.dv!==task.dv?"Check dv. ":""}${!valueOk?"Your exact expression is not equivalent to the integral. Use * for multiplication.":""}`;
+}
+if(good){
+locked=true;let pts=hinted?50:tries===1?100:tries===2?75:50;
+score+=pts;$("scoreHUD").textContent="Score "+score;
+feedback(msg+` +${pts} points.`,true);
+$("check").hidden=true;$("next").hidden=false;$("hint").disabled=true;
+$("next").textContent=round===5?"See stars ★":"Next round →";
+}else feedback(msg,false);
+});
+$("next").addEventListener("click",()=>{
+round++;if(round===6){
+$("game").hidden=true;$("ending").hidden=false;$("roundHUD").textContent="Complete";
+let stars=score>=520?3:score>=380?2:score>=220?1:0;
+$("stars").innerHTML=Array.from({length:3},(_,i)=>`<span class="${i<stars?"earned":""}">★</span>`).join("");
+$("finalScore").textContent=`${score} / 600 points · ${stars} out of 3 stars`;
+}else setup();
+});
+$("again").addEventListener("click",()=>{
+round=0;score=0;seed=(seed+127181)>>>0;
+$("game").hidden=false;$("ending").hidden=true;setup();
+});
+setup();
+})();
+</script>
+</body>
+</html>

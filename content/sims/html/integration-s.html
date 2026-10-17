@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Area Under Curves | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}body{margin:0;background:var(--fit-paper);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#111}
+button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+header,main,footer{max-width:1150px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.badge{background:var(--lvl-secondary);color:var(--lvl-secondary-on);border:2px solid #111;border-radius:999px;padding:7px 13px;text-transform:uppercase;font-size:12px;font-weight:800}
+.hud{display:flex;gap:8px;flex-wrap:wrap;font-weight:800;font-size:14px}.hud span{border:2px solid #111;border-radius:999px;padding:7px 12px}
+h1{font-size:clamp(30px,5vw,49px);line-height:1.08;margin:10px 0 5px;font-weight:800}
+h2{font-size:20px;margin:0 0 14px;font-weight:800}h3{font-size:16px;margin:15px 0 8px}
+.sub{color:var(--fit-ink-3);line-height:1.5}
+.layout{display:grid;gap:18px}@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.18fr) minmax(0,1fr);align-items:start}}
+.card{min-width:0;border:2px solid #111;border-radius:26px;box-shadow:var(--sh-2);padding:17px;background:#fff}
+.stage{background:var(--lvl-secondary-tint)}
+.plot{width:100%;height:auto;display:block;background:#fff;border:2px solid #111;border-radius:18px}
+.controls{display:grid;gap:13px;margin-top:14px}
+.stepper{display:flex;align-items:center;gap:5px;justify-content:space-between;flex-wrap:wrap;border:2px solid #111;border-radius:16px;padding:8px;background:#fff}
+.stepper label{font-weight:800;min-width:85px}
+.stepper button{min-width:44px;min-height:44px;border:2px solid #111;border-radius:12px;background:#fff;font-weight:900}
+.stepper button:active{background:var(--lvl-secondary)}
+.readout{font-weight:800;min-width:58px;text-align:center;font-variant-numeric:tabular-nums}
+.metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
+.metric{border:2px solid #111;border-radius:15px;padding:12px;background:#fff}
+.metric small{display:block;color:#555;font-weight:700}.metric strong{font-size:22px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.btn{border:2px solid #111;border-radius:999px;background:#fff;min-height:48px;padding:10px 19px;font-weight:800;box-shadow:var(--sh-1)}
+.btn.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.btn:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.48;cursor:not-allowed}
+.feedback{min-height:46px;margin:13px 0;font-weight:700;line-height:1.5}
+.legend{font-size:12px;font-weight:800;display:flex;gap:12px;flex-wrap:wrap;margin:9px 0}
+.key{display:inline-block;width:15px;height:12px;border:2px solid #111;vertical-align:middle;margin-right:4px}
+details{border:2px solid #111;border-radius:16px;padding:13px;background:#fff;margin-top:16px}
+summary{font-weight:800;cursor:pointer}
+.concept{width:100%;max-width:330px;display:block;margin:auto}
+.end{text-align:center;padding:36px 14px}.stars{font-size:48px;letter-spacing:6px;color:#ccc}.stars .earned{color:#e9a600}
+footer{font-size:12px;color:#666}
+@media(max-width:420px){header,main,footer{padding:12px}.card{padding:12px}.stepper label{width:100%}}
+@media(prefers-reduced-motion:no-preference){.feedback.good{animation:pop .24s ease-out}@keyframes pop{50%{transform:scale(1.02)}}}
+</style>
+</head>
+<body>
+<header><span class="badge">Secondary · Additional Mathematics</span>
+<div class="hud"><span id="roundHUD">Round 1/6</span><span id="scoreHUD">Score 0</span></div></header>
+<main>
+<h1>Area Under Curves</h1>
+<p class="sub">Recover a function from its derivative, then find areas using definite integration.</p>
+<div id="game" class="layout">
+<section class="card stage">
+<h2 id="typeTitle">Reverse differentiation</h2>
+<p id="question"></p>
+<svg id="graph" class="plot" viewBox="0 0 520 355" role="img" aria-label="Live polynomial graph"></svg>
+<div class="legend">
+<span><i class="key" style="background:#2EC4A6"></i>Positive area / derivative</span>
+<span><i class="key" style="background:#FF8FB8"></i>Negative area</span>
+<span><i class="key" style="background:#6A45F5"></i>Your function</span>
+</div>
+<div id="controls" class="controls"></div>
+</section>
+<section class="card">
+<h2>Integration dashboard</h2>
+<div class="metric-grid">
+<div class="metric"><small id="metricLabel1">Signed area</small><strong id="metric1">0</strong></div>
+<div class="metric"><small id="metricLabel2">Total area</small><strong id="metric2">0</strong></div>
+</div>
+<svg id="areaChart" class="plot" viewBox="0 0 420 260" role="img" aria-label="Live signed area and total positive area"></svg>
+<p class="sub" id="chartCaption">Adjust your controls to update both plots.</p>
+<div class="btnbar">
+<button class="btn" id="hint">Hint −50</button>
+<button class="btn check" id="check">Check ✓</button>
+<button class="btn" id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite"></div>
+<details>
+<summary>The maths</summary>
+<p><strong>Reverse differentiation:</strong> if f′(x) = 2Ax + B, then f(x) = Ax² + Bx + C. Use a given point to determine C.</p>
+<p><strong>Definite integral:</strong> ∫ₐᵇ f(x) dx = F(b) − F(a), where F′(x) = f(x).</p>
+<p>The definite integral gives <em>signed</em> area. For geometric area, split at each x-intercept and add the absolute areas. Areas are measured in units².</p>
+</details>
+<h2 style="margin-top:22px">One thin strip</h2>
+<svg class="concept" viewBox="0 0 330 125" role="img" aria-label="A curve with a thin shaded strip of width delta x">
+<path d="M35 98H306M38 108V12" fill="none" stroke="#111" stroke-width="3"/>
+<path d="M40 80Q125 16 285 40" fill="none" stroke="#2EC4A6" stroke-width="4"/>
+<path d="M149 98V33H166V30V98Z" fill="#FFC83D" stroke="#111" stroke-width="2"/>
+<path d="M149 111H166" stroke="#111" stroke-width="2"/>
+<g font-size="13" font-weight="700"><text x="157" y="123" text-anchor="middle">Δx</text><text x="181" y="57">height f(x)</text><text x="298" y="115">x</text><text x="19" y="19">y</text></g>
+</svg>
+<p class="sub">Area of a narrow strip ≈ height × width.</p>
+</section></div>
+<div id="ending" class="card end" hidden>
+<h2>Integration complete!</h2><div id="stars" class="stars"></div>
+<p id="finalScore"></p><button class="btn check" id="again">Play again ↻</button>
+</div>
+</main><footer>FIT · Integration · Area Under Curves</footer>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+let round=0,score=0,tries=0,hinted=false,locked=false,seed=82641,state={},task={};
+function rng(){seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;}
+function pick(a){return a[Math.floor(rng()*a.length)];}
+function fmt(x){return Math.abs(x)<1e-9?"0":Number(x.toFixed(4)).toString();}
+function S(x){return Number.isFinite(x)?x:0;}
+function derivative(x){return task.A*2*x+task.B;}
+function antiderivative(x){return state.A*x*x+state.B*x+state.C;}
+function f(x){return task.m*(x-task.q);}
+function primitive(x){return task.m*(x*x/2-task.q*x);}
+function signed(a,b){return primitive(b)-primitive(a);}
+function total(a,b){
+if(b<=task.q||a>=task.q)return Math.abs(signed(a,b));
+return Math.abs(signed(a,task.q))+Math.abs(signed(task.q,b));
+}
+function stepper(id,label,min,max,step,coarse){
+const wrap=document.createElement("div");wrap.className="stepper";
+wrap.innerHTML=`<label>${label}</label><button data-d="${-coarse}" aria-label="Decrease ${label} coarsely">−−</button><button data-d="${-step}" aria-label="Decrease ${label}">−</button><span class="readout" id="read-${id}"></span><button data-d="${step}" aria-label="Increase ${label}">+</button><button data-d="${coarse}" aria-label="Increase ${label} coarsely">++</button>`;
+wrap.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+if(locked)return;
+state[id]=Math.max(min,Math.min(max,Math.round((state[id]+Number(b.dataset.d))*100)/100));
+update();
+}));
+$("controls").appendChild(wrap);
+}
+function setup(){
+tries=0;hinted=false;locked=false;
+const type=round%2;
+if(type===0){
+const A=pick([-2,-1.5,-1,.5,1,1.5,2]),B=pick([-3,-2,-1,1,2,3]),C=pick([-3,-2,-1,1,2,3]);
+task={type,A,B,C};
+state={A:A===0?1:0,B:0,C:0};
+$("typeTitle").textContent="Reverse differentiation";
+$("question").textContent=`Given f′(x) = ${fmt(2*A)}x ${B<0?"−":"+"} ${fmt(Math.abs(B))} and f(0) = ${fmt(C)}, construct f(x) = Ax² + Bx + C.`;
+$("chartCaption").textContent="The green derivative is fixed. The purple curve is your proposed original function.";
+$("metricLabel1").textContent="Your f(0)";$("metricLabel2").textContent="Derivative mismatch";
+$("controls").replaceChildren();
+stepper("A","Coefficient A",-4,4,.5,1);
+stepper("B","Coefficient B",-5,5,.5,1);
+stepper("C","Constant C",-5,5,.5,1);
+}else{
+const q=pick([1,1.5,2,2.5]),m=pick([1,1.5,2]),answerB=pick([3,3.5,4,4.5,5]);
+task={type,q,m,answerB,target:total(0,answerB)};
+state={a:0,b:1};
+$("typeTitle").textContent="Area above and below the axis";
+$("question").textContent=`For f(x) = ${fmt(m)}(x − ${fmt(q)}), choose limits 0 ≤ a < b ≤ 5 so the total geometric area is ${fmt(task.target)} units². Count any region below the x-axis as positive area.`;
+$("chartCaption").textContent="Green regions contribute positively; pink regions are below the axis. Signed and total areas update live.";
+$("metricLabel1").textContent="Signed integral (units²)";
+$("metricLabel2").textContent="Total area (units²)";
+$("controls").replaceChildren();
+stepper("a","Lower limit a",0,4.5,.5,1);
+stepper("b","Upper limit b",.5,5,.5,1);
+}
+$("roundHUD").textContent=`Round ${round+1}/6`;
+$("scoreHUD").textContent="Score "+score;
+$("check").hidden=false;$("hint").disabled=false;$("next").hidden=true;
+$("feedback").textContent="";update();
+}
+function update(){
+Object.keys(state).forEach(k=>{const el=$("read-"+k);if(el)el.textContent=fmt(state[k]);});
+if(task.type===0){
+$("metric1").textContent=fmt(state.C);
+$("metric2").textContent=fmt(Math.abs(state.A-task.A)*2+Math.abs(state.B-task.B));
+}else{
+$("metric1").textContent=state.b>state.a?fmt(signed(state.a,state.b)):"—";
+$("metric2").textContent=state.b>state.a?fmt(total(state.a,state.b)):"—";
+}
+drawGraph();drawChart();
+}
+function drawGraph(){
+const svg=$("graph"),left=49,right=496,top=39,bottom=308;
+const xMin=task.type===0?-3:0,xMax=task.type===0?3:5;
+let vals=[];
+for(let i=0;i<=180;i++){
+let x=xMin+(xMax-xMin)*i/180;
+vals.push(task.type===0?derivative(x):f(x));
+if(task.type===0)vals.push(antiderivative(x));
+}
+let lo=Math.min(-1,...vals),hi=Math.max(1,...vals);
+lo=Math.floor(lo-1);hi=Math.ceil(hi+1);
+let X=x=>left+(x-xMin)/(xMax-xMin)*(right-left),Y=y=>bottom-(y-lo)/(hi-lo)*(bottom-top);
+let zero=Y(0),html=`<rect width="520" height="355" fill="#fff"/>
+<text x="16" y="23" font-size="17" font-weight="800">${task.type===0?"Function and derivative":"Signed area under f(x)"}</text>`;
+for(let j=0;j<=5;j++){
+let x=xMin+(xMax-xMin)*j/5;
+html+=`<line x1="${X(x)}" y1="${top}" x2="${X(x)}" y2="${bottom}" stroke="#eee"/>
+<text x="${X(x)}" y="331" font-size="12" text-anchor="middle">${fmt(x)}</text>`;
+}
+for(let j=0;j<=4;j++){
+let y=lo+(hi-lo)*j/4;
+html+=`<line x1="${left}" y1="${Y(y)}" x2="${right}" y2="${Y(y)}" stroke="#eee"/><text x="42" y="${Y(y)+4}" font-size="11" text-anchor="end">${fmt(y)}</text>`;
+}
+html+=`<line x1="${left}" y1="${zero}" x2="${right}" y2="${zero}" stroke="#111" stroke-width="2"/>`;
+let path=(fn)=>{let d="";for(let i=0;i<=160;i++){let x=xMin+(xMax-xMin)*i/160;d+=(i?"L":"M")+X(x).toFixed(2)+" "+Y(fn(x)).toFixed(2);}return d;};
+if(task.type===0){
+html+=`<path d="${path(derivative)}" fill="none" stroke="#2EC4A6" stroke-width="4"/>
+<path d="${path(antiderivative)}" fill="none" stroke="#6A45F5" stroke-width="4"/>
+<circle cx="${X(0)}" cy="${Y(task.C)}" r="6" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+}else{
+if(state.b>state.a){
+let n=90,h=(state.b-state.a)/n;
+for(let i=0;i<n;i++){
+let x=state.a+(i+.5)*h,yy=f(x);
+html+=`<rect x="${X(state.a+i*h)}" y="${Math.min(zero,Y(yy))}" width="${Math.max(1,X(state.a+(i+1)*h)-X(state.a+i*h))}" height="${Math.abs(Y(yy)-zero)}" fill="${yy>=0?"#2EC4A6":"#FF8FB8"}" opacity=".65"/>`;
+}
+}
+html+=`<path d="${path(f)}" fill="none" stroke="#111" stroke-width="3"/>`;
+if(state.b>state.a)for(let x of [state.a,state.b])html+=`<line x1="${X(x)}" x2="${X(x)}" y1="${zero}" y2="${Y(f(x))}" stroke="#6A45F5" stroke-width="4"/>`;
+}
+html+=`<text x="500" y="346" font-size="14" text-anchor="end">x (units)</text>
+<text x="14" y="54" font-size="14">y</text>`;
+svg.innerHTML=html;
+svg.setAttribute("aria-label",task.type===0?"Graph of the given derivative and player's antiderivative":"Graph of f(x) with player's integration limits and shaded signed area");
+}
+function drawChart(){
+const svg=$("areaChart");
+let v1,v2,t1,t2;
+if(task.type===0){
+v1=state.C;v2=Math.abs(state.A-task.A)*2+Math.abs(state.B-task.B);
+t1="f(0)";t2="Mismatch";
+}else{
+v1=state.b>state.a?signed(state.a,state.b):0;
+v2=state.b>state.a?total(state.a,state.b):0;
+t1="Signed";t2="Total";
+}
+let max=Math.max(1,Math.abs(v1),Math.abs(v2),task.type===1?task.target:0)*1.35;
+const y0=127,scale=86/max;
+let h=`<rect width="420" height="260" fill="#fff"/><text x="17" y="24" font-size="17" font-weight="800">Live quantities</text>
+<line x1="48" y1="${y0}" x2="400" y2="${y0}" stroke="#111" stroke-width="2"/>
+<text x="41" y="${y0+4}" font-size="12" text-anchor="end">0</text>`;
+[v1,v2].forEach((v,i)=>{
+let x=106+i*156,y=v>=0?y0-v*scale:y0;
+h+=`<rect x="${x}" y="${y}" width="94" height="${Math.abs(v)*scale}" fill="${i?"#2EC4A6":"#6A45F5"}" stroke="#111" stroke-width="2"/>
+<text x="${x+47}" y="${v>=0?y-8:y0+Math.abs(v)*scale+17}" text-anchor="middle" font-size="14" font-weight="800">${fmt(v)}</text>
+<text x="${x+47}" y="234" text-anchor="middle" font-size="13" font-weight="700">${i?t2:t1}</text>`;
+});
+svg.innerHTML=h;
+svg.setAttribute("aria-label",`${t1} ${fmt(v1)} and ${t2} ${fmt(v2)}`);
+}
+function message(t,good){$("feedback").textContent=t;$("feedback").className="feedback"+(good?" good":"");}
+$("hint").addEventListener("click",()=>{
+hinted=true;$("hint").disabled=true;
+message(task.type===0?"Integrate each term separately. Differentiating Ax² gives 2Ax. Use the point to fix C.":"Split the region at its x-intercept. The negative part must be made positive before you add areas.",false);
+});
+$("check").addEventListener("click",()=>{
+if(locked)return;tries++;
+let correct=false,why="";
+if(task.type===0){
+correct=Math.abs(state.A-task.A)<1e-8&&Math.abs(state.B-task.B)<1e-8&&Math.abs(state.C-task.C)<1e-8;
+why=correct?`✓ Differentiating gives the required f′(x), and f(0) = ${fmt(task.C)}.`:
+`Not yet: check ${["A","B","C"].filter(k=>Math.abs(state[k]-task[k])>1e-8).join(", ")}. Differentiate your f(x) and compare it with f′(x), then use f(0).`;
+}else{
+let val=state.b>state.a?total(state.a,state.b):NaN;
+correct=Number.isFinite(val)&&Math.abs(val-task.target)<.015;
+why=correct?`✓ Total geometric area = ${fmt(val)} units². The negative region contributes its magnitude.`:
+state.b<=state.a?"The upper limit must exceed the lower limit.":`Your total area is ${fmt(Math.abs(val-task.target))} units² too ${val>task.target?"large":"small"}.`;
+}
+if(correct){
+locked=true;let pts=hinted?50:tries===1?100:tries===2?75:50;score+=pts;
+$("scoreHUD").textContent="Score "+score;
+message(why+` +${pts} points.`,true);
+$("check").hidden=true;$("hint").disabled=true;$("next").hidden=false;
+$("next").textContent=round===5?"See stars ★":"Next round →";
+}else message(why,false);
+});
+$("next").addEventListener("click",()=>{
+round++;if(round>=6){
+$("game").hidden=true;$("ending").hidden=false;
+$("roundHUD").textContent="Complete";
+let n=score>=520?3:score>=380?2:score>=220?1:0;
+$("stars").innerHTML=Array.from({length:3},(_,i)=>`<span class="${i<n?"earned":""}">★</span>`).join("");
+$("finalScore").textContent=`${score} / 600 points · ${n} out of 3 stars`;
+}else setup();
+});
+$("again").addEventListener("click",()=>{
+round=0;score=0;seed=(seed+29817)>>>0;
+$("game").hidden=false;$("ending").hidden=true;setup();
+});
+setup();
+})();
+</script>
+</body>
+</html>
