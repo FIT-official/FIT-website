@@ -1,0 +1,1656 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Predator–Prey Lab</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font:400 16px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1390px;margin:auto;padding:16px 14px 45px}
+h1,h2,h3,p{margin:0}
+h1{font-size:clamp(30px,5vw,46px);font-weight:800;letter-spacing:-.045em;line-height:1.1;margin:15px 0 8px}
+h2{font-size:22px;font-weight:800;margin-bottom:12px}
+h3{font-size:15px;font-weight:800;margin:12px 0 8px}
+p{color:var(--fit-ink-2)}
+.hud{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.badge,.counter{border:2px solid #111;border-radius:999px;font-size:12px;font-weight:800;padding:8px 12px}
+.badge{background:var(--lvl-uni);color:var(--lvl-uni-on);text-transform:uppercase}
+.counter{background:#fff}
+.score{margin-left:auto}
+.layout{display:grid;gap:19px;margin-top:23px}
+.panel{min-width:0;border:2px solid #111;background:#fff;border-radius:26px;padding:19px;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-uni-tint)}
+.question{font-size:18px;font-weight:700;margin:11px 0 17px}
+.scene{border:2px solid #111;border-radius:20px;background:#fff;padding:13px;margin-bottom:17px}
+.scene svg,.plot{width:100%;height:auto;display:block}
+.caption{font-size:12px;color:var(--fit-ink-3);margin-top:8px}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fact{border:2px solid #111;border-radius:14px;padding:11px;background:#fff}
+.fact small{display:block;font-size:12px;color:var(--fit-ink-3);font-weight:700}
+.fact strong{display:block;font-size:19px;font-weight:800;overflow-wrap:anywhere}
+button,input[type="range"],input[type="number"],.choice{-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+button{font:800 15px/1.2 Inter,system-ui,sans-serif;min-height:46px;border:2px solid #111;border-radius:999px;padding:9px 14px;background:#fff;color:#111;cursor:pointer;box-shadow:var(--sh-1)}
+button:disabled{opacity:.5;cursor:default}
+button:active:not(:disabled){transform:translateY(2px);box-shadow:none}
+button:focus:not(:focus-visible),input:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+.control{background:#fff;border:2px solid #111;border-radius:16px;padding:11px;margin:11px 0}
+.control label{font-size:13px;font-weight:800;display:block;margin-bottom:8px}
+.stepper{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.stepper button{flex:0 0 45px;padding:8px}
+.stepper input{flex:1 1 84px;min-width:80px;width:90px;text-align:center;font-weight:800;font-size:18px}
+input[type="number"]{min-height:48px;border:2px solid #111;border-radius:13px;padding:8px;font-family:inherit}
+input[type="range"]{height:44px;width:100%;display:block;accent-color:var(--lvl-uni)}
+.choices{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.choice[aria-pressed="true"]{background:var(--lvl-uni);color:#fff}
+.plot-box{border:2px solid #111;border-radius:18px;padding:8px;overflow:hidden;margin:12px 0}
+.legend{font-size:12px;font-weight:800;display:flex;gap:12px;flex-wrap:wrap}
+.swatch{width:13px;height:5px;border-radius:3px;display:inline-block;vertical-align:middle;margin-right:5px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.feedback{min-height:65px;background:var(--fit-sunken);border:2px solid var(--fit-line-soft);padding:13px;border-radius:16px;margin-top:13px;font-weight:700}
+.feedback.good{background:#EAF9EF;border-color:var(--fit-success)}
+.feedback.bad{background:#FFF0EE;border-color:var(--fit-danger)}
+details{margin-top:24px;border:2px solid #111;border-radius:17px;padding:13px}
+summary{font-weight:800;min-height:44px;display:flex;align-items:center;cursor:pointer}
+footer{text-align:center;font-size:12px;color:var(--fit-ink-3);margin-top:27px}
+.end{text-align:center;padding:43px 13px}
+.stars{font-size:44px;letter-spacing:7px;color:#9B7000}
+.end strong{display:block;font-size:29px;margin:14px}
+@media(min-width:900px){
+  .layout{grid-template-columns:minmax(0,.96fr) minmax(0,1.04fr)}
+  .panel{padding:24px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{
+    animation:none!important;
+    transition:none!important;
+    scroll-behaviour:auto!important
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="hud">
+<span class="badge">University · Ecology</span>
+<span id="round" class="counter">Round 1/6</span>
+<span id="score" class="counter score">Score 0</span>
+</div>
+<h1>Predator–Prey Lab</h1>
+<p>Investigate equilibria, oscillations and limiting prey resources.</p>
+</header>
+
+<div id="game" class="layout">
+<section class="panel stage">
+<h2 id="title">Coexistence challenge</h2>
+<p id="question" class="question"></p>
+<div class="scene">
+<svg viewBox="0 0 480 126" role="img" aria-label="A predator fish pursuing smaller prey fish">
+<rect x="2" y="2" width="476" height="122" rx="18" stroke="#111" stroke-width="3" fill="#DDF7F1"/>
+<path d="M2 85Q90 61 164 82T320 79T478 81V124H2Z" stroke="#111" stroke-width="3" fill="#77C9EA"/>
+<path d="M48 82Q83 48 117 81L140 61V101L117 82Q85 108 48 82Z" fill="#FFDD00" stroke="#111" stroke-width="3"/>
+<circle cx="111" cy="77" r="4"/>
+<path d="M198 62H250M238 50L257 62L238 74" fill="none" stroke="#111" stroke-width="4"/>
+<path d="M303 82Q354 18 401 82L442 54V109L401 82Q360 124 303 82Z" fill="#1F66E5" stroke="#111" stroke-width="3"/>
+<circle cx="392" cy="72" r="5" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="93" y="117" text-anchor="middle" font-size="12" font-weight="800">Prey</text>
+<text x="374" y="117" text-anchor="middle" font-size="12" font-weight="800">Predator</text>
+</svg>
+<p id="assumption" class="caption">Assumption: a closed predator–prey system with fixed rates.</p>
+</div>
+<div id="facts" class="facts"></div>
+<div id="controls"></div>
+</section>
+
+<section class="panel">
+<h2>Population trajectories</h2>
+<div class="legend">
+<span><i class="swatch" style="background:#1F66E5"></i>Prey x</span>
+<span><i class="swatch" style="background:#FF8FB8"></i>Predators y</span>
+</div>
+<div class="plot-box">
+<svg id="timePlot" class="plot" viewBox="0 0 490 270" role="img" aria-label="Prey and predator populations over years"></svg>
+</div>
+<h2>Phase plane</h2>
+<div class="plot-box">
+<svg id="phasePlot" class="plot" viewBox="0 0 490 280" role="img" aria-label="Predator population against prey population, with trajectory and equilibrium"></svg>
+</div>
+<p id="plotNote" class="caption">Trajectories use the calculation module's fourth-order Runge–Kutta solver.</p>
+<div class="actions">
+<button id="hint">Hint − points</button>
+<button id="check" class="check">Check</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div class="feedback" id="feedback" role="status" aria-live="polite">Adjust the controls, then check your prediction.</div>
+</section>
+</div>
+
+<details>
+<summary>The biology</summary>
+<p>Prey: dx/dt = αx(1 − x/K) − βxy. Predator: dy/dt = δxy − γy. With unlimited prey, remove the carrying-capacity factor. Coexistence gives x* = γ/δ and y* = α/β. With capacity K, predator coexistence requires K greater than γ/δ, and y* = (α/β)(1 − x*/K). Small-oscillation period without K = 2π/√(αγ). The unrestricted conserved quantity is H = δx − γln(x) + βy − αln(y). Logistic prey limitation can damp oscillations or exclude predators.</p>
+</details>
+<footer>Fix It Today</footer>
+</main>
+
+<script>
+/* FIT-CALC-BEGIN ecosystems */
+const FITCalcEco = (function () {
+  'use strict';
+
+  const err = (error, reason) => ({ error, reason });
+  const finite = n => typeof n === 'number' && Number.isFinite(n);
+  const allFinite = (...a) => a.every(finite);
+  const whole = n => Number.isInteger(n) && n >= 0;
+  const invalid = () => err('ConstraintViolation', 'invalid_number');
+  const overflow = () => err('RuntimeError', 'numeric_overflow');
+  const negative = kind => err('ConstraintViolation', 'negative_' + kind);
+  const rateError = () => err('ConstraintViolation', 'rate_not_positive');
+  const capacityError = () => err('ConstraintViolation', 'carrying_capacity_not_positive');
+  const levelError = () => err('ConstraintViolation', 'levels_out_of_range_1_6');
+
+  function analyseWeb(organisms, eats) {
+    if (!Array.isArray(organisms) || organisms.length < 2 ||
+        organisms.length > 12) {
+      return err('ConstraintViolation', 'organisms_out_of_range_2_12');
+    }
+    if (organisms.some(n => typeof n !== 'string' || !n.length)) {
+      return err('ConstraintViolation', 'invalid_organism');
+    }
+    if (new Set(organisms).size !== organisms.length) {
+      return err('ConstraintViolation', 'duplicate_organism');
+    }
+    if (!Array.isArray(eats)) {
+      return err('ConstraintViolation', 'invalid_links');
+    }
+
+    const prey = new Map(organisms.map(n => [n, []]));
+    const predators = new Map(organisms.map(n => [n, []]));
+
+    for (const link of eats) {
+      if (!Array.isArray(link) || link.length !== 2) {
+        return err('ConstraintViolation', 'invalid_links');
+      }
+      const [predator, food] = link;
+      if (!prey.has(predator) || !prey.has(food)) {
+        return err('ConstraintViolation', 'unknown_organism');
+      }
+      if (predator === food) {
+        return err('ConstraintViolation', 'food_web_has_cycle');
+      }
+      if (!prey.get(predator).includes(food)) {
+        prey.get(predator).push(food);
+        predators.get(food).push(predator);
+      }
+    }
+
+    const state = new Map();
+    const levels = new Map();
+    const paths = new Map();
+
+    function visit(name) {
+      if (state.get(name) === 1) return false;
+      if (state.get(name) === 2) return true;
+      state.set(name, 1);
+      let level = 1;
+      let chains = 0;
+      const food = prey.get(name);
+      for (const item of food) {
+        if (!visit(item)) return false;
+        level = Math.max(level, levels.get(item) + 1);
+        chains += paths.get(item);
+      }
+      levels.set(name, level);
+      paths.set(name, food.length ? chains : 1);
+      state.set(name, 2);
+      return true;
+    }
+
+    for (const name of organisms) {
+      if (!visit(name)) {
+        return err('ConstraintViolation', 'food_web_has_cycle');
+      }
+    }
+    if (organisms.some(n => !prey.get(n).length &&
+        !predators.get(n).length)) {
+      return err('ConstraintViolation', 'organism_not_linked');
+    }
+
+    const producers = organisms.filter(n => !prey.get(n).length);
+    const top_consumers = organisms.filter(n => !predators.get(n).length);
+    const max_trophic_level = Object.fromEntries(
+      organisms.map(n => [n, levels.get(n)])
+    );
+
+    return {
+      producers, top_consumers, max_trophic_level, prey, predators,
+      chain_count: top_consumers.reduce((s, n) => s + paths.get(n), 0),
+      longest_chain: Math.max(...top_consumers.map(n => levels.get(n)))
+    };
+  }
+
+  /**
+   * Inputs: organisms (2–12 names), eats ([predator,prey] pairs).
+   * Outputs: producers, top_consumers, chain_count, longest_chain,
+   * max_trophic_level (dimensionless). Energy flows prey to predator.
+   * Assumption: an acyclic food web with no isolated organisms.
+   * Errors: ConstraintViolation organisms_out_of_range_2_12,
+   * invalid_organism, duplicate_organism, invalid_links,
+   * unknown_organism, food_web_has_cycle, organism_not_linked.
+   * Hand check: grass -> rabbit -> fox has one chain, length 3,
+   * and levels grass=1, rabbit=2, fox=3.
+   */
+  function food_web({ organisms, eats } = {}) {
+    const w = analyseWeb(organisms, eats);
+    if (w.error) return w;
+    return {
+      producers: w.producers,
+      top_consumers: w.top_consumers,
+      chain_count: w.chain_count,
+      longest_chain: w.longest_chain,
+      max_trophic_level: w.max_trophic_level
+    };
+  }
+
+  /**
+   * Inputs: organisms, eats as above; removed (organism name).
+   * Outputs: effects (organism -> increase/decrease/unchanged),
+   * starving (names in original order).
+   * Assumption: first-order direct feeding effects only.
+   * Errors: food_web errors; ConstraintViolation unknown_organism.
+   * Hand check: remove rabbit from grass -> rabbit -> fox:
+   * grass increases, fox decreases, and fox is starving.
+   */
+  function remove_effect({ organisms, eats, removed } = {}) {
+    const w = analyseWeb(organisms, eats);
+    if (w.error) return w;
+    if (!w.prey.has(removed)) {
+      return err('ConstraintViolation', 'unknown_organism');
+    }
+    const effects = {};
+    const starving = [];
+    for (const name of organisms) {
+      if (name === removed) continue;
+      let effect = 'unchanged';
+      if (w.prey.get(removed).includes(name)) effect = 'increase';
+      if (w.predators.get(removed).includes(name)) effect = 'decrease';
+      Object.defineProperty(effects, name, {
+        value: effect, enumerable: true, writable: true, configurable: true
+      });
+      const foods = w.prey.get(name);
+      if (foods.length === 1 && foods[0] === removed) starving.push(name);
+    }
+    return { effects, starving };
+  }
+
+  /**
+   * Inputs: energy_kJ >=0, efficiency fraction (0,1], levels 1..6.
+   * Outputs: energy_by_level_kJ, total_lost_kJ.
+   * Assumption: identical efficiency at successive transfers.
+   * Errors: ConstraintViolation negative_energy, invalid_number,
+   * efficiency_out_of_range_0_1, levels_out_of_range_1_6;
+   * RuntimeError numeric_overflow.
+   * Hand check: 1000 kJ at 10%, 3 levels -> [1000,100,10],
+   * total lost 990 kJ.
+   */
+  function energy_transfer({ energy_kJ, efficiency, levels } = {}) {
+    if (finite(energy_kJ) && energy_kJ < 0) return negative('energy');
+    if (!allFinite(energy_kJ, efficiency)) return invalid();
+    if (efficiency <= 0 || efficiency > 1) {
+      return err('ConstraintViolation', 'efficiency_out_of_range_0_1');
+    }
+    if (!Number.isInteger(levels) || levels < 1 || levels > 6) {
+      return levelError();
+    }
+    const energy_by_level_kJ = [energy_kJ];
+    for (let i = 1; i < levels; i++) {
+      const value = energy_by_level_kJ[i - 1] * efficiency;
+      if (!finite(value)) return overflow();
+      energy_by_level_kJ.push(value);
+    }
+    return {
+      energy_by_level_kJ,
+      total_lost_kJ: energy_kJ - energy_by_level_kJ[levels - 1]
+    };
+  }
+
+  /**
+   * Inputs: energy_in_kJ, energy_out_kJ.
+   * Outputs: efficiency (fraction), percent (%).
+   * Assumption: output energy cannot exceed input energy.
+   * Errors: ConstraintViolation negative_energy, invalid_number,
+   * output_exceeds_input; MathError division_by_zero.
+   * Hand check: input 200 kJ, output 25 kJ -> 0.125, 12.5%.
+   */
+  function transfer_efficiency({ energy_in_kJ, energy_out_kJ } = {}) {
+    if (finite(energy_in_kJ) && energy_in_kJ < 0 ||
+        finite(energy_out_kJ) && energy_out_kJ < 0) return negative('energy');
+    if (!allFinite(energy_in_kJ, energy_out_kJ)) return invalid();
+    if (energy_in_kJ === 0) return err('MathError', 'division_by_zero');
+    if (energy_out_kJ > energy_in_kJ) {
+      return err('ConstraintViolation', 'output_exceeds_input');
+    }
+    const efficiency = energy_out_kJ / energy_in_kJ;
+    return { efficiency, percent: efficiency * 100 };
+  }
+
+  /**
+   * Inputs: numbers (whole organisms per level), mass_each_g (g each).
+   * Outputs: biomass_g, numbers_shape, biomass_shape.
+   * Assumption: a representative individual mass for each level.
+   * Errors: ConstraintViolation levels_out_of_range_1_6,
+   * length_mismatch, negative_count, invalid_number, invalid_count;
+   * RuntimeError numeric_overflow.
+   * Hand check: numbers [1,100,10], masses [10000,2,10] g:
+   * biomass [10000,200,100] g; numbers irregular, biomass upright.
+   */
+  function pyramid({ numbers, mass_each_g } = {}) {
+    if (!Array.isArray(numbers) || numbers.length < 1 ||
+        numbers.length > 6) return levelError();
+    if (!Array.isArray(mass_each_g) ||
+        numbers.length !== mass_each_g.length) {
+      return err('ConstraintViolation', 'length_mismatch');
+    }
+    if ([...numbers, ...mass_each_g].some(n => finite(n) && n < 0)) {
+      return negative('count');
+    }
+    if ([...numbers, ...mass_each_g].some(n => !finite(n))) return invalid();
+    if (numbers.some(n => !whole(n))) {
+      return err('ConstraintViolation', 'invalid_count');
+    }
+    const biomass_g = numbers.map((n, i) => n * mass_each_g[i]);
+    if (biomass_g.some(n => !finite(n))) return overflow();
+
+    function shape(a) {
+      if (a.every((n, i) => i === 0 || n <= a[i - 1])) return 'upright';
+      if (a.every((n, i) => i === 0 || n >= a[i - 1])) return 'inverted';
+      return 'irregular';
+    }
+    return {
+      biomass_g,
+      numbers_shape: shape(numbers),
+      biomass_shape: shape(biomass_g)
+    };
+  }
+
+  /**
+   * Inputs: c0_ppm >=0, factor >=1, levels 1..6.
+   * Outputs: concentration_ppm_by_level (ppm).
+   * Assumption: constant magnification factor per feeding step.
+   * Errors: ConstraintViolation negative_concentration, invalid_number,
+   * factor_below_1, levels_out_of_range_1_6;
+   * RuntimeError numeric_overflow.
+   * Hand check: 0.02 ppm, factor 5, three levels
+   * -> [0.02,0.1,0.5] ppm.
+   */
+  function bioaccumulation({ c0_ppm, factor, levels } = {}) {
+    if (finite(c0_ppm) && c0_ppm < 0) return negative('concentration');
+    if (!allFinite(c0_ppm, factor)) return invalid();
+    if (factor < 1) return err('ConstraintViolation', 'factor_below_1');
+    if (!Number.isInteger(levels) || levels < 1 || levels > 6) {
+      return levelError();
+    }
+    const concentration_ppm_by_level = [c0_ppm];
+    for (let i = 1; i < levels; i++) {
+      const next = concentration_ppm_by_level[i - 1] * factor;
+      if (!finite(next)) return overflow();
+      concentration_ppm_by_level.push(next);
+    }
+    return { concentration_ppm_by_level };
+  }
+
+  /**
+   * Inputs: N0 (individuals), r_per_year, t_years.
+   * Outputs: N (individuals), doubling_time_years (null if r<=0).
+   * Assumption: unrestricted growth at a fixed per-capita rate.
+   * Errors: ConstraintViolation negative_population, invalid_number;
+   * RuntimeError numeric_overflow.
+   * Hand check: N0=100, r=ln(2)/year, t=2 years
+   * -> N=400, doubling time=1 year.
+   */
+  function exponential({ N0, r_per_year, t_years } = {}) {
+    if (finite(N0) && N0 < 0) return negative('population');
+    if (!allFinite(N0, r_per_year, t_years)) return invalid();
+    const N = N0 === 0 ? 0 : N0 * Math.exp(r_per_year * t_years);
+    const doubling_time_years = r_per_year > 0
+      ? Math.LN2 / r_per_year : null;
+    if (!finite(N) || (doubling_time_years !== null &&
+        !finite(doubling_time_years))) return overflow();
+    return { N, doubling_time_years };
+  }
+
+  /**
+   * Inputs: N0, K (individuals), r_per_year, t_years.
+   * Outputs: N (individuals), dN_dt_per_year (individuals/year).
+   * Assumption: closed logistic population, fixed K; N0>K allowed.
+   * Errors: ConstraintViolation negative_population,
+   * carrying_capacity_not_positive, invalid_number;
+   * MathError population_not_defined; RuntimeError numeric_overflow.
+   * Hand check: N0=20, K=100, r=ln(4), t=1 -> N=50,
+   * dN/dt=25ln(4) individuals/year.
+   */
+  function logistic({ N0, r_per_year, K, t_years } = {}) {
+    if (finite(N0) && N0 < 0) return negative('population');
+    if (finite(K) && K <= 0) return capacityError();
+    if (!allFinite(N0, r_per_year, K, t_years)) return invalid();
+    if (N0 === 0) return { N: 0, dN_dt_per_year: 0 };
+    const q = (K - N0) / N0;
+    const z = -r_per_year * t_years;
+    let N;
+    if (z > 0) {
+      const e = Math.exp(-z);
+      N = K * e / (e + q);
+    } else {
+      N = K / (1 + q * Math.exp(z));
+    }
+    if (!(N >= 0) || !finite(N)) {
+      return err('MathError', 'population_not_defined');
+    }
+    const dN_dt_per_year = r_per_year * N * (1 - N / K);
+    if (!finite(dN_dt_per_year)) return overflow();
+    return { N, dN_dt_per_year };
+  }
+
+  /**
+   * Inputs: N0, K, N_target (individuals), r_per_year.
+   * Outputs: t_years to reach target, including zero for equal target.
+   * Assumption: positive finite time under exact logistic dynamics.
+   * Errors: ConstraintViolation negative_population,
+   * carrying_capacity_not_positive, invalid_number;
+   * MathError target_not_reachable.
+   * Hand check: N0=20, K=100, r=ln(4), target=50 -> 1 year.
+   */
+  function logistic_time({ N0, r_per_year, K, N_target } = {}) {
+    if (finite(N0) && N0 < 0 ||
+        finite(N_target) && N_target < 0) return negative('population');
+    if (finite(K) && K <= 0) return capacityError();
+    if (!allFinite(N0, r_per_year, K, N_target)) return invalid();
+    if (N_target === N0) return { t_years: 0 };
+    if (N0 === 0 || N0 === K || N_target <= 0 ||
+        N_target === K || r_per_year === 0) {
+      return err('MathError', 'target_not_reachable');
+    }
+    const ratio = (K / N_target - 1) / (K / N0 - 1);
+    if (!(ratio > 0) || !finite(ratio)) {
+      return err('MathError', 'target_not_reachable');
+    }
+    const t_years = -Math.log(ratio) / r_per_year;
+    if (!finite(t_years) || t_years <= 0) {
+      return err('MathError', 'target_not_reachable');
+    }
+    return { t_years };
+  }
+
+  /**
+   * Inputs: r_per_year>0, K>0 (individuals), h_per_year>=0
+   * (individuals/year).
+   * Outputs: msy_per_year, equilibria (ascending), regime.
+   * Assumption: constant quota removed from logistic production.
+   * Errors: ConstraintViolation rate_not_positive,
+   * carrying_capacity_not_positive, negative_harvest, invalid_number;
+   * RuntimeError numeric_overflow.
+   * Hand check: r=0.4, K=1000, h=75 -> MSY=100,
+   * equilibria [250,750], sustainable.
+   */
+  function harvest({ r_per_year, K, h_per_year } = {}) {
+    if (finite(r_per_year) && r_per_year <= 0) return rateError();
+    if (finite(K) && K <= 0) return capacityError();
+    if (finite(h_per_year) && h_per_year < 0) {
+      return err('ConstraintViolation', 'negative_harvest');
+    }
+    if (!allFinite(r_per_year, K, h_per_year)) return invalid();
+    const msy_per_year = r_per_year * K / 4;
+    if (!finite(msy_per_year)) return overflow();
+    const tol = 1e-9 * Math.max(1, msy_per_year);
+    if (Math.abs(h_per_year - msy_per_year) <= tol) {
+      return { msy_per_year, equilibria: [K / 2], regime: 'at_msy' };
+    }
+    if (h_per_year > msy_per_year) {
+      return { msy_per_year, equilibria: [], regime: 'collapse' };
+    }
+    const d = Math.sqrt(Math.max(0, 1 - h_per_year / msy_per_year));
+    return {
+      msy_per_year,
+      equilibria: [K * (1 - d) / 2, K * (1 + d) / 2],
+      regime: 'sustainable'
+    };
+  }
+
+  /**
+   * Inputs: counts (individuals/quadrat), quadrat_area_m2,
+   * total_area_m2 (positive m²).
+   * Outputs: mean_per_quadrat, density_per_m2,
+   * population_estimate, percent_frequency (%).
+   * Assumption: representative, equal-area quadrats.
+   * Errors: ConstraintViolation empty_data, negative_count,
+   * invalid_count, invalid_number, area_not_positive;
+   * RuntimeError numeric_overflow.
+   * Hand check: [0,2,4,2], quadrat 2m², field 100m² ->
+   * mean=2, density=1/m², estimate=100, frequency=75%.
+   */
+  function quadrat({ counts, quadrat_area_m2, total_area_m2 } = {}) {
+    if (!Array.isArray(counts) || !counts.length) {
+      return err('ConstraintViolation', 'empty_data');
+    }
+    if (counts.some(n => finite(n) && n < 0)) return negative('count');
+    if (counts.some(n => !whole(n))) {
+      return err('ConstraintViolation', 'invalid_count');
+    }
+    if (finite(quadrat_area_m2) && quadrat_area_m2 <= 0 ||
+        finite(total_area_m2) && total_area_m2 <= 0) {
+      return err('ConstraintViolation', 'area_not_positive');
+    }
+    if (!allFinite(quadrat_area_m2, total_area_m2)) return invalid();
+    const mean_per_quadrat = counts.reduce((a, b) => a + b, 0) /
+      counts.length;
+    const density_per_m2 = mean_per_quadrat / quadrat_area_m2;
+    const population_estimate = density_per_m2 * total_area_m2;
+    const percent_frequency = 100 * counts.filter(n => n > 0).length /
+      counts.length;
+    if (!allFinite(mean_per_quadrat, density_per_m2,
+      population_estimate, percent_frequency)) return overflow();
+    return {
+      mean_per_quadrat, density_per_m2,
+      population_estimate, percent_frequency
+    };
+  }
+
+  /**
+   * Inputs: marked_first M, caught_second C, marked_second R
+   * (whole animals); method lincoln_petersen (default) or chapman.
+   * Outputs: N_estimate (animals, not rounded).
+   * Assumption: closed mixed population and equal catchability.
+   * Errors: NotSupported method_not_supported;
+   * ConstraintViolation negative_count, invalid_count,
+   * recaptures_exceed_catch; MathError no_recaptures;
+   * RuntimeError numeric_overflow.
+   * Hand check: M=20,C=30,R=10 -> LP=60,
+   * Chapman=21*31/11-1=58.18181818.
+   */
+  function mark_recapture({
+    marked_first, caught_second, marked_second,
+    method = 'lincoln_petersen'
+  } = {}) {
+    if (method !== 'lincoln_petersen' && method !== 'chapman') {
+      return err('NotSupported', 'method_not_supported');
+    }
+    const a = [marked_first, caught_second, marked_second];
+    if (a.some(n => finite(n) && n < 0)) return negative('count');
+    if (a.some(n => !whole(n))) {
+      return err('ConstraintViolation', 'invalid_count');
+    }
+    if (marked_second > caught_second || marked_second > marked_first) {
+      return err('ConstraintViolation', 'recaptures_exceed_catch');
+    }
+    if (method === 'lincoln_petersen' && marked_second === 0) {
+      return err('MathError', 'no_recaptures');
+    }
+    const N_estimate = method === 'chapman'
+      ? (marked_first + 1) * (caught_second + 1) /
+        (marked_second + 1) - 1
+      : marked_first * caught_second / marked_second;
+    if (!finite(N_estimate)) return overflow();
+    return { N_estimate };
+  }
+
+  /**
+   * Inputs: counts (whole individuals for each species).
+   * Outputs: N, S, simpson_D, simpson_diversity,
+   * shannon_H (natural log), evenness (null if S<2).
+   * Assumption: distinct species, complete sampled counts.
+   * Errors: ConstraintViolation empty_data, negative_count,
+   * invalid_count; MathError too_few_individuals;
+   * RuntimeError numeric_overflow.
+   * Hand check: [2,2] -> N=4,S=2,D=1/3,1-D=2/3,
+   * H=ln(2), evenness=1.
+   */
+  function diversity({ counts } = {}) {
+    if (!Array.isArray(counts) || !counts.length) {
+      return err('ConstraintViolation', 'empty_data');
+    }
+    if (counts.some(n => finite(n) && n < 0)) return negative('count');
+    if (counts.some(n => !whole(n))) {
+      return err('ConstraintViolation', 'invalid_count');
+    }
+    const N = counts.reduce((a, b) => a + b, 0);
+    const S = counts.filter(n => n > 0).length;
+    if (N < 2) return err('MathError', 'too_few_individuals');
+    const simpson_D = counts.reduce((s, n) => s + n * (n - 1), 0) /
+      (N * (N - 1));
+    const simpson_diversity = 1 - simpson_D;
+    const shannon_H = -counts.reduce((s, n) => {
+      if (!n) return s;
+      const p = n / N;
+      return s + p * Math.log(p);
+    }, 0);
+    const evenness = S < 2 ? null : shannon_H / Math.log(S);
+    if (!allFinite(N, simpson_D, simpson_diversity, shannon_H) ||
+        evenness !== null && !finite(evenness)) return overflow();
+    return { N, S, simpson_D, simpson_diversity, shannon_H, evenness };
+  }
+
+  function validLV({ alpha, beta, gamma, delta, K }) {
+    const a = [alpha, beta, gamma, delta];
+    if (a.some(n => finite(n) && n <= 0)) return rateError();
+    if (K !== null && K !== undefined && finite(K) && K <= 0) {
+      return capacityError();
+    }
+    if (a.some(n => !finite(n)) ||
+        K !== null && K !== undefined && !finite(K)) return invalid();
+    return null;
+  }
+
+  /**
+   * Inputs: alpha,gamma (1/year); beta,delta (interaction rates);
+   * optional K (prey individuals, null means unlimited).
+   * Outputs: prey_star, predator_star (individuals), regime.
+   * Assumption: logistic prey limitation only when K is supplied.
+   * Errors: ConstraintViolation rate_not_positive,
+   * carrying_capacity_not_positive, invalid_number;
+   * RuntimeError numeric_overflow.
+   * Hand check: alpha=2,beta=.02,gamma=1,delta=.01:
+   * (100,100); with K=80 -> (80,0), predator_extinct.
+   */
+  function lv_equilibrium({ alpha, beta, gamma, delta, K } = {}) {
+    const problem = validLV({ alpha, beta, gamma, delta, K });
+    if (problem) return problem;
+    const x = gamma / delta;
+    if (!finite(x)) return overflow();
+    if (K != null && x >= K) {
+      return { prey_star: K, predator_star: 0, regime: 'predator_extinct' };
+    }
+    const y = alpha / beta * (K == null ? 1 : 1 - x / K);
+    if (!finite(y)) return overflow();
+    return { prey_star: x, predator_star: y, regime: 'coexistence' };
+  }
+
+  function lvRun(args, trace) {
+    const { alpha, beta, gamma, delta, K, x0, y0, dt, steps } = args;
+    const problem = validLV({ alpha, beta, gamma, delta, K });
+    if (problem) return problem;
+    if (finite(x0) && x0 < 0 || finite(y0) && y0 < 0) {
+      return negative('population');
+    }
+    if (!allFinite(x0, y0)) return invalid();
+    if (finite(dt) && dt <= 0) {
+      return err('MathError', 'dt_must_be_positive');
+    }
+    if (!finite(dt)) return invalid();
+    if (!Number.isInteger(steps) || steps < 1 || steps > 20000) {
+      return err('ConstraintViolation', 'steps_out_of_range_1_20000');
+    }
+
+    const derivative = (x, y) => ({
+      x: alpha * x * (K == null ? 1 : 1 - x / K) - beta * x * y,
+      y: delta * x * y - gamma * y
+    });
+
+    let x = x0, y = y0;
+    let x_max = x, x_min = x, y_max = y, y_min = y;
+    const points = trace ? [{ t_years: 0, x, y }] : null;
+
+    for (let i = 1; i <= steps; i++) {
+      const a = derivative(x, y);
+      const b = derivative(x + dt * a.x / 2, y + dt * a.y / 2);
+      const c = derivative(x + dt * b.x / 2, y + dt * b.y / 2);
+      const d = derivative(x + dt * c.x, y + dt * c.y);
+      x += dt * (a.x + 2 * b.x + 2 * c.x + d.x) / 6;
+      y += dt * (a.y + 2 * b.y + 2 * c.y + d.y) / 6;
+      if (!allFinite(x, y)) return overflow();
+      x_max = Math.max(x_max, x);
+      x_min = Math.min(x_min, x);
+      y_max = Math.max(y_max, y);
+      y_min = Math.min(y_min, y);
+      if (trace) points.push({ t_years: i * dt, x, y });
+    }
+    const result = {
+      t_final: steps * dt, x_final: x, y_final: y,
+      x_max, x_min, y_max, y_min
+    };
+    if (trace) result.points = points;
+    if (!allFinite(result.t_final, x, y, x_max, x_min, y_max, y_min)) {
+      return overflow();
+    }
+    return result;
+  }
+
+  /**
+   * Inputs: alpha,beta,gamma,delta, optional K as lv_equilibrium;
+   * x0,y0 (individuals), dt (years), steps (integer 1..20000).
+   * Outputs: t_final, x_final, y_final, x_max, x_min, y_max, y_min.
+   * Assumption: constant-parameter classical fourth-order RK4.
+   * Errors: ConstraintViolation rate_not_positive,
+   * carrying_capacity_not_positive, negative_population, invalid_number,
+   * steps_out_of_range_1_20000; MathError dt_must_be_positive;
+   * RuntimeError numeric_overflow.
+   * Hand check: alpha=1,x0=10,y0=0,dt=.1,steps=1,K=null
+   * -> x_final approximately 11.0517083, y_final=0.
+   */
+  function lv_simulate(args = {}) {
+    return lvRun(args, false);
+  }
+
+  /**
+   * Inputs: identical to lv_simulate, with same units and errors.
+   * Outputs: lv_simulate fields plus points [{t_years,x,y}].
+   * Assumption: all RK4 points are recorded, including the start.
+   * Errors: same as lv_simulate.
+   * Hand check: one step at dt=.1 gives two points at 0 and .1 years.
+   */
+  function lv_trace(args = {}) {
+    return lvRun(args, true);
+  }
+
+  /**
+   * Inputs: alpha,gamma (positive per-year rates).
+   * Outputs: period (years).
+   * Assumption: small oscillations without a carrying capacity.
+   * Errors: ConstraintViolation rate_not_positive, invalid_number;
+   * RuntimeError numeric_overflow.
+   * Hand check: alpha=4,gamma=1 -> period=pi years.
+   */
+  function lv_period({ alpha, gamma } = {}) {
+    if (finite(alpha) && alpha <= 0 ||
+        finite(gamma) && gamma <= 0) return rateError();
+    if (!allFinite(alpha, gamma)) return invalid();
+    const period = 2 * Math.PI / Math.sqrt(alpha * gamma);
+    if (!finite(period)) return overflow();
+    return { period };
+  }
+
+  /**
+   * Inputs: alpha,beta,gamma,delta (positive model rates),
+   * x,y (positive individuals).
+   * Outputs: H (conserved model quantity).
+   * Assumption: unrestricted prey, no carrying capacity.
+   * Errors: ConstraintViolation rate_not_positive, invalid_number;
+   * MathError log_of_non_positive; RuntimeError numeric_overflow.
+   * Hand check: alpha=2,beta=.5,gamma=3,delta=.25,x=4,y=2:
+   * H=2-3ln(4)-2ln(2).
+   */
+  function lv_invariant({ alpha, beta, gamma, delta, x, y } = {}) {
+    const problem = validLV({ alpha, beta, gamma, delta, K: null });
+    if (problem) return problem;
+    if (finite(x) && x <= 0 || finite(y) && y <= 0) {
+      return err('MathError', 'log_of_non_positive');
+    }
+    if (!allFinite(x, y)) return invalid();
+    const H = delta * x - gamma * Math.log(x) +
+      beta * y - alpha * Math.log(y);
+    if (!finite(H)) return overflow();
+    return { H };
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    food_web, remove_effect, energy_transfer, transfer_efficiency,
+    pyramid, bioaccumulation, exponential, logistic, logistic_time,
+    harvest, quadrat, mark_recapture, diversity, lv_equilibrium,
+    lv_simulate, lv_trace, lv_period, lv_invariant
+  });
+})();
+/* FIT-CALC-END ecosystems */
+
+(() => {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const fmt = n => Number.isFinite(n)
+    ? Number(n.toPrecision(3)).toLocaleString('en-GB')
+    : '—';
+
+  let index = 0;
+  let score = 0;
+  let tries = 0;
+  let hinted = false;
+  let solved = false;
+  let config;
+  let values = {};
+  let mode = '';
+
+  const base = {
+    alpha: .8,
+    beta: .02,
+    gamma: .6,
+    delta: .01
+  };
+
+  function tell(text, kind = '') {
+    $('feedback').className = 'feedback' + (kind ? ' ' + kind : '');
+    $('feedback').textContent = text;
+  }
+
+  function fail(r) {
+    const errors = {
+      rate_not_positive: 'All model rates must be positive.',
+      carrying_capacity_not_positive: 'Prey carrying capacity must be positive.',
+      negative_population: 'Starting populations cannot be negative.',
+      log_of_non_positive: 'The conserved quantity requires positive populations.',
+      numeric_overflow: 'These parameters make the numerical trajectory unstable.'
+    };
+
+    tell(
+      errors[r.reason] || 'Choose valid model parameters.',
+      'bad'
+    );
+  }
+
+  function configuration(i) {
+    if (i === 0) {
+      return {
+        type: 'equilibrium',
+        title: 'Set the coexistence point',
+        question: 'Adjust α, β, γ and δ until the coexistence equilibrium is 80 prey and 40 predators. Then predict the small-oscillation period in years. Several parameter combinations are possible.',
+        K: null,
+        x0: 90,
+        y0: 34,
+        dt: .02,
+        steps: 850,
+        facts: [
+          ['Target prey', '80 individuals'],
+          ['Target predators', '40 individuals']
+        ],
+        controls: [
+          ['alpha', 'Prey growth α', 'per year', .1, 1.5, .05, .6],
+          ['beta', 'Predation β', 'per predator/year', .005, .05, .005, .025],
+          ['gamma', 'Predator mortality γ', 'per year', .1, 1.5, .05, .5],
+          ['delta', 'Predator gain δ', 'per prey/year', .005, .05, .005, .015],
+          ['period', 'Small-oscillation period', 'years', .01, 25, .01, 1]
+        ]
+      };
+    }
+
+    if (i === 1) {
+      return {
+        type: 'invariant',
+        title: 'Conservation along an orbit',
+        question: 'With unlimited prey resources, calculate the conserved quantity H at the initial point and the small-oscillation period. Use natural logarithms.',
+        K: null,
+        x0: 82,
+        y0: 44,
+        dt: .02,
+        steps: 1000,
+        facts: [
+          ['Initial prey', '82'],
+          ['Initial predators', '44'],
+          ['α, β', '0.8; 0.02'],
+          ['γ, δ', '0.6; 0.01']
+        ],
+        controls: [
+          ['H', 'Conserved quantity H', 'model units', -50, 30, .01, 0],
+          ['period', 'Predicted period', 'years', 0, 20, .01, 1]
+        ]
+      };
+    }
+
+    if (i === 2) {
+      return {
+        type: 'threshold',
+        title: 'Can predators persist?',
+        question: 'The prey capacity is 50 individuals. Choose the equilibrium regime and calculate the critical capacity at which predators cease to coexist.',
+        K: 50,
+        x0: 80,
+        y0: 25,
+        dt: .02,
+        steps: 1200,
+        facts: [
+          ['Prey capacity', '50'],
+          ['Predator loss γ', '0.6 per year'],
+          ['Predator gain δ', '0.01 per prey/year']
+        ],
+        controls: [
+          ['threshold', 'Critical prey capacity', 'individuals', 10, 150, 1, 30]
+        ],
+        modes: [
+          ['predator_extinct', 'Predators extinct'],
+          ['coexistence', 'Coexistence']
+        ]
+      };
+    }
+
+    if (i === 3) {
+      return {
+        type: 'rescue',
+        title: 'Restore coexistence',
+        question: 'Using capacity steps of 10, find the smallest K for which the predator equilibrium becomes strictly positive. Also choose the new regime.',
+        K: 40,
+        x0: 70,
+        y0: 15,
+        dt: .02,
+        steps: 1200,
+        facts: [
+          ['Predator loss γ', '0.6 per year'],
+          ['Predator gain δ', '0.01 per prey/year']
+        ],
+        controls: [
+          ['K', 'Prey carrying capacity', 'individuals', 10, 160, 10, 40]
+        ],
+        modes: [
+          ['coexistence', 'Coexistence'],
+          ['predator_extinct', 'Predators extinct']
+        ]
+      };
+    }
+
+    if (i === 4) {
+      return {
+        type: 'extrema',
+        title: 'Bounds of the closed orbit',
+        question: 'For a model without prey self-limitation, predict the highest and lowest prey populations along its conserved orbit. Use the phase plot and invariant to reason about the turning points.',
+        K: null,
+        x0: 88,
+        y0: 36,
+        dt: .015,
+        steps: 2500,
+        facts: [
+          ['Initial prey', '88'],
+          ['Initial predators', '36'],
+          ['Growth and predation', 'α 0.8; β 0.02'],
+          ['Mortality and gain', 'γ 0.6; δ 0.01']
+        ],
+        controls: [
+          ['high', 'Largest prey population', 'individuals', 0, 400, .1, 50],
+          ['low', 'Smallest prey population', 'individuals', 0, 400, .1, 30]
+        ]
+      };
+    }
+
+    return {
+      type: 'damped',
+      title: 'Prey self-limitation',
+      question: 'Introduce capacity K = 120 prey. Predict the predator population after 12 years, then classify whether the dynamics are damped, neutral or driven to predator extinction.',
+      K: 120,
+      x0: 100,
+      y0: 12,
+      dt: .02,
+      steps: 600,
+      facts: [
+        ['Capacity', '120 prey'],
+        ['Initial prey', '100'],
+        ['Initial predators', '12'],
+        ['Elapsed time', '12 years']
+      ],
+      controls: [
+        ['final', 'Predators at 12 years', 'individuals', 0, 300, .1, 35]
+      ],
+      modes: [
+        ['damped', 'Damped towards coexistence'],
+        ['neutral', 'Neutral closed cycles'],
+        ['predator_extinct', 'Predators extinct']
+      ]
+    };
+  }
+
+  function parameterSet() {
+    const p = { ...base };
+
+    for (const k of ['alpha', 'beta', 'gamma', 'delta']) {
+      if (values[k] !== undefined) {
+        p[k] = values[k];
+      }
+    }
+
+    p.K = values.K === undefined
+      ? config.K
+      : values.K;
+
+    return p;
+  }
+
+  function traceFor(p) {
+    return FITCalcEco.lv_trace({
+      ...p,
+      x0: config.x0,
+      y0: config.y0,
+      dt: config.dt,
+      steps: config.steps
+    });
+  }
+
+  function controlRow(c) {
+    const [key, label, unit, min, max, step, start] = c;
+    const coarse = Math.round(step * 10 * 100000) / 100000;
+
+    return '<div class="control">' +
+      '<label for="v-' + key + '">' +
+      label + ' (' + unit + ')</label>' +
+      '<div class="stepper">' +
+      '<button data-key="' + key +
+      '" data-diff="' + (-coarse) +
+      '" aria-label="Decrease ' + label + ' coarsely">−−</button>' +
+      '<button data-key="' + key +
+      '" data-diff="' + (-step) +
+      '" aria-label="Decrease ' + label + ' finely">−</button>' +
+      '<input type="number" id="v-' + key +
+      '" min="' + min +
+      '" max="' + max +
+      '" step="' + step +
+      '" value="' + start +
+      '" inputmode="decimal">' +
+      '<button data-key="' + key +
+      '" data-diff="' + step +
+      '" aria-label="Increase ' + label + ' finely">+</button>' +
+      '<button data-key="' + key +
+      '" data-diff="' + coarse +
+      '" aria-label="Increase ' + label + ' coarsely">++</button>' +
+      '</div>' +
+      '<input type="range" id="s-' + key +
+      '" min="' + min +
+      '" max="' + max +
+      '" step="' + step +
+      '" value="' + start +
+      '" aria-label="Adjust ' + label + '">' +
+      '</div>';
+  }
+
+  function controls() {
+    $('controls').innerHTML =
+      config.controls.map(controlRow).join('') +
+      (config.modes
+        ? '<h3>Classify the regime</h3>' +
+          '<div class="choices">' +
+          config.modes.map(([value, label]) =>
+            '<button class="choice" data-mode="' + value +
+            '" aria-pressed="false">' + label +
+            '</button>'
+          ).join('') +
+          '</div>'
+        : '');
+
+    values = {};
+
+    config.controls.forEach(c => {
+      const [key, , , , , , start] = c;
+      values[key] = start;
+
+      const input = $('v-' + key);
+      const slider = $('s-' + key);
+
+      function update(n) {
+        if (solved || !Number.isFinite(n)) return;
+
+        values[key] = Math.max(
+          Number(input.min),
+          Math.min(Number(input.max), n)
+        );
+
+        input.value = String(values[key]);
+        slider.value = String(values[key]);
+
+        draw();
+      }
+
+      input.addEventListener('input', () => {
+        if (input.value !== '') {
+          update(Number(input.value));
+        }
+      });
+
+      slider.addEventListener('input', () => {
+        update(Number(slider.value));
+      });
+
+      $('controls')
+        .querySelectorAll('[data-key="' + key + '"]')
+        .forEach(b => {
+          b.addEventListener('click', () => {
+            update(
+              Math.round(
+                (values[key] + Number(b.dataset.diff)) * 100000
+              ) / 100000
+            );
+          });
+        });
+    });
+
+    $('controls').querySelectorAll('[data-mode]').forEach(b => {
+      b.addEventListener('click', () => {
+        if (solved) return;
+
+        mode = b.dataset.mode;
+
+        $('controls').querySelectorAll('[data-mode]').forEach(x => {
+          x.setAttribute(
+            'aria-pressed',
+            String(x === b)
+          );
+        });
+      });
+    });
+  }
+
+  function begin(i) {
+    if (i === 6) {
+      end();
+      return;
+    }
+
+    index = i;
+    config = configuration(i);
+
+    tries = 0;
+    hinted = false;
+    solved = false;
+    mode = '';
+
+    $('round').textContent = 'Round ' + (i + 1) + '/6';
+    $('title').textContent = config.title;
+    $('question').textContent = config.question;
+
+    $('assumption').textContent =
+      config.K === null
+        ? 'Assumption: unrestricted prey in the absence of predators; constant rates.'
+        : 'Assumption: logistic prey growth and constant predator–prey interaction rates.';
+
+    $('facts').innerHTML = config.facts.map(([k, v]) =>
+      '<div class="fact"><small>' + k +
+      '</small><strong>' + v +
+      '</strong></div>'
+    ).join('');
+
+    controls();
+
+    $('check').hidden = false;
+    $('next').hidden = true;
+    $('hint').disabled = false;
+
+    tell('Adjust the controls, then check your prediction.');
+    draw();
+  }
+
+  function axes(xMax, yMax, xName, yName, height) {
+    const L = 61;
+    const R = 471;
+    const T = 24;
+    const B = height - 40;
+
+    let s =
+      '<rect width="490" height="' + height + '" fill="#fff"/>' +
+      '<path d="M' + L + ' ' + T +
+      'V' + B + 'H' + R +
+      '" fill="none" stroke="#111" stroke-width="2"/>';
+
+    for (let i = 0; i <= 4; i++) {
+      const x = L + (R - L) * i / 4;
+      const y = B - (B - T) * i / 4;
+
+      s +=
+        '<path d="M' + L + ' ' + y +
+        'H' + R + '" stroke="#ececec"/>' +
+        '<path d="M' + x + ' ' + T +
+        'V' + B + '" stroke="#f0f0f0"/>' +
+        '<text x="' + x +
+        '" y="' + (B + 16) +
+        '" font-size="10" text-anchor="middle">' +
+        fmt(xMax * i / 4) +
+        '</text>' +
+        '<text x="' + (L - 7) +
+        '" y="' + (y + 4) +
+        '" font-size="10" text-anchor="end">' +
+        fmt(yMax * i / 4) +
+        '</text>';
+    }
+
+    s +=
+      '<text x="266" y="' + (height - 8) +
+      '" font-size="11" text-anchor="middle">' +
+      xName +
+      '</text>' +
+      '<text transform="translate(14 ' + height / 2 +
+      ') rotate(-90)" text-anchor="middle" font-size="11">' +
+      yName +
+      '</text>';
+
+    return { s, L, R, T, B };
+  }
+
+  function makePath(points, fx, fy) {
+    return points.map((p, i) =>
+      (i ? 'L' : 'M') +
+      fx(p).toFixed(2) + ' ' +
+      fy(p).toFixed(2)
+    ).join(' ');
+  }
+
+  function draw() {
+    const p = parameterSet();
+
+    const trajectory = traceFor(p);
+    const equilibrium = FITCalcEco.lv_equilibrium(p);
+
+    if (trajectory.error || equilibrium.error) {
+      fail(trajectory.error ? trajectory : equilibrium);
+      return;
+    }
+
+    const T = trajectory.t_final;
+
+    const maxPop = Math.max(
+      1,
+      trajectory.x_max,
+      trajectory.y_max,
+      equilibrium.prey_star,
+      equilibrium.predator_star
+    ) * 1.14;
+
+    const a = axes(
+      T,
+      maxPop,
+      'Time (years)',
+      'Individuals',
+      270
+    );
+
+    const x = t => a.L + (a.R - a.L) * t / T;
+    const y = n => a.B -
+      (a.B - a.T) * Math.max(0, n) / maxPop;
+
+    let s = a.s;
+
+    s +=
+      '<path d="' +
+      makePath(
+        trajectory.points,
+        v => x(v.t_years),
+        v => y(v.x)
+      ) +
+      '" stroke="#1F66E5" stroke-width="3" fill="none"/>';
+
+    s +=
+      '<path d="' +
+      makePath(
+        trajectory.points,
+        v => x(v.t_years),
+        v => y(v.y)
+      ) +
+      '" stroke="#FF8FB8" stroke-width="3" fill="none"/>';
+
+    s +=
+      '<circle cx="' + x(T) +
+      '" cy="' + y(trajectory.y_final) +
+      '" r="6" fill="#FFDD00" stroke="#111" stroke-width="2"/>';
+
+    $('timePlot').innerHTML = s;
+
+    $('timePlot').setAttribute(
+      'aria-label',
+      'Time series of prey and predator populations from 0 to ' +
+      fmt(T) + ' years.'
+    );
+
+    const maxX = Math.max(
+      1,
+      trajectory.x_max,
+      equilibrium.prey_star
+    ) * 1.15;
+
+    const maxY = Math.max(
+      1,
+      trajectory.y_max,
+      equilibrium.predator_star
+    ) * 1.15;
+
+    const b = axes(
+      maxX,
+      maxY,
+      'Prey x (individuals)',
+      'Predators y (individuals)',
+      280
+    );
+
+    const xx = n => b.L +
+      (b.R - b.L) * Math.max(0, n) / maxX;
+
+    const yy = n => b.B -
+      (b.B - b.T) * Math.max(0, n) / maxY;
+
+    let q = b.s;
+
+    q +=
+      '<path d="' +
+      makePath(
+        trajectory.points,
+        v => xx(v.x),
+        v => yy(v.y)
+      ) +
+      '" stroke="#1F66E5" stroke-width="3" fill="none"/>';
+
+    q +=
+      '<circle cx="' + xx(config.x0) +
+      '" cy="' + yy(config.y0) +
+      '" r="6" fill="#FFDD00" stroke="#111" stroke-width="2.5"/>';
+
+    q +=
+      '<path d="M' +
+      (xx(equilibrium.prey_star) - 8) + ' ' +
+      yy(equilibrium.predator_star) +
+      'h16 M' +
+      xx(equilibrium.prey_star) + ' ' +
+      (yy(equilibrium.predator_star) - 8) +
+      'v16" stroke="#D92D20" stroke-width="3"/>';
+
+    q +=
+      '<text x="294" y="17" font-size="11">● Start · + Equilibrium</text>';
+
+    $('phasePlot').innerHTML = q;
+
+    $('phasePlot').setAttribute(
+      'aria-label',
+      'Phase-plane trajectory and equilibrium with prey on the horizontal axis and predators on the vertical axis.'
+    );
+
+    $('plotNote').textContent = p.K === null
+      ? 'With unlimited prey, the phase trajectory follows a conserved orbit.'
+      : 'Limiting prey changes the coexistence point and can damp the cycles.';
+  }
+
+  function near(a, b, tolerance) {
+    return Number.isFinite(a) &&
+      Number.isFinite(b) &&
+      Math.abs(a - b) <= tolerance;
+  }
+
+  function check() {
+    if (solved) return;
+
+    tries++;
+
+    const c = config;
+    const p = parameterSet();
+
+    const eq = FITCalcEco.lv_equilibrium(p);
+
+    if (eq.error) {
+      fail(eq);
+      return;
+    }
+
+    if (c.type === 'equilibrium') {
+      if (
+        !near(eq.prey_star, 80, .03) ||
+        !near(eq.predator_star, 40, .03)
+      ) {
+        tell(
+          'The equilibrium misses the target. Rebalance prey growth, feeding and predator mortality.',
+          'bad'
+        );
+        return;
+      }
+
+      const period = FITCalcEco.lv_period({
+        alpha: p.alpha,
+        gamma: p.gamma
+      });
+
+      if (period.error) {
+        fail(period);
+        return;
+      }
+
+      if (!near(values.period, period.period, .06)) {
+        tell(
+          'The coexistence point is correct, but check the small-oscillation period.',
+          'bad'
+        );
+        return;
+      }
+
+      award(
+        'Equilibrium ratios and oscillation frequency constrain different combinations of rates.'
+      );
+      return;
+    }
+
+    if (c.type === 'invariant') {
+      const inv = FITCalcEco.lv_invariant({
+        ...p,
+        x: c.x0,
+        y: c.y0
+      });
+
+      const period = FITCalcEco.lv_period({
+        alpha: p.alpha,
+        gamma: p.gamma
+      });
+
+      if (inv.error || period.error) {
+        fail(inv.error ? inv : period);
+        return;
+      }
+
+      if (
+        !near(values.H, inv.H, .06) ||
+        !near(values.period, period.period, .06)
+      ) {
+        tell(
+          'Use natural logarithms for H and the growth and mortality rates for the period.',
+          'bad'
+        );
+        return;
+      }
+
+      award(
+        'H is conserved in the unrestricted model; the small-oscillation period depends on α and γ.'
+      );
+      return;
+    }
+
+    if (c.type === 'threshold') {
+      const free = FITCalcEco.lv_equilibrium({
+        ...p,
+        K: null
+      });
+
+      if (free.error) {
+        fail(free);
+        return;
+      }
+
+      if (
+        !near(values.threshold, free.prey_star, .01) ||
+        mode !== eq.regime
+      ) {
+        tell(
+          'Predator persistence is lost when capacity reaches the predator zero-growth prey density.',
+          'bad'
+        );
+        return;
+      }
+
+      award(
+        'A prey capacity at or below the critical density excludes predators.'
+      );
+      return;
+    }
+
+    if (c.type === 'rescue') {
+      let first = null;
+
+      for (let K = 10; K <= 160; K += 10) {
+        const trial = FITCalcEco.lv_equilibrium({
+          ...p,
+          K
+        });
+
+        if (trial.error) {
+          fail(trial);
+          return;
+        }
+
+        if (trial.regime === 'coexistence') {
+          first = K;
+          break;
+        }
+      }
+
+      if (
+        values.K !== first ||
+        mode !== 'coexistence'
+      ) {
+        tell(
+          'Find the first allowed capacity step strictly above the persistence threshold.',
+          'bad'
+        );
+        return;
+      }
+
+      award(
+        'The smallest allowable higher capacity gives a positive predator equilibrium.'
+      );
+      return;
+    }
+
+    if (c.type === 'extrema') {
+      const sim = FITCalcEco.lv_simulate({
+        ...p,
+        x0: c.x0,
+        y0: c.y0,
+        dt: c.dt,
+        steps: c.steps
+      });
+
+      const inv = FITCalcEco.lv_invariant({
+        ...p,
+        x: c.x0,
+        y: c.y0
+      });
+
+      if (sim.error || inv.error) {
+        fail(sim.error ? sim : inv);
+        return;
+      }
+
+      const toleranceHigh = Math.max(
+        .8,
+        sim.x_max * .02
+      );
+
+      const toleranceLow = Math.max(
+        .8,
+        sim.x_min * .02
+      );
+
+      if (
+        !near(values.high, sim.x_max, toleranceHigh) ||
+        !near(values.low, sim.x_min, toleranceLow)
+      ) {
+        tell(
+          'The bounds are off. Find the prey turning points along the conserved phase-plane orbit.',
+          'bad'
+        );
+        return;
+      }
+
+      award(
+        'The conserved orbit determines the prey range; integration approximates its extrema.'
+      );
+      return;
+    }
+
+    const sim = FITCalcEco.lv_simulate({
+      ...p,
+      x0: c.x0,
+      y0: c.y0,
+      dt: c.dt,
+      steps: c.steps
+    });
+
+    if (sim.error) {
+      fail(sim);
+      return;
+    }
+
+    if (
+      !near(
+        values.final,
+        sim.y_final,
+        Math.max(.7, sim.y_final * .025)
+      ) ||
+      mode !== 'damped'
+    ) {
+      tell(
+        'Read the final predator value on the curve and inspect whether oscillations shrink.',
+        'bad'
+      );
+      return;
+    }
+
+    award(
+      'Logistic prey limitation can damp oscillations towards coexistence.'
+    );
+  }
+
+  function award(message) {
+    score += hinted ? 50 : tries === 1 ? 100 : 75;
+    solved = true;
+
+    $('score').textContent = 'Score ' + score;
+    $('check').hidden = true;
+    $('hint').disabled = true;
+    $('next').hidden = false;
+    $('next').textContent = index === 5
+      ? 'See stars →'
+      : 'Next round →';
+
+    tell('✓ ' + message, 'good');
+    draw();
+  }
+
+  function hint() {
+    if (solved) return;
+
+    hinted = true;
+
+    const hints = {
+      equilibrium: 'Equilibrium prey is controlled by γ and δ; predators by α and β.',
+      invariant: 'Use natural logarithms in H. The period uses α and γ.',
+      threshold: 'At the critical capacity, the positive predator equilibrium reaches zero.',
+      rescue: 'Equality with the critical capacity still produces zero predators. Go one full step higher.',
+      extrema: 'The orbit follows constant H. Turning points appear where prey stops increasing or decreasing.',
+      damped: 'With capacity, the exact unrestricted invariant no longer applies, and oscillations can shrink.'
+    };
+
+    tell('Hint: ' + hints[config.type]);
+  }
+
+  function end() {
+    const stars = score >= 510
+      ? 3
+      : score >= 390
+        ? 2
+        : 1;
+
+    $('game').innerHTML =
+      '<section class="panel end" style="grid-column:1/-1">' +
+      '<h2>Predator–prey modeller!</h2>' +
+      '<div class="stars" aria-label="' + stars + ' stars">' +
+      '★'.repeat(stars) +
+      '☆'.repeat(3 - stars) +
+      '</div>' +
+      '<strong>' + score + ' / 600 points</strong>' +
+      '<p>All six experiments completed.</p>' +
+      '<button id="again" class="check" style="margin-top:22px">Play again</button>' +
+      '</section>';
+
+    $('round').textContent = 'Complete';
+
+    $('again').addEventListener('click', () => {
+      location.reload();
+    });
+  }
+
+  $('check').addEventListener('click', check);
+  $('hint').addEventListener('click', hint);
+  $('next').addEventListener('click', () => begin(index + 1));
+
+  begin(0);
+})();
+</script>
+</body>
+</html>

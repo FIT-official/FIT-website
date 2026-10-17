@@ -1,0 +1,1508 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Energy Pyramid</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font:400 16px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1330px;margin:auto;padding:16px 14px 45px}
+h1,h2,h3,p{margin:0}
+h1{font-size:clamp(30px,5vw,45px);font-weight:800;letter-spacing:-.045em;line-height:1.1;margin:15px 0 8px}
+h2{font-size:23px;font-weight:800;margin-bottom:12px}
+h3{font-size:15px;font-weight:800;margin:12px 0 8px}
+p{color:var(--fit-ink-2)}
+.hud{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.badge,.counter{border:2px solid #111;border-radius:999px;font-weight:800;font-size:12px;padding:8px 12px}
+.badge{background:var(--lvl-secondary);color:var(--lvl-secondary-on);text-transform:uppercase}
+.counter{background:white}
+.score{margin-left:auto}
+.layout{display:grid;gap:18px;margin-top:23px}
+.panel{min-width:0;border:2px solid #111;border-radius:26px;padding:19px;background:white;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-secondary-tint)}
+.question{font-size:18px;font-weight:700;margin:10px 0 17px}
+.scene{background:white;border:2px solid #111;border-radius:20px;padding:13px;margin-bottom:17px}
+.scene svg,.plot{width:100%;height:auto;display:block}
+.caption{font-size:12px;color:var(--fit-ink-3);margin-top:7px}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.fact{padding:11px;border:2px solid #111;border-radius:14px;background:white}
+.fact small{font-size:12px;color:var(--fit-ink-3);font-weight:700;display:block}
+.fact strong{font-weight:800;font-size:20px;display:block;overflow-wrap:anywhere}
+button,input[type="range"],input[type="number"],.choice{-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+button{font:800 15px/1.2 Inter,system-ui,sans-serif;min-height:46px;border:2px solid #111;border-radius:999px;padding:10px 15px;background:#fff;color:#111;box-shadow:var(--sh-1);cursor:pointer}
+button:disabled{opacity:.5;cursor:default}
+button:active:not(:disabled){transform:translateY(2px);box-shadow:none}
+button:focus:not(:focus-visible),input:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+.control{background:#fff;border:2px solid #111;border-radius:17px;margin:11px 0;padding:11px}
+.control label{display:block;font-size:13px;font-weight:800;margin-bottom:8px}
+.stepper{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+.stepper button{flex:0 0 45px;padding:8px}
+.stepper input{flex:1 1 84px;min-width:82px;width:90px;text-align:center;font-size:18px;font-weight:800}
+input[type="number"]{border:2px solid #111;min-height:48px;border-radius:13px;padding:8px;font-family:inherit}
+input[type="range"]{height:44px;width:100%;accent-color:var(--lvl-secondary)}
+.choices{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.choice[aria-pressed="true"]{background:var(--lvl-secondary)}
+.plot-box{border:2px solid #111;border-radius:18px;padding:7px;overflow:hidden;margin:12px 0}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;font-weight:800}
+.legend span:before{content:"";display:inline-block;width:13px;height:13px;background:#2EC4A6;border:1px solid #111;margin-right:5px;vertical-align:middle}
+.legend .candidate:before{background:#FF8FB8}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:19px}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.feedback{margin-top:13px;min-height:63px;border:2px solid var(--fit-line-soft);border-radius:17px;background:var(--fit-sunken);padding:13px;font-weight:700}
+.feedback.good{background:#EAF9EF;border-color:var(--fit-success)}
+.feedback.bad{background:#FFF0EE;border-color:var(--fit-danger)}
+details{margin-top:24px;border:2px solid #111;border-radius:16px;padding:13px}
+summary{display:flex;align-items:center;min-height:44px;cursor:pointer;font-weight:800}
+footer{text-align:center;font-size:12px;color:var(--fit-ink-3);margin-top:27px}
+.end{text-align:center;padding:43px 13px}
+.stars{font-size:44px;letter-spacing:7px;color:#9B7000}
+.end strong{display:block;font-size:30px;margin:14px}
+@media(min-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .panel{padding:25px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{
+    animation:none!important;
+    transition:none!important;
+    scroll-behaviour:auto!important
+  }
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="hud">
+<span class="badge">Secondary · Biology</span>
+<span id="round" class="counter">Round 1/6</span>
+<span id="score" class="counter score">Score 0</span>
+</div>
+<h1>Energy Pyramid</h1>
+<p>Trace energy, biomass and pollutants through feeding levels.</p>
+</header>
+<div id="game" class="layout">
+<section class="panel stage">
+<h2 id="title">Energy transfer</h2>
+<p class="question" id="question"></p>
+<div class="scene">
+<svg viewBox="0 0 480 125" role="img" aria-label="Algae are eaten by water fleas, which are eaten by fish">
+<rect x="2" y="2" width="476" height="121" rx="18" fill="#F4F3EF" stroke="#111" stroke-width="3"/>
+<path d="M48 94V41M32 69Q15 40 39 29Q53 48 48 69M48 72Q69 42 89 50Q82 76 48 72" stroke="#111" stroke-width="4" fill="#3DBE6B"/>
+<path d="M117 61H155M144 49L161 61L144 73" stroke="#111" stroke-width="4" fill="none"/>
+<ellipse cx="217" cy="67" rx="27" ry="19" fill="#FF8FB8" stroke="#111" stroke-width="3"/>
+<circle cx="230" cy="61" r="3"/>
+<path d="M265 61H306M294 49L311 61L294 73" stroke="#111" stroke-width="4" fill="none"/>
+<path d="M333 67Q369 33 406 67L436 47V87L406 67Q367 99 333 67Z" fill="#2EC4A6" stroke="#111" stroke-width="3"/>
+<circle cx="401" cy="61" r="4"/>
+<text x="51" y="113" font-size="12" font-weight="800" text-anchor="middle">Algae</text>
+<text x="217" y="113" font-size="12" font-weight="800" text-anchor="middle">Water flea</text>
+<text x="385" y="113" font-size="12" font-weight="800" text-anchor="middle">Fish</text>
+</svg>
+<p class="caption" id="assumption">Assumption: equal transfer efficiency at each trophic step.</p>
+</div>
+<div id="facts" class="facts"></div>
+<div id="controls"></div>
+</section>
+<section class="panel">
+<h2>Live trophic pyramid</h2>
+<div class="legend">
+<span>Model bars</span>
+<span class="candidate">Your answer</span>
+</div>
+<div class="plot-box">
+<svg id="plot" class="plot" viewBox="0 0 490 350" role="img" aria-label="Horizontal bars for trophic levels on a labelled numerical scale"></svg>
+</div>
+<p id="plotNote" class="caption">The target value stays hidden until Check.</p>
+<div class="actions">
+<button id="hint">Hint − points</button>
+<button id="check" class="check">Check</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div class="feedback" id="feedback" role="status" aria-live="polite">Use the controls and check your answer.</div>
+</section>
+</div>
+<details>
+<summary>The biology</summary>
+<p>Energy at trophic level k = producer energy × efficiency^(k − 1). Energy not passed on is lost as heat through respiration, or stays in uneaten parts and waste. Biomass at a level = number of organisms × mass per organism. A pyramid of numbers may be irregular when one large tree supports many insects. Biomagnification can raise pesticide concentration at successively higher feeding levels. Decomposers recycle nutrients but are not an additional trophic level in this pyramid.</p>
+</details>
+<footer>Fix It Today</footer>
+</main>
+
+<script>
+/* FIT-CALC-BEGIN ecosystems */
+const FITCalcEco = (function () {
+  'use strict';
+
+  const err = (error, reason) => ({ error, reason });
+  const finite = n => typeof n === 'number' && Number.isFinite(n);
+  const allFinite = (...a) => a.every(finite);
+  const whole = n => Number.isInteger(n) && n >= 0;
+  const invalid = () => err('ConstraintViolation', 'invalid_number');
+  const overflow = () => err('RuntimeError', 'numeric_overflow');
+  const negative = kind => err('ConstraintViolation', 'negative_' + kind);
+  const rateError = () => err('ConstraintViolation', 'rate_not_positive');
+  const capacityError = () => err('ConstraintViolation', 'carrying_capacity_not_positive');
+  const levelError = () => err('ConstraintViolation', 'levels_out_of_range_1_6');
+
+  function analyseWeb(organisms, eats) {
+    if (!Array.isArray(organisms) || organisms.length < 2 ||
+        organisms.length > 12) {
+      return err('ConstraintViolation', 'organisms_out_of_range_2_12');
+    }
+    if (organisms.some(n => typeof n !== 'string' || !n.length)) {
+      return err('ConstraintViolation', 'invalid_organism');
+    }
+    if (new Set(organisms).size !== organisms.length) {
+      return err('ConstraintViolation', 'duplicate_organism');
+    }
+    if (!Array.isArray(eats)) {
+      return err('ConstraintViolation', 'invalid_links');
+    }
+
+    const prey = new Map(organisms.map(n => [n, []]));
+    const predators = new Map(organisms.map(n => [n, []]));
+
+    for (const link of eats) {
+      if (!Array.isArray(link) || link.length !== 2) {
+        return err('ConstraintViolation', 'invalid_links');
+      }
+      const [predator, food] = link;
+      if (!prey.has(predator) || !prey.has(food)) {
+        return err('ConstraintViolation', 'unknown_organism');
+      }
+      if (predator === food) {
+        return err('ConstraintViolation', 'food_web_has_cycle');
+      }
+      if (!prey.get(predator).includes(food)) {
+        prey.get(predator).push(food);
+        predators.get(food).push(predator);
+      }
+    }
+
+    const state = new Map();
+    const levels = new Map();
+    const paths = new Map();
+
+    function visit(name) {
+      if (state.get(name) === 1) return false;
+      if (state.get(name) === 2) return true;
+      state.set(name, 1);
+      let level = 1;
+      let chains = 0;
+      const food = prey.get(name);
+      for (const item of food) {
+        if (!visit(item)) return false;
+        level = Math.max(level, levels.get(item) + 1);
+        chains += paths.get(item);
+      }
+      levels.set(name, level);
+      paths.set(name, food.length ? chains : 1);
+      state.set(name, 2);
+      return true;
+    }
+
+    for (const name of organisms) {
+      if (!visit(name)) {
+        return err('ConstraintViolation', 'food_web_has_cycle');
+      }
+    }
+    if (organisms.some(n => !prey.get(n).length &&
+        !predators.get(n).length)) {
+      return err('ConstraintViolation', 'organism_not_linked');
+    }
+
+    const producers = organisms.filter(n => !prey.get(n).length);
+    const top_consumers = organisms.filter(n => !predators.get(n).length);
+    const max_trophic_level = Object.fromEntries(
+      organisms.map(n => [n, levels.get(n)])
+    );
+
+    return {
+      producers, top_consumers, max_trophic_level, prey, predators,
+      chain_count: top_consumers.reduce((s, n) => s + paths.get(n), 0),
+      longest_chain: Math.max(...top_consumers.map(n => levels.get(n)))
+    };
+  }
+
+  /**
+   * Inputs: organisms (2–12 names), eats ([predator,prey] pairs).
+   * Outputs: producers, top_consumers, chain_count, longest_chain,
+   * max_trophic_level (dimensionless). Energy flows prey to predator.
+   * Assumption: an acyclic food web with no isolated organisms.
+   * Errors: ConstraintViolation organisms_out_of_range_2_12,
+   * invalid_organism, duplicate_organism, invalid_links,
+   * unknown_organism, food_web_has_cycle, organism_not_linked.
+   * Hand check: grass -> rabbit -> fox has one chain, length 3,
+   * and levels grass=1, rabbit=2, fox=3.
+   */
+  function food_web({ organisms, eats } = {}) {
+    const w = analyseWeb(organisms, eats);
+    if (w.error) return w;
+    return {
+      producers: w.producers,
+      top_consumers: w.top_consumers,
+      chain_count: w.chain_count,
+      longest_chain: w.longest_chain,
+      max_trophic_level: w.max_trophic_level
+    };
+  }
+
+  /**
+   * Inputs: organisms, eats as above; removed (organism name).
+   * Outputs: effects (organism -> increase/decrease/unchanged),
+   * starving (names in original order).
+   * Assumption: first-order direct feeding effects only.
+   * Errors: food_web errors; ConstraintViolation unknown_organism.
+   * Hand check: remove rabbit from grass -> rabbit -> fox:
+   * grass increases, fox decreases, and fox is starving.
+   */
+  function remove_effect({ organisms, eats, removed } = {}) {
+    const w = analyseWeb(organisms, eats);
+    if (w.error) return w;
+    if (!w.prey.has(removed)) {
+      return err('ConstraintViolation', 'unknown_organism');
+    }
+    const effects = {};
+    const starving = [];
+    for (const name of organisms) {
+      if (name === removed) continue;
+      let effect = 'unchanged';
+      if (w.prey.get(removed).includes(name)) effect = 'increase';
+      if (w.predators.get(removed).includes(name)) effect = 'decrease';
+      Object.defineProperty(effects, name, {
+        value: effect, enumerable: true, writable: true, configurable: true
+      });
+      const foods = w.prey.get(name);
+      if (foods.length === 1 && foods[0] === removed) starving.push(name);
+    }
+    return { effects, starving };
+  }
+
+  /**
+   * Inputs: energy_kJ >=0, efficiency fraction (0,1], levels 1..6.
+   * Outputs: energy_by_level_kJ, total_lost_kJ.
+   * Assumption: identical efficiency at successive transfers.
+   * Errors: ConstraintViolation negative_energy, invalid_number,
+   * efficiency_out_of_range_0_1, levels_out_of_range_1_6;
+   * RuntimeError numeric_overflow.
+   * Hand check: 1000 kJ at 10%, 3 levels -> [1000,100,10],
+   * total lost 990 kJ.
+   */
+  function energy_transfer({ energy_kJ, efficiency, levels } = {}) {
+    if (finite(energy_kJ) && energy_kJ < 0) return negative('energy');
+    if (!allFinite(energy_kJ, efficiency)) return invalid();
+    if (efficiency <= 0 || efficiency > 1) {
+      return err('ConstraintViolation', 'efficiency_out_of_range_0_1');
+    }
+    if (!Number.isInteger(levels) || levels < 1 || levels > 6) {
+      return levelError();
+    }
+    const energy_by_level_kJ = [energy_kJ];
+    for (let i = 1; i < levels; i++) {
+      const value = energy_by_level_kJ[i - 1] * efficiency;
+      if (!finite(value)) return overflow();
+      energy_by_level_kJ.push(value);
+    }
+    return {
+      energy_by_level_kJ,
+      total_lost_kJ: energy_kJ - energy_by_level_kJ[levels - 1]
+    };
+  }
+
+  /**
+   * Inputs: energy_in_kJ, energy_out_kJ.
+   * Outputs: efficiency (fraction), percent (%).
+   * Assumption: output energy cannot exceed input energy.
+   * Errors: ConstraintViolation negative_energy, invalid_number,
+   * output_exceeds_input; MathError division_by_zero.
+   * Hand check: input 200 kJ, output 25 kJ -> 0.125, 12.5%.
+   */
+  function transfer_efficiency({ energy_in_kJ, energy_out_kJ } = {}) {
+    if (finite(energy_in_kJ) && energy_in_kJ < 0 ||
+        finite(energy_out_kJ) && energy_out_kJ < 0) return negative('energy');
+    if (!allFinite(energy_in_kJ, energy_out_kJ)) return invalid();
+    if (energy_in_kJ === 0) return err('MathError', 'division_by_zero');
+    if (energy_out_kJ > energy_in_kJ) {
+      return err('ConstraintViolation', 'output_exceeds_input');
+    }
+    const efficiency = energy_out_kJ / energy_in_kJ;
+    return { efficiency, percent: efficiency * 100 };
+  }
+
+  /**
+   * Inputs: numbers (whole organisms per level), mass_each_g (g each).
+   * Outputs: biomass_g, numbers_shape, biomass_shape.
+   * Assumption: a representative individual mass for each level.
+   * Errors: ConstraintViolation levels_out_of_range_1_6,
+   * length_mismatch, negative_count, invalid_number, invalid_count;
+   * RuntimeError numeric_overflow.
+   * Hand check: numbers [1,100,10], masses [10000,2,10] g:
+   * biomass [10000,200,100] g; numbers irregular, biomass upright.
+   */
+  function pyramid({ numbers, mass_each_g } = {}) {
+    if (!Array.isArray(numbers) || numbers.length < 1 ||
+        numbers.length > 6) return levelError();
+    if (!Array.isArray(mass_each_g) ||
+        numbers.length !== mass_each_g.length) {
+      return err('ConstraintViolation', 'length_mismatch');
+    }
+    if ([...numbers, ...mass_each_g].some(n => finite(n) && n < 0)) {
+      return negative('count');
+    }
+    if ([...numbers, ...mass_each_g].some(n => !finite(n))) return invalid();
+    if (numbers.some(n => !whole(n))) {
+      return err('ConstraintViolation', 'invalid_count');
+    }
+    const biomass_g = numbers.map((n, i) => n * mass_each_g[i]);
+    if (biomass_g.some(n => !finite(n))) return overflow();
+
+    function shape(a) {
+      if (a.every((n, i) => i === 0 || n <= a[i - 1])) return 'upright';
+      if (a.every((n, i) => i === 0 || n >= a[i - 1])) return 'inverted';
+      return 'irregular';
+    }
+    return {
+      biomass_g,
+      numbers_shape: shape(numbers),
+      biomass_shape: shape(biomass_g)
+    };
+  }
+
+  /**
+   * Inputs: c0_ppm >=0, factor >=1, levels 1..6.
+   * Outputs: concentration_ppm_by_level (ppm).
+   * Assumption: constant magnification factor per feeding step.
+   * Errors: ConstraintViolation negative_concentration, invalid_number,
+   * factor_below_1, levels_out_of_range_1_6;
+   * RuntimeError numeric_overflow.
+   * Hand check: 0.02 ppm, factor 5, three levels
+   * -> [0.02,0.1,0.5] ppm.
+   */
+  function bioaccumulation({ c0_ppm, factor, levels } = {}) {
+    if (finite(c0_ppm) && c0_ppm < 0) return negative('concentration');
+    if (!allFinite(c0_ppm, factor)) return invalid();
+    if (factor < 1) return err('ConstraintViolation', 'factor_below_1');
+    if (!Number.isInteger(levels) || levels < 1 || levels > 6) {
+      return levelError();
+    }
+    const concentration_ppm_by_level = [c0_ppm];
+    for (let i = 1; i < levels; i++) {
+      const next = concentration_ppm_by_level[i - 1] * factor;
+      if (!finite(next)) return overflow();
+      concentration_ppm_by_level.push(next);
+    }
+    return { concentration_ppm_by_level };
+  }
+
+  /**
+   * Inputs: N0 (individuals), r_per_year, t_years.
+   * Outputs: N (individuals), doubling_time_years (null if r<=0).
+   * Assumption: unrestricted growth at a fixed per-capita rate.
+   * Errors: ConstraintViolation negative_population, invalid_number;
+   * RuntimeError numeric_overflow.
+   * Hand check: N0=100, r=ln(2)/year, t=2 years
+   * -> N=400, doubling time=1 year.
+   */
+  function exponential({ N0, r_per_year, t_years } = {}) {
+    if (finite(N0) && N0 < 0) return negative('population');
+    if (!allFinite(N0, r_per_year, t_years)) return invalid();
+    const N = N0 === 0 ? 0 : N0 * Math.exp(r_per_year * t_years);
+    const doubling_time_years = r_per_year > 0
+      ? Math.LN2 / r_per_year : null;
+    if (!finite(N) || (doubling_time_years !== null &&
+        !finite(doubling_time_years))) return overflow();
+    return { N, doubling_time_years };
+  }
+
+  /**
+   * Inputs: N0, K (individuals), r_per_year, t_years.
+   * Outputs: N (individuals), dN_dt_per_year (individuals/year).
+   * Assumption: closed logistic population, fixed K; N0>K allowed.
+   * Errors: ConstraintViolation negative_population,
+   * carrying_capacity_not_positive, invalid_number;
+   * MathError population_not_defined; RuntimeError numeric_overflow.
+   * Hand check: N0=20, K=100, r=ln(4), t=1 -> N=50,
+   * dN/dt=25ln(4) individuals/year.
+   */
+  function logistic({ N0, r_per_year, K, t_years } = {}) {
+    if (finite(N0) && N0 < 0) return negative('population');
+    if (finite(K) && K <= 0) return capacityError();
+    if (!allFinite(N0, r_per_year, K, t_years)) return invalid();
+    if (N0 === 0) return { N: 0, dN_dt_per_year: 0 };
+    const q = (K - N0) / N0;
+    const z = -r_per_year * t_years;
+    let N;
+    if (z > 0) {
+      const e = Math.exp(-z);
+      N = K * e / (e + q);
+    } else {
+      N = K / (1 + q * Math.exp(z));
+    }
+    if (!(N >= 0) || !finite(N)) {
+      return err('MathError', 'population_not_defined');
+    }
+    const dN_dt_per_year = r_per_year * N * (1 - N / K);
+    if (!finite(dN_dt_per_year)) return overflow();
+    return { N, dN_dt_per_year };
+  }
+
+  /**
+   * Inputs: N0, K, N_target (individuals), r_per_year.
+   * Outputs: t_years to reach target, including zero for equal target.
+   * Assumption: positive finite time under exact logistic dynamics.
+   * Errors: ConstraintViolation negative_population,
+   * carrying_capacity_not_positive, invalid_number;
+   * MathError target_not_reachable.
+   * Hand check: N0=20, K=100, r=ln(4), target=50 -> 1 year.
+   */
+  function logistic_time({ N0, r_per_year, K, N_target } = {}) {
+    if (finite(N0) && N0 < 0 ||
+        finite(N_target) && N_target < 0) return negative('population');
+    if (finite(K) && K <= 0) return capacityError();
+    if (!allFinite(N0, r_per_year, K, N_target)) return invalid();
+    if (N_target === N0) return { t_years: 0 };
+    if (N0 === 0 || N0 === K || N_target <= 0 ||
+        N_target === K || r_per_year === 0) {
+      return err('MathError', 'target_not_reachable');
+    }
+    const ratio = (K / N_target - 1) / (K / N0 - 1);
+    if (!(ratio > 0) || !finite(ratio)) {
+      return err('MathError', 'target_not_reachable');
+    }
+    const t_years = -Math.log(ratio) / r_per_year;
+    if (!finite(t_years) || t_years <= 0) {
+      return err('MathError', 'target_not_reachable');
+    }
+    return { t_years };
+  }
+
+  /**
+   * Inputs: r_per_year>0, K>0 (individuals), h_per_year>=0
+   * (individuals/year).
+   * Outputs: msy_per_year, equilibria (ascending), regime.
+   * Assumption: constant quota removed from logistic production.
+   * Errors: ConstraintViolation rate_not_positive,
+   * carrying_capacity_not_positive, negative_harvest, invalid_number;
+   * RuntimeError numeric_overflow.
+   * Hand check: r=0.4, K=1000, h=75 -> MSY=100,
+   * equilibria [250,750], sustainable.
+   */
+  function harvest({ r_per_year, K, h_per_year } = {}) {
+    if (finite(r_per_year) && r_per_year <= 0) return rateError();
+    if (finite(K) && K <= 0) return capacityError();
+    if (finite(h_per_year) && h_per_year < 0) {
+      return err('ConstraintViolation', 'negative_harvest');
+    }
+    if (!allFinite(r_per_year, K, h_per_year)) return invalid();
+    const msy_per_year = r_per_year * K / 4;
+    if (!finite(msy_per_year)) return overflow();
+    const tol = 1e-9 * Math.max(1, msy_per_year);
+    if (Math.abs(h_per_year - msy_per_year) <= tol) {
+      return { msy_per_year, equilibria: [K / 2], regime: 'at_msy' };
+    }
+    if (h_per_year > msy_per_year) {
+      return { msy_per_year, equilibria: [], regime: 'collapse' };
+    }
+    const d = Math.sqrt(Math.max(0, 1 - h_per_year / msy_per_year));
+    return {
+      msy_per_year,
+      equilibria: [K * (1 - d) / 2, K * (1 + d) / 2],
+      regime: 'sustainable'
+    };
+  }
+
+  /**
+   * Inputs: counts (individuals/quadrat), quadrat_area_m2,
+   * total_area_m2 (positive m²).
+   * Outputs: mean_per_quadrat, density_per_m2,
+   * population_estimate, percent_frequency (%).
+   * Assumption: representative, equal-area quadrats.
+   * Errors: ConstraintViolation empty_data, negative_count,
+   * invalid_count, invalid_number, area_not_positive;
+   * RuntimeError numeric_overflow.
+   * Hand check: [0,2,4,2], quadrat 2m², field 100m² ->
+   * mean=2, density=1/m², estimate=100, frequency=75%.
+   */
+  function quadrat({ counts, quadrat_area_m2, total_area_m2 } = {}) {
+    if (!Array.isArray(counts) || !counts.length) {
+      return err('ConstraintViolation', 'empty_data');
+    }
+    if (counts.some(n => finite(n) && n < 0)) return negative('count');
+    if (counts.some(n => !whole(n))) {
+      return err('ConstraintViolation', 'invalid_count');
+    }
+    if (finite(quadrat_area_m2) && quadrat_area_m2 <= 0 ||
+        finite(total_area_m2) && total_area_m2 <= 0) {
+      return err('ConstraintViolation', 'area_not_positive');
+    }
+    if (!allFinite(quadrat_area_m2, total_area_m2)) return invalid();
+    const mean_per_quadrat = counts.reduce((a, b) => a + b, 0) /
+      counts.length;
+    const density_per_m2 = mean_per_quadrat / quadrat_area_m2;
+    const population_estimate = density_per_m2 * total_area_m2;
+    const percent_frequency = 100 * counts.filter(n => n > 0).length /
+      counts.length;
+    if (!allFinite(mean_per_quadrat, density_per_m2,
+      population_estimate, percent_frequency)) return overflow();
+    return {
+      mean_per_quadrat, density_per_m2,
+      population_estimate, percent_frequency
+    };
+  }
+
+  /**
+   * Inputs: marked_first M, caught_second C, marked_second R
+   * (whole animals); method lincoln_petersen (default) or chapman.
+   * Outputs: N_estimate (animals, not rounded).
+   * Assumption: closed mixed population and equal catchability.
+   * Errors: NotSupported method_not_supported;
+   * ConstraintViolation negative_count, invalid_count,
+   * recaptures_exceed_catch; MathError no_recaptures;
+   * RuntimeError numeric_overflow.
+   * Hand check: M=20,C=30,R=10 -> LP=60,
+   * Chapman=21*31/11-1=58.18181818.
+   */
+  function mark_recapture({
+    marked_first, caught_second, marked_second,
+    method = 'lincoln_petersen'
+  } = {}) {
+    if (method !== 'lincoln_petersen' && method !== 'chapman') {
+      return err('NotSupported', 'method_not_supported');
+    }
+    const a = [marked_first, caught_second, marked_second];
+    if (a.some(n => finite(n) && n < 0)) return negative('count');
+    if (a.some(n => !whole(n))) {
+      return err('ConstraintViolation', 'invalid_count');
+    }
+    if (marked_second > caught_second || marked_second > marked_first) {
+      return err('ConstraintViolation', 'recaptures_exceed_catch');
+    }
+    if (method === 'lincoln_petersen' && marked_second === 0) {
+      return err('MathError', 'no_recaptures');
+    }
+    const N_estimate = method === 'chapman'
+      ? (marked_first + 1) * (caught_second + 1) /
+        (marked_second + 1) - 1
+      : marked_first * caught_second / marked_second;
+    if (!finite(N_estimate)) return overflow();
+    return { N_estimate };
+  }
+
+  /**
+   * Inputs: counts (whole individuals for each species).
+   * Outputs: N, S, simpson_D, simpson_diversity,
+   * shannon_H (natural log), evenness (null if S<2).
+   * Assumption: distinct species, complete sampled counts.
+   * Errors: ConstraintViolation empty_data, negative_count,
+   * invalid_count; MathError too_few_individuals;
+   * RuntimeError numeric_overflow.
+   * Hand check: [2,2] -> N=4,S=2,D=1/3,1-D=2/3,
+   * H=ln(2), evenness=1.
+   */
+  function diversity({ counts } = {}) {
+    if (!Array.isArray(counts) || !counts.length) {
+      return err('ConstraintViolation', 'empty_data');
+    }
+    if (counts.some(n => finite(n) && n < 0)) return negative('count');
+    if (counts.some(n => !whole(n))) {
+      return err('ConstraintViolation', 'invalid_count');
+    }
+    const N = counts.reduce((a, b) => a + b, 0);
+    const S = counts.filter(n => n > 0).length;
+    if (N < 2) return err('MathError', 'too_few_individuals');
+    const simpson_D = counts.reduce((s, n) => s + n * (n - 1), 0) /
+      (N * (N - 1));
+    const simpson_diversity = 1 - simpson_D;
+    const shannon_H = -counts.reduce((s, n) => {
+      if (!n) return s;
+      const p = n / N;
+      return s + p * Math.log(p);
+    }, 0);
+    const evenness = S < 2 ? null : shannon_H / Math.log(S);
+    if (!allFinite(N, simpson_D, simpson_diversity, shannon_H) ||
+        evenness !== null && !finite(evenness)) return overflow();
+    return { N, S, simpson_D, simpson_diversity, shannon_H, evenness };
+  }
+
+  function validLV({ alpha, beta, gamma, delta, K }) {
+    const a = [alpha, beta, gamma, delta];
+    if (a.some(n => finite(n) && n <= 0)) return rateError();
+    if (K !== null && K !== undefined && finite(K) && K <= 0) {
+      return capacityError();
+    }
+    if (a.some(n => !finite(n)) ||
+        K !== null && K !== undefined && !finite(K)) return invalid();
+    return null;
+  }
+
+  /**
+   * Inputs: alpha,gamma (1/year); beta,delta (interaction rates);
+   * optional K (prey individuals, null means unlimited).
+   * Outputs: prey_star, predator_star (individuals), regime.
+   * Assumption: logistic prey limitation only when K is supplied.
+   * Errors: ConstraintViolation rate_not_positive,
+   * carrying_capacity_not_positive, invalid_number;
+   * RuntimeError numeric_overflow.
+   * Hand check: alpha=2,beta=.02,gamma=1,delta=.01:
+   * (100,100); with K=80 -> (80,0), predator_extinct.
+   */
+  function lv_equilibrium({ alpha, beta, gamma, delta, K } = {}) {
+    const problem = validLV({ alpha, beta, gamma, delta, K });
+    if (problem) return problem;
+    const x = gamma / delta;
+    if (!finite(x)) return overflow();
+    if (K != null && x >= K) {
+      return { prey_star: K, predator_star: 0, regime: 'predator_extinct' };
+    }
+    const y = alpha / beta * (K == null ? 1 : 1 - x / K);
+    if (!finite(y)) return overflow();
+    return { prey_star: x, predator_star: y, regime: 'coexistence' };
+  }
+
+  function lvRun(args, trace) {
+    const { alpha, beta, gamma, delta, K, x0, y0, dt, steps } = args;
+    const problem = validLV({ alpha, beta, gamma, delta, K });
+    if (problem) return problem;
+    if (finite(x0) && x0 < 0 || finite(y0) && y0 < 0) {
+      return negative('population');
+    }
+    if (!allFinite(x0, y0)) return invalid();
+    if (finite(dt) && dt <= 0) {
+      return err('MathError', 'dt_must_be_positive');
+    }
+    if (!finite(dt)) return invalid();
+    if (!Number.isInteger(steps) || steps < 1 || steps > 20000) {
+      return err('ConstraintViolation', 'steps_out_of_range_1_20000');
+    }
+
+    const derivative = (x, y) => ({
+      x: alpha * x * (K == null ? 1 : 1 - x / K) - beta * x * y,
+      y: delta * x * y - gamma * y
+    });
+
+    let x = x0, y = y0;
+    let x_max = x, x_min = x, y_max = y, y_min = y;
+    const points = trace ? [{ t_years: 0, x, y }] : null;
+
+    for (let i = 1; i <= steps; i++) {
+      const a = derivative(x, y);
+      const b = derivative(x + dt * a.x / 2, y + dt * a.y / 2);
+      const c = derivative(x + dt * b.x / 2, y + dt * b.y / 2);
+      const d = derivative(x + dt * c.x, y + dt * c.y);
+      x += dt * (a.x + 2 * b.x + 2 * c.x + d.x) / 6;
+      y += dt * (a.y + 2 * b.y + 2 * c.y + d.y) / 6;
+      if (!allFinite(x, y)) return overflow();
+      x_max = Math.max(x_max, x);
+      x_min = Math.min(x_min, x);
+      y_max = Math.max(y_max, y);
+      y_min = Math.min(y_min, y);
+      if (trace) points.push({ t_years: i * dt, x, y });
+    }
+    const result = {
+      t_final: steps * dt, x_final: x, y_final: y,
+      x_max, x_min, y_max, y_min
+    };
+    if (trace) result.points = points;
+    if (!allFinite(result.t_final, x, y, x_max, x_min, y_max, y_min)) {
+      return overflow();
+    }
+    return result;
+  }
+
+  /**
+   * Inputs: alpha,beta,gamma,delta, optional K as lv_equilibrium;
+   * x0,y0 (individuals), dt (years), steps (integer 1..20000).
+   * Outputs: t_final, x_final, y_final, x_max, x_min, y_max, y_min.
+   * Assumption: constant-parameter classical fourth-order RK4.
+   * Errors: ConstraintViolation rate_not_positive,
+   * carrying_capacity_not_positive, negative_population, invalid_number,
+   * steps_out_of_range_1_20000; MathError dt_must_be_positive;
+   * RuntimeError numeric_overflow.
+   * Hand check: alpha=1,x0=10,y0=0,dt=.1,steps=1,K=null
+   * -> x_final approximately 11.0517083, y_final=0.
+   */
+  function lv_simulate(args = {}) {
+    return lvRun(args, false);
+  }
+
+  /**
+   * Inputs: identical to lv_simulate, with same units and errors.
+   * Outputs: lv_simulate fields plus points [{t_years,x,y}].
+   * Assumption: all RK4 points are recorded, including the start.
+   * Errors: same as lv_simulate.
+   * Hand check: one step at dt=.1 gives two points at 0 and .1 years.
+   */
+  function lv_trace(args = {}) {
+    return lvRun(args, true);
+  }
+
+  /**
+   * Inputs: alpha,gamma (positive per-year rates).
+   * Outputs: period (years).
+   * Assumption: small oscillations without a carrying capacity.
+   * Errors: ConstraintViolation rate_not_positive, invalid_number;
+   * RuntimeError numeric_overflow.
+   * Hand check: alpha=4,gamma=1 -> period=pi years.
+   */
+  function lv_period({ alpha, gamma } = {}) {
+    if (finite(alpha) && alpha <= 0 ||
+        finite(gamma) && gamma <= 0) return rateError();
+    if (!allFinite(alpha, gamma)) return invalid();
+    const period = 2 * Math.PI / Math.sqrt(alpha * gamma);
+    if (!finite(period)) return overflow();
+    return { period };
+  }
+
+  /**
+   * Inputs: alpha,beta,gamma,delta (positive model rates),
+   * x,y (positive individuals).
+   * Outputs: H (conserved model quantity).
+   * Assumption: unrestricted prey, no carrying capacity.
+   * Errors: ConstraintViolation rate_not_positive, invalid_number;
+   * MathError log_of_non_positive; RuntimeError numeric_overflow.
+   * Hand check: alpha=2,beta=.5,gamma=3,delta=.25,x=4,y=2:
+   * H=2-3ln(4)-2ln(2).
+   */
+  function lv_invariant({ alpha, beta, gamma, delta, x, y } = {}) {
+    const problem = validLV({ alpha, beta, gamma, delta, K: null });
+    if (problem) return problem;
+    if (finite(x) && x <= 0 || finite(y) && y <= 0) {
+      return err('MathError', 'log_of_non_positive');
+    }
+    if (!allFinite(x, y)) return invalid();
+    const H = delta * x - gamma * Math.log(x) +
+      beta * y - alpha * Math.log(y);
+    if (!finite(H)) return overflow();
+    return { H };
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    food_web, remove_effect, energy_transfer, transfer_efficiency,
+    pyramid, bioaccumulation, exponential, logistic, logistic_time,
+    harvest, quadrat, mark_recapture, diversity, lv_equilibrium,
+    lv_simulate, lv_trace, lv_period, lv_invariant
+  });
+})();
+/* FIT-CALC-END ecosystems */
+
+(() => {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const fmt = n => Number.isFinite(n)
+    ? Number(n.toPrecision(3)).toLocaleString('en-GB')
+    : '—';
+
+  let index = 0;
+  let score = 0;
+  let tries = 0;
+  let hinted = false;
+  let solved = false;
+  let current;
+  let values = {};
+  let selections = {};
+
+  let seed = 1;
+  function rand() {
+    seed = (Math.imul(1664525, seed) + 1013904223) >>> 0;
+    return seed / 4294967296;
+  }
+  function pick(a) {
+    return a[Math.floor(rand() * a.length)];
+  }
+
+  function tell(text, kind = '') {
+    $('feedback').className = 'feedback' + (kind ? ' ' + kind : '');
+    $('feedback').textContent = text;
+  }
+
+  function moduleError(result) {
+    const errors = {
+      division_by_zero: 'Input energy must be greater than zero.',
+      negative_energy: 'Energy cannot be negative.',
+      factor_below_1: 'The pollutant factor must be at least one.',
+      numeric_overflow: 'The entered value is too large.'
+    };
+    tell(
+      errors[result.reason] || 'The selected values are not valid.',
+      'bad'
+    );
+  }
+
+  function configuration(n) {
+    seed = 49011 + n * 8111;
+
+    const energy = pick([2000, 4000, 8000, 12000]);
+    const percentage = pick([10, 15, 20, 25]);
+
+    if (n === 0) {
+      return {
+        type: 'energy',
+        unknown: 'level',
+        title: 'Energy to a consumer',
+        question: 'Producers store ' + fmt(energy) +
+          ' kJ. Each trophic level passes ' + percentage +
+          '% to the next. How many kJ reach level 3?',
+        E: energy,
+        f: percentage / 100,
+        levels: 3,
+        target: 3,
+        facts: [
+          ['Producer energy', fmt(energy) + ' kJ'],
+          ['Efficiency', percentage + '%']
+        ],
+        step: 1,
+        max: energy,
+        start: 0
+      };
+    }
+
+    if (n === 1) {
+      return {
+        type: 'energy',
+        unknown: 'efficiency',
+        title: 'Find the transfer rate',
+        question: 'Primary consumers receive ' +
+          fmt(energy * percentage / 100) +
+          ' kJ from producers storing ' + fmt(energy) +
+          ' kJ. Find the efficiency as a percentage.',
+        E: energy,
+        f: percentage / 100,
+        levels: 4,
+        target: 2,
+        facts: [
+          ['Energy supplied', fmt(energy) + ' kJ'],
+          ['Energy received', fmt(energy * percentage / 100) + ' kJ']
+        ],
+        step: 1,
+        max: 100,
+        start: 5
+      };
+    }
+
+    if (n === 2) {
+      return {
+        type: 'pyramid',
+        title: 'One tree, many caterpillars',
+        question: 'A large rain tree supports many caterpillars. Find the number-pyramid shape AND the biomass-pyramid shape. They do not have to match.',
+        names: [
+          'rain tree',
+          'caterpillar',
+          'insect-eating bird'
+        ],
+        numbers: [1, 200, 20],
+        masses: [100000, 2, 20],
+        facts: [
+          ['Counts, levels 1–3', '1, 200, 20'],
+          ['Individual masses', '100,000 g; 2 g; 20 g']
+        ]
+      };
+    }
+
+    if (n === 3) {
+      return {
+        type: 'chemical',
+        title: 'Pesticide in a lake',
+        question: 'Algae contain 0.006 ppm of a pesticide. The concentration becomes five times greater at each feeding step. Calculate the concentration at level 4 and decide whether it exceeds the 0.5 ppm limit.',
+        c0: .006,
+        factor: 5,
+        levels: 4,
+        limit: .5,
+        facts: [
+          ['Algae', '0.006 ppm'],
+          ['Factor', '× 5 per level'],
+          ['Safety limit', '0.5 ppm']
+        ],
+        step: .001,
+        max: 3,
+        start: .1
+      };
+    }
+
+    if (n === 4) {
+      return {
+        type: 'pyramid',
+        title: 'Woodland energy structure',
+        question: 'Use counts and mass per organism to decide whether each pyramid is upright, inverted or irregular.',
+        names: [
+          'large tree',
+          'caterpillar',
+          'insect-eating bird',
+          'sparrowhawk'
+        ],
+        numbers: [2, 360, 45, 3],
+        masses: [90000, 1, 18, 700],
+        facts: [
+          ['Counts', '2, 360, 45, 3'],
+          ['Individual masses', '90,000 g; 1 g; 18 g; 700 g']
+        ]
+      };
+    }
+
+    return {
+      type: 'energy',
+      unknown: 'loss',
+      title: 'A five-level food chain',
+      question: 'Producers store ' + fmt(energy) +
+        ' kJ and each level passes ' + percentage +
+        '% to the next. How much energy in total does NOT reach the fifth level? Also choose why that energy is unavailable.',
+      E: energy,
+      f: percentage / 100,
+      levels: 5,
+      target: 5,
+      facts: [
+        ['Producer energy', fmt(energy) + ' kJ'],
+        ['Efficiency', percentage + '%'],
+        ['Chain length', '5 levels']
+      ],
+      step: 1,
+      max: energy,
+      start: 0
+    };
+  }
+
+  function calculation() {
+    if (current.type === 'pyramid') {
+      return FITCalcEco.pyramid({
+        numbers: current.numbers,
+        mass_each_g: current.masses
+      });
+    }
+
+    if (current.type === 'chemical') {
+      return FITCalcEco.bioaccumulation({
+        c0_ppm: current.c0,
+        factor: current.factor,
+        levels: current.levels
+      });
+    }
+
+    return FITCalcEco.energy_transfer({
+      energy_kJ: current.E,
+      efficiency: current.f,
+      levels: current.levels
+    });
+  }
+
+  function numericAnswer() {
+    const m = calculation();
+    if (m.error) return m;
+
+    if (current.type === 'chemical') {
+      return m.concentration_ppm_by_level.at(-1);
+    }
+
+    if (current.unknown === 'loss') {
+      return m.total_lost_kJ;
+    }
+
+    if (current.unknown === 'efficiency') {
+      const r = FITCalcEco.transfer_efficiency({
+        energy_in_kJ: m.energy_by_level_kJ[0],
+        energy_out_kJ: m.energy_by_level_kJ[1]
+      });
+      return r.error ? r : r.percent;
+    }
+
+    return m.energy_by_level_kJ[current.target - 1];
+  }
+
+  function numericControl() {
+    const c = current;
+
+    const label = c.type === 'chemical'
+      ? 'Top consumer concentration (ppm)'
+      : c.unknown === 'efficiency'
+        ? 'Transfer efficiency (%)'
+        : c.unknown === 'loss'
+          ? 'Total unavailable energy (kJ)'
+          : 'Energy at level ' + c.target + ' (kJ)';
+
+    return '<div class="control">' +
+      '<label for="answer">' + label + '</label>' +
+      '<div class="stepper">' +
+      '<button data-diff="' + (-10 * c.step) +
+      '" aria-label="Decrease coarsely">−−</button>' +
+      '<button data-diff="' + (-c.step) +
+      '" aria-label="Decrease finely">−</button>' +
+      '<input id="answer" type="number" min="0" max="' +
+      c.max + '" step="' + c.step + '" value="' + c.start +
+      '" inputmode="decimal">' +
+      '<button data-diff="' + c.step +
+      '" aria-label="Increase finely">+</button>' +
+      '<button data-diff="' + (10 * c.step) +
+      '" aria-label="Increase coarsely">++</button>' +
+      '</div>' +
+      '<input type="range" id="range" min="0" max="' +
+      c.max + '" step="' + c.step + '" value="' + c.start +
+      '" aria-label="Slide your numerical answer">' +
+      '</div>';
+  }
+
+  function choices(key, label, options) {
+    return '<h3>' + label + '</h3>' +
+      '<div class="choices">' +
+      options.map(v =>
+        '<button data-choice="' + key + ':' + v +
+        '" class="choice" aria-pressed="' +
+        (selections[key] === v) + '">' +
+        v.replaceAll('_', ' ') +
+        '</button>'
+      ).join('') +
+      '</div>';
+  }
+
+  function controls() {
+    let html = '';
+
+    if (current.type === 'pyramid') {
+      html = choices(
+        'numbers',
+        'Pyramid of numbers',
+        ['upright', 'inverted', 'irregular']
+      ) + choices(
+        'biomass',
+        'Pyramid of biomass',
+        ['upright', 'inverted', 'irregular']
+      );
+    } else {
+      html = numericControl();
+
+      if (current.type === 'chemical') {
+        html += choices(
+          'safety',
+          'Does the concentration exceed the limit?',
+          ['yes', 'no']
+        );
+      }
+
+      if (current.unknown === 'loss') {
+        html += choices(
+          'cause',
+          'Why is energy unavailable?',
+          ['heat_waste_uneaten', 'energy_recycles_completely']
+        );
+      }
+    }
+
+    $('controls').innerHTML = html;
+
+    $('controls').querySelectorAll('[data-choice]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (solved) return;
+
+        const [key, value] = btn.dataset.choice.split(':');
+        selections[key] = value;
+        controls();
+        draw();
+      });
+    });
+
+    const field = $('answer');
+    const range = $('range');
+
+    if (!field) return;
+
+    field.value = String(values.answer);
+    range.value = String(values.answer);
+
+    function update(n) {
+      if (solved || !Number.isFinite(n)) return;
+
+      values.answer = Math.min(
+        current.max,
+        Math.max(0, n)
+      );
+
+      field.value = String(values.answer);
+      range.value = String(values.answer);
+
+      draw();
+    }
+
+    field.addEventListener('input', () => {
+      if (field.value !== '') {
+        update(Number(field.value));
+      }
+    });
+
+    range.addEventListener('input', () => {
+      update(Number(range.value));
+    });
+
+    $('controls').querySelectorAll('[data-diff]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        update(
+          Math.round(
+            (values.answer + Number(btn.dataset.diff)) * 100000
+          ) / 100000
+        );
+      });
+    });
+  }
+
+  function begin(n) {
+    if (n === 6) {
+      end();
+      return;
+    }
+
+    index = n;
+    current = configuration(n);
+
+    tries = 0;
+    hinted = false;
+    solved = false;
+    selections = {};
+    values = { answer: current.start ?? 0 };
+
+    $('round').textContent = 'Round ' + (n + 1) + '/6';
+    $('title').textContent = current.title;
+    $('question').textContent = current.question;
+
+    $('assumption').textContent =
+      current.type === 'pyramid'
+        ? 'Assumption: each feeding level has one representative individual mass.'
+        : current.type === 'chemical'
+          ? 'Assumption: constant pesticide multiplication at each feeding step.'
+          : 'Assumption: fixed transfer efficiency between every two levels.';
+
+    $('facts').innerHTML = current.facts.map(([k, v]) =>
+      '<div class="fact"><small>' + k +
+      '</small><strong>' + v +
+      '</strong></div>'
+    ).join('');
+
+    $('hint').disabled = false;
+    $('check').hidden = false;
+    $('next').hidden = true;
+
+    controls();
+    tell('Use the controls and check your answer.');
+    draw();
+  }
+
+  function draw() {
+    const m = calculation();
+    if (m.error) {
+      moduleError(m);
+      return;
+    }
+
+    const isP = current.type === 'pyramid';
+
+    const a = isP
+      ? current.numbers
+      : current.type === 'chemical'
+        ? m.concentration_ppm_by_level
+        : m.energy_by_level_kJ;
+
+    const b = isP ? m.biomass_g : null;
+    const max = Math.max(1, ...a, ...(b || []));
+    const nonzero = [...a, ...(b || [])].filter(n => n > 0);
+    const min = Math.min(...nonzero);
+
+    const logarithmic = max / Math.max(min, 1e-100) > 1000;
+
+    const scale = v => logarithmic
+      ? Math.log10(1 + Math.max(0, v)) / Math.log10(1 + max)
+      : Math.max(0, v) / max;
+
+    const sx = v => 119 + 333 * scale(v);
+    const rh = 247 / a.length;
+
+    let svg =
+      '<rect width="490" height="350" fill="#fff"/>' +
+      '<text x="10" y="17" font-size="12" font-weight="800">' +
+      (isP
+        ? 'Numbers and biomass'
+        : current.type === 'chemical'
+          ? 'Pesticide by level'
+          : 'Energy available by level') +
+      '</text>';
+
+    for (let j = 0; j <= 4; j++) {
+      const v = logarithmic
+        ? Math.pow(10, Math.log10(1 + max) * j / 4) - 1
+        : max * j / 4;
+
+      const x = sx(v);
+
+      svg +=
+        '<path d="M' + x + ' 30V285" stroke="#ddd" stroke-dasharray="4 4"/>' +
+        '<text x="' + x +
+        '" y="302" text-anchor="middle" font-size="10">' +
+        fmt(v) + '</text>';
+    }
+
+    a.forEach((value, i) => {
+      const y = 40 + i * rh;
+
+      svg +=
+        '<text x="8" y="' + (y + 14) +
+        '" font-weight="800" font-size="12">Level ' +
+        (i + 1) + '</text>' +
+        '<rect x="119" y="' + y +
+        '" width="' + Math.max(0, sx(value) - 119) +
+        '" height="' + (isP ? 12 : 19) +
+        '" rx="4" fill="#2EC4A6" stroke="#111" stroke-width="1.4"/>';
+
+      if (isP) {
+        svg +=
+          '<rect x="119" y="' + (y + 16) +
+          '" width="' + Math.max(0, sx(b[i]) - 119) +
+          '" height="11" rx="3" fill="#FF8FB8" stroke="#111" stroke-width="1.4"/>';
+      } else {
+        const hidden = !solved && (
+          current.type === 'chemical' && i === a.length - 1 ||
+          current.unknown === 'level' && i === current.target - 1
+        );
+
+        if (!hidden && current.unknown !== 'loss') {
+          svg +=
+            '<text x="' + Math.min(470, sx(value) + 4) +
+            '" y="' + (y + 15) +
+            '" font-size="10" font-weight="700">' +
+            fmt(value) + '</text>';
+        }
+
+        if (current.type === 'energy' && i < a.length - 1) {
+          const pair = FITCalcEco.energy_transfer({
+            energy_kJ: value,
+            efficiency: current.f,
+            levels: 2
+          });
+
+          if (!pair.error) {
+            svg +=
+              '<text x="122" y="' + (y + rh - 5) +
+              '" font-size="10" fill="#555">Step loss ' +
+              fmt(pair.total_lost_kJ) + ' kJ</text>';
+          }
+        }
+      }
+    });
+
+    if (
+      current.type !== 'pyramid' &&
+      current.unknown !== 'efficiency' &&
+      current.unknown !== 'loss' &&
+      Number.isFinite(values.answer)
+    ) {
+      const i = current.type === 'chemical'
+        ? a.length - 1
+        : current.target - 1;
+
+      const y = 40 + i * rh + 10;
+
+      svg +=
+        '<circle cx="' + sx(Math.min(max, values.answer)) +
+        '" cy="' + y +
+        '" r="7" fill="#FF8FB8" stroke="#111" stroke-width="2"/>';
+    }
+
+    svg +=
+      '<text x="286" y="333" font-size="12" text-anchor="middle">' +
+      (logarithmic ? 'Logarithmic scale' : 'Linear scale') +
+      ' (' +
+      (isP
+        ? 'individuals / g'
+        : current.type === 'chemical'
+          ? 'ppm'
+          : 'kJ') +
+      ')</text>' +
+      '<text transform="translate(14 183) rotate(-90)" font-size="12" text-anchor="middle">Trophic level</text>';
+
+    $('plot').innerHTML = svg;
+
+    $('plot').setAttribute(
+      'aria-label',
+      'Trophic level bars with ' +
+      (logarithmic ? 'logarithmic' : 'linear') +
+      ' values for ' + a.length + ' levels.'
+    );
+
+    $('plotNote').textContent = isP
+      ? 'Green shows number of organisms; pink shows calculated biomass in grams.'
+      : current.type === 'chemical'
+        ? 'Pesticide concentration increases through successive consumers.'
+        : 'The model shows all levels, with the numeric target concealed until Check.';
+  }
+
+  function check() {
+    if (solved) return;
+
+    tries++;
+
+    const m = calculation();
+    if (m.error) {
+      moduleError(m);
+      return;
+    }
+
+    if (current.type === 'pyramid') {
+      if (
+        selections.numbers !== m.numbers_shape ||
+        selections.biomass !== m.biomass_shape
+      ) {
+        tell(
+          'Compare adjacent levels. Multiply numbers by individual masses for the biomass shape.',
+          'bad'
+        );
+        return;
+      }
+
+      award(
+        'A number pyramid may be irregular even when the biomass pyramid is upright.'
+      );
+      return;
+    }
+
+    const answer = numericAnswer();
+
+    if (answer && answer.error) {
+      moduleError(answer);
+      return;
+    }
+
+    const candidate = values.answer;
+
+    const tolerance = current.type === 'chemical'
+      ? .00051
+      : current.unknown === 'efficiency'
+        ? .51
+        : Math.max(1, answer * .015);
+
+    if (
+      !Number.isFinite(candidate) ||
+      Math.abs(candidate - answer) > tolerance
+    ) {
+      const difference = Math.abs(candidate - answer);
+
+      tell(
+        'Your answer is ' + fmt(difference) +
+        (current.type === 'chemical'
+          ? ' ppm'
+          : current.unknown === 'efficiency'
+            ? ' percentage points'
+            : ' kJ') +
+        (candidate > answer ? ' too high.' : ' too low.') +
+        ' Count the transfers and check the units.',
+        'bad'
+      );
+      return;
+    }
+
+    if (current.type === 'chemical') {
+      if (
+        selections.safety !==
+        (answer > current.limit ? 'yes' : 'no')
+      ) {
+        tell(
+          'Compare the final concentration with the stated limit.',
+          'bad'
+        );
+        return;
+      }
+    }
+
+    if (
+      current.unknown === 'loss' &&
+      selections.cause !== 'heat_waste_uneaten'
+    ) {
+      tell(
+        'The number is correct, but energy does not recycle like nutrients.',
+        'bad'
+      );
+      return;
+    }
+
+    award(
+      current.type === 'chemical'
+        ? 'Biomagnification raises concentration at higher feeding levels.'
+        : current.unknown === 'efficiency'
+          ? 'Transfer efficiency compares output energy with input energy.'
+          : current.unknown === 'loss'
+            ? 'Energy unavailable to the final consumer includes losses at each transfer.'
+            : 'There are two transfers from level 1 to level 3.'
+    );
+  }
+
+  function award(text) {
+    score += hinted ? 50 : tries === 1 ? 100 : 75;
+    solved = true;
+
+    $('score').textContent = 'Score ' + score;
+    $('check').hidden = true;
+    $('hint').disabled = true;
+    $('next').hidden = false;
+    $('next').textContent = index === 5
+      ? 'See stars →'
+      : 'Next round →';
+
+    tell('✓ ' + text, 'good');
+    draw();
+  }
+
+  function hint() {
+    if (solved) return;
+
+    hinted = true;
+
+    tell(
+      'Hint: ' +
+      (current.type === 'pyramid'
+        ? 'Calculate biomass at every level before classifying its shape.'
+        : current.type === 'chemical'
+          ? 'There is one fewer feeding step than the number of levels.'
+          : current.unknown === 'loss'
+            ? 'Find the final-level energy first, then compare it with the producer energy.'
+            : current.unknown === 'efficiency'
+              ? 'Find the output-to-input ratio and express it as a percentage.'
+              : 'Apply efficiency once for each arrow, not once for each organism.')
+    );
+  }
+
+  function end() {
+    const stars = score >= 510
+      ? 3
+      : score >= 390
+        ? 2
+        : 1;
+
+    $('game').innerHTML =
+      '<section class="panel end" style="grid-column:1/-1">' +
+      '<h2>Energy expert!</h2>' +
+      '<div class="stars" aria-label="' + stars + ' stars">' +
+      '★'.repeat(stars) +
+      '☆'.repeat(3 - stars) +
+      '</div>' +
+      '<strong>' + score + ' / 600 points</strong>' +
+      '<p>All six challenges completed.</p>' +
+      '<button id="again" class="check" style="margin-top:22px">Play again</button>' +
+      '</section>';
+
+    $('round').textContent = 'Complete';
+
+    $('again').addEventListener('click', () => {
+      location.reload();
+    });
+  }
+
+  $('check').addEventListener('click', check);
+  $('hint').addEventListener('click', hint);
+  $('next').addEventListener('click', () => begin(index + 1));
+
+  begin(0);
+})();
+</script>
+</body>
+</html>

@@ -44,6 +44,10 @@ const algorithmsX8 = { subject: 'Computing', concept: 'algorithms', accent: '#1F
 const attenuationX9 = { subject: 'Chemistry', concept: 'attenuation', accent: '#2EC4A6', minutes: '15–20', status: 'live' }
 // Tier-1 X10 optimisation and decisions (calc: lib/sims/tier1/x10_optimisation.calc.js, inlined in each file). Live: FITCalcX10 passes all 24 KATs in tier1/decisions_optimisation.json on the module + 3 byte-identical blocks (FIT Stock Strategy vet).
 const optimisationX10 = { subject: 'Maths', concept: 'optimisation', accent: '#8B5CF6', minutes: '15–20', status: 'live' }
+// Ecosystems family (row 72): FITCalcEco (lib/sims/families/ecosystems.calc.js, inlined byte-identical in each game) passes all 53 cases of
+// kat_cases/families/ecosystems.json (tests/families). All five live. The ChatGPT reply had no registry snippet (FILE 7), so these entries were
+// filled in mechanically from the family prompt (titles, badges, objectives); heights are the 390 px maxima over rounds 1-6 plus margin.
+const ecosystems = { subject: 'Biology', concept: 'ecosystems', accent: '#3DBE6B', minutes: '10–15', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -439,4 +443,24 @@ export const htmlSims = [
     syllabusRef: 'University, Game Theory and Decision Making',
     approach: 'Find pure and mixed Nash equilibria, prune a game tree with alpha–beta search, and optimise a grid-world policy with value iteration.',
     activityPrompt: 'Play all rounds, then explain why alpha–beta pruning gives the same root value as full minimax while evaluating fewer leaves.', tags: ['University', 'Game theory', 'Nash equilibrium', 'alpha–beta pruning', 'value iteration'] },
+  { ...ecosystems, subject: 'Science', id: 'ecosystems-p', title: 'Food Chain Builder', level: 'Primary', topic: 'Food Chains and Food Webs', symbol: '🐸', height: 2000,
+    syllabusRef: 'MOE Primary Science: Interactions within the environment (food chains and food webs)',
+    approach: 'Put organisms in order to build food chains, find the producers and top consumer in a food web, and predict what happens when one animal disappears.',
+    activityPrompt: 'Play all rounds, then explain why removing one animal changes the numbers of the others in a food web.', tags: ['ecosystems', 'Primary', 'Science', 'food chains', 'food webs', 'producers', 'consumers'] },
+  { ...ecosystems, id: 'ecosystems-s', title: 'Energy Pyramid', level: 'Secondary', topic: 'Energy Flow, Pyramids and Bioaccumulation', symbol: '🔺', height: 1900,
+    syllabusRef: 'MOE Secondary Biology: Organisms and their environment (energy flow, food chains and webs, pyramids)',
+    approach: 'Follow energy through trophic levels with a transfer efficiency, build pyramids of numbers and biomass, and track a pesticide as it builds up a food chain.',
+    activityPrompt: 'Play all rounds, then explain why only a small fraction of energy passes from one trophic level to the next.', tags: ['ecosystems', 'Secondary', 'Biology', 'energy flow', 'trophic levels', 'pyramids', 'bioaccumulation'] },
+  { ...ecosystems, id: 'ecosystems-jc', title: 'Population Curve', level: 'JC', topic: 'Population Growth and Sustainable Harvesting', symbol: '📈', height: 2150,
+    syllabusRef: 'Pre-university biology: populations and ecosystems (generic)',
+    approach: 'Fit exponential and logistic growth curves, find when a population reaches a target, and set a harvest quota against the maximum sustainable yield.',
+    activityPrompt: 'Play all rounds, then explain why the growth rate of a logistic population peaks at half the carrying capacity.', tags: ['ecosystems', 'JC', 'Biology', 'logistic growth', 'carrying capacity', 'maximum sustainable yield'] },
+  { ...ecosystems, id: 'ecosystems-poly', title: 'Field Survey', level: 'Poly', topic: 'Sampling Populations and Biodiversity', symbol: '🌼', height: 2050,
+    syllabusRef: 'Polytechnic applied science: environmental field work (generic)',
+    approach: 'Estimate population size with quadrats and capture–recapture, choose between Lincoln–Petersen and Chapman, and compare two sites with Simpson and Shannon indices.',
+    activityPrompt: 'Play all rounds, then explain when the Chapman estimator is a better choice than Lincoln–Petersen.', tags: ['ecosystems', 'Poly', 'Applied Science', 'quadrats', 'capture–recapture', 'biodiversity'] },
+  { ...ecosystems, id: 'ecosystems-u', title: 'Predator–Prey Lab', level: 'University', topic: 'Lotka–Volterra Predator–Prey Models', symbol: '🦊', height: 2550,
+    syllabusRef: 'University, Ecology',
+    approach: 'Set the Lotka–Volterra rates to place the equilibrium, predict the cycle period and extremes from the conserved quantity, and add a carrying capacity to see when predators die out.',
+    activityPrompt: 'Play all rounds, then explain how prey self-limitation damps the predator–prey cycles.', tags: ['University', 'Ecology', 'population dynamics', 'predator–prey'] },
 ]
