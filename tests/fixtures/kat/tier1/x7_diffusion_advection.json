@@ -1,0 +1,802 @@
+{
+  "tool": "x7_diffusion_advection",
+  "owner": "FIT Printers",
+  "version": "2026-10-17",
+  "tolerance": {
+    "rel": 1e-09,
+    "abs": 1e-15,
+    "note": "pass if |got-expected| <= max(abs, rel*|expected|); per-case 'tol' overrides; strings, booleans, nulls, regimes and error classes exact"
+  },
+  "convention": "SI units: m, s, m^2/s, mol/m^3 (river mixing in mg/L as in the topic map). 1-D only, constant coefficients, at most 100 cells (101+ -> ConstraintViolation, reason too_many_cells). Flux positive from the left (high) boundary to the right. Membrane: J=D P (C_left-C_right)/L with dimensionless partition P. Gaussian pulse: C=M/sqrt(4 pi D t) exp(-(x-ut)^2/(4Dt)), M in mol/m^2. Lake: V dC/dt=Q(C_in-C)-kVC. Morphogen: D C''=kC, C(0)=C0, C->0, lambda=sqrt(D/k). Finite-volume cells of equal width dx, cell centres at (i+1/2)dx, mass=sum(C)dx. FTCS diffusion: C_i'=C_i+r(C_(i+1)-2C_i+C_(i-1)), r=D dt/dx^2; 'zero_flux' = no flux through the two end faces (mirror ghost cells); r<=0.5 accepted (compared with a relative slack of 1e-12), r>0.5 -> ConstraintViolation, reason ftcs_unstable_r_gt_0_5. First-order upwind (u>=0): C_i'=C_i-Co(C_i-C_(i-1)), Co=u dt/dx, cell -1 = inflow_concentration, 'zero_gradient_outflow' at the right end; Co<=1 accepted, Co>1 -> ConstraintViolation, reason upwind_unstable_courant_gt_1. A combined advection-diffusion step is NOT in these cases (needs its own bound). Errors (ruling 17:46: schema classes only, cause in expected.reason as lower_snake_case): MathError = mathematically undefined (dx_zero, thickness_zero, d_zero, dt_must_be_positive for dt=0); ConstraintViolation = input outside the allowed range or a stability/size limit checked before the run (d_must_be_non_negative, too_many_cells, ftcs_unstable_r_gt_0_5, upwind_unstable_courant_gt_1).",
+  "oracle": "hand formulas re-checked independently in _build_fit_printers_tier1_kats.py: numpy finite-difference steady solves (membrane, scaffold), exact fractions (microchannel), scipy.stats.norm + quad mass check (Gaussian), numpy mass balance (river mix), solve_ivp DOP853 (lake, advection), solve_bvp (morphogen), own FTCS in matrix form and own upwind loop; x7-021 expected values are the exact discrete cosine-mode solution (1+lambda^n cos), not a simulation output",
+  "cases": [
+    {
+      "id": "x7-001",
+      "desc": "Two-film overall mass-transfer coefficient",
+      "op": "two_film_overall_coefficient",
+      "input": {
+        "k1_m_s": 0.002,
+        "k2_m_s": 0.003
+      },
+      "expected": {
+        "K_m_s": 0.0012
+      },
+      "edge": false,
+      "hand_check": "1/K=1/k1+1/k2=500+333.333=833.333; K=0.0012 m/s. Bird, Stewart and Lightfoot, Transport Phenomena, two-film (series resistance) theory. Oracle: series film resistances in a numpy linear flux balance."
+    },
+    {
+      "id": "x7-002",
+      "desc": "Microchannel diffusion time and mixing length",
+      "op": "microchannel_diffusion",
+      "input": {
+        "L_m": 0.0001,
+        "D_m2_s": 1e-09,
+        "u_m_s": 0.02
+      },
+      "expected": {
+        "diffusion_time_s": 10.0,
+        "mixing_length_m": 0.2
+      },
+      "edge": false,
+      "hand_check": "t_D=L^2/D=1e-8/1e-9=10 s; L_mix=u t_D=0.2 m. Crank, The Mathematics of Diffusion, diffusion time scales. Oracle: L^2/D and u t_D in exact rational arithmetic (fractions)."
+    },
+    {
+      "id": "x7-003",
+      "desc": "Required Fick's-law membrane flux (D=1e-9, dC=100 over 1 mm)",
+      "op": "membrane_steady_flux",
+      "input": {
+        "D_m2_s": 1e-09,
+        "C_left": 100,
+        "C_right": 0,
+        "thickness_m": 0.001,
+        "partition": 1
+      },
+      "expected": {
+        "flux": 0.0001
+      },
+      "edge": false,
+      "hand_check": "J=D P (CL-CR)/L=1e-9(100)/0.001=1e-4 mol/(m^2 s) (must-reproduce). Crank, The Mathematics of Diffusion, steady diffusion through a plane sheet. Oracle: numpy steady finite-difference solve (50 nodes) of D C''=0, flux from the discrete gradient."
+    },
+    {
+      "id": "x7-004",
+      "desc": "Partitioned membrane flux (P=0.5)",
+      "op": "membrane_steady_flux",
+      "input": {
+        "D_m2_s": 2e-10,
+        "C_left": 100,
+        "C_right": 20,
+        "thickness_m": 0.0005,
+        "partition": 0.5
+      },
+      "expected": {
+        "flux": 1.6e-05
+      },
+      "edge": false,
+      "hand_check": "J=(2e-10)(0.5)(80)/5e-4=1.6e-5 mol/(m^2 s); partition applies to both faces. Crank, The Mathematics of Diffusion, membranes with partition coefficient. Oracle: FD solve with membrane-side boundary values P*CL, P*CR."
+    },
+    {
+      "id": "x7-005",
+      "desc": "Linear steady scaffold profile: concentration at x and flux",
+      "op": "scaffold_steady_diffusion",
+      "input": {
+        "D_m2_s": 1e-09,
+        "length_m": 0.002,
+        "C_left": 100,
+        "C_right": 20,
+        "x_m": 0.0005
+      },
+      "expected": {
+        "concentration": 80.0,
+        "flux": 4e-05
+      },
+      "edge": false,
+      "hand_check": "C=100+(20-100)(0.0005/0.002)=80 mol/m^3; J=1e-9(80)/0.002=4e-5 mol/(m^2 s). Crank, The Mathematics of Diffusion. Oracle: FD solve, linear interpolation at x."
+    },
+    {
+      "id": "x7-006",
+      "desc": "Required pure advection: tracer centre moves 100 m in 100 s at 1 m/s",
+      "op": "advect_tracer_centre",
+      "input": {
+        "u_m_s": 1.0,
+        "initial_centre_m": 0,
+        "time_s": 100.0,
+        "D_m2_s": 0
+      },
+      "expected": {
+        "centre_m": 100.0,
+        "displacement_m": 100.0
+      },
+      "edge": false,
+      "hand_check": "x=x0+ut=100 m (must-reproduce). Chapra, Surface Water-Quality Modeling, advective transport. Oracle: solve_ivp of dx/dt=u."
+    },
+    {
+      "id": "x7-007",
+      "desc": "Gaussian river pulse at its centre",
+      "op": "gaussian_pulse",
+      "input": {
+        "mass_per_area_mol_m2": 1.0,
+        "D_m2_s": 2.0,
+        "u_m_s": 1.0,
+        "time_s": 25.0,
+        "x_m": 25.0
+      },
+      "expected": {
+        "concentration": 0.0398942280401,
+        "centre_m": 25.0
+      },
+      "edge": false,
+      "hand_check": "C=M/sqrt(4 pi D t)=1/sqrt(200 pi)=0.0398942280 mol/m^3 at x=ut. Crank, The Mathematics of Diffusion, instantaneous plane source with advection. Oracle: scipy.stats.norm.pdf(x, ut, sqrt(2Dt)), and quad confirms the profile integrates to M."
+    },
+    {
+      "id": "x7-008",
+      "desc": "Gaussian pulse at x-ut=sqrt(4Dt)",
+      "op": "gaussian_pulse",
+      "input": {
+        "mass_per_area_mol_m2": 1.0,
+        "D_m2_s": 2.0,
+        "u_m_s": 1.0,
+        "time_s": 25.0,
+        "x_m": 39.14213562373095
+      },
+      "expected": {
+        "concentration": 0.01467626631737,
+        "centre_m": 25.0
+      },
+      "edge": false,
+      "hand_check": "x-ut=sqrt(200): C=e^-1/sqrt(200 pi)=0.0146762663 mol/m^3. Input x given at full precision (draft truncated it to 39.1421356237). Crank, The Mathematics of Diffusion. Oracle: norm.pdf."
+    },
+    {
+      "id": "x7-009",
+      "desc": "River Peclet number",
+      "op": "peclet_number",
+      "input": {
+        "u_m_s": 0.5,
+        "length_m": 100.0,
+        "D_m2_s": 2.0
+      },
+      "expected": {
+        "Pe": 25.0
+      },
+      "edge": false,
+      "hand_check": "Pe=uL/D=0.5(100)/2=25. Chapra, Surface Water-Quality Modeling, advection versus dispersion. Oracle: ratio of the advective and dispersive time scales (L^2/D)/(L/u)."
+    },
+    {
+      "id": "x7-010",
+      "desc": "Required river + effluent complete mixing: 3.636364 mg/L, not 4",
+      "op": "river_complete_mix",
+      "input": {
+        "Q_river_m3_s": 10.0,
+        "C_river_mg_L": 2.0,
+        "Q_effluent_m3_s": 1.0,
+        "C_effluent_mg_L": 20.0
+      },
+      "expected": {
+        "concentration_mg_L": 3.636363636364
+      },
+      "edge": false,
+      "hand_check": "C=(10(2)+1(20))/11=40/11=3.636364 mg/L (flow-weighted; the unweighted mean (2+20)/2=11 and the naive 4 are both wrong; must-reproduce). Units mg/L kept as in the map (1 mg/L = 1e-3 kg/m^3). Chapra, Surface Water-Quality Modeling, completely mixed systems. Oracle: numpy solve of the downstream mass balance Q_tot C = sum Q_i C_i and of the flow balance."
+    },
+    {
+      "id": "x7-011",
+      "desc": "Well-mixed lake flushing with first-order decay",
+      "op": "lake_flushing",
+      "input": {
+        "V_m3": 1000.0,
+        "Q_m3_s": 10.0,
+        "C_in": 20.0,
+        "C_initial": 50.0,
+        "k_per_s": 0.01,
+        "time_s": 100.0
+      },
+      "expected": {
+        "flushing_time_s": 100.0,
+        "steady_concentration": 10.0,
+        "concentration": 15.41341132946
+      },
+      "edge": false,
+      "hand_check": "V dC/dt=Q(Cin-C)-kVC; tau=V/Q=100 s; C*=Cin(Q/V)/(Q/V+k)=10; C(t)=C*+(C0-C*)e^(-(Q/V+k)t)=10+40e^-2=15.413411 mol/m^3. Chapra, Surface Water-Quality Modeling, completely mixed lake. Oracle: solve_ivp of the ODE (rtol 1e-12)."
+    },
+    {
+      "id": "x7-012",
+      "desc": "Morphogen exponential gradient (synthesis at x=0, first-order decay)",
+      "op": "morphogen_gradient",
+      "input": {
+        "D_m2_s": 1e-09,
+        "k_per_s": 0.001,
+        "C0": 10.0,
+        "x_m": 0.002
+      },
+      "expected": {
+        "lambda_m": 0.001,
+        "concentration": 1.353352832366
+      },
+      "edge": false,
+      "hand_check": "D C''=kC, C(0)=C0, C->0: lambda=sqrt(D/k)=1e-3 m; C=10e^-2=1.3533528 mol/m^3. Crank, The Mathematics of Diffusion, diffusion with first-order reaction. Oracle: scipy solve_bvp on [0, 20 lambda]."
+    },
+    {
+      "id": "x7-013",
+      "desc": "FTCS one step at the exact stability limit r=0.5, zero-flux faces",
+      "op": "ftcs_diffusion_step",
+      "input": {
+        "D_m2_s": 1.0,
+        "dx_m": 1.0,
+        "dt_s": 0.5,
+        "cells": [
+          0,
+          10,
+          0
+        ],
+        "boundary": "zero_flux"
+      },
+      "expected": {
+        "r": 0.5,
+        "cells": [
+          5,
+          0,
+          5
+        ],
+        "mass_before": 10.0,
+        "mass_after": 10.0,
+        "stable": true
+      },
+      "edge": true,
+      "hand_check": "r=D dt/dx^2=0.5 (accepted: bound is <=). C0'=0+0.5(10-0)=5; C1'=10+0.5(0-20+0)=0; C2'=5; mass sum(C)dx=10 before and after. LeVeque, Finite Difference Methods for Ordinary and Partial Differential Equations, FTCS stability r<=1/2. Oracle: own FTCS in matrix form (I + r A_Neumann)."
+    },
+    {
+      "id": "x7-014",
+      "desc": "FTCS just above the stability limit is rejected",
+      "op": "ftcs_diffusion_step",
+      "input": {
+        "D_m2_s": 1.0,
+        "dx_m": 1.0,
+        "dt_s": 0.500001,
+        "cells": [
+          0,
+          10,
+          0
+        ],
+        "boundary": "zero_flux"
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "ftcs_unstable_r_gt_0_5"
+      },
+      "edge": true,
+      "hand_check": "r=0.500001>0.5: stability limit checked before the run -> ConstraintViolation, reason ftcs_unstable_r_gt_0_5 (ruling 17:46; not MathError: the update is computable). LeVeque, Finite Difference Methods for Ordinary and Partial Differential Equations. Oracle: stability check."
+    },
+    {
+      "id": "x7-015",
+      "desc": "Zero grid spacing",
+      "op": "ftcs_diffusion_step",
+      "input": {
+        "D_m2_s": 1.0,
+        "dx_m": 0,
+        "dt_s": 0.1,
+        "cells": [
+          1,
+          2,
+          3
+        ],
+        "boundary": "zero_flux"
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "dx_zero"
+      },
+      "edge": true,
+      "hand_check": "r=D dt/dx^2 divides by 0 -> MathError, reason dx_zero. LeVeque, Finite Difference Methods for Ordinary and Partial Differential Equations. Oracle: zero-denominator test."
+    },
+    {
+      "id": "x7-016",
+      "desc": "Negative diffusivity is physically invalid",
+      "op": "microchannel_diffusion",
+      "input": {
+        "L_m": 0.0001,
+        "D_m2_s": -1e-09,
+        "u_m_s": 0.02
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "d_must_be_non_negative"
+      },
+      "edge": true,
+      "hand_check": "D<0 violates D>=0 (second law); t_D=L^2/D would be computable but meaningless -> ConstraintViolation, reason d_must_be_non_negative. Crank, The Mathematics of Diffusion. Oracle: validation."
+    },
+    {
+      "id": "x7-017",
+      "desc": "101 cells exceeds the 100-cell scope cap",
+      "op": "ftcs_diffusion_step",
+      "input": {
+        "D_m2_s": 1.0,
+        "dx_m": 1.0,
+        "dt_s": 0.1,
+        "cells": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "boundary": "zero_flux"
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "too_many_cells"
+      },
+      "edge": true,
+      "hand_check": "N=101>100 (X7 scope cap: 1-D, at most 100 cells), size limit checked before the run -> ConstraintViolation, reason too_many_cells. Oracle: length check."
+    },
+    {
+      "id": "x7-018",
+      "desc": "First-order upwind at Courant number exactly 1 shifts one cell",
+      "op": "upwind_advection_step",
+      "input": {
+        "u_m_s": 1.0,
+        "dx_m": 1.0,
+        "dt_s": 1.0,
+        "cells": [
+          0,
+          10,
+          0
+        ],
+        "inflow_concentration": 0,
+        "boundary": "zero_gradient_outflow"
+      },
+      "expected": {
+        "courant": 1.0,
+        "cells": [
+          0,
+          0,
+          10
+        ],
+        "stable": true
+      },
+      "edge": true,
+      "hand_check": "Co=u dt/dx=1: C_i'=C_i-Co(C_i-C_(i-1))=C_(i-1); inflow 0 enters cell 0. LeVeque, Finite Difference Methods for Ordinary and Partial Differential Equations, upwind method and CFL condition. Oracle: own upwind loop."
+    },
+    {
+      "id": "x7-019",
+      "desc": "Zero-thickness membrane",
+      "op": "membrane_steady_flux",
+      "input": {
+        "D_m2_s": 1e-09,
+        "C_left": 100,
+        "C_right": 0,
+        "thickness_m": 0,
+        "partition": 1
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "thickness_zero"
+      },
+      "edge": true,
+      "hand_check": "J=DP(CL-CR)/L divides by L=0 -> MathError, reason thickness_zero. Crank, The Mathematics of Diffusion. Oracle: zero-denominator test."
+    },
+    {
+      "id": "x7-020",
+      "desc": "Zero diffusivity in the microchannel time scale",
+      "op": "microchannel_diffusion",
+      "input": {
+        "L_m": 0.0001,
+        "D_m2_s": 0,
+        "u_m_s": 0.02
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "d_zero"
+      },
+      "edge": true,
+      "hand_check": "t_D=L^2/D divides by D=0 -> MathError, reason d_zero (D=0 is physically allowed elsewhere, e.g. pure advection, but this quantity is undefined). Crank, The Mathematics of Diffusion. Oracle: zero-denominator test."
+    },
+    {
+      "id": "x7-021",
+      "desc": "FTCS 400 steps, 100 cells (cap), zero-flux: exact discrete cosine-mode decay and mass conservation",
+      "op": "ftcs_diffusion_run",
+      "input": {
+        "D_m2_s": 1e-09,
+        "dx_m": 1e-05,
+        "dt_s": 0.025,
+        "steps": 400,
+        "boundary": "zero_flux",
+        "initial": "C_i = 1 + cos(pi (i + 0.5) / 100), i = 0..99",
+        "cells": [
+          1.9998766324816606,
+          1.9988898749619701,
+          1.996917333733128,
+          1.9939609554551798,
+          1.9900236577165575,
+          1.9851093261547739,
+          1.9792228106217657,
+          1.9723699203976766,
+          1.964557418457798,
+          1.95579301479833,
+          1.9460853588275453,
+          1.9354440308298675,
+          1.9238795325112867,
+          1.9114032766354452,
+          1.8980275757606155,
+          1.8837656300886936,
+          1.8686315144381913,
+          1.8526401643540922,
+          1.8358073613682704,
+          1.8181497174250234,
+          1.7996846584870907,
+          1.7804304073383297,
+          1.760405965600031,
+          1.7396310949786096,
+          1.7181262977631888,
+          1.6959127965923142,
+          1.6730125135097733,
+          1.6494480483301837,
+          1.6252426563357054,
+          1.6004202253258841,
+          1.5750052520432787,
+          1.5490228179981318,
+          1.5224985647159488,
+          1.4954586684324076,
+          1.4679298142605735,
+          1.439939169855915,
+          1.4115143586051089,
+          1.3826834323650898,
+          1.3534748437792572,
+          1.3239174181981495,
+          1.294040325232304,
+          1.2638730499653728,
+          1.2334453638559055,
+          1.2027872953565126,
+          1.1719291002794094,
+          1.1409012319375829,
+          1.1097343110910454,
+          1.078459095727845,
+          1.0471064507096426,
+          1.0157073173118207,
+          0.9842926826881795,
+          0.9528935492903574,
+          0.9215409042721552,
+          0.8902656889089547,
+          0.8590987680624176,
+          0.8280708997205903,
+          0.7972127046434876,
+          0.7665546361440945,
+          0.7361269500346271,
+          0.7059596747676962,
+          0.6760825818018505,
+          0.646525156220743,
+          0.6173165676349105,
+          0.5884856413948912,
+          0.5600608301440848,
+          0.5320701857394268,
+          0.5045413315675924,
+          0.4775014352840512,
+          0.4509771820018681,
+          0.42499474795672143,
+          0.3995797746741161,
+          0.3747573436642948,
+          0.35055195166981645,
+          0.3269874864902266,
+          0.3040872034076857,
+          0.2818737022368113,
+          0.2603689050213902,
+          0.23959403439996907,
+          0.21956959266167042,
+          0.20031534151290942,
+          0.1818502825749767,
+          0.16419263863172995,
+          0.14735983564590804,
+          0.1313684855618087,
+          0.11623436991130653,
+          0.10197242423938446,
+          0.08859672336455493,
+          0.07612046748871348,
+          0.06455596917013262,
+          0.0539146411724547,
+          0.04420698520166988,
+          0.035442581542202034,
+          0.027630079602323443,
+          0.02077718937823414,
+          0.014890673845226132,
+          0.009976342283442463,
+          0.006039044544820404,
+          0.003082666266872036,
+          0.0011101250380300964,
+          0.00012336751833941229
+        ],
+        "report_cells": [
+          0,
+          49,
+          99
+        ]
+      },
+      "expected": {
+        "r": 0.25,
+        "mass_before": 0.001,
+        "mass_after": 0.001,
+        "report_values": [
+          1.9059026055425226,
+          1.0142310553288407,
+          0.09409739445747733
+        ],
+        "stable": true
+      },
+      "edge": true,
+      "hand_check": "r=1e-9(0.025)/1e-10=0.25. cos(pi(i+1/2)/N) is an exact eigenvector of the zero-flux FTCS operator (mirror ghost cells) with factor lambda=1-4r sin^2(pi/2N)=0.99975328; after n steps C_i=1+lambda^n cos(pi(i+1/2)/N). Mass sum(C)dx=N dx=1e-3 (cosine sums to 0) is conserved exactly (must-reproduce: bound + conservation). LeVeque, Finite Difference Methods for Ordinary and Partial Differential Equations, von Neumann analysis; Crank, The Mathematics of Diffusion. Oracle: own FTCS stepped 400 times in matrix form.",
+      "tol": {
+        "rel": 1e-09,
+        "abs": 1e-12
+      }
+    },
+    {
+      "id": "x7-022",
+      "desc": "Upwind at Co=0.5 stays bounded (one step)",
+      "op": "upwind_advection_step",
+      "input": {
+        "u_m_s": 1.0,
+        "dx_m": 1.0,
+        "dt_s": 0.5,
+        "cells": [
+          0,
+          10,
+          0
+        ],
+        "inflow_concentration": 0,
+        "boundary": "zero_gradient_outflow"
+      },
+      "expected": {
+        "courant": 0.5,
+        "cells": [
+          0,
+          5,
+          5
+        ],
+        "stable": true
+      },
+      "edge": false,
+      "hand_check": "C1'=10-0.5(10-0)=5; C2'=0-0.5(0-10)=5; C0'=0; values stay within [0,10] (monotone for 0<=Co<=1). LeVeque, Finite Difference Methods for Ordinary and Partial Differential Equations. Oracle: own upwind loop."
+    },
+    {
+      "id": "x7-023",
+      "desc": "Upwind at Co=1.5 is rejected",
+      "op": "upwind_advection_step",
+      "input": {
+        "u_m_s": 1.0,
+        "dx_m": 1.0,
+        "dt_s": 1.5,
+        "cells": [
+          0,
+          10,
+          0
+        ],
+        "inflow_concentration": 0,
+        "boundary": "zero_gradient_outflow"
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "upwind_unstable_courant_gt_1"
+      },
+      "edge": true,
+      "hand_check": "Co=1.5>1 violates the CFL condition for first-order upwind -> ConstraintViolation, reason upwind_unstable_courant_gt_1. LeVeque, Finite Difference Methods for Ordinary and Partial Differential Equations. Oracle: stability check."
+    },
+    {
+      "id": "x7-024",
+      "desc": "Upwind run, Co=1, 100 cells: centre moves 100 m in 100 s (numerical must-reproduce)",
+      "op": "upwind_advection_run",
+      "input": {
+        "u_m_s": 1.0,
+        "dx_m": 2.0,
+        "dt_s": 2.0,
+        "steps": 50,
+        "cells": [
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "inflow_concentration": 0,
+        "boundary": "zero_gradient_outflow"
+      },
+      "expected": {
+        "courant": 1.0,
+        "elapsed_s": 100.0,
+        "centre_before_m": 1.0,
+        "centre_after_m": 101.0,
+        "displacement_m": 100.0,
+        "mass_after": 20.0,
+        "peak_cell": 50
+      },
+      "edge": true,
+      "hand_check": "Co=1 shifts exactly one cell (2 m) per 2 s step: after 50 steps (100 s) the pulse sits in cell 50, centre (50+1/2)2=101 m, displaced 100 m = u t; mass 10(2)=20 kept (nothing has left the 200 m domain). LeVeque, Finite Difference Methods for Ordinary and Partial Differential Equations; Chapra, Surface Water-Quality Modeling. Oracle: own upwind loop, centre of mass sum(x C)/sum(C)."
+    }
+  ]
+}

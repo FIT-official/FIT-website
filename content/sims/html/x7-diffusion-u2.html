@@ -1,0 +1,1958 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grid Transport Lab | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+html{background:var(--fit-paper);color:var(--fit-ink)}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5}
+button,input,summary{font:inherit}
+button,input[type=range],input[type=number],summary{-webkit-tap-highlight-color:transparent;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{border:2px solid #111;min-height:44px;border-radius:999px;background:white;font-weight:800;cursor:pointer;color:#111}
+button:disabled{opacity:.55;cursor:default}
+button:active:not(:disabled){transform:translateY(2px)}
+input[type=range]{width:100%;min-height:48px;accent-color:var(--lvl-uni);cursor:pointer}
+input[type=number]{min-height:44px;font-size:16px;border:2px solid #111;border-radius:12px}
+h1,h2,h3,p{margin-top:0}
+h1,h2,h3{font-weight:800;line-height:1.2}
+h1{font-size:clamp(1.65rem,4vw,2.5rem);margin-bottom:6px}
+h2{font-size:1.23rem;margin-bottom:10px}
+h3{font-size:1rem}
+.shell{max-width:1300px;margin:auto;padding:17px 14px 48px}
+.top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.badge{display:inline-flex;align-items:center;min-height:30px;padding:3px 12px;border:2px solid #111;border-radius:999px;background:var(--lvl-uni);color:var(--lvl-uni-on);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.subtitle{margin:0;color:var(--fit-ink-2)}
+.hud{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:white;border:2px solid #111;border-radius:999px;padding:8px 13px;font-weight:800}
+.chip:nth-child(2){background:var(--lvl-uni-tint)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:17px}
+.card{min-width:0;background:white;border:2px solid #111;border-radius:24px;padding:17px;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-uni-tint)}
+.kicker{font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;font-weight:800;color:var(--fit-ink-2);margin-bottom:8px}
+.question{font-size:1.05rem;font-weight:600;margin-bottom:14px}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.fact{background:white;border:2px solid #111;border-radius:12px;padding:9px;min-width:0}
+.fact span{display:block;font-size:.72rem;text-transform:uppercase;font-weight:800;color:var(--fit-ink-3)}
+.fact strong{display:block;font-size:.93rem;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.scene,.plot{width:100%;height:auto;display:block;background:white;border:2px solid #111;border-radius:16px}
+.scene text,.plot text{font-family:Inter,system-ui,sans-serif;fill:#111}
+.concept{display:flex;gap:12px;align-items:center;margin-top:12px;border:2px solid #111;border-radius:15px;padding:10px;background:white}
+.concept svg{width:100px;height:62px;flex:none}
+.concept p{font-size:.82rem;font-weight:600;margin:0}
+.plotCaption{font-size:.8rem;color:var(--fit-ink-3);margin:8px 0}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;font-weight:700;margin-top:8px}
+.legend span:before{content:"";display:inline-block;width:19px;border-top:4px solid #1F66E5;margin-right:6px;vertical-align:middle}
+.legend span:nth-child(2):before{border-top:3px dashed #111}
+.monitor{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.readout{border:2px solid #111;border-radius:12px;padding:9px 11px;min-width:0}
+.readout span{display:block;color:var(--fit-ink-3);font-size:.76rem;font-weight:700}
+.readout strong{display:block;font-size:.98rem;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.diagnostics{border:2px solid #111;border-radius:12px;padding:10px;background:var(--lvl-uni-tint);font-size:.88rem;font-weight:700;min-height:44px}
+.diagnostics.warning{background:#FFF0E9}
+.viewer{margin-top:12px;padding:10px 12px;border:2px solid #111;border-radius:14px;background:white}
+.viewerHead{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.viewer label{font-weight:800}
+.viewer output{font-weight:800}
+.control{margin-top:12px;background:var(--fit-sunken);border:2px solid #111;border-radius:16px;padding:13px}
+.controlHead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.controlHead label{font-weight:800}
+.controlHead output{font-size:1.22rem;font-weight:800;font-variant-numeric:tabular-nums}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
+.steps button{min-height:49px;font-size:1.25rem;min-width:0;box-shadow:var(--sh-1)}
+.steps button.coarse{background:var(--lvl-uni-tint)}
+.stepText{font-size:.78rem;color:var(--fit-ink-3);margin:8px 0 0}
+.actions{margin-top:14px;display:flex;gap:9px;flex-wrap:wrap}
+.actions button{padding:11px 17px;box-shadow:var(--sh-1)}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)!important;flex:1}
+.check:active{box-shadow:var(--sh-1)!important}
+.feedback{border:2px solid #111;border-radius:14px;background:white;padding:12px;min-height:52px;font-weight:600;margin-top:12px}
+.feedback:empty{display:none}
+.feedback.good{background:#E0F7E9}
+.feedback.bad{background:#FFF0E9}
+.feedback.info{background:#FFF6D9}
+.maths{margin-top:18px;border:2px solid #111;border-radius:16px;padding:0 14px}
+.maths summary{min-height:48px;cursor:pointer;padding:14px 3px;font-weight:800}
+.maths div{border-top:1px solid var(--fit-line-soft);padding:13px 3px}
+.maths p{margin:0 0 8px}
+.maths p:last-child{margin:0}
+.hidden{display:none!important}
+.finish{text-align:center;background:var(--lvl-uni-tint);padding:36px 20px}
+.stars{font-size:3rem;letter-spacing:.12em;margin:16px 0}
+.finish button{background:var(--fit-sun);padding:13px 25px;box-shadow:var(--sh-2)}
+@media(min-width:900px){
+.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
+.card{padding:22px}
+}
+@media(max-width:420px){
+.shell{padding:12px 10px 40px}
+.card{padding:13px}
+.chip{font-size:.82rem}
+.steps{gap:5px}
+}
+@media(prefers-reduced-motion:no-preference){
+button{transition:transform var(--dur-1) var(--ease-out)}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="top">
+  <div>
+    <span class="badge">University (later years)</span>
+    <h1>Grid Transport Lab</h1>
+    <p class="subtitle">Stability, conservation, numerical transport and flushing.</p>
+  </div>
+  <div class="hud">
+    <div class="chip" id="roundChip">Round 1/6</div>
+    <div class="chip" id="scoreChip">Score 0</div>
+  </div>
+</header>
+
+<main id="game" class="layout">
+  <section class="card stage">
+    <div id="kind" class="kicker">Diffusion solver</div>
+    <h2 id="challengeTitle">The challenge</h2>
+    <p class="question" id="question"></p>
+    <div class="facts" id="facts"></div>
+    <svg id="scene" class="scene" viewBox="0 0 510 245"
+      role="img" aria-label="Transport model schematic"></svg>
+    <div class="concept">
+      <svg viewBox="0 0 100 62" role="img"
+        aria-label="A computational grid contains concentration cells">
+        <rect x="2" y="7" width="96" height="48" rx="9"
+          fill="#E2ECFD" stroke="#111" stroke-width="3"/>
+        <path d="M20 8V54M40 8V54M60 8V54M80 8V54"
+          stroke="#111" stroke-width="2"/>
+        <rect x="41" y="9" width="18" height="44" fill="#FF8FB8"/>
+        <path d="M28 31H38M33 26L38 31L33 36M62 31H72M67 26L72 31L67 36"
+          stroke="#111" stroke-width="2" fill="none"/>
+      </svg>
+      <p>Finite-volume cells store concentration; face fluxes redistribute material while numerical stability limits each time step.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="kicker">Live model and stability monitor</div>
+    <h2 id="plotHeading">Transport across the grid</h2>
+    <svg id="plot" class="plot" viewBox="0 0 510 318"
+      role="img" aria-label="Live concentration plot"></svg>
+    <div class="legend">
+      <span id="legendOne">Current state</span>
+      <span id="legendTwo">Initial state</span>
+    </div>
+    <p class="plotCaption" id="plotCaption"></p>
+
+    <div class="viewer" id="viewer">
+      <div class="viewerHead">
+        <label for="viewStep">Inspect simulation step</label>
+        <output id="viewDisplay" for="viewStep">0</output>
+      </div>
+      <input id="viewStep" type="range" min="0" max="5" step="1"
+        aria-label="Inspect solution at a simulation step">
+    </div>
+
+    <div class="monitor">
+      <div class="readout">
+        <span id="currentLabel">Final result</span>
+        <strong id="currentReadout">—</strong>
+      </div>
+      <div class="readout">
+        <span>Goal</span>
+        <strong id="goalReadout">—</strong>
+      </div>
+    </div>
+
+    <div id="diagnostics" class="diagnostics" aria-live="polite"></div>
+
+    <div class="control">
+      <div class="controlHead">
+        <label for="slider" id="controlLabel">Time step</label>
+        <output for="slider" id="display">—</output>
+      </div>
+      <input id="slider" type="range" min="1" max="15" step="1">
+      <div class="steps" role="group" aria-label="Adjust numerical parameter">
+        <button class="coarse" type="button" data-delta="-5"
+          aria-label="Decrease five increments">−−</button>
+        <button type="button" data-delta="-1"
+          aria-label="Decrease one increment">−</button>
+        <button type="button" data-delta="1"
+          aria-label="Increase one increment">+</button>
+        <button class="coarse" type="button" data-delta="5"
+          aria-label="Increase five increments">++</button>
+      </div>
+      <p class="stepText" id="stepText"></p>
+    </div>
+
+    <div class="actions">
+      <button id="hintBtn" type="button">Hint − points</button>
+      <button id="checkBtn" class="check" type="button">Check</button>
+      <button id="nextBtn" type="button" class="hidden">Next round →</button>
+    </div>
+    <div id="feedback" class="feedback" aria-live="polite"></div>
+
+    <details class="maths">
+      <summary>The maths</summary>
+      <div id="mathsText"></div>
+    </details>
+  </section>
+</main>
+
+<section class="card finish hidden" id="finish" aria-live="polite">
+  <span class="badge">University (later years)</span>
+  <h2>Transport simulation complete!</h2>
+  <div id="stars" class="stars"></div>
+  <h3 id="finalScore"></h3>
+  <p id="finishCopy"></p>
+  <button id="again" type="button">Play again ↻</button>
+</section>
+</div>
+
+<script>
+/* FIT-CALC-BEGIN x7_diffusion */
+const FITCalcX7 = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+  const MAX_CELLS = 100;
+  const MAX_STEPS = 10000;
+  const STABILITY_SLACK = 1e-12;
+
+  function error(errorClass, reason) {
+    return { error: errorClass, reason };
+  }
+
+  function invalidInput() {
+    return error('ConstraintViolation', 'input_must_be_finite');
+  }
+
+  function hasFiniteFields(p, keys) {
+    return p !== null &&
+      typeof p === 'object' &&
+      keys.every(key =>
+        typeof p[key] === 'number' && Number.isFinite(p[key])
+      );
+  }
+
+  function finiteResult(value) {
+    function valid(v) {
+      if (v === null) return true;
+      if (typeof v === 'number') return Number.isFinite(v);
+      if (typeof v === 'boolean' || typeof v === 'string') return true;
+      if (Array.isArray(v)) return v.every(valid);
+      if (v && typeof v === 'object') {
+        return Object.keys(v).every(k => valid(v[k]));
+      }
+      return false;
+    }
+
+    return valid(value)
+      ? value
+      : error('MathError', 'non_finite_result');
+  }
+
+  function nonNegative(value, reason) {
+    return value < 0
+      ? error('ConstraintViolation', reason)
+      : null;
+  }
+
+  function positive(value, reason) {
+    return value <= 0
+      ? error('ConstraintViolation', reason)
+      : null;
+  }
+
+  function sumCells(cells) {
+    let sum = 0;
+    for (let i = 0; i < cells.length; i++) sum += cells[i];
+    return sum;
+  }
+
+  function cellMass(cells, dx) {
+    return sumCells(cells) * dx;
+  }
+
+  function cellCentre(cells, dx) {
+    let weighted = 0;
+    let total = 0;
+
+    for (let i = 0; i < cells.length; i++) {
+      total += cells[i];
+      weighted += (i + 0.5) * dx * cells[i];
+    }
+
+    return total === 0 ? null : weighted / total;
+  }
+
+  function peakIndex(cells) {
+    let index = 0;
+    for (let i = 1; i < cells.length; i++) {
+      if (cells[i] > cells[index]) index = i;
+    }
+    return index;
+  }
+
+  /**
+   * Two-film mass transfer: two positive film resistances in series.
+   * Input: k1_m_s, k2_m_s (m/s).
+   * Output: K_m_s (m/s), with 1/K = 1/k1 + 1/k2.
+   * Assumptions: steady state; no additional interfacial resistance.
+   * Errors: non-positive film coefficient, non-finite input/result.
+   *
+   * Hand check: k1 = 2 m/s, k2 = 3 m/s.
+   * K = 1/(1/2 + 1/3) = 1.2 m/s.
+   */
+  function two_film_overall_coefficient(p) {
+    if (!hasFiniteFields(p, ['k1_m_s', 'k2_m_s'])) {
+      return invalidInput();
+    }
+    if (p.k1_m_s <= 0 || p.k2_m_s <= 0) {
+      return error(
+        'ConstraintViolation',
+        'mass_transfer_coefficient_must_be_positive'
+      );
+    }
+
+    return finiteResult({
+      K_m_s: 1 / (1 / p.k1_m_s + 1 / p.k2_m_s)
+    });
+  }
+
+  /**
+   * Transverse diffusion across a microchannel.
+   * Inputs: L_m (m), D_m2_s (m^2/s), u_m_s (m/s).
+   * Outputs: diffusion_time_s (s), mixing_length_m (m).
+   * Assumptions: constant diffusivity and mean axial velocity;
+   * characteristic transverse diffusion time L^2/D.
+   * Errors: negative D, zero D, non-finite input/result.
+   *
+   * Hand check: L = 0.002 m, D = 1e-9 m^2/s, u = 0.01 m/s.
+   * t_D = 0.002^2/1e-9 = 4000 s; length = 40 m.
+   */
+  function microchannel_diffusion(p) {
+    if (!hasFiniteFields(p, ['L_m', 'D_m2_s', 'u_m_s'])) {
+      return invalidInput();
+    }
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+    if (p.D_m2_s === 0) return error('MathError', 'd_zero');
+    if (p.L_m < 0) {
+      return error('ConstraintViolation', 'length_must_be_non_negative');
+    }
+
+    const t = p.L_m * p.L_m / p.D_m2_s;
+
+    return finiteResult({
+      diffusion_time_s: t,
+      mixing_length_m: p.u_m_s * t
+    });
+  }
+
+  /**
+   * Steady one-dimensional membrane diffusion.
+   * Inputs: D_m2_s (m^2/s), C_left and C_right (mol/m^3),
+   * thickness_m (m), partition (dimensionless).
+   * Output: flux (mol/(m^2 s)), positive left to right.
+   * Assumptions: Fick's first law, constant D, steady linear
+   * profile, identical partition factor applied at both faces.
+   * Errors: zero/negative thickness, negative D or partition,
+   * non-finite input/result.
+   *
+   * Hand check: D = 2e-9, C_left = 5, C_right = 1,
+   * thickness = 0.002, partition = 0.5.
+   * J = 2e-9 * 0.5 * 4 / 0.002 = 2e-6 mol/(m^2 s).
+   */
+  function membrane_steady_flux(p) {
+    if (!hasFiniteFields(
+      p,
+      ['D_m2_s', 'C_left', 'C_right', 'thickness_m', 'partition']
+    )) return invalidInput();
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+
+    if (p.thickness_m === 0) {
+      return error('MathError', 'thickness_zero');
+    }
+    if (p.thickness_m < 0) {
+      return error('ConstraintViolation', 'thickness_must_be_positive');
+    }
+    if (p.partition < 0) {
+      return error('ConstraintViolation', 'partition_must_be_non_negative');
+    }
+
+    return finiteResult({
+      flux: p.D_m2_s * p.partition *
+        (p.C_left - p.C_right) / p.thickness_m
+    });
+  }
+
+  /**
+   * Steady diffusion profile along a slab.
+   * Inputs: D_m2_s (m^2/s), length_m and x_m (m),
+   * C_left and C_right (mol/m^3).
+   * Outputs: concentration (mol/m^3), flux (mol/(m^2 s)).
+   * Assumptions: constant D, steady state, linear concentration.
+   * Errors: zero/negative length, x outside [0,length],
+   * negative D, non-finite input/result.
+   *
+   * Hand check: L = 0.1 m, x = 0.025 m,
+   * C_left = 10, C_right = 2, D = 1e-9.
+   * C(x) = 8 mol/m^3; J = 8e-8 mol/(m^2 s).
+   */
+  function scaffold_steady_diffusion(p) {
+    if (!hasFiniteFields(
+      p,
+      ['D_m2_s', 'length_m', 'C_left', 'C_right', 'x_m']
+    )) return invalidInput();
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+
+    if (p.length_m === 0) {
+      return error('MathError', 'thickness_zero');
+    }
+    if (p.length_m < 0) {
+      return error('ConstraintViolation', 'thickness_must_be_positive');
+    }
+    if (p.x_m < 0 || p.x_m > p.length_m) {
+      return error('ConstraintViolation', 'x_out_of_range');
+    }
+
+    return finiteResult({
+      concentration: p.C_left +
+        (p.C_right - p.C_left) * p.x_m / p.length_m,
+      flux: p.D_m2_s *
+        (p.C_left - p.C_right) / p.length_m
+    });
+  }
+
+  /**
+   * Advective motion of a tracer centre.
+   * Inputs: u_m_s (m/s), initial_centre_m (m), time_s (s),
+   * D_m2_s (m^2/s).
+   * Outputs: centre_m and displacement_m (m).
+   * Assumptions: constant uniform flow; diffusion broadens
+   * the tracer without changing its centre.
+   * Errors: negative time or D, non-finite input/result.
+   *
+   * Hand check: x0 = 2 m, u = 0.4 m/s, t = 5 s, D = 0.01.
+   * Displacement = 2 m; centre = 4 m.
+   */
+  function advect_tracer_centre(p) {
+    if (!hasFiniteFields(
+      p,
+      ['u_m_s', 'initial_centre_m', 'time_s', 'D_m2_s']
+    )) return invalidInput();
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+    const badTime = nonNegative(p.time_s, 'time_must_be_non_negative');
+    if (badTime) return badTime;
+
+    const displacement = p.u_m_s * p.time_s;
+
+    return finiteResult({
+      centre_m: p.initial_centre_m + displacement,
+      displacement_m: displacement
+    });
+  }
+
+  /**
+   * Gaussian solution for an instantaneous plane tracer release.
+   * Inputs: mass_per_area_mol_m2 (mol/m^2), D_m2_s (m^2/s),
+   * u_m_s (m/s), time_s (s), x_m (m).
+   * Outputs: concentration (mol/m^3), centre_m (m).
+   * Assumptions: infinite 1-D domain, constant D and u,
+   * instantaneous plane release at x=0 and t=0.
+   * Errors: zero/negative D, zero/negative time, negative mass,
+   * non-finite input/result.
+   *
+   * Hand check: M = 1 mol/m^2, D = 1 m^2/s, u = 0,
+   * t = 1 s, x = 0. C = 1/sqrt(4*pi) = 0.2820947918
+   * mol/m^3; centre = 0 m.
+   */
+  function gaussian_pulse(p) {
+    if (!hasFiniteFields(
+      p,
+      ['mass_per_area_mol_m2', 'D_m2_s', 'u_m_s', 'time_s', 'x_m']
+    )) return invalidInput();
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+    if (p.D_m2_s === 0) return error('MathError', 'd_zero');
+
+    const badTime = nonNegative(p.time_s, 'time_must_be_non_negative');
+    if (badTime) return badTime;
+    if (p.time_s === 0) return error('MathError', 'time_zero');
+
+    if (p.mass_per_area_mol_m2 < 0) {
+      return error('ConstraintViolation', 'mass_must_be_non_negative');
+    }
+
+    const centre = p.u_m_s * p.time_s;
+    const varianceFactor = 4 * p.D_m2_s * p.time_s;
+    const distance = p.x_m - centre;
+
+    const concentration =
+      p.mass_per_area_mol_m2 /
+      Math.sqrt(Math.PI * varianceFactor) *
+      Math.exp(-distance * distance / varianceFactor);
+
+    return finiteResult({
+      concentration,
+      centre_m: centre
+    });
+  }
+
+  /**
+   * Signed Péclet number, comparing advection with diffusion.
+   * Inputs: u_m_s (m/s), length_m (m), D_m2_s (m^2/s).
+   * Output: Pe (dimensionless).
+   * Assumptions: single characteristic length, uniform velocity.
+   * Errors: zero/negative D, negative length, non-finite result.
+   *
+   * Hand check: u = 0.1 m/s, L = 2 m, D = 0.05 m^2/s.
+   * Pe = 0.1*2/0.05 = 4.
+   */
+  function peclet_number(p) {
+    if (!hasFiniteFields(p, ['u_m_s', 'length_m', 'D_m2_s'])) {
+      return invalidInput();
+    }
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+    if (p.D_m2_s === 0) return error('MathError', 'd_zero');
+    if (p.length_m < 0) {
+      return error('ConstraintViolation', 'length_must_be_non_negative');
+    }
+
+    return finiteResult({
+      Pe: p.u_m_s * p.length_m / p.D_m2_s
+    });
+  }
+
+  /**
+   * Complete mixing at a river outfall.
+   * Inputs: Q_river_m3_s and Q_effluent_m3_s (m^3/s),
+   * C_river_mg_L and C_effluent_mg_L (mg/L).
+   * Output: concentration_mg_L (mg/L).
+   * Assumptions: steady flows, conservative solute, complete
+   * instantaneous mixing, no other sources or sinks.
+   * Errors: negative flow, zero total flow, non-finite result.
+   *
+   * Hand check: river Q=9, C=2; effluent Q=1, C=12.
+   * Mixed C=(9*2+1*12)/10=3 mg/L.
+   */
+  function river_complete_mix(p) {
+    if (!hasFiniteFields(
+      p,
+      [
+        'Q_river_m3_s', 'C_river_mg_L',
+        'Q_effluent_m3_s', 'C_effluent_mg_L'
+      ]
+    )) return invalidInput();
+
+    if (p.Q_river_m3_s < 0 || p.Q_effluent_m3_s < 0) {
+      return error('ConstraintViolation', 'flow_must_be_non_negative');
+    }
+
+    const total = p.Q_river_m3_s + p.Q_effluent_m3_s;
+    if (total === 0) return error('MathError', 'total_flow_zero');
+
+    return finiteResult({
+      concentration_mg_L:
+        (p.Q_river_m3_s * p.C_river_mg_L +
+          p.Q_effluent_m3_s * p.C_effluent_mg_L) / total
+    });
+  }
+
+  /**
+   * Well-mixed lake with throughflow and first-order decay.
+   * Inputs: V_m3 (m^3), Q_m3_s (m^3/s), C_in and C_initial
+   * (mol/m^3), k_per_s (s^-1), time_s (s).
+   * Outputs: flushing_time_s (s or null),
+   * steady_concentration (mol/m^3 or null),
+   * concentration (mol/m^3).
+   * Assumptions: constant volume, inflow equals outflow,
+   * perfect mixing, constant inputs, first-order removal.
+   * Q=0 gives null flushing time. Q=k=0 gives null steady
+   * concentration and unchanged initial concentration.
+   * Errors: non-positive V, negative Q/k/time, non-finite result.
+   *
+   * Hand check: V=100 m^3, Q=10 m^3/s, k=0.02 s^-1,
+   * C_in=10, C_initial=20, t=10 s.
+   * tau=10 s; C*=10*(0.1/0.12)=8.333333333333334.
+   * C(10)=C*+(20-C*)*exp(-1.2).
+   */
+  function lake_flushing(p) {
+    if (!hasFiniteFields(
+      p,
+      ['V_m3', 'Q_m3_s', 'C_in', 'C_initial', 'k_per_s', 'time_s']
+    )) return invalidInput();
+
+    if (p.V_m3 <= 0) {
+      return error('ConstraintViolation', 'volume_must_be_positive');
+    }
+    if (p.Q_m3_s < 0) {
+      return error('ConstraintViolation', 'flow_must_be_non_negative');
+    }
+    if (p.k_per_s < 0) {
+      return error('ConstraintViolation', 'k_must_be_non_negative');
+    }
+    if (p.time_s < 0) {
+      return error('ConstraintViolation', 'time_must_be_non_negative');
+    }
+
+    const flushing = p.Q_m3_s === 0
+      ? null
+      : p.V_m3 / p.Q_m3_s;
+
+    const flowRate = p.Q_m3_s / p.V_m3;
+    const removalRate = flowRate + p.k_per_s;
+
+    if (removalRate === 0) {
+      return finiteResult({
+        flushing_time_s: null,
+        steady_concentration: null,
+        concentration: p.C_initial
+      });
+    }
+
+    const steady = p.C_in * flowRate / removalRate;
+
+    return finiteResult({
+      flushing_time_s: flushing,
+      steady_concentration: steady,
+      concentration:
+        steady + (p.C_initial - steady) *
+        Math.exp(-removalRate * p.time_s)
+    });
+  }
+
+  /**
+   * Steady diffusion-decay morphogen gradient on a half-line.
+   * Inputs: D_m2_s (m^2/s), k_per_s (s^-1),
+   * C0 (mol/m^3), x_m (m).
+   * Outputs: lambda_m (m), concentration (mol/m^3).
+   * Assumptions: D*C''=k*C, C(0)=C0, C(infinity)=0,
+   * spatially uniform diffusion and first-order removal.
+   * Errors: zero/negative k, zero/negative D,
+   * negative x, non-finite input/result.
+   *
+   * Hand check: D=4 m^2/s, k=1 s^-1, C0=10, x=2 m.
+   * lambda=2 m; C=10*exp(-1)=3.6787944117 mol/m^3.
+   */
+  function morphogen_gradient(p) {
+    if (!hasFiniteFields(p, ['D_m2_s', 'k_per_s', 'C0', 'x_m'])) {
+      return invalidInput();
+    }
+
+    if (p.k_per_s < 0) {
+      return error('ConstraintViolation', 'k_must_be_positive');
+    }
+    if (p.k_per_s === 0) return error('MathError', 'k_zero');
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+    if (p.D_m2_s === 0) return error('MathError', 'd_zero');
+
+    if (p.x_m < 0) {
+      return error('ConstraintViolation', 'x_must_be_non_negative');
+    }
+
+    const lambda = Math.sqrt(p.D_m2_s / p.k_per_s);
+
+    return finiteResult({
+      lambda_m: lambda,
+      concentration: p.C0 * Math.exp(-p.x_m / lambda)
+    });
+  }
+
+  /**
+   * Shared validation for the two explicit finite-volume schemes.
+   * Input: p containing cells (mol/m^3), dx_m (m), dt_s (s),
+   * either D_m2_s (m^2/s) or u_m_s (m/s), and boundary (string).
+   * Output: { r } or { courant }, or a schema error.
+   * Assumptions: 1-D equal-width cells, constant coefficients.
+   * Order: cell count, dx, dt, coefficient, boundary, stability.
+   * Errors: too_many_cells, too_few_cells, dx_zero,
+   * dx_must_be_positive, dt_must_be_positive,
+   * d_must_be_non_negative, velocity_must_be_non_negative,
+   * boundary_not_supported, scheme-specific stability reason.
+   *
+   * Hand checks: D=1, dx=1, dt=0.5 gives r=0.5 accepted.
+   * u=1, dx=1, dt=1 gives Co=1 accepted.
+   */
+  function validateGrid(p, scheme) {
+    const cells = p && p.cells;
+    const n = Array.isArray(cells) ? cells.length : 0;
+
+    if (n > MAX_CELLS) {
+      return error('ConstraintViolation', 'too_many_cells');
+    }
+    if (n < 2) {
+      return error('ConstraintViolation', 'too_few_cells');
+    }
+
+    if (!hasFiniteFields(p, ['dx_m'])) return invalidInput();
+
+    if (p.dx_m === 0) return error('MathError', 'dx_zero');
+    if (p.dx_m < 0) {
+      return error('ConstraintViolation', 'dx_must_be_positive');
+    }
+
+    if (!hasFiniteFields(p, ['dt_s'])) return invalidInput();
+
+    if (p.dt_s === 0) {
+      return error('MathError', 'dt_must_be_positive');
+    }
+    if (p.dt_s < 0) {
+      return error('ConstraintViolation', 'dt_must_be_positive');
+    }
+
+    const coefficient = scheme === 'diffusion'
+      ? 'D_m2_s'
+      : 'u_m_s';
+
+    if (!hasFiniteFields(p, [coefficient])) return invalidInput();
+
+    if (scheme === 'diffusion' && p.D_m2_s < 0) {
+      return error('ConstraintViolation', 'd_must_be_non_negative');
+    }
+    if (scheme === 'advection' && p.u_m_s < 0) {
+      return error(
+        'ConstraintViolation',
+        'velocity_must_be_non_negative'
+      );
+    }
+
+    const requiredBoundary = scheme === 'diffusion'
+      ? 'zero_flux'
+      : 'zero_gradient_outflow';
+
+    if (p.boundary !== requiredBoundary) {
+      return error('NotSupported', 'boundary_not_supported');
+    }
+
+    if (!cells.every(v =>
+      typeof v === 'number' && Number.isFinite(v)
+    )) return invalidInput();
+
+    if (scheme === 'diffusion') {
+      const r = p.D_m2_s * p.dt_s / (p.dx_m * p.dx_m);
+
+      if (!Number.isFinite(r)) {
+        return error('MathError', 'non_finite_result');
+      }
+      if (r > 0.5 * (1 + STABILITY_SLACK)) {
+        return error(
+          'ConstraintViolation',
+          'ftcs_unstable_r_gt_0_5'
+        );
+      }
+      return { r };
+    }
+
+    const courant = p.u_m_s * p.dt_s / p.dx_m;
+
+    if (!Number.isFinite(courant)) {
+      return error('MathError', 'non_finite_result');
+    }
+    if (courant > 1 * (1 + STABILITY_SLACK)) {
+      return error(
+        'ConstraintViolation',
+        'upwind_unstable_courant_gt_1'
+      );
+    }
+
+    return { courant };
+  }
+
+  function diffusionAdvance(cells, r) {
+    const next = new Array(cells.length);
+
+    for (let i = 0; i < cells.length; i++) {
+      const left = i === 0 ? cells[i] : cells[i - 1];
+      const right = i === cells.length - 1
+        ? cells[i]
+        : cells[i + 1];
+
+      next[i] = cells[i] + r * (right - 2 * cells[i] + left);
+    }
+    return next;
+  }
+
+  function advectionAdvance(cells, courant, inflow) {
+    const next = new Array(cells.length);
+
+    for (let i = 0; i < cells.length; i++) {
+      const left = i === 0 ? inflow : cells[i - 1];
+      next[i] = cells[i] - courant * (cells[i] - left);
+    }
+
+    return next;
+  }
+
+  /**
+   * One FTCS diffusion step with zero-flux end faces.
+   * Inputs: D_m2_s (m^2/s), dx_m (m), dt_s (s),
+   * cells[] (mol/m^3), boundary='zero_flux'.
+   * Outputs: r (dimensionless), cells[] (mol/m^3),
+   * mass_before and mass_after (mol/m^2), stable (boolean).
+   * Assumptions: explicit 1-D diffusion, mirror ghost cells,
+   * constant D and equal cell widths; stable when r<=0.5.
+   * Errors: shared grid errors; r>0.5 rejected before update.
+   *
+   * Hand check: cells=[0,10,0], D=dx=1, dt=0.25.
+   * r=0.25, next=[2.5,5,2.5], mass=10 before and after.
+   */
+  function ftcs_diffusion_step(p) {
+    const validation = validateGrid(p, 'diffusion');
+    if (validation.error) return validation;
+
+    const next = diffusionAdvance(p.cells, validation.r);
+
+    return finiteResult({
+      r: validation.r,
+      cells: next,
+      mass_before: cellMass(p.cells, p.dx_m),
+      mass_after: cellMass(next, p.dx_m),
+      stable: true
+    });
+  }
+
+  /**
+   * Multiple FTCS diffusion steps with optional final-cell probes.
+   * Inputs: D_m2_s (m^2/s), dx_m (m), dt_s (s),
+   * steps (integer, 0..10000), cells[] (mol/m^3),
+   * boundary='zero_flux', report_cells? (array of indices).
+   * Outputs: r, final cells[], mass_before, mass_after,
+   * stable, report_values (array or null).
+   * Mass units: mol/m^2; r dimensionless.
+   * Assumptions: explicit 1-D diffusion, no flux at both ends.
+   * Errors: shared grid errors, steps_out_of_range_0_10000,
+   * report_cell_out_of_range, non-finite intermediate result.
+   *
+   * Hand check: [0,10,0], D=dx=1, dt=0.25, steps=2,
+   * report_cells=[1]. Final=[3.125,3.75,3.125];
+   * r=0.25, report_values=[3.75], mass_before=mass_after=10.
+   */
+  function ftcs_diffusion_run(p) {
+    const validation = validateGrid(p, 'diffusion');
+    if (validation.error) return validation;
+
+    if (
+      !Number.isInteger(p.steps) ||
+      p.steps < 0 ||
+      p.steps > MAX_STEPS
+    ) {
+      return error(
+        'ConstraintViolation',
+        'steps_out_of_range_0_10000'
+      );
+    }
+
+    if (p.report_cells !== undefined) {
+      if (
+        !Array.isArray(p.report_cells) ||
+        !p.report_cells.every(i =>
+          Number.isInteger(i) && i >= 0 && i < p.cells.length
+        )
+      ) {
+        return error(
+          'ConstraintViolation',
+          'report_cell_out_of_range'
+        );
+      }
+    }
+
+    const before = cellMass(p.cells, p.dx_m);
+    let current = p.cells.slice();
+
+    for (let step = 0; step < p.steps; step++) {
+      current = diffusionAdvance(current, validation.r);
+      if (!current.every(Number.isFinite)) {
+        return error('RuntimeError', 'non_finite_intermediate');
+      }
+    }
+
+    const reportValues = p.report_cells === undefined
+      ? null
+      : p.report_cells.map(i => current[i]);
+
+    return finiteResult({
+      r: validation.r,
+      cells: current,
+      mass_before: before,
+      mass_after: cellMass(current, p.dx_m),
+      stable: true,
+      report_values: reportValues
+    });
+  }
+
+  /**
+   * One positive-velocity first-order upwind advection step.
+   * Inputs: u_m_s (m/s), dx_m (m), dt_s (s),
+   * cells[] and inflow_concentration (mol/m^3),
+   * boundary='zero_gradient_outflow'.
+   * Outputs: courant (dimensionless), cells[], stable.
+   * Assumptions: 1-D, constant non-negative velocity,
+   * specified left inflow, right-side free outflow; Co<=1.
+   * Errors: shared grid errors, negative velocity,
+   * missing/non-finite inflow, Co>1.
+   *
+   * Hand check: cells=[0,4,0], inflow=0, u=dx=1, dt=0.5.
+   * Co=0.5, final cells=[0,2,2].
+   */
+  function upwind_advection_step(p) {
+    const validation = validateGrid(p, 'advection');
+    if (validation.error) return validation;
+
+    if (!hasFiniteFields(p, ['inflow_concentration'])) {
+      return invalidInput();
+    }
+
+    const next = advectionAdvance(
+      p.cells,
+      validation.courant,
+      p.inflow_concentration
+    );
+
+    return finiteResult({
+      courant: validation.courant,
+      cells: next,
+      stable: true
+    });
+  }
+
+  /**
+   * Repeated first-order upwind advection with diagnostics.
+   * Inputs: u_m_s (m/s), dx_m (m), dt_s (s),
+   * steps (integer, 0..10000), cells[] and
+   * inflow_concentration (mol/m^3),
+   * boundary='zero_gradient_outflow'.
+   * Outputs: courant, cells[], elapsed_s (s),
+   * centre_before_m, centre_after_m, displacement_m (m or null),
+   * mass_before, mass_after (mol/m^2), peak_cell (index).
+   * Centres use concentration-weighted cell-centre positions;
+   * a zero-total-concentration state has centre=null.
+   * Assumptions: 1-D, uniform positive-direction velocity,
+   * fixed left inflow and unrestricted right-side outflow.
+   * Errors: shared grid errors, steps_out_of_range_0_10000,
+   * invalid inflow, non-finite intermediate/result.
+   *
+   * Hand check: cells=[0,4,0,0], inflow=0, u=dx=1,
+   * dt=0.5, steps=2. Final=[0,1,2,1], Co=0.5.
+   * Centre moves from 1.5 to 2.5 m, displacement=1 m.
+   * Mass remains 4 mol/m^2, peak_cell=2.
+   */
+  function upwind_advection_run(p) {
+    const validation = validateGrid(p, 'advection');
+    if (validation.error) return validation;
+
+    if (
+      !Number.isInteger(p.steps) ||
+      p.steps < 0 ||
+      p.steps > MAX_STEPS
+    ) {
+      return error(
+        'ConstraintViolation',
+        'steps_out_of_range_0_10000'
+      );
+    }
+
+    if (!hasFiniteFields(p, ['inflow_concentration'])) {
+      return invalidInput();
+    }
+
+    const before = cellCentre(p.cells, p.dx_m);
+    const massBefore = cellMass(p.cells, p.dx_m);
+    let current = p.cells.slice();
+
+    for (let step = 0; step < p.steps; step++) {
+      current = advectionAdvance(
+        current,
+        validation.courant,
+        p.inflow_concentration
+      );
+
+      if (!current.every(Number.isFinite)) {
+        return error('RuntimeError', 'non_finite_intermediate');
+      }
+    }
+
+    const after = cellCentre(current, p.dx_m);
+
+    return finiteResult({
+      courant: validation.courant,
+      cells: current,
+      elapsed_s: p.steps * p.dt_s,
+      centre_before_m: before,
+      centre_after_m: after,
+      displacement_m:
+        before === null || after === null ? null : after - before,
+      mass_before: massBefore,
+      mass_after: cellMass(current, p.dx_m),
+      peak_cell: peakIndex(current)
+    });
+  }
+
+  return Object.freeze({
+    API_VERSION,
+    two_film_overall_coefficient,
+    microchannel_diffusion,
+    membrane_steady_flux,
+    scaffold_steady_diffusion,
+    advect_tracer_centre,
+    gaussian_pulse,
+    peclet_number,
+    river_complete_mix,
+    lake_flushing,
+    morphogen_gradient,
+    ftcs_diffusion_step,
+    ftcs_diffusion_run,
+    upwind_advection_step,
+    upwind_advection_run
+  });
+})();
+/* FIT-CALC-END x7_diffusion */
+
+(function () {
+  'use strict';
+
+  const calc = FITCalcX7;
+  const $ = id => document.getElementById(id);
+  const slider = $('slider');
+  const viewStep = $('viewStep');
+  const plot = $('plot');
+  const scene = $('scene');
+
+  let roundNumber = 0;
+  let score = 0;
+  let replay = 0;
+  let round;
+  let tries = 0;
+  let hinted = false;
+  let solved = false;
+  let inspectedStep = 0;
+
+  function rng(seed) {
+    let s = seed >>> 0;
+    return (lo, hi) => {
+      s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+      return lo + s % (hi - lo + 1);
+    };
+  }
+
+  function fmt(x, digits = 3) {
+    if (x === null || x === undefined || !Number.isFinite(x)) {
+      return '—';
+    }
+    if (x === 0) return '0';
+    if (Math.abs(x) < .001 || Math.abs(x) >= 10000) {
+      return x.toExponential(digits - 1);
+    }
+    return Number(x.toPrecision(digits)).toString();
+  }
+
+  function fact(label, value) {
+    return '<div class="fact"><span>' + label +
+      '</span><strong>' + value + '</strong></div>';
+  }
+
+  function initialCells(length, peak, height) {
+    const cells = new Array(length).fill(0);
+    cells[peak] = height;
+    return cells;
+  }
+
+  function ftcs(r, setting, steps = r.steps) {
+    return calc.ftcs_diffusion_run({
+      D_m2_s: r.D,
+      dx_m: r.dx,
+      dt_s: setting * .2,
+      steps,
+      cells: r.cells,
+      boundary: 'zero_flux',
+      report_cells: [r.peak]
+    });
+  }
+
+  function upwind(r, setting, steps = r.steps) {
+    return calc.upwind_advection_run({
+      u_m_s: r.u,
+      dx_m: r.dx,
+      dt_s: setting * .05,
+      steps,
+      cells: r.cells,
+      inflow_concentration: 0,
+      boundary: 'zero_gradient_outflow'
+    });
+  }
+
+  function lake(r, setting, time = r.time) {
+    return calc.lake_flushing({
+      V_m3: r.V,
+      Q_m3_s: r.adjust === 'flow'
+        ? setting * 2
+        : r.Q,
+      C_in: r.Cin,
+      C_initial: r.Cinitial,
+      k_per_s: r.adjust === 'decay'
+        ? setting * .001
+        : r.k,
+      time_s: time
+    });
+  }
+
+  function finalModel(setting = round.setting) {
+    if (round.type === 'ftcs') return ftcs(round, setting);
+    if (round.type === 'upwind') return upwind(round, setting);
+    return lake(round, setting);
+  }
+
+  function createRound(index) {
+    const pick = rng(74231 + replay * 2579 + index * 9173);
+
+    if (index % 3 === 0) {
+      const peak = 9;
+      const r = {
+        type: 'ftcs',
+        D: .0001,
+        dx: .02,
+        steps: pick(3, 6),
+        peak,
+        cells: initialCells(19, peak, pick(8, 14)),
+        targetSetting: pick(2, 9),
+        min: 1,
+        max: 15
+      };
+
+      r.goal = Math.max(
+        ...ftcs(r, r.targetSetting).cells
+      );
+
+      r.setting = 1;
+      if (
+        Math.abs(Math.max(...ftcs(r, r.setting).cells) - r.goal)
+        < 1e-10
+      ) {
+        r.setting = r.targetSetting === 9 ? 2 : 9;
+      }
+
+      return r;
+    }
+
+    if (index % 3 === 1) {
+      const initialPeak = pick(3, 5);
+      const r = {
+        type: 'upwind',
+        dx: .5,
+        u: 1,
+        steps: 5,
+        cells: initialCells(24, initialPeak, pick(7, 13)),
+        startPeak: initialPeak,
+        targetSetting: pick(2, 5) * 2,
+        min: 1,
+        max: 15,
+        setting: 2
+      };
+
+      const target = upwind(r, r.targetSetting);
+      r.goalCentre = target.centre_after_m;
+      r.goalCell = r.startPeak +
+        r.targetSetting / 2;
+      r.ideal = upwind(r, 10);
+      return r;
+    }
+
+    const adjust = index < 3 ? 'flow' : 'decay';
+    const r = {
+      type: 'lake',
+      adjust,
+      V: pick(5, 10) * 100,
+      Q: pick(8, 20),
+      Cin: pick(1, 5),
+      Cinitial: pick(25, 40),
+      k: pick(2, 8) * .001,
+      time: pick(45, 95),
+      targetSetting: pick(4, 10),
+      min: 1,
+      max: 15
+    };
+
+    r.goal = lake(r, r.targetSetting).concentration;
+    r.setting = r.targetSetting <= 8
+      ? r.targetSetting + 5
+      : r.targetSetting - 4;
+
+    return r;
+  }
+
+  function parameterText() {
+    $('roundChip').textContent =
+      'Round ' + (roundNumber + 1) + '/6';
+    $('scoreChip').textContent = 'Score ' + score;
+
+    if (round.type === 'ftcs') {
+      $('kind').textContent = 'FTCS finite-volume diffusion';
+      $('challengeTitle').textContent = 'Choose a stable time step';
+      $('question').textContent =
+        'A narrow concentration pulse diffuses along an insulated ' +
+        'slab. Select a time step so the highest cell concentration ' +
+        'after the specified number of updates matches the target. ' +
+        'The FTCS stability condition must also hold.';
+
+      $('facts').innerHTML =
+        fact('Diffusivity, D', fmt(round.D) + ' m²/s') +
+        fact('Cell width, Δx', fmt(round.dx) + ' m') +
+        fact('Number of updates', fmt(round.steps)) +
+        fact('Initial peak', fmt(round.cells[round.peak]) + ' mol/m³') +
+        fact('Target final peak', fmt(round.goal, 6) + ' mol/m³') +
+        fact('Boundary conditions', 'Zero flux, both ends');
+
+      $('plotHeading').textContent = 'Concentration by cell';
+      $('plotCaption').textContent =
+        'Inspect successive FTCS updates. The initial profile is ' +
+        'dashed; the displayed mass is the integral over all cells.';
+      $('legendOne').textContent = 'Inspected profile';
+      $('legendTwo').textContent = 'Initial profile';
+      $('currentLabel').textContent = 'Final peak concentration';
+      $('controlLabel').textContent = 'FTCS time step, Δt';
+      $('stepText').textContent = 'Fine: 0.2 s · Coarse: 1.0 s';
+      $('mathsText').innerHTML =
+        '<p><strong>Assumption:</strong> one-dimensional, ' +
+        'constant-diffusivity explicit FTCS diffusion, ' +
+        'with zero-flux end boundaries.</p>' +
+        '<p>r = DΔt/Δx², dimensionless.</p>' +
+        '<p>Cᵢⁿ⁺¹ = Cᵢⁿ + r(Cᵢ₊₁ⁿ − 2Cᵢⁿ + Cᵢ₋₁ⁿ).</p>' +
+        '<p>The explicit stability condition is r ≤ 0.5.</p>' +
+        '<p>Cell mass per unit cross-sectional area: ' +
+        'M = Σ Cᵢ Δx, in mol/m².</p>' +
+        '<p>Mirror ghost cells enforce zero normal flux ' +
+        'at both ends. The discrete total mass is conserved.</p>';
+      return;
+    }
+
+    if (round.type === 'upwind') {
+      $('kind').textContent = 'Finite-volume upwind advection';
+      $('challengeTitle').textContent = 'Move the pulse without losing stability';
+      $('question').textContent =
+        'Select the explicit upwind time step that moves the ' +
+        'concentration-weighted pulse centre to the target cell ' +
+        'centre after the specified updates. Observe how ' +
+        'numerical spreading changes with the Courant number.';
+
+      $('facts').innerHTML =
+        fact('Velocity, u', fmt(round.u) + ' m/s') +
+        fact('Cell width, Δx', fmt(round.dx) + ' m') +
+        fact('Number of updates', fmt(round.steps)) +
+        fact('Starting peak cell', fmt(round.startPeak)) +
+        fact('Target centre cell', fmt(round.goalCell)) +
+        fact('Target centre position', fmt(round.goalCentre) + ' m') +
+        fact('Left inflow', '0 mol/m³') +
+        fact('Right boundary', 'Free outflow');
+
+      $('plotHeading').textContent = 'Pulse by cell index';
+      $('plotCaption').textContent =
+        'The dotted reference is the original pulse. ' +
+        'An additional comparison uses the exact Co = 1 shift.';
+      $('legendOne').textContent = 'Current upwind profile';
+      $('legendTwo').textContent = 'Initial / Co = 1 reference';
+      $('currentLabel').textContent = 'Final centre position';
+      $('controlLabel').textContent = 'Upwind time step, Δt';
+      $('stepText').textContent = 'Fine: 0.05 s · Coarse: 0.25 s';
+
+      $('mathsText').innerHTML =
+        '<p><strong>Assumption:</strong> one-dimensional constant ' +
+        'positive velocity, prescribed left inflow and free right outflow.</p>' +
+        '<p>Co = uΔt/Δx, dimensionless.</p>' +
+        '<p>Cᵢⁿ⁺¹ = Cᵢⁿ − Co(Cᵢⁿ − Cᵢ₋₁ⁿ).</p>' +
+        '<p>Stability requires 0 ≤ Co ≤ 1.</p>' +
+        '<p>At Co = 1, the scheme shifts the pulse by exactly ' +
+        'one cell in each time step. At Co &lt; 1, it develops ' +
+        'numerical diffusion.</p>' +
+        '<p>The pulse centre is Σ(xᵢ Cᵢ)/ΣCᵢ, ' +
+        'with xᵢ = (i + ½)Δx in metres.</p>' +
+        '<p>The downstream mass can leave the domain; ' +
+        'the cell mass need not remain constant once it does.</p>';
+      return;
+    }
+
+    $('kind').textContent = 'Well-mixed lake';
+    $('challengeTitle').textContent = round.adjust === 'flow'
+      ? 'Flush the lake'
+      : 'Control pollutant decay';
+    $('question').textContent =
+      'A lake receives clean inflow and loses dissolved pollutant ' +
+      'by flushing and first-order decay. Adjust the ' +
+      (round.adjust === 'flow'
+        ? 'throughflow'
+        : 'decay-rate constant') +
+      ' so the concentration at the specified time matches ' +
+      'the target. Inspect the approach to steady state.';
+
+    $('facts').innerHTML =
+      fact('Lake volume, V', fmt(round.V) + ' m³') +
+      fact('Initial concentration', fmt(round.Cinitial) + ' mol/m³') +
+      fact('Inflow concentration', fmt(round.Cin) + ' mol/m³') +
+      fact('Observation time', fmt(round.time) + ' s') +
+      fact('Target concentration', fmt(round.goal, 6) + ' mol/m³') +
+      (
+        round.adjust === 'flow'
+          ? fact('Decay rate, k', fmt(round.k) + ' s⁻¹')
+          : fact('Throughflow, Q', fmt(round.Q) + ' m³/s')
+      );
+
+    $('plotHeading').textContent = 'Lake concentration against time';
+    $('plotCaption').textContent =
+      'The dashed line marks the current steady concentration C*. ' +
+      'The highlighted point is the reading at the observation time.';
+    $('legendOne').textContent = 'C(t)';
+    $('legendTwo').textContent = 'Steady concentration C*';
+    $('currentLabel').textContent = 'Observation concentration';
+    $('controlLabel').textContent = round.adjust === 'flow'
+      ? 'Inflow and outflow, Q'
+      : 'First-order decay, k';
+    $('stepText').textContent = round.adjust === 'flow'
+      ? 'Fine: 2 m³/s · Coarse: 10 m³/s'
+      : 'Fine: 0.001 s⁻¹ · Coarse: 0.005 s⁻¹';
+
+    $('mathsText').innerHTML =
+      '<p><strong>Assumption:</strong> perfectly mixed lake, ' +
+      'constant volume and equal inflow/outflow, first-order decay.</p>' +
+      '<p>V dC/dt = Q(Cᵢₙ − C) − kVC.</p>' +
+      '<p>Flushing time: τ = V/Q, in seconds, when Q &gt; 0.</p>' +
+      '<p>Steady concentration: ' +
+      'C* = Cᵢₙ(Q/V)/(Q/V + k), in mol/m³.</p>' +
+      '<p>C(t) = C* + (C₀ − C*)exp[−(Q/V + k)t].</p>' +
+      '<p>If Q = 0, the flushing time is undefined. ' +
+      'When Q = k = 0, concentration is constant.</p>';
+  }
+
+  function controlText() {
+    if (round.type === 'ftcs') {
+      return fmt(round.setting * .2) + ' s';
+    }
+    if (round.type === 'upwind') {
+      return fmt(round.setting * .05) + ' s';
+    }
+    if (round.adjust === 'flow') {
+      return fmt(round.setting * 2) + ' m³/s';
+    }
+    return fmt(round.setting * .001) + ' s⁻¹';
+  }
+
+  function frame(title, xlabel, ylabel, xmax, ymax) {
+    const left = 72, right = 479, top = 47, bottom = 250;
+    const sx = x => left + Math.max(0, Math.min(1, x / xmax)) *
+      (right - left);
+    const sy = y => bottom - Math.max(0, Math.min(1, y / ymax)) *
+      (bottom - top);
+
+    let content =
+      '<rect x="0" y="0" width="510" height="318" rx="15" fill="#fff"/>' +
+      '<text x="16" y="28" font-size="17" font-weight="800">' +
+      title + '</text>';
+
+    for (let i = 0; i <= 4; i++) {
+      const x = left + (right - left) * i / 4;
+      const y = bottom - (bottom - top) * i / 4;
+
+      content +=
+        '<path d="M' + left + ' ' + y + 'H' + right +
+        '" stroke="#E4E2DB"/>' +
+        '<path d="M' + x + ' ' + top + 'V' + bottom +
+        '" stroke="#E4E2DB"/>' +
+        '<text x="' + (left - 9) + '" y="' + (y + 4) +
+        '" text-anchor="end" font-size="12">' +
+        fmt(ymax * i / 4, 2) + '</text>' +
+        '<text x="' + x + '" y="270" text-anchor="middle" ' +
+        'font-size="12">' + fmt(xmax * i / 4, 2) + '</text>';
+    }
+
+    content +=
+      '<path d="M' + left + ' ' + top + 'V' + bottom +
+      'H' + right + '" fill="none" stroke="#111" stroke-width="2.5"/>' +
+      '<text x="275" y="303" text-anchor="middle" font-size="13" ' +
+      'font-weight="700">' + xlabel + '</text>' +
+      '<text transform="translate(18 151) rotate(-90)" ' +
+      'text-anchor="middle" font-size="13" font-weight="700">' +
+      ylabel + '</text>';
+
+    return { content, sx, sy };
+  }
+
+  function linePath(points, sx, sy) {
+    return points.map((p, i) =>
+      (i ? 'L' : 'M') +
+      sx(p[0]).toFixed(2) + ' ' + sy(p[1]).toFixed(2)
+    ).join(' ');
+  }
+
+  function gridScene(result) {
+    let rectangles = '';
+    const n = round.cells.length;
+    const displayCells = result.error ? round.cells : result.cells;
+    const maxValue = Math.max(...round.cells, 1);
+    const width = 445 / n;
+
+    for (let i = 0; i < n; i++) {
+      const c = displayCells[i];
+      const height = Math.max(1, c / maxValue * 115);
+      const x = 36 + width * i;
+
+      rectangles +=
+        '<rect x="' + x + '" y="' + (183 - height) +
+        '" width="' + (width - 1) + '" height="' + height +
+        '" fill="#1F66E5" stroke="#111" stroke-width="1"/>';
+    }
+
+    const isDiffusion = round.type === 'ftcs';
+
+    scene.innerHTML =
+      '<rect x="24" y="45" width="462" height="148" rx="15" ' +
+      'fill="#fff" stroke="#111" stroke-width="3"/>' +
+      '<path d="M36 183H480" stroke="#111" stroke-width="2"/>' +
+      rectangles +
+      '<text x="36" y="26" font-size="14" font-weight="800">' +
+      (isDiffusion ? 'LEFT: J = 0' : 'INFLOW: 0 mol/m³') +
+      '</text>' +
+      '<text x="481" y="26" text-anchor="end" font-size="14" ' +
+      'font-weight="800">' +
+      (isDiffusion ? 'RIGHT: J = 0' : 'OUTFLOW →') +
+      '</text>' +
+      '<text x="255" y="223" font-size="14" font-weight="800" ' +
+      'text-anchor="middle">Cells: ' + n +
+      ' · Δx = ' + fmt(round.dx) + ' m</text>' +
+      '<text x="255" y="241" text-anchor="middle" font-size="12">' +
+      'Cᵢ in mol/m³ · Cell centres at (i + ½)Δx</text>';
+
+    scene.setAttribute(
+      'aria-label',
+      'One-dimensional finite-volume grid with ' + n +
+      ' cells, width ' + fmt(round.dx) +
+      ' metres, and ' +
+      (isDiffusion
+        ? 'zero-flux end faces.'
+        : 'zero-concentration inflow and right free outflow.')
+    );
+  }
+
+  function lakeScene(result) {
+    scene.innerHTML =
+      '<path d="M170 45H370V190Q270 222 170 190Z" ' +
+      'fill="#DDF7F1" stroke="#111" stroke-width="4"/>' +
+      '<path d="M32 109H170M157 98L170 109L157 120" ' +
+      'fill="none" stroke="#111" stroke-width="4"/>' +
+      '<path d="M370 109H478M465 98L478 109L465 120" ' +
+      'fill="none" stroke="#111" stroke-width="4"/>' +
+      '<circle cx="270" cy="131" r="26" fill="#FF8FB8" ' +
+      'stroke="#111" stroke-width="3"/>' +
+      '<path d="M259 131H281M275 125L281 131L275 137" ' +
+      'stroke="#111" stroke-width="3" fill="none"/>' +
+      '<text x="70" y="86" font-size="14" font-weight="800">' +
+      'Cᵢₙ = ' + fmt(round.Cin) + '</text>' +
+      '<text x="387" y="87" font-size="14" font-weight="800">' +
+      'Q = ' + fmt(round.adjust === 'flow'
+        ? round.setting * 2
+        : round.Q) + '</text>' +
+      '<text x="270" y="76" font-size="15" font-weight="800" ' +
+      'text-anchor="middle">V = ' + fmt(round.V) + ' m³</text>' +
+      '<text x="270" y="175" font-size="14" font-weight="800" ' +
+      'text-anchor="middle">C = ' +
+      fmt(result.concentration, 5) + '</text>' +
+      '<text x="270" y="234" text-anchor="middle" ' +
+      'font-size="14" font-weight="800">' +
+      'k = ' + fmt(round.adjust === 'decay'
+        ? round.setting * .001
+        : round.k) + ' s⁻¹ · C in mol/m³</text>';
+
+    scene.setAttribute(
+      'aria-label',
+      'Well-mixed lake volume ' + fmt(round.V) +
+      ' cubic metres. Concentration at observation time ' +
+      fmt(result.concentration) + ' mol per cubic metre.'
+    );
+  }
+
+  function drawGrid(result, viewed) {
+    const initial = round.cells;
+    const current = viewed.error ? initial : viewed.cells;
+    const n = initial.length;
+
+    const ymax = Math.max(
+      1,
+      ...initial,
+      ...current
+    ) * 1.18;
+    const f = frame(
+      'Cell-centred concentration', 'Cell index i',
+      'Cᵢ (mol/m³)', n - 1, ymax
+    );
+
+    const initialPoints = initial.map((v, i) => [i, v]);
+    const currentPoints = current.map((v, i) => [i, v]);
+
+    let content = f.content +
+      '<path d="' + linePath(initialPoints, f.sx, f.sy) +
+      '" fill="none" stroke="#111" stroke-width="3" ' +
+      'stroke-dasharray="8 6"/>' +
+      '<path d="' + linePath(currentPoints, f.sx, f.sy) +
+      '" fill="none" stroke="#1F66E5" stroke-width="4.5" ' +
+      'stroke-linejoin="round"/>';
+
+    if (round.type === 'upwind') {
+      const reference = round.ideal.cells.map((v, i) => [i, v]);
+
+      content +=
+        '<path d="' + linePath(reference, f.sx, f.sy) +
+        '" fill="none" stroke="#FF6B3D" stroke-width="2.5" ' +
+        'stroke-dasharray="3 5"/>' +
+        '<path d="M' + f.sx(round.goalCell) +
+        ' 47V250" stroke="#111" stroke-width="2" ' +
+        'stroke-dasharray="3 6"/>' +
+        '<text x="467" y="64" text-anchor="end" font-size="12" ' +
+        'font-weight="800">ORANGE: Co = 1</text>';
+
+      if (!viewed.error && viewed.centre_after_m !== null) {
+        const centreIndex =
+          viewed.centre_after_m / round.dx - .5;
+        content +=
+          '<circle cx="' + f.sx(centreIndex) + '" cy="' +
+          f.sy(Math.max(...current) * .5) +
+          '" r="7" fill="#FFC83D" stroke="#111" stroke-width="3"/>';
+      }
+    } else if (!viewed.error) {
+      const peak = Math.max(...current);
+      const peakIndex = current.indexOf(peak);
+
+      content +=
+        '<circle cx="' + f.sx(peakIndex) +
+        '" cy="' + f.sy(peak) +
+        '" r="8" fill="#FFC83D" stroke="#111" stroke-width="3"/>';
+    }
+
+    if (result.error) {
+      content +=
+        '<rect x="110" y="120" width="320" height="47" rx="14" ' +
+        'fill="#FFF0E9" stroke="#111" stroke-width="2"/>' +
+        '<text x="270" y="149" text-anchor="middle" ' +
+        'font-size="17" font-weight="800">' +
+        (round.type === 'ftcs'
+          ? 'Unstable: r &gt; 0.5'
+          : 'Unstable: Co &gt; 1') +
+        '</text>';
+    }
+
+    plot.innerHTML = content;
+    plot.setAttribute(
+      'aria-label',
+      'Concentration against cell index for inspected step ' +
+      inspectedStep + '. ' +
+      (result.error
+        ? 'The selected numerical time step is unstable.'
+        : 'Initial and current profiles are compared.')
+    );
+  }
+
+  function drawLake(result) {
+    const points = [];
+    const horizon = round.time * 1.5;
+    let ymax = Math.max(
+      round.Cinitial,
+      round.goal,
+      result.concentration,
+      result.steady_concentration || 0
+    );
+
+    for (let i = 0; i <= 100; i++) {
+      const t = horizon * i / 100;
+      const sample = lake(round, round.setting, t);
+      points.push([t, sample.concentration]);
+      ymax = Math.max(ymax, sample.concentration);
+    }
+
+    const f = frame(
+      'Transient lake concentration',
+      'Time t (s)', 'C (mol/m³)',
+      horizon, ymax * 1.13
+    );
+
+    let content = f.content +
+      '<path d="' + linePath(points, f.sx, f.sy) +
+      '" fill="none" stroke="#1F66E5" stroke-width="4.5"/>';
+
+    if (result.steady_concentration !== null) {
+      const steadyY = f.sy(result.steady_concentration);
+      content +=
+        '<path d="M72 ' + steadyY +
+        'H479" stroke="#111" stroke-width="3" ' +
+        'stroke-dasharray="9 6"/>' +
+        '<text x="466" y="' + Math.max(43, steadyY - 9) +
+        '" font-size="12" font-weight="800" text-anchor="end">C*</text>';
+    }
+
+    content +=
+      '<path d="M' + f.sx(round.time) +
+      ' 47V250" stroke="#111" stroke-width="2" ' +
+      'stroke-dasharray="3 6"/>' +
+      '<circle cx="' + f.sx(round.time) +
+      '" cy="' + f.sy(result.concentration) +
+      '" r="8" fill="#FFC83D" stroke="#111" stroke-width="3"/>';
+
+    plot.innerHTML = content;
+    plot.setAttribute(
+      'aria-label',
+      'Lake concentration versus time. Concentration at ' +
+      fmt(round.time) + ' seconds is ' +
+      fmt(result.concentration) +
+      ' mol per cubic metre; steady concentration ' +
+      fmt(result.steady_concentration) + ' mol per cubic metre.'
+    );
+  }
+
+  function update() {
+    const result = finalModel();
+    slider.value = String(round.setting);
+    $('display').textContent = controlText();
+
+    if (round.type === 'lake') {
+      $('viewer').classList.add('hidden');
+
+      if (result.error) {
+        $('currentReadout').textContent = 'Model unavailable';
+        $('diagnostics').textContent = result.reason;
+        return;
+      }
+
+      drawLake(result);
+      lakeScene(result);
+
+      $('currentReadout').textContent =
+        fmt(result.concentration, 6) + ' mol/m³';
+      $('goalReadout').textContent =
+        fmt(round.goal, 6) + ' mol/m³';
+
+      $('diagnostics').className = 'diagnostics';
+      $('diagnostics').textContent =
+        'C* = ' + fmt(result.steady_concentration, 5) +
+        ' mol/m³ · τ = ' + fmt(result.flushing_time_s, 5) +
+        ' s · t = ' + fmt(round.time) + ' s';
+      return;
+    }
+
+    $('viewer').classList.remove('hidden');
+    const viewed = round.type === 'ftcs'
+      ? ftcs(round, round.setting, inspectedStep)
+      : upwind(round, round.setting, inspectedStep);
+
+    $('viewDisplay').textContent =
+      inspectedStep + ' / ' + round.steps;
+    viewStep.value = String(inspectedStep);
+
+    drawGrid(result, viewed);
+    gridScene(viewed);
+
+    $('diagnostics').className = 'diagnostics';
+
+    if (result.error) {
+      const note = round.type === 'ftcs'
+        ? 'Unstable: r > 0.5'
+        : 'Unstable: Co > 1';
+
+      $('currentReadout').textContent = note;
+      $('diagnostics').className = 'diagnostics warning';
+      $('diagnostics').textContent =
+        note + '. The engine refused this time step ' +
+        'before updating any cells.';
+
+      if (round.type === 'ftcs') {
+        $('goalReadout').textContent =
+          fmt(round.goal, 6) + ' mol/m³';
+      } else {
+        $('goalReadout').textContent =
+          'Cell ' + round.goalCell + ' · ' +
+          fmt(round.goalCentre) + ' m';
+      }
+      return;
+    }
+
+    if (round.type === 'ftcs') {
+      $('currentReadout').textContent =
+        fmt(Math.max(...result.cells), 6) + ' mol/m³';
+      $('goalReadout').textContent =
+        fmt(round.goal, 6) + ' mol/m³';
+
+      $('diagnostics').textContent =
+        'Stable: r = ' + fmt(result.r, 5) +
+        ' · Mass before = ' + fmt(result.mass_before, 6) +
+        ' mol/m² · Mass after = ' +
+        fmt(result.mass_after, 6) + ' mol/m²';
+    } else {
+      $('currentReadout').textContent =
+        fmt(result.centre_after_m, 6) + ' m';
+      $('goalReadout').textContent =
+        'Cell ' + round.goalCell + ' · ' +
+        fmt(round.goalCentre) + ' m';
+
+      $('diagnostics').textContent =
+        'Stable: Co = ' + fmt(result.courant, 5) +
+        ' · Peak cell = ' + result.peak_cell +
+        ' · Mass before/after = ' +
+        fmt(result.mass_before, 5) + ' / ' +
+        fmt(result.mass_after, 5) + ' mol/m²';
+    }
+  }
+
+  function setSetting(value) {
+    if (solved) return;
+    const v = Number(value);
+    if (!Number.isFinite(v)) return;
+    round.setting = Math.max(
+      round.min, Math.min(round.max, Math.round(v))
+    );
+    update();
+  }
+
+  function feedback(message, kind) {
+    $('feedback').textContent = message;
+    $('feedback').className = 'feedback ' + kind;
+  }
+
+  function check() {
+    if (solved) return;
+    tries++;
+
+    const result = finalModel();
+
+    if (result.error) {
+      if (result.reason === 'ftcs_unstable_r_gt_0_5') {
+        feedback(
+          'Unstable: r > 0.5. Reduce Δt before running FTCS.',
+          'bad'
+        );
+      } else if (result.reason === 'upwind_unstable_courant_gt_1') {
+        feedback(
+          'Unstable: Co > 1. Reduce Δt before running upwind.',
+          'bad'
+        );
+      } else {
+        feedback('The model rejected this setting: ' + result.reason, 'bad');
+      }
+      return;
+    }
+
+    let correct;
+    let wrong;
+    let reason;
+
+    if (round.type === 'ftcs') {
+      const peak = Math.max(...result.cells);
+      const difference = Math.abs(peak - round.goal);
+      correct = difference <=
+        Math.max(1e-12, Math.abs(round.goal) * 1e-9);
+
+      wrong = peak > round.goal
+        ? 'The final peak remains ' + fmt(difference, 5) +
+          ' mol/m³ too high. Try a larger stable time step.'
+        : 'The final peak is ' + fmt(difference, 5) +
+          ' mol/m³ below the target. Try a smaller time step.';
+
+      reason =
+        'The explicit step matches the peak target while ' +
+        'respecting r ≤ 0.5. Zero-flux boundaries preserve ' +
+        'the discrete cell-integrated mass.';
+    } else if (round.type === 'upwind') {
+      const distance = Math.abs(
+        result.centre_after_m - round.goalCentre
+      );
+      correct = distance <= 1e-9;
+
+      wrong = result.centre_after_m < round.goalCentre
+        ? 'The centre is ' + fmt(distance, 5) +
+          ' m short. Increase Δt to raise Co.'
+        : 'The centre travels ' + fmt(distance, 5) +
+          ' m too far. Reduce Δt.';
+
+      reason =
+        'Correct. The upwind solver reaches the target cell ' +
+        'centre. Compare the current curve with the Co = 1 ' +
+        'reference to see numerical spreading.';
+    } else {
+      const difference = Math.abs(
+        result.concentration - round.goal
+      );
+      correct = difference <=
+        Math.max(1e-11, Math.abs(round.goal) * 1e-9);
+
+      wrong = result.concentration > round.goal
+        ? 'The lake concentration is ' + fmt(difference, 5) +
+          ' mol/m³ too high. ' +
+          (round.adjust === 'flow'
+            ? 'Increase the flushing flow.'
+            : 'Increase the decay rate.')
+        : 'The lake concentration is ' + fmt(difference, 5) +
+          ' mol/m³ too low. ' +
+          (round.adjust === 'flow'
+            ? 'Reduce the flushing flow.'
+            : 'Reduce the decay rate.');
+
+      reason =
+        'Correct. Flushing and decay combine into a single ' +
+        'exponential relaxation towards the steady concentration.';
+    }
+
+    if (!correct) {
+      feedback('Not yet. ' + wrong, 'bad');
+      return;
+    }
+
+    solved = true;
+    const gained = hinted ? 50 : tries === 1 ? 100 :
+      tries === 2 ? 75 : 50;
+
+    score += gained;
+    $('scoreChip').textContent = 'Score ' + score;
+
+    feedback('✓ +' + gained + ' points. ' + reason, 'good');
+
+    slider.disabled = true;
+    $('hintBtn').disabled = true;
+    document.querySelectorAll('.steps button').forEach(b => {
+      b.disabled = true;
+    });
+    $('checkBtn').classList.add('hidden');
+    $('nextBtn').classList.remove('hidden');
+    $('nextBtn').textContent = roundNumber === 5
+      ? 'See stars ★'
+      : 'Next round →';
+  }
+
+  function hint() {
+    if (solved) return;
+    hinted = true;
+    $('hintBtn').disabled = true;
+
+    let text;
+    if (round.type === 'ftcs') {
+      text =
+        'Compute r from D, Δt and Δx². Only the stable ' +
+        'range is usable; increasing Δt generally spreads ' +
+        'the initial peak more strongly over the set updates.';
+    } else if (round.type === 'upwind') {
+      text =
+        'Each update transports a fraction Co of a cell. ' +
+        'The target centre displacement accumulates across ' +
+        'the specified number of updates.';
+    } else {
+      text =
+        'Both higher throughflow of cleaner water and a ' +
+        'higher first-order decay rate can reduce lake concentration. ' +
+        'Compare the observation value with the target.';
+    }
+
+    feedback('Hint: ' + text + ' Maximum reward: 50 points.', 'info');
+  }
+
+  function startRound() {
+    round = createRound(roundNumber);
+    tries = 0;
+    hinted = false;
+    solved = false;
+    inspectedStep = round.type === 'lake' ? 0 : round.steps;
+
+    $('feedback').textContent = '';
+    $('feedback').className = 'feedback';
+    $('hintBtn').disabled = false;
+    $('checkBtn').classList.remove('hidden');
+    $('nextBtn').classList.add('hidden');
+    slider.disabled = false;
+
+    document.querySelectorAll('.steps button').forEach(b => {
+      b.disabled = false;
+    });
+
+    slider.min = String(round.min);
+    slider.max = String(round.max);
+    slider.step = '1';
+
+    if (round.type !== 'lake') {
+      viewStep.max = String(round.steps);
+      viewStep.value = String(inspectedStep);
+    }
+
+    parameterText();
+    update();
+  }
+
+  function advance() {
+    if (!solved) return;
+    roundNumber++;
+
+    if (roundNumber < 6) {
+      startRound();
+      return;
+    }
+
+    $('game').classList.add('hidden');
+    $('finish').classList.remove('hidden');
+    $('roundChip').textContent = '6/6 complete';
+
+    const count = score >= 525 ? 3 : score >= 375 ? 2 : 1;
+    $('stars').textContent =
+      '★'.repeat(count) + '☆'.repeat(3 - count);
+    $('stars').setAttribute(
+      'aria-label', count + ' out of 3 stars'
+    );
+    $('finalScore').textContent = score + ' / 600 points';
+    $('finishCopy').textContent = count === 3
+      ? 'Excellent! You mastered explicit stability and transport diagnostics.'
+      : 'Replay to refine stability, conservation and lake dynamics.';
+  }
+
+  function restart() {
+    replay++;
+    roundNumber = 0;
+    score = 0;
+    $('finish').classList.add('hidden');
+    $('game').classList.remove('hidden');
+    startRound();
+  }
+
+  slider.addEventListener('input', () => setSetting(slider.value));
+
+  viewStep.addEventListener('input', () => {
+    if (round.type === 'lake') return;
+    inspectedStep = Math.max(
+      0, Math.min(round.steps, Number(viewStep.value))
+    );
+    update();
+  });
+
+  document.querySelectorAll('.steps button').forEach(button => {
+    button.addEventListener('click', () =>
+      setSetting(round.setting + Number(button.dataset.delta))
+    );
+  });
+
+  $('checkBtn').addEventListener('click', check);
+  $('hintBtn').addEventListener('click', hint);
+  $('nextBtn').addEventListener('click', advance);
+  $('again').addEventListener('click', restart);
+
+  startRound();
+})();
+</script>
+</body>
+</html>

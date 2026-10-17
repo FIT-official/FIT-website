@@ -1,0 +1,1165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Layers and Half-Values | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input{font:inherit}
+button,input[type=range],input[type=number]{-webkit-tap-highlight-color:transparent;user-select:none}
+button{cursor:pointer}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button:disabled{opacity:.5;cursor:default}
+svg [tabindex]:focus-visible{outline:none;stroke:#111;stroke-width:6}
+.wrap{max-width:1460px;margin:auto;padding:16px 14px 48px}
+.hud{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.badge,.stat{border:2px solid #111;border-radius:999px;padding:8px 13px;font-weight:800;font-size:13px;background:#fff}
+.badge{background:var(--lvl-uni);color:var(--lvl-uni-on);text-transform:uppercase;letter-spacing:.05em;font-size:12px}
+h1{font-size:clamp(29px,4vw,45px);font-weight:800;line-height:1.1;letter-spacing:-.035em;margin:16px 0 5px}
+.sub{margin:0 0 22px;color:var(--fit-ink-2);font-size:16px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:19px;align-items:start}
+.card{border:2px solid #111;border-radius:var(--r-lg);background:#fff;box-shadow:var(--sh-2);padding:17px;min-width:0}
+.stage{background:var(--lvl-uni-tint);border-radius:var(--r-xl);box-shadow:var(--sh-3)}
+.side{display:grid;gap:18px;min-width:0}
+.eyebrow{text-transform:uppercase;font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--fit-ink-3)}
+h2{font-size:21px;line-height:1.18;font-weight:800;margin:8px 0 12px}
+.question{font-weight:600;font-size:17px;min-height:57px;margin:10px 0 14px}
+.given{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:13px;background:#fff;border:2px solid #111;border-radius:999px;padding:6px 11px;font-weight:700;font-variant-numeric:tabular-nums}
+.diagram{border:2px solid #111;border-radius:20px;background:#fff;margin-top:17px;padding:7px}
+.diagram svg{display:block;width:100%;height:auto}
+.clinical{font-weight:800;color:#3D3D3D;font-size:12px;margin-top:9px}
+.readouts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:15px 0}
+.metric{border:2px solid #111;border-radius:16px;padding:12px;background:#fff;min-width:0}
+.metric small{display:block;font-weight:700;color:var(--fit-ink-3);font-size:12px}
+.metric strong{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.concept{border:2px dashed #111;border-radius:18px;background:#fff;padding:11px;display:flex;align-items:center;gap:12px;margin-top:17px}
+.concept svg{height:72px;width:105px;min-width:105px}
+.concept p{margin:0;font-size:13px}
+.plot{width:100%;height:auto;display:block}
+.plots{display:grid;gap:12px}
+.plot-wrap{border:2px solid var(--fit-line-soft);padding:7px;border-radius:16px;background:#fff}
+.plot-title{font-size:14px;font-weight:800;margin:4px}
+.legend{font-size:12px;font-weight:700;display:flex;flex-wrap:wrap;gap:12px}
+.legend i{width:18px;height:5px;display:inline-block;border-radius:3px;background:var(--lvl-uni);margin-right:5px}
+.legend i.dashed{background:#111}
+.controls{display:grid;gap:11px}
+.field{background:var(--fit-sunken);border:2px solid #111;border-radius:17px;padding:12px}
+.field label{display:block;font-weight:800;font-size:14px;margin-bottom:6px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.step{border:2px solid #111;border-radius:999px;background:#fff;min-width:44px;min-height:46px;font-weight:800;box-shadow:var(--sh-1);font-size:17px}
+.step:active,.btn:active{transform:translateY(2px);box-shadow:none}
+.field input[type=number]{border:2px solid #111;border-radius:12px;width:115px;min-width:0;text-align:center;padding:10px 4px;font-size:16px;font-weight:700;background:#fff}
+.field input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-uni);cursor:pointer;margin-top:4px}
+.ends{display:flex;justify-content:space-between;font-size:12px;color:var(--fit-ink-3)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.btn{border:2px solid #111;background:#fff;border-radius:999px;min-height:48px;padding:11px 20px;box-shadow:var(--sh-1);font-weight:800}
+.btn.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2);font-size:17px}
+.btn.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.feedback{border:2px solid #111;border-radius:16px;background:#fff;padding:12px;margin-top:12px;min-height:50px;font-weight:600}
+.feedback:empty{display:none}
+.feedback.ok{border-color:var(--fit-success);background:#E8FAEF}
+.feedback.bad{border-color:var(--fit-danger);background:#FFF0EE}
+.hint{border:2px dashed #111;background:#FFF5D3;border-radius:14px;padding:12px;margin-top:12px;font-size:14px;font-weight:600}
+[hidden],.hidden{display:none!important}
+details{border:2px solid #111;border-radius:16px;background:#fff;padding:12px 15px;margin-top:18px}
+summary{font-weight:800;cursor:pointer;min-height:44px;display:flex;align-items:center}
+.math{font-size:14px;line-height:1.9}
+.math p{margin:7px 0}
+.math strong{font-weight:800}
+.end{border:3px solid #111;border-radius:32px;background:var(--lvl-uni-tint);box-shadow:var(--sh-3);padding:36px 18px;text-align:center}
+.stars{font-size:55px;color:#DEA900;letter-spacing:6px}
+.end-score{font-size:24px;font-weight:800}
+@media(min-width:900px){.wrap{padding:25px 27px 60px}.layout{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}.card{padding:21px}}
+@media(max-width:440px){.wrap{padding:12px 9px 35px}.card{padding:13px}.field input[type=number]{width:97px}.step{min-width:44px}.metric strong{font-size:17px}}
+@media(prefers-reduced-motion:no-preference){.step,.btn{transition:transform var(--dur-1) var(--ease-out),box-shadow var(--dur-1) var(--ease-out)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="hud">
+      <span class="badge">University (Years 1–2)</span>
+      <span class="stat" id="roundLabel">Round 1/6</span>
+      <span class="stat">Score <span id="score">0</span>/600</span>
+    </div>
+    <h1>Layers and Half-Values</h1>
+    <p class="sub">Exponential attenuation · Multi-layer shielding · Material properties</p>
+  </header>
+
+  <main id="game" class="layout">
+    <section class="card stage">
+      <div class="eyebrow" id="type">Shielding design</div>
+      <h2 id="title">Configure the stack</h2>
+      <p class="question" id="question"></p>
+      <div class="given" id="given"></div>
+
+      <div class="diagram">
+        <svg id="diagram" viewBox="0 0 650 265" role="img"
+          aria-label="An incident X-ray beam crosses a shielding stack and reaches a detector."></svg>
+      </div>
+      <p class="clinical">teaching model, not clinical</p>
+
+      <div class="readouts">
+        <div class="metric">
+          <small>Current transmitted fraction, I/I₀</small>
+          <strong id="transmission">—</strong>
+        </div>
+        <div class="metric">
+          <small>Current optical thickness, Σμx</small>
+          <strong id="optical">—</strong>
+        </div>
+      </div>
+
+      <div class="concept">
+        <svg viewBox="0 0 110 72" role="img"
+          aria-label="Equal attenuation intervals halve the transmitted beam successively.">
+          <path d="M8 12 H102" stroke="#111" stroke-width="3"/>
+          <path d="M8 12 V61 H102" stroke="#111" stroke-width="3" fill="none"/>
+          <path d="M9 15 L35 37 L62 49 L97 56" fill="none"
+            stroke="#1F66E5" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="9" cy="15" r="4" fill="#111"/>
+          <circle cx="35" cy="37" r="4" fill="#111"/>
+          <circle cx="62" cy="49" r="4" fill="#111"/>
+          <circle cx="97" cy="56" r="4" fill="#111"/>
+        </svg>
+        <p><strong>Concept:</strong> Each additional half-value layer halves the remaining intensity, not the original intensity.</p>
+      </div>
+
+      <details>
+        <summary>The maths</summary>
+        <div class="math">
+          <p><strong>One slab:</strong> I/I₀ = exp(−μx).</p>
+          <p><strong>Stack:</strong> I/I₀ = exp(−Σμᵢxᵢ).</p>
+          <p><strong>Linearised:</strong> ln(I/I₀) = −Σμᵢxᵢ.</p>
+          <p><strong>Half-value layer:</strong> HVL = ln(2)/μ.</p>
+          <p><strong>Mean free path:</strong> λ = 1/μ.</p>
+          <p><strong>Measurement:</strong> μ = −ln(I/I₀)/x.</p>
+          <p><strong>Mass coefficient:</strong> μ = (μ/ρ)ρ.</p>
+          <p>μ: cm⁻¹; x, HVL, λ: cm; μ/ρ: cm²/g; ρ: g/cm³.</p>
+          <p>Assumption: a narrow monochromatic beam follows the exponential law through at most three homogeneous layers, with no scattering or build-up.</p>
+        </div>
+      </details>
+    </section>
+
+    <div class="side">
+      <section class="card">
+        <div class="eyebrow">Live model output</div>
+        <h2>Attenuation plots</h2>
+
+        <div class="plots">
+          <div class="plot-wrap">
+            <p class="plot-title">Log intensity through the stack</p>
+            <svg id="logPlot" class="plot" role="img"
+              aria-label="Natural logarithm of transmission against cumulative slab depth."
+              viewBox="0 0 760 245"></svg>
+          </div>
+
+          <div class="plot-wrap">
+            <p class="plot-title">Exponential transmission and half-values</p>
+            <svg id="hvlPlot" class="plot" role="img"
+              aria-label="Transmitted fraction against thickness with half-value layer markers."
+              viewBox="0 0 760 245"></svg>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span><i></i>Model</span>
+          <span><i class="dashed"></i>Layer boundary / HVL marker</span>
+          <span>● Current thickness</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="eyebrow">Simulation controls</div>
+        <h2 id="controlTitle">Adjust the layers</h2>
+        <div class="controls" id="controls"></div>
+        <div class="hint" id="hintBox" hidden></div>
+        <div class="actions">
+          <button class="btn" type="button" id="hintBtn">Hint −50 points</button>
+          <button class="btn check" type="button" id="checkBtn">Check</button>
+          <button class="btn" type="button" id="nextBtn" hidden>Next round →</button>
+        </div>
+        <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+      </section>
+    </div>
+  </main>
+
+  <section id="end" class="end hidden" aria-live="polite">
+    <div class="eyebrow">Six challenges completed</div>
+    <h2>Shielding specialist!</h2>
+    <div class="stars" id="stars"></div>
+    <div class="end-score" id="finalScore"></div>
+    <p id="closing"></p>
+    <button class="btn check" id="again" type="button">Play again ↻</button>
+  </section>
+</div>
+
+<script>
+/* FIT-CALC-BEGIN x9_beer_lambert */
+const FITCalcX9 = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+
+  function error(cls, reason) {
+    return { error: cls, reason };
+  }
+
+  function validate(values) {
+    for (const value of values) {
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
+        return error('ConstraintViolation', 'non_finite_input');
+      }
+      if (value < 0) {
+        return error('ConstraintViolation', 'negative_input');
+      }
+    }
+    return null;
+  }
+
+  function finiteResult(result) {
+    for (const value of Object.values(result)) {
+      if (typeof value === 'number' && !Number.isFinite(value)) {
+        return error('ConstraintViolation', 'numeric_overflow');
+      }
+    }
+    return result;
+  }
+
+  function finiteOrNull(value) {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  /**
+   * Beer-Lambert spectroscopy at one wavelength.
+   * Inputs: epsilon in L/(mol cm), c in mol/L, l in cm.
+   * Outputs: A dimensionless, T as a fraction, percent_T in %.
+   * Assumptions: homogeneous solution, monochromatic light,
+   * constant molar absorptivity, no scattering or stray light.
+   * Errors: negative_input, non_finite_input, numeric_overflow.
+   *
+   * Hand check: epsilon=200, c=0.002, l=1 gives
+   * A=0.4, T=0.3981071705534972, percent_T=39.81071705534972.
+   */
+  function beer_lambert({ epsilon, c, l }) {
+    const invalid = validate([epsilon, c, l]);
+    if (invalid) return invalid;
+
+    const A = epsilon * c * l;
+    const T = Math.pow(10, -A);
+    const percent_T = 100 * T;
+
+    return finiteResult({ A, T, percent_T });
+  }
+
+  /**
+   * Recover concentration from measured absorbance.
+   * Inputs: A dimensionless, epsilon in L/(mol cm), l in cm.
+   * Output: c in mol/L.
+   * Assumptions: Beer-Lambert linear regime; epsilon and l known.
+   * Errors: negative_input, non_finite_input,
+   * epsilon_times_path_must_be_positive, numeric_overflow.
+   *
+   * Hand check: A=0.6, epsilon=150, l=2 gives c=0.002 mol/L.
+   */
+  function beer_lambert_conc({ A, epsilon, l }) {
+    const invalid = validate([A, epsilon, l]);
+    if (invalid) return invalid;
+
+    const denominator = epsilon * l;
+    if (denominator <= 0) {
+      return error('MathError', 'epsilon_times_path_must_be_positive');
+    }
+
+    return finiteResult({ c: A / denominator });
+  }
+
+  /**
+   * Convert percentage transmittance to base-10 absorbance.
+   * Input: percent_T in %, strictly above 0 and at most 100.
+   * Output: A dimensionless.
+   * Assumptions: transmittance refers to the incident beam.
+   * Errors: transmittance_must_be_in_0_100, non_finite_input.
+   *
+   * Hand check: percent_T=10 gives A=1.
+   */
+  function absorbance_from_T({ percent_T }) {
+    if (typeof percent_T !== 'number' || !Number.isFinite(percent_T)) {
+      return error('ConstraintViolation', 'non_finite_input');
+    }
+    if (percent_T <= 0 || percent_T > 100) {
+      return error('MathError', 'transmittance_must_be_in_0_100');
+    }
+
+    return finiteResult({ A: 2 - Math.log10(percent_T) });
+  }
+
+  /**
+   * Exponential attenuation through one to three homogeneous layers.
+   * Input: layers is an array of 1-3 {mu, x} objects;
+   * mu in cm^-1, x in cm.
+   * Outputs: I_over_I0 dimensionless, total_mu_x dimensionless,
+   * HVL and mean_free_path in cm or null.
+   * HVL and mean_free_path are defined here only for one layer
+   * with positive mu. They are null for multiple layers or mu=0.
+   * Assumptions: narrow-beam exponential law, independent layers,
+   * no scattering, build-up or spectral changes.
+   * Errors: layers_out_of_range_1_3, negative_input,
+   * non_finite_input, numeric_overflow.
+   *
+   * Hand check: [{mu:0.2,x:3}] gives total_mu_x=0.6,
+   * I_over_I0=0.5488116360940264,
+   * HVL=3.465735902799726, mean_free_path=5 cm.
+   */
+  function attenuation({ layers }) {
+    if (!Array.isArray(layers) || layers.length < 1 || layers.length > 3) {
+      return error('ConstraintViolation', 'layers_out_of_range_1_3');
+    }
+
+    let total_mu_x = 0;
+    for (const layer of layers) {
+      if (!layer || typeof layer !== 'object') {
+        return error('ConstraintViolation', 'non_finite_input');
+      }
+      const invalid = validate([layer.mu, layer.x]);
+      if (invalid) return invalid;
+      total_mu_x += layer.mu * layer.x;
+    }
+
+    const I_over_I0 = Math.exp(-total_mu_x);
+    let HVL = null;
+    let mean_free_path = null;
+
+    if (layers.length === 1 && layers[0].mu > 0) {
+      HVL = finiteOrNull(Math.LN2 / layers[0].mu);
+      mean_free_path = finiteOrNull(1 / layers[0].mu);
+    }
+
+    return finiteResult({
+      I_over_I0,
+      total_mu_x,
+      HVL,
+      mean_free_path
+    });
+  }
+
+  /**
+   * Convert a supplied mass attenuation coefficient to linear
+   * attenuation and transmitted intensity.
+   * Inputs: mu_over_rho in cm^2/g, rho in g/cm^3, x in cm.
+   * Outputs: mu in cm^-1, I_over_I0 dimensionless.
+   * Assumptions: uniform density and coefficient at one photon
+   * energy; no coefficient database, scattering or build-up.
+   * Errors: negative_input, non_finite_input, numeric_overflow.
+   *
+   * Hand check: mu_over_rho=0.08, rho=2.5, x=4 gives
+   * mu=0.2 cm^-1, I_over_I0=0.44932896411722156.
+   */
+  function mass_attenuation({ mu_over_rho, rho, x }) {
+    const invalid = validate([mu_over_rho, rho, x]);
+    if (invalid) return invalid;
+
+    const mu = mu_over_rho * rho;
+    const I_over_I0 = Math.exp(-mu * x);
+
+    return finiteResult({ mu, I_over_I0 });
+  }
+
+  /**
+   * Light attenuation with depth in homogeneous water.
+   * Inputs: k in m^-1, z in m.
+   * Outputs: I_over_I0 dimensionless, euphotic_depth in m
+   * or null if k=0.
+   * Euphotic depth is the 1% light level.
+   * Assumptions: fixed diffuse attenuation coefficient, one
+   * optical band, exponential decay with depth.
+   * Errors: negative_input, non_finite_input, numeric_overflow.
+   *
+   * Hand check: k=0.25, z=4 gives I_over_I0=0.36787944117144233,
+   * euphotic_depth=18.420680743952367 m.
+   */
+  function light_depth({ k, z }) {
+    const invalid = validate([k, z]);
+    if (invalid) return invalid;
+
+    const I_over_I0 = Math.exp(-k * z);
+    const euphotic_depth = k === 0
+      ? null
+      : finiteOrNull(Math.log(100) / k);
+
+    return finiteResult({ I_over_I0, euphotic_depth });
+  }
+
+  /**
+   * Infer a homogeneous exponential attenuation coefficient.
+   * Inputs: I_over_I0 as a fraction in (0,1], x in cm
+   * for slab work or a consistent distance unit for other media.
+   * Output: mu in inverse units of x (cm^-1 for slab work,
+   * m^-1 when x is supplied in metres for water).
+   * Assumptions: one homogeneous exponential attenuation region.
+   * Errors: transmission_must_be_in_0_1_and_x_positive,
+   * non_finite_input, numeric_overflow.
+   *
+   * Hand check: I_over_I0=0.5, x=2 gives
+   * mu=0.34657359027997264 in inverse distance units.
+   */
+  function mu_from_measurement({ I_over_I0, x }) {
+    if (
+      typeof I_over_I0 !== 'number' ||
+      !Number.isFinite(I_over_I0) ||
+      typeof x !== 'number' ||
+      !Number.isFinite(x)
+    ) {
+      return error('ConstraintViolation', 'non_finite_input');
+    }
+
+    if (I_over_I0 <= 0 || I_over_I0 > 1 || x <= 0) {
+      return error(
+        'MathError',
+        'transmission_must_be_in_0_1_and_x_positive'
+      );
+    }
+
+    return finiteResult({ mu: -Math.log(I_over_I0) / x });
+  }
+
+  return Object.freeze({
+    API_VERSION,
+    beer_lambert,
+    beer_lambert_conc,
+    absorbance_from_T,
+    attenuation,
+    mass_attenuation,
+    light_depth,
+    mu_from_measurement
+  });
+})();
+/* FIT-CALC-END x9_beer_lambert */
+
+(function () {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const modes = ['A', 'B', 'C', 'A', 'B', 'C'];
+  const colours = ['#B4C7EB', '#FFBC8A', '#BDE7C6'];
+  let round = 0;
+  let run = 0;
+  let score = 0;
+  let state;
+
+  function rng(seed) {
+    let n = seed >>> 0;
+    return () => {
+      n = (Math.imul(n, 1664525) + 1013904223) >>> 0;
+      return n / 4294967296;
+    };
+  }
+
+  function choose(r, values) {
+    return values[Math.floor(r() * values.length)];
+  }
+
+  function sig(n) {
+    return Number.isFinite(n) ? Number(n.toPrecision(3)).toString() : '—';
+  }
+
+  function pct(fraction) {
+    return `${sig(100 * fraction)}%`;
+  }
+
+  function clamp(n, a, b) {
+    return Math.min(b, Math.max(a, n));
+  }
+
+  function modelOK(result) {
+    return result && !result.error;
+  }
+
+  function createRound(index) {
+    const r = rng(92381 + run * 65537 + index * 32771);
+    const mode = modes[index];
+
+    if (mode === 'A') {
+      const count = index === 0 ? 2 : 3;
+      const layers = Array.from({ length: count }, () => ({
+        mu: choose(r, [0.12, 0.18, 0.24, 0.30]),
+        x: 0.25
+      }));
+      const design = layers.map(layer => ({
+        mu: layer.mu,
+        x: choose(r, [2, 3, 4, 5])
+      }));
+      const target = FITCalcX9.attenuation({
+        layers: design
+      }).I_over_I0;
+
+      return {
+        mode, layers, target, attempts: 0, hinted: false, solved: false
+      };
+    }
+
+    if (mode === 'B') {
+      const actualMu = choose(r, [0.12, 0.16, 0.20, 0.25, 0.32]);
+      const x = choose(r, [3, 4, 5]);
+      const measured = FITCalcX9.attenuation({
+        layers: [{ mu: actualMu, x }]
+      });
+
+      return {
+        mode, x,
+        measured: measured.I_over_I0,
+        mu: 0.05,
+        HVL: 2,
+        mfp: 3,
+        attempts: 0, hinted: false, solved: false
+      };
+    }
+
+    const mu_over_rho = choose(r, [0.05, 0.08, 0.12, 0.16]);
+    const rho = choose(r, [1.5, 2, 2.5, 3]);
+    const designX = choose(r, [3, 4, 5, 6, 7]);
+    const desired = FITCalcX9.mass_attenuation({
+      mu_over_rho, rho, x: designX
+    });
+
+    return {
+      mode, mu_over_rho, rho,
+      target: desired.I_over_I0,
+      x: 0.5,
+      attempts: 0, hinted: false, solved: false
+    };
+  }
+
+  function addChip(text) {
+    const span = document.createElement('span');
+    span.className = 'chip';
+    span.textContent = text;
+    $('given').appendChild(span);
+  }
+
+  function field(key, label, unit, min, max, step, value, index) {
+    const attr = index === undefined ? '' : ` data-index="${index}"`;
+    return `
+      <div class="field">
+        <label for="field-${key}-${index === undefined ? 's' : index}">
+          ${label} (${unit})
+        </label>
+        <div class="row">
+          <button class="step" type="button" data-key="${key}"${attr}
+            data-delta="${-5 * step}" aria-label="Decrease ${label} coarsely">−−</button>
+          <button class="step" type="button" data-key="${key}"${attr}
+            data-delta="${-step}" aria-label="Decrease ${label} finely">−</button>
+          <input id="field-${key}-${index === undefined ? 's' : index}"
+            type="number" inputmode="decimal" data-key="${key}"${attr}
+            min="${min}" max="${max}" step="${step}" value="${value}"
+            aria-label="${label} in ${unit}">
+          <button class="step" type="button" data-key="${key}"${attr}
+            data-delta="${step}" aria-label="Increase ${label} finely">+</button>
+          <button class="step" type="button" data-key="${key}"${attr}
+            data-delta="${5 * step}" aria-label="Increase ${label} coarsely">++</button>
+        </div>
+        <input type="range" data-key="${key}"${attr}
+          min="${min}" max="${max}" step="${step}" value="${value}"
+          aria-label="${label} slider">
+        <div class="ends"><span>${min} ${unit}</span><span>${max} ${unit}</span></div>
+      </div>`;
+  }
+
+  function initialise() {
+    state = createRound(round);
+    $('roundLabel').textContent = `Round ${round + 1}/6`;
+    $('score').textContent = score;
+    $('given').replaceChildren();
+    $('feedback').textContent = '';
+    $('feedback').className = 'feedback';
+    $('hintBox').hidden = true;
+    $('hintBox').textContent = '';
+    $('hintBtn').disabled = false;
+    $('checkBtn').hidden = false;
+    $('nextBtn').hidden = true;
+    $('nextBtn').textContent = round === 5 ? 'See results →' : 'Next round →';
+
+    const s = state;
+
+    if (s.mode === 'A') {
+      $('type').textContent = 'Challenge A · Layer design';
+      $('title').textContent = 'Build a shielding stack';
+      $('question').textContent =
+        `Adjust the ${s.layers.length} slab thicknesses so no more ` +
+        `than ${pct(s.target)} of the incident beam reaches the detector.`;
+
+      s.layers.forEach((layer, i) => {
+        addChip(`Layer ${i + 1}: μ = ${sig(layer.mu)} cm⁻¹`);
+      });
+
+      $('controlTitle').textContent = 'Set each slab thickness';
+      $('controls').innerHTML = s.layers.map((layer, i) =>
+        field('x', `Layer ${i + 1} thickness`, 'cm', 0, 8, 0.25, layer.x, i)
+      ).join('');
+    } else if (s.mode === 'B') {
+      $('type').textContent = 'Challenge B · Inverse measurement';
+      $('title').textContent = 'Recover three material properties';
+      $('question').textContent =
+        `A uniform slab of thickness ${sig(s.x)} cm transmits ` +
+        `${pct(s.measured)} of the beam. Infer μ, then calculate ` +
+        'its half-value layer and mean free path.';
+
+      addChip(`Thickness = ${sig(s.x)} cm`);
+      addChip(`I/I₀ = ${sig(s.measured)}`);
+
+      $('controlTitle').textContent = 'Enter the three related quantities';
+      $('controls').innerHTML =
+        field('mu', 'Attenuation coefficient μ', 'cm⁻¹',
+          0.01, 0.8, 0.005, s.mu) +
+        field('HVL', 'Half-value layer', 'cm',
+          0.1, 20, 0.01, s.HVL) +
+        field('mfp', 'Mean free path', 'cm',
+          0.1, 30, 0.01, s.mfp);
+    } else {
+      $('type').textContent = 'Challenge C · Mass attenuation';
+      $('title').textContent = 'Design a material thickness';
+      $('question').textContent =
+        `A material has the supplied mass coefficient and density below. ` +
+        `Choose a slab thickness that transmits ${pct(s.target)} ` +
+        'of the original beam.';
+
+      addChip(`μ/ρ = ${sig(s.mu_over_rho)} cm²/g`);
+      addChip(`ρ = ${sig(s.rho)} g/cm³`);
+      addChip(`Target I/I₀ = ${sig(s.target)}`);
+
+      $('controlTitle').textContent = 'Choose the slab thickness';
+      $('controls').innerHTML = field(
+        'x', 'Material thickness', 'cm', 0, 12, 0.1, s.x
+      );
+    }
+
+    update();
+  }
+
+  function refMu() {
+    if (state.mode === 'A') return state.layers[0].mu;
+    if (state.mode === 'B') return state.mu;
+    return FITCalcX9.mass_attenuation({
+      mu_over_rho: state.mu_over_rho,
+      rho: state.rho,
+      x: state.x
+    }).mu;
+  }
+
+  function activeLayers() {
+    if (state.mode === 'A') {
+      return state.layers.map(layer => ({
+        mu: layer.mu, x: layer.x
+      }));
+    }
+    return [{
+      mu: refMu(),
+      x: state.x
+    }];
+  }
+
+  function current() {
+    if (state.mode === 'C') {
+      return FITCalcX9.mass_attenuation({
+        mu_over_rho: state.mu_over_rho,
+        rho: state.rho,
+        x: state.x
+      });
+    }
+    return FITCalcX9.attenuation({ layers: activeLayers() });
+  }
+
+  function getFieldValue(key, index) {
+    if (state.mode === 'A') return state.layers[index].x;
+    return state[key];
+  }
+
+  function setFieldValue(key, index, value) {
+    if (state.mode === 'A') {
+      state.layers[index].x = value;
+    } else {
+      state[key] = value;
+    }
+  }
+
+  function fieldRange(key) {
+    if (state.mode === 'A') return { min: 0, max: 8, step: 0.25 };
+    if (key === 'mu') return { min: 0.01, max: 0.8, step: 0.005 };
+    if (key === 'HVL') return { min: 0.1, max: 20, step: 0.01 };
+    if (key === 'mfp') return { min: 0.1, max: 30, step: 0.01 };
+    return { min: 0, max: 12, step: 0.1 };
+  }
+
+  function update(source) {
+    const result = current();
+    if (!modelOK(result)) return;
+
+    $('transmission').textContent = sig(result.I_over_I0);
+    const layers = activeLayers();
+    const optical = FITCalcX9.attenuation({ layers });
+    $('optical').textContent = sig(optical.total_mu_x);
+
+    for (const input of $('controls').querySelectorAll('input[data-key]')) {
+      if (input === source) continue;
+      const key = input.dataset.key;
+      const index = input.hasAttribute('data-index')
+        ? Number(input.dataset.index) : undefined;
+      input.value = getFieldValue(key, index);
+    }
+
+    drawDiagram(layers, result.I_over_I0);
+    drawLogPlot(layers);
+    drawHalfPlot(layers);
+  }
+
+  function drawDiagram(layers, transmission) {
+    const count = layers.length;
+    const totalThickness = layers.reduce((a, layer) => a + layer.x, 0);
+    const widths = layers.map(layer =>
+      totalThickness > 0
+        ? 100 + 45 * layer.x / totalThickness
+        : 100
+    );
+    const totalWidth = widths.reduce((a, w) => a + w, 0);
+    let x = 155;
+    let shapes = '';
+
+    for (let i = 0; i < count; i++) {
+      const layer = layers[i];
+      const width = widths[i] * Math.min(1, 375 / totalWidth);
+      shapes += `
+        <rect x="${x}" y="71" width="${width}" height="129" rx="5"
+          fill="${colours[i]}" stroke="#111" stroke-width="3"/>
+        <text x="${x + width / 2}" y="60" text-anchor="middle"
+          font-size="16" font-weight="800">Layer ${i + 1}</text>
+        <text x="${x + width / 2}" y="120" text-anchor="middle"
+          font-size="15" font-weight="700">μ ${sig(layer.mu)}</text>
+        <text x="${x + width / 2}" y="145" text-anchor="middle"
+          font-size="15" font-weight="700">cm⁻¹</text>
+        <text x="${x + width / 2}" y="175" text-anchor="middle"
+          font-size="16" font-weight="800">x ${sig(layer.x)} cm</text>`;
+      x += width;
+    }
+
+    const outStart = x + 4;
+    const beamEnd = 590;
+    $('diagram').innerHTML = `
+      <rect x="5" y="6" width="640" height="253" rx="17" fill="#F4F3EF"/>
+      <rect x="20" y="104" width="104" height="69" rx="12"
+        fill="#FFC83D" stroke="#111" stroke-width="4"/>
+      <text x="72" y="131" text-anchor="middle" font-size="16"
+        font-weight="800">X-RAY</text>
+      <text x="72" y="153" text-anchor="middle" font-size="15"
+        font-weight="800">SOURCE</text>
+      <path d="M124 127 H155 V149 H124Z" fill="#FFDD00"
+        stroke="#111" stroke-width="2"/>
+      <text x="139" y="115" text-anchor="middle" font-weight="800"
+        font-size="14">I₀</text>
+      ${shapes}
+      <rect x="${outStart}" y="127"
+        width="${Math.max(8, beamEnd - outStart)}" height="22"
+        fill="#FFDD00" opacity="${clamp(transmission, 0.025, 1)}"/>
+      <text x="${(outStart + beamEnd) / 2}" y="115" text-anchor="middle"
+        font-size="14" font-weight="800">I</text>
+      <rect x="592" y="101" width="45" height="81" rx="8"
+        fill="#fff" stroke="#111" stroke-width="3"/>
+      <circle cx="615" cy="137" r="13" fill="#E4E2DB"
+        stroke="#111" stroke-width="3"/>
+      <text x="615" y="203" text-anchor="middle" font-size="12"
+        font-weight="800">SENSOR</text>
+      <text x="320" y="237" text-anchor="middle" font-size="15"
+        font-weight="700">Total slab thickness: ${sig(totalThickness)} cm</text>`;
+
+    $('diagram').setAttribute('aria-label',
+      `X-ray teaching model: ${count} slab layers, total thickness ` +
+      `${sig(totalThickness)} cm, transmitted fraction ${sig(transmission)}.`);
+  }
+
+  function axes(title, xlabel, ylabel, xMax, yMin, yMax, xTicks, yTicks) {
+    const x0 = 72;
+    const x1 = 723;
+    const y0 = 40;
+    const y1 = 196;
+    const px = x => x0 + clamp(x / xMax, 0, 1) * (x1 - x0);
+    const py = y => y1 - clamp((y - yMin) / (yMax - yMin), 0, 1) * (y1 - y0);
+
+    let svg = `
+      <text x="72" y="19" font-size="15" font-weight="800">${title}</text>
+      <line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}"
+        stroke="#111" stroke-width="2"/>
+      <line x1="${x0}" y1="${y1}" x2="${x1}" y2="${y1}"
+        stroke="#111" stroke-width="2"/>
+      <text x="398" y="239" font-size="12" text-anchor="middle"
+        font-weight="700">${xlabel}</text>
+      <text x="${x0}" y="33" font-size="12" font-weight="700">${ylabel}</text>`;
+
+    for (const tick of xTicks) {
+      const x = px(tick);
+      svg += `
+        <line x1="${x}" y1="${y1}" x2="${x}" y2="${y1 + 5}"
+          stroke="#111" stroke-width="2"/>
+        <text x="${x}" y="${y1 + 18}" text-anchor="middle"
+          font-size="11">${sig(tick)}</text>`;
+    }
+
+    for (const tick of yTicks) {
+      const y = py(tick);
+      svg += `
+        <line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"
+          stroke="#D5D4D0" stroke-dasharray="4 5"/>
+        <text x="${x0 - 9}" y="${y + 4}" text-anchor="end"
+          font-size="11">${sig(tick)}</text>`;
+    }
+
+    return { svg, px, py, x0, x1, y0, y1 };
+  }
+
+  function drawLogPlot(layers) {
+    const full = FITCalcX9.attenuation({ layers });
+    const totalX = layers.reduce((a, layer) => a + layer.x, 0);
+    const xMax = Math.max(1, totalX * 1.12);
+    const maxTau = Math.max(0.5, full.total_mu_x * 1.2);
+    const ticksX = Array.from({ length: 5 }, (_, i) => xMax * i / 4);
+    const ticksY = Array.from({ length: 5 }, (_, i) => -maxTau * i / 4);
+    const a = axes('Piecewise linearised attenuation',
+      'Cumulative thickness x (cm)', 'ln(I/I₀) (unitless)',
+      xMax, -maxTau, 0, ticksX, ticksY);
+
+    let svg = a.svg;
+    let distance = 0;
+    const completed = [];
+
+    for (let i = 0; i < layers.length; i++) {
+      const layer = layers[i];
+      const points = [];
+
+      for (let j = 0; j <= 16; j++) {
+        const localX = layer.x * j / 16;
+        const testLayers = completed.concat([{
+          mu: layer.mu,
+          x: localX
+        }]);
+        const result = FITCalcX9.attenuation({ layers: testLayers });
+        if (!modelOK(result)) continue;
+
+        const x = distance + localX;
+        const lnValue = -result.total_mu_x;
+        points.push(`${a.px(x)},${a.py(lnValue)}`);
+      }
+
+      svg += `
+        <polyline points="${points.join(' ')}" fill="none"
+          stroke="${colours[i] === '#B4C7EB' ? '#1F66E5' :
+            colours[i] === '#FFBC8A' ? '#C25B1F' : '#13824B'}"
+          stroke-width="4" stroke-linejoin="round"/>`;
+
+      distance += layer.x;
+      completed.push(layer);
+
+      if (i < layers.length - 1) {
+        svg += `
+          <line x1="${a.px(distance)}" y1="${a.y0}"
+            x2="${a.px(distance)}" y2="${a.y1}"
+            stroke="#111" stroke-width="2" stroke-dasharray="5 5"/>`;
+      }
+    }
+
+    svg += `
+      <circle cx="${a.px(totalX)}" cy="${a.py(-full.total_mu_x)}"
+        r="6" fill="#111" stroke="#fff" stroke-width="2"/>`;
+
+    $('logPlot').innerHTML = svg;
+    $('logPlot').setAttribute('aria-label',
+      `Natural log transmitted fraction versus cumulative depth. ` +
+      `${layers.length} piecewise linear segments; final thickness ` +
+      `${sig(totalX)} cm, ln transmission ${sig(-full.total_mu_x)}.`);
+  }
+
+  function drawHalfPlot(layers) {
+    const mu = refMu();
+    const reference = FITCalcX9.attenuation({
+      layers: [{ mu, x: 0 }]
+    });
+    const hvl = reference.HVL;
+    const totalX = layers.reduce((sum, layer) => sum + layer.x, 0);
+    const xMax = Math.max(5, totalX * 1.15, 3.25 * hvl);
+    const ticksX = Array.from({ length: 5 }, (_, i) => xMax * i / 4);
+    const a = axes('Homogeneous reference material',
+      'Reference thickness x (cm)', 'I/I₀ (fraction)',
+      xMax, 0, 1, ticksX, [0, 0.125, 0.25, 0.5, 0.75, 1]);
+
+    let svg = a.svg;
+    const pts = [];
+
+    for (let i = 0; i <= 80; i++) {
+      const x = xMax * i / 80;
+      const result = FITCalcX9.attenuation({
+        layers: [{ mu, x }]
+      });
+      if (modelOK(result)) {
+        pts.push(`${a.px(x)},${a.py(result.I_over_I0)}`);
+      }
+    }
+
+    svg += `<polyline points="${pts.join(' ')}" fill="none"
+      stroke="#1F66E5" stroke-width="4"/>`;
+
+    for (let n = 1; n <= 3; n++) {
+      const x = hvl * n;
+      const result = FITCalcX9.attenuation({
+        layers: [{ mu, x }]
+      });
+      if (!modelOK(result)) continue;
+
+      const y = a.py(result.I_over_I0);
+      svg += `
+        <line x1="${a.px(x)}" y1="${a.y0}"
+          x2="${a.px(x)}" y2="${a.y1}"
+          stroke="#111" stroke-dasharray="5 5"/>
+        <circle cx="${a.px(x)}" cy="${y}" r="6"
+          fill="#111" stroke="#fff" stroke-width="2"/>
+        <text x="${a.px(x)}" y="${Math.max(a.y0 + 12, y - 11)}"
+          text-anchor="middle" font-size="12" font-weight="800">
+          ${n === 1 ? '½' : n === 2 ? '¼' : '⅛'}
+        </text>`;
+    }
+
+    const currentX = state.mode === 'A' ? layers[0].x : state.x;
+    const currentRef = FITCalcX9.attenuation({
+      layers: [{ mu, x: currentX }]
+    });
+
+    svg += `
+      <circle cx="${a.px(currentX)}"
+        cy="${a.py(currentRef.I_over_I0)}" r="8"
+        fill="#FFC83D" stroke="#111" stroke-width="3"/>`;
+
+    $('hvlPlot').innerHTML = svg;
+    $('hvlPlot').setAttribute('aria-label',
+      `Reference material with attenuation coefficient ${sig(mu)} per centimetre. ` +
+      `First, second and third half-value thicknesses are marked. ` +
+      `Current reference thickness ${sig(currentX)} cm.`);
+  }
+
+  function evaluate() {
+    const s = state;
+
+    if (s.mode === 'A') {
+      const result = FITCalcX9.attenuation({
+        layers: s.layers
+      });
+      const difference = result.I_over_I0 - s.target;
+
+      return {
+        correct: difference <= 0.00000001,
+        wrong: `The transmitted fraction is ${sig(difference)} above the limit. ` +
+          'Increase one or more slab thicknesses.',
+        why: `The stack transmits ${pct(result.I_over_I0)}, meeting the ` +
+          `${pct(s.target)} limit. Optical thicknesses add in the exponent.`
+      };
+    }
+
+    if (s.mode === 'B') {
+      const inferred = FITCalcX9.mu_from_measurement({
+        I_over_I0: s.measured,
+        x: s.x
+      });
+      const properties = FITCalcX9.attenuation({
+        layers: [{ mu: inferred.mu, x: s.x }]
+      });
+
+      const expectations = [
+        ['μ', s.mu, inferred.mu, 'cm⁻¹'],
+        ['HVL', s.HVL, properties.HVL, 'cm'],
+        ['mean free path', s.mfp, properties.mean_free_path, 'cm']
+      ];
+
+      const incorrect = expectations.find(([, submitted, expected]) =>
+        Math.abs(submitted - expected) > Math.max(0.005, expected * 0.02)
+      );
+
+      return {
+        correct: !incorrect,
+        wrong: incorrect
+          ? `${incorrect[0]} is ${sig(Math.abs(incorrect[1] -
+              incorrect[2]))} ${incorrect[3]} ` +
+            `${incorrect[1] < incorrect[2] ? 'too low' : 'too high'}.`
+          : '',
+        why: `μ = ${sig(inferred.mu)} cm⁻¹, ` +
+          `HVL = ${sig(properties.HVL)} cm and ` +
+          `mean free path = ${sig(properties.mean_free_path)} cm. ` +
+          'The two lengths have different physical meanings.'
+      };
+    }
+
+    const observed = FITCalcX9.mass_attenuation({
+      mu_over_rho: s.mu_over_rho,
+      rho: s.rho,
+      x: s.x
+    });
+    const difference = observed.I_over_I0 - s.target;
+
+    return {
+      correct: Math.abs(difference) <= Math.max(
+        0.0005, s.target * 0.015
+      ),
+      wrong: difference > 0
+        ? `Transmission is ${sig(Math.abs(difference))} too high. ` +
+          'The material needs more thickness.'
+        : `Transmission is ${sig(Math.abs(difference))} too low. ` +
+          'The material is thicker than required.',
+      why: `The supplied properties give μ = ${sig(observed.mu)} cm⁻¹. ` +
+        `At x = ${sig(s.x)} cm, the transmitted fraction is ` +
+        `${sig(observed.I_over_I0)}.`
+    };
+  }
+
+  function feedback(text, kind) {
+    $('feedback').textContent = text;
+    $('feedback').className = `feedback ${kind}`;
+  }
+
+  function check() {
+    if (state.solved) return;
+    state.attempts++;
+    const result = evaluate();
+
+    if (!result.correct) {
+      feedback(`Not yet. ${result.wrong}`, 'bad');
+      return;
+    }
+
+    state.solved = true;
+    const points = state.hinted || state.attempts > 2
+      ? 50 : state.attempts === 1 ? 100 : 75;
+
+    score += points;
+    $('score').textContent = score;
+    feedback(`✓ Correct! +${points} points. ${result.why}`, 'ok');
+
+    $('hintBtn').disabled = true;
+    $('checkBtn').hidden = true;
+    $('nextBtn').hidden = false;
+
+    for (const item of $('controls').querySelectorAll('input,button')) {
+      item.disabled = true;
+    }
+  }
+
+  function hint() {
+    if (state.solved || state.hinted) return;
+    state.hinted = true;
+    $('hintBtn').disabled = true;
+
+    const message = state.mode === 'A'
+      ? 'For each layer, μx is the optical thickness. Add these contributions, then use their exponential to compare with the target.'
+      : state.mode === 'B'
+        ? 'Start with μ = −ln(I/I₀)/x. Then calculate ln(2)/μ and 1/μ separately; both lengths are in cm.'
+        : 'Convert the supplied mass coefficient to μ using density. Rearrange the exponential attenuation law for thickness.';
+
+    $('hintBox').textContent =
+      `Hint (round score capped at 50): ${message}`;
+    $('hintBox').hidden = false;
+  }
+
+  $('controls').addEventListener('click', event => {
+    if (!state || state.solved) return;
+    const button = event.target.closest('button[data-key]');
+    if (!button) return;
+
+    const key = button.dataset.key;
+    const index = button.hasAttribute('data-index')
+      ? Number(button.dataset.index) : undefined;
+    const range = fieldRange(key);
+    const oldValue = getFieldValue(key, index);
+    const desired = oldValue + Number(button.dataset.delta);
+    const rounded = Math.round(desired / range.step) * range.step;
+
+    setFieldValue(key, index, clamp(rounded, range.min, range.max));
+    update();
+  });
+
+  $('controls').addEventListener('input', event => {
+    if (!state || state.solved) return;
+    const input = event.target.closest('input[data-key]');
+    if (!input || input.value === '') return;
+
+    const number = Number(input.value);
+    if (!Number.isFinite(number)) return;
+
+    const key = input.dataset.key;
+    const index = input.hasAttribute('data-index')
+      ? Number(input.dataset.index) : undefined;
+    const range = fieldRange(key);
+
+    setFieldValue(key, index, clamp(number, range.min, range.max));
+    update(input);
+  });
+
+  $('controls').addEventListener('change', event => {
+    if (!state || state.solved) return;
+    const input = event.target.closest('input[data-key]');
+    if (!input) return;
+
+    const key = input.dataset.key;
+    const index = input.hasAttribute('data-index')
+      ? Number(input.dataset.index) : undefined;
+    const range = fieldRange(key);
+    const value = getFieldValue(key, index);
+    const snapped = Math.round(value / range.step) * range.step;
+    setFieldValue(key, index, clamp(snapped, range.min, range.max));
+    update();
+  });
+
+  $('checkBtn').addEventListener('click', check);
+  $('hintBtn').addEventListener('click', hint);
+
+  $('nextBtn').addEventListener('click', () => {
+    if (!state.solved) return;
+    round++;
+    if (round === 6) {
+      finish();
+    } else {
+      initialise();
+    }
+  });
+
+  function finish() {
+    $('game').classList.add('hidden');
+    $('end').classList.remove('hidden');
+    $('roundLabel').textContent = 'Complete';
+
+    const count = score >= 510 ? 3 : score >= 360 ? 2 : 1;
+    $('stars').textContent = '★'.repeat(count) + '☆'.repeat(3 - count);
+    $('stars').setAttribute('aria-label', `${count} out of 3 stars`);
+    $('finalScore').textContent = `${score} / 600 points`;
+
+    $('closing').textContent = count === 3
+      ? 'Superb multi-step reasoning: three stars!'
+      : count === 2
+        ? 'Well done. Try for three stars on your next run.'
+        : 'All six rounds complete. Revisit the maths and try again.';
+  }
+
+  $('again').addEventListener('click', () => {
+    run++;
+    round = 0;
+    score = 0;
+    $('end').classList.add('hidden');
+    $('game').classList.remove('hidden');
+    initialise();
+  });
+
+  initialise();
+})();
+</script>
+</body>
+</html>

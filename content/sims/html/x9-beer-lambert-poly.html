@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Colour and Concentration | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--fit-paper);color:var(--fit-ink);line-height:1.5}
+button,input{font:inherit}
+button,input[type=range],input[type=number],.choice{-webkit-tap-highlight-color:transparent;user-select:none}
+button{cursor:pointer}
+button:focus:not(:focus-visible),input:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button:disabled{opacity:.5;cursor:default}
+svg [tabindex]:focus-visible{outline:none;stroke:#111;stroke-width:6}
+.shell{max-width:1400px;margin:auto;padding:16px 14px 44px}
+.hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.badge{border:2px solid #111;border-radius:999px;background:var(--lvl-poly);color:var(--lvl-poly-on);font-size:12px;font-weight:800;text-transform:uppercase;padding:8px 13px;letter-spacing:.06em}
+.stat{font-size:14px;font-weight:800;border:2px solid #111;border-radius:999px;background:#fff;padding:8px 13px}
+.stat strong{font-variant-numeric:tabular-nums}
+h1{font-size:clamp(28px,4.5vw,44px);line-height:1.12;letter-spacing:-.035em;margin:10px 0 4px;font-weight:800}
+.subtitle{color:var(--fit-ink-2);font-size:16px;margin:0 0 20px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+.card{min-width:0;border:2px solid #111;background:#fff;border-radius:var(--r-lg);box-shadow:var(--sh-2);padding:18px}
+.stage{background:var(--lvl-poly-tint);border-radius:var(--r-xl);box-shadow:var(--sh-3)}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--fit-ink-3)}
+h2{font-size:21px;line-height:1.2;font-weight:800;margin:7px 0 12px}
+.question{font-weight:600;font-size:17px;margin:4px 0 14px;min-height:52px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pill{border:2px solid #111;background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.diagram{border:2px solid #111;border-radius:20px;background:#fff;padding:8px;margin:14px 0}
+.diagram svg{display:block;width:100%;height:auto}
+.readouts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.readout{border:2px solid #111;border-radius:16px;background:#fff;padding:12px;min-width:0}
+.readout small{display:block;color:var(--fit-ink-3);font-weight:700;font-size:12px}
+.readout strong{display:block;font-weight:800;font-variant-numeric:tabular-nums;font-size:19px;overflow-wrap:anywhere}
+.concept{display:flex;align-items:center;gap:12px;margin-top:17px;padding:12px;border:2px dashed #111;border-radius:16px;background:#fff}
+.concept svg{width:112px;min-width:112px;height:65px}
+.concept p{font-size:13px;margin:0}
+.side{display:grid;gap:18px;min-width:0}
+.chart-box{overflow:hidden}
+.chart-box svg{display:block;width:100%;height:auto;min-height:180px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;font-weight:700}
+.swatch{width:18px;height:5px;display:inline-block;vertical-align:middle;margin-right:5px;border-radius:3px;background:var(--lvl-poly)}
+.swatch.dark{background:var(--fit-ink)}
+.control-zone{display:grid;gap:14px}
+.control-block{padding:14px;border:2px solid #111;border-radius:18px;background:var(--fit-sunken)}
+.control-heading{font-weight:800;display:block;margin-bottom:7px}
+.control-line{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.control-line input[type=number]{min-width:0;width:118px;padding:9px;border:2px solid #111;border-radius:12px;font-size:16px;background:#fff;font-weight:700;text-align:center}
+.step{min-width:47px;min-height:47px;border:2px solid #111;border-radius:999px;background:#fff;font-weight:800;font-size:18px;box-shadow:var(--sh-1)}
+.step:active,.action:active{transform:translateY(2px);box-shadow:none}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-poly);cursor:pointer}
+.range-ends{display:flex;justify-content:space-between;color:var(--fit-ink-3);font-size:12px;font-weight:600}
+.choice-list{display:grid;gap:9px}
+.choice{min-height:54px;width:100%;border:2px solid #111;background:#fff;border-radius:16px;padding:12px;text-align:left;font-weight:700}
+.choice[aria-pressed=true]{background:var(--lvl-poly);box-shadow:var(--sh-1)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}
+.action{border:2px solid #111;border-radius:999px;min-height:48px;padding:11px 21px;font-weight:800;background:#fff;box-shadow:var(--sh-1)}
+.action.primary{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2);font-size:17px}
+.action.primary:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.feedback{margin-top:12px;min-height:48px;padding:12px;border:2px solid #111;border-radius:16px;background:#fff;font-weight:600}
+.feedback:empty{display:none}
+.feedback.ok{border-color:var(--fit-success);background:#E8FAEF}
+.feedback.bad{border-color:var(--fit-danger);background:#FFF0EE}
+.hint{border:2px dashed #111;border-radius:14px;background:#FFF6DA;padding:12px;margin-top:10px;font-weight:600}
+.hint[hidden],.hidden{display:none!important}
+details{border:2px solid #111;border-radius:18px;background:#fff;padding:14px;margin-top:18px}
+summary{cursor:pointer;font-weight:800;min-height:44px;display:flex;align-items:center}
+.math-content{font-size:14px;color:var(--fit-ink-2);line-height:1.8}
+.math-content code{font-family:inherit;font-weight:800;color:#111}
+.end{border:3px solid #111;border-radius:32px;background:var(--lvl-poly-tint);box-shadow:var(--sh-3);padding:38px 22px;text-align:center}
+.stars{font-size:55px;letter-spacing:8px;color:#E2B000}
+.end strong{font-size:25px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.06fr) minmax(0,1fr)}.shell{padding:25px 28px 60px}.card{padding:22px}}
+@media(max-width:440px){.shell{padding:12px 10px 35px}.card{padding:14px}.stage{padding:15px}.pill{font-size:12px;padding:6px 9px}.readout strong{font-size:17px}.step{min-width:44px}.control-line input[type=number]{width:100px}}
+@media(prefers-reduced-motion:no-preference){.step,.action,.choice{transition:transform var(--dur-1) var(--ease-out),box-shadow var(--dur-1) var(--ease-out)}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="hud">
+      <span class="badge">Polytechnic</span>
+      <span class="stat" id="roundLabel">Round 1/6</span>
+      <span class="stat">Score <strong id="score">0</strong>/600</span>
+    </div>
+    <h1>Colour and Concentration</h1>
+    <p class="subtitle">Beer–Lambert spectroscopy laboratory</p>
+  </header>
+
+  <main id="game" class="layout">
+    <section class="card stage">
+      <div class="eyebrow" id="roundType">Cuvette challenge</div>
+      <h2 id="roundTitle">Prepare the sample</h2>
+      <p class="question" id="question"></p>
+      <div class="pills" id="given"></div>
+
+      <div class="diagram">
+        <svg id="labDiagram" role="img"
+          aria-label="Light passes from an incident source through a cuvette to a detector."
+          viewBox="0 0 560 255">
+          <rect x="8" y="8" width="544" height="239" rx="17" fill="#F4F3EF"/>
+          <rect x="22" y="94" width="90" height="68" rx="12"
+            fill="#FFC83D" stroke="#111" stroke-width="3"/>
+          <circle cx="105" cy="128" r="12" fill="#fff" stroke="#111" stroke-width="3"/>
+          <text x="65" y="79" text-anchor="middle" font-size="16" font-weight="800">SOURCE</text>
+
+          <path d="M116 118 L212 118 L212 139 L116 139Z"
+            fill="#FFDD00" stroke="#111" stroke-width="2"/>
+          <text x="159" y="107" text-anchor="middle" font-size="14" font-weight="700">I₀</text>
+
+          <rect x="211" y="41" width="135" height="178" rx="13"
+            fill="#E9FAFF" stroke="#111" stroke-width="4"/>
+          <rect id="liquid" x="218" y="68" width="121" height="143"
+            rx="7" fill="#FF8FB8" opacity=".3"/>
+          <line x1="218" y1="68" x2="339" y2="68" stroke="#111" stroke-width="2"/>
+          <path id="internalBeam" d="M214 118 L344 118 L344 139 L214 139Z"
+            fill="#FFDD00" opacity=".8"/>
+          <text x="279" y="29" text-anchor="middle" font-size="16" font-weight="800">
+            CUVETTE
+          </text>
+          <text id="pathText" x="280" y="193" text-anchor="middle"
+            font-size="16" font-weight="800">l = 1 cm</text>
+
+          <path id="outBeam" d="M347 118 L448 118 L448 139 L347 139Z"
+            fill="#FFDD00" opacity=".6" stroke="#111" stroke-width="1"/>
+          <text x="400" y="107" text-anchor="middle" font-size="14" font-weight="700">I</text>
+          <rect x="449" y="87" width="90" height="85" rx="14"
+            fill="#fff" stroke="#111" stroke-width="3"/>
+          <circle cx="494" cy="122" r="20" fill="#E4E2DB" stroke="#111" stroke-width="3"/>
+          <text x="494" y="207" text-anchor="middle" font-size="15" font-weight="800">
+            DETECTOR
+          </text>
+          <text id="sampleText" x="280" y="237" text-anchor="middle"
+            font-size="14" font-weight="700">Solution concentration</text>
+        </svg>
+      </div>
+
+      <div class="readouts">
+        <div class="readout"><small id="readingALabel">Predicted absorbance</small>
+          <strong id="readingA">0.000</strong></div>
+        <div class="readout"><small>Predicted transmittance</small>
+          <strong id="readingT">100%</strong></div>
+      </div>
+
+      <div class="concept">
+        <svg viewBox="0 0 120 65" role="img"
+          aria-label="Two equal cuvettes, one pale and one dark, transmit different amounts of light.">
+          <rect x="6" y="9" width="42" height="47" rx="6" stroke="#111"
+            stroke-width="3" fill="#FBD1DF"/>
+          <rect x="72" y="9" width="42" height="47" rx="6" stroke="#111"
+            stroke-width="3" fill="#D95181"/>
+          <path d="M1 32 H50 M66 32 H119" stroke="#111" stroke-width="3"
+            stroke-dasharray="5 4"/>
+          <path d="M51 32 L65 32" stroke="#FFC83D" stroke-width="5"/>
+        </svg>
+        <p><strong>Concept:</strong> More absorbing molecules along the light path mean less transmitted light.</p>
+      </div>
+
+      <details>
+        <summary>The maths</summary>
+        <div class="math-content">
+          <div><code>A = εcl</code></div>
+          <div><code>T = 10<sup>−A</sup></code></div>
+          <div><code>%T = 100T</code></div>
+          <div><code>A = 2 − log₁₀(%T)</code></div>
+          <div><code>c = A/(εl)</code></div>
+          <p>ε: L/(mol·cm); c: mol/L; l: cm; A: dimensionless; %T: percent.</p>
+          <p>Assumption: homogeneous, non-scattering solution at one wavelength, in the linear Beer–Lambert regime.</p>
+        </div>
+      </details>
+    </section>
+
+    <div class="side">
+      <section class="card chart-box">
+        <div class="eyebrow">Live quantitative plots</div>
+        <h2>Calibration and transmission</h2>
+        <svg id="chart" role="img"
+          aria-label="Live absorbance against concentration and percentage transmittance against concentration."
+          viewBox="0 0 780 320"></svg>
+        <div class="legend">
+          <span><i class="swatch"></i>Model curve</span>
+          <span><i class="swatch dark"></i>Current sample ●</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="eyebrow">Experiment controls</div>
+        <h2 id="controlTitle">Set the concentration</h2>
+        <div class="control-zone" id="controls"></div>
+        <div id="hintText" class="hint" hidden></div>
+        <div class="actions">
+          <button class="action" id="hintButton" type="button">Hint −50 points</button>
+          <button class="action primary" id="checkButton" type="button">Check</button>
+          <button class="action" id="nextButton" type="button" hidden>Next round →</button>
+        </div>
+        <div id="feedback" class="feedback" aria-live="polite" role="status"></div>
+      </section>
+    </div>
+  </main>
+
+  <section id="endScreen" class="end hidden" aria-live="polite">
+    <div class="eyebrow">Laboratory completed</div>
+    <h2>Excellent experiment!</h2>
+    <div class="stars" id="stars" aria-label="Stars earned"></div>
+    <p><strong id="finalScore"></strong></p>
+    <p id="finalMessage"></p>
+    <button id="again" type="button" class="action primary">Play again ↻</button>
+  </section>
+</div>
+
+<script>
+/* FIT-CALC-BEGIN x9_beer_lambert */
+const FITCalcX9 = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+
+  function error(cls, reason) {
+    return { error: cls, reason };
+  }
+
+  function validate(values) {
+    for (const value of values) {
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
+        return error('ConstraintViolation', 'non_finite_input');
+      }
+      if (value < 0) {
+        return error('ConstraintViolation', 'negative_input');
+      }
+    }
+    return null;
+  }
+
+  function finiteResult(result) {
+    for (const value of Object.values(result)) {
+      if (typeof value === 'number' && !Number.isFinite(value)) {
+        return error('ConstraintViolation', 'numeric_overflow');
+      }
+    }
+    return result;
+  }
+
+  function finiteOrNull(value) {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  /**
+   * Beer-Lambert spectroscopy at one wavelength.
+   * Inputs: epsilon in L/(mol cm), c in mol/L, l in cm.
+   * Outputs: A dimensionless, T as a fraction, percent_T in %.
+   * Assumptions: homogeneous solution, monochromatic light,
+   * constant molar absorptivity, no scattering or stray light.
+   * Errors: negative_input, non_finite_input, numeric_overflow.
+   *
+   * Hand check: epsilon=200, c=0.002, l=1 gives
+   * A=0.4, T=0.3981071705534972, percent_T=39.81071705534972.
+   */
+  function beer_lambert({ epsilon, c, l }) {
+    const invalid = validate([epsilon, c, l]);
+    if (invalid) return invalid;
+
+    const A = epsilon * c * l;
+    const T = Math.pow(10, -A);
+    const percent_T = 100 * T;
+
+    return finiteResult({ A, T, percent_T });
+  }
+
+  /**
+   * Recover concentration from measured absorbance.
+   * Inputs: A dimensionless, epsilon in L/(mol cm), l in cm.
+   * Output: c in mol/L.
+   * Assumptions: Beer-Lambert linear regime; epsilon and l known.
+   * Errors: negative_input, non_finite_input,
+   * epsilon_times_path_must_be_positive, numeric_overflow.
+   *
+   * Hand check: A=0.6, epsilon=150, l=2 gives c=0.002 mol/L.
+   */
+  function beer_lambert_conc({ A, epsilon, l }) {
+    const invalid = validate([A, epsilon, l]);
+    if (invalid) return invalid;
+
+    const denominator = epsilon * l;
+    if (denominator <= 0) {
+      return error('MathError', 'epsilon_times_path_must_be_positive');
+    }
+
+    return finiteResult({ c: A / denominator });
+  }
+
+  /**
+   * Convert percentage transmittance to base-10 absorbance.
+   * Input: percent_T in %, strictly above 0 and at most 100.
+   * Output: A dimensionless.
+   * Assumptions: transmittance refers to the incident beam.
+   * Errors: transmittance_must_be_in_0_100, non_finite_input.
+   *
+   * Hand check: percent_T=10 gives A=1.
+   */
+  function absorbance_from_T({ percent_T }) {
+    if (typeof percent_T !== 'number' || !Number.isFinite(percent_T)) {
+      return error('ConstraintViolation', 'non_finite_input');
+    }
+    if (percent_T <= 0 || percent_T > 100) {
+      return error('MathError', 'transmittance_must_be_in_0_100');
+    }
+
+    return finiteResult({ A: 2 - Math.log10(percent_T) });
+  }
+
+  /**
+   * Exponential attenuation through one to three homogeneous layers.
+   * Input: layers is an array of 1-3 {mu, x} objects;
+   * mu in cm^-1, x in cm.
+   * Outputs: I_over_I0 dimensionless, total_mu_x dimensionless,
+   * HVL and mean_free_path in cm or null.
+   * HVL and mean_free_path are defined here only for one layer
+   * with positive mu. They are null for multiple layers or mu=0.
+   * Assumptions: narrow-beam exponential law, independent layers,
+   * no scattering, build-up or spectral changes.
+   * Errors: layers_out_of_range_1_3, negative_input,
+   * non_finite_input, numeric_overflow.
+   *
+   * Hand check: [{mu:0.2,x:3}] gives total_mu_x=0.6,
+   * I_over_I0=0.5488116360940264,
+   * HVL=3.465735902799726, mean_free_path=5 cm.
+   */
+  function attenuation({ layers }) {
+    if (!Array.isArray(layers) || layers.length < 1 || layers.length > 3) {
+      return error('ConstraintViolation', 'layers_out_of_range_1_3');
+    }
+
+    let total_mu_x = 0;
+    for (const layer of layers) {
+      if (!layer || typeof layer !== 'object') {
+        return error('ConstraintViolation', 'non_finite_input');
+      }
+      const invalid = validate([layer.mu, layer.x]);
+      if (invalid) return invalid;
+      total_mu_x += layer.mu * layer.x;
+    }
+
+    const I_over_I0 = Math.exp(-total_mu_x);
+    let HVL = null;
+    let mean_free_path = null;
+
+    if (layers.length === 1 && layers[0].mu > 0) {
+      HVL = finiteOrNull(Math.LN2 / layers[0].mu);
+      mean_free_path = finiteOrNull(1 / layers[0].mu);
+    }
+
+    return finiteResult({
+      I_over_I0,
+      total_mu_x,
+      HVL,
+      mean_free_path
+    });
+  }
+
+  /**
+   * Convert a supplied mass attenuation coefficient to linear
+   * attenuation and transmitted intensity.
+   * Inputs: mu_over_rho in cm^2/g, rho in g/cm^3, x in cm.
+   * Outputs: mu in cm^-1, I_over_I0 dimensionless.
+   * Assumptions: uniform density and coefficient at one photon
+   * energy; no coefficient database, scattering or build-up.
+   * Errors: negative_input, non_finite_input, numeric_overflow.
+   *
+   * Hand check: mu_over_rho=0.08, rho=2.5, x=4 gives
+   * mu=0.2 cm^-1, I_over_I0=0.44932896411722156.
+   */
+  function mass_attenuation({ mu_over_rho, rho, x }) {
+    const invalid = validate([mu_over_rho, rho, x]);
+    if (invalid) return invalid;
+
+    const mu = mu_over_rho * rho;
+    const I_over_I0 = Math.exp(-mu * x);
+
+    return finiteResult({ mu, I_over_I0 });
+  }
+
+  /**
+   * Light attenuation with depth in homogeneous water.
+   * Inputs: k in m^-1, z in m.
+   * Outputs: I_over_I0 dimensionless, euphotic_depth in m
+   * or null if k=0.
+   * Euphotic depth is the 1% light level.
+   * Assumptions: fixed diffuse attenuation coefficient, one
+   * optical band, exponential decay with depth.
+   * Errors: negative_input, non_finite_input, numeric_overflow.
+   *
+   * Hand check: k=0.25, z=4 gives I_over_I0=0.36787944117144233,
+   * euphotic_depth=18.420680743952367 m.
+   */
+  function light_depth({ k, z }) {
+    const invalid = validate([k, z]);
+    if (invalid) return invalid;
+
+    const I_over_I0 = Math.exp(-k * z);
+    const euphotic_depth = k === 0
+      ? null
+      : finiteOrNull(Math.log(100) / k);
+
+    return finiteResult({ I_over_I0, euphotic_depth });
+  }
+
+  /**
+   * Infer a homogeneous exponential attenuation coefficient.
+   * Inputs: I_over_I0 as a fraction in (0,1], x in cm
+   * for slab work or a consistent distance unit for other media.
+   * Output: mu in inverse units of x (cm^-1 for slab work,
+   * m^-1 when x is supplied in metres for water).
+   * Assumptions: one homogeneous exponential attenuation region.
+   * Errors: transmission_must_be_in_0_1_and_x_positive,
+   * non_finite_input, numeric_overflow.
+   *
+   * Hand check: I_over_I0=0.5, x=2 gives
+   * mu=0.34657359027997264 in inverse distance units.
+   */
+  function mu_from_measurement({ I_over_I0, x }) {
+    if (
+      typeof I_over_I0 !== 'number' ||
+      !Number.isFinite(I_over_I0) ||
+      typeof x !== 'number' ||
+      !Number.isFinite(x)
+    ) {
+      return error('ConstraintViolation', 'non_finite_input');
+    }
+
+    if (I_over_I0 <= 0 || I_over_I0 > 1 || x <= 0) {
+      return error(
+        'MathError',
+        'transmission_must_be_in_0_1_and_x_positive'
+      );
+    }
+
+    return finiteResult({ mu: -Math.log(I_over_I0) / x });
+  }
+
+  return Object.freeze({
+    API_VERSION,
+    beer_lambert,
+    beer_lambert_conc,
+    absorbance_from_T,
+    attenuation,
+    mass_attenuation,
+    light_depth,
+    mu_from_measurement
+  });
+})();
+/* FIT-CALC-END x9_beer_lambert */
+
+(function () {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const modes = ['A', 'B', 'C', 'A', 'B', 'C'];
+  const MAX_ROUNDS = 6;
+  let run = 0;
+  let round = 0;
+  let score = 0;
+  let state = null;
+
+  function generator(seed) {
+    let value = seed >>> 0;
+    return function () {
+      value = (Math.imul(1664525, value) + 1013904223) >>> 0;
+      return value / 4294967296;
+    };
+  }
+
+  function choose(random, items) {
+    return items[Math.floor(random() * items.length)];
+  }
+
+  function fixed(x, places) {
+    return Number.isFinite(x) ? x.toFixed(places) : '—';
+  }
+
+  function sig(x) {
+    if (!Number.isFinite(x)) return '—';
+    return Number(x.toPrecision(3)).toString();
+  }
+
+  function safe(result) {
+    return result && !result.error;
+  }
+
+  function pill(text) {
+    const el = document.createElement('span');
+    el.className = 'pill';
+    el.textContent = text;
+    return el;
+  }
+
+  function mkRound(index) {
+    const random = generator(7919 + run * 100003 + index * 104729);
+    const mode = modes[index];
+
+    if (mode === 'A') {
+      const pathMode = index === 3;
+      const epsilon = choose(random, [60, 80, 100, 120]);
+      const goalC = choose(random, [0.002, 0.004, 0.006, 0.008]);
+      const goalL = pathMode
+        ? choose(random, [1.5, 2, 2.5])
+        : choose(random, [1, 1.5, 2]);
+
+      return {
+        mode,
+        pathMode,
+        epsilon,
+        c: pathMode ? goalC : 0.0005,
+        l: pathMode ? 0.5 : goalL,
+        target: FITCalcX9.beer_lambert({
+          epsilon, c: goalC, l: goalL
+        }).A,
+        goalC,
+        goalL,
+        attempts: 0,
+        hinted: false,
+        solved: false
+      };
+    }
+
+    if (mode === 'B') {
+      const epsilon = choose(random, [80, 100, 150, 200]);
+      const l = choose(random, [1, 1.5, 2]);
+      const hiddenC = choose(random, [0.002, 0.003, 0.004, 0.006, 0.008]);
+      const measured = FITCalcX9.beer_lambert({
+        epsilon, c: hiddenC, l
+      });
+
+      return {
+        mode, epsilon, l,
+        c: 0.0005,
+        measuredA: measured.A,
+        attempts: 0,
+        hinted: false,
+        solved: false
+      };
+    }
+
+    const epsilon = 100;
+    const l = 1;
+    const hiddenC = choose(random, [0.004, 0.006, 0.008]);
+    const candidates = [
+      hiddenC - 0.002,
+      hiddenC,
+      hiddenC + 0.002
+    ];
+
+    if (random() > 0.5) {
+      const first = candidates.shift();
+      candidates.push(first);
+    }
+
+    if (candidates[0] === hiddenC) {
+      candidates.push(candidates.shift());
+    }
+
+    return {
+      mode, epsilon, l,
+      c: candidates[0],
+      candidates,
+      pick: 0,
+      measuredPercent: FITCalcX9.beer_lambert({
+        epsilon, c: hiddenC, l
+      }).percent_T,
+      attempts: 0,
+      hinted: false,
+      solved: false
+    };
+  }
+
+  function stepper(field, label, unit, min, max, step, value) {
+    const coarse = step * 5;
+    return `
+      <div class="control-block">
+        <label class="control-heading" for="${field}">${label} (${unit})</label>
+        <div class="control-line">
+          <button class="step" type="button" data-field="${field}"
+            data-delta="${-coarse}" aria-label="Decrease ${label} coarsely">−−</button>
+          <button class="step" type="button" data-field="${field}"
+            data-delta="${-step}" aria-label="Decrease ${label} finely">−</button>
+          <input id="${field}" type="number" inputmode="decimal"
+            data-field="${field}" min="${min}" max="${max}" step="${step}"
+            value="${value}" aria-label="${label} in ${unit}">
+          <button class="step" type="button" data-field="${field}"
+            data-delta="${step}" aria-label="Increase ${label} finely">+</button>
+          <button class="step" type="button" data-field="${field}"
+            data-delta="${coarse}" aria-label="Increase ${label} coarsely">++</button>
+        </div>
+        <input type="range" data-field="${field}" min="${min}" max="${max}"
+          step="${step}" value="${value}" aria-label="${label} slider">
+        <div class="range-ends"><span>${min} ${unit}</span><span>${max} ${unit}</span></div>
+      </div>`;
+  }
+
+  function initialise() {
+    state = mkRound(round);
+    $('roundLabel').textContent = `Round ${round + 1}/${MAX_ROUNDS}`;
+    $('score').textContent = score;
+    $('hintText').hidden = true;
+    $('hintText').textContent = '';
+    $('feedback').textContent = '';
+    $('feedback').className = 'feedback';
+    $('hintButton').disabled = false;
+    $('checkButton').hidden = false;
+    $('nextButton').hidden = true;
+    $('nextButton').textContent = round === 5 ? 'See results →' : 'Next round →';
+
+    const s = state;
+    const given = $('given');
+    given.replaceChildren();
+
+    if (s.mode === 'A') {
+      $('roundType').textContent = 'Experiment 01 · Tune the sample';
+      $('roundTitle').textContent = s.pathMode
+        ? 'Set the optical path'
+        : 'Set the concentration';
+
+      $('question').textContent = s.pathMode
+        ? `Adjust the cuvette path length to reach absorbance ${sig(s.target)}.`
+        : `Adjust the solution concentration to reach absorbance ${sig(s.target)}.`;
+
+      given.append(
+        pill(`ε = ${sig(s.epsilon)} L/(mol·cm)`),
+        pill(s.pathMode ? `c = ${sig(s.c)} mol/L` : `l = ${sig(s.l)} cm`)
+      );
+
+      $('controlTitle').textContent = s.pathMode
+        ? 'Adjust light path length'
+        : 'Adjust solution concentration';
+
+      $('controls').innerHTML = s.pathMode
+        ? stepper('l', 'Path length', 'cm', 0.5, 3, 0.1, s.l)
+        : stepper('c', 'Concentration', 'mol/L', 0, 0.012, 0.0005, s.c);
+    } else if (s.mode === 'B') {
+      $('roundType').textContent = 'Experiment 02 · Unknown sample';
+      $('roundTitle').textContent = 'Identify an unknown';
+
+      $('question').textContent =
+        `The spectrometer measures absorbance ${sig(s.measuredA)}. ` +
+        'Determine the unknown concentration.';
+
+      given.append(
+        pill(`ε = ${sig(s.epsilon)} L/(mol·cm)`),
+        pill(`l = ${sig(s.l)} cm`),
+        pill(`A measured = ${sig(s.measuredA)}`)
+      );
+
+      $('controlTitle').textContent = 'Estimate the unknown concentration';
+      $('controls').innerHTML = stepper(
+        'c', 'Unknown concentration', 'mol/L', 0, 0.012, 0.0005, s.c
+      );
+    } else {
+      $('roundType').textContent = 'Experiment 03 · Percentage meter';
+      $('roundTitle').textContent = 'Match the measurement';
+
+      $('question').textContent =
+        `A meter reads ${sig(s.measuredPercent)}% transmittance. ` +
+        'Which sample matches this reading?';
+
+      given.append(
+        pill(`ε = ${s.epsilon} L/(mol·cm)`),
+        pill(`l = ${s.l} cm`),
+        pill(`Meter = ${sig(s.measuredPercent)}%T`)
+      );
+
+      $('controlTitle').textContent = 'Select a candidate sample';
+      $('controls').innerHTML = `
+        <div class="choice-list" role="group" aria-label="Candidate samples">
+          ${s.candidates.map((c, i) => `
+            <button type="button" class="choice" data-pick="${i}"
+              aria-pressed="${i === s.pick}">
+              Sample ${i + 1} · ${sig(c)} mol/L
+            </button>
+          `).join('')}
+        </div>`;
+    }
+
+    update();
+  }
+
+  function currentReading() {
+    return FITCalcX9.beer_lambert({
+      epsilon: state.epsilon,
+      c: state.c,
+      l: state.l
+    });
+  }
+
+  function update(source) {
+    const s = state;
+    if (!s || !safe(currentReading())) return;
+
+    const reading = currentReading();
+    $('readingALabel').textContent = s.mode === 'B'
+      ? 'Predicted absorbance of your estimate'
+      : 'Current absorbance';
+    $('readingA').textContent = sig(reading.A);
+    $('readingT').textContent = `${sig(reading.percent_T)}%`;
+
+    $('pathText').textContent = `l = ${sig(s.l)} cm`;
+    $('sampleText').textContent = `c = ${sig(s.c)} mol/L`;
+    $('liquid').setAttribute('opacity', String(
+      Math.max(0.16, Math.min(0.95, reading.A / 1.5))
+    ));
+    $('outBeam').setAttribute('opacity', String(
+      Math.max(0.025, Math.min(1, reading.T))
+    ));
+    $('internalBeam').setAttribute('opacity', String(
+      Math.max(0.08, Math.min(1, (1 + reading.T) / 2))
+    ));
+
+    $('labDiagram').setAttribute('aria-label',
+      `Cuvette concentration ${sig(s.c)} mol/L; path ${sig(s.l)} cm; ` +
+      `absorbance ${sig(reading.A)}; transmission ${sig(reading.percent_T)} percent.`);
+
+    for (const input of $('controls').querySelectorAll('input[data-field]')) {
+      if (input === source) continue;
+      const field = input.dataset.field;
+      input.value = s[field];
+    }
+
+    for (const button of $('controls').querySelectorAll('[data-pick]')) {
+      button.setAttribute('aria-pressed',
+        String(Number(button.dataset.pick) === s.pick));
+    }
+
+    drawChart();
+  }
+
+  function drawChart() {
+    const s = state;
+    const maxC = 0.012;
+    const maxA = 3.6;
+    const leftX = 61;
+    const rightX = 451;
+    const width = 279;
+    const top = 58;
+    const bottom = 251;
+    const height = bottom - top;
+
+    const xCoord = (c, ox) => ox + c / maxC * width;
+    const yA = a => bottom - Math.max(0, Math.min(maxA, a)) / maxA * height;
+    const yT = t => bottom - Math.max(0, Math.min(100, t)) / 100 * height;
+
+    const ptsA = [];
+    const ptsT = [];
+    for (let i = 0; i <= 60; i++) {
+      const c = maxC * i / 60;
+      const model = FITCalcX9.beer_lambert({
+        epsilon: s.epsilon, c, l: s.l
+      });
+
+      if (!safe(model)) continue;
+      ptsA.push(`${xCoord(c, leftX).toFixed(2)},${yA(model.A).toFixed(2)}`);
+      ptsT.push(`${xCoord(c, rightX).toFixed(2)},${yT(model.percent_T).toFixed(2)}`);
+    }
+
+    const model = currentReading();
+
+    function axes(ox, title, ylabel, ticks, converter) {
+      let result = `
+        <text x="${ox}" y="25" font-size="19" font-weight="800">${title}</text>
+        <line x1="${ox}" y1="${top}" x2="${ox}" y2="${bottom}"
+          stroke="#111" stroke-width="2"/>
+        <line x1="${ox}" y1="${bottom}" x2="${ox + width}" y2="${bottom}"
+          stroke="#111" stroke-width="2"/>
+        <text x="${ox + width / 2}" y="305" text-anchor="middle"
+          font-size="12" font-weight="700">c (mol/L)</text>
+        <text x="${ox + 3}" y="45" font-size="12" font-weight="800">${ylabel}</text>`;
+
+      for (let i = 0; i <= 3; i++) {
+        const c = maxC * i / 3;
+        const x = xCoord(c, ox);
+        result += `
+          <line x1="${x}" y1="${bottom}" x2="${x}" y2="${bottom + 6}"
+            stroke="#111" stroke-width="2"/>
+          <text x="${x}" y="${bottom + 23}" text-anchor="middle"
+            font-size="11">${fixed(c, 3)}</text>`;
+      }
+
+      for (const tick of ticks) {
+        const y = converter(tick);
+        result += `
+          <line x1="${ox}" y1="${y}" x2="${ox + width}" y2="${y}"
+            stroke="#C8C5BD" stroke-dasharray="3 5"/>
+          <text x="${ox - 8}" y="${y + 4}" text-anchor="end"
+            font-size="11">${tick}</text>`;
+      }
+      return result;
+    }
+
+    const markerA = {
+      x: xCoord(s.c, leftX),
+      y: yA(model.A)
+    };
+    const markerT = {
+      x: xCoord(s.c, rightX),
+      y: yT(model.percent_T)
+    };
+
+    $('chart').innerHTML = `
+      ${axes(leftX, 'Absorbance calibration', 'A (unitless)',
+        [0, 1.2, 2.4, 3.6], yA)}
+      ${axes(rightX, 'Transmission curve', '%T (%)',
+        [0, 25, 50, 75, 100], yT)}
+      <polyline points="${ptsA.join(' ')}" fill="none"
+        stroke="#FF6B3D" stroke-width="4" stroke-linejoin="round"/>
+      <polyline points="${ptsT.join(' ')}" fill="none"
+        stroke="#FF6B3D" stroke-width="4" stroke-linejoin="round"/>
+      <line x1="${markerA.x}" y1="${markerA.y}" x2="${markerA.x}"
+        y2="${bottom}" stroke="#111" stroke-dasharray="4 4"/>
+      <line x1="${markerT.x}" y1="${markerT.y}" x2="${markerT.x}"
+        y2="${bottom}" stroke="#111" stroke-dasharray="4 4"/>
+      <circle cx="${markerA.x}" cy="${markerA.y}" r="7"
+        fill="#111" stroke="#fff" stroke-width="2"/>
+      <circle cx="${markerT.x}" cy="${markerT.y}" r="7"
+        fill="#111" stroke="#fff" stroke-width="2"/>
+    `;
+
+    $('chart').setAttribute('aria-label',
+      `Model absorbance against concentration and transmittance against concentration. ` +
+      `Player concentration ${sig(s.c)} mol/L; A ${sig(model.A)}; ` +
+      `transmittance ${sig(model.percent_T)} percent.`);
+  }
+
+  function evaluate() {
+    const s = state;
+
+    if (s.mode === 'A') {
+      const model = currentReading();
+      const delta = model.A - s.target;
+      return {
+        correct: Math.abs(delta) < 0.00001,
+        wrong: `Your absorbance is ${sig(Math.abs(delta))} ` +
+          `${delta < 0 ? 'too low' : 'too high'}.`,
+        why: `The selected sample gives A = ${sig(model.A)}. ` +
+          'Absorbance increases in direct proportion to concentration and path length.'
+      };
+    }
+
+    if (s.mode === 'B') {
+      const answer = FITCalcX9.beer_lambert_conc({
+        A: s.measuredA, epsilon: s.epsilon, l: s.l
+      });
+      const delta = s.c - answer.c;
+      return {
+        correct: Math.abs(delta) <= 0.000251,
+        wrong: `Your concentration is ${sig(Math.abs(delta))} mol/L ` +
+          `${delta < 0 ? 'too low' : 'too high'}.`,
+        why: `The unknown concentration is ${sig(answer.c)} mol/L. ` +
+          'Divide absorbance by molar absorptivity multiplied by path length.'
+      };
+    }
+
+    const measured = FITCalcX9.absorbance_from_T({
+      percent_T: s.measuredPercent
+    });
+    const selected = FITCalcX9.beer_lambert({
+      epsilon: s.epsilon, c: s.c, l: s.l
+    });
+    const delta = selected.A - measured.A;
+
+    return {
+      correct: Math.abs(delta) < 0.00001,
+      wrong: `This sample predicts an absorbance ${sig(Math.abs(delta))} ` +
+        `${delta < 0 ? 'below' : 'above'} the measured value.`,
+      why: `The meter reading converts to A = ${sig(measured.A)}. ` +
+        `Sample ${s.pick + 1} has the matching absorbance.`
+    };
+  }
+
+  function setFeedback(text, kind) {
+    $('feedback').textContent = text;
+    $('feedback').className = 'feedback ' + kind;
+  }
+
+  function check() {
+    if (state.solved) return;
+    state.attempts++;
+    const result = evaluate();
+
+    if (!result.correct) {
+      setFeedback(`Not quite. ${result.wrong} Adjust your answer and try again.`, 'bad');
+      return;
+    }
+
+    state.solved = true;
+    const earned = state.hinted || state.attempts > 2
+      ? 50
+      : state.attempts === 1 ? 100 : 75;
+    score += earned;
+    $('score').textContent = score;
+
+    setFeedback(`✓ Correct! +${earned} points. ${result.why}`, 'ok');
+    $('checkButton').hidden = true;
+    $('hintButton').disabled = true;
+    $('nextButton').hidden = false;
+
+    for (const input of $('controls').querySelectorAll('input,button')) {
+      input.disabled = true;
+    }
+  }
+
+  function hint() {
+    if (state.solved || state.hinted) return;
+    state.hinted = true;
+    $('hintButton').disabled = true;
+    const text = state.mode === 'A'
+      ? 'Keep ε constant. A grows linearly with c and with l. Use the calibration slope to reach the target.'
+      : state.mode === 'B'
+        ? 'Rearrange A = εcl into c = A/(εl). Use mol/L for c and cm for l.'
+        : 'First convert the percentage reading to A = 2 − log₁₀(%T). Compare with εcl for each candidate.';
+    $('hintText').textContent = `Hint (maximum round score now 50): ${text}`;
+    $('hintText').hidden = false;
+  }
+
+  $('controls').addEventListener('click', event => {
+    if (!state || state.solved) return;
+
+    const pickButton = event.target.closest('button[data-pick]');
+    if (pickButton) {
+      state.pick = Number(pickButton.dataset.pick);
+      state.c = state.candidates[state.pick];
+      update();
+      return;
+    }
+
+    const button = event.target.closest('button[data-field]');
+    if (!button) return;
+
+    const field = button.dataset.field;
+    const step = field === 'l' ? 0.1 : 0.0005;
+    const min = field === 'l' ? 0.5 : 0;
+    const max = field === 'l' ? 3 : 0.012;
+    const next = state[field] + Number(button.dataset.delta);
+
+    state[field] = Math.max(min, Math.min(max,
+      Math.round(next / step) * step
+    ));
+    update();
+  });
+
+  $('controls').addEventListener('input', event => {
+    if (!state || state.solved) return;
+    const input = event.target.closest('input[data-field]');
+    if (!input) return;
+
+    const value = Number(input.value);
+    if (input.value === '' || !Number.isFinite(value)) return;
+
+    const field = input.dataset.field;
+    const min = field === 'l' ? 0.5 : 0;
+    const max = field === 'l' ? 3 : 0.012;
+    state[field] = Math.max(min, Math.min(max, value));
+    update(input);
+  });
+
+  $('controls').addEventListener('change', event => {
+    const input = event.target.closest('input[data-field]');
+    if (!input || !state || state.solved) return;
+    const step = input.dataset.field === 'l' ? 0.1 : 0.0005;
+    const field = input.dataset.field;
+    state[field] = Math.round(state[field] / step) * step;
+    update();
+  });
+
+  $('checkButton').addEventListener('click', check);
+  $('hintButton').addEventListener('click', hint);
+
+  $('nextButton').addEventListener('click', () => {
+    if (!state.solved) return;
+    round++;
+    if (round >= MAX_ROUNDS) {
+      finish();
+    } else {
+      initialise();
+    }
+  });
+
+  function finish() {
+    $('game').classList.add('hidden');
+    $('endScreen').classList.remove('hidden');
+    $('roundLabel').textContent = 'Complete';
+    const n = score >= 510 ? 3 : score >= 360 ? 2 : 1;
+    $('stars').textContent = '★'.repeat(n) + '☆'.repeat(3 - n);
+    $('stars').setAttribute('aria-label', `${n} out of 3 stars`);
+    $('finalScore').textContent = `${score} / 600 points`;
+    $('finalMessage').textContent =
+      n === 3
+        ? 'Outstanding spectrometer work: three stars!'
+        : n === 2
+          ? 'Solid laboratory technique: two stars!'
+          : 'You completed all six experiments. Try for more stars!';
+  }
+
+  $('again').addEventListener('click', () => {
+    run++;
+    round = 0;
+    score = 0;
+    $('game').classList.remove('hidden');
+    $('endScreen').classList.add('hidden');
+    initialise();
+  });
+
+  initialise();
+})();
+</script>
+</body>
+</html>

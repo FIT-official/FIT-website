@@ -1,0 +1,1641 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Money and Choices | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:400}
+button,input{font:inherit}
+button,input[type=range],input[type=number],[role=button]{-webkit-tap-highlight-color:transparent;user-select:none}
+button{min-width:44px;min-height:44px;padding:10px 17px;border:2px solid #111;border-radius:999px;background:white;color:#111;font-weight:800;cursor:pointer;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:default}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+svg [role=button]:focus-visible{outline:none;stroke:#111;stroke-width:5px}
+input{accent-color:var(--lvl-poly)}
+input[type=range]{width:100%;min-height:44px;cursor:pointer}
+input[type=number]{width:112px;min-height:48px;padding:8px;border:2px solid #111;border-radius:12px;font-size:17px;font-weight:700}
+.wrap{max-width:1440px;margin:auto;padding:16px}
+.hud{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:16px}
+.badge{display:inline-flex;padding:9px 15px;border:2px solid #111;border-radius:999px;background:var(--lvl-poly);color:var(--lvl-poly-on);font-size:12px;font-weight:800;text-transform:uppercase}
+.pill{padding:9px 14px;border:2px solid #111;border-radius:999px;font-weight:800;background:white}
+.pill strong{font-variant-numeric:tabular-nums}
+header h1{margin:5px 0;font-size:clamp(28px,4vw,42px);line-height:1.1;font-weight:800}
+.subtitle{font-weight:600;color:var(--fit-ink-2);margin:8px 0 18px}
+.layout{display:grid;gap:16px;align-items:start}
+.card{padding:18px;border:2px solid #111;border-radius:24px;box-shadow:var(--sh-2);background:white;min-width:0}
+.stage{background:var(--lvl-poly-tint)}
+.card h2{font-size:20px;font-weight:800;margin:0 0 12px}
+.question{font-size:19px;font-weight:800;line-height:1.4;margin:14px 0}
+.scene{min-height:200px;display:grid;place-items:center}
+.scene svg{max-width:100%;height:auto}
+.stack{display:grid;gap:14px}
+.readouts{display:flex;gap:8px;flex-wrap:wrap}
+.metric{border:2px solid #111;background:white;border-radius:16px;padding:10px 14px;min-width:115px}
+.metric small{display:block;color:var(--fit-ink-3);font-size:12px;font-weight:700}
+.metric b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.controlbox{padding:14px;border:2px solid var(--fit-line-soft);border-radius:16px;background:var(--fit-sunken)}
+.controlbox label{display:block;font-weight:800;margin-bottom:8px}
+.stepper{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px}
+.stepper output{min-width:78px;text-align:center;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.choices{display:flex;gap:9px;flex-wrap:wrap}
+.choices button[aria-pressed=true]{background:var(--lvl-poly);color:#111;box-shadow:var(--sh-2)}
+.plot{border:2px solid var(--fit-line-soft);border-radius:18px;background:white;padding:8px;margin-bottom:12px}
+.plot:last-child{margin-bottom:0}
+.plot svg{display:block;width:100%;height:auto}
+.plot-title{font-size:15px;font-weight:800;margin:4px 8px}
+.graph-touch{touch-action:none}
+.graph-touch [data-vertex]{cursor:grab}
+.caption{font-size:12px;font-weight:600;color:var(--fit-ink-2)}
+footer.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2);font-size:17px;min-width:130px}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.feedback{margin-top:14px;padding:12px 16px;border:2px solid #111;border-radius:16px;background:var(--fit-sunken);min-height:50px;font-weight:600}
+.feedback.good{background:#ddf7e6}
+.feedback.bad{background:#ffe7e7}
+details{margin-top:15px;background:white;border:2px solid #111;border-radius:16px;padding:12px}
+summary{cursor:pointer;font-weight:800;min-height:26px}
+details p{line-height:1.55;margin:10px 0 0}
+.concept{display:flex;gap:14px;align-items:center;padding:12px;border:2px dashed #111;border-radius:16px;background:white;margin:14px 0}
+.concept svg{width:110px;flex:0 0 110px}
+.concept p{margin:0;font-size:13px;font-weight:600}
+.key{font-weight:800;font-size:13px}
+.hidden{display:none!important}
+.end{max-width:650px;margin:20px auto;text-align:center;padding:32px}
+.stars{font-size:46px;letter-spacing:8px}
+.end button{background:var(--fit-sun)}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.wrap{padding:24px}.card{padding:22px}}
+@media(max-width:480px){.card{padding:14px}.wrap{padding:12px}.metric{min-width:95px}.stepper button{padding:8px 11px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="hud">
+      <span class="badge">Polytechnic</span>
+      <span class="pill" id="roundIndicator">Round 1/6</span>
+      <span class="pill">Score: <strong id="score">0</strong></span>
+      <span class="pill">★ ★ ★</span>
+    </div>
+    <h1>Money and Choices</h1>
+    <p class="subtitle">Compare investments, uncertain outcomes and limited resources.</p>
+  </header>
+  <main id="game">
+    <div class="layout">
+      <section class="card stage">
+        <h2 id="roundTitle">Investment decision</h2>
+        <p class="question" id="question"></p>
+        <div id="scene" class="scene"></div>
+        <div class="concept">
+          <svg viewBox="0 0 120 70" role="img" aria-label="A decision splits into two possible outcomes">
+            <path d="M15 35H48M48 35L88 12M48 35L88 57" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="48" cy="35" r="10" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+            <rect x="88" y="3" width="24" height="18" rx="5" fill="#3DBE6B" stroke="#111" stroke-width="3"/>
+            <rect x="88" y="48" width="24" height="18" rx="5" fill="#FF8FB8" stroke="#111" stroke-width="3"/>
+          </svg>
+          <p><b>Concept:</b> One choice may have several possible outcomes. Compare them using a consistent measure.</p>
+        </div>
+        <details id="maths">
+          <summary>The maths</summary>
+          <p id="mathText"></p>
+        </details>
+      </section>
+      <section class="stack">
+        <section class="card">
+          <h2>Live calculations</h2>
+          <div id="readouts" class="readouts" aria-live="off"></div>
+          <div id="plots"></div>
+        </section>
+        <section class="card">
+          <h2>Your controls</h2>
+          <div id="controls"></div>
+          <footer class="actions">
+            <button id="hint">Hint −50 points</button>
+            <button id="check" class="check">Check</button>
+            <button id="next" class="hidden">Next round →</button>
+          </footer>
+          <div id="feedback" class="feedback" aria-live="polite">Change the controls, then press Check.</div>
+        </section>
+      </section>
+    </div>
+  </main>
+  <section id="finish" class="card end hidden" aria-live="polite"></section>
+</div>
+<script>
+/* FIT-CALC-BEGIN x10_optimisation */
+const FITCalcX10 = (function () {
+  'use strict';
+
+  const EPS = 1e-9;
+
+  function problem(error, reason) {
+    throw { error, reason };
+  }
+
+  function requireNumber(x, reason = 'invalid_number') {
+    if (typeof x !== 'number' || !Number.isFinite(x)) {
+      problem('ConstraintViolation', reason);
+    }
+    return x;
+  }
+
+  function requireArray(x, reason = 'invalid_array') {
+    if (!Array.isArray(x)) {
+      problem('ConstraintViolation', reason);
+    }
+    return x;
+  }
+
+  function requireFinite(x) {
+    if (!Number.isFinite(x)) {
+      problem('MathError', 'non_finite_result');
+    }
+    return x;
+  }
+
+  function safe(fn) {
+    return function (input) {
+      try {
+        if (!input || typeof input !== 'object' || Array.isArray(input)) {
+          problem('ConstraintViolation', 'invalid_input');
+        }
+        return fn(input);
+      } catch (e) {
+        if (e && (
+          e.error === 'MathError' ||
+          e.error === 'ConstraintViolation' ||
+          e.error === 'RuntimeError' ||
+          e.error === 'NotSupported'
+        )) {
+          return { error: e.error, reason: e.reason };
+        }
+        return { error: 'RuntimeError', reason: 'invalid_structure' };
+      }
+    };
+  }
+
+  function probabilities(values) {
+    if (!values.length) {
+      problem('ConstraintViolation', 'empty_probabilities');
+    }
+    let total = 0;
+    for (const p of values) {
+      requireNumber(p, 'invalid_probability');
+      if (p < 0 || p > 1) {
+        problem('ConstraintViolation', 'probability_out_of_range');
+      }
+      total += p;
+    }
+    if (Math.abs(total - 1) > 1e-9) {
+      problem('ConstraintViolation', 'probabilities_must_sum_to_1');
+    }
+  }
+
+  /**
+   * End-of-period discounted cash-flow analysis.
+   * Input: {rate: decimal discount rate per period,
+   *         flows: cash flows at periods 0,...,n}, n <= 10.
+   * Output: {npv: money, irr: decimal rate|null,
+   *          payback: periods|null, cumulative: money[],
+   *          discounted: money[]}.
+   * Assumptions: constant discount rate, end-of-period payments,
+   * linear interpolation for undiscounted payback.
+   * Errors: MathError/rate_must_exceed_minus_1;
+   * ConstraintViolation/periods_exceed_10, invalid_flows;
+   * MathError/non_finite_result.
+   * Hand check: rate .1, flows [-100,60,60] gives
+   * NPV 4.132231404958674, IRR about .1306623863,
+   * payback 1 + 40/60 = 1.6666666667 periods.
+   */
+  function cash_flow(input) {
+    const rate = requireNumber(input.rate, 'invalid_rate');
+    const flows = requireArray(input.flows, 'invalid_flows');
+
+    if (rate <= -1) {
+      problem('MathError', 'rate_must_exceed_minus_1');
+    }
+    if (flows.length > 11) {
+      problem('ConstraintViolation', 'periods_exceed_10');
+    }
+    if (flows.length === 0) {
+      problem('ConstraintViolation', 'invalid_flows');
+    }
+
+    flows.forEach(x => requireNumber(x, 'invalid_flows'));
+
+    function npvAt(r) {
+      let sum = 0;
+      let factor = 1;
+      for (let t = 0; t < flows.length; t++) {
+        if (t > 0) factor *= 1 + r;
+        sum += flows[t] / factor;
+      }
+      return requireFinite(sum);
+    }
+
+    const npv = npvAt(rate);
+    const cumulative = [];
+    const discounted = [];
+    let running = 0;
+    let factor = 1;
+    let payback = null;
+
+    for (let t = 0; t < flows.length; t++) {
+      const before = running;
+      running = requireFinite(running + flows[t]);
+      cumulative.push(running);
+
+      if (t > 0) factor *= 1 + rate;
+      discounted.push(requireFinite(flows[t] / factor));
+
+      if (
+        t > 0 &&
+        payback === null &&
+        before < 0 &&
+        running >= 0 &&
+        flows[t] > 0
+      ) {
+        payback = (t - 1) + (-before / flows[t]);
+      }
+    }
+
+    let changes = 0;
+    let previousSign = 0;
+
+    for (const flow of flows) {
+      const sign = Math.sign(flow);
+      if (!sign) continue;
+      if (previousSign && sign !== previousSign) changes++;
+      previousSign = sign;
+    }
+
+    let irr = null;
+
+    if (changes === 1) {
+      let low = -0.99;
+      let high = 10;
+      let fLow = npvAt(low);
+      let fHigh = npvAt(high);
+
+      if (fLow === 0) {
+        irr = low;
+      } else if (fHigh === 0) {
+        irr = high;
+      } else if (Math.sign(fLow) !== Math.sign(fHigh)) {
+        for (let k = 0; k < 180; k++) {
+          const mid = (low + high) / 2;
+          const fMid = npvAt(mid);
+
+          if (fMid === 0) {
+            low = mid;
+            high = mid;
+            break;
+          }
+
+          if (Math.sign(fMid) === Math.sign(fLow)) {
+            low = mid;
+            fLow = fMid;
+          } else {
+            high = mid;
+            fHigh = fMid;
+          }
+
+          if (high - low < 1e-14) break;
+        }
+        irr = (low + high) / 2;
+      }
+    }
+
+    return { npv, irr, payback, cumulative, discounted };
+  }
+
+  /**
+   * Evaluate a finite decision/chance tree by backward induction.
+   * Input: {tree}; decisions contain options keyed by names,
+   * chance nodes contain branches [{p,node}], leaves contain {value}.
+   * Output: {emv: money, best: chosen option names[]}.
+   * Assumptions: risk-neutral decision maker; probabilities dimensionless;
+   * ties resolved by alphabetical option name.
+   * Errors: ConstraintViolation/probabilities_must_sum_to_1,
+   * invalid_tree, invalid_probability; RuntimeError/tree_too_deep.
+   * Hand check: choose between chance(.5*20 + .5*0)
+   * and a certain 9; EMV 10, best ['Risky'].
+   */
+  function decision_tree(input) {
+    function visit(node, depth) {
+      if (depth > 100) {
+        problem('RuntimeError', 'tree_too_deep');
+      }
+      if (!node || typeof node !== 'object' || Array.isArray(node)) {
+        problem('ConstraintViolation', 'invalid_tree');
+      }
+
+      if (Object.prototype.hasOwnProperty.call(node, 'value')) {
+        return {
+          value: requireNumber(node.value, 'invalid_leaf_value'),
+          best: []
+        };
+      }
+
+      if (node.type === 'chance') {
+        const branches = requireArray(node.branches, 'invalid_tree');
+        probabilities(branches.map(b => {
+          if (!b || typeof b !== 'object') {
+            problem('ConstraintViolation', 'invalid_tree');
+          }
+          return b.p;
+        }));
+
+        let value = 0;
+        for (const branch of branches) {
+          value += branch.p * visit(branch.node, depth + 1).value;
+        }
+        return { value: requireFinite(value), best: [] };
+      }
+
+      if (node.type === 'decision') {
+        const options = node.options;
+        if (!options || typeof options !== 'object' ||
+            Array.isArray(options)) {
+          problem('ConstraintViolation', 'invalid_tree');
+        }
+
+        const names = Object.keys(options).sort();
+        if (!names.length) {
+          problem('ConstraintViolation', 'empty_options');
+        }
+
+        let chosen = null;
+        let highest = -Infinity;
+        let chosenPath = [];
+
+        for (const name of names) {
+          const result = visit(options[name], depth + 1);
+          if (chosen === null || result.value > highest + EPS) {
+            chosen = name;
+            highest = result.value;
+            chosenPath = result.best;
+          }
+        }
+
+        return {
+          value: requireFinite(highest),
+          best: [chosen, ...chosenPath]
+        };
+      }
+
+      problem('NotSupported', 'unknown_node_type');
+    }
+
+    const result = visit(input.tree, 0);
+    return { emv: result.value, best: result.best };
+  }
+
+  /**
+   * Expected value of perfect information for a payoff matrix.
+   * Input: {payoff: [action][state] in money, prior: probabilities[]}.
+   * Output: {emv, best_action, ev_perfect_info, evpi,
+   *          action_emvs: money[]}.
+   * Assumptions: risk-neutral action selection, all states observable
+   * under perfect information; ties use the lowest action index.
+   * Errors: ConstraintViolation/probabilities_must_sum_to_1,
+   * invalid_payoff, invalid_probability.
+   * Hand check: payoff [[10,0],[0,8]], prior [.5,.5]:
+   * EMV 5, best action 0, perfect information 9, EVPI 4.
+   */
+  function evpi(input) {
+    const payoff = requireArray(input.payoff, 'invalid_payoff');
+    const prior = requireArray(input.prior, 'invalid_probability');
+
+    probabilities(prior);
+
+    if (!payoff.length || payoff.some(row =>
+      !Array.isArray(row) || row.length !== prior.length
+    )) {
+      problem('ConstraintViolation', 'invalid_payoff');
+    }
+
+    payoff.forEach(row =>
+      row.forEach(x => requireNumber(x, 'invalid_payoff'))
+    );
+
+    const action_emvs = payoff.map(row =>
+      requireFinite(row.reduce((sum, value, s) =>
+        sum + value * prior[s], 0
+      ))
+    );
+
+    let best_action = 0;
+    for (let a = 1; a < action_emvs.length; a++) {
+      if (action_emvs[a] > action_emvs[best_action] + EPS) {
+        best_action = a;
+      }
+    }
+
+    const emv = action_emvs[best_action];
+
+    let ev_perfect_info = 0;
+    for (let s = 0; s < prior.length; s++) {
+      let best = payoff[0][s];
+      for (let a = 1; a < payoff.length; a++) {
+        best = Math.max(best, payoff[a][s]);
+      }
+      ev_perfect_info += prior[s] * best;
+    }
+
+    ev_perfect_info = requireFinite(ev_perfect_info);
+    let difference = requireFinite(ev_perfect_info - emv);
+    if (Math.abs(difference) < 1e-10) difference = 0;
+
+    return {
+      emv,
+      best_action,
+      ev_perfect_info,
+      evpi: difference,
+      action_emvs
+    };
+  }
+
+  /**
+   * Maximise a linear objective over a two-variable feasible region.
+   * Input: {c: [c1,c2] money per unit,
+   *         constraints: [{a:[a1,a2],b,sense:'<='|'>='}]}.
+   * Output: {status:'optimal'|'infeasible'|'unbounded',
+   *          x: [x,y]|null, objective: money|null,
+   *          alternative_optima: boolean,
+   *          vertices: [{x:[x,y],objective}]}.
+   * Assumptions: continuous non-negative x,y, linear constraints;
+   * intersections enumerated exactly up to floating-point tolerances.
+   * Unboundedness is determined by the recession cone, not a box.
+   * Errors: ConstraintViolation/invalid_lp;
+   * NotSupported/unsupported_constraint_sense.
+   * Hand check: maximise 3x+2y, x+y<=4, x<=2.
+   * Optimum (2,2), objective 10; no alternative optimum.
+   */
+  function lp2(input) {
+    const c = requireArray(input.c, 'invalid_lp');
+    const supplied = requireArray(input.constraints, 'invalid_lp');
+
+    if (c.length !== 2) {
+      problem('ConstraintViolation', 'variables_must_equal_2');
+    }
+    c.forEach(x => requireNumber(x, 'invalid_lp'));
+
+    const constraints = supplied.map(q => {
+      if (!q || typeof q !== 'object' ||
+          !Array.isArray(q.a) || q.a.length !== 2) {
+        problem('ConstraintViolation', 'invalid_lp');
+      }
+      q.a.forEach(x => requireNumber(x, 'invalid_lp'));
+      requireNumber(q.b, 'invalid_lp');
+
+      const sense = q.sense === undefined ? '<=' : q.sense;
+      if (sense !== '<=' && sense !== '>=') {
+        problem('NotSupported', 'unsupported_constraint_sense');
+      }
+      return { a: q.a, b: q.b, sense };
+    });
+
+    const lines = [
+      { a: [1, 0], b: 0 },
+      { a: [0, 1], b: 0 },
+      ...constraints
+    ];
+
+    function feasible(x, y) {
+      if (x < -EPS || y < -EPS) return false;
+
+      return constraints.every(q => {
+        const v = q.a[0] * x + q.a[1] * y;
+        const slack = EPS * Math.max(
+          1, Math.abs(v), Math.abs(q.b)
+        );
+        return q.sense === '<='
+          ? v <= q.b + slack
+          : v >= q.b - slack;
+      });
+    }
+
+    const vertices = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      for (let j = i + 1; j < lines.length; j++) {
+        const u = lines[i];
+        const v = lines[j];
+
+        const determinant =
+          u.a[0] * v.a[1] - u.a[1] * v.a[0];
+
+        if (Math.abs(determinant) < 1e-12) continue;
+
+        let x = (u.b * v.a[1] - u.a[1] * v.b) / determinant;
+        let y = (u.a[0] * v.b - u.b * v.a[0]) / determinant;
+
+        if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+        if (!feasible(x, y)) continue;
+
+        if (Math.abs(x) < EPS) x = 0;
+        if (Math.abs(y) < EPS) y = 0;
+
+        if (vertices.some(p =>
+          Math.abs(p.x[0] - x) < EPS &&
+          Math.abs(p.x[1] - y) < EPS
+        )) continue;
+
+        vertices.push({
+          x: [x, y],
+          objective: requireFinite(c[0] * x + c[1] * y)
+        });
+      }
+    }
+
+    vertices.sort((a, b) =>
+      a.x[0] - b.x[0] || a.x[1] - b.x[1]
+    );
+
+    if (!vertices.length) {
+      return {
+        status: 'infeasible',
+        x: null,
+        objective: null,
+        alternative_optima: false,
+        vertices: []
+      };
+    }
+
+    const directions = [[1, 0], [0, 1]];
+
+    for (const q of constraints) {
+      const [a, b] = q.a;
+      if (Math.abs(a) + Math.abs(b) < 1e-14) continue;
+
+      const magnitude = Math.max(Math.abs(a), Math.abs(b));
+      directions.push([-b / magnitude, a / magnitude]);
+      directions.push([b / magnitude, -a / magnitude]);
+    }
+
+    function feasibleRay(d) {
+      if (d[0] < -EPS || d[1] < -EPS) return false;
+
+      return constraints.every(q => {
+        const dot = q.a[0] * d[0] + q.a[1] * d[1];
+        const tol = EPS * Math.max(
+          1, Math.abs(q.a[0]), Math.abs(q.a[1])
+        );
+        return q.sense === '<='
+          ? dot <= tol
+          : dot >= -tol;
+      });
+    }
+
+    const rays = directions.filter(feasibleRay);
+
+    if (rays.some(d => c[0] * d[0] + c[1] * d[1] > EPS)) {
+      return {
+        status: 'unbounded',
+        x: null,
+        objective: null,
+        alternative_optima: false,
+        vertices
+      };
+    }
+
+    let bestValue = -Infinity;
+
+    for (const vertex of vertices) {
+      if (vertex.objective > bestValue) {
+        bestValue = vertex.objective;
+      }
+    }
+
+    const tol = EPS * Math.max(1, Math.abs(bestValue));
+    const optimisers = vertices.filter(p =>
+      Math.abs(p.objective - bestValue) <= tol
+    );
+
+    const optimum = optimisers[0];
+
+    const flatRay = rays.some(d =>
+      Math.abs(c[0] * d[0] + c[1] * d[1]) <= EPS &&
+      Math.abs(d[0]) + Math.abs(d[1]) > EPS
+    );
+
+    return {
+      status: 'optimal',
+      x: optimum.x.slice(),
+      objective: requireFinite(bestValue),
+      alternative_optima: optimisers.length > 1 || flatRay,
+      vertices
+    };
+  }
+
+  /**
+   * Pure and completely mixed Nash equilibria of a small bimatrix game.
+   * Input: {A: row-player payoff matrix, B: column-player payoff matrix,
+   *         q_col1?: probability of column 0 for payoff plotting}.
+   * Output: {pure: [[row,col],...],
+   *          mixed: {p_row1,q_col1}|null,
+   *          row_expected: number[]|null}.
+   * Payoffs are in utility points; probabilities are dimensionless.
+   * Assumptions: simultaneous play, weak best responses count.
+   * A mixed equilibrium is reported only for a 2x2 game with no
+   * pure equilibrium and a strictly interior solution.
+   * Errors: ConstraintViolation/strategies_exceed_3,
+   * invalid_payoff, invalid_probability.
+   * Hand check: matching pennies A=[[1,-1],[-1,1]], B=-A
+   * has no pure equilibrium and p_row1=q_col1=.5.
+   */
+  function nash(input) {
+    const A = requireArray(input.A, 'invalid_payoff');
+    const B = requireArray(input.B, 'invalid_payoff');
+
+    const rows = A.length;
+    const cols = rows && Array.isArray(A[0]) ? A[0].length : 0;
+
+    if (rows > 3 || cols > 3 || B.length > 3 ||
+        B.some(row => Array.isArray(row) && row.length > 3)) {
+      problem('ConstraintViolation', 'strategies_exceed_3');
+    }
+
+    if (
+      rows < 1 || cols < 1 ||
+      A.some(row => !Array.isArray(row) || row.length !== cols) ||
+      B.length !== rows ||
+      B.some(row => !Array.isArray(row) || row.length !== cols)
+    ) {
+      problem('ConstraintViolation', 'invalid_payoff');
+    }
+
+    for (const matrix of [A, B]) {
+      matrix.forEach(row =>
+        row.forEach(x => requireNumber(x, 'invalid_payoff'))
+      );
+    }
+
+    const pure = [];
+
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        const rowBest = A.every(row =>
+          A[i][j] >= row[j] - EPS
+        );
+
+        const colBest = B[i].every(value =>
+          B[i][j] >= value - EPS
+        );
+
+        if (rowBest && colBest) pure.push([i, j]);
+      }
+    }
+
+    let mixed = null;
+
+    if (rows === 2 && cols === 2 && pure.length === 0) {
+      const denomP =
+        B[0][0] - B[0][1] - B[1][0] + B[1][1];
+
+      const denomQ =
+        A[0][0] - A[0][1] - A[1][0] + A[1][1];
+
+      if (Math.abs(denomP) > 1e-14 &&
+          Math.abs(denomQ) > 1e-14) {
+        const p = (B[1][1] - B[1][0]) / denomP;
+        const q = (A[1][1] - A[0][1]) / denomQ;
+
+        if (p > 0 && p < 1 && q > 0 && q < 1) {
+          mixed = { p_row1: p, q_col1: q };
+        }
+      }
+    }
+
+    let row_expected = null;
+
+    if (Object.prototype.hasOwnProperty.call(input, 'q_col1')) {
+      const q = requireNumber(input.q_col1, 'invalid_probability');
+
+      if (q < 0 || q > 1) {
+        problem('ConstraintViolation', 'probability_out_of_range');
+      }
+
+      if (cols === 2) {
+        row_expected = A.map(row =>
+          requireFinite(q * row[0] + (1 - q) * row[1])
+        );
+      }
+    }
+
+    return { pure, mixed, row_expected };
+  }
+
+  /**
+   * Left-to-right alpha-beta minimax on nested arrays.
+   * Input: {tree: nested arrays with finite numeric leaves}.
+   * Output: {value: utility points, leaves_evaluated: integer,
+   *          leaves_pruned: integer, visited_leaf_ids: integer[],
+   *          pruned_leaf_ids: integer[], leaf_values: number[]}.
+   * Assumptions: MAX at root; alternating MIN/MAX on each edge;
+   * depth counted as edges from root to deepest leaf.
+   * Errors: ConstraintViolation/tree_depth_exceeds_4,
+   * invalid_tree; MathError/non_finite_result.
+   * Hand check: [[3,5],[2,9]] has value 3;
+   * three leaves evaluated and the final leaf pruned.
+   */
+  function minimax(input) {
+    const leaf_values = [];
+
+    function inspect(node, depth) {
+      if (depth > 4) {
+        problem('ConstraintViolation', 'tree_depth_exceeds_4');
+      }
+
+      if (typeof node === 'number') {
+        requireNumber(node, 'invalid_leaf_value');
+        leaf_values.push(node);
+        return 1;
+      }
+
+      if (!Array.isArray(node) || node.length === 0) {
+        problem('ConstraintViolation', 'invalid_tree');
+      }
+
+      let count = 0;
+      for (const child of node) {
+        count += inspect(child, depth + 1);
+      }
+      return count;
+    }
+
+    inspect(input.tree, 0);
+
+    const visited_leaf_ids = [];
+
+    function countLeaves(node) {
+      if (typeof node === 'number') return 1;
+      let total = 0;
+      for (const child of node) total += countLeaves(child);
+      return total;
+    }
+
+    function search(node, maximizing, alpha, beta, offset) {
+      if (typeof node === 'number') {
+        visited_leaf_ids.push(offset);
+        return node;
+      }
+
+      let value = maximizing ? -Infinity : Infinity;
+      let nextOffset = offset;
+
+      for (const child of node) {
+        const result = search(
+          child, !maximizing, alpha, beta, nextOffset
+        );
+
+        if (maximizing) {
+          value = Math.max(value, result);
+          alpha = Math.max(alpha, value);
+        } else {
+          value = Math.min(value, result);
+          beta = Math.min(beta, value);
+        }
+
+        nextOffset += countLeaves(child);
+
+        if (alpha >= beta) break;
+      }
+
+      return requireFinite(value);
+    }
+
+    const value = search(input.tree, true, -Infinity, Infinity, 0);
+    const visited = new Set(visited_leaf_ids);
+    const pruned_leaf_ids = [];
+
+    for (let i = 0; i < leaf_values.length; i++) {
+      if (!visited.has(i)) pruned_leaf_ids.push(i);
+    }
+
+    return {
+      value,
+      leaves_evaluated: visited_leaf_ids.length,
+      leaves_pruned: pruned_leaf_ids.length,
+      visited_leaf_ids,
+      pruned_leaf_ids,
+      leaf_values
+    };
+  }
+
+  /**
+   * Deterministic, synchronous Bellman value iteration on a grid.
+   * Input: {grid:{rows,cols,gamma,step_reward?,
+   *               terminals:[[row,col,reward],...],
+   *               walls?:[[row,col],...]},horizon?:integer}.
+   * Output: {V: number|null [rows][cols],
+   *          policy: {'row,col':'N'|'E'|'S'|'W'},
+   *          sweeps: integer, delta_history: number[]}.
+   * Rewards are utility points per move; gamma is dimensionless;
+   * coordinates are zero-based grid indices.
+   * Assumptions: deterministic moves, N/E/S/W tie priority,
+   * bumps leave the agent in place, terminal V=0 and the
+   * terminal reward is received upon entry.
+   * Without a horizon, the sup-norm convergence threshold is 1e-13.
+   * Errors: ConstraintViolation/grid_exceeds_16_states,
+   * gamma_must_be_below_1, invalid_grid, invalid_horizon;
+   * RuntimeError/iteration_cap_reached.
+   * Hand check: 1x2 grid, right cell terminal reward 5,
+   * gamma .9, step reward 0: V=[[5,0]], policy {'0,0':'E'}.
+   */
+  function value_iteration(input) {
+    const grid = input.grid;
+
+    if (!grid || typeof grid !== 'object') {
+      problem('ConstraintViolation', 'invalid_grid');
+    }
+
+    const { rows, cols } = grid;
+    const gamma = requireNumber(grid.gamma, 'invalid_gamma');
+    const step = grid.step_reward === undefined
+      ? 0
+      : requireNumber(grid.step_reward, 'invalid_step_reward');
+
+    if (!Number.isInteger(rows) || !Number.isInteger(cols) ||
+        rows < 1 || cols < 1) {
+      problem('ConstraintViolation', 'invalid_grid');
+    }
+
+    if (rows * cols > 16) {
+      problem('ConstraintViolation', 'grid_exceeds_16_states');
+    }
+
+    const hasHorizon = input.horizon !== undefined;
+
+    if (gamma < 0) {
+      problem('ConstraintViolation', 'invalid_gamma');
+    }
+
+    if (!hasHorizon && gamma >= 1) {
+      problem('ConstraintViolation', 'gamma_must_be_below_1');
+    }
+
+    if (hasHorizon &&
+        (!Number.isInteger(input.horizon) ||
+         input.horizon < 0 || input.horizon > 10000)) {
+      problem('ConstraintViolation', 'invalid_horizon');
+    }
+
+    const terminals = requireArray(grid.terminals, 'invalid_grid');
+    const wallList = grid.walls === undefined
+      ? []
+      : requireArray(grid.walls, 'invalid_grid');
+
+    const rewards = new Map();
+    const walls = new Set();
+
+    function key(r, c) {
+      return r + ',' + c;
+    }
+
+    function coordinate(r, c) {
+      if (!Number.isInteger(r) || !Number.isInteger(c) ||
+          r < 0 || r >= rows || c < 0 || c >= cols) {
+        problem('ConstraintViolation', 'invalid_grid_coordinate');
+      }
+    }
+
+    for (const wall of wallList) {
+      if (!Array.isArray(wall) || wall.length !== 2) {
+        problem('ConstraintViolation', 'invalid_grid');
+      }
+      coordinate(wall[0], wall[1]);
+      walls.add(key(wall[0], wall[1]));
+    }
+
+    for (const terminal of terminals) {
+      if (!Array.isArray(terminal) || terminal.length !== 3) {
+        problem('ConstraintViolation', 'invalid_grid');
+      }
+      coordinate(terminal[0], terminal[1]);
+
+      const k = key(terminal[0], terminal[1]);
+      if (walls.has(k) || rewards.has(k)) {
+        problem('ConstraintViolation', 'overlapping_grid_cells');
+      }
+
+      rewards.set(
+        k, requireNumber(terminal[2], 'invalid_terminal_reward')
+      );
+    }
+
+    const moves = [
+      ['N', -1, 0],
+      ['E', 0, 1],
+      ['S', 1, 0],
+      ['W', 0, -1]
+    ];
+
+    function nextCell(r, c, dr, dc) {
+      const nr = r + dr;
+      const nc = c + dc;
+
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols ||
+          walls.has(key(nr, nc))) {
+        return [r, c];
+      }
+      return [nr, nc];
+    }
+
+    function actionValue(r, c, move, V) {
+      const [nr, nc] = nextCell(r, c, move[1], move[2]);
+      const terminalReward = rewards.get(key(nr, nc)) || 0;
+      return requireFinite(
+        step + terminalReward + gamma * V[nr][nc]
+      );
+    }
+
+    let V = Array.from({ length: rows }, (_, r) =>
+      Array.from({ length: cols }, (_, c) =>
+        walls.has(key(r, c)) ? null : 0
+      )
+    );
+
+    const delta_history = [];
+    let sweeps = 0;
+    const limit = hasHorizon ? input.horizon : 100000;
+
+    while (sweeps < limit) {
+      const next = V.map(row => row.slice());
+      let delta = 0;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const k = key(r, c);
+
+          if (walls.has(k) || rewards.has(k)) continue;
+
+          let best = -Infinity;
+          for (const move of moves) {
+            best = Math.max(best, actionValue(r, c, move, V));
+          }
+
+          next[r][c] = requireFinite(best);
+          delta = Math.max(delta, Math.abs(best - V[r][c]));
+        }
+      }
+
+      V = next;
+      sweeps++;
+
+      if (delta_history.length < 200) {
+        delta_history.push(delta);
+      }
+
+      if (!hasHorizon && delta < 1e-13) break;
+    }
+
+    if (!hasHorizon && sweeps === limit &&
+        delta_history[delta_history.length - 1] >= 1e-13) {
+      problem('RuntimeError', 'iteration_cap_reached');
+    }
+
+    const policy = {};
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const k = key(r, c);
+        if (walls.has(k) || rewards.has(k)) continue;
+
+        let best = -Infinity;
+        let chosen = 'N';
+
+        for (const move of moves) {
+          const value = actionValue(r, c, move, V);
+          if (value > best + 1e-12) {
+            best = value;
+            chosen = move[0];
+          }
+        }
+
+        policy[k] = chosen;
+      }
+    }
+
+    return { V, policy, sweeps, delta_history };
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    cash_flow: safe(cash_flow),
+    decision_tree: safe(decision_tree),
+    evpi: safe(evpi),
+    lp2: safe(lp2),
+    nash: safe(nash),
+    minimax: safe(minimax),
+    value_iteration: safe(value_iteration)
+  });
+})();
+/* FIT-CALC-END x10_optimisation */
+
+(function () {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const fmt = x => x === null ? '—' :
+    Number(x).toLocaleString('en-SG', { maximumSignificantDigits: 3 });
+  const money = x => x === null ? '—' : 'S$' + fmt(x);
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  const kinds = ['project', 'chance', 'factory', 'project', 'chance', 'factory'];
+
+  let baseSeed = Math.floor(Math.random() * 1000000000);
+  let current = {};
+  const game = {
+    round: 0,
+    score: 0,
+    tries: 0,
+    hinted: false,
+    locked: false
+  };
+
+  function randomForRound(n) {
+    let seed = (baseSeed + (n + 1) * 2654435761) >>> 0;
+    return function (max) {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed % max;
+    };
+  }
+
+  function metric(label, value) {
+    return `<div class="metric"><small>${label}</small><b>${value}</b></div>`;
+  }
+
+  function plot(title, xLabel, yLabel, series, marker, crossing) {
+    const w = 520, h = 260, l = 64, r = 20, t = 26, b = 47;
+    const all = series.flatMap(s => s.points).filter(p =>
+      Number.isFinite(p[0]) && Number.isFinite(p[1])
+    );
+    if (!all.length) return '';
+    let xmin = Math.min(...all.map(p => p[0]));
+    let xmax = Math.max(...all.map(p => p[0]));
+    let ymin = Math.min(...all.map(p => p[1]), 0);
+    let ymax = Math.max(...all.map(p => p[1]), 0);
+    if (marker) {
+      xmin = Math.min(xmin, marker[0]);
+      xmax = Math.max(xmax, marker[0]);
+      ymin = Math.min(ymin, marker[1]);
+      ymax = Math.max(ymax, marker[1]);
+    }
+    if (xmax === xmin) xmax = xmin + 1;
+    if (ymax === ymin) ymax = ymin + 1;
+    const yp = (ymax - ymin) * .12 || 1;
+    ymin -= yp;
+    ymax += yp;
+    const X = x => l + (x - xmin) / (xmax - xmin) * (w - l - r);
+    const Y = y => h - b - (y - ymin) / (ymax - ymin) * (h - t - b);
+    let svg = `<svg viewBox="0 0 ${w} ${h}" role="img"
+      aria-label="${title}: horizontal ${xLabel}, vertical ${yLabel}">
+      <path d="M${l} ${t}V${h-b}H${w-r}" fill="none" stroke="#111" stroke-width="2"/>`;
+    for (let i = 0; i <= 4; i++) {
+      const x = xmin + (xmax - xmin) * i / 4;
+      const y = ymin + (ymax - ymin) * i / 4;
+      svg += `<path d="M${X(x)} ${h-b}v5M${l-5} ${Y(y)}h5"
+       stroke="#111" stroke-width="1.4"/>
+       <text x="${X(x)}" y="${h-b+19}" text-anchor="middle" font-size="11">${fmt(x)}</text>
+       <text x="${l-9}" y="${Y(y)+4}" text-anchor="end" font-size="11">${fmt(y)}</text>`;
+    }
+    if (ymin < 0 && ymax > 0) {
+      svg += `<path d="M${l} ${Y(0)}H${w-r}" stroke="#999" stroke-dasharray="5 4"/>`;
+    }
+    const colours = ['#1F66E5', '#D92D20', '#1E9E5A'];
+    series.forEach((s, i) => {
+      const pts = s.points.filter(p =>
+        Number.isFinite(p[0]) && Number.isFinite(p[1])
+      );
+      svg += `<polyline fill="none" stroke="${colours[i%3]}" stroke-width="3"
+        points="${pts.map(p => `${X(p[0])},${Y(p[1])}`).join(' ')}"/>`;
+    });
+    if (Number.isFinite(crossing) && crossing >= xmin && crossing <= xmax) {
+      svg += `<path d="M${X(crossing)} ${t}V${h-b}"
+        stroke="#1E9E5A" stroke-width="2" stroke-dasharray="5 4"/>
+        <circle cx="${X(crossing)}" cy="${Y(0)}" r="6"
+        fill="#1E9E5A" stroke="#111" stroke-width="2"/>`;
+    }
+    if (marker) {
+      svg += `<circle cx="${X(marker[0])}" cy="${Y(marker[1])}"
+        r="8" fill="#FFC83D" stroke="#111" stroke-width="3"/>`;
+    }
+    svg += `<text x="${(w+l-r)/2}" y="${h-5}" text-anchor="middle"
+       font-size="13" font-weight="700">${xLabel}</text>
+       <text x="16" y="${h/2}" transform="rotate(-90 16 ${h/2})"
+       text-anchor="middle" font-size="13" font-weight="700">${yLabel}</text>
+       </svg>`;
+    const legend = series.map((s, i) =>
+      `<span class="key" style="color:${colours[i%3]}">━ ${s.name}</span>`
+    ).join(' &nbsp; ');
+    return `<div class="plot"><div class="plot-title">${title}</div>${svg}
+      <div class="caption">${legend} &nbsp; ● Your setting
+      ${Number.isFinite(crossing) ? ' &nbsp; ┆ IRR crossing' : ''}</div></div>`;
+  }
+
+  function bars(values, payback) {
+    const w = 520, h = 240, left = 54, top = 20, bottom = 45;
+    const min = Math.min(0, ...values);
+    const max = Math.max(0, ...values);
+    const span = Math.max(1, max - min);
+    const y = v => top + (max - v) / span * (h - top - bottom);
+    const x = i => left + (i + .5) * (w - left - 20) / values.length;
+    let out = `<svg viewBox="0 0 ${w} ${h}" role="img"
+      aria-label="Undiscounted cumulative cash balance by year, in Singapore dollars">
+      <path d="M${left} ${top}V${h-bottom}H${w-20}"
+      stroke="#111" fill="none" stroke-width="2"/>
+      <path d="M${left} ${y(0)}H${w-20}" stroke="#777" stroke-dasharray="5 4"/>`;
+    values.forEach((v, i) => {
+      const width = Math.min(54, (w - left - 20) / values.length * .65);
+      const topBar = Math.min(y(v), y(0));
+      const height = Math.max(1, Math.abs(y(v)-y(0)));
+      out += `<rect x="${x(i)-width/2}" y="${topBar}" width="${width}"
+        height="${height}" rx="4" fill="${v>=0?'#3DBE6B':'#FF8FB8'}"
+        stroke="#111" stroke-width="2"/>
+        <text x="${x(i)}" y="${h-bottom+18}" text-anchor="middle" font-size="12">${i}</text>`;
+    });
+    if (payback !== null) {
+      const px = x(0) + payback * (w - left - 20) / values.length;
+      out += `<path d="M${px} ${top}V${h-bottom}" stroke="#D92D20"
+        stroke-width="2" stroke-dasharray="5 4"/>`;
+    }
+    out += `<text x="${w/2}" y="${h-5}" text-anchor="middle" font-size="13">Year (years)</text>
+      <text x="15" y="${h/2}" transform="rotate(-90 15 ${h/2})"
+      text-anchor="middle" font-size="13">Balance (S$)</text></svg>`;
+    return `<div class="plot"><div class="plot-title">Cash recovered over time</div>
+      ${out}<div class="caption">Green: recovered · Pink: negative balance · Dashed red: interpolated payback</div></div>`;
+  }
+
+  function factoryPlot(data) {
+    const result = FITCalcX10.lp2(data.lp);
+    const vertices = result.vertices;
+    const w = 520, h = 340, l = 58, b = 48, top = 25, right = 24;
+    const xmax = 10, ymax = 11;
+    const X = x => l + x / xmax * (w-l-right);
+    const Y = y => h-b-y/ymax*(h-top-b);
+    const selected = vertices[data.index];
+    const polygon = vertices.slice().sort((a,b) =>
+      Math.atan2(a.x[1]-3,a.x[0]-3) -
+      Math.atan2(b.x[1]-3,b.x[0]-3)
+    );
+    let svg = `<svg class="graph-touch" viewBox="0 0 ${w} ${h}"
+      role="img" aria-label="Feasible region in product units, with selectable corners and the movable profit line">
+      <path d="M${l} ${top}V${h-b}H${w-right}"
+      stroke="#111" stroke-width="3" fill="none"/>`;
+    for (let v=0;v<=10;v+=2) {
+      svg += `<text x="${X(v)}" y="${h-b+20}" font-size="12" text-anchor="middle">${v}</text>
+      <text x="${l-9}" y="${Y(v)+4}" font-size="12" text-anchor="end">${v}</text>`;
+    }
+    svg += `<polygon points="${polygon.map(p =>
+      X(p.x[0])+','+Y(p.x[1])
+    ).join(' ')}" fill="#FFE6DC" stroke="#FF6B3D" stroke-width="3"/>`;
+    const c=data.lp.c, profit=selected.objective;
+    const linePts=[];
+    if (c[1]!==0) {
+      for (const x of [0,xmax]) {
+        const y=(profit-c[0]*x)/c[1];
+        if(y>=0&&y<=ymax)linePts.push([x,y]);
+      }
+    }
+    if (c[0]!==0) {
+      for (const y of [0,ymax]) {
+        const x=(profit-c[1]*y)/c[0];
+        if(x>=0&&x<=xmax)linePts.push([x,y]);
+      }
+    }
+    if(linePts.length>=2){
+      svg+=`<path d="M${X(linePts[0][0])} ${Y(linePts[0][1])}
+        L${X(linePts[1][0])} ${Y(linePts[1][1])}"
+        stroke="#1F66E5" stroke-width="4" stroke-dasharray="8 5"/>`;
+    }
+    vertices.forEach((v,i)=>{
+      svg+=`<circle data-vertex="${i}" tabindex="0" role="button"
+        aria-label="Select corner ${i+1}" cx="${X(v.x[0])}" cy="${Y(v.x[1])}"
+        r="22" fill="${data.index===i?'#FFC83D':'#FFFFFF'}"
+        stroke="#111" stroke-width="3"/>
+        <text x="${X(v.x[0])}" y="${Y(v.x[1])+5}" font-size="14"
+        font-weight="800" text-anchor="middle" pointer-events="none">${i+1}</text>`;
+    });
+    svg+=`<text x="${w/2}" y="${h-5}" text-anchor="middle" font-size="13">Product X (units)</text>
+    <text x="14" y="${h/2}" transform="rotate(-90 14 ${h/2})"
+      text-anchor="middle" font-size="13">Product Y (units)</text></svg>`;
+    return `<div class="plot"><div class="plot-title">Feasible production corners</div>
+      ${svg}<div class="caption">Orange: feasible region · Blue dashed: your iso-profit line · Yellow: selected corner</div></div>`;
+  }
+
+  function chanceTree(p) {
+    const q=1-p;
+    return {
+      type:'decision',
+      options:{
+        Product:{
+          type:'chance',
+          branches:[
+            {p,node:{value:current.success}},
+            {p:q,node:{value:current.failure}}
+          ]
+        },
+        Contract:{value:current.certain}
+      }
+    };
+  }
+
+  function setup() {
+    const round=game.round, kind=kinds[round], rng=randomForRound(round);
+    game.tries=0;
+    game.hinted=false;
+    game.locked=false;
+    current={kind};
+
+    if(kind==='project'){
+      current.cost=round===0?110+10*rng(4):100+10*rng(5);
+      current.rate=.10;
+      current.inflow=30;
+      current.mode=round===0?'npv':'payback';
+      current.target=0;
+      for(let n=30;n<=100;n++){
+        const r=FITCalcX10.cash_flow({
+          rate:current.rate,flows:[-current.cost,n,n,n]
+        });
+        const works=current.mode==='npv'
+          ? r.npv>0
+          : r.payback!==null&&r.payback<=2.5;
+        if(works){current.target=n;break;}
+      }
+      $('roundTitle').textContent=round===0?'A worthwhile investment':'Recover the initial outlay';
+      $('question').textContent=round===0
+        ? 'Set the SMALLEST whole-dollar yearly inflow that makes NPV positive.'
+        : 'Set the SMALLEST whole-dollar yearly inflow that recovers the outlay within 2.5 years.';
+      $('scene').innerHTML=`<svg viewBox="0 0 500 190" role="img"
+        aria-label="An initial outlay followed by three equal annual receipts">
+        <path d="M45 95H455" stroke="#111" stroke-width="4"/>
+        ${[0,1,2,3].map((t)=>`<circle cx="${65+t*120}" cy="95" r="12"
+        fill="${t===0?'#FF8FB8':'#3DBE6B'}" stroke="#111" stroke-width="3"/>`).join('')}
+        <path d="M65 110v44M185 80V35M305 80V35M425 80V35"
+        stroke="#111" stroke-width="4"/>
+        <text x="65" y="175" text-anchor="middle" font-weight="800">−${money(current.cost)}</text>
+        ${[185,305,425].map(x=>`<text x="${x}" y="23"
+        font-weight="800" text-anchor="middle">+${money(current.inflow)}</text>`).join('')}
+        ${[0,1,2,3].map((t)=>`<text x="${65+t*120}" y="120"
+        font-size="12" text-anchor="middle">Year ${t}</text>`).join('')}
+        </svg>`;
+      $('mathText').textContent='NPV = Σ CFₜ/(1+r)ᵗ, with t in years and CF in S$. Payback is the first negative-to-non-negative cumulative-cash crossing, interpolated within its year. Annual receipts occur at year-end.';
+      $('controls').innerHTML=`<div class="controlbox">
+        <label for="amount">Annual receipt (S$ per year)</label>
+        <div class="stepper">
+          <button data-step="-10" aria-label="Reduce by ten">−−</button>
+          <button data-step="-1" aria-label="Reduce by one">−</button>
+          <output id="amountOut">30</output>
+          <button data-step="1" aria-label="Increase by one">+</button>
+          <button data-step="10" aria-label="Increase by ten">++</button>
+        </div>
+        <input id="amount" type="range" min="30" max="100" step="1" value="30">
+        <p class="caption">Discount rate fixed at 10% per year. Receipts continue for three years.</p>
+      </div>`;
+    } else if(kind==='chance'){
+      current.success=90+10*rng(5);
+      current.failure=5+5*rng(3);
+      current.certain=40+5*rng(5);
+      current.p=.10;
+      current.choice='Contract';
+      current.target=null;
+      for(let i=0;i<=20;i++){
+        const p=i/20;
+        const outcome=FITCalcX10.decision_tree({tree:{
+          type:'decision',options:{
+            Product:{type:'chance',branches:[
+              {p,node:{value:current.success}},
+              {p:1-p,node:{value:current.failure}}
+            ]},
+            Contract:{value:current.certain}
+          }
+        }});
+        if(outcome.best[0]==='Product'){current.target=p;break;}
+      }
+      $('roundTitle').textContent='An uncertain product launch';
+      $('question').textContent='Find the SMALLEST success probability, in 5% steps, that makes Product the better option. Select that option too.';
+      $('scene').innerHTML=`<svg viewBox="0 0 500 220" role="img"
+        aria-label="Decision between a fixed-value contract and a risky product">
+        <rect x="12" y="90" width="105" height="50" rx="14" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+        <text x="65" y="120" text-anchor="middle" font-weight="800">Choose</text>
+        <path d="M117 113L225 48M117 113L225 171" fill="none" stroke="#111" stroke-width="4"/>
+        <circle cx="225" cy="48" r="13" fill="#FF8FB8" stroke="#111" stroke-width="3"/>
+        <rect x="225" y="145" width="105" height="48" rx="12" fill="#3DBE6B" stroke="#111" stroke-width="3"/>
+        <text x="277" y="174" text-anchor="middle" font-weight="800">Contract</text>
+        <path d="M238 48L360 21M238 48L360 92" stroke="#111" stroke-width="3" fill="none"/>
+        <text x="367" y="25" font-size="15" font-weight="800">+${money(current.success)}</text>
+        <text x="367" y="96" font-size="15" font-weight="800">+${money(current.failure)}</text>
+        <text x="220" y="22" font-size="14" font-weight="800">Product</text>
+        <text x="345" y="174" font-weight="800">${money(current.certain)} certain</text>
+        <text x="370" y="48" font-size="12">Success / failure</text>
+        </svg>`;
+      $('mathText').textContent='Expected monetary value (EMV) = Σ probability × payoff, in S$. A decision node chooses its highest-EMV option; a chance node averages its branches. Probabilities sum to 1.';
+      $('controls').innerHTML=`<div class="controlbox">
+        <label for="chance">Probability of product success</label>
+        <input id="chance" type="range" min="0" max="100" step="5" value="10">
+        <div class="metric"><small>Selected probability</small><b id="pOut">10%</b></div>
+      </div><div class="controlbox"><label>Your decision</label>
+        <div class="choices">
+          <button data-choice="Product" aria-pressed="false">Product</button>
+          <button data-choice="Contract" aria-pressed="true">Contract</button>
+        </div>
+      </div>`;
+    } else {
+      const c=[4+rng(2),3+rng(2)];
+      current.lp={c,constraints:[
+        {a:[1,1],b:8},
+        {a:[2,1],b:12}
+      ]};
+      current.index=0;
+      $('roundTitle').textContent='Two products, limited resources';
+      $('question').textContent='Move the profit line by tapping or dragging to the corner giving the greatest total profit.';
+      $('scene').innerHTML=`<svg viewBox="0 0 500 220" role="img"
+        aria-label="Two products consume two resources with capacity limits">
+        <rect x="12" y="45" width="138" height="55" rx="13" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+        <rect x="12" y="121" width="138" height="55" rx="13" fill="#FF8FB8" stroke="#111" stroke-width="3"/>
+        <text x="80" y="69" text-anchor="middle" font-weight="800">Product X</text>
+        <text x="80" y="89" text-anchor="middle">${money(c[0])}/unit</text>
+        <text x="80" y="145" text-anchor="middle" font-weight="800">Product Y</text>
+        <text x="80" y="165" text-anchor="middle">${money(c[1])}/unit</text>
+        <path d="M150 72L236 72L300 109M150 148L236 148L300 109"
+          fill="none" stroke="#111" stroke-width="4"/>
+        <rect x="300" y="75" width="175" height="72" rx="15" fill="#3DBE6B" stroke="#111" stroke-width="3"/>
+        <text x="388" y="100" text-anchor="middle" font-weight="800">Resources</text>
+        <text x="388" y="122" text-anchor="middle">X + Y ≤ 8 units</text>
+        <text x="388" y="139" text-anchor="middle">2X + Y ≤ 12 units</text></svg>`;
+      $('mathText').textContent='Maximise profit Z = c₁x + c₂y in S$, subject to x+y ≤ 8, 2x+y ≤ 12 and x,y ≥ 0. An optimum of a bounded linear programme occurs at a feasible vertex.';
+      const result=FITCalcX10.lp2(current.lp);
+      $('controls').innerHTML=`<div class="controlbox"><label>Choose a feasible corner</label>
+      <div class="choices">${result.vertices.map((v,i)=>
+        `<button data-vertex="${i}" aria-pressed="${i===0}">Corner ${i+1}</button>`
+      ).join('')}</div><p class="caption">Drag the line in the chart or use the corner buttons.</p></div>`;
+    }
+
+    $('hint').disabled=false;
+    $('check').disabled=false;
+    $('next').classList.add('hidden');
+    $('feedback').className='feedback';
+    $('feedback').textContent='Change the controls, then press Check.';
+    $('roundIndicator').textContent=`Round ${round+1}/6`;
+    $('score').textContent=game.score;
+    update();
+  }
+
+  function update() {
+    if(current.kind==='project'){
+      const flows=[-current.cost,current.inflow,current.inflow,current.inflow];
+      const r=FITCalcX10.cash_flow({rate:current.rate,flows});
+      const points=[];
+      for(let i=0;i<=30;i++){
+        const discount=i/100;
+        const v=FITCalcX10.cash_flow({rate:discount,flows});
+        points.push([discount*100,v.npv]);
+      }
+      $('readouts').innerHTML=metric('Current NPV',money(r.npv))+
+        metric('Current payback',r.payback===null?'Not recovered':fmt(r.payback)+' years')+
+        metric('Current IRR',r.irr===null?'Undefined':fmt(r.irr*100)+'%');
+      $('plots').innerHTML=plot('NPV against annual discount rate',
+        'Discount rate (% per year)','NPV (S$)',
+        [{name:'NPV',points}],[current.rate*100,r.npv],
+        r.irr===null?null:r.irr*100
+      )+bars(r.cumulative,r.payback);
+      $('amountOut').textContent=money(current.inflow);
+      $('amount').value=current.inflow;
+      const labels=$('scene').querySelectorAll('text');
+      labels.forEach(el=>{
+        if(el.textContent.startsWith('+S$')) el.textContent='+'+money(current.inflow);
+      });
+    } else if(current.kind==='chance'){
+      const tree=chanceTree(current.p);
+      const result=FITCalcX10.decision_tree({tree});
+      const product=FITCalcX10.decision_tree({tree:tree.options.Product});
+      const values=[];
+      const fixed=[];
+      for(let i=0;i<=20;i++){
+        const p=i/20;
+        values.push([p*100,FITCalcX10.decision_tree({
+          tree:{
+            type:'chance',branches:[
+              {p,node:{value:current.success}},
+              {p:1-p,node:{value:current.failure}}
+            ]
+          }
+        }).emv]);
+        fixed.push([p*100,current.certain]);
+      }
+      $('readouts').innerHTML=metric('Product EMV',money(product.emv))+
+        metric('Contract EMV',money(current.certain))+
+        metric('Best available EMV',money(result.emv));
+      $('plots').innerHTML=plot('Expected value against success probability',
+        'Success probability (%)','EMV (S$)',
+        [{name:'Product',points:values},{name:'Contract',points:fixed}],
+        [current.p*100,product.emv],null);
+      $('pOut').textContent=fmt(current.p*100)+'%';
+      $('chance').value=current.p*100;
+      document.querySelectorAll('[data-choice]').forEach(el=>{
+        el.setAttribute('aria-pressed',String(el.dataset.choice===current.choice));
+      });
+    } else {
+      const result=FITCalcX10.lp2(current.lp);
+      const chosen=result.vertices[current.index];
+      $('readouts').innerHTML=metric('Your profit',money(chosen.objective))+
+        metric('Production X',fmt(chosen.x[0])+' units')+
+        metric('Production Y',fmt(chosen.x[1])+' units');
+      $('plots').innerHTML=factoryPlot(current);
+      document.querySelectorAll('button[data-vertex]').forEach(el=>{
+        el.setAttribute('aria-pressed',
+          String(Number(el.dataset.vertex)===current.index));
+      });
+    }
+  }
+
+  function setVertex(index) {
+    const vertices=FITCalcX10.lp2(current.lp).vertices;
+    if(!game.locked&&index>=0&&index<vertices.length){
+      current.index=index;
+      update();
+    }
+  }
+
+  $('controls').addEventListener('click',event=>{
+    if(game.locked) return;
+    const button=event.target.closest('button');
+    if(!button)return;
+    if(button.hasAttribute('data-step')&&current.kind==='project'){
+      current.inflow=clamp(current.inflow+Number(button.dataset.step),30,100);
+    }
+    if(button.dataset.choice&&current.kind==='chance'){
+      current.choice=button.dataset.choice;
+    }
+    if(button.dataset.vertex!==undefined&&current.kind==='factory'){
+      current.index=Number(button.dataset.vertex);
+    }
+    update();
+  });
+
+  $('controls').addEventListener('input',event=>{
+    if(game.locked)return;
+    if(event.target.id==='amount'){
+      current.inflow=Number(event.target.value);
+    }
+    if(event.target.id==='chance'){
+      current.p=Number(event.target.value)/100;
+    }
+    update();
+  });
+
+  $('plots').addEventListener('click',event=>{
+    const target=event.target.closest('[data-vertex]');
+    if(target&&current.kind==='factory'){
+      setVertex(Number(target.dataset.vertex));
+    }
+  });
+
+  $('plots').addEventListener('keydown',event=>{
+    const target=event.target.closest('[data-vertex]');
+    if(target&&(event.key==='Enter'||event.key===' ')){
+      event.preventDefault();
+      setVertex(Number(target.dataset.vertex));
+    }
+  });
+
+  let dragging=false;
+
+  function nearestVertex(event){
+    const svg=$('plots').querySelector('.graph-touch');
+    if(!svg)return;
+    const rect=svg.getBoundingClientRect();
+    const bx=(event.clientX-rect.left)/rect.width*520;
+    const by=(event.clientY-rect.top)/rect.height*340;
+    const vertices=FITCalcX10.lp2(current.lp).vertices;
+    let best=0,dist=Infinity;
+    vertices.forEach((v,i)=>{
+      const px=58+v.x[0]/10*(520-58-24);
+      const py=340-48-v.x[1]/11*(340-25-48);
+      const d=(px-bx)**2+(py-by)**2;
+      if(d<dist){dist=d;best=i;}
+    });
+    setVertex(best);
+  }
+
+  $('plots').addEventListener('pointerdown',event=>{
+    if(game.locked||current.kind!=='factory')return;
+    if(event.target.closest('.graph-touch')){
+      dragging=true;
+      nearestVertex(event);
+    }
+  });
+  document.addEventListener('pointermove',event=>{
+    if(dragging&&!game.locked)nearestVertex(event);
+  });
+  document.addEventListener('pointerup',()=>{dragging=false;});
+  document.addEventListener('pointercancel',()=>{dragging=false;});
+
+  function expected() {
+    if(current.kind==='project'){
+      const outcome=FITCalcX10.cash_flow({
+        rate:current.rate,
+        flows:[-current.cost,current.inflow,current.inflow,current.inflow]
+      });
+      return {
+        okay:current.inflow===current.target,
+        reason:current.mode==='npv'
+          ? `Your NPV is ${money(outcome.npv)}. Find the first whole-dollar inflow with a positive NPV.`
+          : `Your payback is ${outcome.payback===null?'not reached':fmt(outcome.payback)+' years'}. Find the first inflow with payback at most 2.5 years.`,
+        why:`The smallest qualifying inflow is ${money(current.target)} per year. Check the previous whole-dollar amount: it fails the target.`
+      };
+    }
+    if(current.kind==='chance'){
+      const outcome=FITCalcX10.decision_tree({tree:chanceTree(current.p)});
+      return {
+        okay:Math.abs(current.p-current.target)<1e-9&&
+          current.choice===outcome.best[0]&&current.choice==='Product',
+        reason:`At your probability, backward induction prefers ${outcome.best[0]}. Check the threshold and the selected option.`,
+        why:`At ${fmt(current.target*100)}% success, Product first overtakes Contract on the 5% grid. Its expected payoff is higher.`
+      };
+    }
+    const result=FITCalcX10.lp2(current.lp);
+    const chosen=result.vertices[current.index];
+    return {
+      okay:Math.abs(chosen.objective-result.objective)<1e-9,
+      reason:`This corner gives ${money(chosen.objective)}. Test whether another feasible corner gives more.`,
+      why:`The optimal mix is (${fmt(result.x[0])}, ${fmt(result.x[1])}) units, yielding ${money(result.objective)}. Linear objectives reach a maximum at a feasible corner.`
+    };
+  }
+
+  $('check').addEventListener('click',()=>{
+    if(game.locked)return;
+    game.tries++;
+    const answer=expected();
+    if(answer.okay){
+      const earned=game.hinted||game.tries>2?50:
+        game.tries===2?75:100;
+      game.score+=earned;
+      game.locked=true;
+      $('score').textContent=game.score;
+      $('feedback').className='feedback good';
+      $('feedback').textContent=`★ Correct! +${earned} points. ${answer.why}`;
+      $('check').disabled=true;
+      $('hint').disabled=true;
+      $('next').textContent=game.round===5?'See your stars →':'Next round →';
+      $('next').classList.remove('hidden');
+    }else{
+      $('feedback').className='feedback bad';
+      $('feedback').textContent='Not yet. '+answer.reason;
+    }
+  });
+
+  $('hint').addEventListener('click',()=>{
+    if(game.locked)return;
+    game.hinted=true;
+    $('hint').disabled=true;
+    const text=current.kind==='project'
+      ? 'Check the smallest whole-dollar value: compare it with one dollar less.'
+      :current.kind==='chance'
+      ? 'At the break-even point, Product and Contract have equal expected monetary value. Move one slider step beyond it.'
+      : 'A straight iso-profit line can be pushed parallel to itself until it reaches the last feasible corner.';
+    $('feedback').className='feedback';
+    $('feedback').textContent='Hint: '+text+' Maximum credit for this round is now 50.';
+  });
+
+  function endGame(){
+    $('game').classList.add('hidden');
+    $('finish').classList.remove('hidden');
+    const stars=game.score>=500?3:game.score>=350?2:1;
+    $('finish').innerHTML=`<div class="stars" aria-label="${stars} out of 3 stars">
+      ${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
+      <h2>Six decisions complete!</h2>
+      <p class="question">${game.score} / 600 points</p>
+      <p>Investment decisions become clearer when every alternative is calculated using the same assumptions.</p>
+      <button id="restart">Play again</button>`;
+    $('restart').addEventListener('click',()=>{
+      baseSeed=Math.floor(Math.random()*1000000000);
+      game.round=0;
+      game.score=0;
+      $('finish').classList.add('hidden');
+      $('game').classList.remove('hidden');
+      setup();
+    });
+  }
+
+  $('next').addEventListener('click',()=>{
+    if(!game.locked)return;
+    game.round++;
+    if(game.round===6)endGame();
+    else setup();
+  });
+
+  setup();
+})();
+</script>
+</body>
+</html>

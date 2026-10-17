@@ -1,0 +1,1830 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Membranes and Rivers | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+html{background:var(--fit-paper);color:var(--fit-ink)}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5}
+button,input,summary{font:inherit}
+button,input[type=range],input[type=number],summary{
+-webkit-tap-highlight-color:transparent;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{cursor:pointer;border:2px solid var(--fit-ink);min-height:44px;border-radius:999px;font-weight:800;background:white;color:var(--fit-ink)}
+button:disabled{cursor:default;opacity:.55}
+button:active:not(:disabled){transform:translateY(2px)}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-poly);cursor:pointer}
+input[type=number]{min-height:44px;font-size:16px;border:2px solid #111;border-radius:12px;padding:8px}
+h1,h2,h3,p{margin-top:0}
+h1,h2,h3{font-weight:800;line-height:1.2}
+h1{font-size:clamp(1.65rem,4vw,2.5rem);margin-bottom:6px}
+h2{font-size:1.25rem;margin-bottom:10px}
+h3{font-size:1.05rem;margin-bottom:8px}
+small{color:var(--fit-ink-3)}
+.shell{max-width:1250px;margin:auto;padding:18px 14px 48px}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.badge{display:inline-flex;align-items:center;min-height:30px;padding:3px 12px;border:2px solid #111;border-radius:999px;background:var(--lvl-poly);color:var(--lvl-poly-on);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.sub{color:var(--fit-ink-2);font-size:.96rem;margin-bottom:0}
+.hud{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.chip{border:2px solid #111;border-radius:999px;padding:8px 13px;background:var(--fit-white);font-weight:800;white-space:nowrap}
+.chip:nth-child(2){background:var(--lvl-poly-tint)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.panel{min-width:0;padding:17px;border:2px solid #111;border-radius:var(--r-lg);background:var(--fit-white);box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-poly-tint)}
+.eyebrow{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--fit-ink-2);margin-bottom:9px}
+.question{font-size:1.07rem;font-weight:600;max-width:65ch;margin-bottom:12px}
+.keyfacts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.fact{padding:10px;border:2px solid #111;border-radius:var(--r-sm);background:white;min-width:0}
+.fact span{display:block;color:var(--fit-ink-3);font-size:.74rem;font-weight:800;text-transform:uppercase}
+.fact strong{display:block;overflow-wrap:anywhere;font-size:.95rem;font-variant-numeric:tabular-nums}
+.diagram{width:100%;height:auto;display:block;border:2px solid #111;border-radius:16px;background:#fff;margin:12px 0}
+.diagram text,.plot text{font-family:Inter,system-ui,sans-serif;fill:#111}
+.concept{display:flex;align-items:center;gap:12px;background:white;border:2px solid #111;border-radius:16px;padding:9px 12px;font-size:.83rem;font-weight:600}
+.concept svg{flex:none;width:94px;height:56px}
+.concept p{margin:0}
+.plot{width:100%;height:auto;display:block;background:#fff;border:2px solid #111;border-radius:16px}
+.readout{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:12px 0}
+.readout strong{font-size:1.05rem;font-variant-numeric:tabular-nums}
+.readout span{color:var(--fit-ink-3);font-size:.82rem}
+.control{border:2px solid #111;border-radius:16px;padding:13px;background:var(--fit-sunken);margin-top:12px}
+.controltop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.controltop strong{font-size:1.06rem}
+.current{font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
+.steps button{min-width:0;min-height:49px;font-size:1.2rem;box-shadow:var(--sh-1)}
+.steps button.coarse{background:var(--lvl-poly-tint)}
+.stepnote{font-size:.77rem;color:var(--fit-ink-3);margin-top:7px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.actions button{padding:11px 20px;box-shadow:var(--sh-1)}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)!important;flex:1}
+.check:active{box-shadow:var(--sh-1)!important;transform:translateY(2px)}
+.hint{background:#fff}
+.feedback{margin-top:12px;border:2px solid #111;border-radius:14px;background:white;padding:12px;font-weight:600;min-height:52px}
+.feedback:empty{display:none}
+.feedback.good{background:#E0F7E9}
+.feedback.bad{background:#FFF0E9}
+.feedback.info{background:#FFF6D9}
+.maths{margin-top:18px;border:2px solid #111;border-radius:16px;padding:0 14px;background:white}
+.maths summary{cursor:pointer;padding:14px 3px;font-weight:800;min-height:48px}
+.maths div{border-top:1px solid var(--fit-line-soft);padding:13px 3px 15px}
+.maths p{margin:0 0 8px}
+.hidden{display:none!important}
+.finish{text-align:center;padding:35px 20px;background:var(--lvl-poly-tint)}
+.stars{font-size:3rem;letter-spacing:.12em;margin:16px 0}
+.finish button{background:var(--fit-sun);padding:12px 27px;box-shadow:var(--sh-2)}
+.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:.8rem;font-weight:700;margin-top:8px}
+.legend span:before{content:"";display:inline-block;width:22px;border-top:4px solid #FF6B3D;vertical-align:middle;margin-right:6px}
+.legend span:nth-child(2):before{border-top:3px dashed #111}
+@media(min-width:900px){
+.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
+.panel{padding:22px}
+}
+@media(max-width:420px){
+.shell{padding:12px 10px 40px}
+.panel{padding:13px}
+.steps{gap:5px}
+.chip{font-size:.84rem}
+}
+@media(prefers-reduced-motion:no-preference){
+button{transition:transform var(--dur-1) var(--ease-out)}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="top">
+  <div>
+    <span class="badge">Polytechnic</span>
+    <h1>Membranes and Rivers</h1>
+    <p class="sub">Steady diffusion, mixing and moving dye.</p>
+  </div>
+  <div class="hud" aria-label="Game progress">
+    <div class="chip" id="roundChip">Round 1/6</div>
+    <div class="chip" id="scoreChip">Score 0</div>
+  </div>
+</header>
+
+<main id="game" class="layout">
+  <section class="panel stage" aria-labelledby="scenarioTitle">
+    <div class="eyebrow" id="roundType">Barrier experiment</div>
+    <h2 id="scenarioTitle">The challenge</h2>
+    <p id="question" class="question"></p>
+    <div id="facts" class="keyfacts"></div>
+    <svg id="scene" class="diagram" viewBox="0 0 510 245"
+      role="img" aria-label="Transport experiment diagram"></svg>
+    <div class="concept">
+      <svg viewBox="0 0 100 60" role="img"
+        aria-label="Molecules move from high to low concentration">
+        <rect x="2" y="5" width="96" height="50" rx="12"
+          fill="#FFE6DC" stroke="#111" stroke-width="3"/>
+        <path d="M49 8V52" stroke="#111" stroke-width="4"/>
+        <g fill="#FF6B3D" stroke="#111" stroke-width="2">
+          <circle cx="15" cy="17" r="4"/><circle cx="33" cy="26" r="4"/>
+          <circle cx="17" cy="42" r="4"/><circle cx="35" cy="43" r="4"/>
+          <circle cx="75" cy="29" r="4"/>
+        </g>
+        <path d="M53 16H86M79 10L86 16L79 22"
+          stroke="#111" stroke-width="3" fill="none"/>
+      </svg>
+      <p>Concentration gradients drive diffusive flux; flowing water transports tracer centres.</p>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="chartHeading">
+    <div class="eyebrow">Live experiment</div>
+    <h2 id="chartHeading">Concentration profile</h2>
+    <svg id="chart" class="plot" viewBox="0 0 510 310"
+      role="img" aria-label="Live quantitative transport plot"></svg>
+    <div class="legend">
+      <span id="legendOne">Current prediction</span>
+      <span id="legendTwo">Target or limit</span>
+    </div>
+    <div class="readout">
+      <div><span>Current result</span><br><strong id="prediction">—</strong></div>
+      <div><span>Goal</span><br><strong id="goal">—</strong></div>
+    </div>
+
+    <div class="control">
+      <div class="controltop">
+        <strong id="controlLabel">Change the setting</strong>
+        <output id="valueDisplay" class="current" for="slider">—</output>
+      </div>
+      <input id="slider" type="range" min="0" max="10" step="1"
+        aria-label="Experimental control">
+      <div class="steps" role="group" aria-label="Adjust setting">
+        <button type="button" class="coarse" data-delta="-5"
+          aria-label="Decrease by five steps">−−</button>
+        <button type="button" data-delta="-1"
+          aria-label="Decrease by one step">−</button>
+        <button type="button" data-delta="1"
+          aria-label="Increase by one step">+</button>
+        <button type="button" class="coarse" data-delta="5"
+          aria-label="Increase by five steps">++</button>
+      </div>
+      <div class="stepnote" id="stepNote"></div>
+    </div>
+
+    <div class="actions">
+      <button class="hint" id="hintBtn" type="button">Hint − points</button>
+      <button class="check" id="checkBtn" type="button">Check</button>
+      <button class="hidden" id="nextBtn" type="button">Next round →</button>
+    </div>
+    <div id="feedback" class="feedback" aria-live="polite"></div>
+
+    <details class="maths">
+      <summary>The maths</summary>
+      <div id="mathContent"></div>
+    </details>
+  </section>
+</main>
+
+<section id="finish" class="panel finish hidden" aria-live="polite">
+  <span class="badge">Polytechnic</span>
+  <h2>Experiment complete!</h2>
+  <div id="stars" class="stars" aria-label="Star rating"></div>
+  <h3 id="finalScore"></h3>
+  <p id="finishMessage"></p>
+  <button id="replayBtn" type="button">Play again ↻</button>
+</section>
+</div>
+
+<script>
+/* FIT-CALC-BEGIN x7_diffusion */
+const FITCalcX7 = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+  const MAX_CELLS = 100;
+  const MAX_STEPS = 10000;
+  const STABILITY_SLACK = 1e-12;
+
+  function error(errorClass, reason) {
+    return { error: errorClass, reason };
+  }
+
+  function invalidInput() {
+    return error('ConstraintViolation', 'input_must_be_finite');
+  }
+
+  function hasFiniteFields(p, keys) {
+    return p !== null &&
+      typeof p === 'object' &&
+      keys.every(key =>
+        typeof p[key] === 'number' && Number.isFinite(p[key])
+      );
+  }
+
+  function finiteResult(value) {
+    function valid(v) {
+      if (v === null) return true;
+      if (typeof v === 'number') return Number.isFinite(v);
+      if (typeof v === 'boolean' || typeof v === 'string') return true;
+      if (Array.isArray(v)) return v.every(valid);
+      if (v && typeof v === 'object') {
+        return Object.keys(v).every(k => valid(v[k]));
+      }
+      return false;
+    }
+
+    return valid(value)
+      ? value
+      : error('MathError', 'non_finite_result');
+  }
+
+  function nonNegative(value, reason) {
+    return value < 0
+      ? error('ConstraintViolation', reason)
+      : null;
+  }
+
+  function positive(value, reason) {
+    return value <= 0
+      ? error('ConstraintViolation', reason)
+      : null;
+  }
+
+  function sumCells(cells) {
+    let sum = 0;
+    for (let i = 0; i < cells.length; i++) sum += cells[i];
+    return sum;
+  }
+
+  function cellMass(cells, dx) {
+    return sumCells(cells) * dx;
+  }
+
+  function cellCentre(cells, dx) {
+    let weighted = 0;
+    let total = 0;
+
+    for (let i = 0; i < cells.length; i++) {
+      total += cells[i];
+      weighted += (i + 0.5) * dx * cells[i];
+    }
+
+    return total === 0 ? null : weighted / total;
+  }
+
+  function peakIndex(cells) {
+    let index = 0;
+    for (let i = 1; i < cells.length; i++) {
+      if (cells[i] > cells[index]) index = i;
+    }
+    return index;
+  }
+
+  /**
+   * Two-film mass transfer: two positive film resistances in series.
+   * Input: k1_m_s, k2_m_s (m/s).
+   * Output: K_m_s (m/s), with 1/K = 1/k1 + 1/k2.
+   * Assumptions: steady state; no additional interfacial resistance.
+   * Errors: non-positive film coefficient, non-finite input/result.
+   *
+   * Hand check: k1 = 2 m/s, k2 = 3 m/s.
+   * K = 1/(1/2 + 1/3) = 1.2 m/s.
+   */
+  function two_film_overall_coefficient(p) {
+    if (!hasFiniteFields(p, ['k1_m_s', 'k2_m_s'])) {
+      return invalidInput();
+    }
+    if (p.k1_m_s <= 0 || p.k2_m_s <= 0) {
+      return error(
+        'ConstraintViolation',
+        'mass_transfer_coefficient_must_be_positive'
+      );
+    }
+
+    return finiteResult({
+      K_m_s: 1 / (1 / p.k1_m_s + 1 / p.k2_m_s)
+    });
+  }
+
+  /**
+   * Transverse diffusion across a microchannel.
+   * Inputs: L_m (m), D_m2_s (m^2/s), u_m_s (m/s).
+   * Outputs: diffusion_time_s (s), mixing_length_m (m).
+   * Assumptions: constant diffusivity and mean axial velocity;
+   * characteristic transverse diffusion time L^2/D.
+   * Errors: negative D, zero D, non-finite input/result.
+   *
+   * Hand check: L = 0.002 m, D = 1e-9 m^2/s, u = 0.01 m/s.
+   * t_D = 0.002^2/1e-9 = 4000 s; length = 40 m.
+   */
+  function microchannel_diffusion(p) {
+    if (!hasFiniteFields(p, ['L_m', 'D_m2_s', 'u_m_s'])) {
+      return invalidInput();
+    }
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+    if (p.D_m2_s === 0) return error('MathError', 'd_zero');
+    if (p.L_m < 0) {
+      return error('ConstraintViolation', 'length_must_be_non_negative');
+    }
+
+    const t = p.L_m * p.L_m / p.D_m2_s;
+
+    return finiteResult({
+      diffusion_time_s: t,
+      mixing_length_m: p.u_m_s * t
+    });
+  }
+
+  /**
+   * Steady one-dimensional membrane diffusion.
+   * Inputs: D_m2_s (m^2/s), C_left and C_right (mol/m^3),
+   * thickness_m (m), partition (dimensionless).
+   * Output: flux (mol/(m^2 s)), positive left to right.
+   * Assumptions: Fick's first law, constant D, steady linear
+   * profile, identical partition factor applied at both faces.
+   * Errors: zero/negative thickness, negative D or partition,
+   * non-finite input/result.
+   *
+   * Hand check: D = 2e-9, C_left = 5, C_right = 1,
+   * thickness = 0.002, partition = 0.5.
+   * J = 2e-9 * 0.5 * 4 / 0.002 = 2e-6 mol/(m^2 s).
+   */
+  function membrane_steady_flux(p) {
+    if (!hasFiniteFields(
+      p,
+      ['D_m2_s', 'C_left', 'C_right', 'thickness_m', 'partition']
+    )) return invalidInput();
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+
+    if (p.thickness_m === 0) {
+      return error('MathError', 'thickness_zero');
+    }
+    if (p.thickness_m < 0) {
+      return error('ConstraintViolation', 'thickness_must_be_positive');
+    }
+    if (p.partition < 0) {
+      return error('ConstraintViolation', 'partition_must_be_non_negative');
+    }
+
+    return finiteResult({
+      flux: p.D_m2_s * p.partition *
+        (p.C_left - p.C_right) / p.thickness_m
+    });
+  }
+
+  /**
+   * Steady diffusion profile along a slab.
+   * Inputs: D_m2_s (m^2/s), length_m and x_m (m),
+   * C_left and C_right (mol/m^3).
+   * Outputs: concentration (mol/m^3), flux (mol/(m^2 s)).
+   * Assumptions: constant D, steady state, linear concentration.
+   * Errors: zero/negative length, x outside [0,length],
+   * negative D, non-finite input/result.
+   *
+   * Hand check: L = 0.1 m, x = 0.025 m,
+   * C_left = 10, C_right = 2, D = 1e-9.
+   * C(x) = 8 mol/m^3; J = 8e-8 mol/(m^2 s).
+   */
+  function scaffold_steady_diffusion(p) {
+    if (!hasFiniteFields(
+      p,
+      ['D_m2_s', 'length_m', 'C_left', 'C_right', 'x_m']
+    )) return invalidInput();
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+
+    if (p.length_m === 0) {
+      return error('MathError', 'thickness_zero');
+    }
+    if (p.length_m < 0) {
+      return error('ConstraintViolation', 'thickness_must_be_positive');
+    }
+    if (p.x_m < 0 || p.x_m > p.length_m) {
+      return error('ConstraintViolation', 'x_out_of_range');
+    }
+
+    return finiteResult({
+      concentration: p.C_left +
+        (p.C_right - p.C_left) * p.x_m / p.length_m,
+      flux: p.D_m2_s *
+        (p.C_left - p.C_right) / p.length_m
+    });
+  }
+
+  /**
+   * Advective motion of a tracer centre.
+   * Inputs: u_m_s (m/s), initial_centre_m (m), time_s (s),
+   * D_m2_s (m^2/s).
+   * Outputs: centre_m and displacement_m (m).
+   * Assumptions: constant uniform flow; diffusion broadens
+   * the tracer without changing its centre.
+   * Errors: negative time or D, non-finite input/result.
+   *
+   * Hand check: x0 = 2 m, u = 0.4 m/s, t = 5 s, D = 0.01.
+   * Displacement = 2 m; centre = 4 m.
+   */
+  function advect_tracer_centre(p) {
+    if (!hasFiniteFields(
+      p,
+      ['u_m_s', 'initial_centre_m', 'time_s', 'D_m2_s']
+    )) return invalidInput();
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+    const badTime = nonNegative(p.time_s, 'time_must_be_non_negative');
+    if (badTime) return badTime;
+
+    const displacement = p.u_m_s * p.time_s;
+
+    return finiteResult({
+      centre_m: p.initial_centre_m + displacement,
+      displacement_m: displacement
+    });
+  }
+
+  /**
+   * Gaussian solution for an instantaneous plane tracer release.
+   * Inputs: mass_per_area_mol_m2 (mol/m^2), D_m2_s (m^2/s),
+   * u_m_s (m/s), time_s (s), x_m (m).
+   * Outputs: concentration (mol/m^3), centre_m (m).
+   * Assumptions: infinite 1-D domain, constant D and u,
+   * instantaneous plane release at x=0 and t=0.
+   * Errors: zero/negative D, zero/negative time, negative mass,
+   * non-finite input/result.
+   *
+   * Hand check: M = 1 mol/m^2, D = 1 m^2/s, u = 0,
+   * t = 1 s, x = 0. C = 1/sqrt(4*pi) = 0.2820947918
+   * mol/m^3; centre = 0 m.
+   */
+  function gaussian_pulse(p) {
+    if (!hasFiniteFields(
+      p,
+      ['mass_per_area_mol_m2', 'D_m2_s', 'u_m_s', 'time_s', 'x_m']
+    )) return invalidInput();
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+    if (p.D_m2_s === 0) return error('MathError', 'd_zero');
+
+    const badTime = nonNegative(p.time_s, 'time_must_be_non_negative');
+    if (badTime) return badTime;
+    if (p.time_s === 0) return error('MathError', 'time_zero');
+
+    if (p.mass_per_area_mol_m2 < 0) {
+      return error('ConstraintViolation', 'mass_must_be_non_negative');
+    }
+
+    const centre = p.u_m_s * p.time_s;
+    const varianceFactor = 4 * p.D_m2_s * p.time_s;
+    const distance = p.x_m - centre;
+
+    const concentration =
+      p.mass_per_area_mol_m2 /
+      Math.sqrt(Math.PI * varianceFactor) *
+      Math.exp(-distance * distance / varianceFactor);
+
+    return finiteResult({
+      concentration,
+      centre_m: centre
+    });
+  }
+
+  /**
+   * Signed Péclet number, comparing advection with diffusion.
+   * Inputs: u_m_s (m/s), length_m (m), D_m2_s (m^2/s).
+   * Output: Pe (dimensionless).
+   * Assumptions: single characteristic length, uniform velocity.
+   * Errors: zero/negative D, negative length, non-finite result.
+   *
+   * Hand check: u = 0.1 m/s, L = 2 m, D = 0.05 m^2/s.
+   * Pe = 0.1*2/0.05 = 4.
+   */
+  function peclet_number(p) {
+    if (!hasFiniteFields(p, ['u_m_s', 'length_m', 'D_m2_s'])) {
+      return invalidInput();
+    }
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+    if (p.D_m2_s === 0) return error('MathError', 'd_zero');
+    if (p.length_m < 0) {
+      return error('ConstraintViolation', 'length_must_be_non_negative');
+    }
+
+    return finiteResult({
+      Pe: p.u_m_s * p.length_m / p.D_m2_s
+    });
+  }
+
+  /**
+   * Complete mixing at a river outfall.
+   * Inputs: Q_river_m3_s and Q_effluent_m3_s (m^3/s),
+   * C_river_mg_L and C_effluent_mg_L (mg/L).
+   * Output: concentration_mg_L (mg/L).
+   * Assumptions: steady flows, conservative solute, complete
+   * instantaneous mixing, no other sources or sinks.
+   * Errors: negative flow, zero total flow, non-finite result.
+   *
+   * Hand check: river Q=9, C=2; effluent Q=1, C=12.
+   * Mixed C=(9*2+1*12)/10=3 mg/L.
+   */
+  function river_complete_mix(p) {
+    if (!hasFiniteFields(
+      p,
+      [
+        'Q_river_m3_s', 'C_river_mg_L',
+        'Q_effluent_m3_s', 'C_effluent_mg_L'
+      ]
+    )) return invalidInput();
+
+    if (p.Q_river_m3_s < 0 || p.Q_effluent_m3_s < 0) {
+      return error('ConstraintViolation', 'flow_must_be_non_negative');
+    }
+
+    const total = p.Q_river_m3_s + p.Q_effluent_m3_s;
+    if (total === 0) return error('MathError', 'total_flow_zero');
+
+    return finiteResult({
+      concentration_mg_L:
+        (p.Q_river_m3_s * p.C_river_mg_L +
+          p.Q_effluent_m3_s * p.C_effluent_mg_L) / total
+    });
+  }
+
+  /**
+   * Well-mixed lake with throughflow and first-order decay.
+   * Inputs: V_m3 (m^3), Q_m3_s (m^3/s), C_in and C_initial
+   * (mol/m^3), k_per_s (s^-1), time_s (s).
+   * Outputs: flushing_time_s (s or null),
+   * steady_concentration (mol/m^3 or null),
+   * concentration (mol/m^3).
+   * Assumptions: constant volume, inflow equals outflow,
+   * perfect mixing, constant inputs, first-order removal.
+   * Q=0 gives null flushing time. Q=k=0 gives null steady
+   * concentration and unchanged initial concentration.
+   * Errors: non-positive V, negative Q/k/time, non-finite result.
+   *
+   * Hand check: V=100 m^3, Q=10 m^3/s, k=0.02 s^-1,
+   * C_in=10, C_initial=20, t=10 s.
+   * tau=10 s; C*=10*(0.1/0.12)=8.333333333333334.
+   * C(10)=C*+(20-C*)*exp(-1.2).
+   */
+  function lake_flushing(p) {
+    if (!hasFiniteFields(
+      p,
+      ['V_m3', 'Q_m3_s', 'C_in', 'C_initial', 'k_per_s', 'time_s']
+    )) return invalidInput();
+
+    if (p.V_m3 <= 0) {
+      return error('ConstraintViolation', 'volume_must_be_positive');
+    }
+    if (p.Q_m3_s < 0) {
+      return error('ConstraintViolation', 'flow_must_be_non_negative');
+    }
+    if (p.k_per_s < 0) {
+      return error('ConstraintViolation', 'k_must_be_non_negative');
+    }
+    if (p.time_s < 0) {
+      return error('ConstraintViolation', 'time_must_be_non_negative');
+    }
+
+    const flushing = p.Q_m3_s === 0
+      ? null
+      : p.V_m3 / p.Q_m3_s;
+
+    const flowRate = p.Q_m3_s / p.V_m3;
+    const removalRate = flowRate + p.k_per_s;
+
+    if (removalRate === 0) {
+      return finiteResult({
+        flushing_time_s: null,
+        steady_concentration: null,
+        concentration: p.C_initial
+      });
+    }
+
+    const steady = p.C_in * flowRate / removalRate;
+
+    return finiteResult({
+      flushing_time_s: flushing,
+      steady_concentration: steady,
+      concentration:
+        steady + (p.C_initial - steady) *
+        Math.exp(-removalRate * p.time_s)
+    });
+  }
+
+  /**
+   * Steady diffusion-decay morphogen gradient on a half-line.
+   * Inputs: D_m2_s (m^2/s), k_per_s (s^-1),
+   * C0 (mol/m^3), x_m (m).
+   * Outputs: lambda_m (m), concentration (mol/m^3).
+   * Assumptions: D*C''=k*C, C(0)=C0, C(infinity)=0,
+   * spatially uniform diffusion and first-order removal.
+   * Errors: zero/negative k, zero/negative D,
+   * negative x, non-finite input/result.
+   *
+   * Hand check: D=4 m^2/s, k=1 s^-1, C0=10, x=2 m.
+   * lambda=2 m; C=10*exp(-1)=3.6787944117 mol/m^3.
+   */
+  function morphogen_gradient(p) {
+    if (!hasFiniteFields(p, ['D_m2_s', 'k_per_s', 'C0', 'x_m'])) {
+      return invalidInput();
+    }
+
+    if (p.k_per_s < 0) {
+      return error('ConstraintViolation', 'k_must_be_positive');
+    }
+    if (p.k_per_s === 0) return error('MathError', 'k_zero');
+
+    const badD = nonNegative(p.D_m2_s, 'd_must_be_non_negative');
+    if (badD) return badD;
+    if (p.D_m2_s === 0) return error('MathError', 'd_zero');
+
+    if (p.x_m < 0) {
+      return error('ConstraintViolation', 'x_must_be_non_negative');
+    }
+
+    const lambda = Math.sqrt(p.D_m2_s / p.k_per_s);
+
+    return finiteResult({
+      lambda_m: lambda,
+      concentration: p.C0 * Math.exp(-p.x_m / lambda)
+    });
+  }
+
+  /**
+   * Shared validation for the two explicit finite-volume schemes.
+   * Input: p containing cells (mol/m^3), dx_m (m), dt_s (s),
+   * either D_m2_s (m^2/s) or u_m_s (m/s), and boundary (string).
+   * Output: { r } or { courant }, or a schema error.
+   * Assumptions: 1-D equal-width cells, constant coefficients.
+   * Order: cell count, dx, dt, coefficient, boundary, stability.
+   * Errors: too_many_cells, too_few_cells, dx_zero,
+   * dx_must_be_positive, dt_must_be_positive,
+   * d_must_be_non_negative, velocity_must_be_non_negative,
+   * boundary_not_supported, scheme-specific stability reason.
+   *
+   * Hand checks: D=1, dx=1, dt=0.5 gives r=0.5 accepted.
+   * u=1, dx=1, dt=1 gives Co=1 accepted.
+   */
+  function validateGrid(p, scheme) {
+    const cells = p && p.cells;
+    const n = Array.isArray(cells) ? cells.length : 0;
+
+    if (n > MAX_CELLS) {
+      return error('ConstraintViolation', 'too_many_cells');
+    }
+    if (n < 2) {
+      return error('ConstraintViolation', 'too_few_cells');
+    }
+
+    if (!hasFiniteFields(p, ['dx_m'])) return invalidInput();
+
+    if (p.dx_m === 0) return error('MathError', 'dx_zero');
+    if (p.dx_m < 0) {
+      return error('ConstraintViolation', 'dx_must_be_positive');
+    }
+
+    if (!hasFiniteFields(p, ['dt_s'])) return invalidInput();
+
+    if (p.dt_s === 0) {
+      return error('MathError', 'dt_must_be_positive');
+    }
+    if (p.dt_s < 0) {
+      return error('ConstraintViolation', 'dt_must_be_positive');
+    }
+
+    const coefficient = scheme === 'diffusion'
+      ? 'D_m2_s'
+      : 'u_m_s';
+
+    if (!hasFiniteFields(p, [coefficient])) return invalidInput();
+
+    if (scheme === 'diffusion' && p.D_m2_s < 0) {
+      return error('ConstraintViolation', 'd_must_be_non_negative');
+    }
+    if (scheme === 'advection' && p.u_m_s < 0) {
+      return error(
+        'ConstraintViolation',
+        'velocity_must_be_non_negative'
+      );
+    }
+
+    const requiredBoundary = scheme === 'diffusion'
+      ? 'zero_flux'
+      : 'zero_gradient_outflow';
+
+    if (p.boundary !== requiredBoundary) {
+      return error('NotSupported', 'boundary_not_supported');
+    }
+
+    if (!cells.every(v =>
+      typeof v === 'number' && Number.isFinite(v)
+    )) return invalidInput();
+
+    if (scheme === 'diffusion') {
+      const r = p.D_m2_s * p.dt_s / (p.dx_m * p.dx_m);
+
+      if (!Number.isFinite(r)) {
+        return error('MathError', 'non_finite_result');
+      }
+      if (r > 0.5 * (1 + STABILITY_SLACK)) {
+        return error(
+          'ConstraintViolation',
+          'ftcs_unstable_r_gt_0_5'
+        );
+      }
+      return { r };
+    }
+
+    const courant = p.u_m_s * p.dt_s / p.dx_m;
+
+    if (!Number.isFinite(courant)) {
+      return error('MathError', 'non_finite_result');
+    }
+    if (courant > 1 * (1 + STABILITY_SLACK)) {
+      return error(
+        'ConstraintViolation',
+        'upwind_unstable_courant_gt_1'
+      );
+    }
+
+    return { courant };
+  }
+
+  function diffusionAdvance(cells, r) {
+    const next = new Array(cells.length);
+
+    for (let i = 0; i < cells.length; i++) {
+      const left = i === 0 ? cells[i] : cells[i - 1];
+      const right = i === cells.length - 1
+        ? cells[i]
+        : cells[i + 1];
+
+      next[i] = cells[i] + r * (right - 2 * cells[i] + left);
+    }
+    return next;
+  }
+
+  function advectionAdvance(cells, courant, inflow) {
+    const next = new Array(cells.length);
+
+    for (let i = 0; i < cells.length; i++) {
+      const left = i === 0 ? inflow : cells[i - 1];
+      next[i] = cells[i] - courant * (cells[i] - left);
+    }
+
+    return next;
+  }
+
+  /**
+   * One FTCS diffusion step with zero-flux end faces.
+   * Inputs: D_m2_s (m^2/s), dx_m (m), dt_s (s),
+   * cells[] (mol/m^3), boundary='zero_flux'.
+   * Outputs: r (dimensionless), cells[] (mol/m^3),
+   * mass_before and mass_after (mol/m^2), stable (boolean).
+   * Assumptions: explicit 1-D diffusion, mirror ghost cells,
+   * constant D and equal cell widths; stable when r<=0.5.
+   * Errors: shared grid errors; r>0.5 rejected before update.
+   *
+   * Hand check: cells=[0,10,0], D=dx=1, dt=0.25.
+   * r=0.25, next=[2.5,5,2.5], mass=10 before and after.
+   */
+  function ftcs_diffusion_step(p) {
+    const validation = validateGrid(p, 'diffusion');
+    if (validation.error) return validation;
+
+    const next = diffusionAdvance(p.cells, validation.r);
+
+    return finiteResult({
+      r: validation.r,
+      cells: next,
+      mass_before: cellMass(p.cells, p.dx_m),
+      mass_after: cellMass(next, p.dx_m),
+      stable: true
+    });
+  }
+
+  /**
+   * Multiple FTCS diffusion steps with optional final-cell probes.
+   * Inputs: D_m2_s (m^2/s), dx_m (m), dt_s (s),
+   * steps (integer, 0..10000), cells[] (mol/m^3),
+   * boundary='zero_flux', report_cells? (array of indices).
+   * Outputs: r, final cells[], mass_before, mass_after,
+   * stable, report_values (array or null).
+   * Mass units: mol/m^2; r dimensionless.
+   * Assumptions: explicit 1-D diffusion, no flux at both ends.
+   * Errors: shared grid errors, steps_out_of_range_0_10000,
+   * report_cell_out_of_range, non-finite intermediate result.
+   *
+   * Hand check: [0,10,0], D=dx=1, dt=0.25, steps=2,
+   * report_cells=[1]. Final=[3.125,3.75,3.125];
+   * r=0.25, report_values=[3.75], mass_before=mass_after=10.
+   */
+  function ftcs_diffusion_run(p) {
+    const validation = validateGrid(p, 'diffusion');
+    if (validation.error) return validation;
+
+    if (
+      !Number.isInteger(p.steps) ||
+      p.steps < 0 ||
+      p.steps > MAX_STEPS
+    ) {
+      return error(
+        'ConstraintViolation',
+        'steps_out_of_range_0_10000'
+      );
+    }
+
+    if (p.report_cells !== undefined) {
+      if (
+        !Array.isArray(p.report_cells) ||
+        !p.report_cells.every(i =>
+          Number.isInteger(i) && i >= 0 && i < p.cells.length
+        )
+      ) {
+        return error(
+          'ConstraintViolation',
+          'report_cell_out_of_range'
+        );
+      }
+    }
+
+    const before = cellMass(p.cells, p.dx_m);
+    let current = p.cells.slice();
+
+    for (let step = 0; step < p.steps; step++) {
+      current = diffusionAdvance(current, validation.r);
+      if (!current.every(Number.isFinite)) {
+        return error('RuntimeError', 'non_finite_intermediate');
+      }
+    }
+
+    const reportValues = p.report_cells === undefined
+      ? null
+      : p.report_cells.map(i => current[i]);
+
+    return finiteResult({
+      r: validation.r,
+      cells: current,
+      mass_before: before,
+      mass_after: cellMass(current, p.dx_m),
+      stable: true,
+      report_values: reportValues
+    });
+  }
+
+  /**
+   * One positive-velocity first-order upwind advection step.
+   * Inputs: u_m_s (m/s), dx_m (m), dt_s (s),
+   * cells[] and inflow_concentration (mol/m^3),
+   * boundary='zero_gradient_outflow'.
+   * Outputs: courant (dimensionless), cells[], stable.
+   * Assumptions: 1-D, constant non-negative velocity,
+   * specified left inflow, right-side free outflow; Co<=1.
+   * Errors: shared grid errors, negative velocity,
+   * missing/non-finite inflow, Co>1.
+   *
+   * Hand check: cells=[0,4,0], inflow=0, u=dx=1, dt=0.5.
+   * Co=0.5, final cells=[0,2,2].
+   */
+  function upwind_advection_step(p) {
+    const validation = validateGrid(p, 'advection');
+    if (validation.error) return validation;
+
+    if (!hasFiniteFields(p, ['inflow_concentration'])) {
+      return invalidInput();
+    }
+
+    const next = advectionAdvance(
+      p.cells,
+      validation.courant,
+      p.inflow_concentration
+    );
+
+    return finiteResult({
+      courant: validation.courant,
+      cells: next,
+      stable: true
+    });
+  }
+
+  /**
+   * Repeated first-order upwind advection with diagnostics.
+   * Inputs: u_m_s (m/s), dx_m (m), dt_s (s),
+   * steps (integer, 0..10000), cells[] and
+   * inflow_concentration (mol/m^3),
+   * boundary='zero_gradient_outflow'.
+   * Outputs: courant, cells[], elapsed_s (s),
+   * centre_before_m, centre_after_m, displacement_m (m or null),
+   * mass_before, mass_after (mol/m^2), peak_cell (index).
+   * Centres use concentration-weighted cell-centre positions;
+   * a zero-total-concentration state has centre=null.
+   * Assumptions: 1-D, uniform positive-direction velocity,
+   * fixed left inflow and unrestricted right-side outflow.
+   * Errors: shared grid errors, steps_out_of_range_0_10000,
+   * invalid inflow, non-finite intermediate/result.
+   *
+   * Hand check: cells=[0,4,0,0], inflow=0, u=dx=1,
+   * dt=0.5, steps=2. Final=[0,1,2,1], Co=0.5.
+   * Centre moves from 1.5 to 2.5 m, displacement=1 m.
+   * Mass remains 4 mol/m^2, peak_cell=2.
+   */
+  function upwind_advection_run(p) {
+    const validation = validateGrid(p, 'advection');
+    if (validation.error) return validation;
+
+    if (
+      !Number.isInteger(p.steps) ||
+      p.steps < 0 ||
+      p.steps > MAX_STEPS
+    ) {
+      return error(
+        'ConstraintViolation',
+        'steps_out_of_range_0_10000'
+      );
+    }
+
+    if (!hasFiniteFields(p, ['inflow_concentration'])) {
+      return invalidInput();
+    }
+
+    const before = cellCentre(p.cells, p.dx_m);
+    const massBefore = cellMass(p.cells, p.dx_m);
+    let current = p.cells.slice();
+
+    for (let step = 0; step < p.steps; step++) {
+      current = advectionAdvance(
+        current,
+        validation.courant,
+        p.inflow_concentration
+      );
+
+      if (!current.every(Number.isFinite)) {
+        return error('RuntimeError', 'non_finite_intermediate');
+      }
+    }
+
+    const after = cellCentre(current, p.dx_m);
+
+    return finiteResult({
+      courant: validation.courant,
+      cells: current,
+      elapsed_s: p.steps * p.dt_s,
+      centre_before_m: before,
+      centre_after_m: after,
+      displacement_m:
+        before === null || after === null ? null : after - before,
+      mass_before: massBefore,
+      mass_after: cellMass(current, p.dx_m),
+      peak_cell: peakIndex(current)
+    });
+  }
+
+  return Object.freeze({
+    API_VERSION,
+    two_film_overall_coefficient,
+    microchannel_diffusion,
+    membrane_steady_flux,
+    scaffold_steady_diffusion,
+    advect_tracer_centre,
+    gaussian_pulse,
+    peclet_number,
+    river_complete_mix,
+    lake_flushing,
+    morphogen_gradient,
+    ftcs_diffusion_step,
+    ftcs_diffusion_run,
+    upwind_advection_step,
+    upwind_advection_run
+  });
+})();
+/* FIT-CALC-END x7_diffusion */
+
+(function () {
+  'use strict';
+
+  const calc = FITCalcX7;
+  const $ = id => document.getElementById(id);
+  const svg = $('chart');
+  const scene = $('scene');
+  const slider = $('slider');
+
+  let roundNumber = 0;
+  let score = 0;
+  let replay = 0;
+  let round = null;
+  let attempts = 0;
+  let hinted = false;
+  let solved = false;
+
+  function generator(seed) {
+    let s = seed >>> 0;
+    return function (lo, hi) {
+      s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+      return lo + (s % (hi - lo + 1));
+    };
+  }
+
+  function fmt(n, digits = 3) {
+    if (n === null || n === undefined || !Number.isFinite(n)) return '—';
+    if (n === 0) return '0';
+    if (Math.abs(n) < .001 || Math.abs(n) >= 10000) {
+      return n.toExponential(digits - 1);
+    }
+    return Number(n.toPrecision(digits)).toString();
+  }
+
+  function fact(label, value) {
+    return '<div class="fact"><span>' + label +
+      '</span><strong>' + value + '</strong></div>';
+  }
+
+  function linePath(points, sx, sy) {
+    return points.map((p, i) =>
+      (i ? 'L' : 'M') + sx(p[0]).toFixed(2) + ' ' +
+      sy(p[1]).toFixed(2)
+    ).join(' ');
+  }
+
+  function plotFrame(title, xTitle, yTitle, xMax, yMax) {
+    const left = 73, right = 479, top = 47, bottom = 249;
+    const sx = x => left + (right - left) *
+      Math.max(0, Math.min(1, x / xMax));
+    const sy = y => bottom - (bottom - top) *
+      Math.max(0, Math.min(1, y / yMax));
+
+    let markup =
+      '<rect x="0" y="0" width="510" height="310" rx="15" fill="#fff"/>' +
+      '<text x="18" y="27" font-size="17" font-weight="800">' +
+      title + '</text>';
+
+    for (let i = 0; i <= 4; i++) {
+      const x = left + (right - left) * i / 4;
+      const y = bottom - (bottom - top) * i / 4;
+      markup +=
+        '<path d="M' + left + ' ' + y + 'H' + right +
+        '" stroke="#E4E2DB" stroke-width="1"/>' +
+        '<path d="M' + x + ' ' + top + 'V' + bottom +
+        '" stroke="#E4E2DB" stroke-width="1"/>' +
+        '<text x="' + (left - 10) + '" y="' + (y + 5) +
+        '" text-anchor="end" font-size="12">' +
+        fmt(yMax * i / 4, 2) + '</text>' +
+        '<text x="' + x + '" y="' + (bottom + 19) +
+        '" text-anchor="middle" font-size="12">' +
+        fmt(xMax * i / 4, 2) + '</text>';
+    }
+
+    markup +=
+      '<path d="M' + left + ' ' + top + 'V' + bottom +
+      'H' + right + '" fill="none" stroke="#111" stroke-width="2.5"/>' +
+      '<text x="276" y="299" text-anchor="middle" font-size="13" ' +
+      'font-weight="700">' + xTitle + '</text>' +
+      '<text transform="translate(18 153) rotate(-90)" ' +
+      'text-anchor="middle" font-size="13" font-weight="700">' +
+      yTitle + '</text>';
+
+    return { markup, sx, sy };
+  }
+
+  function membraneResult(r, setting) {
+    const thickness = r.variant === 'membrane'
+      ? setting * .0002
+      : .001;
+
+    if (r.variant === 'membrane') {
+      return calc.membrane_steady_flux({
+        D_m2_s: r.D,
+        C_left: r.left,
+        C_right: r.right,
+        thickness_m: thickness,
+        partition: r.partition
+      });
+    }
+
+    const film = calc.two_film_overall_coefficient({
+      k1_m_s: r.k1,
+      k2_m_s: r.k2
+    });
+
+    if (film.error) return film;
+
+    return calc.membrane_steady_flux({
+      D_m2_s: film.K_m_s * thickness,
+      C_left: setting,
+      C_right: 0,
+      thickness_m: thickness,
+      partition: r.partition
+    });
+  }
+
+  function riverResult(r, setting) {
+    return calc.river_complete_mix({
+      Q_river_m3_s: r.qRiver,
+      C_river_mg_L: r.cRiver,
+      Q_effluent_m3_s: setting * .5,
+      C_effluent_mg_L: r.cEffluent
+    });
+  }
+
+  function tracerResult(r, setting) {
+    return calc.advect_tracer_centre({
+      u_m_s: setting * .05,
+      initial_centre_m: 0,
+      time_s: r.time,
+      D_m2_s: r.D
+    });
+  }
+
+  function makeRound(index) {
+    const pick = generator(81001 + replay * 1009 + index * 7919);
+    const type = index % 3;
+
+    if (type === 0) {
+      const variant = index < 3 ? 'membrane' : 'interface';
+      const targetSetting = variant === 'membrane'
+        ? pick(4, 12)
+        : pick(5, 13);
+
+      const r = {
+        type: 'barrier',
+        variant,
+        D: pick(2, 8) * 1e-9,
+        left: pick(7, 14),
+        right: pick(1, 4),
+        k1: pick(1, 4) * 1e-6,
+        k2: pick(2, 5) * 1e-6,
+        partition: pick(6, 10) / 10,
+        targetSetting,
+        min: 1,
+        max: variant === 'membrane' ? 15 : 16,
+        setting: 1
+      };
+
+      r.target = membraneResult(r, targetSetting).flux;
+      r.setting = targetSetting <= 8 ? targetSetting + 5 : targetSetting - 4;
+      return r;
+    }
+
+    if (type === 1) {
+      const r = {
+        type: 'river',
+        qRiver: pick(5, 8),
+        cRiver: pick(1, 3),
+        cEffluent: pick(12, 20),
+        targetSetting: pick(3, 10),
+        min: 0,
+        max: 20,
+        setting: 0
+      };
+
+      const atTarget = riverResult(r, r.targetSetting).concentration_mg_L;
+      const atNext = riverResult(r, r.targetSetting + 1)
+        .concentration_mg_L;
+
+      r.limit = (atTarget + atNext) / 2;
+      r.setting = r.targetSetting + 4;
+      return r;
+    }
+
+    const r = {
+      type: 'tracer',
+      time: pick(8, 24),
+      D: pick(1, 4) * .1,
+      targetSetting: pick(7, 17),
+      min: 1,
+      max: 20,
+      setting: 1
+    };
+
+    r.gauge = tracerResult(r, r.targetSetting).centre_m;
+    r.setting = r.targetSetting <= 12
+      ? r.targetSetting + 4
+      : r.targetSetting - 5;
+    return r;
+  }
+
+  function headerAndText() {
+    $('roundChip').textContent = 'Round ' + (roundNumber + 1) + '/6';
+    $('scoreChip').textContent = 'Score ' + score;
+
+    if (round.type === 'barrier') {
+      const interfaceMode = round.variant === 'interface';
+
+      $('roundType').textContent = interfaceMode
+        ? 'Two-film interface'
+        : 'Membrane experiment';
+      $('scenarioTitle').textContent = interfaceMode
+        ? 'Balance two resistances'
+        : 'Tune the membrane';
+      $('question').textContent = interfaceMode
+        ? 'Adjust the concentration difference until the steady ' +
+          'interfacial flux matches the specified target.'
+        : 'Adjust the barrier thickness until the steady diffusion ' +
+          'flux matches the specified target.';
+
+      $('facts').innerHTML = interfaceMode
+        ? fact('Film 1, k₁', fmt(round.k1) + ' m/s') +
+          fact('Film 2, k₂', fmt(round.k2) + ' m/s') +
+          fact('Partition factor, P', fmt(round.partition)) +
+          fact('Target flux, J', fmt(round.target, 5) + ' mol/(m²·s)')
+        : fact('Diffusivity, D', fmt(round.D) + ' m²/s') +
+          fact('Left, Cₗ', fmt(round.left) + ' mol/m³') +
+          fact('Right, Cᵣ', fmt(round.right) + ' mol/m³') +
+          fact('Partition factor, P', fmt(round.partition)) +
+          fact('Target flux, J', fmt(round.target, 5) + ' mol/(m²·s)');
+
+      $('controlLabel').textContent = interfaceMode
+        ? 'Concentration difference, ΔC'
+        : 'Membrane thickness, L';
+      $('stepNote').textContent = interfaceMode
+        ? 'Fine: 1 mol/m³ · Coarse: 5 mol/m³'
+        : 'Fine: 0.2 mm · Coarse: 1.0 mm';
+      $('chartHeading').textContent = 'Steady concentration gradient';
+      $('legendOne').textContent = 'Current concentration';
+      $('legendTwo').textContent = 'Flux direction';
+
+      $('mathContent').innerHTML =
+        '<p><strong>Assumption:</strong> steady one-dimensional ' +
+        'transport with constant properties.</p>' +
+        '<p>Fick\'s first law: J = D P (Cₗ − Cᵣ)/L, ' +
+        'in mol/(m²·s).</p>' +
+        '<p>Two-film model: 1/K = 1/k₁ + 1/k₂, with K in m/s. ' +
+        'For an interface, J = K P ΔC.</p>' +
+        '<p>The partition factor is dimensionless. ' +
+        'A thicker barrier lowers flux for the same ΔC.</p>';
+      return;
+    }
+
+    if (round.type === 'river') {
+      $('roundType').textContent = 'River outfall';
+      $('scenarioTitle').textContent = 'Protect the downstream reach';
+      $('question').textContent =
+        'Find the greatest effluent flow allowed by the water-quality ' +
+        'limit. The mixed concentration must not exceed the limit.';
+      $('facts').innerHTML =
+        fact('River flow, Qᵣ', fmt(round.qRiver) + ' m³/s') +
+        fact('River concentration', fmt(round.cRiver) + ' mg/L') +
+        fact('Effluent concentration', fmt(round.cEffluent) + ' mg/L') +
+        fact('Concentration limit', fmt(round.limit, 6) + ' mg/L');
+      $('controlLabel').textContent = 'Effluent flow, Qₑ';
+      $('stepNote').textContent = 'Fine: 0.5 m³/s · Coarse: 2.5 m³/s';
+      $('chartHeading').textContent = 'Mixed concentration and limit';
+      $('legendOne').textContent = 'Complete-mix concentration';
+      $('legendTwo').textContent = 'Water-quality limit';
+      $('mathContent').innerHTML =
+        '<p><strong>Assumption:</strong> steady, complete mixing ' +
+        'of a conservative solute.</p>' +
+        '<p>Cₘᵢₓ = (QᵣCᵣ + QₑCₑ)/(Qᵣ + Qₑ), in mg/L.</p>' +
+        '<p>Flow rates are in m³/s. A plain average is generally ' +
+        'incorrect because the two streams need not have equal flow.</p>' +
+        '<p>Search for the highest control setting still satisfying ' +
+        'Cₘᵢₓ ≤ Cₗᵢₘᵢₜ.</p>';
+      return;
+    }
+
+    $('roundType').textContent = 'Dye-tracer survey';
+    $('scenarioTitle').textContent = 'Reach the downstream gauge';
+    $('question').textContent =
+      'Choose the river velocity that places the centre of an ' +
+      'instantaneously released dye cloud at the sampling gauge ' +
+      'when the survey clock reaches the specified time.';
+    $('facts').innerHTML =
+      fact('Travel time', fmt(round.time) + ' s') +
+      fact('Gauge distance', fmt(round.gauge, 5) + ' m') +
+      fact('Diffusivity, D', fmt(round.D) + ' m²/s') +
+      fact('Initial dye centre', '0 m');
+    $('controlLabel').textContent = 'Mean river speed, u';
+    $('stepNote').textContent = 'Fine: 0.05 m/s · Coarse: 0.25 m/s';
+    $('chartHeading').textContent = 'Dye-centre travel';
+    $('legendOne').textContent = 'Advected centre';
+    $('legendTwo').textContent = 'Gauge position';
+    $('mathContent').innerHTML =
+      '<p><strong>Assumption:</strong> uniform river velocity and ' +
+      'constant longitudinal diffusivity.</p>' +
+      '<p>x̄ = x₀ + ut; displacement = ut, measured in metres.</p>' +
+      '<p>Pe = uL/D is dimensionless and compares advection with ' +
+      'diffusion over distance L.</p>' +
+      '<p>Diffusion spreads the dye cloud but does not shift ' +
+      'its centre relative to the mean flow.</p>';
+  }
+
+  function currentResult() {
+    if (round.type === 'barrier') {
+      return membraneResult(round, round.setting);
+    }
+    if (round.type === 'river') {
+      return riverResult(round, round.setting);
+    }
+    return tracerResult(round, round.setting);
+  }
+
+  function currentValueText() {
+    if (round.type === 'barrier') {
+      return round.variant === 'membrane'
+        ? fmt(round.setting * .2) + ' mm'
+        : fmt(round.setting) + ' mol/m³';
+    }
+    if (round.type === 'river') {
+      return fmt(round.setting * .5) + ' m³/s';
+    }
+    return fmt(round.setting * .05) + ' m/s';
+  }
+
+  function drawScene(result) {
+    const leftColour = '#FF8FB8';
+    const rightColour = '#DDF7F1';
+    let content = '';
+
+    if (round.type === 'barrier') {
+      const thickness = round.variant === 'membrane'
+        ? round.setting * .2
+        : 1;
+
+      content =
+        '<rect x="20" y="40" width="465" height="155" rx="16" ' +
+        'fill="#fff" stroke="#111" stroke-width="3"/>' +
+        '<rect x="24" y="44" width="180" height="147" rx="12" ' +
+        'fill="' + leftColour + '"/>' +
+        '<rect x="294" y="44" width="187" height="147" rx="12" ' +
+        'fill="' + rightColour + '"/>' +
+        '<rect x="204" y="44" width="90" height="147" fill="#FFE6DC" ' +
+        'stroke="#111" stroke-width="3"/>' +
+        '<text x="114" y="28" font-size="15" text-anchor="middle" ' +
+        'font-weight="800">LEFT</text>' +
+        '<text x="387" y="28" font-size="15" text-anchor="middle" ' +
+        'font-weight="800">RIGHT</text>' +
+        '<text x="114" y="112" font-size="17" font-weight="800" ' +
+        'text-anchor="middle">' +
+        (round.variant === 'membrane'
+          ? fmt(round.left)
+          : fmt(round.setting)) + '</text>' +
+        '<text x="114" y="134" font-size="13" text-anchor="middle">' +
+        'mol/m³</text>' +
+        '<text x="388" y="120" font-size="17" font-weight="800" ' +
+        'text-anchor="middle">' +
+        (round.variant === 'membrane' ? fmt(round.right) : '0') +
+        ' mol/m³</text>' +
+        '<path d="M195 87H316M303 74L316 87L303 100" ' +
+        'stroke="#111" stroke-width="4" fill="none"/>' +
+        '<text x="249" y="119" text-anchor="middle" font-size="14" ' +
+        'font-weight="800">P = ' + fmt(round.partition) + '</text>' +
+        '<text x="249" y="157" text-anchor="middle" font-size="13" ' +
+        'font-weight="800">' + fmt(thickness) + ' mm</text>' +
+        '<text x="250" y="224" font-size="14" font-weight="700" ' +
+        'text-anchor="middle">J = ' + fmt(result.flux, 5) +
+        ' mol/(m²·s) →</text>';
+    } else if (round.type === 'river') {
+      content =
+        '<path d="M15 123H482V207H15Z" fill="#DDF7F1" ' +
+        'stroke="#111" stroke-width="3"/>' +
+        '<path d="M140 14H225V123H140Z" fill="#FF8FB8" ' +
+        'stroke="#111" stroke-width="3"/>' +
+        '<path d="M182 98V151M171 139L182 152L193 139" ' +
+        'stroke="#111" stroke-width="4" fill="none"/>' +
+        '<path d="M35 168H475M461 157L475 168L461 179" ' +
+        'stroke="#111" stroke-width="4" fill="none"/>' +
+        '<text x="47" y="148" font-size="14" font-weight="800">RIVER</text>' +
+        '<text x="244" y="43" font-size="14" font-weight="800">OUTFALL</text>' +
+        '<text x="244" y="65" font-size="13">Qₑ = ' +
+        fmt(round.setting * .5) + ' m³/s</text>' +
+        '<text x="244" y="86" font-size="13">Cₑ = ' +
+        fmt(round.cEffluent) + ' mg/L</text>' +
+        '<text x="46" y="192" font-size="13">Qᵣ = ' +
+        fmt(round.qRiver) + ' m³/s</text>' +
+        '<text x="306" y="192" font-size="13">Cₘᵢₓ = ' +
+        fmt(result.concentration_mg_L, 5) + ' mg/L</text>' +
+        '<text x="250" y="232" font-size="13" font-weight="700" ' +
+        'text-anchor="middle">Complete mixing downstream</text>';
+    } else {
+      const maxX = Math.max(round.gauge * 1.4, result.centre_m * 1.2, 1);
+      const px = x => 27 + 444 * x / maxX;
+      const dyeX = px(result.centre_m);
+      const gaugeX = px(round.gauge);
+
+      content =
+        '<rect x="17" y="70" width="476" height="115" rx="18" ' +
+        'fill="#DDF7F1" stroke="#111" stroke-width="3"/>' +
+        '<path d="M28 105H476M463 95L476 105L463 115" ' +
+        'stroke="#111" stroke-width="3" fill="none"/>' +
+        '<line x1="' + gaugeX + '" y1="46" x2="' + gaugeX +
+        '" y2="198" stroke="#111" stroke-width="3" ' +
+        'stroke-dasharray="7 5"/>' +
+        '<circle cx="' + dyeX + '" cy="139" r="17" ' +
+        'fill="#FF8FB8" stroke="#111" stroke-width="3"/>' +
+        '<circle cx="' + dyeX + '" cy="139" r="6" fill="#111"/>' +
+        '<text x="' + gaugeX + '" y="31" font-size="14" ' +
+        'font-weight="800" text-anchor="middle">GAUGE</text>' +
+        '<text x="25" y="218" font-size="13">Release: 0 m</text>' +
+        '<text x="470" y="218" font-size="13" text-anchor="end">' +
+        'Dye centre: ' + fmt(result.centre_m) + ' m</text>';
+    }
+
+    scene.innerHTML = content;
+    scene.setAttribute(
+      'aria-label',
+      round.type === 'barrier'
+        ? 'Steady transport across a barrier; flux ' +
+          fmt(result.flux) + ' mol per square metre per second.'
+        : round.type === 'river'
+          ? 'Effluent enters a river. Mixed concentration ' +
+            fmt(result.concentration_mg_L) + ' milligrams per litre.'
+          : 'Dye centre at ' + fmt(result.centre_m) +
+            ' metres; sampling gauge at ' + fmt(round.gauge) + ' metres.'
+    );
+  }
+
+  function drawChart(result) {
+    if (round.type === 'barrier') {
+      const thickness = round.variant === 'membrane'
+        ? round.setting * .0002
+        : .001;
+      const left = round.variant === 'membrane'
+        ? round.left * round.partition
+        : round.setting * round.partition;
+      const right = round.variant === 'membrane'
+        ? round.right * round.partition
+        : 0;
+
+      const diffusion = round.variant === 'membrane'
+        ? round.D
+        : calc.two_film_overall_coefficient({
+            k1_m_s: round.k1,
+            k2_m_s: round.k2
+          }).K_m_s * thickness;
+
+      const points = [];
+
+      for (let i = 0; i <= 30; i++) {
+        const x = thickness * i / 30;
+        const v = calc.scaffold_steady_diffusion({
+          D_m2_s: diffusion,
+          length_m: thickness,
+          C_left: left,
+          C_right: right,
+          x_m: x
+        });
+        points.push([x * 1000, v.concentration]);
+      }
+
+      const yMax = Math.max(1, left * 1.25, right * 1.25);
+      const p = plotFrame(
+        'Inside the barrier', 'Distance x (mm)',
+        'C (mol/m³)', thickness * 1000, yMax
+      );
+      const marker = points[15];
+
+      svg.innerHTML = p.markup +
+        '<path d="' + linePath(points, p.sx, p.sy) +
+        '" stroke="#FF6B3D" stroke-width="5" fill="none" ' +
+        'stroke-linejoin="round"/>' +
+        '<circle cx="' + p.sx(marker[0]) + '" cy="' +
+        p.sy(marker[1]) + '" r="7" fill="#FFDD00" ' +
+        'stroke="#111" stroke-width="3"/>' +
+        '<text x="467" y="40" text-anchor="end" font-size="12" ' +
+        'font-weight="800">J →</text>';
+
+      svg.setAttribute(
+        'aria-label',
+        'Steady linear concentration profile, from ' +
+        fmt(left) + ' to ' + fmt(right) + ' mol per cubic metre.'
+      );
+      return;
+    }
+
+    if (round.type === 'river') {
+      const ymax = Math.max(
+        round.cEffluent, round.limit, result.concentration_mg_L
+      ) * 1.16;
+      const p = plotFrame(
+        'Downstream water quality', 'Stream', 'C (mg/L)', 2, ymax
+      );
+      const yValue = p.sy(result.concentration_mg_L);
+      const yLimit = p.sy(round.limit);
+
+      svg.innerHTML = p.markup +
+        '<rect x="' + p.sx(.55) + '" y="' + yValue + '" width="128" ' +
+        'height="' + Math.max(0, 249 - yValue) + '" fill="#FF6B3D" ' +
+        'stroke="#111" stroke-width="2"/>' +
+        '<path d="M73 ' + yLimit + 'H479" stroke="#111" ' +
+        'stroke-width="3" stroke-dasharray="9 6"/>' +
+        '<circle cx="' + p.sx(.55) + '" cy="' + yValue +
+        '" r="6" fill="#FFDD00" stroke="#111" stroke-width="2"/>' +
+        '<text x="276" y="229" font-size="14" font-weight="800" ' +
+        'text-anchor="middle">MIXED</text>' +
+        '<text x="468" y="' + Math.max(43, yLimit - 10) +
+        '" font-size="12" text-anchor="end" font-weight="800">' +
+        'LIMIT</text>';
+
+      svg.setAttribute(
+        'aria-label',
+        'Mixed river concentration ' +
+        fmt(result.concentration_mg_L) + ' milligrams per litre, ' +
+        'limit ' + fmt(round.limit) + ' milligrams per litre.'
+      );
+      return;
+    }
+
+    const last = round.time;
+    const maxX = Math.max(
+      round.gauge * 1.3,
+      result.centre_m * 1.3,
+      1
+    );
+    const p = plotFrame(
+      'Centre displacement', 'Time t (s)', 'Position x (m)',
+      last, maxX
+    );
+    const points = [];
+
+    for (let i = 0; i <= 40; i++) {
+      const t = last * i / 40;
+      const x = calc.advect_tracer_centre({
+        u_m_s: round.setting * .05,
+        initial_centre_m: 0,
+        time_s: t,
+        D_m2_s: round.D
+      }).centre_m;
+      points.push([t, x]);
+    }
+
+    svg.innerHTML = p.markup +
+      '<path d="' + linePath(points, p.sx, p.sy) +
+      '" stroke="#FF6B3D" stroke-width="5" fill="none"/>' +
+      '<path d="M73 ' + p.sy(round.gauge) +
+      'H479" stroke="#111" stroke-width="3" stroke-dasharray="8 6"/>' +
+      '<circle cx="' + p.sx(last) + '" cy="' + p.sy(result.centre_m) +
+      '" r="8" fill="#FFDD00" stroke="#111" stroke-width="3"/>' +
+      '<text x="460" y="' + Math.max(43, p.sy(round.gauge) - 9) +
+      '" text-anchor="end" font-size="12" font-weight="800">GAUGE</text>';
+
+    svg.setAttribute(
+      'aria-label',
+      'Dye centre progresses to ' + fmt(result.centre_m) +
+      ' metres in ' + fmt(round.time) +
+      ' seconds. Gauge is at ' + fmt(round.gauge) + ' metres.'
+    );
+  }
+
+  function update() {
+    const r = currentResult();
+    if (r.error) {
+      $('prediction').textContent = 'Calculation unavailable';
+      return;
+    }
+
+    $('valueDisplay').textContent = currentValueText();
+    slider.value = String(round.setting);
+    drawScene(r);
+    drawChart(r);
+
+    if (round.type === 'barrier') {
+      $('prediction').textContent =
+        fmt(r.flux, 5) + ' mol/(m²·s)';
+      $('goal').textContent =
+        fmt(round.target, 5) + ' mol/(m²·s)';
+    } else if (round.type === 'river') {
+      $('prediction').textContent =
+        fmt(r.concentration_mg_L, 5) + ' mg/L';
+      $('goal').textContent =
+        '≤ ' + fmt(round.limit, 6) + ' mg/L';
+    } else {
+      const pe = calc.peclet_number({
+        u_m_s: round.setting * .05,
+        length_m: round.gauge,
+        D_m2_s: round.D
+      });
+      $('prediction').textContent =
+        fmt(r.centre_m, 5) + ' m; Pe = ' + fmt(pe.Pe);
+      $('goal').textContent =
+        fmt(round.gauge, 5) + ' m';
+    }
+  }
+
+  function setSetting(value) {
+    if (solved) return;
+    round.setting = Math.max(
+      round.min,
+      Math.min(round.max, Math.round(Number(value)))
+    );
+    update();
+  }
+
+  function feedback(text, kind) {
+    $('feedback').textContent = text;
+    $('feedback').className = 'feedback ' + kind;
+  }
+
+  function check() {
+    if (solved) return;
+
+    attempts++;
+    const r = currentResult();
+    if (r.error) {
+      feedback('This setting cannot be calculated. Adjust the control.', 'bad');
+      return;
+    }
+
+    let correct = false;
+    let explanation = '';
+    let correction = '';
+
+    if (round.type === 'barrier') {
+      correct = Math.abs(r.flux - round.target) <=
+        Math.max(1e-15, Math.abs(round.target) * 1e-9);
+
+      explanation = round.variant === 'membrane'
+        ? 'Exactly! Increasing thickness increases the diffusion ' +
+          'resistance, so less material crosses each second.'
+        : 'Exactly! Two films act like resistances in series; ' +
+          'the overall coefficient sets the flux.';
+
+      correction = r.flux > round.target
+        ? 'The flux is too high. ' +
+          (round.variant === 'membrane'
+            ? 'Increase the thickness.'
+            : 'Decrease the concentration difference.')
+        : 'The flux is too low. ' +
+          (round.variant === 'membrane'
+            ? 'Decrease the thickness.'
+            : 'Increase the concentration difference.');
+    } else if (round.type === 'river') {
+      correct = round.setting === round.targetSetting &&
+        r.concentration_mg_L <= round.limit;
+
+      explanation =
+        'Correct! This is the greatest available effluent flow that ' +
+        'keeps the fully mixed river concentration below the limit.';
+
+      const plainAverage = calc.river_complete_mix({
+        Q_river_m3_s: 1,
+        C_river_mg_L: round.cRiver,
+        Q_effluent_m3_s: 1,
+        C_effluent_mg_L: round.cEffluent
+      }).concentration_mg_L;
+
+      if (
+        Math.abs(r.concentration_mg_L - plainAverage) < 1e-10 &&
+        round.setting !== round.targetSetting
+      ) {
+        correction =
+          'That is the plain average of the two concentrations. ' +
+          'The actual streams must be weighted by their flow rates.';
+      } else if (r.concentration_mg_L > round.limit) {
+        correction =
+          'The mixed concentration exceeds the limit. ' +
+          'Reduce the effluent flow.';
+      } else {
+        correction =
+          'The concentration is safe, but more effluent can be ' +
+          'released. Find the largest compliant setting.';
+      }
+    } else {
+      correct = Math.abs(r.centre_m - round.gauge) <= 1e-9;
+
+      explanation =
+        'Spot on! The flow carries the dye centre to the gauge; ' +
+        'diffusion changes the width of the cloud, not its centre.';
+
+      const difference = Math.abs(r.centre_m - round.gauge);
+      correction = r.centre_m < round.gauge
+        ? 'The centre is ' + fmt(difference, 4) +
+          ' m upstream. Increase the river speed.'
+        : 'The centre passes the gauge by ' + fmt(difference, 4) +
+          ' m. Decrease the river speed.';
+    }
+
+    if (!correct) {
+      feedback('Not yet. ' + correction, 'bad');
+      return;
+    }
+
+    solved = true;
+    const points = hinted ? 50 : attempts === 1 ? 100 :
+      attempts === 2 ? 75 : 50;
+
+    score += points;
+    $('scoreChip').textContent = 'Score ' + score;
+    feedback('✓ +' + points + ' points. ' + explanation, 'good');
+
+    slider.disabled = true;
+    document.querySelectorAll('.steps button').forEach(b => {
+      b.disabled = true;
+    });
+    $('hintBtn').disabled = true;
+    $('checkBtn').classList.add('hidden');
+    $('nextBtn').classList.remove('hidden');
+    $('nextBtn').textContent = roundNumber === 5
+      ? 'See stars ★'
+      : 'Next round →';
+  }
+
+  function hint() {
+    if (solved) return;
+    hinted = true;
+    $('hintBtn').disabled = true;
+
+    let message = '';
+    if (round.type === 'barrier') {
+      message = round.variant === 'membrane'
+        ? 'Hint: J is inversely proportional to membrane thickness.'
+        : 'Hint: first combine the two film resistances, then ' +
+          'apply the partition factor to the concentration difference.';
+    } else if (round.type === 'river') {
+      message =
+        'Hint: the clean river dilutes the effluent. Test the ' +
+        'highest flow just below the concentration limit.';
+    } else {
+      message =
+        'Hint: centre displacement equals velocity multiplied ' +
+        'by elapsed time. Diffusivity does not enter this equation.';
+    }
+    feedback(message + ' Maximum reward for this round: 50.', 'info');
+  }
+
+  function startRound() {
+    round = makeRound(roundNumber);
+    attempts = 0;
+    hinted = false;
+    solved = false;
+
+    $('feedback').textContent = '';
+    $('feedback').className = 'feedback';
+    $('checkBtn').classList.remove('hidden');
+    $('nextBtn').classList.add('hidden');
+    $('hintBtn').disabled = false;
+    slider.disabled = false;
+
+    document.querySelectorAll('.steps button').forEach(b => {
+      b.disabled = false;
+    });
+
+    slider.min = String(round.min);
+    slider.max = String(round.max);
+    slider.step = '1';
+
+    headerAndText();
+    update();
+  }
+
+  function nextRound() {
+    if (!solved) return;
+    roundNumber++;
+
+    if (roundNumber >= 6) {
+      showFinish();
+      return;
+    }
+    startRound();
+  }
+
+  function showFinish() {
+    $('game').classList.add('hidden');
+    $('finish').classList.remove('hidden');
+    $('roundChip').textContent = '6/6 complete';
+
+    const count = score >= 525 ? 3 : score >= 375 ? 2 : 1;
+    $('stars').textContent =
+      '★'.repeat(count) + '☆'.repeat(3 - count);
+    $('stars').setAttribute(
+      'aria-label', count + ' out of 3 stars'
+    );
+    $('finalScore').textContent = score + ' / 600 points';
+    $('finishMessage').textContent = count === 3
+      ? 'Excellent transport engineering. You balanced all three processes.'
+      : 'Good work. Replay to sharpen your flux and flow decisions.';
+  }
+
+  function restart() {
+    replay++;
+    roundNumber = 0;
+    score = 0;
+    $('finish').classList.add('hidden');
+    $('game').classList.remove('hidden');
+    startRound();
+  }
+
+  slider.addEventListener('input', () => setSetting(slider.value));
+
+  document.querySelectorAll('.steps button').forEach(button => {
+    button.addEventListener('click', () =>
+      setSetting(round.setting + Number(button.dataset.delta))
+    );
+  });
+
+  $('checkBtn').addEventListener('click', check);
+  $('hintBtn').addEventListener('click', hint);
+  $('nextBtn').addEventListener('click', nextRound);
+  $('replayBtn').addEventListener('click', restart);
+
+  startRound();
+})();
+</script>
+</body>
+</html>

@@ -36,6 +36,14 @@ const statistics = {
 const codingLoops = { subject: 'Computing', concept: 'coding-loops', accent: '#1F66E5', minutes: '10–15', status: 'live' }
 // Tier-1 X6 numerical stability + pendulum (calc: lib/sims/tier1/x6_numerical_stability.calc.js, inlined in each file). Live: all 48 KATs pass (numerics_stability 23 + x6_pendulum 25).
 const numStability = { subject: 'Maths', concept: 'numerical-methods', accent: '#1F66E5', minutes: '10–15', status: 'live' }
+// Tier-1 X7 diffusion and advection (calc: lib/sims/tier1/x7_diffusion.calc.js, inlined in each file). Live: FITCalcX7 passes all 24 KATs in tier1/x7_diffusion_advection.json on the module + 3 byte-identical blocks; 7 checks clean at 390/1440 (FIT Printers vet).
+const diffusionX7 = { subject: 'Engineering', concept: 'diffusion-advection', accent: '#1F66E5', minutes: '15–20', status: 'live' }
+// Tier-1 X8 algorithms: logic, number theory, graphs and DNA (calc: lib/sims/tier1/x8_algorithms.calc.js, inlined in each file). Live: FITCalcX8 passes all 25 KATs in tier1/discrete_stepper_maths_bio.json on the module + 3 byte-identical blocks (FIT Stock Strategy vet).
+const algorithmsX8 = { subject: 'Computing', concept: 'algorithms', accent: '#1F66E5', minutes: '15–20', status: 'live' }
+// Tier-1 X9 Beer–Lambert and exponential attenuation (calc: lib/sims/tier1/x9_beer_lambert.calc.js, inlined in each file). Live: FITCalcX9 passes all 15 KATs in tier1/attenuation.json on the module + 3 byte-identical blocks (FIT Stock Strategy vet).
+const attenuationX9 = { subject: 'Chemistry', concept: 'attenuation', accent: '#2EC4A6', minutes: '15–20', status: 'live' }
+// Tier-1 X10 optimisation and decisions (calc: lib/sims/tier1/x10_optimisation.calc.js, inlined in each file). Live: FITCalcX10 passes all 24 KATs in tier1/decisions_optimisation.json on the module + 3 byte-identical blocks (FIT Stock Strategy vet).
+const optimisationX10 = { subject: 'Maths', concept: 'optimisation', accent: '#8B5CF6', minutes: '15–20', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -383,4 +391,52 @@ export const htmlSims = [
     syllabusRef: 'University, Computational Methods for Engineers',
     approach: 'Set the Courant number so upwind advection stays bounded, extrapolate from two grid levels with Richardson, and compare Euler and RK4 energy drift for a nonlinear pendulum.',
     activityPrompt: 'Play all rounds, then explain why explicit Euler makes a pendulum gain energy while RK4 nearly conserves it.', tags: ['University', 'Computational methods', 'CFL condition', 'Richardson extrapolation', 'nonlinear pendulum'] },
+  { ...diffusionX7, id: 'x7-diffusion-poly', title: 'Membranes and Rivers', level: 'Poly', topic: "Fick's law, river mixing and tracer advection", symbol: '🌊', height: 1850,
+    syllabusRef: 'Poly chemical and environmental engineering: steady diffusion through membranes, complete mixing of an effluent and advection of a tracer (generic)',
+    approach: 'Set membrane thickness or concentration difference to hit a target flux, choose an effluent flow so the mixed river stays under a limit, and set the river speed so a dye reaches a gauge on time.',
+    activityPrompt: 'Play all rounds, then explain why the mixed river concentration is a flow-weighted average and not the plain mean.', tags: ['diffusion', "Fick's law", 'membrane', 'river mixing', 'advection'] },
+  { ...diffusionX7, id: 'x7-diffusion-u1', title: 'Diffusion Scales', level: 'University', topic: 'Diffusion time scales, Gaussian pulses and morphogen gradients', symbol: '🧫', height: 1900,
+    syllabusRef: 'University, Transport Phenomena',
+    approach: 'Size a microchannel so the mixing length fits on a chip, pick a sampling time when a Gaussian pollutant pulse hits a target concentration, and set a decay rate so a morphogen gradient reaches a threshold at a target distance.',
+    activityPrompt: 'Play all rounds, then explain why doubling a channel width makes diffusion take four times as long.', tags: ['University', 'Transport phenomena', 'diffusion time', 'Gaussian pulse', 'morphogen gradient'] },
+  { ...diffusionX7, id: 'x7-diffusion-u2', title: 'Grid Transport Lab', level: 'University', topic: 'FTCS diffusion, upwind advection and lake flushing', symbol: '🧮', height: 2250,
+    syllabusRef: 'University, Computational Transport Modelling',
+    approach: 'Choose a time step so explicit FTCS diffusion stays stable (r ≤ 0.5) and conserves mass, set the Courant number so an upwind pulse reaches a target cell, and tune flushing or decay so a well-mixed lake reaches a target concentration.',
+    activityPrompt: 'Play all rounds, then explain why first-order upwind smears a pulse at Co < 1 but shifts it exactly at Co = 1.', tags: ['University', 'Computational methods', 'FTCS', 'upwind advection', 'lake flushing'] },
+  { ...algorithmsX8, id: 'x8-algorithms-poly', title: 'Algorithm Steps', level: 'Poly', topic: "Euclid's algorithm, modular arithmetic and breadth-first search", symbol: '🔢', height: 1350,
+    syllabusRef: 'Poly computing and engineering mathematics: Euclid\'s algorithm, clock (modular) arithmetic and breadth-first search (generic)',
+    approach: "Carry out Euclid's algorithm step by step, work out residues on a modular clock dial, and visit a directed map in breadth-first order using a queue.",
+    activityPrompt: 'Play all rounds, then explain why the remainders in Euclid\'s algorithm must shrink until one of them is zero.', tags: ['algorithms', "Euclid's algorithm", 'modular arithmetic', 'breadth-first search', 'graphs'] },
+  { ...algorithmsX8, id: 'x8-algorithms-u1', title: 'Logic and Number Theory', level: 'University', topic: 'Truth tables, Bézout coefficients and modular exponentiation', symbol: '🧠', height: 1750,
+    syllabusRef: 'University, Discrete Mathematics',
+    approach: 'Evaluate logical formulas with truth tables, find Bézout coefficients and modular inverses with the extended Euclidean algorithm, and carry out binary modular exponentiation.',
+    activityPrompt: 'Play all rounds, then explain why a number has an inverse modulo m only when its gcd with m is 1.', tags: ['University', 'Discrete mathematics', 'truth tables', 'Bézout coefficients', 'modular exponentiation'] },
+  { ...algorithmsX8, id: 'x8-algorithms-u2', title: 'Paths and Genes', level: 'University', topic: "Dijkstra's algorithm, BFS and DFS, and DNA reading frames", symbol: '🧬', height: 2000,
+    syllabusRef: 'University, Algorithms and Bioinformatics',
+    approach: "Run Dijkstra's algorithm on a weighted graph, compare breadth-first and depth-first visiting orders, translate DNA into protein and find open reading frames.",
+    activityPrompt: "Play all rounds, then explain why Dijkstra's algorithm can settle the closest unsettled vertex for good when every edge weight is non-negative.", tags: ['University', 'Algorithms', "Dijkstra's algorithm", 'graph traversal', 'reading frames'] },
+  { ...attenuationX9, id: 'x9-beer-lambert-poly', title: 'Colour and Concentration', level: 'Poly', topic: 'Absorbance, transmittance and calibration curves', symbol: '🧪', height: 1600,
+    syllabusRef: 'Poly applied chemistry: Beer–Lambert law, absorbance, transmittance and calibration curves (generic)',
+    approach: 'Work out absorbance and transmittance with the Beer–Lambert law, and read an unknown solution concentration from a calibration line.',
+    activityPrompt: 'Play all rounds, then explain why absorbance rises in a straight line with concentration while transmittance falls along a curve.', tags: ['Beer–Lambert law', 'absorbance', 'transmittance', 'calibration curve', 'spectroscopy'] },
+  { ...attenuationX9, id: 'x9-beer-lambert-u1', title: 'Layers and Half-Values', level: 'University', topic: 'Stacked attenuation, half-value layers and mass attenuation coefficients', symbol: '🧱', height: 2050,
+    syllabusRef: 'University, Radiation Physics',
+    approach: 'Design shielding stacks of up to three layers, infer attenuation coefficients from measurements, and calculate half-value layers, mean free paths and mass attenuation coefficients.',
+    activityPrompt: 'Play all rounds, then explain why each half-value layer cuts the intensity by the same fraction however thick the shield already is.', tags: ['University', 'Radiation physics', 'attenuation', 'half-value layer', 'mean free path'] },
+  { ...attenuationX9, id: 'x9-beer-lambert-u2', title: 'Light Under Water', level: 'University', topic: 'Light attenuation with depth, euphotic depth and dilution', symbol: '🌊', height: 2000,
+    syllabusRef: 'University, Environmental and Analytical Science',
+    approach: 'Set the euphotic depth of a water body, infer the light attenuation coefficient from readings at two depths, and recover a stock concentration from a dilution and absorbance reading.',
+    activityPrompt: 'Play all rounds, then explain why the euphotic depth is ln(100) divided by the attenuation coefficient.', tags: ['University', 'Environmental science', 'light attenuation', 'euphotic depth', 'dilution'] },
+  { ...optimisationX10, id: 'x10-optimisation-poly', title: 'Money and Choices', level: 'Poly', topic: 'NPV, payback, expected monetary value and production planning', symbol: '💰', height: 1900,
+    syllabusRef: 'Poly business and engineering mathematics: net present value, payback, expected monetary value and two-product optimisation (generic)',
+    approach: 'Compare options using net present value and payback, choose under uncertainty with expected monetary value, and slide an iso-profit line across a feasible region to plan production.',
+    activityPrompt: 'Play all rounds, then explain why a project can pay back quickly yet still have a lower NPV than a slower one.', tags: ['optimisation', 'net present value', 'payback', 'expected monetary value', 'linear programming'] },
+  { ...optimisationX10, id: 'x10-optimisation-u1', title: 'Optimise and Decide', level: 'University', topic: 'Linear programmes, decision trees and the value of information', symbol: '📈', height: 2100,
+    syllabusRef: 'University, Operations Research',
+    approach: 'Classify and solve two-variable linear programmes from their vertices, optimise decisions under uncertainty, and calculate the expected value of perfect information.',
+    activityPrompt: 'Play all rounds, then explain why the expected value of perfect information can never be negative.', tags: ['University', 'Operations research', 'linear programming', 'decision analysis', 'value of information'] },
+  { ...optimisationX10, id: 'x10-optimisation-u2', title: 'Games and Policies', level: 'University', topic: 'Nash equilibria, alpha–beta pruning and value iteration', symbol: '♟️', height: 2000,
+    syllabusRef: 'University, Game Theory and Decision Making',
+    approach: 'Find pure and mixed Nash equilibria, prune a game tree with alpha–beta search, and optimise a grid-world policy with value iteration.',
+    activityPrompt: 'Play all rounds, then explain why alpha–beta pruning gives the same root value as full minimax while evaluating fewer leaves.', tags: ['University', 'Game theory', 'Nash equilibrium', 'alpha–beta pruning', 'value iteration'] },
 ]

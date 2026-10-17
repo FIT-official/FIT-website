@@ -1,0 +1,1276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Light Under Water | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input{font:inherit}
+button,input[type=number],input[type=range]{-webkit-tap-highlight-color:transparent;user-select:none}
+button{cursor:pointer}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button:disabled{opacity:.5;cursor:default}
+svg [tabindex]:focus-visible{outline:none;stroke:#111;stroke-width:6}
+.shell{max-width:1460px;margin:auto;padding:17px 14px 45px}
+.hud{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.badge,.stat{border:2px solid #111;border-radius:999px;padding:8px 13px;font-size:13px;font-weight:800;background:#fff}
+.badge{background:var(--lvl-uni);color:var(--lvl-uni-on);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+h1{font-size:clamp(30px,4.5vw,46px);font-weight:800;letter-spacing:-.035em;line-height:1.1;margin:17px 0 5px}
+.sub{margin:0 0 22px;font-size:16px;color:var(--fit-ink-2)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+.card{background:#fff;border:2px solid #111;border-radius:var(--r-lg);box-shadow:var(--sh-2);padding:18px;min-width:0}
+.stage{background:var(--lvl-uni-tint);border-radius:var(--r-xl);box-shadow:var(--sh-3)}
+.side{display:grid;gap:18px;min-width:0}
+.eyebrow{color:var(--fit-ink-3);font-size:12px;letter-spacing:.11em;text-transform:uppercase;font-weight:800}
+h2{font-size:21px;line-height:1.2;font-weight:800;margin:7px 0 13px}
+.question{min-height:64px;font-size:17px;font-weight:600;margin:8px 0 14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{background:#fff;border:2px solid #111;border-radius:999px;font-size:13px;font-weight:700;padding:7px 12px;font-variant-numeric:tabular-nums}
+.diagram{background:#fff;border:2px solid #111;border-radius:20px;padding:7px;margin:16px 0}
+.diagram svg{display:block;width:100%;height:auto}
+.readouts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0}
+.readout{background:#fff;border:2px solid #111;border-radius:16px;padding:12px;min-width:0}
+.readout small{font-size:12px;color:var(--fit-ink-3);display:block;font-weight:700}
+.readout strong{display:block;font-weight:800;font-size:20px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.concept{display:flex;align-items:center;gap:12px;margin-top:16px;border:2px dashed #111;border-radius:16px;background:#fff;padding:12px}
+.concept svg{width:112px;min-width:112px;height:73px}
+.concept p{font-size:13px;margin:0}
+.plot-group{display:grid;gap:14px}
+.plot-panel{border:2px solid var(--fit-line-soft);border-radius:17px;padding:8px;background:#fff}
+.plot-panel h3{font-weight:800;font-size:15px;margin:3px 0 5px}
+.plot-panel svg{display:block;width:100%;height:auto}
+.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:12px;font-weight:700}
+.legend i{display:inline-block;width:18px;height:5px;background:#1F66E5;border-radius:2px;margin-right:5px}
+.legend i.clear{background:#1E9E5A}
+.legend i.turbid{background:#FF6B3D}
+.legend i.black{background:#111}
+.field{background:var(--fit-sunken);border:2px solid #111;border-radius:18px;padding:12px;margin-bottom:12px}
+.field label{display:block;font-weight:800;font-size:14px;margin-bottom:8px}
+.step-row{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+.step{border:2px solid #111;border-radius:999px;min-width:44px;min-height:46px;background:#fff;font-weight:800;font-size:18px;box-shadow:var(--sh-1)}
+.step:active,.action:active{transform:translateY(2px);box-shadow:none}
+input[type=number]{min-width:0;width:115px;border:2px solid #111;border-radius:12px;background:#fff;text-align:center;font-weight:700;padding:10px 5px;font-size:16px}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-uni);cursor:pointer;margin-top:5px}
+.ends{display:flex;justify-content:space-between;font-size:12px;color:var(--fit-ink-3);font-weight:600}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:17px}
+.action{min-height:48px;border:2px solid #111;background:#fff;border-radius:999px;padding:11px 20px;font-weight:800;box-shadow:var(--sh-1)}
+.action.check{border-width:3px;background:var(--fit-sun);font-size:17px;box-shadow:var(--sh-2)}
+.action.check:active{box-shadow:var(--sh-1);transform:translateY(3px)}
+.feedback{border:2px solid #111;border-radius:16px;background:#fff;min-height:48px;padding:12px;font-weight:600;margin-top:12px}
+.feedback:empty{display:none}
+.feedback.ok{border-color:var(--fit-success);background:#E8FAEF}
+.feedback.bad{border-color:var(--fit-danger);background:#FFF0EE}
+.hint{background:#FFF5D3;border:2px dashed #111;padding:12px;border-radius:15px;margin-top:13px;font-weight:600;font-size:14px}
+[hidden],.hidden{display:none!important}
+details{margin-top:18px;border:2px solid #111;border-radius:18px;background:#fff;padding:14px}
+summary{display:flex;align-items:center;min-height:44px;cursor:pointer;font-weight:800}
+.math{font-size:14px;line-height:1.85}
+.math p{margin:8px 0}
+.end{border:3px solid #111;border-radius:32px;background:var(--lvl-uni-tint);box-shadow:var(--sh-3);padding:36px 20px;text-align:center}
+.stars{color:#DEAA00;font-size:55px;letter-spacing:7px}
+.end-score{font-size:26px;font-weight:800}
+@media(min-width:900px){.shell{padding:25px 27px 62px}.layout{grid-template-columns:minmax(0,1fr) minmax(0,1.07fr)}.card{padding:21px}}
+@media(max-width:440px){.shell{padding:12px 9px 35px}.card{padding:13px}.field{padding:10px}input[type=number]{width:98px}.readout strong{font-size:17px}}
+@media(prefers-reduced-motion:no-preference){.action,.step{transition:transform var(--dur-1) var(--ease-out),box-shadow var(--dur-1) var(--ease-out)}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="hud">
+      <span class="badge">University (later years)</span>
+      <span class="stat" id="roundLabel">Round 1/6</span>
+      <span class="stat">Score <span id="score">0</span>/600</span>
+    </div>
+    <h1>Light Under Water</h1>
+    <p class="sub">Diffuse attenuation · Euphotic depth · Inverse measurement · Dilution design</p>
+  </header>
+
+  <main id="game" class="layout">
+    <section class="card stage">
+      <div class="eyebrow" id="type">Challenge A · Water clarity</div>
+      <h2 id="title">Locate the euphotic boundary</h2>
+      <p class="question" id="question"></p>
+      <div class="chips" id="given"></div>
+
+      <div class="diagram">
+        <svg id="diagram" role="img"
+          aria-label="A water column with light decreasing with depth."
+          viewBox="0 0 640 315"></svg>
+      </div>
+
+      <div class="readouts">
+        <div class="readout">
+          <small id="readingOneLabel">Current euphotic depth</small>
+          <strong id="readingOne">—</strong>
+        </div>
+        <div class="readout">
+          <small id="readingTwoLabel">Light at probe depth</small>
+          <strong id="readingTwo">—</strong>
+        </div>
+      </div>
+
+      <div class="concept">
+        <svg viewBox="0 0 115 75" role="img"
+          aria-label="Two columns of water, clear and turbid, with light reaching different depths.">
+          <rect x="4" y="6" width="45" height="62" rx="6" fill="#B6E9FE"
+            stroke="#111" stroke-width="3"/>
+          <rect x="65" y="6" width="45" height="62" rx="6" fill="#78B4C6"
+            stroke="#111" stroke-width="3"/>
+          <path d="M25 12 V58 M87 12 V29" stroke="#FFDD00"
+            stroke-width="7" stroke-linecap="round"/>
+          <path d="M20 51 L25 61 L30 51 M82 23 L87 33 L92 23"
+            fill="none" stroke="#111" stroke-width="2"/>
+        </svg>
+        <p><strong>Concept:</strong> Clear water carries useful light deeper than turbid water; both follow an exponential model.</p>
+      </div>
+
+      <details>
+        <summary>The maths</summary>
+        <div class="math">
+          <p><strong>Water:</strong> I(z)/I₀ = exp(−kz).</p>
+          <p><strong>Euphotic depth:</strong> zₑ = ln(100)/k, at 1% light.</p>
+          <p><strong>Two-depth measurement:</strong>
+            I(z₂)/I(z₁) = exp[−k(z₂ − z₁)].</p>
+          <p><strong>Inverse coefficient:</strong>
+            k = −ln[I(z₂)/I(z₁)]/(z₂ − z₁).</p>
+          <p><strong>Spectroscopy:</strong> A = εcl;
+            c = A/(εl).</p>
+          <p><strong>Dilution:</strong> D = V<sub>final</sub>/V<sub>aliquot</sub>;
+            c<sub>diluted</sub> = c<sub>stock</sub>/D.</p>
+          <p>k: m⁻¹; z and zₑ: m; ε: L/(mol·cm); c: mol/L; l: cm; A: dimensionless.</p>
+          <p>Assumption: each medium has one constant attenuation coefficient at one optical band, without multi-component spectra. The cuvette is homogeneous and follows the linear Beer–Lambert law.</p>
+        </div>
+      </details>
+    </section>
+
+    <div class="side">
+      <section class="card">
+        <div class="eyebrow">Live quantitative models</div>
+        <h2>Depth and calibration</h2>
+
+        <div class="plot-group">
+          <div class="plot-panel">
+            <h3>Light fraction against depth · logarithmic intensity axis</h3>
+            <svg id="depthPlot" role="img"
+              aria-label="Logarithmic light fraction versus water depth with a one-percent line."
+              viewBox="0 0 760 285"></svg>
+          </div>
+
+          <div class="plot-panel">
+            <h3>Absorbance against concentration · linear window</h3>
+            <svg id="calPlot" role="img"
+              aria-label="Absorbance calibration curve with a shaded linear working window."
+              viewBox="0 0 760 265"></svg>
+          </div>
+
+          <div class="legend">
+            <span><i></i>Current model</span>
+            <span><i class="clear"></i>Clear-water reference</span>
+            <span><i class="turbid"></i>Turbid-water reference</span>
+            <span><i class="black"></i>Observation / sample ●</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="eyebrow">Investigation controls</div>
+        <h2 id="controlTitle">Set the attenuation coefficient</h2>
+        <div id="controls"></div>
+        <div id="hintBox" class="hint" hidden></div>
+        <div class="actions">
+          <button id="hintBtn" class="action" type="button">Hint −50 points</button>
+          <button id="checkBtn" class="action check" type="button">Check</button>
+          <button id="nextBtn" class="action" type="button" hidden>Next round →</button>
+        </div>
+        <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+      </section>
+    </div>
+  </main>
+
+  <section id="end" class="end hidden" aria-live="polite">
+    <div class="eyebrow">All investigations completed</div>
+    <h2>Light and water specialist!</h2>
+    <div class="stars" id="stars"></div>
+    <div class="end-score" id="finalScore"></div>
+    <p id="closing"></p>
+    <button id="again" class="action check" type="button">Play again ↻</button>
+  </section>
+</div>
+
+<script>
+/* FIT-CALC-BEGIN x9_beer_lambert */
+const FITCalcX9 = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+
+  function error(cls, reason) {
+    return { error: cls, reason };
+  }
+
+  function validate(values) {
+    for (const value of values) {
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
+        return error('ConstraintViolation', 'non_finite_input');
+      }
+      if (value < 0) {
+        return error('ConstraintViolation', 'negative_input');
+      }
+    }
+    return null;
+  }
+
+  function finiteResult(result) {
+    for (const value of Object.values(result)) {
+      if (typeof value === 'number' && !Number.isFinite(value)) {
+        return error('ConstraintViolation', 'numeric_overflow');
+      }
+    }
+    return result;
+  }
+
+  function finiteOrNull(value) {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  /**
+   * Beer-Lambert spectroscopy at one wavelength.
+   * Inputs: epsilon in L/(mol cm), c in mol/L, l in cm.
+   * Outputs: A dimensionless, T as a fraction, percent_T in %.
+   * Assumptions: homogeneous solution, monochromatic light,
+   * constant molar absorptivity, no scattering or stray light.
+   * Errors: negative_input, non_finite_input, numeric_overflow.
+   *
+   * Hand check: epsilon=200, c=0.002, l=1 gives
+   * A=0.4, T=0.3981071705534972, percent_T=39.81071705534972.
+   */
+  function beer_lambert({ epsilon, c, l }) {
+    const invalid = validate([epsilon, c, l]);
+    if (invalid) return invalid;
+
+    const A = epsilon * c * l;
+    const T = Math.pow(10, -A);
+    const percent_T = 100 * T;
+
+    return finiteResult({ A, T, percent_T });
+  }
+
+  /**
+   * Recover concentration from measured absorbance.
+   * Inputs: A dimensionless, epsilon in L/(mol cm), l in cm.
+   * Output: c in mol/L.
+   * Assumptions: Beer-Lambert linear regime; epsilon and l known.
+   * Errors: negative_input, non_finite_input,
+   * epsilon_times_path_must_be_positive, numeric_overflow.
+   *
+   * Hand check: A=0.6, epsilon=150, l=2 gives c=0.002 mol/L.
+   */
+  function beer_lambert_conc({ A, epsilon, l }) {
+    const invalid = validate([A, epsilon, l]);
+    if (invalid) return invalid;
+
+    const denominator = epsilon * l;
+    if (denominator <= 0) {
+      return error('MathError', 'epsilon_times_path_must_be_positive');
+    }
+
+    return finiteResult({ c: A / denominator });
+  }
+
+  /**
+   * Convert percentage transmittance to base-10 absorbance.
+   * Input: percent_T in %, strictly above 0 and at most 100.
+   * Output: A dimensionless.
+   * Assumptions: transmittance refers to the incident beam.
+   * Errors: transmittance_must_be_in_0_100, non_finite_input.
+   *
+   * Hand check: percent_T=10 gives A=1.
+   */
+  function absorbance_from_T({ percent_T }) {
+    if (typeof percent_T !== 'number' || !Number.isFinite(percent_T)) {
+      return error('ConstraintViolation', 'non_finite_input');
+    }
+    if (percent_T <= 0 || percent_T > 100) {
+      return error('MathError', 'transmittance_must_be_in_0_100');
+    }
+
+    return finiteResult({ A: 2 - Math.log10(percent_T) });
+  }
+
+  /**
+   * Exponential attenuation through one to three homogeneous layers.
+   * Input: layers is an array of 1-3 {mu, x} objects;
+   * mu in cm^-1, x in cm.
+   * Outputs: I_over_I0 dimensionless, total_mu_x dimensionless,
+   * HVL and mean_free_path in cm or null.
+   * HVL and mean_free_path are defined here only for one layer
+   * with positive mu. They are null for multiple layers or mu=0.
+   * Assumptions: narrow-beam exponential law, independent layers,
+   * no scattering, build-up or spectral changes.
+   * Errors: layers_out_of_range_1_3, negative_input,
+   * non_finite_input, numeric_overflow.
+   *
+   * Hand check: [{mu:0.2,x:3}] gives total_mu_x=0.6,
+   * I_over_I0=0.5488116360940264,
+   * HVL=3.465735902799726, mean_free_path=5 cm.
+   */
+  function attenuation({ layers }) {
+    if (!Array.isArray(layers) || layers.length < 1 || layers.length > 3) {
+      return error('ConstraintViolation', 'layers_out_of_range_1_3');
+    }
+
+    let total_mu_x = 0;
+    for (const layer of layers) {
+      if (!layer || typeof layer !== 'object') {
+        return error('ConstraintViolation', 'non_finite_input');
+      }
+      const invalid = validate([layer.mu, layer.x]);
+      if (invalid) return invalid;
+      total_mu_x += layer.mu * layer.x;
+    }
+
+    const I_over_I0 = Math.exp(-total_mu_x);
+    let HVL = null;
+    let mean_free_path = null;
+
+    if (layers.length === 1 && layers[0].mu > 0) {
+      HVL = finiteOrNull(Math.LN2 / layers[0].mu);
+      mean_free_path = finiteOrNull(1 / layers[0].mu);
+    }
+
+    return finiteResult({
+      I_over_I0,
+      total_mu_x,
+      HVL,
+      mean_free_path
+    });
+  }
+
+  /**
+   * Convert a supplied mass attenuation coefficient to linear
+   * attenuation and transmitted intensity.
+   * Inputs: mu_over_rho in cm^2/g, rho in g/cm^3, x in cm.
+   * Outputs: mu in cm^-1, I_over_I0 dimensionless.
+   * Assumptions: uniform density and coefficient at one photon
+   * energy; no coefficient database, scattering or build-up.
+   * Errors: negative_input, non_finite_input, numeric_overflow.
+   *
+   * Hand check: mu_over_rho=0.08, rho=2.5, x=4 gives
+   * mu=0.2 cm^-1, I_over_I0=0.44932896411722156.
+   */
+  function mass_attenuation({ mu_over_rho, rho, x }) {
+    const invalid = validate([mu_over_rho, rho, x]);
+    if (invalid) return invalid;
+
+    const mu = mu_over_rho * rho;
+    const I_over_I0 = Math.exp(-mu * x);
+
+    return finiteResult({ mu, I_over_I0 });
+  }
+
+  /**
+   * Light attenuation with depth in homogeneous water.
+   * Inputs: k in m^-1, z in m.
+   * Outputs: I_over_I0 dimensionless, euphotic_depth in m
+   * or null if k=0.
+   * Euphotic depth is the 1% light level.
+   * Assumptions: fixed diffuse attenuation coefficient, one
+   * optical band, exponential decay with depth.
+   * Errors: negative_input, non_finite_input, numeric_overflow.
+   *
+   * Hand check: k=0.25, z=4 gives I_over_I0=0.36787944117144233,
+   * euphotic_depth=18.420680743952367 m.
+   */
+  function light_depth({ k, z }) {
+    const invalid = validate([k, z]);
+    if (invalid) return invalid;
+
+    const I_over_I0 = Math.exp(-k * z);
+    const euphotic_depth = k === 0
+      ? null
+      : finiteOrNull(Math.log(100) / k);
+
+    return finiteResult({ I_over_I0, euphotic_depth });
+  }
+
+  /**
+   * Infer a homogeneous exponential attenuation coefficient.
+   * Inputs: I_over_I0 as a fraction in (0,1], x in cm
+   * for slab work or a consistent distance unit for other media.
+   * Output: mu in inverse units of x (cm^-1 for slab work,
+   * m^-1 when x is supplied in metres for water).
+   * Assumptions: one homogeneous exponential attenuation region.
+   * Errors: transmission_must_be_in_0_1_and_x_positive,
+   * non_finite_input, numeric_overflow.
+   *
+   * Hand check: I_over_I0=0.5, x=2 gives
+   * mu=0.34657359027997264 in inverse distance units.
+   */
+  function mu_from_measurement({ I_over_I0, x }) {
+    if (
+      typeof I_over_I0 !== 'number' ||
+      !Number.isFinite(I_over_I0) ||
+      typeof x !== 'number' ||
+      !Number.isFinite(x)
+    ) {
+      return error('ConstraintViolation', 'non_finite_input');
+    }
+
+    if (I_over_I0 <= 0 || I_over_I0 > 1 || x <= 0) {
+      return error(
+        'MathError',
+        'transmission_must_be_in_0_1_and_x_positive'
+      );
+    }
+
+    return finiteResult({ mu: -Math.log(I_over_I0) / x });
+  }
+
+  return Object.freeze({
+    API_VERSION,
+    beer_lambert,
+    beer_lambert_conc,
+    absorbance_from_T,
+    attenuation,
+    mass_attenuation,
+    light_depth,
+    mu_from_measurement
+  });
+})();
+/* FIT-CALC-END x9_beer_lambert */
+
+(function () {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const modes = ['A', 'B', 'C', 'A', 'B', 'C'];
+  const CLEAR_K = 0.08;
+  const TURBID_K = 0.50;
+  let round = 0;
+  let run = 0;
+  let score = 0;
+  let state;
+
+  function generator(seed) {
+    let n = seed >>> 0;
+    return () => {
+      n = (Math.imul(1664525, n) + 1013904223) >>> 0;
+      return n / 4294967296;
+    };
+  }
+
+  function choose(r, list) {
+    return list[Math.floor(r() * list.length)];
+  }
+
+  function sig(n) {
+    return Number.isFinite(n)
+      ? Number(n.toPrecision(3)).toString()
+      : '—';
+  }
+
+  function clamp(n, min, max) {
+    return Math.max(min, Math.min(max, n));
+  }
+
+  function good(result) {
+    return result && !result.error;
+  }
+
+  function createRound(index) {
+    const r = generator(17713 + run * 99991 + index * 7919);
+    const mode = modes[index];
+
+    if (mode === 'A') {
+      const wantedK = choose(r, [0.10, 0.15, 0.20, 0.25, 0.30, 0.40]);
+      const model = FITCalcX9.light_depth({
+        k: wantedK,
+        z: 12
+      });
+
+      return {
+        mode,
+        targetDepth: model.euphotic_depth,
+        k: 0.05,
+        attempts: 0,
+        hinted: false,
+        solved: false
+      };
+    }
+
+    if (mode === 'B') {
+      const actualK = choose(r, [0.12, 0.18, 0.24, 0.32]);
+      const z1 = choose(r, [2, 3, 4]);
+      const z2 = choose(r, [9, 11, 13]);
+      const reading1 = FITCalcX9.light_depth({
+        k: actualK, z: z1
+      });
+      const reading2 = FITCalcX9.light_depth({
+        k: actualK, z: z2
+      });
+      const ratio = FITCalcX9.light_depth({
+        k: actualK, z: z2 - z1
+      });
+
+      return {
+        mode,
+        z1, z2,
+        reading1: reading1.I_over_I0,
+        reading2: reading2.I_over_I0,
+        ratio: ratio.I_over_I0,
+        k: 0.05,
+        depthGuess: 10,
+        attempts: 0,
+        hinted: false,
+        solved: false
+      };
+    }
+
+    const stock = choose(r, [0.024, 0.032, 0.040, 0.048]);
+    const epsilon = choose(r, [75, 100, 125]);
+    const path = 1;
+
+    return {
+      mode,
+      stock,
+      epsilon,
+      path,
+      D: 1,
+      stockGuess: 0.005,
+      attempts: 0,
+      hinted: false,
+      solved: false
+    };
+  }
+
+  function chip(text) {
+    const el = document.createElement('span');
+    el.className = 'chip';
+    el.textContent = text;
+    $('given').appendChild(el);
+  }
+
+  function field(key, label, unit, min, max, step, initial) {
+    return `
+      <div class="field">
+        <label for="field-${key}">${label} (${unit})</label>
+        <div class="step-row">
+          <button type="button" class="step" data-key="${key}"
+            data-delta="${-5 * step}"
+            aria-label="Decrease ${label} coarsely">−−</button>
+          <button type="button" class="step" data-key="${key}"
+            data-delta="${-step}"
+            aria-label="Decrease ${label} finely">−</button>
+          <input id="field-${key}" data-key="${key}" type="number"
+            inputmode="decimal" min="${min}" max="${max}" step="${step}"
+            value="${initial}" aria-label="${label} in ${unit}">
+          <button type="button" class="step" data-key="${key}"
+            data-delta="${step}"
+            aria-label="Increase ${label} finely">+</button>
+          <button type="button" class="step" data-key="${key}"
+            data-delta="${5 * step}"
+            aria-label="Increase ${label} coarsely">++</button>
+        </div>
+        <input data-key="${key}" type="range" min="${min}"
+          max="${max}" step="${step}" value="${initial}"
+          aria-label="${label} slider">
+        <div class="ends"><span>${min} ${unit}</span><span>${max} ${unit}</span></div>
+      </div>`;
+  }
+
+  function initialise() {
+    state = createRound(round);
+    $('roundLabel').textContent = `Round ${round + 1}/6`;
+    $('score').textContent = score;
+    $('given').replaceChildren();
+    $('feedback').textContent = '';
+    $('feedback').className = 'feedback';
+    $('hintBox').hidden = true;
+    $('hintBox').textContent = '';
+    $('hintBtn').disabled = false;
+    $('checkBtn').hidden = false;
+    $('nextBtn').hidden = true;
+    $('nextBtn').textContent = round === 5 ? 'See results →' : 'Next round →';
+
+    const s = state;
+
+    if (s.mode === 'A') {
+      $('type').textContent = 'Challenge A · Water clarity';
+      $('title').textContent = 'Design a euphotic depth';
+      $('question').textContent =
+        `Adjust the diffuse attenuation coefficient until the 1% ` +
+        `light depth is ${sig(s.targetDepth)} m. ` +
+        'Compare your curve with the clear and turbid references.';
+
+      chip(`Target euphotic depth = ${sig(s.targetDepth)} m`);
+      chip('Euphotic boundary = 1% surface light');
+
+      $('controlTitle').textContent = 'Set water attenuation';
+      $('controls').innerHTML = field(
+        'k', 'Diffuse attenuation k', 'm⁻¹', 0.05, 0.8, 0.01, s.k
+      );
+    } else if (s.mode === 'B') {
+      $('type').textContent = 'Challenge B · Inverse light measurement';
+      $('title').textContent = 'Recover the attenuation coefficient';
+      $('question').textContent =
+        'A probe measures light at two depths. ' +
+        'Infer k from their intensity ratio, then calculate the 1% depth.';
+
+      chip(`z₁ = ${sig(s.z1)} m`);
+      chip(`I(z₁)/I₀ = ${sig(s.reading1)}`);
+      chip(`z₂ = ${sig(s.z2)} m`);
+      chip(`I(z₂)/I₀ = ${sig(s.reading2)}`);
+
+      $('controlTitle').textContent = 'Enter both inferred quantities';
+      $('controls').innerHTML =
+        field('k', 'Inferred k', 'm⁻¹', 0.05, 0.8, 0.01, s.k) +
+        field('depthGuess', 'Calculated euphotic depth', 'm',
+          0, 150, 0.1, s.depthGuess);
+    } else {
+      $('type').textContent = 'Challenge C · Dilution design';
+      $('title').textContent = 'Rescue an overloaded spectrometer';
+      $('question').textContent =
+        'An unknown stock is too concentrated to measure directly. ' +
+        'Choose an integer dilution factor D that puts absorbance ' +
+        'within 0.1–1.0. Use the live meter reading to recover the ' +
+        'original stock concentration.';
+
+      chip(`ε = ${sig(s.epsilon)} L/(mol·cm)`);
+      chip(`Path l = ${sig(s.path)} cm`);
+      chip('Linear window: 0.1 ≤ A ≤ 1.0');
+
+      $('controlTitle').textContent = 'Dilute, measure and recover';
+      $('controls').innerHTML =
+        field('D', 'Dilution factor D', 'times', 1, 40, 1, s.D) +
+        field('stockGuess', 'Estimated stock concentration',
+          'mol/L', 0, 0.08, 0.001, s.stockGuess);
+    }
+
+    update();
+  }
+
+  function selectedK() {
+    return state.mode === 'C' ? 0.20 : state.k;
+  }
+
+  function waterReading() {
+    return FITCalcX9.light_depth({
+      k: selectedK(),
+      z: state.mode === 'B' ? state.z2 : 12
+    });
+  }
+
+  function dilutedReading() {
+    if (state.mode !== 'C') return null;
+    return FITCalcX9.beer_lambert({
+      epsilon: state.epsilon,
+      c: state.stock / state.D,
+      l: state.path
+    });
+  }
+
+  function fieldLimits(key) {
+    if (key === 'k') {
+      return { min: 0.05, max: 0.8, step: 0.01 };
+    }
+    if (key === 'depthGuess') {
+      return { min: 0, max: 150, step: 0.1 };
+    }
+    if (key === 'D') {
+      return { min: 1, max: 40, step: 1 };
+    }
+    return { min: 0, max: 0.08, step: 0.001 };
+  }
+
+  function update(source) {
+    const s = state;
+    const water = waterReading();
+    if (!good(water)) return;
+
+    if (s.mode === 'C') {
+      const diluted = dilutedReading();
+      if (!good(diluted)) return;
+      $('readingOneLabel').textContent = 'Live diluted absorbance';
+      $('readingOne').textContent = sig(diluted.A);
+      $('readingTwoLabel').textContent = 'Linear-window status';
+      $('readingTwo').textContent =
+        diluted.A >= 0.1 && diluted.A <= 1
+          ? '✓ In window'
+          : diluted.A < 0.1 ? 'Below window' : 'Above window';
+    } else {
+      $('readingOneLabel').textContent = 'Current euphotic depth';
+      $('readingOne').textContent = `${sig(water.euphotic_depth)} m`;
+      $('readingTwoLabel').textContent =
+        s.mode === 'B'
+          ? `Current model at ${sig(s.z2)} m`
+          : 'Model light at 12 m';
+      $('readingTwo').textContent =
+        `${sig(100 * water.I_over_I0)}%`;
+    }
+
+    for (const input of $('controls').querySelectorAll('input[data-key]')) {
+      if (input === source) continue;
+      input.value = s[input.dataset.key];
+    }
+
+    drawDiagram();
+    drawDepthPlot();
+    drawCalibrationPlot();
+  }
+
+  function drawDiagram() {
+    const s = state;
+
+    if (s.mode === 'C') {
+      const meter = dilutedReading();
+      const opacity = clamp(meter.A / 2, 0.12, 0.95);
+      $('diagram').innerHTML = `
+        <rect x="5" y="5" width="630" height="305" rx="18" fill="#F4F3EF"/>
+        <rect x="22" y="40" width="145" height="200" rx="17"
+          fill="#fff" stroke="#111" stroke-width="4"/>
+        <rect x="38" y="71" width="113" height="151" rx="8"
+          fill="#F78BAD" opacity=".85"/>
+        <path d="M26 73 H164" stroke="#111" stroke-width="3"/>
+        <text x="94" y="28" text-anchor="middle"
+          font-size="18" font-weight="800">STOCK</text>
+        <text x="94" y="260" text-anchor="middle"
+          font-size="15" font-weight="700">Unknown c</text>
+
+        <path d="M185 135 H294" stroke="#111" stroke-width="6"
+          stroke-linecap="round"/>
+        <path d="M281 122 L297 135 L281 148" stroke="#111"
+          stroke-width="6" fill="none" stroke-linecap="round"/>
+        <text x="244" y="111" text-anchor="middle" font-size="18"
+          font-weight="800">Dilute ×${sig(s.D)}</text>
+
+        <rect x="316" y="40" width="115" height="200" rx="16"
+          fill="#E8F9FF" stroke="#111" stroke-width="4"/>
+        <rect x="331" y="72" width="85" height="148" rx="7"
+          fill="#F78BAD" opacity="${opacity}"/>
+        <text x="372" y="28" text-anchor="middle"
+          font-size="18" font-weight="800">CUVETTE</text>
+        <text x="373" y="260" text-anchor="middle"
+          font-size="15" font-weight="700">l = ${sig(s.path)} cm</text>
+
+        <path d="M437 139 H508" stroke="#FFDD00"
+          stroke-width="13" stroke-linecap="round"/>
+        <rect x="510" y="91" width="110" height="107" rx="13"
+          fill="#fff" stroke="#111" stroke-width="4"/>
+        <text x="565" y="120" text-anchor="middle"
+          font-size="16" font-weight="800">METER</text>
+        <text x="565" y="153" text-anchor="middle"
+          font-size="20" font-weight="800">${sig(meter.A)}</text>
+        <text x="565" y="174" text-anchor="middle"
+          font-size="14" font-weight="700">A</text>
+        <text x="322" y="295" text-anchor="middle"
+          font-size="15" font-weight="700">Dilution factor D = ${sig(s.D)}</text>`;
+
+      $('diagram').setAttribute('aria-label',
+        `An unknown stock is diluted by factor ${sig(s.D)}. ` +
+        `The diluted sample meter reads absorbance ${sig(meter.A)}.`);
+      return;
+    }
+
+    const k = selectedK();
+    const zProbe = s.mode === 'B' ? s.z2 : 12;
+    const lightAtProbe = FITCalcX9.light_depth({ k, z: zProbe });
+    const intensity = clamp(lightAtProbe.I_over_I0, 0.04, 1);
+    const h = 240;
+    const probeY = 55 + h * zProbe / 70;
+    const safeY = clamp(probeY, 55, 288);
+
+    let observations = '';
+    if (s.mode === 'B') {
+      for (const [depth, fraction] of [
+        [s.z1, s.reading1],
+        [s.z2, s.reading2]
+      ]) {
+        const y = 55 + h * depth / 70;
+        observations += `
+          <line x1="198" y1="${y}" x2="545" y2="${y}"
+            stroke="#111" stroke-width="2" stroke-dasharray="5 4"/>
+          <circle cx="294" cy="${y}" r="8"
+            fill="#FFC83D" stroke="#111" stroke-width="3"/>
+          <text x="391" y="${y - 9}" font-size="15"
+            font-weight="800">${sig(depth)} m · ${sig(100 * fraction)}%</text>`;
+      }
+    }
+
+    $('diagram').innerHTML = `
+      <rect x="5" y="5" width="630" height="305" rx="17" fill="#F4F3EF"/>
+      <rect x="21" y="55" width="175" height="232" rx="9"
+        fill="#B6E9FE" stroke="#111" stroke-width="4"/>
+      <path d="M25 53 Q65 44 107 53 T190 53" fill="none"
+        stroke="#1579AF" stroke-width="4"/>
+      <circle cx="107" cy="21" r="17" fill="#FFDD00"
+        stroke="#111" stroke-width="3"/>
+      <path d="M107 38 V${safeY}" stroke="#FFDD00"
+        stroke-width="15" opacity="${intensity}"/>
+      <path d="M98 ${safeY - 14} L107 ${safeY}
+        L116 ${safeY - 14}" fill="none"
+        stroke="#111" stroke-width="3"/>
+      <text x="107" y="304" text-anchor="middle"
+        font-size="15" font-weight="800">WATER COLUMN</text>
+
+      <path d="M197 55 H604" stroke="#111" stroke-width="3"/>
+      <text x="399" y="32" text-anchor="middle"
+        font-size="18" font-weight="800">Incident surface light: I₀</text>
+      ${observations}
+      <rect x="492" y="230" width="118" height="55" rx="12"
+        fill="#fff" stroke="#111" stroke-width="3"/>
+      <text x="551" y="251" text-anchor="middle"
+        font-size="14" font-weight="800">Current k</text>
+      <text x="551" y="271" text-anchor="middle"
+        font-size="15" font-weight="800">${sig(k)} m⁻¹</text>`;
+
+    $('diagram').setAttribute('aria-label',
+      `Water light attenuation model. Selected coefficient ${sig(k)} ` +
+      `per metre. At depth ${sig(zProbe)} m, the predicted fraction ` +
+      `is ${sig(lightAtProbe.I_over_I0)}.`);
+  }
+
+  function plotFrame(title, xLabel, yLabel, xMax, yTickValues, yFn) {
+    const left = 77;
+    const right = 718;
+    const top = 45;
+    const bottom = 224;
+    const px = x => left + clamp(x / xMax, 0, 1) * (right - left);
+    const py = yFn;
+
+    let svg = `
+      <text x="${left}" y="20" font-size="16"
+        font-weight="800">${title}</text>
+      <line x1="${left}" y1="${top}" x2="${left}" y2="${bottom}"
+        stroke="#111" stroke-width="2"/>
+      <line x1="${left}" y1="${bottom}" x2="${right}" y2="${bottom}"
+        stroke="#111" stroke-width="2"/>
+      <text x="${left}" y="36" font-size="12"
+        font-weight="800">${yLabel}</text>
+      <text x="395" y="259" text-anchor="middle"
+        font-size="13" font-weight="700">${xLabel}</text>`;
+
+    for (let i = 0; i <= 5; i++) {
+      const x = xMax * i / 5;
+      svg += `
+        <line x1="${px(x)}" y1="${bottom}"
+          x2="${px(x)}" y2="${bottom + 5}"
+          stroke="#111" stroke-width="2"/>
+        <text x="${px(x)}" y="${bottom + 19}"
+          text-anchor="middle" font-size="11">${sig(x)}</text>`;
+    }
+
+    for (const value of yTickValues) {
+      const y = py(value);
+      svg += `
+        <line x1="${left}" y1="${y}" x2="${right}" y2="${y}"
+          stroke="#D5D4D0" stroke-width="1" stroke-dasharray="4 5"/>
+        <text x="${left - 9}" y="${y + 4}" text-anchor="end"
+          font-size="11">${sig(value)}</text>`;
+    }
+
+    return { svg, px, py, left, right, top, bottom };
+  }
+
+  function drawDepthPlot() {
+    const k = selectedK();
+    const reference = FITCalcX9.light_depth({ k, z: 0 });
+    const euphotic = reference.euphotic_depth;
+    const maxDepth = Math.max(
+      70,
+      euphotic === null ? 70 : Math.min(130, euphotic * 1.22),
+      state.mode === 'B' ? state.z2 * 1.3 : 0
+    );
+
+    const py = fraction => {
+      const safeFraction = clamp(fraction, 0.0001, 1);
+      return 45 + (-Math.log10(safeFraction) / 4) * (224 - 45);
+    };
+
+    const f = plotFrame('Diffuse light attenuation',
+      'Depth z (m)', 'I(z)/I₀ (log scale)',
+      maxDepth, [1, 0.1, 0.01, 0.001, 0.0001], py);
+
+    let svg = f.svg;
+    const lineAt1 = py(0.01);
+    svg += `
+      <line x1="${f.left}" y1="${lineAt1}" x2="${f.right}"
+        y2="${lineAt1}" stroke="#111" stroke-width="2"
+        stroke-dasharray="8 5"/>
+      <text x="${f.right - 5}" y="${lineAt1 - 8}" text-anchor="end"
+        font-size="12" font-weight="800">1% light</text>`;
+
+    for (const [coef, colour, dashed] of [
+      [CLEAR_K, '#1E9E5A', true],
+      [TURBID_K, '#FF6B3D', true],
+      [k, '#1F66E5', false]
+    ]) {
+      const points = [];
+
+      for (let i = 0; i <= 100; i++) {
+        const z = maxDepth * i / 100;
+        const result = FITCalcX9.light_depth({
+          k: coef,
+          z
+        });
+        if (good(result)) {
+          points.push(`${f.px(z)},${f.py(result.I_over_I0)}`);
+        }
+      }
+
+      svg += `
+        <polyline points="${points.join(' ')}" fill="none"
+          stroke="${colour}" stroke-width="${dashed ? 2.5 : 4}"
+          ${dashed ? 'stroke-dasharray="7 5"' : ''}/>`;
+    }
+
+    if (Number.isFinite(euphotic)) {
+      const x = f.px(euphotic);
+      svg += `
+        <line x1="${x}" y1="${f.top}" x2="${x}" y2="${f.bottom}"
+          stroke="#111" stroke-width="2" stroke-dasharray="4 5"/>
+        <circle cx="${x}" cy="${lineAt1}" r="7"
+          fill="#FFC83D" stroke="#111" stroke-width="3"/>`;
+    }
+
+    if (state.mode === 'B') {
+      for (const [depth, fraction] of [
+        [state.z1, state.reading1],
+        [state.z2, state.reading2]
+      ]) {
+        svg += `
+          <circle cx="${f.px(depth)}" cy="${f.py(fraction)}" r="7"
+            fill="#111" stroke="#fff" stroke-width="2"/>`;
+      }
+    }
+
+    $('depthPlot').innerHTML = svg;
+    $('depthPlot').setAttribute('aria-label',
+      `Logarithmic intensity versus depth for clear-water, ` +
+      `turbid-water and selected coefficients. One-percent threshold ` +
+      `and selected model euphotic-depth marker are displayed.`);
+  }
+
+  function drawCalibrationPlot() {
+    const s = state;
+    const epsilon = s.mode === 'C' ? s.epsilon : 100;
+    const l = 1;
+    const maxC = s.mode === 'C' ? 0.06 : 0.03;
+    const maxA = s.mode === 'C' ? 7.5 : 4;
+    const top = 44;
+    const bottom = 208;
+    const left = 77;
+    const right = 718;
+
+    const px = c => left + clamp(c / maxC, 0, 1) * (right - left);
+    const py = A => bottom -
+      clamp(A / maxA, 0, 1) * (bottom - top);
+
+    let svg = `
+      <rect x="${left}" y="${py(1)}"
+        width="${right - left}" height="${py(0.1) - py(1)}"
+        fill="#DDF7F1"/>
+      <text x="${left}" y="20" font-size="16" font-weight="800">
+        Beer–Lambert calibration
+      </text>
+      <line x1="${left}" y1="${top}" x2="${left}" y2="${bottom}"
+        stroke="#111" stroke-width="2"/>
+      <line x1="${left}" y1="${bottom}" x2="${right}" y2="${bottom}"
+        stroke="#111" stroke-width="2"/>
+      <text x="${left}" y="35" font-size="12"
+        font-weight="800">A (unitless)</text>
+      <text x="398" y="250" text-anchor="middle" font-size="13"
+        font-weight="700">Concentration c (mol/L)</text>`;
+
+    for (let i = 0; i <= 5; i++) {
+      const c = maxC * i / 5;
+      svg += `
+        <line x1="${px(c)}" y1="${bottom}" x2="${px(c)}"
+          y2="${bottom + 5}" stroke="#111" stroke-width="2"/>
+        <text x="${px(c)}" y="${bottom + 18}"
+          text-anchor="middle" font-size="11">${sig(c)}</text>`;
+    }
+
+    for (const a of [0, 0.1, 1, 2, 3, maxA]) {
+      svg += `
+        <line x1="${left}" y1="${py(a)}" x2="${right}" y2="${py(a)}"
+          stroke="#D5D4D0" stroke-width="1" stroke-dasharray="3 5"/>
+        <text x="${left - 9}" y="${py(a) + 4}"
+          text-anchor="end" font-size="11">${sig(a)}</text>`;
+    }
+
+    const points = [];
+    for (let i = 0; i <= 100; i++) {
+      const c = maxC * i / 100;
+      const model = FITCalcX9.beer_lambert({
+        epsilon, c, l
+      });
+
+      if (good(model)) {
+        points.push(`${px(c)},${py(model.A)}`);
+      }
+    }
+
+    svg += `
+      <polyline points="${points.join(' ')}" fill="none"
+        stroke="#1F66E5" stroke-width="4"/>
+      <text x="${right - 8}" y="${py(0.55)}"
+        text-anchor="end" font-weight="800" font-size="12">
+        Linear working window
+      </text>`;
+
+    if (s.mode === 'C') {
+      const reading = dilutedReading();
+      const dilutedC = s.stock / s.D;
+
+      svg += `
+        <line x1="${px(dilutedC)}" y1="${py(reading.A)}"
+          x2="${px(dilutedC)}" y2="${bottom}"
+          stroke="#111" stroke-dasharray="4 5"/>
+        <circle cx="${px(dilutedC)}" cy="${py(reading.A)}"
+          r="8" fill="#FFC83D" stroke="#111" stroke-width="3"/>`;
+    }
+
+    $('calPlot').innerHTML = svg;
+    $('calPlot').setAttribute('aria-label',
+      `Beer-Lambert calibration at molar absorptivity ${sig(epsilon)} ` +
+      `litres per mole centimetre, with the absorbance interval ` +
+      `0.1 to 1.0 shaded. ` +
+      (s.mode === 'C'
+        ? 'The current diluted sample is marked.'
+        : 'The calibration curve is displayed for comparison.'));
+  }
+
+  function evaluate() {
+    const s = state;
+
+    if (s.mode === 'A') {
+      const model = FITCalcX9.light_depth({
+        k: s.k, z: 0
+      });
+      const difference = model.euphotic_depth - s.targetDepth;
+      return {
+        correct: Math.abs(difference) <= s.targetDepth * 0.01,
+        wrong: `Your euphotic depth is ${sig(Math.abs(difference))} m ` +
+          `${difference < 0 ? 'too shallow' : 'too deep'}.`,
+        why: `k = ${sig(s.k)} m⁻¹ puts the 1% light boundary ` +
+          `at ${sig(model.euphotic_depth)} m. ` +
+          'Higher attenuation coefficients give shallower euphotic depths.'
+      };
+    }
+
+    if (s.mode === 'B') {
+      const inferred = FITCalcX9.mu_from_measurement({
+        I_over_I0: s.ratio,
+        x: s.z2 - s.z1
+      });
+
+      const depth = FITCalcX9.light_depth({
+        k: inferred.mu,
+        z: 0
+      }).euphotic_depth;
+
+      const kDifference = s.k - inferred.mu;
+      const depthDifference = s.depthGuess - depth;
+      const kCorrect = Math.abs(kDifference) <=
+        Math.max(0.005, inferred.mu * 0.02);
+      const depthCorrect = Math.abs(depthDifference) <=
+        Math.max(0.12, depth * 0.02);
+
+      let wrong = '';
+      if (!kCorrect) {
+        wrong = `Your k is ${sig(Math.abs(kDifference))} m⁻¹ ` +
+          `${kDifference < 0 ? 'too low' : 'too high'}.`;
+      } else if (!depthCorrect) {
+        wrong = `Your 1% depth is ${sig(Math.abs(depthDifference))} m ` +
+          `${depthDifference < 0 ? 'too shallow' : 'too deep'}.`;
+      }
+
+      return {
+        correct: kCorrect && depthCorrect,
+        wrong,
+        why: `The measurement ratio gives k = ${sig(inferred.mu)} m⁻¹. ` +
+          `The corresponding euphotic depth is ${sig(depth)} m. ` +
+          'Using the ratio removes dependence on the unknown surface intensity.'
+      };
+    }
+
+    const diluted = dilutedReading();
+    const recoveredDiluted = FITCalcX9.beer_lambert_conc({
+      A: diluted.A,
+      epsilon: s.epsilon,
+      l: s.path
+    });
+
+    const recoveredStock = recoveredDiluted.c * s.D;
+    const inside = diluted.A >= 0.1 - 1e-10 &&
+      diluted.A <= 1 + 1e-10;
+    const difference = s.stockGuess - recoveredStock;
+    const concentrationCorrect = Math.abs(difference) <=
+      Math.max(0.0006, recoveredStock * 0.02);
+
+    let wrong = '';
+    if (!inside) {
+      wrong = diluted.A > 1
+        ? `Your diluted absorbance is ${sig(diluted.A - 1)} ` +
+          'above the working window. Increase the dilution factor.'
+        : `Your diluted absorbance is ${sig(0.1 - diluted.A)} ` +
+          'below the working window. Decrease the dilution factor.';
+    } else if (!concentrationCorrect) {
+      wrong = `Your stock concentration estimate is ` +
+        `${sig(Math.abs(difference))} mol/L ` +
+        `${difference < 0 ? 'too low' : 'too high'}.`;
+    }
+
+    return {
+      correct: inside && concentrationCorrect,
+      wrong,
+      why: `Dilution factor ${sig(s.D)} gives measured ` +
+        `A = ${sig(diluted.A)} and diluted concentration ` +
+        `${sig(recoveredDiluted.c)} mol/L. ` +
+        `The recovered stock concentration is ${sig(recoveredStock)} mol/L.`
+    };
+  }
+
+  function feedback(text, kind) {
+    $('feedback').textContent = text;
+    $('feedback').className = `feedback ${kind}`;
+  }
+
+  function check() {
+    if (state.solved) return;
+    state.attempts++;
+    const result = evaluate();
+
+    if (!result.correct) {
+      feedback(`Not quite. ${result.wrong}`, 'bad');
+      return;
+    }
+
+    state.solved = true;
+    const earned = state.hinted || state.attempts > 2
+      ? 50
+      : state.attempts === 1 ? 100 : 75;
+
+    score += earned;
+    $('score').textContent = score;
+    feedback(`✓ Correct! +${earned} points. ${result.why}`, 'ok');
+
+    $('hintBtn').disabled = true;
+    $('checkBtn').hidden = true;
+    $('nextBtn').hidden = false;
+
+    for (const input of $('controls').querySelectorAll('input,button')) {
+      input.disabled = true;
+    }
+  }
+
+  function hint() {
+    if (state.solved || state.hinted) return;
+    state.hinted = true;
+    $('hintBtn').disabled = true;
+
+    const message = state.mode === 'A'
+      ? 'Set the exponential transmission to 0.01 at the required depth. The euphotic depth is inversely proportional to k.'
+      : state.mode === 'B'
+        ? 'Take the ratio of the deeper reading to the shallower reading. The distance for the inverse calculation is z₂ − z₁, not z₂ alone.'
+        : 'The live meter shows the diluted sample. Use c = A/(εl), then multiply that concentration by the dilution factor. Check the shaded window first.';
+
+    $('hintBox').textContent =
+      `Hint (maximum score for this round is now 50): ${message}`;
+    $('hintBox').hidden = false;
+  }
+
+  $('controls').addEventListener('click', event => {
+    if (!state || state.solved) return;
+    const button = event.target.closest('button[data-key]');
+    if (!button) return;
+
+    const key = button.dataset.key;
+    const limits = fieldLimits(key);
+    const desired = state[key] + Number(button.dataset.delta);
+    const snapped = Math.round(desired / limits.step) * limits.step;
+
+    state[key] = clamp(snapped, limits.min, limits.max);
+    update();
+  });
+
+  $('controls').addEventListener('input', event => {
+    if (!state || state.solved) return;
+    const input = event.target.closest('input[data-key]');
+    if (!input || input.value === '') return;
+    const value = Number(input.value);
+    if (!Number.isFinite(value)) return;
+
+    const key = input.dataset.key;
+    const limits = fieldLimits(key);
+    state[key] = clamp(value, limits.min, limits.max);
+    update(input);
+  });
+
+  $('controls').addEventListener('change', event => {
+    if (!state || state.solved) return;
+    const input = event.target.closest('input[data-key]');
+    if (!input) return;
+
+    const key = input.dataset.key;
+    const limits = fieldLimits(key);
+    state[key] = clamp(
+      Math.round(state[key] / limits.step) * limits.step,
+      limits.min,
+      limits.max
+    );
+    update();
+  });
+
+  $('checkBtn').addEventListener('click', check);
+  $('hintBtn').addEventListener('click', hint);
+
+  $('nextBtn').addEventListener('click', () => {
+    if (!state.solved) return;
+    round++;
+    if (round === 6) {
+      finish();
+    } else {
+      initialise();
+    }
+  });
+
+  function finish() {
+    $('game').classList.add('hidden');
+    $('end').classList.remove('hidden');
+    $('roundLabel').textContent = 'Complete';
+
+    const count = score >= 510 ? 3 : score >= 360 ? 2 : 1;
+    $('stars').textContent = '★'.repeat(count) + '☆'.repeat(3 - count);
+    $('stars').setAttribute('aria-label', `${count} out of 3 stars`);
+    $('finalScore').textContent = `${score} / 600 points`;
+
+    $('closing').textContent = count === 3
+      ? 'Outstanding quantitative reasoning: three stars!'
+      : count === 2
+        ? 'Strong work. Refine your estimates for three stars.'
+        : 'You completed all six investigations. Revisit the equations and try again.';
+  }
+
+  $('again').addEventListener('click', () => {
+    run++;
+    round = 0;
+    score = 0;
+    $('game').classList.remove('hidden');
+    $('end').classList.add('hidden');
+    initialise();
+  });
+
+  initialise();
+})();
+</script>
+</body>
+</html>

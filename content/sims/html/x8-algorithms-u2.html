@@ -1,0 +1,1554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Paths and Genes | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+button,input,select,summary,[role="button"]{-webkit-tap-highlight-color:transparent;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+button{font:inherit;min-width:44px;min-height:44px;background:white;border:2px solid #111;border-radius:99px;font-weight:800;padding:9px 14px;cursor:pointer;box-shadow:var(--sh-1)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button:active:not(:disabled){transform:translateY(2px);box-shadow:none}
+input,select{font:inherit}
+input[type="number"],input[type="text"],select{font-size:17px;font-weight:600;border:2px solid #111;border-radius:12px;min-height:48px;padding:8px;width:100%;background:white}
+input[type="range"]{min-height:44px;width:100%;accent-color:var(--lvl-uni)}
+main{max-width:1280px;margin:auto;padding:16px 16px 48px}
+h1,h2,h3,p{margin:0}
+h1{font-size:clamp(28px,5vw,40px);font-weight:800;letter-spacing:-.04em}
+h2{font-size:21px;font-weight:800}
+h3{font-size:16px;font-weight:800}
+.muted{color:var(--fit-ink-3)}
+header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
+.badge{display:inline-block;background:var(--lvl-uni);color:var(--lvl-uni-on);border:2px solid #111;border-radius:99px;padding:6px 12px;font-size:12px;font-weight:800;text-transform:uppercase;margin-bottom:8px}
+.hud{display:flex;gap:8px;flex-wrap:wrap}
+.pill{border:2px solid #111;background:var(--lvl-uni-tint);border-radius:99px;padding:9px 13px;font-weight:800}
+.progress{height:12px;background:white;border:2px solid #111;border-radius:99px;overflow:hidden;margin:12px 0}
+.progress span{display:block;background:var(--lvl-uni);height:100%}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.card{min-width:0;border:2px solid #111;border-radius:var(--r-lg);padding:16px;background:white;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-uni-tint);min-height:440px}
+.sub{margin:8px 0 16px;color:var(--fit-ink-2)}
+.control{background:var(--fit-sunken);border:2px solid #111;border-radius:16px;padding:13px;margin:12px 0}
+.control label{display:block;font-size:14px;font-weight:800;margin:6px 0}
+.choices{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.choices button.active{background:var(--lvl-uni);color:white}
+.dual{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.stepper{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.stepper button{padding:8px 12px}
+.stepper output{background:white;padding:10px;min-width:48px;text-align:center;border:2px solid #111;border-radius:12px;font-weight:800}
+.vertexField{display:grid;grid-template-columns:42px 1fr auto;gap:7px;align-items:center;margin:8px 0}
+.vertexField input{min-width:0}
+.vertexField button{font-size:12px;padding:7px 10px}
+.vertexField button.active{background:var(--fit-pink)}
+.sequence{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0;min-height:36px}
+.sequence span{border:2px solid #111;padding:6px 9px;border-radius:12px;background:white;font-weight:800;font-size:13px}
+.plot{width:100%;height:auto;border:2px solid #111;border-radius:16px;background:white;display:block}
+svg text{font-family:Inter,system-ui,sans-serif}
+svg [role="button"]{cursor:pointer;outline:none}
+svg [role="button"]:focus-visible circle{stroke-width:6}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;font-weight:700;margin-top:8px}
+.legend b{width:14px;height:12px;border:2px solid #111;display:inline-block;vertical-align:middle;margin-right:4px}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.next{background:var(--fit-green)}
+.feedback{min-height:54px;border:2px solid var(--fit-line-soft);border-radius:12px;padding:12px;margin-top:12px;font-weight:700;background:white}
+.feedback.good{border-color:var(--fit-success)}
+.feedback.bad{border-color:var(--fit-danger)}
+.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
+.strand{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:1px;line-height:2;overflow-wrap:anywhere;font-weight:800;font-size:16px;background:white;border:2px solid #111;border-radius:12px;padding:10px}
+details{margin-top:16px;border-top:2px solid var(--fit-line-soft);padding-top:12px}
+summary{min-height:44px;font-weight:800;cursor:pointer}
+details p{margin:8px 0}
+.concept{border:2px dashed #111;border-radius:16px;background:white;padding:12px;margin-top:16px}
+.concept svg{width:100%;max-height:92px}
+.concept p{font-size:13px;color:var(--fit-ink-2)}
+.end{text-align:center;max-width:540px;margin:44px auto;padding:28px}
+.stars{font-size:44px;letter-spacing:8px}
+@media(min-width:900px){main{padding:24px 28px 60px}.layout{grid-template-columns:1.12fr 1fr}.card{padding:22px}.stage{min-height:570px}}
+@media(max-width:390px){main{padding:12px 10px 40px}.card{padding:12px}.vertexField{grid-template-columns:30px 1fr auto}.vertexField button{padding:7px 8px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main id="app">
+<header>
+<div>
+<span class="badge">University (later years)</span>
+<h1>Paths and Genes</h1>
+<p class="muted">Graph search, shortest paths and reading DNA.</p>
+</div>
+<div class="hud">
+<span id="roundLabel" class="pill">Round 1/6</span>
+<span id="scoreLabel" class="pill">Score 0</span>
+</div>
+</header>
+<div class="progress"><span id="progressBar" style="width:0%"></span></div>
+<div class="layout">
+<section class="card stage">
+<h2 id="challenge"></h2>
+<p id="question" class="sub"></p>
+<div id="figure"></div>
+<div class="concept">
+<svg viewBox="0 0 360 92" role="img" aria-label="Paths through a graph and codons through a DNA strand are both sequences that algorithms can analyse">
+<circle cx="33" cy="42" r="18" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+<circle cx="111" cy="22" r="18" fill="#E2ECFD" stroke="#111" stroke-width="3"/>
+<circle cx="111" cy="70" r="18" fill="#E2ECFD" stroke="#111" stroke-width="3"/>
+<path d="M51 37L93 26M51 48L93 65" stroke="#111" stroke-width="3"/>
+<path d="M145 46H187" stroke="#111" stroke-width="3"/>
+<path d="M179 38L189 46L179 54" fill="none" stroke="#111" stroke-width="3"/>
+<rect x="196" y="20" width="46" height="48" rx="8" fill="#1F66E5" stroke="#111" stroke-width="3"/>
+<rect x="248" y="20" width="46" height="48" rx="8" fill="#FF8FB8" stroke="#111" stroke-width="3"/>
+<rect x="300" y="20" width="46" height="48" rx="8" fill="#3DBE6B" stroke="#111" stroke-width="3"/>
+<text x="219" y="49" text-anchor="middle" fill="white" font-weight="800" font-size="13">A</text>
+<text x="271" y="49" text-anchor="middle" font-weight="800" font-size="13">T</text>
+<text x="323" y="49" text-anchor="middle" font-weight="800" font-size="13">G</text>
+</svg>
+<p>Order and connectivity determine what a sequence means.</p>
+</div>
+</section>
+<section class="card">
+<h2>Your analysis</h2>
+<div id="controls"></div>
+<div id="plotWrap"></div>
+<div class="actions">
+<button id="check" class="check">Check</button>
+<button id="hint">Hint − points</button>
+<button id="next" class="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Make your first move.</div>
+<details>
+<summary>The maths</summary>
+<div id="maths"></div>
+</details>
+</section>
+</div>
+</main>
+<script>
+/* FIT-CALC-BEGIN x8_algorithms */
+const FITCalcX8 = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+  const MAX_SAFE = Number.MAX_SAFE_INTEGER;
+
+  function failure(error, reason) {
+    return { error, reason };
+  }
+
+  function integer(n) {
+    return typeof n === 'number' &&
+      Number.isSafeInteger(n);
+  }
+
+  function number(n) {
+    return Number(n);
+  }
+
+  function sorted(values) {
+    return values.slice().sort((a, b) =>
+      a < b ? -1 : a > b ? 1 : 0
+    );
+  }
+
+  function validSequence(seq) {
+    if (typeof seq !== 'string') {
+      return failure('ConstraintViolation', 'invalid_base');
+    }
+    const upper = seq.toUpperCase();
+    if (/[^ACGT]/.test(upper)) {
+      return failure('ConstraintViolation', 'invalid_base');
+    }
+    if (upper.length > 300) {
+      return failure('ConstraintViolation', 'bases_exceed_300');
+    }
+    return { seq: upper };
+  }
+
+  function graphData(graph) {
+    if (!graph || typeof graph !== 'object' ||
+        Array.isArray(graph)) {
+      return failure('ConstraintViolation', 'invalid_graph');
+    }
+
+    const names = new Set(Object.keys(graph));
+    for (const vertex of Object.keys(graph)) {
+      const edges = graph[vertex];
+      if (!edges || typeof edges !== 'object' ||
+          Array.isArray(edges)) {
+        return failure('ConstraintViolation', 'invalid_graph');
+      }
+      for (const neighbour of Object.keys(edges)) {
+        names.add(neighbour);
+        if (!integer(edges[neighbour])) {
+          return failure('ConstraintViolation', 'invalid_edge_weight');
+        }
+        if (edges[neighbour] < 0) {
+          return failure('ConstraintViolation', 'negative_edge_weight');
+        }
+      }
+    }
+
+    if (names.size > 10) {
+      return failure('ConstraintViolation', 'vertices_exceed_10');
+    }
+
+    const vertices = sorted([...names]);
+    const adjacency = {};
+    for (const vertex of vertices) {
+      adjacency[vertex] = graph[vertex] || {};
+    }
+
+    return { vertices, adjacency };
+  }
+
+  function gcdBig(a, b) {
+    let oldR = a;
+    let r = b;
+    let oldS = 1n;
+    let s = 0n;
+    let oldT = 0n;
+    let t = 1n;
+    const trace = [];
+
+    while (r !== 0n) {
+      const q = oldR / r;
+      const nextR = oldR - q * r;
+      trace.push([
+        number(oldR),
+        number(q),
+        number(r),
+        number(nextR)
+      ]);
+      [oldR, r] = [r, nextR];
+      [oldS, s] = [s, oldS - q * s];
+      [oldT, t] = [t, oldT - q * t];
+    }
+
+    return {
+      gcd: oldR,
+      x: oldS,
+      y: oldT,
+      trace
+    };
+  }
+
+  function tokensFor(formula) {
+    if (typeof formula !== 'string') return null;
+    const tokens = [];
+    let i = 0;
+
+    while (i < formula.length) {
+      if (/\s/.test(formula[i])) {
+        i++;
+        continue;
+      }
+
+      if (formula.slice(i, i + 3) === '<->') {
+        tokens.push('<->');
+        i += 3;
+      } else if (formula.slice(i, i + 2) === '->') {
+        tokens.push('->');
+        i += 2;
+      } else if ('~&|()'.includes(formula[i])) {
+        tokens.push(formula[i]);
+        i++;
+      } else {
+        const match = /^[A-Za-z_][A-Za-z_0-9]*/
+          .exec(formula.slice(i));
+        if (!match) return null;
+        tokens.push(match[0]);
+        i += match[0].length;
+      }
+    }
+    return tokens;
+  }
+
+  /**
+   * Evaluate a propositional formula by recursive descent.
+   * Input: {formula:string, vars:string[]} (Boolean, dimensionless).
+   * Output: {column:number[], class:string}; optional row assignments.
+   * Assumptions: ~, &, |, ->, <-> in increasing looseness;
+   * implication associates right; first variable is the MSB.
+   * Errors: variables_exceed_4; formula_syntax_error.
+   * Hand check: P -> Q gives column [1,1,0,1], contingent.
+   */
+  function truth_table({ formula, vars } = {}) {
+    if (!Array.isArray(vars)) {
+      return failure('CompileError', 'formula_syntax_error');
+    }
+    if (vars.length > 4) {
+      return failure('ConstraintViolation', 'variables_exceed_4');
+    }
+    if (new Set(vars).size !== vars.length ||
+        vars.some(v => typeof v !== 'string' ||
+          !/^[A-Za-z_][A-Za-z_0-9]*$/.test(v))) {
+      return failure('CompileError', 'formula_syntax_error');
+    }
+
+    const tokens = tokensFor(formula);
+    if (!tokens) {
+      return failure('CompileError', 'formula_syntax_error');
+    }
+
+    let pos = 0;
+    const allowed = new Set(vars);
+
+    function atom() {
+      const token = tokens[pos++];
+      if (token === '(') {
+        const value = equivalence();
+        if (!value || tokens[pos++] !== ')') return null;
+        return value;
+      }
+      if (allowed.has(token)) return ['var', token];
+      return null;
+    }
+
+    function unary() {
+      if (tokens[pos] === '~') {
+        pos++;
+        const child = unary();
+        return child ? ['not', child] : null;
+      }
+      return atom();
+    }
+
+    function conjunction() {
+      let left = unary();
+      while (left && tokens[pos] === '&') {
+        pos++;
+        const right = unary();
+        if (!right) return null;
+        left = ['and', left, right];
+      }
+      return left;
+    }
+
+    function disjunction() {
+      let left = conjunction();
+      while (left && tokens[pos] === '|') {
+        pos++;
+        const right = conjunction();
+        if (!right) return null;
+        left = ['or', left, right];
+      }
+      return left;
+    }
+
+    function implication() {
+      const left = disjunction();
+      if (!left) return null;
+      if (tokens[pos] === '->') {
+        pos++;
+        const right = implication();
+        return right ? ['implies', left, right] : null;
+      }
+      return left;
+    }
+
+    function equivalence() {
+      let left = implication();
+      while (left && tokens[pos] === '<->') {
+        pos++;
+        const right = implication();
+        if (!right) return null;
+        left = ['iff', left, right];
+      }
+      return left;
+    }
+
+    const tree = equivalence();
+    if (!tree || pos !== tokens.length) {
+      return failure('CompileError', 'formula_syntax_error');
+    }
+
+    function evaluate(node, values) {
+      const op = node[0];
+      if (op === 'var') return values[node[1]];
+      if (op === 'not') return 1 - evaluate(node[1], values);
+      const a = evaluate(node[1], values);
+      const b = evaluate(node[2], values);
+      if (op === 'and') return a & b;
+      if (op === 'or') return a | b;
+      if (op === 'implies') return a === 1 && b === 0 ? 0 : 1;
+      return a === b ? 1 : 0;
+    }
+
+    const column = [];
+    const assignments = [];
+    const count = 2 ** vars.length;
+
+    for (let row = 0; row < count; row++) {
+      const values = {};
+      vars.forEach((v, j) => {
+        values[v] = Math.floor(
+          row / (2 ** (vars.length - j - 1))
+        ) % 2;
+      });
+      assignments.push(values);
+      column.push(evaluate(tree, values));
+    }
+
+    const ones = column.reduce((sum, value) => sum + value, 0);
+    return {
+      column,
+      class: ones === count ? 'tautology' :
+        ones === 0 ? 'contradiction' : 'contingent',
+      assignments
+    };
+  }
+
+  /**
+   * Extended Euclidean algorithm for non-negative integers.
+   * Input: {a:number,b:number}, dimensionless safe integers.
+   * Output: {gcd,x,y,steps,first_step,trace}.
+   * Assumption: Euclidean division, r0=a and r1=b.
+   * Errors: gcd_of_zero_and_zero_undefined;
+   * inputs_must_be_non_negative_integers.
+   * Hand check: (240,46) gives gcd=2, x=-9, y=47;
+   * first division [240,5,46,10] and five steps.
+   */
+  function euclid({ a, b } = {}) {
+    if (!integer(a) || !integer(b) || a < 0 || b < 0) {
+      return failure(
+        'ConstraintViolation',
+        'inputs_must_be_non_negative_integers'
+      );
+    }
+    if (a === 0 && b === 0) {
+      return failure('MathError', 'gcd_of_zero_and_zero_undefined');
+    }
+
+    const result = gcdBig(BigInt(a), BigInt(b));
+    return {
+      gcd: number(result.gcd),
+      x: number(result.x),
+      y: number(result.y),
+      steps: result.trace.length,
+      first_step: result.trace[0] || null,
+      trace: result.trace
+    };
+  }
+
+  /**
+   * Modular addition, subtraction, multiplication, exponentiation
+   * and multiplicative inverse.
+   * Input: {op:string,a:number,b:number,m:number}, safe integers,
+   * all dimensionless; b is unused for inverse.
+   * Output: {r:number,trace?:object[]}, 0 <= r < m.
+   * Assumptions: BigInt integer arithmetic; exponentiation uses
+   * left-to-right processing of the exponent's least-significant
+   * bits with repeated squaring.
+   * Errors: modulus_must_be_positive, exponent_must_be_non_negative,
+   * no_inverse_gcd_not_1, modular_op_not_supported;
+   * invalid_integer_input.
+   * Hand checks: 7^13 mod 11 = 2;
+   * inverse(7,11)=8; (-3+5) mod 7=2.
+   */
+  function modular({ op, a, b, m } = {}) {
+    if (!integer(m) || m <= 0) {
+      return failure('ConstraintViolation', 'modulus_must_be_positive');
+    }
+    if (!['add', 'sub', 'mul', 'pow', 'inverse'].includes(op)) {
+      return failure('NotSupported', 'modular_op_not_supported');
+    }
+    if (!integer(a) ||
+        (op !== 'inverse' && !integer(b))) {
+      return failure('ConstraintViolation', 'invalid_integer_input');
+    }
+    if (op === 'pow' && b < 0) {
+      return failure(
+        'ConstraintViolation',
+        'exponent_must_be_non_negative'
+      );
+    }
+
+    const M = BigInt(m);
+    const A = BigInt(a);
+    const B = op === 'inverse' ? 0n : BigInt(b);
+    const residue = v => (v % M + M) % M;
+
+    if (op === 'add') return { r: number(residue(A + B)) };
+    if (op === 'sub') return { r: number(residue(A - B)) };
+    if (op === 'mul') return { r: number(residue(A * B)) };
+
+    if (op === 'inverse') {
+      const extended = gcdBig(residue(A), M);
+      if (extended.gcd !== 1n) {
+        return failure('MathError', 'no_inverse_gcd_not_1');
+      }
+      return { r: number(residue(extended.x)) };
+    }
+
+    let exponent = B;
+    let base = residue(A);
+    let accumulator = 1n % M;
+    let bit = 0;
+    const trace = [];
+
+    while (exponent > 0n) {
+      if ((exponent & 1n) === 1n) {
+        accumulator = residue(accumulator * base);
+        if (trace.length < 200) {
+          trace.push({
+            action: 'multiply',
+            bit,
+            value: number(accumulator)
+          });
+        }
+      }
+      base = residue(base * base);
+      if (trace.length < 200) {
+        trace.push({
+          action: 'square',
+          bit,
+          value: number(base)
+        });
+      }
+      exponent >>= 1n;
+      bit++;
+    }
+
+    return { r: number(accumulator), trace };
+  }
+
+  /**
+   * Visit vertices using breadth-first or recursive depth-first search.
+   * Input: {graph:adjacencyMap,start:string,kind:'bfs'|'dfs'}.
+   * Edge weights are dimensionless and irrelevant to traversal.
+   * Output: {order:string[],trace:object[]}.
+   * Assumptions: directed edges; ascending neighbour labels.
+   * Errors: vertices_exceed_10, unknown_vertex,
+   * traversal_kind_not_supported, invalid_graph/edge_weight.
+   * Hand check: A->{B,C}, B->{D}, C->{D}:
+   * BFS A,B,C,D; DFS A,B,D,C.
+   */
+  function graph_traverse({ graph, start, kind } = {}) {
+    const data = graphData(graph);
+    if (data.error) return data;
+    if (!data.vertices.includes(start)) {
+      return failure('ConstraintViolation', 'unknown_vertex');
+    }
+    if (kind !== 'bfs' && kind !== 'dfs') {
+      return failure(
+        'NotSupported',
+        'traversal_kind_not_supported'
+      );
+    }
+
+    const order = [];
+    const trace = [];
+    const visited = new Set();
+
+    if (kind === 'bfs') {
+      const queue = [start];
+      visited.add(start);
+      while (queue.length) {
+        const vertex = queue.shift();
+        order.push(vertex);
+        for (const next of sorted(
+          Object.keys(data.adjacency[vertex])
+        )) {
+          if (!visited.has(next)) {
+            visited.add(next);
+            queue.push(next);
+          }
+        }
+        trace.push({ vertex, frontier: queue.slice() });
+      }
+    } else {
+      function visit(vertex) {
+        visited.add(vertex);
+        order.push(vertex);
+        trace.push({ vertex, frontier: [] });
+        for (const next of sorted(
+          Object.keys(data.adjacency[vertex])
+        )) {
+          if (!visited.has(next)) visit(next);
+        }
+      }
+      visit(start);
+    }
+
+    return { order, trace };
+  }
+
+  /**
+   * Dijkstra shortest paths from a start vertex.
+   * Input: {graph:adjacencyMap,start:string}; weights are
+   * non-negative, dimensionless integer costs.
+   * Output: {dist,paths,path_to_F,trace,settlement_order}.
+   * Unreachable distances and paths are null.
+   * Assumptions: directed edges, ascending-label tie-breaking;
+   * predecessors change only on strict improvement.
+   * Errors: negative_edge_weight, vertices_exceed_10,
+   * unknown_vertex, invalid_graph/edge_weight,
+   * distance_exceeds_safe_integer.
+   * Hand check: A->B=2,A->C=5,B->C=1 gives
+   * dist {A:0,B:2,C:3}; path to C is A,B,C.
+   */
+  function shortest_path({ graph, start } = {}) {
+    const data = graphData(graph);
+    if (data.error) return data;
+    if (!data.vertices.includes(start)) {
+      return failure('ConstraintViolation', 'unknown_vertex');
+    }
+
+    const distances = {};
+    const previous = {};
+    const settled = new Set();
+    const trace = [];
+    const settlement_order = [];
+
+    for (const vertex of data.vertices) {
+      distances[vertex] = null;
+      previous[vertex] = null;
+    }
+    distances[start] = 0n;
+
+    while (true) {
+      let current = null;
+
+      for (const vertex of data.vertices) {
+        if (settled.has(vertex) || distances[vertex] === null) {
+          continue;
+        }
+        if (current === null ||
+            distances[vertex] < distances[current]) {
+          current = vertex;
+        }
+      }
+      if (current === null) break;
+
+      settled.add(current);
+      settlement_order.push(current);
+
+      for (const next of sorted(
+        Object.keys(data.adjacency[current])
+      )) {
+        if (settled.has(next)) continue;
+        const candidate = distances[current] +
+          BigInt(data.adjacency[current][next]);
+
+        if (candidate > BigInt(MAX_SAFE)) {
+          return failure(
+            'RuntimeError',
+            'distance_exceeds_safe_integer'
+          );
+        }
+        if (distances[next] === null ||
+            candidate < distances[next]) {
+          distances[next] = candidate;
+          previous[next] = current;
+        }
+      }
+
+      const snapshot = {};
+      for (const vertex of data.vertices) {
+        snapshot[vertex] = distances[vertex] === null ?
+          null : number(distances[vertex]);
+      }
+      trace.push({
+        vertex: current,
+        dist: snapshot,
+        settled: settlement_order.slice()
+      });
+    }
+
+    const dist = {};
+    const paths = {};
+
+    for (const vertex of data.vertices) {
+      dist[vertex] = distances[vertex] === null ?
+        null : number(distances[vertex]);
+
+      if (dist[vertex] === null) {
+        paths[vertex] = null;
+      } else {
+        const path = [];
+        let at = vertex;
+        while (at !== null) {
+          path.unshift(at);
+          at = previous[at];
+        }
+        paths[vertex] = path;
+      }
+    }
+
+    return {
+      dist,
+      paths,
+      path_to_F: paths.F || null,
+      trace,
+      settlement_order
+    };
+  }
+
+  const code = Object.freeze({
+    TTT:'Phe',TTC:'Phe',TTA:'Leu',TTG:'Leu',
+    TCT:'Ser',TCC:'Ser',TCA:'Ser',TCG:'Ser',
+    TAT:'Tyr',TAC:'Tyr',TAA:'Stop',TAG:'Stop',
+    TGT:'Cys',TGC:'Cys',TGA:'Stop',TGG:'Trp',
+    CTT:'Leu',CTC:'Leu',CTA:'Leu',CTG:'Leu',
+    CCT:'Pro',CCC:'Pro',CCA:'Pro',CCG:'Pro',
+    CAT:'His',CAC:'His',CAA:'Gln',CAG:'Gln',
+    CGT:'Arg',CGC:'Arg',CGA:'Arg',CGG:'Arg',
+    ATT:'Ile',ATC:'Ile',ATA:'Ile',ATG:'Met',
+    ACT:'Thr',ACC:'Thr',ACA:'Thr',ACG:'Thr',
+    AAT:'Asn',AAC:'Asn',AAA:'Lys',AAG:'Lys',
+    AGT:'Ser',AGC:'Ser',AGA:'Arg',AGG:'Arg',
+    GTT:'Val',GTC:'Val',GTA:'Val',GTG:'Val',
+    GCT:'Ala',GCC:'Ala',GCA:'Ala',GCG:'Ala',
+    GAT:'Asp',GAC:'Asp',GAA:'Glu',GAG:'Glu',
+    GGT:'Gly',GGC:'Gly',GGA:'Gly',GGG:'Gly'
+  });
+
+  /**
+   * Translate a 5'-to-3' DNA coding strand using genetic code 1.
+   * Input: {seq:string}, base sequence (dimensionless).
+   * Output: {protein:string[],reverse_complement:string,
+   * gc_fraction:number|null}.
+   * Assumptions: translation begins at the first base and
+   * includes the first Stop; incomplete final codons ignored.
+   * Errors: invalid_base, bases_exceed_300 (in that order).
+   * Hand check: ATGGCTTAA -> [Met,Ala,Stop],
+   * reverse complement TTAAGCCAT, GC fraction 3/9.
+   */
+  function dna({ seq } = {}) {
+    const validated = validSequence(seq);
+    if (validated.error) return validated;
+
+    const s = validated.seq;
+    const protein = [];
+
+    for (let i = 0; i + 3 <= s.length; i += 3) {
+      const amino = code[s.slice(i, i + 3)];
+      protein.push(amino);
+      if (amino === 'Stop') break;
+    }
+
+    const complement = { A:'T', T:'A', G:'C', C:'G' };
+    const reverse_complement = [...s].reverse()
+      .map(base => complement[base]).join('');
+    const gc = [...s].filter(base =>
+      base === 'G' || base === 'C'
+    ).length;
+
+    return {
+      protein,
+      reverse_complement,
+      gc_fraction: s.length ? gc / s.length : null
+    };
+  }
+
+  /**
+   * Find forward-strand ATG-to-stop open reading frames.
+   * Input: {seq:string,min_aa:number}; min_aa is a non-negative
+   * dimensionless amino-acid count.
+   * Output: {orfs:[{frame,start,end,aa}]}.
+   * Positions are 1-based base indices; end includes the stop.
+   * Assumptions: forward frames 1,2,3; resume after each stop;
+   * nested ATGs inside a completed ORF are skipped.
+   * Errors: invalid_base, bases_exceed_300,
+   * min_aa_must_be_non_negative_integer.
+   * Hand check: ATGAAATAA, min_aa=2 yields
+   * [{frame:1,start:1,end:9,aa:2}].
+   */
+  function reading_frames({ seq, min_aa } = {}) {
+    const validated = validSequence(seq);
+    if (validated.error) return validated;
+    if (!integer(min_aa) || min_aa < 0) {
+      return failure(
+        'ConstraintViolation',
+        'min_aa_must_be_non_negative_integer'
+      );
+    }
+
+    const s = validated.seq;
+    const orfs = [];
+
+    for (let frame = 0; frame < 3; frame++) {
+      let i = frame;
+
+      while (i + 3 <= s.length) {
+        if (s.slice(i, i + 3) !== 'ATG') {
+          i += 3;
+          continue;
+        }
+
+        let stop = -1;
+        for (let j = i + 3; j + 3 <= s.length; j += 3) {
+          if (code[s.slice(j, j + 3)] === 'Stop') {
+            stop = j;
+            break;
+          }
+        }
+
+        if (stop < 0) {
+          i += 3;
+          continue;
+        }
+
+        const aa = (stop - i) / 3;
+        if (aa >= min_aa) {
+          orfs.push({
+            frame: frame + 1,
+            start: i + 1,
+            end: stop + 3,
+            aa
+          });
+        }
+        i = stop + 3;
+      }
+    }
+
+    return { orfs };
+  }
+
+  return Object.freeze({
+    API_VERSION,
+    truth_table,
+    euclid,
+    modular,
+    graph_traverse,
+    shortest_path,
+    dna,
+    reading_frames
+  });
+})();
+/* FIT-CALC-END x8_algorithms */
+
+(function () {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const graphSets = [
+    {
+      A:{B:4,C:2},B:{D:5,E:10},C:{B:1,D:8},
+      D:{E:2,F:6},E:{F:1},F:{}
+    },
+    {
+      A:{B:3,C:7},B:{C:2,D:4},C:{E:5},
+      D:{E:1,F:8},E:{F:2},F:{}
+    },
+    {
+      A:{B:5,C:1},B:{D:2},C:{B:2,E:8},
+      D:{F:3},E:{F:1},F:{}
+    },
+    {
+      A:{B:2,C:6},B:{D:3},C:{E:2},
+      D:{F:4},E:{},F:{},G:{}
+    }
+  ];
+  const traversalSets = [
+    {
+      A:{B:1,C:1},B:{D:1,E:1},C:{F:1},
+      D:{F:1},E:{},F:{}
+    },
+    {
+      A:{B:1,C:1},B:{D:1},C:{E:1,F:1},
+      D:{F:1},E:{},F:{}
+    },
+    {
+      A:{B:1,C:1},B:{E:1,D:1},C:{F:1},
+      D:{F:1},E:{},F:{}
+    }
+  ];
+  const sequences = [
+    'ATGAAATAACCATGGCTTGAGGATGCCCTGA',
+    'CCATGGCTTGAATGAAACCCGGGTAA',
+    'GGATGCCCTAGATGTTTGGATAA',
+    'ATGGCCTAGCCATGAAATGAGCATGGGGTAA'
+  ];
+  const positions = {
+    A:[54,137],B:[147,49],C:[147,225],
+    D:[244,49],E:[244,225],F:[337,137],
+    G:[337,245]
+  };
+
+  let round = 0;
+  let score = 0;
+  let run = 0;
+  let state;
+
+  function rand(roundIndex) {
+    let seed = (0xC8E223 ^ Math.imul(run+1,99991) ^
+      Math.imul(roundIndex+1,53197)) >>> 0;
+    return max => {
+      seed = (Math.imul(seed,1664525)+1013904223)>>>0;
+      return seed%max;
+    };
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g,c=>
+      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function message(text,kind='') {
+    const box=$('feedback');
+    box.className='feedback'+(kind?' '+kind:'');
+    box.textContent=text;
+  }
+
+  function initialise() {
+    const pick=rand(round);
+    const type=['dijkstra','traversal','dna'][round%3];
+    state={
+      type,attempts:0,hint:false,solved:false,checked:false,
+      chosen:[],bfs:[],dfs:[],active:'bfs',
+      distances:{},noPath:{},orfs:[],frame:1
+    };
+
+    if(type==='dijkstra'){
+      state.graph=graphSets[pick(graphSets.length)];
+      state.expected=FITCalcX8.shortest_path({
+        graph:state.graph,start:'A'
+      });
+      for(const v of Object.keys(state.graph)){
+        state.distances[v]='';
+        state.noPath[v]=false;
+      }
+    } else if(type==='traversal'){
+      state.graph=traversalSets[pick(traversalSets.length)];
+      state.expectedBfs=FITCalcX8.graph_traverse({
+        graph:state.graph,start:'A',kind:'bfs'
+      });
+      state.expectedDfs=FITCalcX8.graph_traverse({
+        graph:state.graph,start:'A',kind:'dfs'
+      });
+    } else {
+      state.seq=sequences[pick(sequences.length)];
+      state.minAA=round<3?2:1;
+      state.expectedDNA=FITCalcX8.dna({seq:state.seq});
+      state.expectedORFs=FITCalcX8.reading_frames({
+        seq:state.seq,min_aa:state.minAA
+      });
+    }
+
+    $('roundLabel').textContent=`Round ${round+1}/6`;
+    $('scoreLabel').textContent=`Score ${score}`;
+    $('progressBar').style.width=`${round/6*100}%`;
+    $('next').hidden=true;
+    $('check').disabled=false;
+    $('hint').disabled=false;
+    message('Make your first move.');
+    render();
+  }
+
+  function graphSvg() {
+    const selected = state.type==='dijkstra'?state.chosen:
+      state[state.active];
+    const arcs = Object.entries(state.graph).flatMap(([u,links])=>
+      Object.entries(links).map(([v,weight])=>{
+        const [x1,y1]=positions[u], [x2,y2]=positions[v];
+        const dx=x2-x1,dy=y2-y1,length=Math.hypot(dx,dy)||1;
+        const startX=x1+dx/length*29,startY=y1+dy/length*29;
+        const endX=x2-dx/length*31,endY=y2-dy/length*31;
+        const tx=(startX+endX)/2,ty=(startY+endY)/2;
+        return `<path d="M${startX} ${startY}L${endX} ${endY}"
+          stroke="#111" stroke-width="2.5" fill="none"
+          marker-end="url(#arr)"/>
+          ${state.type==='dijkstra'?
+          `<rect x="${tx-12}" y="${ty-13}" width="24" height="22" rx="6"
+            fill="white" stroke="#111" stroke-width="1.3"/>
+           <text x="${tx}" y="${ty+3}" text-anchor="middle"
+            font-size="12" font-weight="800">${weight}</text>`:''}`;
+      })
+    ).join('');
+
+    const nodes=Object.keys(state.graph).map(v=>{
+      const [x,y]=positions[v];
+      const i=selected.indexOf(v);
+      return `<g tabindex="0" role="button" data-vertex="${v}"
+        aria-label="Select vertex ${v}">
+        <circle cx="${x}" cy="${y}" r="26" stroke="#111" stroke-width="3"
+          fill="${i>=0?'#FFC83D':'#FFFFFF'}"/>
+        <text x="${x}" y="${y+5}" text-anchor="middle" font-size="16"
+          font-weight="800" pointer-events="none">${v}</text>
+        ${i>=0?`<text x="${x}" y="${y+43}" text-anchor="middle"
+          font-size="12" font-weight="800">#${i+1}</text>`:''}
+      </g>`;
+    }).join('');
+
+    return `<svg class="plot" viewBox="0 0 390 294" role="img"
+      aria-label="Directed graph, selected order ${selected.join(', ')||'empty'}">
+      <defs><marker id="arr" markerWidth="8" markerHeight="8"
+        refX="7" refY="4" orient="auto">
+      <path d="M0 0L8 4L0 8Z" fill="#111"/></marker></defs>
+      <text x="195" y="19" text-anchor="middle" font-size="15" font-weight="800">
+        ${state.type==='dijkstra'?'Weighted directed graph':'Directed graph'}</text>
+      ${arcs}${nodes}
+      <text x="195" y="287" text-anchor="middle" font-size="11">
+        ${state.type==='dijkstra'?'Edge weight (dimensionless cost)':'Vertices (places)'}</text>
+    </svg>`;
+  }
+
+  function render() {
+    const type=state.type;
+    $('challenge').textContent=type==='dijkstra'?'Dijkstra: settle and relax':
+      type==='traversal'?'Breadth-first versus depth-first':
+      'Coding strand and reading frames';
+
+    $('question').textContent=type==='dijkstra'?
+      'Start at A. Tap the reachable vertices in settlement order, then enter every final distance. Mark unreachable vertices “No path”. Break ties alphabetically.':
+      type==='traversal'?
+      'Start at A. Enter both complete visit orders. All neighbours are considered alphabetically. Identify the first divergence and its cause.':
+      `Translate the 5′→3′ coding strand from base 1, find its reverse complement and mark every forward-strand ORF of at least ${state.minAA} amino acids.`;
+
+    $('maths').innerHTML=type==='dijkstra'?
+      `<p class="mono">tentative[v] = min(tentative[v], tentative[u] + w(u,v))</p>
+       <p>Settle the reachable vertex with lowest tentative distance; break ties by label. No negative edge weights. Distances are dimensionless costs. An unreachable vertex has no finite path.</p>`:
+      type==='traversal'?
+      `<p>BFS: a first-in, first-out queue. DFS: recurse to the first unvisited neighbour before returning. Ties use ascending labels. The order index is a count, not an SI measurement.</p>`:
+      `<p>Read 5′→3′ in triplets. The standard genetic code maps each codon to an amino acid. Stop at the first stop for translation from base 1.</p>
+       <p>An ORF starts with ATG and finishes at the first in-frame TAA, TAG or TGA. Its reported end includes that stop codon. GC fraction = (G+C)/all bases. Bases and amino-acid counts are dimensionless.</p>`;
+
+    if(type==='dna'){
+      $('figure').innerHTML=`
+        <h3>5′ Coding strand 3′</h3>
+        <div class="strand" aria-label="DNA coding strand">${esc(state.seq)}</div>
+        <p style="margin:10px 0"><strong>Minimum ORF length:</strong> ${state.minAA} amino acids, excluding Stop</p>`;
+      $('controls').innerHTML=dnaControls();
+    } else {
+      $('figure').innerHTML=graphSvg();
+      $('controls').innerHTML=type==='dijkstra'?
+        dijkstraControls():traversalControls();
+    }
+    updatePlot();
+  }
+
+  function dijkstraControls() {
+    const fields=Object.keys(state.graph).map(v=>`
+      <div class="vertexField">
+        <strong>${v}</strong>
+        <input type="number" step="1" min="0" inputmode="numeric"
+          data-distance="${v}" value="${state.distances[v]}"
+          aria-label="Distance to ${v}" ${state.noPath[v]?'disabled':''}
+          placeholder="Distance">
+        <button data-nopath="${v}" class="${state.noPath[v]?'active':''}"
+          aria-pressed="${Boolean(state.noPath[v])}">No path</button>
+      </div>`).join('');
+
+    return `<div class="control">
+      <h3>Your settlement order</h3>
+      <div class="sequence" id="settledList"></div>
+      <div class="row">
+        <button data-undo="chosen">Undo visit</button>
+        <button data-clear="chosen">Clear visits</button>
+      </div>
+      <h3 style="margin-top:15px">Final distances</h3>
+      ${fields}
+    </div>`;
+  }
+
+  function traversalControls() {
+    const selected=state.active;
+    return `<div class="control">
+      <h3>Build both orders by tapping the graph</h3>
+      <div class="choices">
+        <button data-mode="bfs" class="${selected==='bfs'?'active':''}"
+          aria-pressed="${selected==='bfs'}">BFS</button>
+        <button data-mode="dfs" class="${selected==='dfs'?'active':''}"
+          aria-pressed="${selected==='dfs'}">DFS</button>
+      </div>
+      <strong>BFS order</strong><div class="sequence" id="bfsList"></div>
+      <strong>DFS order</strong><div class="sequence" id="dfsList"></div>
+      <div class="row">
+        <button data-undo="${selected}">Undo ${selected.toUpperCase()}</button>
+        <button data-clear="${selected}">Clear ${selected.toUpperCase()}</button>
+      </div>
+      <div class="dual" style="margin-top:14px">
+        <div><label for="firstBfs">First differing BFS vertex</label>
+          <input id="firstBfs" type="text" maxlength="2" placeholder="Vertex"></div>
+        <div><label for="firstDfs">First differing DFS vertex</label>
+          <input id="firstDfs" type="text" maxlength="2" placeholder="Vertex"></div>
+      </div>
+      <label style="margin-top:14px">Why do they first differ?</label>
+      <div class="choices" id="causeChoices">
+        <button data-cause="queue">BFS finishes its earlier queue entries first</button>
+        <button data-cause="weight">BFS chooses the smallest edge weight</button>
+        <button data-cause="reverse">DFS always chooses the largest label</button>
+      </div>
+    </div>`;
+  }
+
+  function dnaControls() {
+    return `<div class="control">
+      <label for="protein">Protein from base 1 (three-letter names, commas or spaces)</label>
+      <input id="protein" type="text" autocomplete="off"
+        placeholder="Met Ala ... Stop">
+      <label for="reverse">Reverse complement, 5′→3′</label>
+      <input id="reverse" type="text" autocomplete="off"
+        autocapitalize="characters" placeholder="ACGT...">
+    </div>
+    <div class="control">
+      <h3>Add an open reading frame</h3>
+      <div class="dual">
+        <div><label for="orfFrame">Forward frame</label>
+        <select id="orfFrame">
+          <option value="1">Frame 1</option>
+          <option value="2">Frame 2</option>
+          <option value="3">Frame 3</option>
+        </select></div>
+        <div><label>Position units</label>
+          <p style="padding:10px 0">1-based bases</p></div>
+      </div>
+      <div class="dual">
+        <div><label for="orfStart">Start base</label>
+          <input id="orfStart" type="number" min="1" max="${state.seq.length}"
+            step="1" value="1" inputmode="numeric"></div>
+        <div><label for="orfEnd">End base (includes Stop)</label>
+          <input id="orfEnd" type="number" min="1" max="${state.seq.length}"
+            step="1" value="3" inputmode="numeric"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button id="addOrf">+ Add ORF</button>
+        <button id="clearOrfs">Clear all</button>
+      </div>
+      <div class="sequence" id="orfList"></div>
+    </div>`;
+  }
+
+  function distancePlot() {
+    const vertices=Object.keys(state.graph).sort();
+    const count=state.chosen.length;
+    const snapshot=count ?
+      state.expected.trace[Math.min(count,state.expected.trace.length)-1]?.dist:
+      {A:0};
+    const w=334/vertices.length;
+    const scaleMax=30;
+    const bars=vertices.map((v,i)=>{
+      const raw=snapshot?.[v];
+      const value=raw===null||raw===undefined?0:Math.min(raw,scaleMax);
+      const height=value/scaleMax*155;
+      const x=43+i*w+5;
+      const settled=state.chosen.includes(v);
+      return `<rect x="${x}" y="${205-height}" width="${w-10}"
+        height="${Math.max(2,height)}"
+        fill="${settled?'#1F66E5':'#FF8FB8'}"
+        stroke="#111" stroke-width="1.3"/>
+        <text x="${x+(w-10)/2}" y="226" text-anchor="middle"
+          font-size="12">${v}</text>
+        ${state.checked ? `<text x="${x+(w-10)/2}" y="244"
+          text-anchor="middle" font-size="10">${state.expected.dist[v]===null?
+          '∞':state.expected.dist[v]}</text>`:''}`;
+    }).join('');
+
+    return `<svg class="plot" viewBox="0 0 420 286" role="img"
+      aria-label="Tentative distance bars after ${count} settlements. Numeric final distances ${state.checked?'shown':'hidden'}">
+      <text x="210" y="21" text-anchor="middle" font-size="15"
+        font-weight="800">Tentative distances after relaxation</text>
+      <path d="M43 37V205H384" stroke="#111" stroke-width="2" fill="none"/>
+      ${[0,10,20,30].map(v=>`
+        <text x="22" y="${205-v/30*155+4}" font-size="11">${v}</text>
+        <path d="M43 ${205-v/30*155}H382" stroke="#E4E2DB"
+          fill="none"/>`).join('')}
+      ${bars}
+      <text x="210" y="274" text-anchor="middle" font-size="12">Vertex label</text>
+      <text transform="translate(12 127) rotate(-90)" text-anchor="middle"
+        font-size="12">Cost (dimensionless)</text>
+    </svg>
+    <div class="legend">
+      <span><b style="background:#1F66E5"></b>Settled</span>
+      <span><b style="background:#FF8FB8"></b>Tentative</span>
+      <span>Missing bars: not yet reached</span>
+    </div>`;
+  }
+
+  function traversalPlot() {
+    const count=Math.max(state.bfs.length,state.dfs.length,1);
+    const vertices=Object.keys(state.graph).sort();
+    const all=state.checked?
+      [
+        ['Engine BFS',state.expectedBfs.order,'#3DBE6B',2],
+        ['Engine DFS',state.expectedDfs.order,'#FF8FB8',3]
+      ]:[];
+    const series=[
+      ['Your BFS',state.bfs,'#1F66E5',0],
+      ['Your DFS',state.dfs,'#FFC83D',1],...all
+    ];
+
+    const marks=series.flatMap(([name,values,colour,lane])=>
+      values.map((vertex,i)=>{
+        const vx=vertices.indexOf(vertex);
+        const x=50+(i+1)/Math.max(2,vertices.length)*325;
+        const y=190-vx/Math.max(1,vertices.length-1)*133;
+        return `<circle cx="${x}" cy="${y+lane*2}" r="5"
+          fill="${colour}" stroke="#111" stroke-width="1.2"/>
+          <text x="${x}" y="${y-9+lane*2}" text-anchor="middle"
+            font-size="10" font-weight="800">${vertex}</text>`;
+      })
+    ).join('');
+
+    return `<svg class="plot" viewBox="0 0 420 274" role="img"
+      aria-label="Comparison of entered BFS and DFS visit-index distributions">
+      <text x="210" y="19" text-anchor="middle" font-size="15"
+        font-weight="800">Visit-order comparison</text>
+      <path d="M50 43V204H390" stroke="#111" stroke-width="2" fill="none"/>
+      ${vertices.map((v,i)=>{
+        const y=190-i/Math.max(1,vertices.length-1)*133;
+        return `<text x="29" y="${y+4}" font-size="11">${v}</text>
+          <path d="M50 ${y}H389" stroke="#E4E2DB" fill="none"/>`;
+      }).join('')}
+      ${marks}
+      <text x="210" y="256" text-anchor="middle" font-size="12">Visit index (count)</text>
+      <text transform="translate(12 128) rotate(-90)" text-anchor="middle"
+        font-size="12">Vertex label</text>
+    </svg>
+    <div class="legend">
+    ${series.map(([name,,c])=>`<span><b style="background:${c}"></b>${name}</span>`).join('')}
+    </div>`;
+  }
+
+  function dnaPlot() {
+    const len=state.seq.length;
+    const xOf=pos=>46+(pos-1)/Math.max(1,len)*330;
+    const lane=frame=>69+(frame-1)*63;
+
+    const codons=Array.from({length:3},(_,j)=>
+      `<rect x="45" y="${lane(j+1)-22}" width="334" height="45"
+        rx="8" fill="#F4F3EF" stroke="#E4E2DB" stroke-width="2"/>
+       <text x="8" y="${lane(j+1)+4}" font-size="12" font-weight="800">
+         F${j+1}</text>`).join('');
+
+    const mark= (orf,colour,outline=false) => {
+      const x=xOf(orf.start);
+      const width=Math.max(6,xOf(orf.end+1)-x);
+      const y=lane(orf.frame)-16;
+      return `<rect x="${x}" y="${y}" width="${width}" height="32"
+        rx="5" fill="${outline?'none':colour}"
+        stroke="${outline?colour:'#111'}"
+        stroke-width="${outline?3:1.5}"
+        ${outline?'stroke-dasharray="5 3"':''}/>`;
+    };
+
+    const selected=state.orfs.map(o=>mark(o,'#1F66E5')).join('');
+    const reference=state.checked?
+      state.expectedORFs.orfs.map(o=>mark(o,'#3DBE6B',true)).join(''):'';
+    const ticks=Array.from({length:6},(_,i)=>1+Math.round(i*(len-1)/5));
+    const gc=state.expectedDNA.gc_fraction;
+
+    return `<svg class="plot" viewBox="0 0 420 318" role="img"
+      aria-label="Three forward reading frames with ${state.orfs.length} selected ORFs. GC fraction ${(gc*100).toFixed(1)} percent">
+      <text x="210" y="20" text-anchor="middle" font-size="15"
+        font-weight="800">Forward-strand reading frames</text>
+      ${codons}${selected}${reference}
+      <path d="M46 239H379" stroke="#111" stroke-width="2"/>
+      ${ticks.map(v=>`
+        <path d="M${xOf(v)} 239v6" stroke="#111" stroke-width="1.5"/>
+        <text x="${xOf(v)}" y="260" font-size="10"
+          text-anchor="middle">${v}</text>`).join('')}
+      <text x="210" y="280" text-anchor="middle" font-size="12">Position (base index, 1-based)</text>
+      <text x="210" y="302" text-anchor="middle" font-size="12"
+        font-weight="800">GC fraction: ${gc===null?'undefined':(gc*100).toFixed(3)+'%'}</text>
+    </svg>
+    <div class="legend">
+      <span><b style="background:#1F66E5"></b>Your ORF boxes</span>
+      ${state.checked?'<span><b style="background:#3DBE6B"></b>Engine ORFs (dashed outline)</span>':''}
+    </div>`;
+  }
+
+  function updatePlot() {
+    if(state.type==='dijkstra'){
+      $('plotWrap').innerHTML=distancePlot();
+      const list=$('settledList');
+      if(list) list.innerHTML=state.chosen.map((v,i)=>
+        `<span>${i+1}. ${v}</span>`).join('')||'<span>Nothing settled yet</span>';
+    } else if(state.type==='traversal'){
+      $('plotWrap').innerHTML=traversalPlot();
+      for(const kind of ['bfs','dfs']){
+        const list=$(kind+'List');
+        if(list) list.innerHTML=state[kind].map((v,i)=>
+          `<span>${i+1}. ${v}</span>`).join('')||'<span>Empty</span>';
+      }
+    } else {
+      $('plotWrap').innerHTML=dnaPlot();
+      const list=$('orfList');
+      if(list) list.innerHTML=state.orfs.map((v,i)=>`
+        <span>F${v.frame}: ${v.start}–${v.end}
+          <button data-remove="${i}" aria-label="Remove ORF ${i+1}"
+            style="min-width:44px;margin-left:4px">×</button>
+        </span>`).join('')||'<span>No ORFs marked</span>';
+    }
+  }
+
+  function selectVertex(vertex) {
+    if(state.solved || state.type==='dna') return;
+    const key=state.type==='dijkstra'?'chosen':state.active;
+    const array=state[key];
+    const max=state.type==='dijkstra'?
+      state.expected.settlement_order.length:
+      state[key==='bfs'?'expectedBfs':'expectedDfs'].order.length;
+
+    if(!array.includes(vertex) && array.length<max){
+      array.push(vertex);
+      $('figure').innerHTML=graphSvg();
+      updatePlot();
+    }
+  }
+
+  function wrong(text) {
+    state.attempts++;
+    message(text,'bad');
+  }
+
+  function success(text) {
+    state.solved=true;
+    const points=state.hint?50:state.attempts===0?100:
+      state.attempts===1?75:50;
+    score+=points;
+    $('scoreLabel').textContent=`Score ${score}`;
+    $('check').disabled=true;
+    $('hint').disabled=true;
+    $('next').hidden=false;
+    $('next').textContent=round===5?'See results ★':'Next round →';
+    message(`★ Correct! +${points} points. ${text}`,'good');
+  }
+
+  function compareOrder(actual,expected,name) {
+    const index=actual.findIndex((v,i)=>v!==expected[i]);
+    if(index>=0) return `${name} differs at visit ${index+1}.`;
+    if(actual.length!==expected.length)
+      return `${name} needs ${expected.length-actual.length} more visits.`;
+    return '';
+  }
+
+  function checkDijkstra() {
+    const expected=state.expected;
+    const mismatch=compareOrder(
+      state.chosen,expected.settlement_order,'Settlement order'
+    );
+    state.checked=true;
+    updatePlot();
+    if(mismatch){wrong(mismatch);return;}
+
+    for(const vertex of Object.keys(state.graph)){
+      const distance=expected.dist[vertex];
+      if(distance===null){
+        if(!state.noPath[vertex]){
+          wrong(`Vertex ${vertex} is unreachable. Mark it “No path”.`);
+          return;
+        }
+      } else {
+        if(state.noPath[vertex]){
+          wrong(`Vertex ${vertex} is reachable, so it needs a distance.`);
+          return;
+        }
+        const entered=String(state.distances[vertex]).trim();
+        if(!entered || Number(entered)!==distance){
+          wrong(`The final distance to ${vertex} is incorrect. Check its incoming relaxations.`);
+          return;
+        }
+      }
+    }
+    success('All reachable vertices were settled in order and all shortest distances are correct.');
+  }
+
+  function checkTraversal() {
+    const bfs=state.expectedBfs.order;
+    const dfs=state.expectedDfs.order;
+    let mismatch=compareOrder(state.bfs,bfs,'BFS');
+    state.checked=true;
+    updatePlot();
+    if(mismatch){wrong(mismatch);return;}
+    mismatch=compareOrder(state.dfs,dfs,'DFS');
+    if(mismatch){wrong(mismatch);return;}
+
+    const first=bfs.findIndex((v,i)=>v!==dfs[i]);
+    const a=$('firstBfs').value.trim().toUpperCase();
+    const b=$('firstDfs').value.trim().toUpperCase();
+    if(first>=0 && (a!==bfs[first]||b!==dfs[first])){
+      wrong('The two orders are correct. Identify both vertices at their first differing visit index.');
+      return;
+    }
+    if(state.cause!=='queue'){
+      wrong('Revisit the distinction between the FIFO queue and recursive exploration.');
+      return;
+    }
+    success('BFS follows queue order while DFS explores down a branch before backtracking.');
+  }
+
+  function proteinParts(raw) {
+    const parts=raw.trim().split(/[\s,;]+/).filter(Boolean);
+    return parts.map(w=>w.charAt(0).toUpperCase()+
+      w.slice(1).toLowerCase());
+  }
+
+  function checkDNA() {
+    const expected=state.expectedDNA;
+    const typed=proteinParts($('protein').value);
+    const reverse=$('reverse').value.replace(/\s/g,'').toUpperCase();
+    state.checked=true;
+    updatePlot();
+
+    if(JSON.stringify(typed)!==JSON.stringify(expected.protein)){
+      wrong('The translation differs. Read complete codons from base 1 and include the first Stop.');
+      return;
+    }
+    if(reverse!==expected.reverse_complement){
+      wrong('The reverse complement differs. Reverse the strand order and complement every base.');
+      return;
+    }
+
+    function id(o) {return `${o.frame}:${o.start}:${o.end}`;}
+    const expectedORFs=state.expectedORFs.orfs.map(id).sort();
+    const selected=state.orfs.map(id).sort();
+    if(JSON.stringify(expectedORFs)!==JSON.stringify(selected)){
+      wrong(`The ORF boxes differ. You marked ${selected.length}; verify every start, stop and frame, including all qualifying ORFs.`);
+      return;
+    }
+
+    success('Translation, reverse complement and all qualifying open reading frames match.');
+  }
+
+  function check() {
+    if(state.solved)return;
+    if(state.type==='dijkstra')checkDijkstra();
+    else if(state.type==='traversal')checkTraversal();
+    else checkDNA();
+  }
+
+  function hint() {
+    if(state.solved)return;
+    state.hint=true;
+    message(state.type==='dijkstra'?
+      'Hint: start with distance 0 at A. Settle the lowest tentative distance, then relax every outgoing edge. An unreached vertex remains without a path.':
+      state.type==='traversal'?
+      'Hint: BFS visits discovered vertices in queue order; DFS recursively follows the first available neighbour. Their first difference appears when the DFS branch goes deeper.':
+      'Hint: a forward ORF starts with ATG and ends at its first in-frame stop. End coordinates include all three stop bases; translation from base 1 is a separate task.');
+  }
+
+  function endScreen() {
+    const stars=score>=500?3:score>=350?2:1;
+    $('app').innerHTML=`<div class="card end">
+      <span class="badge">University (later years)</span>
+      <h1>Paths and Genes completed!</h1>
+      <div class="stars" aria-label="${stars} out of 3 stars">
+        ${'★'.repeat(stars)}${'☆'.repeat(3-stars)}
+      </div>
+      <h2>${score} / 600 points</h2>
+      <p class="sub">Six rounds of shortest paths, graph traversal and DNA analysis completed.</p>
+      <button id="again" class="check">Play again ↻</button>
+    </div>`;
+    $('again').addEventListener('click',()=>location.reload());
+  }
+
+  $('figure').addEventListener('click',e=>{
+    const target=e.target.closest('[data-vertex]');
+    if(target)selectVertex(target.dataset.vertex);
+  });
+  $('figure').addEventListener('keydown',e=>{
+    const target=e.target.closest('[data-vertex]');
+    if(!target||(e.key!=='Enter'&&e.key!==' '))return;
+    e.preventDefault();
+    selectVertex(target.dataset.vertex);
+  });
+
+  $('controls').addEventListener('input',e=>{
+    const vertex=e.target.dataset.distance;
+    if(vertex!==undefined){
+      state.distances[vertex]=e.target.value;
+    }
+  });
+
+  $('controls').addEventListener('click',e=>{
+    const no=e.target.closest('[data-nopath]');
+    if(no){
+      const v=no.dataset.nopath;
+      state.noPath[v]=!state.noPath[v];
+      no.classList.toggle('active',state.noPath[v]);
+      no.setAttribute('aria-pressed',String(state.noPath[v]));
+      const input=$('controls').querySelector(`[data-distance="${v}"]`);
+      input.disabled=state.noPath[v];
+      return;
+    }
+
+    const mode=e.target.closest('[data-mode]');
+    if(mode && state.type==='traversal'){
+      const a=$('firstBfs')?.value||'';
+      const b=$('firstDfs')?.value||'';
+      const cause=state.cause||'';
+      state.active=mode.dataset.mode;
+      render();
+      $('firstBfs').value=a;
+      $('firstDfs').value=b;
+      state.cause=cause;
+      $('causeChoices').querySelectorAll('button').forEach(btn=>{
+        btn.classList.toggle('active',btn.dataset.cause===cause);
+      });
+      return;
+    }
+
+    const cause=e.target.closest('[data-cause]');
+    if(cause){
+      state.cause=cause.dataset.cause;
+      $('causeChoices').querySelectorAll('button').forEach(btn=>{
+        btn.classList.toggle('active',btn.dataset.cause===state.cause);
+        btn.setAttribute('aria-pressed',String(btn.dataset.cause===state.cause));
+      });
+    }
+
+    const undo=e.target.closest('[data-undo]');
+    if(undo){
+      state[undo.dataset.undo].pop();
+      if(state.type!=='dna')$('figure').innerHTML=graphSvg();
+      updatePlot();
+    }
+    const clear=e.target.closest('[data-clear]');
+    if(clear){
+      state[clear.dataset.clear]=[];
+      if(state.type!=='dna')$('figure').innerHTML=graphSvg();
+      updatePlot();
+    }
+
+    if(e.target.id==='addOrf'){
+      const frame=Number($('orfFrame').value);
+      const start=Number($('orfStart').value);
+      const end=Number($('orfEnd').value);
+      if(!Number.isInteger(start)||!Number.isInteger(end)||
+          start<1||end>state.seq.length||end<start){
+        message('Use valid 1-based start and end positions.','bad');
+        return;
+      }
+      const candidate={frame,start,end};
+      if(!state.orfs.some(v=>v.frame===frame&&
+          v.start===start&&v.end===end)){
+        state.orfs.push(candidate);
+        updatePlot();
+      }
+    }
+
+    if(e.target.id==='clearOrfs'){
+      state.orfs=[];
+      updatePlot();
+    }
+    const remove=e.target.closest('[data-remove]');
+    if(remove){
+      state.orfs.splice(Number(remove.dataset.remove),1);
+      updatePlot();
+    }
+  });
+
+  $('check').addEventListener('click',check);
+  $('hint').addEventListener('click',hint);
+  $('next').addEventListener('click',()=>{
+    round++;
+    if(round===6)endScreen();
+    else initialise();
+  });
+
+  initialise();
+})();
+</script>
+</body>
+</html>

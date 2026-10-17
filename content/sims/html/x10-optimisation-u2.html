@@ -1,0 +1,1686 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Games and Policies | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit}
+button,input,[role=button]{-webkit-tap-highlight-color:transparent;user-select:none}
+button{border:2px solid #111;border-radius:999px;background:white;color:#111;min-width:44px;min-height:44px;padding:10px 15px;cursor:pointer;font-weight:800;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:default}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+svg [role=button]:focus-visible{outline:none;stroke:#111;stroke-width:5}
+input{accent-color:var(--lvl-uni)}
+input[type=number]{min-height:48px;width:108px;border:2px solid #111;border-radius:12px;padding:9px;font-size:17px;font-weight:800}
+input[type=range]{width:100%;min-height:44px;cursor:pointer}
+.wrap{max-width:1440px;margin:auto;padding:18px}
+.hud{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:16px}
+.badge{border:2px solid #111;border-radius:999px;background:var(--lvl-uni);color:var(--lvl-uni-on);font-size:12px;font-weight:800;text-transform:uppercase;padding:9px 14px}
+.pill{border:2px solid #111;border-radius:999px;background:white;padding:9px 14px;font-weight:800}
+h1{font-size:clamp(28px,4vw,42px);font-weight:800;margin:5px 0}
+.subtitle{font-weight:600;color:var(--fit-ink-2);margin:8px 0 18px}
+.layout{display:grid;gap:17px;align-items:start}
+.card{min-width:0;border:2px solid #111;border-radius:24px;padding:19px;background:white;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-uni-tint)}
+.stack{display:grid;gap:17px}
+h2{font-size:20px;font-weight:800;margin:0 0 12px}
+.question{font-size:19px;font-weight:800;line-height:1.4}
+.scene{min-height:180px}
+.scene svg{max-width:100%;height:auto}
+.statrow{display:flex;gap:8px;flex-wrap:wrap}
+.stat{border:2px solid #111;border-radius:14px;background:white;padding:9px 13px;min-width:105px}
+.stat small{display:block;font-size:12px;font-weight:700;color:var(--fit-ink-3)}
+.stat b{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.plot{border:2px solid var(--fit-line-soft);border-radius:18px;background:white;margin-top:12px;padding:8px;min-width:0}
+.plot svg{display:block;width:100%;height:auto}
+.plot h3{font-size:15px;font-weight:800;margin:5px 8px}
+.caption{font-size:12px;font-weight:700;color:var(--fit-ink-2);line-height:1.5}
+.controls{display:grid;gap:13px}
+.control{border:2px solid var(--fit-line-soft);border-radius:16px;background:var(--fit-sunken);padding:13px}
+.control label,.control .label{font-weight:800;display:block;margin-bottom:9px}
+.options{display:flex;gap:8px;flex-wrap:wrap}
+.options button[aria-pressed=true]{background:var(--lvl-uni);color:white;box-shadow:var(--sh-2)}
+.stepper{display:flex;align-items:center;gap:7px;justify-content:center;flex-wrap:wrap}
+.stepper output{font-weight:800;font-size:21px;min-width:75px;text-align:center}
+.matrix{border-collapse:collapse;margin:12px auto;max-width:100%;font-size:14px}
+.matrix td,.matrix th{border:2px solid #111;text-align:center;padding:10px}
+.matrix th{background:var(--fit-sunken)}
+.matrix td{background:white;font-weight:700}
+.leafpad{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.leafpad button{border-radius:14px;padding:9px 5px;font-size:13px}
+.leafpad button[aria-pressed=true]{background:var(--fit-pink)}
+.gridworld{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px auto;max-width:420px}
+.cell{border:3px solid #111;border-radius:13px;min-height:83px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px;padding:5px}
+.cell strong{font-size:18px;font-weight:800}
+.cell small{font-size:11px;font-weight:700}
+.cell.wall{background:#555;color:white}
+.cell.terminal{background:#3DBE6B}
+.cell.start{outline:4px solid #FFC83D;outline-offset:-8px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.check{background:var(--fit-sun);border:3px solid #111;min-width:135px;box-shadow:var(--sh-2)}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.feedback{min-height:55px;background:var(--fit-sunken);border:2px solid #111;border-radius:16px;padding:12px;margin-top:14px;font-weight:600;line-height:1.5}
+.good{background:#ddf7e6}
+.bad{background:#ffe7e7}
+details{border:2px solid #111;border-radius:16px;background:white;padding:12px;margin-top:15px}
+summary{font-weight:800;cursor:pointer}
+details p{line-height:1.55;margin:10px 0 0}
+.concept{display:flex;gap:12px;align-items:center;border:2px dashed #111;border-radius:16px;padding:12px;background:white;margin-top:14px}
+.concept svg{flex:0 0 105px;width:105px}
+.concept p{font-size:13px;font-weight:600;margin:0}
+.hidden{display:none!important}
+.end{max-width:650px;text-align:center;padding:32px;margin:20px auto}
+.stars{font-size:46px}
+.end button{background:var(--fit-sun)}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.wrap{padding:24px}.card{padding:23px}}
+@media(max-width:460px){.wrap{padding:12px}.card{padding:14px}.leafpad{grid-template-columns:repeat(3,minmax(0,1fr))}.cell{min-height:75px}input[type=number]{width:100%}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="hud">
+      <span class="badge">University (later years)</span>
+      <span class="pill" id="round">Round 1/6</span>
+      <span class="pill">Score: <span id="score">0</span></span>
+      <span class="pill">★ ★ ★</span>
+    </div>
+    <h1>Games and Policies</h1>
+    <p class="subtitle">Equilibria, adversarial search and sequential decisions.</p>
+  </header>
+  <main id="game">
+    <div class="layout">
+      <section class="card stage">
+        <h2 id="title"></h2>
+        <p class="question" id="question"></p>
+        <div id="scene" class="scene"></div>
+        <div class="concept">
+          <svg viewBox="0 0 115 80" role="img" aria-label="Branching game tree">
+            <path d="M57 15L22 44M57 15L94 44M22 44L7 70M22 44L39 70M94 44L75 70M94 44L109 70"
+              stroke="#111" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <rect x="43" y="3" width="28" height="25" rx="6" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+            <circle cx="22" cy="44" r="10" fill="#FF8FB8" stroke="#111" stroke-width="3"/>
+            <circle cx="94" cy="44" r="10" fill="#FF8FB8" stroke="#111" stroke-width="3"/>
+            <g fill="#3DBE6B" stroke="#111" stroke-width="2">
+              <circle cx="7" cy="70" r="6"/><circle cx="39" cy="70" r="6"/>
+              <circle cx="75" cy="70" r="6"/><circle cx="109" cy="70" r="6"/>
+            </g>
+          </svg>
+          <p><b>Concept:</b> In a sequential game, later outcomes affect which earlier choices are rational.</p>
+        </div>
+        <details>
+          <summary>The maths</summary>
+          <p id="mathText"></p>
+        </details>
+      </section>
+      <section class="stack">
+        <section class="card">
+          <h2>Live strategy analysis</h2>
+          <div class="statrow" id="readouts"></div>
+          <div id="plots"></div>
+        </section>
+        <section class="card">
+          <h2>Your controls</h2>
+          <div class="controls" id="controls"></div>
+          <div class="actions">
+            <button id="hint">Hint −50 points</button>
+            <button id="check" class="check">Check</button>
+            <button id="next" class="hidden">Next →</button>
+          </div>
+          <div class="feedback" id="feedback" aria-live="polite">Choose your strategy and check it.</div>
+        </section>
+      </section>
+    </div>
+  </main>
+  <section id="finish" class="card end hidden"></section>
+</div>
+<script>
+/* FIT-CALC-BEGIN x10_optimisation */
+const FITCalcX10 = (function () {
+  'use strict';
+
+  const EPS = 1e-9;
+
+  function problem(error, reason) {
+    throw { error, reason };
+  }
+
+  function requireNumber(x, reason = 'invalid_number') {
+    if (typeof x !== 'number' || !Number.isFinite(x)) {
+      problem('ConstraintViolation', reason);
+    }
+    return x;
+  }
+
+  function requireArray(x, reason = 'invalid_array') {
+    if (!Array.isArray(x)) {
+      problem('ConstraintViolation', reason);
+    }
+    return x;
+  }
+
+  function requireFinite(x) {
+    if (!Number.isFinite(x)) {
+      problem('MathError', 'non_finite_result');
+    }
+    return x;
+  }
+
+  function safe(fn) {
+    return function (input) {
+      try {
+        if (!input || typeof input !== 'object' || Array.isArray(input)) {
+          problem('ConstraintViolation', 'invalid_input');
+        }
+        return fn(input);
+      } catch (e) {
+        if (e && (
+          e.error === 'MathError' ||
+          e.error === 'ConstraintViolation' ||
+          e.error === 'RuntimeError' ||
+          e.error === 'NotSupported'
+        )) {
+          return { error: e.error, reason: e.reason };
+        }
+        return { error: 'RuntimeError', reason: 'invalid_structure' };
+      }
+    };
+  }
+
+  function probabilities(values) {
+    if (!values.length) {
+      problem('ConstraintViolation', 'empty_probabilities');
+    }
+    let total = 0;
+    for (const p of values) {
+      requireNumber(p, 'invalid_probability');
+      if (p < 0 || p > 1) {
+        problem('ConstraintViolation', 'probability_out_of_range');
+      }
+      total += p;
+    }
+    if (Math.abs(total - 1) > 1e-9) {
+      problem('ConstraintViolation', 'probabilities_must_sum_to_1');
+    }
+  }
+
+  /**
+   * End-of-period discounted cash-flow analysis.
+   * Input: {rate: decimal discount rate per period,
+   *         flows: cash flows at periods 0,...,n}, n <= 10.
+   * Output: {npv: money, irr: decimal rate|null,
+   *          payback: periods|null, cumulative: money[],
+   *          discounted: money[]}.
+   * Assumptions: constant discount rate, end-of-period payments,
+   * linear interpolation for undiscounted payback.
+   * Errors: MathError/rate_must_exceed_minus_1;
+   * ConstraintViolation/periods_exceed_10, invalid_flows;
+   * MathError/non_finite_result.
+   * Hand check: rate .1, flows [-100,60,60] gives
+   * NPV 4.132231404958674, IRR about .1306623863,
+   * payback 1 + 40/60 = 1.6666666667 periods.
+   */
+  function cash_flow(input) {
+    const rate = requireNumber(input.rate, 'invalid_rate');
+    const flows = requireArray(input.flows, 'invalid_flows');
+
+    if (rate <= -1) {
+      problem('MathError', 'rate_must_exceed_minus_1');
+    }
+    if (flows.length > 11) {
+      problem('ConstraintViolation', 'periods_exceed_10');
+    }
+    if (flows.length === 0) {
+      problem('ConstraintViolation', 'invalid_flows');
+    }
+
+    flows.forEach(x => requireNumber(x, 'invalid_flows'));
+
+    function npvAt(r) {
+      let sum = 0;
+      let factor = 1;
+      for (let t = 0; t < flows.length; t++) {
+        if (t > 0) factor *= 1 + r;
+        sum += flows[t] / factor;
+      }
+      return requireFinite(sum);
+    }
+
+    const npv = npvAt(rate);
+    const cumulative = [];
+    const discounted = [];
+    let running = 0;
+    let factor = 1;
+    let payback = null;
+
+    for (let t = 0; t < flows.length; t++) {
+      const before = running;
+      running = requireFinite(running + flows[t]);
+      cumulative.push(running);
+
+      if (t > 0) factor *= 1 + rate;
+      discounted.push(requireFinite(flows[t] / factor));
+
+      if (
+        t > 0 &&
+        payback === null &&
+        before < 0 &&
+        running >= 0 &&
+        flows[t] > 0
+      ) {
+        payback = (t - 1) + (-before / flows[t]);
+      }
+    }
+
+    let changes = 0;
+    let previousSign = 0;
+
+    for (const flow of flows) {
+      const sign = Math.sign(flow);
+      if (!sign) continue;
+      if (previousSign && sign !== previousSign) changes++;
+      previousSign = sign;
+    }
+
+    let irr = null;
+
+    if (changes === 1) {
+      let low = -0.99;
+      let high = 10;
+      let fLow = npvAt(low);
+      let fHigh = npvAt(high);
+
+      if (fLow === 0) {
+        irr = low;
+      } else if (fHigh === 0) {
+        irr = high;
+      } else if (Math.sign(fLow) !== Math.sign(fHigh)) {
+        for (let k = 0; k < 180; k++) {
+          const mid = (low + high) / 2;
+          const fMid = npvAt(mid);
+
+          if (fMid === 0) {
+            low = mid;
+            high = mid;
+            break;
+          }
+
+          if (Math.sign(fMid) === Math.sign(fLow)) {
+            low = mid;
+            fLow = fMid;
+          } else {
+            high = mid;
+            fHigh = fMid;
+          }
+
+          if (high - low < 1e-14) break;
+        }
+        irr = (low + high) / 2;
+      }
+    }
+
+    return { npv, irr, payback, cumulative, discounted };
+  }
+
+  /**
+   * Evaluate a finite decision/chance tree by backward induction.
+   * Input: {tree}; decisions contain options keyed by names,
+   * chance nodes contain branches [{p,node}], leaves contain {value}.
+   * Output: {emv: money, best: chosen option names[]}.
+   * Assumptions: risk-neutral decision maker; probabilities dimensionless;
+   * ties resolved by alphabetical option name.
+   * Errors: ConstraintViolation/probabilities_must_sum_to_1,
+   * invalid_tree, invalid_probability; RuntimeError/tree_too_deep.
+   * Hand check: choose between chance(.5*20 + .5*0)
+   * and a certain 9; EMV 10, best ['Risky'].
+   */
+  function decision_tree(input) {
+    function visit(node, depth) {
+      if (depth > 100) {
+        problem('RuntimeError', 'tree_too_deep');
+      }
+      if (!node || typeof node !== 'object' || Array.isArray(node)) {
+        problem('ConstraintViolation', 'invalid_tree');
+      }
+
+      if (Object.prototype.hasOwnProperty.call(node, 'value')) {
+        return {
+          value: requireNumber(node.value, 'invalid_leaf_value'),
+          best: []
+        };
+      }
+
+      if (node.type === 'chance') {
+        const branches = requireArray(node.branches, 'invalid_tree');
+        probabilities(branches.map(b => {
+          if (!b || typeof b !== 'object') {
+            problem('ConstraintViolation', 'invalid_tree');
+          }
+          return b.p;
+        }));
+
+        let value = 0;
+        for (const branch of branches) {
+          value += branch.p * visit(branch.node, depth + 1).value;
+        }
+        return { value: requireFinite(value), best: [] };
+      }
+
+      if (node.type === 'decision') {
+        const options = node.options;
+        if (!options || typeof options !== 'object' ||
+            Array.isArray(options)) {
+          problem('ConstraintViolation', 'invalid_tree');
+        }
+
+        const names = Object.keys(options).sort();
+        if (!names.length) {
+          problem('ConstraintViolation', 'empty_options');
+        }
+
+        let chosen = null;
+        let highest = -Infinity;
+        let chosenPath = [];
+
+        for (const name of names) {
+          const result = visit(options[name], depth + 1);
+          if (chosen === null || result.value > highest + EPS) {
+            chosen = name;
+            highest = result.value;
+            chosenPath = result.best;
+          }
+        }
+
+        return {
+          value: requireFinite(highest),
+          best: [chosen, ...chosenPath]
+        };
+      }
+
+      problem('NotSupported', 'unknown_node_type');
+    }
+
+    const result = visit(input.tree, 0);
+    return { emv: result.value, best: result.best };
+  }
+
+  /**
+   * Expected value of perfect information for a payoff matrix.
+   * Input: {payoff: [action][state] in money, prior: probabilities[]}.
+   * Output: {emv, best_action, ev_perfect_info, evpi,
+   *          action_emvs: money[]}.
+   * Assumptions: risk-neutral action selection, all states observable
+   * under perfect information; ties use the lowest action index.
+   * Errors: ConstraintViolation/probabilities_must_sum_to_1,
+   * invalid_payoff, invalid_probability.
+   * Hand check: payoff [[10,0],[0,8]], prior [.5,.5]:
+   * EMV 5, best action 0, perfect information 9, EVPI 4.
+   */
+  function evpi(input) {
+    const payoff = requireArray(input.payoff, 'invalid_payoff');
+    const prior = requireArray(input.prior, 'invalid_probability');
+
+    probabilities(prior);
+
+    if (!payoff.length || payoff.some(row =>
+      !Array.isArray(row) || row.length !== prior.length
+    )) {
+      problem('ConstraintViolation', 'invalid_payoff');
+    }
+
+    payoff.forEach(row =>
+      row.forEach(x => requireNumber(x, 'invalid_payoff'))
+    );
+
+    const action_emvs = payoff.map(row =>
+      requireFinite(row.reduce((sum, value, s) =>
+        sum + value * prior[s], 0
+      ))
+    );
+
+    let best_action = 0;
+    for (let a = 1; a < action_emvs.length; a++) {
+      if (action_emvs[a] > action_emvs[best_action] + EPS) {
+        best_action = a;
+      }
+    }
+
+    const emv = action_emvs[best_action];
+
+    let ev_perfect_info = 0;
+    for (let s = 0; s < prior.length; s++) {
+      let best = payoff[0][s];
+      for (let a = 1; a < payoff.length; a++) {
+        best = Math.max(best, payoff[a][s]);
+      }
+      ev_perfect_info += prior[s] * best;
+    }
+
+    ev_perfect_info = requireFinite(ev_perfect_info);
+    let difference = requireFinite(ev_perfect_info - emv);
+    if (Math.abs(difference) < 1e-10) difference = 0;
+
+    return {
+      emv,
+      best_action,
+      ev_perfect_info,
+      evpi: difference,
+      action_emvs
+    };
+  }
+
+  /**
+   * Maximise a linear objective over a two-variable feasible region.
+   * Input: {c: [c1,c2] money per unit,
+   *         constraints: [{a:[a1,a2],b,sense:'<='|'>='}]}.
+   * Output: {status:'optimal'|'infeasible'|'unbounded',
+   *          x: [x,y]|null, objective: money|null,
+   *          alternative_optima: boolean,
+   *          vertices: [{x:[x,y],objective}]}.
+   * Assumptions: continuous non-negative x,y, linear constraints;
+   * intersections enumerated exactly up to floating-point tolerances.
+   * Unboundedness is determined by the recession cone, not a box.
+   * Errors: ConstraintViolation/invalid_lp;
+   * NotSupported/unsupported_constraint_sense.
+   * Hand check: maximise 3x+2y, x+y<=4, x<=2.
+   * Optimum (2,2), objective 10; no alternative optimum.
+   */
+  function lp2(input) {
+    const c = requireArray(input.c, 'invalid_lp');
+    const supplied = requireArray(input.constraints, 'invalid_lp');
+
+    if (c.length !== 2) {
+      problem('ConstraintViolation', 'variables_must_equal_2');
+    }
+    c.forEach(x => requireNumber(x, 'invalid_lp'));
+
+    const constraints = supplied.map(q => {
+      if (!q || typeof q !== 'object' ||
+          !Array.isArray(q.a) || q.a.length !== 2) {
+        problem('ConstraintViolation', 'invalid_lp');
+      }
+      q.a.forEach(x => requireNumber(x, 'invalid_lp'));
+      requireNumber(q.b, 'invalid_lp');
+
+      const sense = q.sense === undefined ? '<=' : q.sense;
+      if (sense !== '<=' && sense !== '>=') {
+        problem('NotSupported', 'unsupported_constraint_sense');
+      }
+      return { a: q.a, b: q.b, sense };
+    });
+
+    const lines = [
+      { a: [1, 0], b: 0 },
+      { a: [0, 1], b: 0 },
+      ...constraints
+    ];
+
+    function feasible(x, y) {
+      if (x < -EPS || y < -EPS) return false;
+
+      return constraints.every(q => {
+        const v = q.a[0] * x + q.a[1] * y;
+        const slack = EPS * Math.max(
+          1, Math.abs(v), Math.abs(q.b)
+        );
+        return q.sense === '<='
+          ? v <= q.b + slack
+          : v >= q.b - slack;
+      });
+    }
+
+    const vertices = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      for (let j = i + 1; j < lines.length; j++) {
+        const u = lines[i];
+        const v = lines[j];
+
+        const determinant =
+          u.a[0] * v.a[1] - u.a[1] * v.a[0];
+
+        if (Math.abs(determinant) < 1e-12) continue;
+
+        let x = (u.b * v.a[1] - u.a[1] * v.b) / determinant;
+        let y = (u.a[0] * v.b - u.b * v.a[0]) / determinant;
+
+        if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+        if (!feasible(x, y)) continue;
+
+        if (Math.abs(x) < EPS) x = 0;
+        if (Math.abs(y) < EPS) y = 0;
+
+        if (vertices.some(p =>
+          Math.abs(p.x[0] - x) < EPS &&
+          Math.abs(p.x[1] - y) < EPS
+        )) continue;
+
+        vertices.push({
+          x: [x, y],
+          objective: requireFinite(c[0] * x + c[1] * y)
+        });
+      }
+    }
+
+    vertices.sort((a, b) =>
+      a.x[0] - b.x[0] || a.x[1] - b.x[1]
+    );
+
+    if (!vertices.length) {
+      return {
+        status: 'infeasible',
+        x: null,
+        objective: null,
+        alternative_optima: false,
+        vertices: []
+      };
+    }
+
+    const directions = [[1, 0], [0, 1]];
+
+    for (const q of constraints) {
+      const [a, b] = q.a;
+      if (Math.abs(a) + Math.abs(b) < 1e-14) continue;
+
+      const magnitude = Math.max(Math.abs(a), Math.abs(b));
+      directions.push([-b / magnitude, a / magnitude]);
+      directions.push([b / magnitude, -a / magnitude]);
+    }
+
+    function feasibleRay(d) {
+      if (d[0] < -EPS || d[1] < -EPS) return false;
+
+      return constraints.every(q => {
+        const dot = q.a[0] * d[0] + q.a[1] * d[1];
+        const tol = EPS * Math.max(
+          1, Math.abs(q.a[0]), Math.abs(q.a[1])
+        );
+        return q.sense === '<='
+          ? dot <= tol
+          : dot >= -tol;
+      });
+    }
+
+    const rays = directions.filter(feasibleRay);
+
+    if (rays.some(d => c[0] * d[0] + c[1] * d[1] > EPS)) {
+      return {
+        status: 'unbounded',
+        x: null,
+        objective: null,
+        alternative_optima: false,
+        vertices
+      };
+    }
+
+    let bestValue = -Infinity;
+
+    for (const vertex of vertices) {
+      if (vertex.objective > bestValue) {
+        bestValue = vertex.objective;
+      }
+    }
+
+    const tol = EPS * Math.max(1, Math.abs(bestValue));
+    const optimisers = vertices.filter(p =>
+      Math.abs(p.objective - bestValue) <= tol
+    );
+
+    const optimum = optimisers[0];
+
+    const flatRay = rays.some(d =>
+      Math.abs(c[0] * d[0] + c[1] * d[1]) <= EPS &&
+      Math.abs(d[0]) + Math.abs(d[1]) > EPS
+    );
+
+    return {
+      status: 'optimal',
+      x: optimum.x.slice(),
+      objective: requireFinite(bestValue),
+      alternative_optima: optimisers.length > 1 || flatRay,
+      vertices
+    };
+  }
+
+  /**
+   * Pure and completely mixed Nash equilibria of a small bimatrix game.
+   * Input: {A: row-player payoff matrix, B: column-player payoff matrix,
+   *         q_col1?: probability of column 0 for payoff plotting}.
+   * Output: {pure: [[row,col],...],
+   *          mixed: {p_row1,q_col1}|null,
+   *          row_expected: number[]|null}.
+   * Payoffs are in utility points; probabilities are dimensionless.
+   * Assumptions: simultaneous play, weak best responses count.
+   * A mixed equilibrium is reported only for a 2x2 game with no
+   * pure equilibrium and a strictly interior solution.
+   * Errors: ConstraintViolation/strategies_exceed_3,
+   * invalid_payoff, invalid_probability.
+   * Hand check: matching pennies A=[[1,-1],[-1,1]], B=-A
+   * has no pure equilibrium and p_row1=q_col1=.5.
+   */
+  function nash(input) {
+    const A = requireArray(input.A, 'invalid_payoff');
+    const B = requireArray(input.B, 'invalid_payoff');
+
+    const rows = A.length;
+    const cols = rows && Array.isArray(A[0]) ? A[0].length : 0;
+
+    if (rows > 3 || cols > 3 || B.length > 3 ||
+        B.some(row => Array.isArray(row) && row.length > 3)) {
+      problem('ConstraintViolation', 'strategies_exceed_3');
+    }
+
+    if (
+      rows < 1 || cols < 1 ||
+      A.some(row => !Array.isArray(row) || row.length !== cols) ||
+      B.length !== rows ||
+      B.some(row => !Array.isArray(row) || row.length !== cols)
+    ) {
+      problem('ConstraintViolation', 'invalid_payoff');
+    }
+
+    for (const matrix of [A, B]) {
+      matrix.forEach(row =>
+        row.forEach(x => requireNumber(x, 'invalid_payoff'))
+      );
+    }
+
+    const pure = [];
+
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        const rowBest = A.every(row =>
+          A[i][j] >= row[j] - EPS
+        );
+
+        const colBest = B[i].every(value =>
+          B[i][j] >= value - EPS
+        );
+
+        if (rowBest && colBest) pure.push([i, j]);
+      }
+    }
+
+    let mixed = null;
+
+    if (rows === 2 && cols === 2 && pure.length === 0) {
+      const denomP =
+        B[0][0] - B[0][1] - B[1][0] + B[1][1];
+
+      const denomQ =
+        A[0][0] - A[0][1] - A[1][0] + A[1][1];
+
+      if (Math.abs(denomP) > 1e-14 &&
+          Math.abs(denomQ) > 1e-14) {
+        const p = (B[1][1] - B[1][0]) / denomP;
+        const q = (A[1][1] - A[0][1]) / denomQ;
+
+        if (p > 0 && p < 1 && q > 0 && q < 1) {
+          mixed = { p_row1: p, q_col1: q };
+        }
+      }
+    }
+
+    let row_expected = null;
+
+    if (Object.prototype.hasOwnProperty.call(input, 'q_col1')) {
+      const q = requireNumber(input.q_col1, 'invalid_probability');
+
+      if (q < 0 || q > 1) {
+        problem('ConstraintViolation', 'probability_out_of_range');
+      }
+
+      if (cols === 2) {
+        row_expected = A.map(row =>
+          requireFinite(q * row[0] + (1 - q) * row[1])
+        );
+      }
+    }
+
+    return { pure, mixed, row_expected };
+  }
+
+  /**
+   * Left-to-right alpha-beta minimax on nested arrays.
+   * Input: {tree: nested arrays with finite numeric leaves}.
+   * Output: {value: utility points, leaves_evaluated: integer,
+   *          leaves_pruned: integer, visited_leaf_ids: integer[],
+   *          pruned_leaf_ids: integer[], leaf_values: number[]}.
+   * Assumptions: MAX at root; alternating MIN/MAX on each edge;
+   * depth counted as edges from root to deepest leaf.
+   * Errors: ConstraintViolation/tree_depth_exceeds_4,
+   * invalid_tree; MathError/non_finite_result.
+   * Hand check: [[3,5],[2,9]] has value 3;
+   * three leaves evaluated and the final leaf pruned.
+   */
+  function minimax(input) {
+    const leaf_values = [];
+
+    function inspect(node, depth) {
+      if (depth > 4) {
+        problem('ConstraintViolation', 'tree_depth_exceeds_4');
+      }
+
+      if (typeof node === 'number') {
+        requireNumber(node, 'invalid_leaf_value');
+        leaf_values.push(node);
+        return 1;
+      }
+
+      if (!Array.isArray(node) || node.length === 0) {
+        problem('ConstraintViolation', 'invalid_tree');
+      }
+
+      let count = 0;
+      for (const child of node) {
+        count += inspect(child, depth + 1);
+      }
+      return count;
+    }
+
+    inspect(input.tree, 0);
+
+    const visited_leaf_ids = [];
+
+    function countLeaves(node) {
+      if (typeof node === 'number') return 1;
+      let total = 0;
+      for (const child of node) total += countLeaves(child);
+      return total;
+    }
+
+    function search(node, maximizing, alpha, beta, offset) {
+      if (typeof node === 'number') {
+        visited_leaf_ids.push(offset);
+        return node;
+      }
+
+      let value = maximizing ? -Infinity : Infinity;
+      let nextOffset = offset;
+
+      for (const child of node) {
+        const result = search(
+          child, !maximizing, alpha, beta, nextOffset
+        );
+
+        if (maximizing) {
+          value = Math.max(value, result);
+          alpha = Math.max(alpha, value);
+        } else {
+          value = Math.min(value, result);
+          beta = Math.min(beta, value);
+        }
+
+        nextOffset += countLeaves(child);
+
+        if (alpha >= beta) break;
+      }
+
+      return requireFinite(value);
+    }
+
+    const value = search(input.tree, true, -Infinity, Infinity, 0);
+    const visited = new Set(visited_leaf_ids);
+    const pruned_leaf_ids = [];
+
+    for (let i = 0; i < leaf_values.length; i++) {
+      if (!visited.has(i)) pruned_leaf_ids.push(i);
+    }
+
+    return {
+      value,
+      leaves_evaluated: visited_leaf_ids.length,
+      leaves_pruned: pruned_leaf_ids.length,
+      visited_leaf_ids,
+      pruned_leaf_ids,
+      leaf_values
+    };
+  }
+
+  /**
+   * Deterministic, synchronous Bellman value iteration on a grid.
+   * Input: {grid:{rows,cols,gamma,step_reward?,
+   *               terminals:[[row,col,reward],...],
+   *               walls?:[[row,col],...]},horizon?:integer}.
+   * Output: {V: number|null [rows][cols],
+   *          policy: {'row,col':'N'|'E'|'S'|'W'},
+   *          sweeps: integer, delta_history: number[]}.
+   * Rewards are utility points per move; gamma is dimensionless;
+   * coordinates are zero-based grid indices.
+   * Assumptions: deterministic moves, N/E/S/W tie priority,
+   * bumps leave the agent in place, terminal V=0 and the
+   * terminal reward is received upon entry.
+   * Without a horizon, the sup-norm convergence threshold is 1e-13.
+   * Errors: ConstraintViolation/grid_exceeds_16_states,
+   * gamma_must_be_below_1, invalid_grid, invalid_horizon;
+   * RuntimeError/iteration_cap_reached.
+   * Hand check: 1x2 grid, right cell terminal reward 5,
+   * gamma .9, step reward 0: V=[[5,0]], policy {'0,0':'E'}.
+   */
+  function value_iteration(input) {
+    const grid = input.grid;
+
+    if (!grid || typeof grid !== 'object') {
+      problem('ConstraintViolation', 'invalid_grid');
+    }
+
+    const { rows, cols } = grid;
+    const gamma = requireNumber(grid.gamma, 'invalid_gamma');
+    const step = grid.step_reward === undefined
+      ? 0
+      : requireNumber(grid.step_reward, 'invalid_step_reward');
+
+    if (!Number.isInteger(rows) || !Number.isInteger(cols) ||
+        rows < 1 || cols < 1) {
+      problem('ConstraintViolation', 'invalid_grid');
+    }
+
+    if (rows * cols > 16) {
+      problem('ConstraintViolation', 'grid_exceeds_16_states');
+    }
+
+    const hasHorizon = input.horizon !== undefined;
+
+    if (gamma < 0) {
+      problem('ConstraintViolation', 'invalid_gamma');
+    }
+
+    if (!hasHorizon && gamma >= 1) {
+      problem('ConstraintViolation', 'gamma_must_be_below_1');
+    }
+
+    if (hasHorizon &&
+        (!Number.isInteger(input.horizon) ||
+         input.horizon < 0 || input.horizon > 10000)) {
+      problem('ConstraintViolation', 'invalid_horizon');
+    }
+
+    const terminals = requireArray(grid.terminals, 'invalid_grid');
+    const wallList = grid.walls === undefined
+      ? []
+      : requireArray(grid.walls, 'invalid_grid');
+
+    const rewards = new Map();
+    const walls = new Set();
+
+    function key(r, c) {
+      return r + ',' + c;
+    }
+
+    function coordinate(r, c) {
+      if (!Number.isInteger(r) || !Number.isInteger(c) ||
+          r < 0 || r >= rows || c < 0 || c >= cols) {
+        problem('ConstraintViolation', 'invalid_grid_coordinate');
+      }
+    }
+
+    for (const wall of wallList) {
+      if (!Array.isArray(wall) || wall.length !== 2) {
+        problem('ConstraintViolation', 'invalid_grid');
+      }
+      coordinate(wall[0], wall[1]);
+      walls.add(key(wall[0], wall[1]));
+    }
+
+    for (const terminal of terminals) {
+      if (!Array.isArray(terminal) || terminal.length !== 3) {
+        problem('ConstraintViolation', 'invalid_grid');
+      }
+      coordinate(terminal[0], terminal[1]);
+
+      const k = key(terminal[0], terminal[1]);
+      if (walls.has(k) || rewards.has(k)) {
+        problem('ConstraintViolation', 'overlapping_grid_cells');
+      }
+
+      rewards.set(
+        k, requireNumber(terminal[2], 'invalid_terminal_reward')
+      );
+    }
+
+    const moves = [
+      ['N', -1, 0],
+      ['E', 0, 1],
+      ['S', 1, 0],
+      ['W', 0, -1]
+    ];
+
+    function nextCell(r, c, dr, dc) {
+      const nr = r + dr;
+      const nc = c + dc;
+
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols ||
+          walls.has(key(nr, nc))) {
+        return [r, c];
+      }
+      return [nr, nc];
+    }
+
+    function actionValue(r, c, move, V) {
+      const [nr, nc] = nextCell(r, c, move[1], move[2]);
+      const terminalReward = rewards.get(key(nr, nc)) || 0;
+      return requireFinite(
+        step + terminalReward + gamma * V[nr][nc]
+      );
+    }
+
+    let V = Array.from({ length: rows }, (_, r) =>
+      Array.from({ length: cols }, (_, c) =>
+        walls.has(key(r, c)) ? null : 0
+      )
+    );
+
+    const delta_history = [];
+    let sweeps = 0;
+    const limit = hasHorizon ? input.horizon : 100000;
+
+    while (sweeps < limit) {
+      const next = V.map(row => row.slice());
+      let delta = 0;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const k = key(r, c);
+
+          if (walls.has(k) || rewards.has(k)) continue;
+
+          let best = -Infinity;
+          for (const move of moves) {
+            best = Math.max(best, actionValue(r, c, move, V));
+          }
+
+          next[r][c] = requireFinite(best);
+          delta = Math.max(delta, Math.abs(best - V[r][c]));
+        }
+      }
+
+      V = next;
+      sweeps++;
+
+      if (delta_history.length < 200) {
+        delta_history.push(delta);
+      }
+
+      if (!hasHorizon && delta < 1e-13) break;
+    }
+
+    if (!hasHorizon && sweeps === limit &&
+        delta_history[delta_history.length - 1] >= 1e-13) {
+      problem('RuntimeError', 'iteration_cap_reached');
+    }
+
+    const policy = {};
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const k = key(r, c);
+        if (walls.has(k) || rewards.has(k)) continue;
+
+        let best = -Infinity;
+        let chosen = 'N';
+
+        for (const move of moves) {
+          const value = actionValue(r, c, move, V);
+          if (value > best + 1e-12) {
+            best = value;
+            chosen = move[0];
+          }
+        }
+
+        policy[k] = chosen;
+      }
+    }
+
+    return { V, policy, sweeps, delta_history };
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    cash_flow: safe(cash_flow),
+    decision_tree: safe(decision_tree),
+    evpi: safe(evpi),
+    lp2: safe(lp2),
+    nash: safe(nash),
+    minimax: safe(minimax),
+    value_iteration: safe(value_iteration)
+  });
+})();
+/* FIT-CALC-END x10_optimisation */
+
+(function(){
+  'use strict';
+
+  const $=id=>document.getElementById(id);
+  const fmt=x=>x===null?'—':Number(x).toLocaleString('en-SG',{
+    maximumSignificantDigits:4
+  });
+  const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+  const kinds=['mixed','minimax','grid_gamma','pure','minimax','grid_step'];
+
+  const g={round:0,score:0,tries:0,hinted:false,locked:false};
+  let baseSeed=Math.floor(Math.random()*1000000000);
+  let state={};
+
+  function rngFor(n){
+    let x=(baseSeed+(n+1)*2654435761)>>>0;
+    return max=>{
+      x=(Math.imul(x,1664525)+1013904223)>>>0;
+      return x%max;
+    };
+  }
+
+  function stat(name,value){
+    return `<div class="stat"><small>${name}</small><b>${value}</b></div>`;
+  }
+
+  function lineGraph(title,xLabel,yLabel,series,marker,reference){
+    const w=550,h=265,l=67,r=18,t=27,b=46;
+    const all=series.flatMap(s=>s.points).filter(p=>
+      Number.isFinite(p[0])&&Number.isFinite(p[1]));
+    if(!all.length)return '';
+    let xmin=Math.min(...all.map(p=>p[0]));
+    let xmax=Math.max(...all.map(p=>p[0]));
+    let ymin=Math.min(...all.map(p=>p[1]),0);
+    let ymax=Math.max(...all.map(p=>p[1]),0);
+    if(xmin===xmax)xmax=xmin+1;
+    if(ymin===ymax)ymax=ymin+1;
+    const pad=(ymax-ymin)*.12;
+    ymin-=pad;ymax+=pad;
+    const X=x=>l+(x-xmin)/(xmax-xmin)*(w-l-r);
+    const Y=y=>h-b-(y-ymin)/(ymax-ymin)*(h-b-t);
+    let out=`<svg viewBox="0 0 ${w} ${h}" role="img"
+      aria-label="${title}, horizontal ${xLabel}, vertical ${yLabel}">
+      <path d="M${l} ${t}V${h-b}H${w-r}" stroke="#111" stroke-width="2" fill="none"/>`;
+    for(let i=0;i<=4;i++){
+      const x=xmin+(xmax-xmin)*i/4;
+      const y=ymin+(ymax-ymin)*i/4;
+      out+=`<path d="M${X(x)} ${h-b}v5M${l-5} ${Y(y)}h5" stroke="#111"/>
+      <text x="${X(x)}" y="${h-b+19}" font-size="11" text-anchor="middle">${fmt(x)}</text>
+      <text x="${l-8}" y="${Y(y)+4}" font-size="11" text-anchor="end">${fmt(y)}</text>`;
+    }
+    const colours=['#1F66E5','#D92D20','#1E9E5A'];
+    series.forEach((s,i)=>{
+      out+=`<polyline fill="none" stroke="${colours[i%3]}" stroke-width="3"
+      points="${s.points.map(p=>`${X(p[0])},${Y(p[1])}`).join(' ')}"/>`;
+    });
+    if(Number.isFinite(reference)&&reference>=xmin&&reference<=xmax)
+      out+=`<path d="M${X(reference)} ${t}V${h-b}"
+      stroke="#111" stroke-width="2" stroke-dasharray="5 4"/>`;
+    if(marker&&Number.isFinite(marker[0])&&Number.isFinite(marker[1]))
+      out+=`<circle cx="${X(marker[0])}" cy="${Y(marker[1])}"
+        r="8" fill="#FFC83D" stroke="#111" stroke-width="3"/>`;
+    out+=`<text x="${w/2}" y="${h-5}" text-anchor="middle"
+      font-size="13" font-weight="800">${xLabel}</text>
+      <text x="16" y="${h/2}" transform="rotate(-90 16 ${h/2})"
+      text-anchor="middle" font-size="13" font-weight="800">${yLabel}</text></svg>`;
+    return `<div class="plot"><h3>${title}</h3>${out}
+      <p class="caption">${series.map((s,i)=>
+        `<span style="color:${colours[i%3]}">━ ${s.name}</span>`
+      ).join(' &nbsp; ')} &nbsp; ● Current marker
+      ${Number.isFinite(reference)?' · Dashed: indifference point':''}</p></div>`;
+  }
+
+  function matrixHTML(){
+    const A=state.A,B=state.B;
+    let out=`<table class="matrix" aria-label="Bimatrix payoffs in utility points">
+      <thead><tr><th>Row / Column</th>`;
+    for(let c=0;c<A[0].length;c++)out+=`<th>C${c+1}</th>`;
+    out+='</tr></thead><tbody>';
+    for(let r=0;r<A.length;r++){
+      out+=`<tr><th>R${r+1}</th>`;
+      for(let c=0;c<A[r].length;c++){
+        out+=`<td>(${fmt(A[r][c])}, ${fmt(B[r][c])})</td>`;
+      }
+      out+='</tr>';
+    }
+    return out+'</tbody></table><p class="caption">Each cell gives (row payoff, column payoff) in utility points.</p>';
+  }
+
+  function treeDrawing(){
+    const result=FITCalcX10.minimax({tree:state.tree});
+    const leaves=result.leaf_values.length;
+    const width=Math.max(590,leaves*56);
+    const height=375;
+    let cursor=0;
+    const edges=[],nodes=[];
+
+    function walk(node,depth){
+      if(typeof node==='number'){
+        const id=cursor++;
+        const x=(id+.5)*width/leaves;
+        const y=35+depth*73;
+        nodes.push({x,y,depth,id,value:result.leaf_values[id]});
+        return {x,y};
+      }
+      const children=node.map(ch=>walk(ch,depth+1));
+      const x=children.reduce((a,c)=>a+c.x,0)/children.length;
+      const y=35+depth*73;
+      children.forEach(child=>edges.push([x,y,child.x,child.y]));
+      nodes.push({x,y,depth,id:null,value:null});
+      return {x,y};
+    }
+    walk(state.tree,0);
+    let out=`<svg viewBox="0 0 ${width} ${height}" role="img"
+      aria-label="Alternating maximum and minimum game tree, with numbered terminal leaf utilities">`;
+    edges.forEach(e=>{
+      out+=`<path d="M${e[0]} ${e[1]}L${e[2]} ${e[3]}"
+      stroke="#111" stroke-width="3" fill="none"/>`;
+    });
+    nodes.forEach(n=>{
+      if(n.id===null){
+        const max=n.depth%2===0;
+        out+=`<rect x="${n.x-20}" y="${n.y-16}" width="40" height="32" rx="8"
+          fill="${max?'#FFC83D':'#FF8FB8'}" stroke="#111" stroke-width="3"/>
+          <text x="${n.x}" y="${n.y+5}" text-anchor="middle"
+          font-weight="800" font-size="12">${max?'MAX':'MIN'}</text>`;
+      }else{
+        out+=`<circle cx="${n.x}" cy="${n.y}" r="18"
+          fill="${state.chosen.has(n.id)?'#FF8FB8':'white'}"
+          stroke="#111" stroke-width="3"/>
+          <text x="${n.x}" y="${n.y+4}" text-anchor="middle"
+          font-weight="800" font-size="13">${fmt(n.value)}</text>
+          <text x="${n.x}" y="${n.y+33}" text-anchor="middle"
+          font-size="12">L${n.id+1}</text>`;
+      }
+    });
+    return out+'</svg>';
+  }
+
+  function leafBar(){
+    const result=FITCalcX10.minimax({tree:state.tree});
+    const data=result.leaf_values;
+    const w=550,h=255,l=58,b=48,t=25;
+    const min=Math.min(0,...data);
+    const max=Math.max(0,...data);
+    const range=Math.max(1,max-min);
+    const X=i=>l+(i+.5)*(w-l-20)/data.length;
+    const Y=v=>t+(max-v)/range*(h-t-b);
+    let out=`<svg viewBox="0 0 ${w} ${h}" role="img"
+      aria-label="Leaf utility points by left-to-right evaluation order, with selected leaves highlighted">
+      <path d="M${l} ${t}V${h-b}H${w-20}"
+      stroke="#111" stroke-width="2" fill="none"/>`;
+    data.forEach((v,i)=>{
+      const width=Math.min(35,(w-l-20)/data.length*.72);
+      const barTop=Math.min(Y(v),Y(0));
+      out+=`<rect x="${X(i)-width/2}" y="${barTop}"
+        width="${width}" height="${Math.max(1,Math.abs(Y(v)-Y(0)))}"
+        fill="${state.chosen.has(i)?'#FF8FB8':'#1F66E5'}"
+        stroke="#111" stroke-width="1"/>
+        <text x="${X(i)}" y="${h-b+17}" text-anchor="middle"
+        font-size="11">${i+1}</text>`;
+    });
+    out+=`<text x="${w/2}" y="${h-5}" text-anchor="middle"
+      font-size="13">Leaf index (left to right)</text>
+      <text x="15" y="${h/2}" text-anchor="middle"
+      transform="rotate(-90 15 ${h/2})" font-size="13">Utility (points)</text></svg>`;
+    return `<div class="plot"><h3>Leaf utilities and your prune selections</h3>
+      ${out}<p class="caption">Blue: not selected · Pink: marked as pruned</p></div>`;
+  }
+
+  function gridModel(){
+    return {
+      rows:3,cols:3,
+      gamma:state.gamma,
+      step_reward:state.step,
+      walls:[[1,1]],
+      terminals:[[0,2,state.goal],[2,0,state.bonus]]
+    };
+  }
+
+  function gridSolution(){
+    return FITCalcX10.value_iteration({grid:gridModel()});
+  }
+
+  function heatmap(){
+    const result=gridSolution();
+    const values=result.V.flat().filter(v=>v!==null);
+    const low=Math.min(...values),high=Math.max(...values);
+    const directions={N:'↑',E:'→',S:'↓',W:'←'};
+    let out='<div class="gridworld" role="img" aria-label="Value heat map with greedy policy arrows and terminal rewards">';
+    for(let r=0;r<3;r++){
+      for(let c=0;c<3;c++){
+        const wall=r===1&&c===1;
+        const goal=r===0&&c===2;
+        const bonus=r===2&&c===0;
+        const start=r===1&&c===0;
+        const v=result.V[r][c];
+        const ratio=v===null?0:(v-low)/Math.max(.00001,high-low);
+        const alpha=(.14+.50*ratio).toFixed(3);
+        const style=!wall&&!goal&&!bonus
+          ? `style="background:rgba(31,102,229,${alpha})"`:'';
+        const name=wall?'WALL':goal?'EXIT':bonus?'BONUS':start?'START':`${r},${c}`;
+        const arrow=result.policy[`${r},${c}`]||'';
+        out+=`<div class="cell ${wall?'wall':''} ${goal||bonus?'terminal':''} ${start?'start':''}" ${style}>
+          <small>${name}</small>
+          <strong>${wall?'■':goal?'★':bonus?'◆':directions[arrow]}</strong>
+          <small>${wall?'Blocked':goal?'+'+fmt(state.goal)+' pts':
+            bonus?'+'+fmt(state.bonus)+' pts':fmt(v)+' pts'}</small>
+        </div>`;
+      }
+    }
+    out+='</div>';
+    return `<div class="plot"><h3>State values and greedy policy</h3>${out}
+      <p class="caption">Darker blue: higher value · Arrows: best next move · ★ Exit · ◆ Immediate bonus</p></div>`;
+  }
+
+  function makeRound(){
+    const kind=kinds[g.round],rng=rngFor(g.round);
+    state={kind,chosen:new Set()};
+    g.tries=0;g.hinted=false;g.locked=false;
+    $('round').textContent=`Round ${g.round+1}/6`;
+    $('score').textContent=g.score;
+    $('hint').disabled=false;$('check').disabled=false;
+    $('next').classList.add('hidden');
+    $('feedback').className='feedback';
+    $('feedback').textContent='Choose your strategy and check it.';
+
+    if(kind==='mixed'){
+      const a=rng(3),b=rng(3);
+      state.A=[[4+a,-2],[-2,2+b]];
+      state.B=state.A.map(row=>row.map(x=>-x));
+      state.p=.10;
+      state.q=.90;
+      $('title').textContent='Mixed-strategy Nash equilibrium';
+      $('question').textContent='No player can commit to a single pure response. Set p = P(row 1) and q = P(column 1), using probabilities for the FIRST row and column (zero-based index 0).';
+      $('scene').innerHTML=matrixHTML();
+      $('mathText').textContent='For 2×2 games without a pure equilibrium, make the row player indifferent between rows to find q, and the column player indifferent between columns to find p. Probabilities are dimensionless, and each player maximises their own utility.';
+      $('controls').innerHTML=`
+        <div class="control"><label for="p">p: probability of row 1 (index 0)</label>
+          <div class="stepper">
+            <button data-step="p:-.1" aria-label="Reduce p by 0.1">−−</button>
+            <button data-step="p:-.01" aria-label="Reduce p by 0.01">−</button>
+            <output id="pOut">0.10</output>
+            <button data-step="p:.01" aria-label="Increase p by 0.01">+</button>
+            <button data-step="p:.1" aria-label="Increase p by 0.1">++</button>
+          </div>
+          <input id="p" type="range" min="0" max="1" step=".01" value=".10">
+        </div>
+        <div class="control"><label for="q">q: probability of column 1 (index 0)</label>
+          <div class="stepper">
+            <button data-step="q:-.1" aria-label="Reduce q by 0.1">−−</button>
+            <button data-step="q:-.01" aria-label="Reduce q by 0.01">−</button>
+            <output id="qOut">0.90</output>
+            <button data-step="q:.01" aria-label="Increase q by 0.01">+</button>
+            <button data-step="q:.1" aria-label="Increase q by 0.1">++</button>
+          </div>
+          <input id="q" type="range" min="0" max="1" step=".01" value=".90">
+        </div>`;
+    }else if(kind==='pure'){
+      const diagonal=[4+rng(3),3+rng(2),2+rng(2)];
+      state.A=Array.from({length:3},(_,r)=>
+        Array.from({length:3},(_,c)=>r===c?diagonal[r]:0));
+      state.B=state.A.map(row=>row.slice());
+      $('title').textContent='Find every pure Nash equilibrium';
+      $('question').textContent='Select ALL cells that are mutual best responses. Do not select cells that benefit only one player.';
+      $('scene').innerHTML=matrixHTML();
+      $('mathText').textContent='A pure Nash equilibrium (i,j) requires A[i,j] to be maximal in column j and B[i,j] to be maximal in row i. Weak ties count. An equilibrium does not require the highest total payoff.';
+      $('controls').innerHTML=`<div class="control">
+        <span class="label">Tap equilibrium cells</span>
+        <div class="options">${state.A.flatMap((row,r)=>
+          row.map((_,c)=>`<button data-cell="${r},${c}"
+          aria-pressed="false">R${r+1}, C${c+1}</button>`)).join('')}
+        </div>
+      </div>`;
+    }else if(kind==='minimax'){
+      const shift=rng(3);
+      state.tree=g.round===1
+        ? [
+            [[3+shift,5+shift],[2+shift,9+shift]],
+            [[0+shift,1+shift],[7+shift,8+shift]]
+          ]
+        : [
+            [[[4+shift,3+shift],[6+shift,5+shift]],
+             [[1+shift,8+shift],[2+shift,7+shift]]],
+            [[[-2+shift,0+shift],[9+shift,1+shift]],
+             [[5+shift,4+shift],[3+shift,6+shift]]]
+          ];
+      state.root='';
+      const result=FITCalcX10.minimax({tree:state.tree});
+      $('title').textContent='Alpha–beta search';
+      $('question').textContent='Search the tree left to right, starting at MAX. Mark exactly the leaves that alpha–beta pruning skips, then enter the root minimax value.';
+      $('scene').innerHTML=treeDrawing();
+      $('mathText').textContent='MAX takes the largest child value; MIN takes the smallest. Alpha is the best guaranteed MAX bound; beta is the best guaranteed MIN bound. When α ≥ β, later siblings need not be evaluated. Utilities are in points; exploration order is left to right.';
+      $('controls').innerHTML=`
+        <div class="control"><span class="label">Tap every pruned leaf</span>
+          <div class="leafpad">
+          ${result.leaf_values.map((v,i)=>
+            `<button data-leaf="${i}" aria-pressed="false">
+              L${i+1} · ${fmt(v)} pts</button>`).join('')}
+          </div>
+        </div>
+        <div class="control"><label for="root">Root minimax value (utility points)</label>
+          <input id="root" type="number" step="1" placeholder="Root value">
+        </div>`;
+    }else{
+      state.goal=12+2*rng(3);
+      state.bonus=3+rng(2);
+      state.gamma=kind==='grid_gamma'?.10:.75;
+      state.step=kind==='grid_gamma'?0:-4;
+      state.target=null;
+      const startGamma=.10;
+      if(kind==='grid_gamma'){
+        for(let i=2;i<=19;i++){
+          const gamma=i/20;
+          const result=FITCalcX10.value_iteration({grid:{
+            ...gridModel(),gamma
+          }});
+          if(result.policy['1,0']==='N'){
+            state.target=gamma;break;
+          }
+        }
+      }else{
+        for(let i=-16;i<=0;i++){
+          const step=i/4;
+          const result=FITCalcX10.value_iteration({grid:{
+            ...gridModel(),step_reward:step
+          }});
+          if(result.policy['1,0']==='N'){
+            state.target=step;break;
+          }
+        }
+      }
+      $('title').textContent='A sequential routing policy';
+      $('question').textContent=kind==='grid_gamma'
+        ? 'Set the SMALLEST discount factor γ (steps of 0.05) that makes the start state move NORTH towards the distant exit.'
+        : 'Set the MOST NEGATIVE step reward (steps of 0.25 points) that still makes the start state move NORTH towards the distant exit.';
+      $('scene').innerHTML=`
+        <svg viewBox="0 0 500 135" role="img"
+          aria-label="Grid route choice: the start can move north towards an exit or south to an immediate reward">
+          <rect x="18" y="44" width="112" height="49" rx="12" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+          <text x="74" y="74" text-anchor="middle" font-weight="800">START</text>
+          <path d="M130 67L210 25H325M130 67L210 113H325"
+            fill="none" stroke="#111" stroke-width="4"/>
+          <rect x="325" y="3" width="155" height="44" rx="11"
+            fill="#3DBE6B" stroke="#111" stroke-width="3"/>
+          <rect x="325" y="91" width="155" height="44" rx="11"
+            fill="#FF8FB8" stroke="#111" stroke-width="3"/>
+          <text x="402" y="30" text-anchor="middle" font-weight="800">EXIT +${fmt(state.goal)} pts</text>
+          <text x="402" y="118" text-anchor="middle" font-weight="800">BONUS +${fmt(state.bonus)} pts</text>
+          <text x="255" y="16" font-size="13" text-anchor="middle">Longer route</text>
+          <text x="260" y="128" font-size="13" text-anchor="middle">Immediate</text>
+        </svg>`;
+      $('mathText').textContent='V(s) = maxₐ [step reward + terminal-entry reward + γ V(s′)]. Terminals have value zero after entry. Invalid moves remain in place. Greedy action ties use N, E, S, W. Grid rewards and values are utility points; γ is dimensionless.';
+      $('controls').innerHTML=`
+        <div class="control">
+          <label for="policyParam">${kind==='grid_gamma'?'Discount factor γ (dimensionless)':'Step reward (points per move)'}</label>
+          <div class="stepper">
+            <button data-step="param:${kind==='grid_gamma'?'-.10':'-1'}" aria-label="Decrease by coarse step">−−</button>
+            <button data-step="param:${kind==='grid_gamma'?'-.05':'-.25'}" aria-label="Decrease by fine step">−</button>
+            <output id="paramOut"></output>
+            <button data-step="param:${kind==='grid_gamma'?'.05':'.25'}" aria-label="Increase by fine step">+</button>
+            <button data-step="param:${kind==='grid_gamma'?'.10':'1'}" aria-label="Increase by coarse step">++</button>
+          </div>
+          <input id="policyParam" type="range"
+            min="${kind==='grid_gamma'?.10:-4}"
+            max="${kind==='grid_gamma'?.95:0}"
+            step="${kind==='grid_gamma'?.05:.25}"
+            value="${kind==='grid_gamma'?.10:-4}">
+          <p class="caption">Deterministic 3 × 3 grid · One wall · Terminal entry rewards · No external solver.</p>
+        </div>`;
+    }
+    update();
+  }
+
+  function update(){
+    if(state.kind==='mixed'){
+      const result=FITCalcX10.nash({
+        A:state.A,B:state.B,q_col1:state.q
+      });
+      const lines=[[],[]];
+      for(let i=0;i<=100;i++){
+        const q=i/100;
+        const n=FITCalcX10.nash({
+          A:state.A,B:state.B,q_col1:q
+        });
+        lines[0].push([q,n.row_expected[0]]);
+        lines[1].push([q,n.row_expected[1]]);
+      }
+      $('readouts').innerHTML=stat('Your p',fmt(state.p))+
+        stat('Your q',fmt(state.q))+
+        stat('Row 1 payoff at q',fmt(result.row_expected[0])+' pts')+
+        stat('Row 2 payoff at q',fmt(result.row_expected[1])+' pts');
+      $('plots').innerHTML=lineGraph('Row-player expected utility',
+        'q = P(column 1)','Expected utility (points)',
+        [{name:'Row 1',points:lines[0]},
+         {name:'Row 2',points:lines[1]}],
+        [state.q,result.row_expected[0]],
+        result.mixed?result.mixed.q_col1:null);
+      $('pOut').textContent=fmt(state.p);
+      $('qOut').textContent=fmt(state.q);
+      $('p').value=state.p;
+      $('q').value=state.q;
+    }else if(state.kind==='pure'){
+      const result=FITCalcX10.nash({A:state.A,B:state.B});
+      $('readouts').innerHTML=stat('Selected cells',state.chosen.size)+
+        stat('Total payoff cells',state.A.length*state.A[0].length);
+      let out=`<div class="plot"><h3>Pure-response candidate map</h3>
+      <svg viewBox="0 0 450 330" role="img"
+        aria-label="Matrix cells coloured by the player's current equilibrium selections; rows and columns are strategies">`;
+      for(let r=0;r<3;r++){
+        for(let c=0;c<3;c++){
+          const x=76+c*119,y=35+r*87;
+          const chosen=state.chosen.has(r+','+c);
+          out+=`<rect x="${x}" y="${y}" width="104" height="73" rx="12"
+            fill="${chosen?'#FFC83D':'#E2ECFD'}" stroke="#111" stroke-width="3"/>
+            <text x="${x+52}" y="${y+27}" font-size="15"
+            text-anchor="middle" font-weight="800">R${r+1}, C${c+1}</text>
+            <text x="${x+52}" y="${y+51}" font-size="14"
+            text-anchor="middle">${fmt(state.A[r][c])}, ${fmt(state.B[r][c])} pts</text>`;
+        }
+      }
+      out+=`<text x="225" y="320" font-size="13" text-anchor="middle">Column strategy (index)</text>
+        <text x="15" y="150" font-size="13" transform="rotate(-90 15 150)"
+          text-anchor="middle">Row strategy (index)</text></svg>
+        <p class="caption">Yellow: selected · Blue: unselected · Payoff pair in utility points</p></div>`;
+      $('plots').innerHTML=out;
+      document.querySelectorAll('[data-cell]').forEach(b=>
+        b.setAttribute('aria-pressed',String(state.chosen.has(b.dataset.cell))));
+      if(result.error)$('feedback').textContent='Invalid payoff matrix.';
+    }else if(state.kind==='minimax'){
+      $('readouts').innerHTML=stat('Leaves selected',state.chosen.size)+
+        stat('Leaf count',FITCalcX10.minimax({tree:state.tree}).leaf_values.length)+
+        stat('Your root value',state.root===''?'Not entered':state.root+' pts');
+      $('plots').innerHTML=leafBar();
+      $('scene').innerHTML=treeDrawing();
+      document.querySelectorAll('[data-leaf]').forEach(b=>
+        b.setAttribute('aria-pressed',String(state.chosen.has(Number(b.dataset.leaf)))));
+    }else{
+      const result=gridSolution();
+      const gamma=state.gamma,step=state.step;
+      const points=result.delta_history.map((d,i)=>[i+1,d]);
+      const final=points.length?points[points.length-1]:[0,0];
+      $('readouts').innerHTML=stat('Current γ',fmt(gamma))+
+        stat('Step reward',fmt(step)+' pts')+
+        stat('Start action',result.policy['1,0']||'—')+
+        stat('Sweeps',result.sweeps);
+      $('plots').innerHTML=heatmap()+lineGraph(
+        'Bellman update convergence','Sweep number (count)',
+        'Largest ΔV (utility points)',
+        [{name:'Maximum value change',points}],
+        final,null
+      );
+      $('paramOut').textContent=fmt(state.kind==='grid_gamma'?gamma:step);
+      $('policyParam').value=state.kind==='grid_gamma'?gamma:step;
+    }
+  }
+
+  function setParam(change){
+    if(state.kind==='mixed'){
+      const value=state[change.key]+change.delta;
+      state[change.key]=Math.round(clamp(value,0,1)*100)/100;
+    }else{
+      const gamma=state.kind==='grid_gamma';
+      const key=gamma?'gamma':'step';
+      const value=state[key]+change.delta;
+      state[key]=gamma
+        ? Math.round(clamp(value,.10,.95)*20)/20
+        : Math.round(clamp(value,-4,0)*4)/4;
+    }
+    update();
+  }
+
+  $('controls').addEventListener('click',event=>{
+    if(g.locked)return;
+    const b=event.target.closest('button');
+    if(!b)return;
+    if(b.dataset.step){
+      const [key,delta]=b.dataset.step.split(':');
+      setParam({key:key==='param'?'param':key,delta:Number(delta)});
+    }
+    if(b.dataset.cell){
+      if(state.chosen.has(b.dataset.cell))state.chosen.delete(b.dataset.cell);
+      else state.chosen.add(b.dataset.cell);
+      update();
+    }
+    if(b.dataset.leaf!==undefined){
+      const id=Number(b.dataset.leaf);
+      if(state.chosen.has(id))state.chosen.delete(id);
+      else state.chosen.add(id);
+      update();
+    }
+  });
+
+  $('controls').addEventListener('input',event=>{
+    if(g.locked)return;
+    const el=event.target;
+    if(el.id==='p')state.p=Number(el.value);
+    if(el.id==='q')state.q=Number(el.value);
+    if(el.id==='root')state.root=el.value;
+    if(el.id==='policyParam'){
+      if(state.kind==='grid_gamma')state.gamma=Number(el.value);
+      else state.step=Number(el.value);
+    }
+    if(el.id!=='root')update();
+  });
+
+  function resultForRound(){
+    if(state.kind==='mixed'){
+      const r=FITCalcX10.nash({A:state.A,B:state.B});
+      return {
+        correct:r.mixed!==null&&
+          Math.abs(state.p-r.mixed.p_row1)<=.011&&
+          Math.abs(state.q-r.mixed.q_col1)<=.011,
+        off:r.mixed===null?'This matrix requires another equilibrium form.':
+          `Review indifference: your p and q should each make the other player indifferent between their two pure strategies.`,
+        why:`The mixed equilibrium is p=${fmt(r.mixed.p_row1)}, q=${fmt(r.mixed.q_col1)}. There are no pure equilibria.`
+      };
+    }
+    if(state.kind==='pure'){
+      const r=FITCalcX10.nash({A:state.A,B:state.B});
+      const expected=new Set(r.pure.map(x=>x.join(',')));
+      const selected=state.chosen;
+      const correct=selected.size===expected.size&&
+        [...expected].every(x=>selected.has(x));
+      return {
+        correct,
+        off:`You selected ${selected.size} cells. Check every row and column player's best responses, including any weak ties.`,
+        why:`Pure equilibria: ${r.pure.map(v=>
+          `(R${v[0]+1}, C${v[1]+1})`).join(', ')}. Every selected pair is a mutual best response.`
+      };
+    }
+    if(state.kind==='minimax'){
+      const r=FITCalcX10.minimax({tree:state.tree});
+      const expected=new Set(r.pruned_leaf_ids);
+      const correctSet=state.chosen.size===expected.size&&
+        [...expected].every(id=>state.chosen.has(id));
+      const correctValue=state.root!==''&&
+        Number.isFinite(Number(state.root))&&
+        Math.abs(Number(state.root)-r.value)<1e-9;
+      return {
+        correct:correctSet&&correctValue,
+        off:!correctSet?'Your pruned-leaf selection differs from left-to-right alpha–beta evaluation.':
+          'The root value should be computed by alternating MAX and MIN.',
+        why:`Root value ${fmt(r.value)} points; ${r.leaves_evaluated} leaves evaluated and ${r.leaves_pruned} pruned. Pruned leaves: ${r.pruned_leaf_ids.map(i=>'L'+(i+1)).join(', ')||'none'}.`
+      };
+    }
+    const r=gridSolution();
+    const actual=state.kind==='grid_gamma'?state.gamma:state.step;
+    const correct=Math.abs(actual-state.target)<1e-8&&
+      r.policy['1,0']==='N';
+    return {
+      correct,
+      off:`The start action is ${r.policy['1,0']}. Find the first parameter setting, in the specified increment, that directs the agent north.`,
+      why:`The threshold setting is ${fmt(state.target)} ${state.kind==='grid_gamma'?'(dimensionless γ)':'utility points per move'}. At this setting, the greedy action from START is N and the long route reaches the exit.`
+    };
+  }
+
+  $('check').addEventListener('click',()=>{
+    if(g.locked)return;
+    g.tries++;
+    const result=resultForRound();
+    if(result.correct){
+      const points=g.hinted||g.tries>=3?50:g.tries===2?75:100;
+      g.score+=points;
+      g.locked=true;
+      $('score').textContent=g.score;
+      $('feedback').className='feedback good';
+      $('feedback').textContent=`★ Correct! +${points} points. ${result.why}`;
+      $('check').disabled=true;
+      $('hint').disabled=true;
+      $('next').textContent=g.round===5?'See stars →':'Next round →';
+      $('next').classList.remove('hidden');
+    }else{
+      $('feedback').className='feedback bad';
+      $('feedback').textContent='Not yet. '+result.off;
+    }
+  });
+
+  $('hint').addEventListener('click',()=>{
+    if(g.locked)return;
+    g.hinted=true;
+    $('hint').disabled=true;
+    let hint='';
+    if(state.kind==='mixed')
+      hint='Each player mixes to make the OTHER player indifferent. Use the blue and red payoff curves as a guide.';
+    else if(state.kind==='pure')
+      hint='Test each candidate against unilateral deviations by the row player and by the column player.';
+    else if(state.kind==='minimax')
+      hint='Carry alpha down MAX branches and beta down MIN branches. Once alpha is at least beta, remaining siblings are skipped.';
+    else
+      hint='The nearby bonus has fewer steps; the exit has a larger reward. Tune the parameter until the first greedy arrow changes, then verify the neighbouring increment.';
+    $('feedback').className='feedback';
+    $('feedback').textContent=`Hint: ${hint} This round is now worth at most 50 points.`;
+  });
+
+  $('next').addEventListener('click',()=>{
+    if(!g.locked)return;
+    g.round++;
+    if(g.round===6)finish();
+    else makeRound();
+  });
+
+  function finish(){
+    $('game').classList.add('hidden');
+    $('finish').classList.remove('hidden');
+    const stars=g.score>=500?3:g.score>=350?2:1;
+    $('finish').innerHTML=`
+      <div class="stars" aria-label="${stars} out of 3 stars">
+        ${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
+      <h2>Games and policies complete!</h2>
+      <p class="question">${g.score} / 600 points</p>
+      <p>Equilibrium reasoning, correct pruning and Bellman updates are different ways of making complex decisions tractable.</p>
+      <button id="restart">Play again</button>`;
+    $('restart').addEventListener('click',()=>{
+      baseSeed=Math.floor(Math.random()*1000000000);
+      g.round=0;g.score=0;
+      $('finish').classList.add('hidden');
+      $('game').classList.remove('hidden');
+      makeRound();
+    });
+  }
+
+  makeRound();
+})();
+</script>
+</body>
+</html>
