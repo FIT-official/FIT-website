@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Piston Pressure | Fix It Today</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#111;line-height:1.5}
+button,input{font:inherit}
+button,input[type=range],input[type=number],summary{min-height:44px;-webkit-tap-highlight-color:transparent;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{border:2px solid #111;border-radius:999px;background:white;box-shadow:var(--sh-1);padding:10px 16px;font-weight:800;cursor:pointer;transition:transform .12s}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.selected{background:var(--lvl-secondary)}
+button.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+button.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.page{max-width:1250px;margin:auto;padding:18px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:22px}
+.brand{font-weight:800}
+.hud{display:flex;gap:8px;flex-wrap:wrap;font-weight:800}
+.badge,.pill{border:2px solid #111;border-radius:999px;padding:6px 12px;font-size:12px}
+.badge{background:var(--lvl-secondary);color:var(--lvl-secondary-on);text-transform:uppercase;font-weight:800}
+.pill{background:white}
+h1{font-weight:800;font-size:clamp(1.7rem,4vw,2.5rem);margin:0 0 18px}
+h2{font-weight:800;font-size:1.2rem;margin:0 0 12px}
+h3{font-weight:800;font-size:1rem;margin:0 0 10px}
+p{margin:0 0 14px}
+.layout{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+.panel{display:grid;gap:18px;align-content:start;min-width:0}
+.card{border:2px solid #111;border-radius:24px;box-shadow:var(--sh-2);padding:18px;background:white;min-width:0}
+.stage{border-radius:32px;background:var(--lvl-secondary-tint);box-shadow:var(--sh-3)}
+.scene{width:100%;display:block}
+.graph{width:100%;display:block;min-height:230px}
+.question{font-size:1.15rem;font-weight:800}
+.muted,.caption{color:var(--fit-ink-3);font-size:.88rem}
+.choicebox,.actions{display:flex;flex-wrap:wrap;gap:10px}
+.choice{flex:1;min-width:120px}
+.readout{background:var(--fit-sunken);border:2px solid #111;border-radius:16px;padding:12px;margin:12px 0;font-weight:800;font-variant-numeric:tabular-nums}
+.readout strong{font-size:1.3rem}
+.stepper{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0}
+.stepper button{min-width:48px;min-height:48px;padding:6px}
+.stepper output{font-weight:800;min-width:110px;text-align:center}
+input[type=range]{width:100%;accent-color:#111}
+.feedback{border:2px dashed #999;border-radius:16px;padding:12px;min-height:55px;font-weight:600}
+.feedback.good{background:#E4F9ED;border-color:var(--fit-success)}
+.feedback.bad{background:#FFF0EE;border-color:var(--fit-danger)}
+table{border-collapse:collapse;width:100%;font-size:.87rem;margin-top:12px}
+th,td{border-bottom:1px solid #ccc;text-align:right;padding:8px}
+th:first-child,td:first-child{text-align:left}
+details{margin-top:18px;border:2px solid #111;border-radius:16px;padding:8px 15px}
+summary{font-weight:800;cursor:pointer}
+details p{margin:8px 0}
+.hidden{display:none!important}
+.end{text-align:center;padding:30px}
+.stars{font-size:3rem;color:#d49b00;letter-spacing:7px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}}
+@media(max-width:480px){.page{padding:12px}.card{padding:14px}.stepper output{order:-1;width:100%}.stepper button{flex:1}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="page">
+<header>
+<div class="brand">FIT / LEARNING LAB</div>
+<div class="hud"><span class="badge">Secondary</span><span class="pill" id="roundHud">Round 1/6</span><span class="pill" id="scoreHud">0 points</span></div>
+</header>
+<section id="game">
+<h1>Piston Pressure</h1>
+<div class="layout">
+<div class="card stage">
+<h2>Particle chamber</h2>
+<svg id="scene" class="scene" viewBox="0 0 500 365" role="img" aria-label="A piston containing moving gas particles"></svg>
+<p class="caption" id="sceneCaption">Gas pressure comes from particle collisions with the walls.</p>
+<div class="card" style="margin-top:18px">
+<h3>Why pressure happens</h3>
+<svg viewBox="0 0 440 120" width="100%" role="img" aria-label="Gas particle colliding with a wall and changing direction">
+<rect x="340" y="8" width="20" height="94" rx="4" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+<circle cx="260" cy="55" r="13" fill="#FF8FB8" stroke="#111" stroke-width="3"/>
+<path d="M105 55 H237 M218 43 L237 55 L218 67" stroke="#111" stroke-width="4" fill="none" stroke-linejoin="round"/>
+<path d="M250 90 H125 M143 78 L125 90 L143 102" stroke="#1F66E5" stroke-width="4" fill="none" stroke-linejoin="round"/>
+<text x="110" y="25" font-size="14" font-weight="800">Before collision →</text>
+<text x="126" y="116" font-size="13" font-weight="800">After collision ←</text>
+</svg>
+<p class="caption">Particles transfer momentum to the walls. Many collisions create pressure.</p>
+</div>
+</div>
+<div class="panel">
+<div class="card">
+<h2 id="roundType">Challenge</h2>
+<p class="question" id="question"></p>
+<p class="muted" id="assumption"></p>
+<div id="controls"></div>
+<div class="readout" id="readout" aria-live="off"></div>
+<table aria-label="Experimental data">
+<thead><tr><th>State</th><th>V (cm³)</th><th>p (kPa)</th><th>T (K)</th></tr></thead>
+<tbody id="dataTable"></tbody>
+</table>
+</div>
+<div class="card">
+<h2>Live pressure–volume graph</h2>
+<svg id="plot" class="graph" viewBox="0 0 500 305" role="img" aria-label="Pressure in kilopascals against volume in cubic centimetres"></svg>
+<p class="caption">The black marker shows your current state.</p>
+</div>
+<div class="card">
+<div class="actions">
+<button id="hint">Hint</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" disabled>Next round →</button>
+</div>
+<p id="feedback" class="feedback" aria-live="polite">Adjust the controls, then Check.</p>
+</div>
+</div>
+</div>
+<details>
+<summary>The physics</summary>
+<p><strong>Particle model:</strong> gas particles move randomly. Collisions with container walls produce pressure.</p>
+<p><strong>Constant temperature:</strong> p₁V₁ = p₂V₂. Pressure decreases as volume increases.</p>
+<p><strong>Constant volume:</strong> p₁/T₁ = p₂/T₂. Heating makes particles move faster on average, increasing pressure.</p>
+<p><strong>Temperature conversion:</strong> T(K) = θ(°C) + 273.</p>
+<p><strong>Assumptions:</strong> ideal gas, fixed amount of gas, uniform temperature and absolute pressure.</p>
+</details>
+</section>
+<section id="finish" class="card end hidden">
+<h1>Pressure mastered!</h1>
+<div id="stars" class="stars"></div>
+<h2 id="result"></h2>
+<p id="resultText"></p>
+<button id="again" class="check">Play again ↻</button>
+</section>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const NS="http:"+"//www.w3.org/2000/svg";
+const s={r:0,score:0,tries:0,hinted:false,done:false,seed:1,d:null,value:0,choice:null,animation:0,particles:[],last:0};
+const reduced=matchMedia("(prefers-reduced-motion: reduce)");
+const rng=()=>{s.seed=(Math.imul(s.seed,1664525)+1013904223)>>>0;return s.seed/4294967296};
+const pick=a=>a[Math.floor(rng()*a.length)];
+function el(tag,a={},txt){
+ const e=document.createElementNS(NS,tag);
+ for(const [k,v] of Object.entries(a))e.setAttribute(k,String(v));
+ if(txt!==undefined)e.textContent=txt;return e;
+}
+function add(svg,tag,a={},txt){const e=el(tag,a,txt);svg.appendChild(e);return e;}
+function line(g,x1,y1,x2,y2,c="#111",w=2){add(g,"line",{x1,y1,x2,y2,stroke:c,"stroke-width":w});}
+function txt(g,x,y,t,size=13,anchor="start"){add(g,"text",{x,y,"font-size":size,"text-anchor":anchor,"font-weight":700,fill:"#111"},t);}
+function pressure(d,v=s.value){return d.p0*d.v0/v*(d.type==="B"? (s.value/d.t0):1);}
+function current(){
+ const d=s.d;
+ return d.type==="A"?d.p0*d.v0/s.value:d.p0*s.value/d.t0;
+}
+function btns(items){
+ const div=document.createElement("div");div.className="choicebox";
+ for(const [label,val] of items){
+  const b=document.createElement("button");b.className="choice";b.textContent=label;b.dataset.v=val;
+  b.onclick=()=>{s.choice=val;div.querySelectorAll("button").forEach(x=>x.classList.toggle("selected",x===b));};
+  div.appendChild(b);
+ }
+ $("controls").appendChild(div);
+}
+function stepper(unit,min,max,step){
+ const wrap=document.createElement("div");wrap.className="stepper";
+ const out=document.createElement("output");
+ wrap.appendChild(out);
+ const move=delta=>{s.value=Math.round(Math.max(min,Math.min(max,s.value+delta))*1000)/1000;update();};
+ for(const [label,delta] of [["−−",-step*10],["−",-step],["+",step],["++",step*10]]){
+  const b=document.createElement("button");b.textContent=label;b.setAttribute("aria-label",`${delta<0?"Decrease":"Increase"} by ${Math.abs(delta)} ${unit}`);b.onclick=()=>move(delta);
+  if(label==="+"||label==="++")wrap.appendChild(b);
+  else wrap.insertBefore(b,out);
+ }
+ wrap.insertBefore(out,wrap.children[2]||null);
+ $("controls").appendChild(wrap);
+ const slider=document.createElement("input");slider.type="range";slider.min=min;slider.max=max;slider.step=step;slider.value=s.value;
+ slider.setAttribute("aria-label","Adjust "+unit);
+ slider.oninput=()=>{s.value=Number(slider.value);update();};
+ $("controls").appendChild(slider);
+ s.sync=()=>{out.textContent=s.value+" "+unit;slider.value=s.value;};
+}
+function prepare(){
+ s.seed=(Math.floor(Math.random()*0xFFFFFFFF)+s.r*7919)>>>0;
+ s.tries=0;s.hinted=false;s.done=false;s.choice=null;s.sync=null;
+ const type=s.r%2===0?"A":"B";
+ const d={type};
+ if(type==="A"){
+  d.v0=pick([200,300,400]);d.p0=pick([80,100,120]);d.t0=300;
+  d.answer=pick([100,150,250,500,600]);
+  if(d.answer===d.v0)d.answer=450;
+  d.target=d.p0*d.v0/d.answer;
+  s.value=d.answer===300?500:300;
+  $("roundType").textContent="Round type A · Move the piston";
+  $("question").textContent=`The gas begins at ${d.p0} kPa and ${d.v0} cm³. At the same temperature, adjust the piston to reach ${d.target.toFixed(2)} kPa.`;
+  $("assumption").textContent="Fixed amount of ideal gas; temperature stays at 300 K.";
+  stepper("cm³",100,800,10);
+ }else{
+  d.p0=pick([80,100,120]);d.v0=400;d.t0=pick([273,300,320]);
+  d.answer=pick([350,400,450,500,550,600]);
+  if(d.answer===d.t0)d.answer=500;
+  d.target=d.p0*d.answer/d.t0;
+  s.value=300;
+  $("roundType").textContent="Round type B · Heat the can";
+  $("question").textContent=`A sealed can is initially at ${d.p0} kPa and ${d.t0} K. Choose the changes caused by heating, then set its temperature to achieve ${d.target.toFixed(2)} kPa.`;
+  $("assumption").textContent="Ideal gas in a rigid, sealed container. Volume and amount of gas stay fixed.";
+  const p=document.createElement("p");p.textContent="What happens to average particle speed, collision rate and pressure when heated?";$("controls").appendChild(p);
+  btns([["All increase","up"],["All decrease","down"],["No change","same"]]);
+  stepper("K",250,700,5);
+ }
+ s.d=d;
+ $("feedback").className="feedback";$("feedback").textContent="Adjust the controls, then Check.";
+ $("roundHud").textContent=`Round ${s.r+1}/6`;
+ $("scoreHud").textContent=s.score+" points";
+ $("next").disabled=true;$("check").disabled=false;$("hint").disabled=false;
+ makeParticles();update();startMotion();
+}
+function startRound(){
+ $("controls").replaceChildren();prepare();
+}
+function update(){
+ if(!s.d)return;
+ if(s.sync)s.sync();
+ const d=s.d,p=current(),t=d.type==="A"?d.t0:s.value,v=d.type==="A"?s.value:d.v0;
+ $("readout").innerHTML=`Current pressure: <strong>${p.toFixed(2)} kPa</strong><br>V = ${v.toFixed(0)} cm³ · T = ${t.toFixed(0)} K`;
+ $("dataTable").innerHTML=`<tr><td>Start</td><td>${d.v0}</td><td>${d.p0.toFixed(2)}</td><td>${d.t0}</td></tr><tr><td>Current</td><td>${v.toFixed(0)}</td><td>${p.toFixed(2)}</td><td>${t.toFixed(0)}</td></tr>`;
+ drawPlot();drawScene();
+}
+function drawPlot(){
+ const g=$("plot");g.replaceChildren();
+ const d=s.d;
+ const pmax=Math.max(300,d.target*1.4,d.p0*2.5);
+ const X=v=>65+(v-100)/700*405,Y=p=>250-p/pmax*190;
+ txt(g,250,20,"Pressure versus volume",17,"middle");
+ for(let i=0;i<=4;i++){
+  const val=pmax*i/4,y=Y(val);line(g,65,y,470,y,"#ddd",1);
+  txt(g,56,y+4,val.toFixed(0),11,"end");
+ }
+ line(g,65,60,65,250);line(g,65,250,470,250);
+ for(let v=100;v<=800;v+=100){line(g,X(v),250,X(v),256);txt(g,X(v),271,v,10,"middle");}
+ txt(g,270,296,"Volume V (cm³)",13,"middle");
+ add(g,"text",{x:15,y:155,transform:"rotate(-90 15 155)","text-anchor":"middle","font-size":13,"font-weight":700},"Pressure p (kPa)");
+ let path="";
+ const mult=d.type==="B"?s.value/d.t0:1;
+ for(let v=100;v<=800;v+=5){
+  const p=d.p0*d.v0*mult/v;
+  path+=(v===100?"M":"L")+X(v).toFixed(2)+" "+Y(p).toFixed(2)+" ";
+ }
+ add(g,"path",{d:path,fill:"none",stroke:"#12856E","stroke-width":3});
+ const cv=d.type==="A"?s.value:d.v0;
+ add(g,"circle",{cx:X(cv),cy:Y(current()),r:7,fill:"#FFC83D",stroke:"#111","stroke-width":3});
+ txt(g,290,43,"— Constant-T curve / current T",11);
+ g.setAttribute("aria-label",`Pressure versus volume. Current point ${cv.toFixed(0)} cubic centimetres and ${current().toFixed(2)} kilopascals.`);
+}
+function makeParticles(){
+ s.particles=[];
+ for(let i=0;i<22;i++)s.particles.push({x:.05+rng()*.90,y:.05+rng()*.90,vx:(rng()-.5)*.23,vy:(rng()-.5)*.23});
+}
+function drawScene(){
+ const g=$("scene");g.replaceChildren();
+ const d=s.d;if(!d)return;
+ const temp=d.type==="A"?d.t0:s.value;
+ const height=d.type==="A"?Math.max(80,Math.min(235,s.value/800*235)):200;
+ const bottom=302,top=bottom-height,left=110,right=375;
+ add(g,"rect",{x:left,y:62,width:right-left,height:240,rx:12,fill:"#fff",stroke:"#111","stroke-width":4});
+ add(g,"rect",{x:left+4,y:top+3,width:right-left-8,height:bottom-top-7,fill:"#DDF7F1"});
+ add(g,"rect",{x:left-8,y:top-6,width:right-left+16,height:13,rx:5,fill:"#FFC83D",stroke:"#111","stroke-width":4});
+ add(g,"rect",{x:237,y:55,width:12,height:Math.max(0,top-55),fill:"#aaa",stroke:"#111","stroke-width":2});
+ const speed=Math.sqrt(temp/300);
+ for(let i=0;i<s.particles.length;i++){
+  const q=s.particles[i];
+  const cx=left+13+q.x*(right-left-26),cy=top+15+q.y*(height-30);
+  add(g,"circle",{cx,cy,r:5,fill:"#FF8FB8",stroke:"#111","stroke-width":1.5});
+  if(reduced.matches){
+   line(g,cx+6,cy,cx+6+q.vx*90*speed,cy+q.vy*90*speed,"#1F66E5",2);
+  }
+ }
+ txt(g,410,115,`p = ${current().toFixed(1)}`,15);
+ txt(g,410,135,"kPa",13);
+ txt(g,410,187,`T = ${temp}`,14);
+ txt(g,410,207,"K",13);
+ txt(g,410,257,"n = fixed",13);
+ txt(g,240,331,`V = ${d.type==="A"?s.value:d.v0} cm³`,15,"middle");
+ txt(g,242,25,"Movable piston",17,"middle");
+ line(g,242,33,242,52,"#111",2);
+ if(d.type==="B"){
+  txt(g,65,200,"Q →",17);
+  txt(g,248,355,"Fixed volume",13,"middle");
+ }
+ g.setAttribute("aria-label",`Gas in a cylinder. Pressure ${current().toFixed(2)} kilopascals, temperature ${temp} kelvin, volume ${d.type==="A"?s.value:d.v0} cubic centimetres.`);
+}
+function motion(ts){
+ if(!s.d||reduced.matches||$("game").classList.contains("hidden")){s.animation=0;return;}
+ if(ts-s.last>28){
+  const speed=Math.sqrt((s.d.type==="A"?s.d.t0:s.value)/300);
+  for(const q of s.particles){
+   q.x+=q.vx*.09*speed;q.y+=q.vy*.09*speed;
+   if(q.x<.03||q.x>.97){q.vx*=-1;q.x=Math.max(.03,Math.min(.97,q.x));}
+   if(q.y<.03||q.y>.97){q.vy*=-1;q.y=Math.max(.03,Math.min(.97,q.y));}
+  }
+  drawScene();s.last=ts;
+ }
+ s.animation=requestAnimationFrame(motion);
+}
+function startMotion(){
+ if(s.animation)cancelAnimationFrame(s.animation);
+ s.animation=0;s.last=0;
+ if(!reduced.matches)s.animation=requestAnimationFrame(motion);
+}
+reduced.addEventListener("change",()=>{drawScene();startMotion();});
+function hint(){
+ if(s.hinted||s.done)return;s.hinted=true;$("hint").disabled=true;
+ $("feedback").textContent=s.d.type==="A"?"Hint: p × V stays constant. A larger volume means a lower pressure.":"Hint: pressure is proportional to absolute temperature. All three particle effects increase when heated.";
+}
+function check(){
+ if(s.done)return;
+ if(s.d.type==="B"&&!s.choice){$("feedback").textContent="Choose the particle changes first.";return;}
+ s.tries++;
+ const p=current(),delta=p-s.d.target;
+ const choiceOK=s.d.type==="A"||s.choice==="up";
+ const right=Math.abs(delta)<=s.d.target*.012&&choiceOK;
+ if(right){
+  const gain=s.hinted?50:s.tries===1?100:75;
+  s.score+=gain;s.done=true;
+  $("feedback").className="feedback good";
+  $("feedback").textContent=`★ Correct! +${gain} points. ${s.d.type==="A"?"Pressure and volume change inversely.":"Hotter particles move faster and strike the walls more often."}`;
+  $("check").disabled=true;$("next").disabled=false;$("hint").disabled=true;
+  $("scoreHud").textContent=s.score+" points";
+ }else{
+  $("feedback").className="feedback bad";
+  if(!choiceOK)$("feedback").textContent="Reconsider the particles: heating makes them move faster, causing more frequent collisions.";
+  else $("feedback").textContent=`Your pressure is ${Math.abs(delta).toFixed(2)} kPa too ${delta>0?"high":"low"}. Adjust and try again.`;
+ }
+}
+function finish(){
+ if(s.animation)cancelAnimationFrame(s.animation);s.animation=0;
+ $("game").classList.add("hidden");$("finish").classList.remove("hidden");
+ const n=s.score>=500?3:s.score>=350?2:s.score>=200?1:0;
+ $("stars").textContent="★".repeat(n)+"☆".repeat(3-n);
+ $("result").textContent=`${s.score} / 600 points`;
+ $("resultText").textContent="You have explored pressure, volume, temperature and collisions.";
+ $("roundHud").textContent="Complete";
+}
+$("check").onclick=check;$("hint").onclick=hint;
+$("next").onclick=()=>{s.r++;s.r===6?finish():startRound();};
+$("again").onclick=()=>{s.r=0;s.score=0;$("finish").classList.add("hidden");$("game").classList.remove("hidden");startRound();};
+startRound();
+</script>
+</body>
+</html>

@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Real Gas Explorer | Fix It Today</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input{font:inherit}
+button,input[type=range],input[type=number],summary{min-height:44px;-webkit-tap-highlight-color:transparent;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{border:2px solid #111;border-radius:999px;background:white;box-shadow:var(--sh-1);padding:10px 15px;font-weight:800;cursor:pointer;transition:transform .12s,box-shadow .12s}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.selected{background:var(--lvl-uni-tint);border-width:3px}
+button.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+button.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.page{max-width:1280px;margin:auto;padding:18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.brand{font-size:1.1rem;font-weight:800}
+.hud{display:flex;gap:8px;flex-wrap:wrap;font-weight:800}
+.badge,.pill{border:2px solid #111;border-radius:999px;padding:6px 12px;font-size:12px}
+.badge{background:var(--lvl-uni);color:var(--lvl-uni-on);font-weight:800;text-transform:uppercase}
+.pill{background:white}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;line-height:1.15;margin:0 0 20px}
+h2{font-size:1.2rem;font-weight:800;margin:0 0 12px}
+h3{font-size:1rem;font-weight:800;margin:0 0 12px}
+p{margin:0 0 13px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.panel{display:grid;gap:18px;align-content:start;min-width:0}
+.card{background:white;border:2px solid #111;border-radius:24px;box-shadow:var(--sh-2);padding:18px;min-width:0}
+.stage{background:var(--lvl-uni-tint);border-radius:32px;box-shadow:var(--sh-3)}
+.scene{width:100%;display:block;max-height:365px}
+.graph{width:100%;display:block}
+.question{font-size:1.14rem;font-weight:800}
+.caption,.assumption{font-size:.87rem;color:var(--fit-ink-2)}
+.controls{display:grid;gap:12px}
+.control{background:var(--fit-sunken);border:2px solid #111;border-radius:16px;padding:12px}
+.control label{display:block;font-weight:800;margin-bottom:8px}
+.stepper{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap}
+.stepper button{min-width:46px;min-height:48px;padding:6px}
+.stepper output{text-align:center;min-width:115px;font-weight:800;font-size:1.2rem;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--lvl-uni)}
+.choices,.actions{display:flex;gap:9px;flex-wrap:wrap}
+.choice{flex:1;min-width:105px}
+.readout{background:#fff;border:2px solid #111;border-radius:16px;padding:12px;margin-top:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.readout strong{font-size:1.23rem}
+.feedback{border:2px dashed #999;border-radius:16px;min-height:60px;padding:12px;font-weight:600}
+.feedback.good{background:#E4F9ED;border-color:var(--fit-success)}
+.feedback.bad{background:#FFF0EE;border-color:var(--fit-danger)}
+.hidden{display:none!important}
+details{border:2px solid #111;border-radius:16px;padding:8px 15px;margin-top:18px}
+summary{font-weight:800;cursor:pointer}
+details p{margin:8px 0}
+.end{text-align:center;padding:30px}
+.stars{font-size:3rem;color:#d49b00;letter-spacing:8px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.04fr) minmax(0,1fr)}}
+@media(max-width:480px){.page{padding:12px}.card{padding:14px}.stepper output{order:-1;width:100%}.stepper button{flex:1}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="page">
+<header>
+<div class="brand">FIT / LEARNING LAB</div>
+<div class="hud">
+<span class="badge">University</span>
+<span class="pill" id="roundHud">Round 1/6</span>
+<span class="pill" id="scoreHud">0 points</span>
+</div>
+</header>
+
+<section id="game">
+<h1>Real Gas Explorer</h1>
+<div class="layout">
+<div class="card stage">
+<h2>Molecular laboratory</h2>
+<svg id="scene" class="scene" viewBox="0 0 500 360" role="img" aria-label="Gas molecules in a piston-cylinder with pressure, volume, temperature and amount of gas labels"></svg>
+<p class="caption" id="sceneCaption">Real molecules experience finite-size repulsion and intermolecular attraction.</p>
+<div class="card" style="margin-top:16px">
+<h3>Concept figure · Molecular speed distribution</h3>
+<svg viewBox="0 0 440 155" width="100%" role="img" aria-label="Maxwell Boltzmann speed distribution and characteristic speeds">
+<path d="M42 12 V123 H425" stroke="#111" stroke-width="3" fill="none"/>
+<path d="M43 121 C78 118 90 41 148 38 C206 35 233 112 408 120" fill="none" stroke="#1F66E5" stroke-width="4"/>
+<path d="M148 38 V123" stroke="#D92D20" stroke-dasharray="5 5" stroke-width="2"/>
+<path d="M173 48 V123" stroke="#3D3D3D" stroke-dasharray="5 5" stroke-width="2"/>
+<path d="M188 59 V123" stroke="#1E9E5A" stroke-dasharray="5 5" stroke-width="2"/>
+<text x="148" y="137" font-size="11" text-anchor="middle" font-weight="800">mp</text>
+<text x="177" y="150" font-size="11" text-anchor="middle" font-weight="800">mean</text>
+<text x="212" y="137" font-size="11" text-anchor="middle" font-weight="800">rms</text>
+<text x="53" y="17" font-size="12" font-weight="800">f(v)</text>
+<text x="381" y="145" font-size="12" font-weight="800">v →</text>
+</svg>
+<p class="caption">For a Maxwell–Boltzmann gas, the most probable, mean and r.m.s. speeds are different.</p>
+</div>
+</div>
+
+<div class="panel">
+<div class="card">
+<h2 id="roundType">Investigation</h2>
+<p id="question" class="question"></p>
+<p id="assumption" class="assumption"></p>
+<div id="controls" class="controls"></div>
+<div id="readout" class="readout"></div>
+</div>
+<div class="card">
+<h2>Compressibility against pressure</h2>
+<svg id="zPlot" class="graph" viewBox="0 0 500 305" role="img" aria-label="Compressibility factor against pressure in megapascals, comparing ideal and real gases"></svg>
+<p class="caption">Ideal gas Z = 1. Real-gas values depend on pressure and temperature.</p>
+</div>
+<div class="card">
+<h2>Maxwell–Boltzmann distribution</h2>
+<svg id="mbPlot" class="graph" viewBox="0 0 500 305" role="img" aria-label="Probability density against molecular speed in metres per second"></svg>
+<p class="caption">Characteristic speeds are marked for the current temperature.</p>
+</div>
+<div class="card">
+<div class="actions">
+<button id="hint">Hint</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" disabled>Next round →</button>
+</div>
+<p id="feedback" class="feedback" aria-live="polite">Adjust the molecular state, then Check.</p>
+</div>
+</div>
+</div>
+
+<details>
+<summary>The chemistry</summary>
+<p><strong>Ideal gas:</strong> pV = nRT. For university calculations use R = 8.314 J K⁻¹ mol⁻¹ and T(K) = θ(°C) + 273.15.</p>
+<p><strong>van der Waals equation:</strong> (p + an²/V²)(V − nb) = nRT, so p = nRT/(V − nb) − an²/V².</p>
+<p><strong>Constants:</strong> a has units Pa m⁶ mol⁻² and b has units m³ mol⁻¹. The parameters in each challenge are supplied for the named gas.</p>
+<p><strong>Compressibility:</strong> Z = pV/(nRT). Ideal gases have Z = 1. Values below 1 indicate attractive effects dominate the departure from ideality; values above 1 indicate repulsive or excluded-volume effects dominate.</p>
+<p><strong>Maxwell–Boltzmann speed density:</strong> f(v) = 4π(m/(2πkT))³ᐟ² v² exp(−mv²/(2kT)), where m is the mass of one molecule.</p>
+<p><strong>Speeds:</strong> v_mp = √(2kT/m), v_mean = √(8kT/(πm)), v_rms = √(3kT/m).</p>
+<p><strong>Constants:</strong> k = 1.38 × 10⁻²³ J K⁻¹ and N_A = 6.02 × 10²³ mol⁻¹. Molecular mass = molar mass/N_A.</p>
+<p><strong>Conventions:</strong> work done BY the gas is positive on expansion and negative on compression. Reversible boundary work is W_by = ∫p dV. No cyclic processes are included.</p>
+<p><strong>Assumptions:</strong> single-component gas in thermal equilibrium; classical, non-relativistic molecules; van der Waals equation used as an approximate single-phase equation of state; no chemical reactions. Calculations require T above 0 K, V above 0, and V greater than nb.</p>
+</details>
+</section>
+
+<section id="finish" class="card end hidden">
+<h1>Real-gas investigation complete!</h1>
+<div id="stars" class="stars"></div>
+<h2 id="result"></h2>
+<p id="resultText"></p>
+<button id="again" class="check">Play again ↻</button>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const NS="http:"+"//www.w3.org/2000/svg";
+const R=8.314,K=1.38e-23,NA=6.02e23;
+const gases={
+ CO2:{name:"carbon dioxide",a:.364,b:4.267e-5,M:.04401},
+ N2:{name:"nitrogen",a:.137,b:3.870e-5,M:.02802},
+ Ar:{name:"argon",a:.1355,b:3.201e-5,M:.03995},
+ He:{name:"helium",a:.00346,b:2.370e-5,M:.004003}
+};
+const s={
+ round:0,score:0,tries:0,hinted:false,done:false,
+ seed:1,d:null,value:0,choice:null,sync:null
+};
+function randomSeed(){
+ s.seed=(Math.floor(Math.random()*4294967295)+s.round*33409)>>>0;
+}
+function rnd(){
+ s.seed=(Math.imul(s.seed,1664525)+1013904223)>>>0;
+ return s.seed/4294967296;
+}
+function pick(a){return a[Math.floor(rnd()*a.length)];}
+function el(tag,a={},t){
+ const e=document.createElementNS(NS,tag);
+ for(const [k,v] of Object.entries(a))e.setAttribute(k,String(v));
+ if(t!==undefined)e.textContent=String(t);
+ return e;
+}
+function add(g,tag,a={},t){
+ const e=el(tag,a,t);g.appendChild(e);return e;
+}
+function line(g,x1,y1,x2,y2,c="#111",w=2,d=""){
+ add(g,"line",{x1,y1,x2,y2,stroke:c,"stroke-width":w,"stroke-dasharray":d});
+}
+function text(g,x,y,t,size=13,anchor="start",c="#111"){
+ add(g,"text",{
+  x,y,"font-size":size,"text-anchor":anchor,
+  "font-weight":700,fill:c
+ },t);
+}
+function fmt(x,n=3){
+ return Number.isFinite(x)?Number(x).toPrecision(n):"—";
+}
+function safePressure(g,n,V,T){
+ if(!(n>0)||!(V>n*g.b)||!(T>0))return NaN;
+ const p=n*R*T/(V-n*g.b)-g.a*n*n/(V*V);
+ return Number.isFinite(p)&&p>0?p:NaN;
+}
+function idealPressure(n,V,T){
+ if(!(n>0&&V>0&&T>0))return NaN;
+ return n*R*T/V;
+}
+function compressibility(p,V,n,T){
+ if(!(Number.isFinite(p)&&V>0&&n>0&&T>0))return NaN;
+ return p*V/(n*R*T);
+}
+function speeds(g,T){
+ const m=g.M/NA;
+ if(!(m>0&&T>0))return{mp:NaN,mean:NaN,rms:NaN,m};
+ return{
+  mp:Math.sqrt(2*K*T/m),
+  mean:Math.sqrt(8*K*T/(Math.PI*m)),
+  rms:Math.sqrt(3*K*T/m),
+  m
+ };
+}
+function density(v,m,T){
+ if(!(v>=0&&m>0&&T>0))return 0;
+ const x=m/(2*K*T);
+ const f=4*Math.PI*Math.pow(x/Math.PI,1.5)*v*v*Math.exp(-x*v*v);
+ return Number.isFinite(f)?f:0;
+}
+function current(){
+ const d=s.d;if(!d)return{};
+ const g=gases[d.gas];
+ if(d.type==="vdw"){
+  const V=(d.variable==="volume"?s.value:d.volume)/1000;
+  const T=d.variable==="temperature"?s.value:d.T;
+  const p=safePressure(g,d.n,V,T);
+  const pi=idealPressure(d.n,V,T);
+  return{g,V,T,n:d.n,p,pi,Z:compressibility(p,V,d.n,T),speeds:speeds(g,T)};
+ }
+ const T=s.value;
+ const n=d.n,V=d.volume/1000;
+ const p=safePressure(g,n,V,T);
+ return{g,V,T,n,p,pi:idealPressure(n,V,T),
+ Z:compressibility(p,V,n,T),speeds:speeds(g,T)};
+}
+function stepper(label,unit,min,max,step,coarse){
+ const box=document.createElement("div");box.className="control";
+ const lab=document.createElement("label");
+ lab.textContent=label;box.appendChild(lab);
+ const row=document.createElement("div");row.className="stepper";
+ const out=document.createElement("output");
+ function change(delta){
+  s.value=Number(Math.max(min,Math.min(max,s.value+delta)).toFixed(6));
+  update();
+ }
+ for(const [symbol,delta,description] of [
+  ["−−",-coarse,"Decrease coarse"],
+  ["−",-step,"Decrease fine"],
+  ["+",step,"Increase fine"],
+  ["++",coarse,"Increase coarse"]
+ ]){
+  const b=document.createElement("button");
+  b.textContent=symbol;
+  b.setAttribute("aria-label",`${description} by ${Math.abs(delta)} ${unit}`);
+  b.onclick=()=>change(delta);
+  row.appendChild(b);
+ }
+ row.insertBefore(out,row.children[2]);
+ box.appendChild(row);
+ const range=document.createElement("input");
+ range.type="range";range.min=min;range.max=max;range.step=step;
+ range.setAttribute("aria-label",label);
+ range.oninput=()=>{s.value=Number(range.value);update();};
+ box.appendChild(range);
+ $("controls").appendChild(box);
+ s.sync=()=>{
+  out.textContent=`${Number(s.value.toFixed(4))} ${unit}`;
+  range.value=String(s.value);
+ };
+}
+function choices(items){
+ const row=document.createElement("div");row.className="choices";
+ for(const [label,value] of items){
+  const b=document.createElement("button");
+  b.className="choice";b.textContent=label;
+  b.onclick=()=>{
+   s.choice=value;
+   row.querySelectorAll("button").forEach(x=>x.classList.toggle("selected",x===b));
+   update();
+  };
+  row.appendChild(b);
+ }
+ $("controls").appendChild(row);
+}
+function start(){
+ randomSeed();
+ s.tries=0;s.hinted=false;s.done=false;s.choice=null;s.sync=null;
+ $("controls").replaceChildren();
+ $("check").disabled=false;
+ $("next").disabled=true;
+ $("hint").disabled=false;
+ $("feedback").className="feedback";
+ $("feedback").textContent="Adjust the molecular state, then Check.";
+ $("roundHud").textContent=`Round ${s.round+1}/6`;
+ $("scoreHud").textContent=s.score+" points";
+ const types=["vdw","vdw","speed","speed","vdw","order"];
+ const type=types[s.round];
+ const d={type,gas:pick(["CO2","N2","Ar","He"]),n:pick([.5,.75,1])};
+ const g=gases[d.gas];
+ if(type==="vdw"){
+  d.variable=s.round===1?"temperature":"volume";
+  d.volume=pick([1.5,2,2.5,3,4]);
+  d.T=pick([300,350,400,450]);
+  if(d.variable==="volume"){
+   d.answer=pick([1,1.5,2,2.5,3,3.5,4,4.5,5]);
+   if(d.answer===d.volume)d.volume=d.answer===2?4:2;
+   s.value=d.answer===2?4:2;
+   if(s.value===d.answer)s.value=3.5;
+   d.target=safePressure(g,d.n,d.answer/1000,d.T)/1e6;
+  }else{
+   d.answer=pick([300,325,350,375,400,425,450,475,500]);
+   s.value=d.answer===300?450:300;
+   d.target=safePressure(g,d.n,d.volume/1000,d.answer)/1e6;
+  }
+  s.d=d;
+  $("roundType").textContent="A · van der Waals equation";
+  $("question").textContent=d.variable==="volume"?
+   `For ${g.name} (${d.n} mol) at ${d.T} K, select the volume that produces a real-gas pressure of ${d.target.toFixed(6)} MPa. Calculate Z at that state and compare it with the ideal-gas prediction.`:
+   `For ${g.name} (${d.n} mol) in ${d.volume.toFixed(1)} L, adjust temperature to obtain a real-gas pressure of ${d.target.toFixed(6)} MPa. Calculate Z and compare it with the ideal-gas prediction.`;
+  $("assumption").textContent=`a = ${g.a} Pa m⁶ mol⁻², b = ${g.b} m³ mol⁻¹. R = 8.314 J K⁻¹ mol⁻¹. Single-phase van der Waals model.`;
+  if(d.variable==="volume"){
+   stepper("Molar sample volume, V","L",.5,6,.1,.5);
+  }else{
+   stepper("Absolute temperature, T","K",250,600,5,25);
+  }
+ }else{
+  d.variable="temperature";
+  d.volume=3;
+  d.answer=pick([250,300,350,400,450,500,550,600]);
+  d.metric=type==="speed"?pick(["mp","mean"]):"order";
+  const sp=speeds(g,d.answer);
+  d.target=d.metric==="mean"?sp.mean:sp.mp;
+  s.value=d.answer===300?500:300;
+  s.d=d;
+  $("roundType").textContent=type==="order"?
+   "B · Characteristic molecular speeds":
+   "B · Maxwell–Boltzmann distribution";
+  if(type==="speed"){
+   $("question").textContent=`For ${g.name} molecules, set T so that ${d.metric==="mp"?"the most probable speed":"the mean speed"} is ${d.target.toFixed(2)} m/s.`;
+   $("assumption").textContent=`Molar mass = ${(g.M*1000).toFixed(3)} g mol⁻¹. Use k = 1.38 × 10⁻²³ J K⁻¹ and N_A = 6.02 × 10²³ mol⁻¹.`;
+  }else{
+   $("question").textContent=`For ${g.name}, set the temperature to ${d.answer} K, then identify the correct ordering of characteristic molecular speeds from smallest to largest.`;
+   $("assumption").textContent="A classical ideal-gas speed distribution. The three speeds have different statistical definitions.";
+  }
+  stepper("Absolute temperature, T","K",200,700,5,25);
+  if(type==="order"){
+   const p=document.createElement("p");
+   p.textContent="Which sequence goes from smallest to largest?";
+   $("controls").appendChild(p);
+   choices([
+    ["v_mp < v_mean < v_rms","correct"],
+    ["v_rms < v_mean < v_mp","reverse"],
+    ["v_mean < v_mp < v_rms","mixed"]
+   ]);
+  }
+ }
+ update();
+}
+function plotZ(){
+ const g=$("zPlot");g.replaceChildren();
+ const d=s.d,c=current();
+ const n=c.n,T=c.T,gas=c.g;
+ const samples=[];
+ const minV=Math.max(.00035,n*gas.b*2.5);
+ const maxV=.025;
+ for(let i=0;i<=170;i++){
+  const V=minV*Math.pow(maxV/minV,i/170);
+  const p=safePressure(gas,n,V,T);
+  const z=compressibility(p,V,n,T);
+  if(Number.isFinite(p)&&p>0&&p<6e7&&Number.isFinite(z)&&z>0&&z<7){
+   samples.push({p:p/1e6,z});
+  }
+ }
+ const pmax=Math.max(5,Number.isFinite(c.p)?c.p/1e6*1.2:5);
+ const xMax=Math.min(60,Math.max(pmax,...samples.map(o=>o.p),5));
+ const zMax=Math.min(7,Math.max(1.8,...samples.map(o=>o.z),Number.isFinite(c.Z)?c.Z*1.15:1));
+ const X=p=>66+Math.max(0,p)/xMax*410;
+ const Y=z=>253-Math.max(0,z)/zMax*194;
+ text(g,250,20,"Compressibility factor Z versus pressure",16,"middle");
+ for(let i=0;i<=4;i++){
+  const v=zMax*i/4,y=Y(v);
+  line(g,66,y,476,y,"#ddd",1);
+  text(g,57,y+4,v.toFixed(2),10,"end");
+ }
+ line(g,66,59,66,253);line(g,66,253,476,253);
+ for(let i=0;i<=4;i++){
+  const p=xMax*i/4,x=X(p);
+  line(g,x,253,x,258);
+  text(g,x,273,p.toFixed(1),10,"middle");
+ }
+ text(g,270,298,"Pressure p (MPa)",13,"middle");
+ add(g,"text",{x:17,y:153,transform:"rotate(-90 17 153)","text-anchor":"middle","font-size":13,"font-weight":700},"Compressibility Z");
+ line(g,66,Y(1),476,Y(1),"#111",2,"6 5");
+ const points=samples.filter(o=>o.p<=xMax&&o.z<=zMax).sort((a,b)=>a.p-b.p);
+ let path="";
+ for(const o of points){
+  path+=(path?"L":"M")+X(o.p).toFixed(2)+" "+Y(o.z).toFixed(2)+" ";
+ }
+ if(path)add(g,"path",{d:path,fill:"none",stroke:"#1F66E5","stroke-width":3});
+ if(Number.isFinite(c.p)&&Number.isFinite(c.Z)&&c.p/1e6<=xMax&&c.Z<=zMax){
+  add(g,"circle",{
+   cx:X(c.p/1e6),cy:Y(c.Z),r:7,fill:"#FFC83D",
+   stroke:"#111","stroke-width":3
+  });
+ }
+ text(g,292,35,"— van der Waals",12,"start","#1F66E5");
+ text(g,292,50,"-- Ideal gas Z = 1",12);
+ text(g,292,65,"● Current state",12);
+ g.setAttribute("aria-label",`Compressibility factor against pressure. Current van der Waals Z = ${fmt(c.Z)} at ${fmt(c.p/1e6)} megapascals. Ideal gas reference Z = 1.`);
+}
+function plotMB(){
+ const g=$("mbPlot");g.replaceChildren();
+ const c=current(),sp=c.speeds;
+ const maxV=Math.max(400,sp.rms*2.7);
+ const fmax=density(sp.mp,sp.m,c.T)*1.18;
+ const X=v=>65+v/maxV*410;
+ const Y=f=>249-Math.max(0,f)/Math.max(1e-12,fmax)*185;
+ text(g,250,20,"Molecular speed probability density",16,"middle");
+ for(let i=0;i<=4;i++){
+  const v=fmax*i/4,y=Y(v);
+  line(g,65,y,475,y,"#ddd",1);
+  text(g,57,y+4,v.toExponential(1),10,"end");
+ }
+ line(g,65,64,65,249);line(g,65,249,475,249);
+ for(let i=0;i<=4;i++){
+  const v=maxV*i/4,x=X(v);
+  line(g,x,249,x,255);
+  text(g,x,270,v.toFixed(0),10,"middle");
+ }
+ text(g,266,298,"Molecular speed v (m/s)",13,"middle");
+ add(g,"text",{
+  x:17,y:150,transform:"rotate(-90 17 150)",
+  "text-anchor":"middle","font-size":13,"font-weight":700
+ },"Probability density f(v) (s/m)");
+ let path="";
+ for(let i=0;i<=170;i++){
+  const v=maxV*i/170,f=density(v,sp.m,c.T);
+  path+=(i?"L":"M")+X(v).toFixed(2)+" "+Y(f).toFixed(2)+" ";
+ }
+ add(g,"path",{d:path,fill:"none",stroke:"#1F66E5","stroke-width":3.5});
+ for(const [v,colour] of [
+  [sp.mp,"#D92D20"],
+  [sp.mean,"#6A45F5"],
+  [sp.rms,"#1E9E5A"]
+ ]){
+  const y=Y(density(v,sp.m,c.T));
+  line(g,X(v),249,X(v),y,colour,2,"5 4");
+  add(g,"circle",{cx:X(v),cy:y,r:5,fill:colour,stroke:"#111","stroke-width":1.5});
+ }
+ text(g,305,37,"● Most probable",11,"start","#D92D20");
+ text(g,305,52,"● Mean",11,"start","#6A45F5");
+ text(g,305,67,"● R.m.s.",11,"start","#1E9E5A");
+ g.setAttribute("aria-label",`Maxwell Boltzmann distribution at ${c.T} kelvin. Most probable speed ${sp.mp.toFixed(2)}, mean ${sp.mean.toFixed(2)}, r.m.s. ${sp.rms.toFixed(2)} metres per second.`);
+}
+function scene(){
+ const g=$("scene");g.replaceChildren();
+ const c=current(),d=s.d;
+ const h=80+Math.min(180,Math.max(25,c.V*1000/6*180));
+ const top=291-h;
+ text(g,250,22,"Real-gas molecular chamber",20,"middle");
+ add(g,"rect",{
+  x:104,y:56,width:276,height:240,rx:13,
+  fill:"#fff",stroke:"#111","stroke-width":4
+ });
+ add(g,"rect",{
+  x:109,y:top+12,width:266,height:278-top,
+  fill:"#DDE9FF"
+ });
+ add(g,"rect",{
+  x:97,y:top,width:291,height:14,rx:5,
+  fill:"#FFC83D",stroke:"#111","stroke-width":4
+ });
+ add(g,"rect",{
+  x:237,y:36,width:16,height:Math.max(0,top-36),
+  fill:"#aaa",stroke:"#111","stroke-width":2
+ });
+ for(let i=0;i<27;i++){
+  const x=128+(i*83)%233;
+  const y=top+28+(i*47)%Math.max(35,256-top);
+  if(y>=287)continue;
+  add(g,"circle",{
+   cx:x,cy:y,r:6,
+   fill:"#FF8FB8",stroke:"#111","stroke-width":2
+  });
+  if(i%6===0&&i+1<27){
+   const x2=x+15,y2=y+3;
+   if(x2<372&&y2<287)line(g,x+5,y,x2-5,y2,"#1F66E5",2,"3 3");
+  }
+ }
+ text(g,394,118,`p ${fmt(c.p/1e6)}`,14);
+ text(g,394,138,"MPa",12);
+ text(g,394,184,`T ${fmt(c.T)}`,14);
+ text(g,394,204,"K",12);
+ text(g,394,245,`n ${fmt(c.n)}`,14);
+ text(g,250,321,`V ${(c.V*1000).toFixed(2)} L`,16,"middle");
+ text(g,250,346,`Gas: ${d.gas}`,14,"middle");
+ text(g,18,156,"Q →",16);
+ g.setAttribute("aria-label",`${c.g.name} gas chamber. Real-gas pressure ${fmt(c.p/1e6)} megapascals, volume ${fmt(c.V*1000)} litres, temperature ${fmt(c.T)} kelvin, amount ${fmt(c.n)} moles.`);
+}
+function update(){
+ if(!s.d)return;
+ if(s.sync)s.sync();
+ const c=current(),d=s.d;
+ if(d.type==="vdw"){
+  $("readout").innerHTML=
+   `Real pressure: <strong>${(c.p/1e6).toFixed(6)} MPa</strong><br>`+
+   `Ideal prediction: ${(c.pi/1e6).toFixed(6)} MPa<br>`+
+   `Z = ${fmt(c.Z,5)} · T = ${fmt(c.T)} K · V = ${fmt(c.V*1000)} L`;
+ }else{
+  $("readout").innerHTML=
+   `Most probable: <strong>${c.speeds.mp.toFixed(2)} m/s</strong><br>`+
+   `Mean: ${c.speeds.mean.toFixed(2)} m/s · R.m.s.: ${c.speeds.rms.toFixed(2)} m/s<br>`+
+   `T = ${fmt(c.T)} K · molecular mass = ${fmt(c.speeds.m)} kg`;
+ }
+ plotZ();plotMB();scene();
+}
+function hint(){
+ if(s.done||s.hinted)return;
+ s.hinted=true;
+ $("hint").disabled=true;
+ const d=s.d;
+ let msg;
+ if(d.type==="vdw"){
+  msg=d.variable==="volume"?
+   "Substitute trial volumes into p = nRT/(V−nb) − an²/V². Convert L to m³ before calculating.":
+   "Rearrange the van der Waals equation to isolate T. Keep pressure in Pa and volume in m³.";
+ }else if(d.type==="order"){
+  msg="Compare the square-root coefficients 2, 8/π and 3. Each speed contains the same factor √(kT/m).";
+ }else{
+  msg=d.metric==="mp"?
+   "Rearrange v_mp² = 2kT/m. Obtain molecular mass from molar mass divided by N_A.":
+   "Rearrange v_mean² = 8kT/(πm). Use molecular mass, not molar mass.";
+ }
+ $("feedback").textContent="Hint: "+msg;
+}
+function check(){
+ if(s.done)return;
+ const d=s.d,c=current();
+ if(d.type==="order"&&!s.choice){
+  $("feedback").textContent="Choose the speed ordering before checking.";return;
+ }
+ s.tries++;
+ let correct=false,diff=0,unit="";
+ if(d.type==="vdw"){
+  diff=c.p/1e6-d.target;
+  unit="MPa";
+  correct=Math.abs(diff)<.00003;
+ }else if(d.type==="order"){
+  diff=c.T-d.answer;
+  unit="K";
+  correct=Math.abs(diff)<.1&&s.choice==="correct";
+ }else{
+  const v=d.metric==="mp"?c.speeds.mp:c.speeds.mean;
+  diff=v-d.target;
+  unit="m/s";
+  correct=Math.abs(diff)<.035;
+ }
+ if(correct){
+  const gain=s.hinted?50:s.tries===1?100:75;
+  s.score+=gain;s.done=true;
+  $("scoreHud").textContent=s.score+" points";
+  $("check").disabled=true;$("next").disabled=false;$("hint").disabled=true;
+  $("feedback").className="feedback good";
+  let explanation;
+  if(d.type==="vdw"){
+   explanation=`The state gives Z = ${fmt(c.Z,5)}. The ideal-gas pressure is ${(c.pi/1e6).toFixed(4)} MPa; the real-gas result includes attraction and excluded volume.`;
+  }else if(d.type==="order"){
+   explanation="For every positive temperature and molecular mass, v_mp < v_mean < v_rms.";
+  }else{
+   explanation=`The molecular speed is ${(d.metric==="mp"?c.speeds.mp:c.speeds.mean).toFixed(2)} m/s. The speed scales with √T.`;
+  }
+  $("feedback").textContent=`★ Correct! +${gain} points. ${explanation}`;
+ }else{
+  $("feedback").className="feedback bad";
+  if(d.type==="order"&&s.choice!=="correct"){
+   $("feedback").textContent="The speed order is incorrect. Compare the coefficients in the three speed equations.";
+  }else{
+   const decimals=d.type==="vdw"?6:2;
+   $("feedback").textContent=`Your ${d.type==="vdw"?"real-gas pressure":d.type==="order"?"temperature":"characteristic speed"} is ${Math.abs(diff).toFixed(decimals)} ${unit} too ${diff>0?"high":"low"}.`;
+  }
+ }
+}
+function finish(){
+ $("game").classList.add("hidden");
+ $("finish").classList.remove("hidden");
+ const stars=s.score>=500?3:s.score>=350?2:s.score>=200?1:0;
+ $("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
+ $("result").textContent=`${s.score} / 600 points`;
+ $("resultText").textContent="You have explored non-ideal equations of state, compressibility and molecular speed statistics.";
+ $("roundHud").textContent="Complete";
+}
+$("hint").onclick=hint;
+$("check").onclick=check;
+$("next").onclick=()=>{
+ s.round++;
+ s.round>=6?finish():start();
+};
+$("again").onclick=()=>{
+ s.round=0;s.score=0;
+ $("finish").classList.add("hidden");
+ $("game").classList.remove("hidden");
+ start();
+};
+start();
+</script>
+</body>
+</html>

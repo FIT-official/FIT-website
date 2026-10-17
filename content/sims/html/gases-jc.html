@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ideal Gas Lab | Fix It Today</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input,select{font:inherit}
+button,input[type=range],input[type=number],summary{min-height:44px;-webkit-tap-highlight-color:transparent;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{cursor:pointer;border:2px solid #111;border-radius:999px;background:#fff;color:#111;box-shadow:var(--sh-1);padding:10px 15px;font-weight:800;transition:transform .12s,box-shadow .12s}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.selected{background:var(--lvl-jc-tint);border-width:3px}
+button.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+button.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.page{max-width:1280px;margin:auto;padding:18px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:22px}
+.brand{font-weight:800;font-size:1.1rem}
+.hud{display:flex;flex-wrap:wrap;gap:8px;font-weight:800}
+.badge,.pill{border:2px solid #111;border-radius:999px;padding:6px 12px;font-size:12px}
+.badge{background:var(--lvl-jc);color:var(--lvl-jc-on);font-weight:800;text-transform:uppercase}
+.pill{background:white}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.15;font-weight:800;margin:0 0 20px}
+h2{font-size:1.2rem;font-weight:800;margin:0 0 12px}
+h3{font-size:1rem;font-weight:800;margin:0 0 12px}
+p{margin:0 0 14px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.panel{display:grid;gap:18px;align-content:start;min-width:0}
+.card{border:2px solid #111;border-radius:24px;background:white;box-shadow:var(--sh-2);padding:18px;min-width:0}
+.stage{background:var(--lvl-jc-tint);border-radius:32px;box-shadow:var(--sh-3)}
+.scene{width:100%;display:block;max-height:380px}
+.graph{width:100%;display:block}
+.question{font-size:1.13rem;font-weight:800}
+.assumption,.caption{font-size:.88rem;color:var(--fit-ink-2)}
+.controls{display:grid;gap:12px}
+.control{background:var(--fit-sunken);border:2px solid #111;border-radius:16px;padding:12px}
+.control label{display:block;font-weight:800;margin-bottom:8px}
+.stepper{display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}
+.stepper button{min-width:46px;min-height:48px;padding:6px}
+.stepper output{font-size:1.2rem;font-weight:800;text-align:center;min-width:110px;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--lvl-jc)}
+.choicebox,.actions{display:flex;gap:9px;flex-wrap:wrap}
+.choice{flex:1;min-width:110px}
+.readout{background:#fff;border:2px solid #111;border-radius:16px;padding:12px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:12px}
+.readout strong{font-size:1.3rem}
+.legend{font-size:.85rem;font-weight:700;color:#444}
+.feedback{border:2px dashed #999;border-radius:16px;min-height:60px;padding:12px;font-weight:600}
+.feedback.good{border-color:var(--fit-success);background:#E4F9ED}
+.feedback.bad{border-color:var(--fit-danger);background:#FFF0EE}
+.hidden{display:none!important}
+details{border:2px solid #111;border-radius:16px;padding:8px 15px;margin-top:18px}
+summary{font-weight:800;cursor:pointer}
+details p{margin:8px 0}
+.end{text-align:center;padding:28px}
+.stars{font-size:3rem;color:#d49b00;letter-spacing:8px}
+.math{font-variant-numeric:tabular-nums}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.04fr) minmax(0,1fr)}}
+@media(max-width:480px){.page{padding:12px}.card{padding:14px}.stepper output{order:-1;width:100%}.stepper button{flex:1}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="page">
+<header>
+<div class="brand">FIT / LEARNING LAB</div>
+<div class="hud">
+<span class="badge">JC · H2</span>
+<span class="pill" id="roundHud">Round 1/6</span>
+<span class="pill" id="scoreHud">0 points</span>
+</div>
+</header>
+
+<section id="game">
+<h1>Ideal Gas Lab</h1>
+<div class="layout">
+<div class="card stage">
+<h2>Experimental apparatus</h2>
+<svg id="scene" class="scene" viewBox="0 0 500 385" role="img" aria-label="Ideal gas cylinder with pressure, volume, temperature, amount of gas, heat and work labels"></svg>
+<p id="sceneCaption" class="caption">Movable piston, with absolute pressure and temperature.</p>
+<div class="card" style="margin-top:16px">
+<h3>Concept figure · Constant-temperature process</h3>
+<svg viewBox="0 0 440 155" width="100%" role="img" aria-label="Pressure volume diagram showing a curved isotherm and two state points">
+<path d="M48 12 V125 H421" fill="none" stroke="#111" stroke-width="3"/>
+<path d="M75 22 C105 70 179 98 390 114" fill="none" stroke="#6A45F5" stroke-width="4"/>
+<circle cx="112" cy="68" r="7" fill="#FFC83D" stroke="#111" stroke-width="2"/>
+<circle cx="270" cy="107" r="7" fill="#FFC83D" stroke="#111" stroke-width="2"/>
+<text x="52" y="145" font-size="13" font-weight="800">Volume V →</text>
+<text x="56" y="15" font-size="12" font-weight="800">p ↑</text>
+<text x="131" y="58" font-size="12" font-weight="800">A</text>
+<text x="286" y="100" font-size="12" font-weight="800">B</text>
+<text x="250" y="39" font-size="13" fill="#6A45F5" font-weight="800">pV = constant</text>
+</svg>
+<p class="caption">For a fixed amount of ideal gas at constant temperature, pressure decreases as volume increases.</p>
+</div>
+</div>
+
+<div class="panel">
+<div class="card">
+<h2 id="roundType">Experiment</h2>
+<p id="question" class="question"></p>
+<p id="assumption" class="assumption"></p>
+<div id="controls" class="controls"></div>
+<div id="readout" class="readout" aria-live="off"></div>
+</div>
+<div class="card">
+<h2>Live p–V diagram</h2>
+<svg id="pvPlot" class="graph" viewBox="0 0 500 295" role="img" aria-label="Pressure in kilopascals against volume in litres"></svg>
+<p class="caption" id="pvCaption">Solid line: current isotherm. Dashed line: reference isotherm.</p>
+</div>
+<div class="card">
+<h2>First-law energy balance</h2>
+<svg id="energyPlot" class="graph" viewBox="0 0 500 240" role="img" aria-label="Bar chart of heat, work done on the gas, and change in internal energy in joules"></svg>
+<p class="caption">JC convention: W is work done ON the gas. ΔU = Q + W.</p>
+</div>
+<div class="card">
+<div class="actions">
+<button id="hint">Hint</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" disabled>Next round →</button>
+</div>
+<p id="feedback" class="feedback" aria-live="polite">Adjust the apparatus, then Check.</p>
+</div>
+</div>
+</div>
+<details>
+<summary>The physics</summary>
+<p><strong>Ideal gas:</strong> pV = nRT, where p is absolute pressure (Pa), V is volume (m³), n is amount (mol), T is absolute temperature (K), and R = 8.31 J K⁻¹ mol⁻¹.</p>
+<p><strong>Conversions:</strong> 1 kPa = 1,000 Pa; 1 cm³ = 10⁻⁶ m³; 1 L = 10⁻³ m³; T(K) = θ(°C) + 273.</p>
+<p><strong>Kinetic theory:</strong> pV = ⅓Nm⟨c²⟩ and cᵣₘₛ = √(3kT/m).</p>
+<p><strong>Mean translational kinetic energy:</strong> ⟨Eₖ⟩ = 3kT/2, where k = 1.38 × 10⁻²³ J K⁻¹.</p>
+<p><strong>Avogadro constant:</strong> N_A = 6.02 × 10²³ mol⁻¹.</p>
+<p><strong>First law:</strong> ΔU = Q + W; W is work done ON the gas. At constant volume, W = 0. At constant pressure, W = −p(V₂ − V₁). Positive Q is heat supplied to the gas.</p>
+<p><strong>Assumptions:</strong> ideal gas with negligible intermolecular forces, thermal equilibrium, quasi-static constant-pressure processes where used, and no heat lost to the container.</p>
+</details>
+</section>
+
+<section id="finish" class="card end hidden">
+<h1>Lab completed!</h1>
+<div id="stars" class="stars"></div>
+<h2 id="result"></h2>
+<p id="resultText"></p>
+<button class="check" id="again">Play again ↻</button>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const R=8.31,K=1.38e-23,NA=6.02e23;
+const NS="http:"+"//www.w3.org/2000/svg";
+const GAS={
+ helium:{name:"helium",mass:4.00e-3/NA},
+ nitrogen:{name:"nitrogen",mass:28.0e-3/NA},
+ oxygen:{name:"oxygen",mass:32.0e-3/NA},
+ neon:{name:"neon",mass:20.2e-3/NA}
+};
+const s={round:0,score:0,tries:0,hinted:false,done:false,seed:1,d:null,value:0,choice:null,sync:null};
+function randomSeed(){s.seed=(Math.floor(Math.random()*4294967295)+s.round*7331)>>>0;}
+function rnd(){s.seed=(Math.imul(s.seed,1664525)+1013904223)>>>0;return s.seed/4294967296;}
+function pick(a){return a[Math.floor(rnd()*a.length)];}
+function svgEl(tag,a={},t){
+ const e=document.createElementNS(NS,tag);
+ for(const [k,v] of Object.entries(a))e.setAttribute(k,String(v));
+ if(t!==undefined)e.textContent=String(t);
+ return e;
+}
+function add(g,tag,a={},t){const e=svgEl(tag,a,t);g.appendChild(e);return e;}
+function ln(g,x1,y1,x2,y2,c="#111",w=2,d=""){
+ return add(g,"line",{x1,y1,x2,y2,stroke:c,"stroke-width":w,"stroke-dasharray":d});
+}
+function tx(g,x,y,t,size=13,anchor="start",c="#111"){
+ return add(g,"text",{x,y,"font-size":size,"text-anchor":anchor,"font-weight":700,fill:c},t);
+}
+function fmt(x,n=3){
+ return Number.isFinite(x)?Number(x).toPrecision(n):"—";
+}
+function current(){
+ const d=s.d;
+ if(!d)return{};
+ if(d.type==="ideal"){
+  const n=d.variable==="n"?s.value:d.n;
+  const vcm=d.variable==="v"?s.value:d.vcm;
+  const T=d.variable==="t"?s.value+273:d.T;
+  const p=n*R*T/(vcm*1e-6);
+  return{p:p/1000,n,v:vcm/1000,T,Q:0,W:0,U:0};
+ }
+ if(d.type==="kinetic"){
+  const T=s.value+273;
+  const speed=Math.sqrt(3*K*T/d.mass);
+  const energy=1.5*K*T;
+  return{p:100,n:.001,v:.02493,T,speed,energy,Q:0,W:0,U:0};
+ }
+ const Q=s.value;
+ const W=d.process==="volume"?0:-d.p*d.deltaV/1000;
+ return{p:d.p,n:.1,v:d.process==="volume"?d.v0:d.v0+d.deltaV/1000,T:300,Q,W,U:Q+W};
+}
+function buildStepper(label,unit,min,max,step,coarse){
+ const box=document.createElement("div");box.className="control";
+ const lab=document.createElement("label");lab.textContent=label;box.appendChild(lab);
+ const row=document.createElement("div");row.className="stepper";
+ const out=document.createElement("output");
+ const change=delta=>{
+  s.value=Number(Math.max(min,Math.min(max,s.value+delta)).toFixed(6));
+  update();
+ };
+ for(const [sign,delta,description] of [
+  ["−−",-coarse,"Decrease coarse"],
+  ["−",-step,"Decrease fine"],
+  ["+",step,"Increase fine"],
+  ["++",coarse,"Increase coarse"]
+ ]){
+  const b=document.createElement("button");
+  b.textContent=sign;
+  b.setAttribute("aria-label",`${description}: ${Math.abs(delta)} ${unit}`);
+  b.onclick=()=>change(delta);
+  row.appendChild(b);
+ }
+ row.insertBefore(out,row.children[2]);
+ box.appendChild(row);
+ const range=document.createElement("input");
+ range.type="range";range.min=min;range.max=max;range.step=step;
+ range.setAttribute("aria-label",label);
+ range.oninput=()=>{s.value=Number(range.value);update();};
+ box.appendChild(range);
+ $("controls").appendChild(box);
+ s.sync=()=>{
+  out.textContent=`${Number(s.value.toFixed(4))} ${unit}`;
+  range.value=String(s.value);
+ };
+}
+function buildChoices(label,choices){
+ const p=document.createElement("p");p.textContent=label;$("controls").appendChild(p);
+ const row=document.createElement("div");row.className="choicebox";
+ for(const [text,value] of choices){
+  const b=document.createElement("button");b.textContent=text;b.className="choice";
+  b.onclick=()=>{
+   s.choice=value;
+   row.querySelectorAll("button").forEach(q=>q.classList.toggle("selected",q===b));
+   update();
+  };
+  row.appendChild(b);
+ }
+ $("controls").appendChild(row);
+}
+function start(){
+ randomSeed();
+ s.tries=0;s.hinted=false;s.done=false;s.choice=null;s.sync=null;
+ $("controls").replaceChildren();
+ $("feedback").className="feedback";
+ $("feedback").textContent="Adjust the apparatus, then Check.";
+ $("check").disabled=false;$("next").disabled=true;$("hint").disabled=false;
+ $("roundHud").textContent=`Round ${s.round+1}/6`;
+ $("scoreHud").textContent=s.score+" points";
+ const type=["ideal","kinetic","first","ideal","kinetic","first"][s.round];
+ const d={type};
+ if(type==="ideal"){
+  d.variable=s.round===0?pick(["n","v","t"]):pick(["v","n","t"]);
+  d.n=pick([.02,.03,.04,.05]);
+  d.vcm=pick([400,500,600,800]);
+  d.T=pick([293,313,333,353]);
+  if(d.variable==="n"){
+   d.answer=pick([.02,.03,.04,.05,.06,.07,.08]);
+   d.n=d.answer===.04?.02:.04;
+   s.value=d.n;
+  }
+  if(d.variable==="v"){
+   d.answer=pick([300,400,500,600,700,800]);
+   d.vcm=d.answer===500?800:500;
+   s.value=d.vcm;
+  }
+  if(d.variable==="t"){
+   d.answer=pick([20,40,60,80,100,120]);
+   d.T=293;s.value=20;
+   if(d.answer===20)s.value=60;
+  }
+  const n=d.variable==="n"?d.answer:d.n;
+  const v=d.variable==="v"?d.answer:d.vcm;
+  const T=d.variable==="t"?d.answer+273:d.T;
+  d.target=n*R*T/(v*1e-6)/1000;
+  s.d=d;
+  $("roundType").textContent="A · Ideal gas equation";
+  let fixed=[];
+  if(d.variable!=="n")fixed.push(`n = ${d.n.toFixed(3)} mol`);
+  if(d.variable!=="v")fixed.push(`V = ${d.vcm} cm³`);
+  if(d.variable!=="t")fixed.push(`T = ${d.T} K`);
+  $("question").textContent=`An ideal gas has ${fixed.join(", ")}. Adjust the remaining quantity to produce an absolute pressure of ${d.target.toFixed(3)} kPa.`;
+  $("assumption").textContent="R = 8.31 J K⁻¹ mol⁻¹. Use SI units inside pV = nRT.";
+  if(d.variable==="n")buildStepper("Amount of gas, n","mol",.01,.10,.01,.02);
+  if(d.variable==="v")buildStepper("Cylinder volume, V","cm³",200,1000,10,100);
+  if(d.variable==="t")buildStepper("Temperature, θ","°C",0,160,5,20);
+ }else if(type==="kinetic"){
+  d.gas=pick(Object.keys(GAS));
+  d.mass=GAS[d.gas].mass;
+  d.answer=pick([20,40,60,80,100,120,140]);
+  d.speedTarget=Math.sqrt(3*K*(d.answer+273)/d.mass);
+  s.value=d.answer===20?100:20;
+  s.d=d;
+  $("roundType").textContent="B · Kinetic theory";
+  $("question").textContent=`For ${d.gas} molecules, set the Celsius temperature so their r.m.s. speed is ${d.speedTarget.toFixed(2)} m/s.`;
+  $("assumption").textContent=`Molecular mass = ${fmt(d.mass)} kg. k = 1.38 × 10⁻²³ J K⁻¹. Use cᵣₘₛ = √(3kT/m).`;
+  buildStepper("Temperature, θ","°C",0,200,5,20);
+ }else{
+  d.process=pick(["volume","pressure"]);
+  d.p=pick([100,150,200]);
+  d.v0=pick([1.0,1.5,2.0]);
+  d.deltaV=d.process==="volume"?0:pick([-500,-250,250,500]);
+  d.answer=pick([-200,-100,0,100,200,300,400]);
+  d.W=d.process==="volume"?0:-d.p*d.deltaV/1000;
+  d.target=d.answer+d.W;
+  s.value=d.answer===0?200:0;
+  s.d=d;
+  $("roundType").textContent="C · First law";
+  $("question").textContent=`At ${d.p} kPa, a gas undergoes a constant-${d.process} process. ${d.process==="pressure"?`Its volume changes by ${d.deltaV} cm³.`:"Its volume does not change."} Set heat transfer Q so ΔU = ${d.target.toFixed(1)} J.`;
+  $("assumption").textContent="JC convention: ΔU = Q + W. W is work done ON the gas; Q is positive when heat enters.";
+  buildChoices("Confirm the process being modelled:",[
+   ["Constant volume","volume"],["Constant pressure","pressure"]
+  ]);
+  buildStepper("Heat supplied, Q","J",-400,600,25,100);
+ }
+ update();
+}
+function plotPV(){
+ const g=$("pvPlot");g.replaceChildren();
+ const d=s.d,c=current();
+ const xmin=.2,xmax=2.5;
+ const topP=Math.max(900,c.p*1.2,100);
+ const X=v=>65+(v-xmin)/(xmax-xmin)*410;
+ const Y=p=>245-Math.max(0,p)/topP*185;
+ tx(g,250,20,"Pressure versus volume",17,"middle");
+ for(let i=0;i<=4;i++){
+  const v=topP*i/4,yy=Y(v);
+  ln(g,65,yy,475,yy,"#ddd",1);
+  tx(g,57,yy+4,v.toFixed(0),11,"end");
+ }
+ ln(g,65,60,65,245);ln(g,65,245,475,245);
+ for(let v=.5;v<=2.5;v+=.5){
+  ln(g,X(v),245,X(v),252);
+  tx(g,X(v),267,v.toFixed(1),11,"middle");
+ }
+ tx(g,270,289,"Volume V (L)",13,"middle");
+ add(g,"text",{x:15,y:150,transform:"rotate(-90 15 150)","font-size":13,"font-weight":700,"text-anchor":"middle"},"Pressure p (kPa)");
+ let coefficient;
+ if(d.type==="ideal")coefficient=c.n*R*c.T;
+ else coefficient=d.type==="kinetic"?.003*R*c.T:d.p*d.v0;
+ let path="";
+ for(let v=xmin;v<=xmax+.0001;v+=.025){
+  const p=coefficient/v;
+  const y=Y(p);
+  path+=(path?"L":"M")+X(v).toFixed(2)+" "+y.toFixed(2)+" ";
+ }
+ add(g,"path",{d:path,stroke:"#6A45F5","stroke-width":3.5,fill:"none"});
+ if(d.type==="ideal"){
+  let ref="";
+  const refCoeff=c.n*R*293;
+  for(let v=xmin;v<=xmax+.0001;v+=.025){
+   ref+=(ref?"L":"M")+X(v).toFixed(2)+" "+Y(refCoeff/v).toFixed(2)+" ";
+  }
+  add(g,"path",{d:ref,stroke:"#777","stroke-width":2,fill:"none","stroke-dasharray":"6 5"});
+ }
+ if(d.type==="first"&&d.process==="pressure"){
+  const x1=X(d.v0),x2=X(d.v0+d.deltaV/1000);
+  ln(g,x1,Y(d.p),x2,Y(d.p),"#D92D20",5);
+  add(g,"circle",{cx:x1,cy:Y(d.p),r:5,fill:"#fff",stroke:"#111","stroke-width":2});
+ }
+ const px=Math.max(xmin,Math.min(xmax,c.v));
+ const py=d.type==="first"?d.p:coefficient/px;
+ add(g,"circle",{cx:X(px),cy:Y(py),r:7,fill:"#FFC83D",stroke:"#111","stroke-width":3});
+ tx(g,285,38,"— Current isotherm",12);
+ if(d.type==="ideal")tx(g,285,55,"-- Reference 293 K",11);
+ g.setAttribute("aria-label",`Pressure volume diagram. Current point volume ${fmt(c.v)} litres and pressure ${fmt(c.p)} kilopascals.`);
+}
+function plotEnergy(){
+ const g=$("energyPlot");g.replaceChildren();
+ const c=current(),vals=[c.Q,c.W,c.U];
+ const max=Math.max(200,...vals.map(x=>Math.abs(x)))*1.15;
+ const zero=122,scale=86/max;
+ tx(g,250,19,"First law: ΔU = Q + W",17,"middle");
+ for(let i=-2;i<=2;i++){
+  const value=max*i/2,yy=zero-value*scale;
+  ln(g,60,yy,480,yy,i===0?"#111":"#ddd",i===0?2:1);
+  tx(g,52,yy+4,value.toFixed(0),10,"end");
+ }
+ for(let i=0;i<3;i++){
+  const v=vals[i],h=Math.abs(v)*scale,x=104+i*132;
+  add(g,"rect",{x,y:v>=0?zero-h:zero,width:74,height:Math.max(.5,h),rx:4,fill:["#FF8FB8","#6A45F5","#3DBE6B"][i],stroke:"#111","stroke-width":2});
+  tx(g,x+37,v>=0?zero-h-8:zero+h+16,`${v.toFixed(1)} J`,11,"middle");
+  tx(g,x+37,226,["Q","W (on)","ΔU"][i],13,"middle");
+ }
+ tx(g,19,25,"J",12);
+ g.setAttribute("aria-label",`Energy bar chart. Heat ${c.Q.toFixed(1)} joules, work on gas ${c.W.toFixed(1)} joules, change in internal energy ${c.U.toFixed(1)} joules.`);
+}
+function scene(){
+ const g=$("scene");g.replaceChildren();
+ const d=s.d,c=current();
+ const frac=Math.min(1,Math.max(.1,c.v/2.5));
+ const top=280-195*frac;
+ tx(g,250,24,"Ideal gas cylinder",21,"middle");
+ add(g,"rect",{x:115,y:64,width:265,height:231,rx:12,fill:"#fff",stroke:"#111","stroke-width":4});
+ add(g,"rect",{x:119,y:top+8,width:257,height:283-top,fill:"#E1D9FF"});
+ add(g,"rect",{x:106,y:top,width:283,height:14,rx:4,fill:"#FFC83D",stroke:"#111","stroke-width":4});
+ add(g,"rect",{x:240,y:42,width:17,height:Math.max(0,top-42),fill:"#ccc",stroke:"#111","stroke-width":2});
+ for(let i=0;i<27;i++){
+  const x=134+(i*79)%224;
+  const y=top+25+(i*47)%Math.max(25,267-top);
+  if(y<286)add(g,"circle",{cx:x,cy:y,r:5,fill:"#FF8FB8",stroke:"#111","stroke-width":1.5});
+ }
+ tx(g,395,125,`p ${fmt(c.p)} kPa`,14);
+ tx(g,395,151,`T ${fmt(c.T)} K`,14);
+ tx(g,395,177,`n ${fmt(c.n)} mol`,14);
+ tx(g,250,321,`V ${fmt(c.v)} L`,16,"middle");
+ if(d.type==="first"){
+  tx(g,32,170,"Q →",17);
+  tx(g,250,355,"W (on) ↓",16,"middle");
+  ln(g,249,359,249,378);
+ }else{
+  tx(g,26,171,"Heat Q →",14);
+  tx(g,250,354,"Piston work",14,"middle");
+ }
+ g.setAttribute("aria-label",`Gas cylinder at pressure ${fmt(c.p)} kilopascals, volume ${fmt(c.v)} litres, temperature ${fmt(c.T)} kelvin and amount ${fmt(c.n)} moles.`);
+}
+function update(){
+ if(!s.d)return;
+ if(s.sync)s.sync();
+ const c=current(),d=s.d;
+ if(d.type==="ideal"){
+  $("readout").innerHTML=`Current pressure: <strong>${fmt(c.p,5)} kPa</strong><br>n = ${fmt(c.n)} mol · V = ${(c.v*1000).toFixed(0)} cm³ · T = ${c.T.toFixed(0)} K`;
+ }else if(d.type==="kinetic"){
+  $("readout").innerHTML=`Current r.m.s. speed: <strong>${c.speed.toFixed(2)} m/s</strong><br>Mean translational energy = ${fmt(c.energy)} J per molecule · T = ${c.T.toFixed(0)} K`;
+ }else{
+  $("readout").innerHTML=`ΔU = <strong>${c.U.toFixed(1)} J</strong><br>Q = ${c.Q.toFixed(1)} J · W (on) = ${c.W.toFixed(1)} J`;
+ }
+ plotPV();plotEnergy();scene();
+}
+function hint(){
+ if(s.done||s.hinted)return;
+ s.hinted=true;$("hint").disabled=true;
+ const d=s.d;
+ $("feedback").textContent="Hint: "+(d.type==="ideal"?
+  "Rearrange pV = nRT for the unknown. Convert cm³ to m³, Celsius to kelvin and kPa to Pa.":
+  d.type==="kinetic"?"Square cᵣₘₛ = √(3kT/m), then convert kelvin to Celsius.":
+  "Find W first. At constant pressure, convert ΔV from cm³ to m³ and use W = −pΔV.");
+}
+function check(){
+ if(s.done)return;
+ const d=s.d,c=current();
+ if(d.type==="first"&&!s.choice){
+  $("feedback").textContent="Select the process before checking.";return;
+ }
+ s.tries++;
+ let right=false,diff=0,unit="";
+ if(d.type==="ideal"){
+  diff=c.p-d.target;unit="kPa";
+  right=Math.abs(diff)<=Math.max(.005,d.target*.003);
+ }else if(d.type==="kinetic"){
+  diff=c.speed-d.speedTarget;unit="m/s";
+  right=Math.abs(diff)<=.025;
+ }else{
+  diff=c.U-d.target;unit="J";
+  right=Math.abs(diff)<=.01&&s.choice===d.process;
+ }
+ if(right){
+  const gain=s.hinted?50:s.tries===1?100:75;
+  s.score+=gain;s.done=true;
+  $("scoreHud").textContent=s.score+" points";
+  $("check").disabled=true;$("next").disabled=false;$("hint").disabled=true;
+  $("feedback").className="feedback good";
+  const explanation=d.type==="ideal"?
+   "Consistent SI units make pV = nRT work.":
+   d.type==="kinetic"?
+   "Mean translational kinetic energy is proportional to absolute temperature.":
+   `W = ${c.W.toFixed(1)} J, so ΔU = Q + W = ${c.U.toFixed(1)} J.`;
+  $("feedback").textContent=`★ Correct! +${gain} points. ${explanation}`;
+ }else{
+  $("feedback").className="feedback bad";
+  $("feedback").textContent=d.type==="first"&&s.choice!==d.process?
+   "The selected process does not match the experiment. Check which quantity stays constant.":
+   `Your ${d.type==="kinetic"?"speed":d.type==="ideal"?"pressure":"internal energy change"} is ${Math.abs(diff).toFixed(d.type==="ideal"?3:2)} ${unit} too ${diff>0?"high":"low"}.`;
+ }
+}
+function finish(){
+ $("game").classList.add("hidden");$("finish").classList.remove("hidden");
+ const stars=s.score>=500?3:s.score>=350?2:s.score>=200?1:0;
+ $("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
+ $("result").textContent=`${s.score} / 600 points`;
+ $("resultText").textContent="Six experiments across the ideal gas equation, kinetic theory and the first law.";
+ $("roundHud").textContent="Complete";
+}
+$("hint").onclick=hint;
+$("check").onclick=check;
+$("next").onclick=()=>{s.round++;s.round>=6?finish():start();};
+$("again").onclick=()=>{
+ s.round=0;s.score=0;
+ $("finish").classList.add("hidden");$("game").classList.remove("hidden");start();
+};
+start();
+</script>
+</body>
+</html>

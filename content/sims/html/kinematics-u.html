@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Orbit &amp; Curve Lab | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{min-height:48px;border:2px solid #111;border-radius:999px;background:white;padding:9px 16px;font-weight:800;cursor:pointer;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.48;cursor:default}
+main{max-width:1310px;margin:auto;padding:18px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:18px}
+h1{font-size:clamp(30px,5vw,45px);font-weight:800;margin:8px 0}
+h2{font-size:20px;font-weight:800;margin:0 0 13px}
+h3{font-size:16px;font-weight:800;margin:11px 0}
+.badge{display:inline-block;border:2px solid #111;border-radius:999px;padding:7px 12px;font-size:12px;text-transform:uppercase;font-weight:800;background:var(--lvl-uni);color:var(--lvl-uni-on)}
+.hud{display:flex;gap:15px;flex-wrap:wrap;font-weight:800}
+.layout{display:grid;gap:18px}
+.panel{background:white;border:2px solid #111;border-radius:26px;box-shadow:var(--sh-2);padding:18px;min-width:0}
+.stage{background:var(--lvl-uni-tint)}
+.question{font-size:18px;line-height:1.55;font-weight:700}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:inherit;fill:#111}
+.plot{border:2px solid #111;background:#fff;border-radius:16px;padding:8px;margin:12px 0}
+.control{background:var(--fit-sunken);border:2px solid #111;border-radius:16px;padding:14px;margin:13px 0}
+.control-row{margin-bottom:16px}
+.control-row:last-child{margin-bottom:0}
+label{display:block;font-weight:800;margin-bottom:8px}
+input[type=range]{width:100%;height:46px;accent-color:var(--lvl-uni)}
+input[type=number]{width:100%;min-height:48px;border:2px solid #111;border-radius:11px;padding:10px;font-size:18px;background:#fff}
+input:disabled{opacity:.55}
+.vector-inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.stepper{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.stepper button{min-width:48px}
+.stepper output{font-size:22px;font-weight:800;min-width:112px;text-align:center}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:15px 0}
+.check{flex:1;background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+#feedback{font-weight:700;line-height:1.5;min-height:58px}
+.good{color:var(--fit-success)}.bad{color:var(--fit-danger)}
+.concept{border-top:2px dashed #aaa;padding-top:12px;margin-top:17px}
+.concept p{font-size:13px;line-height:1.45}
+.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:13px;font-weight:700}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.swatch{width:17px;height:5px;background:#1F66E5;display:inline-block}
+details{border:2px solid #111;border-radius:15px;padding:12px;margin-top:16px}
+summary{font-weight:800;cursor:pointer}
+details p{font-size:14px;line-height:1.5}
+#finish{display:none;text-align:center}
+.stars{font-size:46px;color:#bd8800}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div>
+<span class="badge">University · Mechanics</span>
+<h1>Orbit &amp; Curve Lab</h1>
+<p>Differentiate position vectors, control circular motion and navigate a current.</p>
+</div>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score: 0</span></div>
+</header>
+
+<div id="game" class="layout">
+<section class="panel stage">
+<h2 id="sceneTitle">Motion in two dimensions</h2>
+<p id="question" class="question"></p>
+<div class="plot">
+<svg id="pathGraph" viewBox="0 0 540 365" role="img" aria-label="Two-dimensional path with velocity and acceleration arrows"></svg>
+</div>
+<div class="legend">
+<span><i class="swatch"></i>Path</span>
+<span><i class="swatch" style="background:#D92D20"></i>Velocity v</span>
+<span><i class="swatch" style="background:#3DBE6B"></i>Acceleration a</span>
+</div>
+<div class="concept">
+<svg viewBox="0 0 490 125" role="img" aria-label="A curved path showing tangent velocity and inward acceleration">
+<path d="M22 100Q143-55 287 93Q373 155 465 25" stroke="#1F66E5" stroke-width="4" fill="none"/>
+<circle cx="265" cy="77" r="10" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+<path d="M265 77L365 120l-17-2m17 2l-10-14" stroke="#D92D20" stroke-width="4" stroke-linejoin="round" fill="none"/>
+<path d="M265 77L214 109l17-2m-17 2l8-16" stroke="#3DBE6B" stroke-width="4" fill="none"/>
+<text x="372" y="113" font-size="13" font-weight="800">v tangent</text>
+<text x="111" y="114" font-size="13" font-weight="800">a bends path</text>
+</svg>
+<p>Velocity is tangent to the path. Acceleration describes changes in speed or direction.</p>
+</div>
+</section>
+
+<section class="panel">
+<h2>Speed history</h2>
+<div class="plot">
+<svg id="speedGraph" viewBox="0 0 520 285" role="img" aria-label="Speed magnitude versus time"></svg>
+</div>
+<div id="controls" class="control"></div>
+<div class="actions">
+<button id="hint">Hint (−25)</button>
+<button id="check" class="check">Check ✓</button>
+<button id="next" hidden>Next →</button>
+</div>
+<div id="feedback" role="status" aria-live="polite"></div>
+<details>
+<summary>The physics</summary>
+<p><b>Vector position:</b> r(t) = x(t)i + y(t)j, in metres.</p>
+<p><b>Velocity:</b> v(t) = dr/dt. Its components are dx/dt and dy/dt, in m/s.</p>
+<p><b>Acceleration:</b> a(t) = dv/dt, in m/s².</p>
+<p><b>Speed:</b> |v| = √(vₓ² + vᵧ²), in m/s.</p>
+<p><b>Circular motion:</b> normal acceleration magnitude aₙ = v²/r, towards the centre.</p>
+<p><b>Non-uniform circular motion:</b> total acceleration magnitude |a| = √(aₜ² + aₙ²), because tangential and normal acceleration are perpendicular.</p>
+<p><b>Angular motion:</b> ω = v/r. With constant tangential acceleration aₜ, angular acceleration α = aₜ/r and θ(t) = θ₀ + ω₀t + ½αt².</p>
+<p><b>Relative velocity:</b> v_ground = v_boat/water + v_water/ground, added as vectors.</p>
+<p><b>River crossing:</b> take east as +x and the far bank as +y. With heading θ measured eastward from north, vₓ = U sinθ + current and vᵧ = U cosθ.</p>
+<p><b>Crossing time:</b> T = river width / vᵧ for positive vᵧ.</p>
+<p>All examples use idealised point objects. Circular trajectories have fixed radius; river current and boat speed relative to water are constant.</p>
+</details>
+</section>
+</div>
+
+<section id="finish" class="panel">
+<div id="stars" class="stars"></div>
+<h2 id="finalScore"></h2>
+<p>Six university mechanics challenges completed.</p>
+<button id="again" class="check">Play again ↻</button>
+</section>
+</main>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const PI=Math.PI;
+let round=0,score=0,attempts=0,hinted=false,solved=false;
+let m={},values=[0,0,0,0],radius=6,speed=6,heading=20,seed=51827;
+function random(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}
+function fmt(x){return Number.isFinite(x)?Number(x.toFixed(3)).toString():"—"}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
+function mag(x,y){return Math.hypot(x,y)}
+function make(i){
+switch(i){
+case 0:return {type:"vector",mode:"poly",t:2};
+case 1:return {type:"circle",mode:"uniform",r:4,v:6,at:0};
+case 2:return {type:"river",mode:"opposite",width:60,U:5,current:2};
+case 3:return {type:"vector",mode:"trig",t:0};
+case 4:return {type:"circle",mode:"nonuniform",r:4,v:8,at:3};
+default:return {type:"river",mode:"fastest",width:80,U:6,current:1.5};
+}
+}
+function truth(){
+if(m.type==="vector"){
+if(m.mode==="poly")return [4,-1,1,-2];
+return [0,2.5,-1.25,0];
+}
+if(m.type==="circle"){
+const ac=m.v*m.v/m.r;
+return Math.hypot(ac,m.at);
+}
+if(m.mode==="opposite")return -Math.asin(m.current/m.U)*180/PI;
+return 0;
+}
+function initialise(){
+if(round>=6){finish();return}
+m=make(round);attempts=0;hinted=false;solved=false;
+$("round").textContent=`Round ${round+1}/6`;
+$("score").textContent=`Score: ${score}`;
+$("hint").disabled=false;$("check").hidden=false;$("next").hidden=true;
+$("feedback").textContent="";$("feedback").className="";
+let q="";
+if(m.type==="vector"){
+$("sceneTitle").textContent=m.mode==="poly"?"Polynomial path":"Trigonometric orbit";
+q=m.mode==="poly"?
+`A particle follows r(t) = (2t + 0.5t²)i + (3t − t²)j metres, with t in seconds. Calculate both components of velocity and acceleration at t = ${m.t} s.`:
+`A particle follows r(t) = 5cos(0.5t)i + 5sin(0.5t)j metres, with t in seconds and angles in radians. Calculate velocity and acceleration components at t = ${m.t} s.`;
+values=[0,0,0,0];
+$("controls").innerHTML=`<h3>Enter vector components</h3>
+<div class="vector-inputs">
+<div><label for="vx">vₓ (m/s)</label><input id="vx" type="number" step="0.01" inputmode="decimal" value="0"></div>
+<div><label for="vy">vᵧ (m/s)</label><input id="vy" type="number" step="0.01" inputmode="decimal" value="0"></div>
+<div><label for="ax">aₓ (m/s²)</label><input id="ax" type="number" step="0.01" inputmode="decimal" value="0"></div>
+<div><label for="ay">aᵧ (m/s²)</label><input id="ay" type="number" step="0.01" inputmode="decimal" value="0"></div>
+</div>`;
+["vx","vy","ax","ay"].forEach((id,i)=>$(id).addEventListener("input",e=>{
+values[i]=e.target.value===""?NaN:Number(e.target.value);
+}));
+}
+if(m.type==="circle"){
+$("sceneTitle").textContent=m.mode==="uniform"?"Uniform circular motion":"Tangential and normal acceleration";
+radius=m.mode==="uniform"?6:6;
+speed=m.mode==="uniform"?6:7;
+q=m.mode==="uniform"?
+`A point moves uniformly around a circle. Set radius r and speed v to produce a centripetal acceleration of ${fmt(truth())} m/s² at the marked point.`:
+`A point follows a circle with tangential acceleration ${m.at} m/s². At t = 0, set its radius and initial speed so the total acceleration magnitude is ${fmt(truth())} m/s². Include both perpendicular acceleration components.`;
+$("controls").innerHTML=`<div class="control-row">
+<label for="radius">Radius r (m): <span id="rVal"></span></label>
+<input id="radius" type="range" min="1" max="12" step="0.1">
+<div class="stepper"><button id="rBigMinus" aria-label="Reduce radius by one metre">−−</button><button id="rMinus" aria-label="Reduce radius by 0.1 metre">−</button><output id="rOut"></output><button id="rPlus" aria-label="Increase radius by 0.1 metre">+</button><button id="rBigPlus" aria-label="Increase radius by one metre">++</button></div>
+</div>
+<div class="control-row">
+<label for="speed">Initial speed v (m/s): <span id="vVal"></span></label>
+<input id="speed" type="range" min="0.5" max="15" step="0.1">
+<div class="stepper"><button id="vBigMinus" aria-label="Reduce speed by one metre per second">−−</button><button id="vMinus" aria-label="Reduce speed by 0.1 metre per second">−</button><output id="vOut"></output><button id="vPlus" aria-label="Increase speed by 0.1 metre per second">+</button><button id="vBigPlus" aria-label="Increase speed by one metre per second">++</button></div>
+</div>`;
+$("radius").value=radius;$("speed").value=speed;
+$("radius").addEventListener("input",e=>{radius=+e.target.value;draw()});
+$("speed").addEventListener("input",e=>{speed=+e.target.value;draw()});
+[
+["rBigMinus",-1,"r"],["rMinus",-.1,"r"],["rPlus",.1,"r"],["rBigPlus",1,"r"],
+["vBigMinus",-1,"v"],["vMinus",-.1,"v"],["vPlus",.1,"v"],["vBigPlus",1,"v"]
+].forEach(([id,d,which])=>$(id).addEventListener("click",()=>{
+if(solved)return;
+if(which==="r")radius=Number(clamp(radius+d,1,12).toFixed(2));
+else speed=Number(clamp(speed+d,.5,15).toFixed(2));
+draw();
+}));
+}
+if(m.type==="river"){
+$("sceneTitle").textContent="River navigation";
+heading=m.mode==="opposite"?20:-20;
+q=m.mode==="opposite"?
+`A river is ${m.width} m wide. Current flows east at ${m.current} m/s. A boat maintains ${m.U} m/s relative to the water. Set its heading, measured in degrees east of north, to arrive directly opposite its starting position.`:
+`A river is ${m.width} m wide, with an eastward current of ${m.current} m/s. Boat speed relative to water is ${m.U} m/s. Choose a heading to minimise crossing time, regardless of downstream drift. Heading is in degrees east of north.`;
+$("controls").innerHTML=`<div class="control-row">
+<label for="heading">Boat heading θ (degrees east of north)</label>
+<input id="heading" type="range" min="-80" max="80" step="0.1">
+<div class="stepper"><button id="hBigMinus" aria-label="Turn ten degrees west">−−</button><button id="hMinus" aria-label="Turn 0.1 degree west">−</button><output id="hOut"></output><button id="hPlus" aria-label="Turn 0.1 degree east">+</button><button id="hBigPlus" aria-label="Turn ten degrees east">++</button></div>
+</div>`;
+$("heading").value=heading;
+$("heading").addEventListener("input",e=>{heading=+e.target.value;draw()});
+[
+["hBigMinus",-10],["hMinus",-.1],["hPlus",.1],["hBigPlus",10]
+].forEach(([id,d])=>$(id).addEventListener("click",()=>{
+if(solved)return;heading=Number(clamp(heading+d,-80,80).toFixed(2));draw();
+}));
+}
+$("question").textContent=q;
+draw();
+}
+function vectorState(t){
+if(m.mode==="poly"){
+return {
+x:2*t+.5*t*t,
+y:3*t-t*t,
+vx:2+t,
+vy:3-2*t,
+ax:1,ay:-2
+};
+}
+const w=.5,th=w*t;
+return {
+x:5*Math.cos(th),y:5*Math.sin(th),
+vx:-5*w*Math.sin(th),vy:5*w*Math.cos(th),
+ax:-5*w*w*Math.cos(th),ay:-5*w*w*Math.sin(th)
+};
+}
+function circleState(t){
+const r=Math.max(.001,radius);
+const theta=speed/r*t+.5*m.at/r*t*t;
+const v=speed+m.at*t;
+const c=Math.cos(theta),s=Math.sin(theta);
+return {
+x:r*c,y:r*s,
+vx:-v*s,vy:v*c,
+ax:-v*v/r*c-m.at*s,
+ay:-v*v/r*s+m.at*c
+};
+}
+function riverState(t){
+const angle=heading*PI/180;
+const vx=m.U*Math.sin(angle)+m.current;
+const vy=m.U*Math.cos(angle);
+return {x:vx*t,y:vy*t,vx,vy,ax:0,ay:0};
+}
+function riverTime(){
+const vy=m.U*Math.cos(heading*PI/180);
+return vy>1e-8?m.width/vy:1e5;
+}
+function timeEnd(){
+if(m.type==="vector")return 4;
+if(m.type==="circle")return Math.min(12,Math.max(2,2*PI*radius/Math.max(.2,speed)));
+return riverTime();
+}
+function stateAt(t){
+return m.type==="vector"?vectorState(t):m.type==="circle"?circleState(t):riverState(t);
+}
+function path(points){
+return points.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2)).join(" ");
+}
+function arrow(x1,y1,x2,y2,colour,head){
+const dx=x2-x1,dy=y2-y1,n=Math.hypot(dx,dy);
+if(n<.1)return `<circle cx="${x1}" cy="${y1}" r="5" fill="${colour}" stroke="#111" stroke-width="1.5"/>`;
+const ux=dx/n,uy=dy/n,h=Math.min(head,Math.max(6,n*.32));
+const bx=x2-ux*h,by=y2-uy*h;
+const px=-uy*5,py=ux*5;
+return `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="${colour}" stroke-width="4" stroke-linecap="round"/><path d="M${x2} ${y2}L${bx+px} ${by+py}L${bx-px} ${by-py}Z" fill="${colour}" stroke="${colour}" stroke-linejoin="round"/>`;
+}
+function drawPath(){
+const W=540,H=365,L=56,R=513,Top=45,B=306,T=timeEnd();
+const data=[];
+for(let i=0;i<=200;i++){
+let t=T*i/200;
+let s=stateAt(t);
+data.push(s);
+}
+const shown=stateAt(m.type==="vector"?m.t:m.type==="circle"?0:T*.55);
+let xmin=Math.min(0,...data.map(p=>p.x)),xmax=Math.max(0,...data.map(p=>p.x));
+let ymin=Math.min(0,...data.map(p=>p.y)),ymax=Math.max(0,...data.map(p=>p.y));
+if(m.type==="river"){
+ymin=0;ymax=m.width;
+const end=stateAt(T);
+xmin=Math.min(-15,end.x-15,0);xmax=Math.max(15,end.x+15,0);
+}
+let xr=Math.max(1,xmax-xmin),yr=Math.max(1,ymax-ymin);
+xmin-=xr*.16;xmax+=xr*.16;
+ymin-=yr*.16;ymax+=yr*.16;
+xr=xmax-xmin;yr=ymax-ymin;
+const xx=x=>L+(x-xmin)/xr*(R-L);
+const yy=y=>B-(y-ymin)/yr*(B-Top);
+let s=`<text x="270" y="19" text-anchor="middle" font-size="17" font-weight="800">${m.type==="river"?"River crossing path":"x–y trajectory"}</text>`;
+for(let i=0;i<=4;i++){
+let px=L+i*(R-L)/4,py=Top+i*(B-Top)/4;
+let xval=xmin+xr*i/4,yval=ymax-yr*i/4;
+s+=`<path d="M${px} ${Top}V${B} M${L} ${py}H${R}" stroke="#e0e0e0" fill="none"/><text x="${px}" y="${B+18}" font-size="11" text-anchor="middle">${fmt(xval)}</text><text x="${L-7}" y="${py+4}" font-size="11" text-anchor="end">${fmt(yval)}</text>`;
+}
+s+=`<path d="M${L} ${Top}V${B}H${R}" stroke="#111" stroke-width="2" fill="none"/><text x="275" y="${H-25}" font-size="13" text-anchor="middle">x (m)</text><text x="14" y="175" font-size="13" text-anchor="middle" transform="rotate(-90 14 175)">y (m)</text>`;
+if(m.type==="river"){
+s+=`<rect x="${L}" y="${yy(m.width)}" width="${R-L}" height="${yy(0)-yy(m.width)}" fill="#E2ECFD" opacity=".55"/>`;
+s+=`<path d="M${L} ${yy(m.width)}H${R}M${L} ${yy(0)}H${R}" stroke="#1F66E5" stroke-width="3"/>`;
+const targetX=xx(0);
+s+=`<path d="M${targetX} ${yy(0)}V${yy(m.width)}" stroke="#888" stroke-width="2" stroke-dasharray="6 5"/>`;
+s+=`<circle cx="${targetX}" cy="${yy(m.width)}" r="8" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+s+=`<text x="${clamp(targetX+15,L+8,R-105)}" y="${yy(m.width)-10}" font-size="12">Opposite bank</text>`;
+}
+const points=data.map(p=>[xx(p.x),yy(p.y)]);
+s+=`<path d="${path(points)}" stroke="#1F66E5" stroke-width="4" fill="none" stroke-linejoin="round"/>`;
+const mx=xx(shown.x),my=yy(shown.y);
+s+=`<circle cx="${mx}" cy="${my}" r="9" fill="#FFC83D" stroke="#111" stroke-width="3"/>`;
+const velocityScale=14;
+const accelerationScale=9;
+const vn=Math.hypot(shown.vx,shown.vy),an=Math.hypot(shown.ax,shown.ay);
+const vfactor=velocityScale;
+const afactor=accelerationScale;
+s+=arrow(mx,my,mx+shown.vx*vfactor,my-shown.vy*vfactor,"#D92D20",13);
+s+=arrow(mx,my,mx+shown.ax*afactor,my-shown.ay*afactor,"#3DBE6B",13);
+s+=`<g transform="translate(76 336)">
+<path d="M0 0H${velocityScale}" stroke="#D92D20" stroke-width="4"/>
+<text x="20" y="4" font-size="11">1 m/s (v arrow scale)</text>
+<path d="M240 0H${accelerationScale}" stroke="#3DBE6B" stroke-width="4"/>
+<text x="255" y="4" font-size="11">1 m/s² (a arrow scale)</text>
+</g>`;
+if(an<1e-9){
+s+=`<text x="350" y="43" font-size="12" font-weight="800">a = 0</text>`;
+}
+$("pathGraph").innerHTML=s;
+$("pathGraph").setAttribute("aria-label",`Two-dimensional trajectory. Marker at x ${fmt(shown.x)} metres, y ${fmt(shown.y)} metres. Velocity magnitude ${fmt(vn)} metres per second. Acceleration magnitude ${fmt(an)} metres per second squared. Red arrow is velocity and green arrow is acceleration.`);
+}
+function drawSpeed(){
+const W=520,H=285,L=67,R=492,Top=39,B=240,T=timeEnd();
+const points=[];
+let maximum=1;
+for(let i=0;i<=120;i++){
+const t=T*i/120,z=stateAt(t);
+const v=mag(z.vx,z.vy);
+points.push([t,v]);maximum=Math.max(maximum,v);
+}
+const ymax=Math.max(1,Math.ceil(maximum*1.15));
+const xx=t=>L+t/T*(R-L),yy=v=>B-v/ymax*(B-Top);
+let s=`<text x="260" y="19" font-size="17" font-weight="800" text-anchor="middle">Speed |v| versus time</text>`;
+for(let i=0;i<=4;i++){
+const x=xx(T*i/4),y=yy(ymax*i/4);
+s+=`<path d="M${x} ${Top}V${B} M${L} ${y}H${R}" stroke="#ddd" fill="none"/>
+<text x="${x}" y="${B+17}" font-size="11" text-anchor="middle">${fmt(T*i/4)}</text>
+<text x="${L-8}" y="${y+4}" font-size="11" text-anchor="end">${fmt(ymax*i/4)}</text>`;
+}
+s+=`<path d="M${L} ${Top}V${B}H${R}" fill="none" stroke="#111" stroke-width="2"/>
+<text x="270" y="282" font-size="12" text-anchor="middle">Time t (s)</text>
+<text x="15" y="140" font-size="12" text-anchor="middle" transform="rotate(-90 15 140)">Speed |v| (m/s)</text>`;
+s+=`<path d="${path(points.map(p=>[xx(p[0]),yy(p[1])]))}" stroke="#1F66E5" stroke-width="4" fill="none"/>`;
+const shownTime=m.type==="vector"?m.t:m.type==="circle"?0:T*.55;
+const z=stateAt(shownTime),v=mag(z.vx,z.vy);
+s+=`<circle cx="${xx(shownTime)}" cy="${yy(v)}" r="8" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+s+=`<line x1="${xx(shownTime)}" y1="${yy(v)}" x2="${xx(shownTime)}" y2="${B}" stroke="#777" stroke-width="2" stroke-dasharray="5 4"/>`;
+$("speedGraph").innerHTML=s;
+$("speedGraph").setAttribute("aria-label",`Speed magnitude over ${fmt(T)} seconds; current highlighted speed is ${fmt(v)} metres per second.`);
+}
+function draw(){
+if(m.type==="circle"){
+$("radius").value=radius;$("speed").value=speed;
+$("rVal").textContent=fmt(radius);$("vVal").textContent=fmt(speed);
+$("rOut").textContent=fmt(radius)+" m";
+$("vOut").textContent=fmt(speed)+" m/s";
+}
+if(m.type==="river"){
+$("heading").value=heading;
+$("hOut").textContent=fmt(heading)+"°";
+}
+drawPath();drawSpeed();
+}
+$("hint").addEventListener("click",()=>{
+if(solved||hinted)return;
+hinted=true;$("hint").disabled=true;
+let message="";
+if(m.type==="vector")message=m.mode==="poly"?
+"Differentiate each component separately. For acceleration, differentiate the resulting velocity components again.":
+"Use d[cos(ωt)]/dt = −ωsin(ωt), and d[sin(ωt)]/dt = ωcos(ωt). Differentiate a second time.";
+if(m.type==="circle")message=m.mode==="uniform"?
+"Rearrange aₙ = v²/r. You can adjust either speed or radius.":
+"Compute aₙ = v²/r, then combine normal and tangential accelerations using Pythagoras.";
+if(m.type==="river")message=m.mode==="opposite"?
+"To land directly opposite, make the eastward ground-velocity component zero: U sinθ + current = 0.":
+"Crossing time depends on the northward component U cosθ. Make this component as large as possible.";
+$("feedback").className="";
+$("feedback").textContent="Hint: "+message;
+});
+$("check").addEventListener("click",()=>{
+if(solved)return;attempts++;
+let ok=false,error="",explain="";
+if(m.type==="vector"){
+const expected=truth();
+const errors=values.map((v,i)=>v-expected[i]);
+ok=values.every(Number.isFinite)&&errors.every(e=>Math.abs(e)<=.021);
+if(ok){
+explain=`v = (${fmt(expected[0])}, ${fmt(expected[1])}) m/s and a = (${fmt(expected[2])}, ${fmt(expected[3])}) m/s². Each is obtained by differentiating the previous vector.`;
+}else{
+const names=["vₓ","vᵧ","aₓ","aᵧ"];
+const invalid=values.some(v=>!Number.isFinite(v));
+error=invalid?"Complete all four component fields with finite numbers.":
+names.map((n,i)=>`${n}: ${fmt(Math.abs(errors[i]))} ${errors[i]>0?"above":"below"} target`).join("; ")+".";
+}
+}
+if(m.type==="circle"){
+const ac=speed*speed/Math.max(.001,radius);
+const got=Math.hypot(m.at,ac);
+const delta=got-truth();
+ok=Math.abs(delta)<=.03;
+explain=`Normal acceleration = v²/r = ${fmt(ac)} m/s². Tangential acceleration = ${fmt(m.at)} m/s². Resultant magnitude = ${fmt(got)} m/s².`;
+error=`Your acceleration magnitude is ${fmt(Math.abs(delta))} m/s² ${delta>0?"too high":"too low"}.`;
+}
+if(m.type==="river"){
+const ang=heading*PI/180;
+const vx=m.U*Math.sin(ang)+m.current;
+const vy=m.U*Math.cos(ang);
+const T=m.width/Math.max(1e-8,vy);
+const drift=vx*T;
+if(m.mode==="opposite"){
+ok=Math.abs(drift)<=.2;
+explain=`The eastward ground-velocity component is ${fmt(vx)} m/s. The landing displacement from the opposite point is ${fmt(drift)} m.`;
+error=`The landing point is ${fmt(Math.abs(drift))} m ${drift>0?"east":"west"} of the opposite point.`;
+}else{
+const fastest=m.width/m.U;
+const loss=T-fastest;
+ok=Math.abs(loss)<=.003&&Math.abs(heading)<=.25;
+explain=`Maximum crossing velocity is ${m.U} m/s directly north, with crossing time ${fmt(fastest)} s. The current changes downstream drift, not this minimum time.`;
+error=`Your crossing takes ${fmt(Math.max(0,loss))} s longer than the minimum. Align the boat's velocity through the water with the northward crossing direction.`;
+}
+}
+if(ok){
+solved=true;
+const points=hinted?50:attempts===1?100:75;
+score+=points;$("score").textContent=`Score: ${score}`;
+$("feedback").className="good";
+$("feedback").textContent=`★ Correct! +${points} points. ${explain}`;
+$("check").hidden=true;$("next").hidden=false;$("hint").disabled=true;
+document.querySelectorAll("#controls input").forEach(el=>el.disabled=true);
+}else{
+$("feedback").className="bad";
+$("feedback").textContent=error;
+}
+});
+$("next").addEventListener("click",()=>{round++;initialise()});
+$("again").addEventListener("click",()=>{
+round=0;score=0;seed=(seed+1553)>>>0;
+$("game").style.display="grid";
+$("finish").style.display="none";
+initialise();
+});
+function finish(){
+$("game").style.display="none";$("finish").style.display="block";
+const stars=score>=500?3:score>=350?2:1;
+$("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
+$("stars").setAttribute("aria-label",`${stars} of 3 stars`);
+$("finalScore").textContent=`${score} / 600 points`;
+$("round").textContent="6/6 complete";
+}
+initialise();
+})();
+</script>
+</body>
+</html>

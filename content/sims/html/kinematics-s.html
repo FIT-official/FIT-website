@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Graph Racer | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{cursor:pointer;min-height:48px;padding:9px 17px;border:2px solid #111;border-radius:999px;background:#fff;font-weight:800;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.5;cursor:default}
+main{max-width:1300px;margin:auto;padding:17px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+h1{font-size:clamp(30px,5vw,45px);font-weight:800;margin:8px 0}
+h2{font-size:20px;font-weight:800;margin:0 0 14px}
+.badge{border:2px solid #111;background:var(--lvl-secondary);color:var(--lvl-secondary-on);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;text-transform:uppercase}
+.hud{display:flex;gap:15px;flex-wrap:wrap;font-weight:800}
+.layout{display:grid;gap:18px}
+.panel{background:#fff;border:2px solid #111;border-radius:26px;box-shadow:var(--sh-2);padding:17px;min-width:0}
+.stage{background:var(--lvl-secondary-tint)}
+.question{font-size:18px;font-weight:700;line-height:1.5}
+svg{width:100%;height:auto;display:block}
+svg text{font-family:inherit;fill:#111}
+.plot{background:white;border:2px solid #111;border-radius:15px;padding:7px;margin:10px 0}
+.plot svg{overflow:hidden}
+#velocityGraph{touch-action:none}
+.graph-dot{cursor:grab;outline:none;touch-action:none}
+.graph-dot:focus-visible{stroke:#111;stroke-width:6}
+.graph-dot:active{cursor:grabbing}
+.controls{background:var(--fit-sunken);border:2px solid #111;border-radius:18px;padding:14px;margin:12px 0}
+.control-row{margin-bottom:14px}
+.control-row:last-child{margin-bottom:0}
+label{display:block;font-weight:800;margin-bottom:8px}
+input[type=range]{width:100%;height:44px;accent-color:#138B75;cursor:pointer}
+input[type=number]{font-size:17px;min-width:0;width:100%;border:2px solid #111;border-radius:12px;padding:12px;background:#fff;min-height:48px}
+input:disabled{opacity:.55}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.check{flex:1;background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+#feedback{min-height:54px;font-weight:700;line-height:1.5}
+.good{color:var(--fit-success)}.bad{color:var(--fit-danger)}
+.concept{border-top:2px dashed #999;margin-top:17px;padding-top:12px}
+.concept p{font-size:13px;line-height:1.4}
+details{border:2px solid #111;border-radius:15px;padding:12px;background:#fff;margin-top:15px}
+summary{font-weight:800;cursor:pointer}
+details p{font-size:14px}
+#finish{display:none;text-align:center}
+.stars{font-size:46px;color:#c58b00}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div><span class="badge">Secondary · Physics</span><h1>Graph Racer</h1><p>Build a speed–time graph and read how a runner moves.</p></div>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score: 0</span></div>
+</header>
+<div id="game" class="layout">
+<section class="panel stage">
+<h2>Running track</h2>
+<svg id="track" viewBox="0 0 520 125" role="img" aria-label="Runner on a straight track">
+<rect x="18" y="20" width="484" height="83" rx="18" fill="#fff" stroke="#111" stroke-width="3"/>
+<path d="M45 85H480" stroke="#111" stroke-width="3" stroke-dasharray="9 8"/>
+<path d="M45 51H480" stroke="#999" stroke-width="2"/>
+<g id="runner"></g>
+<text x="34" y="17" font-size="12">Start</text><text x="457" y="17" font-size="12">Finish →</text>
+</svg>
+<p id="question" class="question"></p>
+<div class="plot">
+<svg id="velocityGraph" viewBox="0 0 520 295" role="img" aria-label="Speed versus time graph with shaded area"></svg>
+</div>
+<div class="concept">
+<svg viewBox="0 0 480 110" role="img" aria-label="A triangle and rectangle forming the area under a speed time graph">
+<path d="M55 15V89H447" stroke="#111" stroke-width="3" fill="none"/>
+<path d="M55 89L180 35H310V89Z" fill="#2EC4A6" fill-opacity=".65" stroke="#111" stroke-width="2"/>
+<text x="155" y="102" font-size="13">Time (s)</text><text x="11" y="20" font-size="12">v (m/s)</text>
+<text x="253" y="65" font-size="16" font-weight="800" text-anchor="middle">Area = distance</text>
+</svg>
+<p>The area under a speed–time graph gives the distance travelled.</p>
+</div>
+</section>
+<section class="panel">
+<h2>Distance–time graph</h2>
+<div class="plot"><svg id="distanceGraph" viewBox="0 0 520 265" role="img" aria-label="Distance in metres versus time in seconds"></svg></div>
+<div id="controls" class="controls"></div>
+<div class="actions"><button id="hint">Hint (−25)</button><button id="check" class="check">Check ✓</button><button id="next" hidden>Next →</button></div>
+<div id="feedback" role="status" aria-live="polite"></div>
+<details>
+<summary>The physics</summary>
+<p><b>Speed:</b> distance travelled per second (m/s).</p>
+<p><b>Acceleration:</b> (final velocity − initial velocity) ÷ time taken, measured in m/s².</p>
+<p><b>Distance:</b> area under a non-negative speed–time graph, including triangles and trapeziums.</p>
+<p><b>Displacement:</b> signed change in position. For this runner travelling forwards, displacement equals distance.</p>
+<p><b>Distance–time gradient:</b> instantaneous speed. Curves have changing gradients.</p>
+<p>Each graph stage assumes constant acceleration. At stage joins, speed is continuous.</p>
+</details>
+</section>
+</div>
+<section id="finish" class="panel">
+<div id="stars" class="stars"></div><h2 id="finalScore"></h2><p id="endText"></p>
+<button id="again" class="check">Play again ↻</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+let round=0,score=0,attempts=0,hinted=false,solved=false,model={},v1=0,v2=0,ansA=0,ansD=0,drag=-1;
+let seed=81029;
+function random(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}
+function pick(a){return a[Math.floor(random()*a.length)]}
+function fmt(n){return Number(n.toFixed(3)).toString()}
+function path(points){return points.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2)).join(" ")}
+function makeModel(i){
+const build=i%2===0;
+const T=pick([8,10,12]),t1=T/2;
+const values=build?{a:pick([2,4,6]),b:pick([2,4,6])}:
+{a:pick([2,4,6,8]),b:pick([0,2,4,6])};
+const m={build,T,t1,va:values.a,vb:values.b};
+m.distance=t1*(m.va/2+(m.va+m.vb)/2);
+m.accel=(m.vb-m.va)/t1;
+m.decidingStage=i%4===1?2:1;
+if(!build){
+m.accel=m.decidingStage===1?m.va/t1:(m.vb-m.va)/t1;
+}
+return m;
+}
+function distanceAt(t,a,b){
+const T=model.T,h=T/2;
+if(t<=h)return .5*a*t*t/h;
+const q=t-h;return a*h/2+a*q+(b-a)*q*q/(2*h);
+}
+function speedAt(t,a,b){const h=model.T/2;return t<=h?a*t/h:a+(b-a)*(t-h)/h}
+function total(a,b){return model.T*(a+.5*b)/2}
+function initialise(){
+if(round===6){finish();return}
+model=makeModel(round);attempts=0;hinted=false;solved=false;
+v1=model.build?Math.max(0,model.va+2):model.va;
+v2=model.build?Math.max(0,model.vb-2):model.vb;
+if(model.build&&Math.abs(total(v1,v2)-model.distance)<.001)v2+=2;
+ansA=0;ansD=0;
+$("round").textContent=`Round ${round+1}/6`;
+$("score").textContent=`Score: ${score}`;
+$("feedback").textContent="";$("feedback").className="";
+$("check").hidden=false;$("next").hidden=true;$("hint").disabled=false;
+if(model.build){
+$("question").textContent=`Move the two round graph points to make the runner travel ${fmt(model.distance)} m in ${model.T} s. Start and finish speeds must be 0 m/s. Only the total distance is marked for checking.`;
+$("controls").innerHTML=`<div class="control-row"><label for="v1">Speed at ${model.t1} s: <span id="v1text"></span> m/s</label><input id="v1" type="range" min="0" max="12" step="0.5"></div><div class="control-row"><label for="v2">Speed at ${model.T} s: <span id="v2text"></span> m/s</label><input id="v2" type="range" min="0" max="12" step="0.5"></div><p style="font-size:13px">Drag the graph points or use the sliders. The final speed is not fixed.</p>`;
+$("question").textContent=`The runner starts from rest. Adjust the corner speeds so the total distance in ${model.T} s is ${fmt(model.distance)} m. The graph joins are at ${model.t1} s and ${model.T} s.`;
+$("v1").value=v1;$("v2").value=v2;
+$("v1").addEventListener("input",e=>{v1=+e.target.value;draw()});
+$("v2").addEventListener("input",e=>{v2=+e.target.value;draw()});
+}else{
+$("question").textContent=`From the given speed–time graph, calculate the acceleration during stage ${model.decidingStage} (${model.decidingStage===1?`0–${model.t1}`:`${model.t1}–${model.T}`} s) and the total distance travelled.`;
+$("controls").innerHTML=`<div class="control-row"><label for="accAnswer">Stage ${model.decidingStage} acceleration (m/s²)</label><input id="accAnswer" type="number" step="0.1" inputmode="decimal" value="0"></div><div class="control-row"><label for="distAnswer">Total distance (m)</label><input id="distAnswer" type="number" min="0" step="0.5" inputmode="decimal" value="0"></div>`;
+$("accAnswer").addEventListener("input",e=>{ansA=Number(e.target.value);});
+$("distAnswer").addEventListener("input",e=>{ansD=Number(e.target.value);});
+}
+draw();
+}
+function graphBase(W,H,title,ylabel,xmax,ymax){
+const L=66,R=W-22,B=H-45,Top=39,ww=R-L,hh=B-Top;
+const xx=t=>L+t/xmax*ww, yy=y=>B-y/ymax*hh;
+let s=`<text x="${W/2}" y="19" font-size="17" text-anchor="middle" font-weight="800">${title}</text>`;
+for(let k=0;k<=4;k++){
+const x=xx(xmax*k/4),y=yy(ymax*k/4);
+s+=`<path d="M${x} ${Top}V${B} M${L} ${y}H${R}" stroke="#ddd" fill="none"/><text x="${x}" y="${B+18}" font-size="12" text-anchor="middle">${fmt(xmax*k/4)}</text><text x="${L-8}" y="${y+4}" font-size="12" text-anchor="end">${fmt(ymax*k/4)}</text>`;
+}
+s+=`<path d="M${L} ${Top}V${B}H${R}" stroke="#111" stroke-width="2" fill="none"/><text x="${(L+R)/2}" y="${H-5}" text-anchor="middle" font-size="13">Time t (s)</text><text x="15" y="${H/2}" transform="rotate(-90 15 ${H/2})" text-anchor="middle" font-size="13">${ylabel}</text>`;
+return {s,xx,yy,B,Top,L,R};
+}
+function draw(){
+const a=v1,b=v2,T=model.T,h=T/2;
+if(model.build){
+$("v1text").textContent=fmt(a);$("v2text").textContent=fmt(b);
+}
+let scale=Math.max(12,Math.ceil(Math.max(a,b,model.va,model.vb)/4)*4);
+let G=graphBase(520,295,"Speed–time graph","Speed v (m/s)",T,scale);
+let poly=[[G.xx(0),G.yy(0)],[G.xx(h),G.yy(a)],[G.xx(T),G.yy(b)],[G.xx(T),G.B]];
+let s=G.s+`<polygon points="${poly.map(p=>p.join(",")).join(" ")}" fill="#2EC4A6" opacity=".23"/>`;
+s+=`<path d="${path(poly.slice(0,3))}" stroke="#087D71" stroke-width="4" fill="none" stroke-linejoin="round"/>`;
+const points=[[0,0],[h,a],[T,b]];
+points.forEach((p,i)=>{
+let x=G.xx(p[0]),y=G.yy(p[1]);
+s+=`<circle class="graph-dot" data-i="${i}" cx="${x}" cy="${y}" r="${i===0?6:11}" fill="${i===0?"#111":"#FFC83D"}" stroke="#111" stroke-width="3" ${model.build&&i>0?'tabindex="0" role="slider" aria-label="Corner speed at '+p[0]+' seconds" aria-valuemin="0" aria-valuemax="12" aria-valuenow="'+p[1]+'"':""}/>`;
+});
+s+=`<path d="M${G.xx(h)} ${G.yy(a)}V${G.B}H${G.xx(0)}" stroke="#D92D20" stroke-dasharray="6 4" fill="none" stroke-width="2"/><text x="${G.xx(h)+8}" y="${G.B-9}" font-size="12">Δt</text><text x="${G.L+7}" y="${G.yy(a)-8}" font-size="12">Δv</text>`;
+s+=`<circle cx="415" cy="25" r="5" fill="#087D71"/><text x="427" y="29" font-size="12">Speed</text>`;
+$("velocityGraph").innerHTML=s;
+$("velocityGraph").setAttribute("aria-label",`Speed time plot: initial speed 0 m/s, midpoint speed ${fmt(a)} m/s at ${h} s, final speed ${fmt(b)} m/s at ${T} s. Shaded area represents distance.`);
+const d=total(a,b),dmax=Math.max(10,Math.ceil(Math.max(d,model.distance)/10)*10);
+G=graphBase(520,265,"Distance–time graph","Distance s (m)",T,dmax);
+const coords=[];
+for(let k=0;k<=100;k++){let t=T*k/100;coords.push([G.xx(t),G.yy(distanceAt(t,a,b))])}
+let dsvg=G.s+`<path d="${path(coords)}" fill="none" stroke="#6A45F5" stroke-width="4"/><circle cx="${G.xx(T)}" cy="${G.yy(d)}" r="7" fill="#FFC83D" stroke="#111" stroke-width="2"/><text x="370" y="27" font-size="12">● Distance</text>`;
+$("distanceGraph").innerHTML=dsvg;
+$("distanceGraph").setAttribute("aria-label",`Distance increases from zero to ${fmt(d)} metres over ${T} seconds. The line curves where acceleration is nonzero.`);
+const fraction=dmax>0?Math.min(1,d/dmax):0;
+let pos=46+410*fraction;
+$("runner").innerHTML=`<circle cx="${pos}" cy="45" r="10" fill="#FF8FB8" stroke="#111" stroke-width="3"/><path d="M${pos} 55l-8 19m8-19l10 18m-10-14l-14 1m14-1l15-9" stroke="#111" stroke-width="4" fill="none" stroke-linecap="round"/><text x="${pos}" y="113" font-size="12" text-anchor="middle">● position</text>`;
+$("track").setAttribute("aria-label",`Runner position marker represents ${fmt(d)} metres on a route scaled to ${fmt(dmax)} metres.`);
+}
+const svg=$("velocityGraph");
+function eventSpeed(ev){
+const r=svg.getBoundingClientRect();
+const cy=(ev.clientY-r.top)/Math.max(1,r.height)*295;
+return Math.max(0,Math.min(12,Math.round((232-cy)/193*12*2)/2));
+}
+function setCorner(index,x){if(!model.build||solved||index<1)return; if(index===1)v1=x;else v2=x;$("v1").value=v1;$("v2").value=v2;draw()}
+svg.addEventListener("pointerdown",e=>{
+const c=e.target.closest(".graph-dot");
+if(!c||!model.build||solved)return;
+let i=Number(c.dataset.i);if(i<1)return;
+drag=i;svg.setPointerCapture(e.pointerId);setCorner(i,eventSpeed(e));
+});
+svg.addEventListener("pointermove",e=>{if(drag>0)setCorner(drag,eventSpeed(e))});
+svg.addEventListener("pointerup",()=>{drag=-1});
+svg.addEventListener("pointercancel",()=>{drag=-1});
+svg.addEventListener("keydown",e=>{
+const c=e.target.closest(".graph-dot");
+if(!c||!model.build||solved)return;
+const i=Number(c.dataset.i);
+if(i<1||!["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key))return;
+e.preventDefault();
+setCorner(i,Math.max(0,Math.min(12,(i===1?v1:v2)+(e.key==="ArrowUp"||e.key==="ArrowRight"?.5:-.5))));
+});
+$("hint").addEventListener("click",()=>{
+if(solved||hinted)return;hinted=true;$("hint").disabled=true;
+$("feedback").className="";
+$("feedback").textContent=model.build?"Hint: the shaded region is a triangle plus a trapezium. Add their areas.":"Hint: gradient = change in speed ÷ change in time. Total distance = sum of areas under the two stages.";
+});
+$("check").addEventListener("click",()=>{
+if(solved)return;attempts++;
+let ok=false,why="",error="";
+if(model.build){
+const got=total(v1,v2),dif=got-model.distance;
+ok=Math.abs(dif)<=.001;
+why=`Distance = ½ × ${fmt(model.t1)} × ${fmt(v1)} + ½ × ${fmt(model.t1)} × (${fmt(v1)} + ${fmt(v2)}) = ${fmt(got)} m.`;
+error=`Your graph travels ${fmt(Math.abs(dif))} m ${dif>0?"too far":"too little"}.`;
+}else{
+const valid=Number.isFinite(ansA)&&Number.isFinite(ansD)&&ansD>=0;
+const ea=ansA-model.accel,ed=ansD-model.distance;
+ok=valid&&Math.abs(ea)<.051&&Math.abs(ed)<.051;
+why=`Stage acceleration = ${fmt(model.accel)} m/s². The two stage areas add to ${fmt(model.distance)} m.`;
+error=!valid?"Enter valid finite acceleration and non-negative distance values.":`Acceleration is ${fmt(Math.abs(ea))} m/s² ${ea>0?"too high":"too low"}; distance is ${fmt(Math.abs(ed))} m ${ed>0?"too high":"too low"}.`;
+}
+if(ok){
+solved=true;const pts=hinted?50:attempts===1?100:75;score+=pts;
+$("score").textContent=`Score: ${score}`;$("feedback").className="good";
+$("feedback").textContent=`★ Correct! +${pts}. ${why}`;
+$("check").hidden=true;$("next").hidden=false;$("hint").disabled=true;
+if(model.build){$("v1").disabled=true;$("v2").disabled=true}
+else{$("accAnswer").disabled=true;$("distAnswer").disabled=true}
+}else{$("feedback").className="bad";$("feedback").textContent=error}
+});
+$("next").addEventListener("click",()=>{round++;initialise()});
+$("again").addEventListener("click",()=>{round=0;score=0;seed=(seed+2027)>>>0;$("game").style.display="grid";$("finish").style.display="none";initialise()});
+function finish(){
+$("game").style.display="none";$("finish").style.display="block";
+let stars=score>=500?3:score>=350?2:1;
+$("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
+$("finalScore").textContent=`${score} / 600 points`;
+$("endText").textContent="You have completed six graph challenges.";
+$("round").textContent="6/6 complete";
+}
+initialise();
+})();
+</script>
+</body>
+</html>

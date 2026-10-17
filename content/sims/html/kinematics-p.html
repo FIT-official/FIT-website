@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Speedy Trips | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit;-webkit-tap-highlight-color:transparent}
+button,input,[role=button]{user-select:none;-webkit-user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{cursor:pointer;min-height:48px;border:2px solid #111;background:#fff;border-radius:999px;font-weight:800;padding:10px 19px;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:default}
+main{max-width:1250px;margin:auto;padding:18px 16px 42px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:800}
+.badge{display:inline-block;background:var(--lvl-primary);color:var(--lvl-primary-on);border:2px solid #111;border-radius:999px;padding:7px 12px;text-transform:uppercase;font-weight:800;font-size:12px}
+h1{font-size:clamp(30px,5vw,46px);line-height:1.1;margin:8px 0;font-weight:800}
+h2{font-size:21px;margin:0 0 13px;font-weight:800}
+p{line-height:1.55}
+.sub{color:var(--fit-ink-2);margin:0 0 21px}
+.layout{display:grid;gap:19px}
+.panel{background:white;border:2px solid #111;border-radius:26px;padding:19px;box-shadow:var(--sh-2);min-width:0}
+.stage{background:var(--lvl-primary-tint)}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:inherit;fill:#111}
+.question{font-size:19px;font-weight:700;line-height:1.5;margin:10px 0 16px}
+.control{border:2px solid #111;border-radius:19px;padding:17px;background:var(--fit-sunken)}
+.stepper{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap}
+.stepper button{min-width:47px;padding:9px}
+.value{font-weight:800;font-size:32px;min-width:115px;text-align:center}
+.unit{font-size:16px;color:#444}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2);flex:1}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+#feedback{min-height:55px;font-weight:700;line-height:1.5;margin-top:13px}
+.good{color:var(--fit-success)}.bad{color:var(--fit-danger)}
+details{margin-top:19px;border:2px solid #111;border-radius:16px;padding:12px 15px;background:white}
+summary{font-weight:800;cursor:pointer;min-height:32px}
+.equation{display:block;background:var(--fit-sunken);border-radius:10px;padding:10px;margin:9px 0;font-weight:700}
+.concept{border-top:2px dashed #bbb;margin-top:20px;padding-top:14px}
+.concept p{font-size:13px;margin:6px 0}
+.plot{border:2px solid #111;border-radius:16px;background:#fff;padding:9px}
+footer{color:#555;font-size:12px;margin-top:25px}
+#finish{display:none;text-align:center}
+#finish .stars{font-size:48px;color:#DA9100;letter-spacing:8px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div>
+<span class="badge">Primary · P5–P6</span>
+<h1>Speedy Trips</h1>
+<p class="sub">Work out speed, distance and time on a journey.</p>
+</div>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score: 0</span></div>
+</header>
+
+<div id="game" class="layout">
+<section class="panel stage">
+<h2 id="sceneTitle">The journey</h2>
+<svg id="scene" viewBox="0 0 540 255" role="img" aria-label="A vehicle travelling on a route">
+<rect x="16" y="40" width="508" height="177" rx="21" fill="#fff" stroke="#111" stroke-width="3"/>
+<path d="M55 155H480" stroke="#555" stroke-width="27" stroke-linecap="round"/>
+<path d="M55 155H480" stroke="#fff" stroke-width="3" stroke-dasharray="17 13"/>
+<g id="mapVehicle"><circle cx="100" cy="155" r="15" fill="#FFC83D" stroke="#111" stroke-width="3"/></g>
+<g font-weight="800" font-size="17">
+<text x="47" y="93">START</text><text x="428" y="93">FINISH</text>
+</g>
+<g id="sceneLabels"></g>
+</svg>
+<p id="story" class="question"></p>
+<div class="concept">
+<svg viewBox="0 0 470 75" role="img" aria-label="A strip showing that speed multiplied by time equals distance">
+<rect x="5" y="10" width="130" height="47" rx="10" fill="#FFC83D" stroke="#111" stroke-width="2"/>
+<rect x="170" y="10" width="130" height="47" rx="10" fill="#FF8FB8" stroke="#111" stroke-width="2"/>
+<rect x="337" y="10" width="128" height="47" rx="10" fill="#3DBE6B" stroke="#111" stroke-width="2"/>
+<g font-size="17" font-weight="800" text-anchor="middle"><text x="70" y="40">Speed</text><text x="152" y="41">×</text><text x="235" y="40">Time</text><text x="318" y="41">=</text><text x="401" y="40">Distance</text></g>
+</svg>
+<p>Speed tells us how far something travels in one unit of time.</p>
+</div>
+</section>
+
+<section class="panel">
+<h2>Choose your answer</h2>
+<div class="control">
+<div id="answerLabel" style="font-weight:800;margin-bottom:12px"></div>
+<div class="stepper">
+<button data-step="-10" aria-label="Decrease by ten steps">−−</button>
+<button data-step="-1" aria-label="Decrease by one step">−</button>
+<div class="value"><span id="answer">0</span><span id="answerUnit" class="unit"></span></div>
+<button data-step="1" aria-label="Increase by one step">+</button>
+<button data-step="10" aria-label="Increase by ten steps">++</button>
+</div>
+</div>
+<div class="actions"><button id="hint">Hint (−25)</button><button class="check" id="check">Check ✓</button><button id="next" hidden>Next →</button></div>
+<div id="feedback" role="status" aria-live="polite"></div>
+<h2>Journey distances</h2>
+<div class="plot">
+<svg id="chart" viewBox="0 0 510 285" role="img" aria-label="Live distance bar chart in kilometres"></svg>
+</div>
+<details>
+<summary>The physics</summary>
+<span class="equation">Speed = distance ÷ time</span>
+<span class="equation">Distance = speed × time</span>
+<span class="equation">Time = distance ÷ speed</span>
+<span class="equation">Average speed = total distance ÷ total time</span>
+<p>For two journeys, add the distances and the times separately. One hour has 60 minutes. One kilometre has 1,000 metres. We assume a steady speed during each part.</p>
+</details>
+</section>
+</div>
+
+<section id="finish" class="panel">
+<h2>Journey complete!</h2>
+<div id="stars" class="stars" aria-label="Stars earned"></div>
+<h2 id="finalScore"></h2>
+<p id="endMessage"></p>
+<button id="restart" class="check">Play again ↻</button>
+</section>
+<footer>FIT · Learn by moving, measuring and checking.</footer>
+</main>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+let round=0,score=0,attempts=0,hinted=false,solved=false,value=0,unitStep=1,model={};
+const vehicles=["cyclist","bus","toy train"];
+const specs=[
+{type:"speed",vehicle:0,d:24,t:3},
+{type:"distance",vehicle:1,v:36,t:2},
+{type:"time",vehicle:2,d:48,v:16},
+{type:"speed",vehicle:1,d:90,t:2.5},
+{type:"distance",vehicle:0,v:12,t:1.5},
+{type:"average",vehicle:2,d1:20,t1:2,d2:40,t2:1}
+];
+let seed=137;
+function rand(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}
+function fmt(n){return Number.isInteger(n)?String(n):Number(n.toFixed(2)).toString()}
+function create(i){
+let m={...specs[i]};
+let factor=[1,1.5,2][Math.floor(rand()*3)];
+if(m.type==="average"){
+m.d1*=factor;m.d2*=factor;
+m.correct=(m.d1+m.d2)/(m.t1+m.t2);
+m.unit="km/h";m.label="Average speed";
+m.question=`A toy train travels ${fmt(m.d1)} km in ${m.t1} h, then ${fmt(m.d2)} km in ${m.t2} h. What is its average speed for the whole trip?`;
+}else{
+if(m.d!==undefined)m.d*=factor;
+if(m.v!==undefined)m.v*=factor;
+if(m.type==="speed"){
+m.correct=m.d/m.t;m.unit="km/h";m.label="Speed";
+m.question=`A ${vehicles[m.vehicle]} travels ${fmt(m.d)} km in ${fmt(m.t)} h. What is its speed in km/h?`;
+}else if(m.type==="distance"){
+m.correct=m.v*m.t;m.unit="km";m.label="Distance";
+m.question=`A ${vehicles[m.vehicle]} travels at ${fmt(m.v)} km/h for ${fmt(m.t)} h. How far does it travel?`;
+}else{
+m.correct=m.d/m.v;m.unit="h";m.label="Time";
+m.question=`A toy train travels ${fmt(m.d)} km at ${fmt(m.v)} km/h. How many hours does it take?`;
+}
+}
+return m;
+}
+function initRound(){
+if(round>=6){finish();return}
+model=create(round);
+attempts=0;hinted=false;solved=false;
+unitStep=model.unit==="h"?.25: model.unit==="km/h"?.5:.5;
+value=Math.max(0,model.correct+unitStep*(round%2?4:-4));
+if(Math.abs(value-model.correct)<.00001)value+=unitStep*4;
+$("round").textContent=`Round ${round+1}/6`;
+$("score").textContent=`Score: ${score}`;
+$("sceneTitle").textContent=["Cyclist route","Bus journey","Toy train track"][model.vehicle];
+$("story").textContent=model.question;
+$("answerLabel").textContent=`Set ${model.label.toLowerCase()}:`;
+$("answerUnit").textContent=" "+model.unit;
+$("feedback").textContent="";
+$("feedback").className="";
+$("next").hidden=true;$("check").hidden=false;$("hint").disabled=false;
+draw(); 
+}
+function draw(){
+$("answer").textContent=fmt(value);
+let label=model.type==="average"?`${fmt(model.d1)} km + ${fmt(model.d2)} km`:
+model.type==="speed"||model.type==="time"?`${fmt(model.d)} km`:`${fmt(value)} km (your estimate)`;
+$("sceneLabels").innerHTML=`<text x="270" y="207" font-size="19" font-weight="800" text-anchor="middle">${label}</text>`;
+const pos=Math.min(465,Math.max(75,75+390*Math.min(1,value/Math.max(1,model.correct*1.8))));
+const shapes=[
+`<circle cx="${pos-13}" cy="164" r="11" fill="#111"/><circle cx="${pos+19}" cy="164" r="11" fill="#111"/><path d="M${pos-13} 164L${pos} 143L${pos+19} 164L${pos+1} 164Z" fill="#FFC83D" stroke="#111" stroke-width="3"/><circle cx="${pos}" cy="127" r="9" fill="#FF8FB8" stroke="#111" stroke-width="3"/><path d="M${pos} 136L${pos+9} 146" stroke="#111" stroke-width="4"/>`,
+`<rect x="${pos-39}" y="123" width="78" height="43" rx="10" fill="#2EC4A6" stroke="#111" stroke-width="3"/><rect x="${pos-26}" y="131" width="43" height="17" rx="3" fill="#fff" stroke="#111" stroke-width="2"/><circle cx="${pos-22}" cy="167" r="9"/><circle cx="${pos+24}" cy="167" r="9"/>`,
+`<rect x="${pos-34}" y="134" width="70" height="32" rx="7" fill="#FF8FB8" stroke="#111" stroke-width="3"/><rect x="${pos-21}" y="121" width="33" height="18" rx="3" fill="#FFC83D" stroke="#111" stroke-width="3"/><circle cx="${pos-19}" cy="169" r="8"/><circle cx="${pos+22}" cy="169" r="8"/>`
+];
+$("mapVehicle").innerHTML=shapes[model.vehicle];
+$("scene").setAttribute("aria-label",`${vehicles[model.vehicle]} travelling along the route; selected ${model.label.toLowerCase()} ${fmt(value)} ${model.unit}`);
+drawBars();
+}
+function drawBars(){
+let a,b;
+if(model.type==="average"){a=model.d1;b=model.d2}
+else if(model.type==="distance"){a=value;b=0}
+else{a=model.d;b=0}
+const data=[a,b,a+b],names=["Part 1","Part 2","Total"];
+const max=Math.max(10,Math.ceil(Math.max(...data)/10)*10);
+let html=`<text x="255" y="19" font-size="16" font-weight="800" text-anchor="middle">Distance (km)</text>`;
+for(let j=0;j<=4;j++){
+let y=232-j*43;
+html+=`<line x1="61" x2="480" y1="${y}" y2="${y}" stroke="#ddd"/><text x="55" y="${y+5}" font-size="12" text-anchor="end">${fmt(j*max/4)}</text>`;
+}
+html+=`<line x1="61" y1="60" x2="61" y2="235" stroke="#111" stroke-width="2"/><line x1="61" y1="232" x2="480" y2="232" stroke="#111" stroke-width="2"/><text x="17" y="157" font-size="12" transform="rotate(-90 17 157)">Distance (km)</text>`;
+data.forEach((n,i)=>{
+let x=94+i*137,h=Math.max(0,n/max*170);
+html+=`<rect x="${x}" y="${232-h}" width="80" height="${h}" rx="4" fill="${i===2?"#FFC83D":"#2EC4A6"}" stroke="#111" stroke-width="2"/><text x="${x+40}" y="${Math.max(72,224-h)}" font-size="13" text-anchor="middle" font-weight="800">${fmt(n)}</text><text x="${x+40}" y="253" font-size="13" text-anchor="middle">${names[i]}</text>`;
+});
+html+=`<text x="290" y="279" font-size="12" text-anchor="middle">Journey part</text>`;
+$("chart").innerHTML=html;
+$("chart").setAttribute("aria-label",`Distance in kilometres: first part ${fmt(a)}, second part ${fmt(b)}, total ${fmt(a+b)}. Bars update with your distance setting.`);
+}
+function change(n){
+if(solved)return;
+value=Math.max(0,Math.round((value+n*unitStep)/unitStep)*unitStep);
+value=Number(value.toFixed(4));
+draw();
+}
+document.querySelectorAll("[data-step]").forEach(b=>b.addEventListener("click",()=>change(Number(b.dataset.step))));
+$("hint").addEventListener("click",()=>{
+if(solved||hinted)return;
+hinted=true;
+const hints={
+speed:"Divide the distance by the number of hours.",
+distance:"Multiply speed by time. Use hours, not minutes.",
+time:"Divide the distance by the speed.",
+average:"Add both distances. Add both times. Then divide the two totals."
+};
+$("feedback").textContent="Hint: "+hints[model.type];
+$("hint").disabled=true;
+});
+$("check").addEventListener("click",()=>{
+if(solved)return;
+attempts++;
+let delta=value-model.correct;
+if(Math.abs(delta)<.000001){
+solved=true;
+let points=hinted?50:attempts===1?100:75;
+score+=points;
+$("score").textContent=`Score: ${score}`;
+$("feedback").className="good";
+let why=model.type==="average"?`(${fmt(model.d1)} + ${fmt(model.d2)}) ÷ (${fmt(model.t1)} + ${fmt(model.t2)}) = ${fmt(model.correct)} km/h.`:
+model.type==="speed"?`${fmt(model.d)} ÷ ${fmt(model.t)} = ${fmt(model.correct)} km/h.`:
+model.type==="distance"?`${fmt(model.v)} × ${fmt(model.t)} = ${fmt(model.correct)} km.`:
+`${fmt(model.d)} ÷ ${fmt(model.v)} = ${fmt(model.correct)} h.`;
+$("feedback").textContent=`★ Correct! +${points} points. ${why}`;
+$("next").hidden=false;$("check").hidden=true;$("hint").disabled=true;
+}else{
+$("feedback").className="bad";
+$("feedback").textContent=`Not yet. Your answer is ${fmt(Math.abs(delta))} ${model.unit} ${delta>0?"too high":"too low"}. Try again!`;
+}
+});
+$("next").addEventListener("click",()=>{round++;initRound()});
+$("restart").addEventListener("click",()=>{
+round=0;score=0;seed=(seed+731)>>>0;
+$("game").style.display="grid";$("finish").style.display="none";initRound();
+});
+function finish(){
+$("game").style.display="none";$("finish").style.display="block";
+const count=score>=500?3:score>=350?2:1;
+$("stars").textContent="★".repeat(count)+"☆".repeat(3-count);
+$("stars").setAttribute("aria-label",`${count} out of 3 stars`);
+$("finalScore").textContent=`${score} / 600 points`;
+$("endMessage").textContent=count===3?"Super speed! You are a journey expert.":"Good travelling! Play again to earn more stars.";
+$("round").textContent="6/6 complete";
+}
+initRound();
+})();
+</script>
+</body>
+</html>

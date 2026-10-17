@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Particle Party | Fix It Today</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input,select{font:inherit}
+button,input[type=range],input[type=number],summary{min-height:44px;-webkit-tap-highlight-color:transparent;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{cursor:pointer;border:2px solid #111;border-radius:999px;background:white;color:#111;font-weight:800;padding:10px 18px;box-shadow:var(--sh-1);transition:transform .12s,box-shadow .12s}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.selected{background:var(--lvl-primary)}
+button.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2);font-size:1.1rem}
+button.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(1.7rem,4vw,2.6rem);font-weight:800;line-height:1.15}
+h2{font-size:1.2rem;font-weight:800}
+h3{font-size:1rem;font-weight:800}
+small,.muted{color:var(--fit-ink-3)}
+.page{max-width:1250px;margin:auto;padding:18px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
+.brand{font-weight:800;font-size:1.1rem}
+.hud{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:800}
+.badge{border:2px solid #111;border-radius:999px;background:var(--lvl-primary);color:var(--lvl-primary-on);font-size:12px;font-weight:800;padding:6px 12px;text-transform:uppercase}
+.pill{border:2px solid #111;border-radius:999px;padding:6px 12px;background:white}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.card{background:white;border:2px solid #111;border-radius:24px;padding:18px;box-shadow:var(--sh-2);min-width:0}
+.stage{background:var(--lvl-primary-tint);border-radius:32px;box-shadow:var(--sh-3)}
+.panel{display:grid;gap:18px;align-content:start}
+.choices,.actions,.steps{display:flex;flex-wrap:wrap;gap:10px}
+.choice{min-width:100px}
+.question{font-size:1.15rem;font-weight:800}
+.figure{width:100%;display:block;max-height:310px}
+.graph{width:100%;display:block;min-height:230px}
+.caption{font-size:.85rem;color:var(--fit-ink-2);margin:8px 0 0}
+.feedback{min-height:58px;border:2px dashed #aaa;border-radius:16px;padding:12px;font-weight:600}
+.feedback.good{border-color:var(--fit-success);background:#E2F7EA}
+.feedback.bad{border-color:var(--fit-danger);background:#FFF0EE}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.temp{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:#111;cursor:pointer}
+details{margin-top:18px;border:2px solid #111;border-radius:16px;padding:8px 15px;background:white}
+summary{cursor:pointer;font-weight:800;display:flex;align-items:center}
+details p{margin:8px 0}
+.end{text-align:center;padding:30px 12px}
+.stars{font-size:3rem;letter-spacing:7px;color:#d49b00}
+.hidden{display:none!important}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}.stage{position:relative}}
+@media(max-width:480px){.page{padding:12px}.card{padding:14px}.choice{flex:1}header{margin-bottom:16px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main class="page">
+<header>
+<div class="brand">FIT / LEARNING LAB</div>
+<div class="hud">
+<span class="badge">Primary</span>
+<span class="pill" id="roundHud">Round 1/6</span>
+<span class="pill" id="scoreHud">0 points</span>
+</div>
+</header>
+
+<section id="game">
+<h1>Particle Party</h1>
+<div class="layout">
+<div class="card stage">
+<h2 id="stageTitle">Look at the particles</h2>
+<svg id="scene" class="figure" viewBox="0 0 500 340" role="img" aria-label="Particles inside a container">
+</svg>
+<div class="card" style="margin-top:14px">
+<h3>Particle picture</h3>
+<svg viewBox="0 0 440 110" width="100%" role="img" aria-label="Solid particles tightly packed, liquid particles close together but irregular, gas particles far apart">
+<g fill="#FFC83D" stroke="#111" stroke-width="2">
+<rect x="3" y="8" width="134" height="92" rx="14" fill="#fff"/>
+<rect x="153" y="8" width="134" height="92" rx="14" fill="#fff"/>
+<rect x="303" y="8" width="134" height="92" rx="14" fill="#fff"/>
+</g>
+<g fill="#FF8FB8" stroke="#111" stroke-width="1.5">
+<circle cx="39" cy="37" r="9"/><circle cx="60" cy="37" r="9"/><circle cx="81" cy="37" r="9"/><circle cx="102" cy="37" r="9"/>
+<circle cx="39" cy="58" r="9"/><circle cx="60" cy="58" r="9"/><circle cx="81" cy="58" r="9"/><circle cx="102" cy="58" r="9"/>
+<circle cx="177" cy="66" r="9"/><circle cx="201" cy="59" r="9"/><circle cx="225" cy="70" r="9"/><circle cx="252" cy="56" r="9"/>
+<circle cx="188" cy="82" r="9"/><circle cx="235" cy="84" r="9"/>
+<circle cx="331" cy="31" r="9"/><circle cx="398" cy="28" r="9"/><circle cx="365" cy="67" r="9"/><circle cx="414" cy="81" r="9"/>
+</g>
+<g font-size="12" text-anchor="middle" font-weight="800" fill="#111">
+<text x="70" y="95">SOLID</text><text x="220" y="95">LIQUID</text><text x="370" y="95">GAS</text>
+</g>
+</svg>
+<p class="caption">Particles are close together in solids and liquids. They spread out in gases.</p>
+</div>
+</div>
+<div class="panel">
+<div class="card">
+<h2 id="roundType">Your challenge</h2>
+<p class="question" id="question"></p>
+<p class="muted" id="detail"></p>
+<div id="controls"></div>
+</div>
+<div class="card">
+<h2>Temperature over time</h2>
+<svg id="plot" class="graph" viewBox="0 0 500 295" role="img" aria-label="Temperature against time graph"></svg>
+<p class="caption" id="plotCaption">Two cups can exchange heat until they reach the same temperature.</p>
+</div>
+<div class="card">
+<div class="actions">
+<button id="hint">Hint (−50 max)</button>
+<button class="check" id="check">Check ✓</button>
+<button id="next" disabled>Next round →</button>
+</div>
+<p id="feedback" class="feedback" aria-live="polite">Make your choice, then press Check.</p>
+</div>
+</div>
+</div>
+<details>
+<summary>The physics</summary>
+<p><strong>Solid:</strong> keeps its own shape and volume.</p>
+<p><strong>Liquid:</strong> keeps its volume but takes the shape of its container.</p>
+<p><strong>Gas:</strong> fills its container and can be compressed.</p>
+<p><strong>Heat and temperature:</strong> heat is energy transferred because of a temperature difference. Temperature tells us how hot or cold something is. They are not the same thing.</p>
+<p><strong>Water mixing model:</strong> equal heat capacity, no heat lost to the surroundings. Final temperature = (mass A × temperature A + mass B × temperature B) ÷ total mass.</p>
+</details>
+</section>
+
+<section id="finish" class="card end hidden">
+<h1>Party complete!</h1>
+<div id="stars" class="stars" aria-label="Stars earned"></div>
+<h2 id="result"></h2>
+<p id="resultText"></p>
+<button id="again" class="check">Play again ↻</button>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const NS="http:"+"//www.w3.org/2000/svg";
+const state={round:0,score:0,tries:0,hinted:false,done:false,answer:null,choice:null,data:null,seed:1};
+const objects=[
+["ice cube","solid"],["wooden block","solid"],["steel spoon","solid"],
+["fruit juice","liquid"],["cooking oil","liquid"],["water","liquid"],
+["air","gas"],["water vapour","gas"],["helium","gas"]
+];
+const rnd=()=>{state.seed=(Math.imul(1664525,state.seed)+1013904223)>>>0;return state.seed/4294967296};
+const pick=a=>a[Math.floor(rnd()*a.length)];
+function node(tag,attrs={},txt){
+ const e=document.createElementNS(NS,tag);
+ for(const [k,v] of Object.entries(attrs))e.setAttribute(k,String(v));
+ if(txt!==undefined)e.textContent=txt;
+ return e;
+}
+function add(svg,tag,a,t){const e=node(tag,a,t);svg.appendChild(e);return e}
+function text(svg,x,y,t,size=14,anchor="start",colour="#111"){
+ add(svg,"text",{x,y,"font-size":size,"font-weight":600,"text-anchor":anchor,fill:colour},t);
+}
+function line(svg,x1,y1,x2,y2,colour="#111",width=2,dash=""){
+ add(svg,"line",{x1,y1,x2,y2,stroke:colour,"stroke-width":width,"stroke-dasharray":dash});
+}
+function particleScene(kind,shape="round"){
+ const svg=$("scene");svg.replaceChildren();
+ const w=500;
+ if(kind==="cups"){
+  const d=state.data;
+  text(svg,250,28,"Two cups of water",20,"middle");
+  for(let i=0;i<2;i++){
+   let x=i?285:55,temp=i?d.cold:d.hot,mass=i?d.mc:d.mh;
+   add(svg,"path",{d:`M${x} 80 L${x+140} 80 L${x+126} 264 L${x+14} 264 Z`,fill:"#fff",stroke:"#111","stroke-width":4,"stroke-linejoin":"round"});
+   const level=Math.min(150,55+mass*.52);
+   add(svg,"rect",{x:x+17,y:260-level,width:106,height:level,rx:5,fill:i?"#8ACBFA":"#FF9B72"});
+   text(svg,x+70,299,`${mass} g`,17,"middle");
+   text(svg,x+70,323,`${temp} °C`,19,"middle");
+  }
+  text(svg,250,178,"→",32,"middle");
+  return;
+ }
+ text(svg,250,28,kind==="gas"?"Gas spreads out":kind==="liquid"?"Liquid flows":"Solid keeps its shape",21,"middle");
+ const path=shape==="tall"?"M180 60 L320 60 L320 282 L180 282 Z":"M80 120 L420 120 L420 282 L80 282 Z";
+ add(svg,"path",{d:path,stroke:"#111","stroke-width":5,fill:"#fff","stroke-linejoin":"round"});
+ const count=kind==="gas"?15:kind==="liquid"?38:32;
+ const x0=shape==="tall"?195:95,x1=shape==="tall"?305:405;
+ const y0=kind==="gas"?(shape==="tall"?75:135):kind==="liquid"?218:190;
+ for(let i=0;i<count;i++){
+  let x,y;
+  if(kind==="solid"){x=x0+25+(i%8)*13;y=205+Math.floor(i/8)*16;}
+  else if(kind==="liquid"){x=x0+10+(i%9)*Math.min(23,(x1-x0-20)/9)+(i%3)*3;y=232+Math.floor(i/9)*12;}
+  else{x=x0+15+((i*79)%Math.max(30,x1-x0-30));y=(shape==="tall"?85:145)+((i*53)%125);}
+  add(svg,"circle",{cx:x,cy:y,r:6,fill:kind==="gas"?"#3DBE6B":"#FF8FB8",stroke:"#111","stroke-width":1.5});
+ }
+ text(svg,250,315,kind==="gas"?"Particles fill the space":kind==="liquid"?"Same amount, new shape":"Particles stay together",15,"middle");
+}
+function graph(){
+ const svg=$("plot");svg.replaceChildren();
+ const d=state.data;
+ const mix=d&&d.type==="mix";
+ const hot=mix?d.hot:70,cold=mix?d.cold:20;
+ const high=Math.max(80,hot+10),low=Math.min(0,cold-10);
+ const x=t=>65+t*40,y=t=>245-(t-low)/(high-low)*180;
+ text(svg,250,22,"Temperature change",17,"middle");
+ for(let i=0;i<=4;i++){
+  const v=low+(high-low)*i/4, yy=y(v);
+  line(svg,65,yy,465,yy,"#ddd",1);
+  text(svg,57,yy+4,v.toFixed(0),11,"end");
+ }
+ line(svg,65,45,65,245);line(svg,65,245,465,245);
+ for(let t=0;t<=10;t+=2){const xx=x(t);line(svg,xx,245,xx,250);text(svg,xx,267,t,11,"middle");}
+ text(svg,265,290,"Time (min)",13,"middle");
+ add(svg,"text",{x:16,y:146,transform:"rotate(-90 16 146)","text-anchor":"middle","font-size":13,"font-weight":700},"Temperature (°C)");
+ const final=mix?d.final:45;
+ for(const [start,c] of [[hot,"#D92D20"],[cold,"#1F66E5"]]){
+  let path="";
+  for(let t=0;t<=10;t+=.25){
+   const value=final+(start-final)*Math.exp(-t*.65);
+   path+=(t===0?"M":"L")+x(t).toFixed(2)+" "+y(value).toFixed(2)+" ";
+  }
+  add(svg,"path",{d:path,fill:"none",stroke:c,"stroke-width":3.5,"stroke-linecap":"round"});
+  add(svg,"circle",{cx:x(0),cy:y(start),r:5,fill:c,stroke:"#111","stroke-width":1.5});
+ }
+ line(svg,290,36,316,36,"#D92D20",4);text(svg,321,40,"Hot cup",12);
+ line(svg,390,36,416,36,"#1F66E5",4);text(svg,420,40,"Cold",12);
+ svg.setAttribute("aria-label","Temperature of hot and cold water against time. The lines approach the same equilibrium temperature.");
+}
+function selectChoice(v){
+ state.choice=v;
+ document.querySelectorAll(".choice").forEach(b=>b.classList.toggle("selected",b.dataset.value===String(v)));
+}
+function choices(items){
+ const div=document.createElement("div");div.className="choices";
+ for(const [label,value] of items){
+  const b=document.createElement("button");b.className="choice";b.textContent=label;b.dataset.value=value;
+  b.addEventListener("click",()=>selectChoice(value));div.appendChild(b);
+ }
+ $("controls").appendChild(div);
+}
+function setRound(){
+ state.tries=0;state.hinted=false;state.done=false;state.choice=null;
+ const r=state.round;
+ state.seed=(0xAFFE+Math.imul(r+1,7919)+Math.floor(Math.random()*100000))>>>0;
+ $("roundHud").textContent=`Round ${r+1}/6`;
+ $("scoreHud").textContent=state.score+" points";
+ $("next").disabled=true;$("check").disabled=false;$("hint").disabled=false;
+ $("feedback").className="feedback";$("feedback").textContent="Make your choice, then press Check.";
+ $("controls").replaceChildren();
+ const types=["sort","sort","container","container","mix","mix"];
+ const type=types[r],d={type};
+ state.data=d;
+ if(type==="sort"){
+  let item=objects[(r*4+Math.floor(rnd()*6))%objects.length];
+  d.item=item;state.answer=item[1];
+  $("roundType").textContent="Sort the matter";
+  $("question").textContent=`What state of matter is ${item[0]}?`;
+  $("detail").textContent="Think about its shape, volume and whether you can squash it.";
+  choices([["Solid","solid"],["Liquid","liquid"],["Gas","gas"]]);
+  particleScene(item[1]);
+ }else if(type==="container"){
+  d.kind=r===2?"liquid":"gas";state.answer=d.kind==="liquid"?"same":"fills";
+  $("roundType").textContent="Change the container";
+  $("question").textContent=d.kind==="liquid"?"You pour water into a tall, narrow bottle. What happens?":"You release air into an empty, larger box. What happens?";
+  $("detail").textContent="Choose what happens to the material.";
+  choices(d.kind==="liquid"?[
+   ["It keeps its old shape","old"],["It takes the new shape, keeping its volume","same"],["It fills the whole bottle like a gas","fills"]
+  ]:[
+   ["It stays in one corner","corner"],["It spreads out to fill the box","fills"],["It becomes a solid","solid"]
+  ]);
+  particleScene(d.kind,"tall");
+ }else{
+  d.hot=pick([60,70,80]);d.cold=pick([10,20,30]);
+  d.mh=pick([100,200,300]);d.mc=pick([100,200,300]);
+  d.final=(d.hot*d.mh+d.cold*d.mc)/(d.mh+d.mc);
+  state.answer=d.final;
+  $("roundType").textContent="Mix the water";
+  $("question").textContent=`Mix ${d.mh} g of water at ${d.hot} °C with ${d.mc} g at ${d.cold} °C. Choose the best final temperature.`;
+  $("detail").textContent="Assume no heat is lost. Move the slider to the nearest degree.";
+  const label=document.createElement("p");label.className="temp";label.id="tempValue";
+  const range=document.createElement("input");range.type="range";range.min=d.cold;range.max=d.hot;range.step=1;
+  range.value=d.cold;range.setAttribute("aria-label","Final temperature in degrees Celsius");
+  range.addEventListener("input",()=>{state.choice=Number(range.value);label.textContent=range.value+" °C";});
+  $("controls").append(label,range);range.dispatchEvent(new Event("input"));
+  particleScene("cups");
+ }
+ graph();
+}
+function hint(){
+ if(state.done||state.hinted)return;
+ state.hinted=true;
+ const d=state.data;
+ let message="";
+ if(d.type==="sort")message="A solid keeps its shape. A liquid flows but keeps its volume. A gas can be squashed.";
+ if(d.type==="container")message="Think about how closely the particles stay together.";
+ if(d.type==="mix")message="The answer lies between the two temperatures. The cup with more water has more influence.";
+ $("feedback").textContent="Hint: "+message;
+ $("hint").disabled=true;
+}
+function check(){
+ if(state.done)return;
+ state.tries++;
+ const d=state.data;
+ if(state.choice===null){$("feedback").textContent="Choose an answer first.";state.tries--;return;}
+ const correct=d.type==="mix"?Math.abs(state.choice-state.answer)<=1:state.choice===state.answer;
+ if(correct){
+  const gained=state.hinted?50:state.tries===1?100:75;
+  state.score+=gained;state.done=true;
+  $("scoreHud").textContent=state.score+" points";
+  $("feedback").className="feedback good";
+  let why=d.type==="sort"?`${d.item[0]} is a ${d.item[1]}.`:d.type==="container"?
+   (d.kind==="liquid"?"Liquid changes shape but keeps the same volume.":"Gas particles spread out to fill their container."):
+   `The final temperature is about ${state.answer.toFixed(1)} °C. Heat moves from hotter water to colder water.`;
+  $("feedback").textContent=`★ Correct! +${gained} points. ${why}`;
+  $("check").disabled=true;$("next").disabled=false;$("hint").disabled=true;
+ }else{
+  $("feedback").className="feedback bad";
+  if(d.type==="mix"){
+   const diff=state.choice-state.answer;
+   $("feedback").textContent=`Not yet. Your estimate is ${Math.abs(diff).toFixed(1)} °C too ${diff>0?"high":"low"}. Try again.`;
+  }else $("feedback").textContent="Not quite. Think about which properties stay the same.";
+ }
+}
+function finish(){
+ $("game").classList.add("hidden");$("finish").classList.remove("hidden");
+ const n=state.score>=500?3:state.score>=350?2:state.score>=200?1:0;
+ $("stars").textContent="★".repeat(n)+"☆".repeat(3-n);
+ $("result").textContent=`${state.score} / 600 points`;
+ $("resultText").textContent=n===3?"Excellent particle scientist!":n===2?"Well done! Keep practising.":"Every experiment teaches you something.";
+ $("roundHud").textContent="Complete";
+}
+$("hint").addEventListener("click",hint);
+$("check").addEventListener("click",check);
+$("next").addEventListener("click",()=>{state.round++;state.round>=6?finish():setRound();});
+$("again").addEventListener("click",()=>{state.round=0;state.score=0;$("finish").classList.add("hidden");$("game").classList.remove("hidden");setRound();});
+setRound();
+</script>
+</body>
+</html>
