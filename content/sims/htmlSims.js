@@ -61,7 +61,7 @@ const moles = {
   concept: 'moles',
   accent: '#14B8A6',
   minutes: '10–15',
-  status: 'draft'
+  status: 'live'
 };
 
 const molesEntries = [
