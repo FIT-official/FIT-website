@@ -1,8 +1,10 @@
 'use client'
-// Creator home — "the morning desk" (blueprint §5.2). Hero: the greeting
-// + revenue chart card. The rail lives in CreatorShell (app/dashboard/layout);
-// this component is only the main column. Shop display name comes from the
-// shell's ShopIdentityContext so rail edits update the greeting live.
+
+// Creator home — "the morning desk" (blueprint §5.2).
+// Hero: greeting and revenue chart.
+// The rail lives in CreatorShell (app/dashboard/layout).
+// Shop display name comes from ShopIdentityContext.
+
 import { useEffect, useMemo, useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import Link from 'next/link'
@@ -10,13 +12,22 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { motion } from 'framer-motion'
 import { staggerParent, staggerChild } from '@/lib/motion/tokens'
-import { DashCard, HeroGreeting, SegmentPill, StatTile } from '@/components/dashboard-ui'
+import {
+    DashCard,
+    HeroGreeting,
+    SegmentPill,
+    StatTile,
+} from '@/components/dashboard-ui'
 import { useShopIdentity } from '@/components/DashboardComponents/CreatorShell'
 import RevenueCard from '@/components/DashboardComponents/RevenueCard'
 import OrdersLedger from '@/components/DashboardComponents/OrdersLedger'
 import ExpressWidget from '@/components/DashboardComponents/ExpressWidget'
 import SetupChecklist from '@/components/DashboardComponents/SetupChecklist'
-import { currencyPrefix, formatMoney } from '@/components/DashboardComponents/format'
+import {
+    currencyPrefix,
+    formatMoney,
+} from '@/components/DashboardComponents/format'
+import CreatorTermsCard from '@/components/Legal/CreatorTermsCard'
 
 dayjs.extend(relativeTime)
 
@@ -26,163 +37,297 @@ function salutationFor(hour) {
     return 'Good evening,'
 }
 
-const isRawUserId = (value) => typeof value === 'string' && /^user_[a-zA-Z0-9]+$/.test(value.trim())
+const isRawUserId = value =>
+    typeof value === 'string' &&
+    /^user_[a-zA-Z0-9]+$/.test(value.trim())
 
-function Dashboard() {
+function Dashboard({ creatorTermsRequired = false }) {
     const { user, isLoaded } = useUser()
     const { displayName } = useShopIdentity()
+
     const [myProducts, setMyProducts] = useState([])
     const [orders, setOrders] = useState([])
     const [ordersUpdatedAt, setOrdersUpdatedAt] = useState(null)
     const [unreadMessages, setUnreadMessages] = useState(0)
 
-    // Hour read post-mount: the server render can't know the client's clock,
-    // and a mismatched salutation trips a hydration warning.
+    // Read the hour after mounting to avoid hydration mismatch.
     const [hour, setHour] = useState(null)
-    useEffect(() => setHour(new Date().getHours()), [])
+
+    useEffect(() => {
+        setHour(new Date().getHours())
+    }, [])
 
     useEffect(() => {
         if (!user || !isLoaded) return
+
         const fetchProducts = async () => {
-            const res = await fetch(`/api/product?creatorUserId=${user.id}`)
+            const res = await fetch(
+                `/api/product?creatorUserId=${user.id}`
+            )
             const data = await res.json()
             setMyProducts(data.products || [])
         }
+
         fetchProducts()
     }, [user, isLoaded])
 
-    // Orders across all of this creator's products (drives the ledger, the
-    // hero context line and the needs-attention triage).
+    // Orders across all of this creator's products.
     useEffect(() => {
         if (!user || myProducts.length === 0) return
+
         const fetchOrders = async () => {
-            const productIds = myProducts.map((p) => p._id)
+            const productIds = myProducts.map(p => p._id)
+
             const res = await fetch('/api/user/orders', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({ productIds }),
             })
+
             const users = await res.json()
-            const myProductMap = Object.fromEntries(myProducts.map((p) => [p._id, p.name]))
+
+            const myProductMap = Object.fromEntries(
+                myProducts.map(p => [p._id, p.name])
+            )
+
             const results = []
             const userList = Array.isArray(users) ? users : []
-            userList.forEach((u) => {
-                if (!u.orderHistory || !Array.isArray(u.orderHistory)) return
-                u.orderHistory.forEach((order) => {
+
+            userList.forEach(u => {
+                if (
+                    !u.orderHistory ||
+                    !Array.isArray(u.orderHistory)
+                ) {
+                    return
+                }
+
+                u.orderHistory.forEach(order => {
                     const item = order.cartItem
-                    if (item && productIds.includes(item.productId)) {
+
+                    if (
+                        item &&
+                        productIds.includes(item.productId)
+                    ) {
                         results.push({
                             productId: item.productId,
-                            productName: myProductMap[item.productId],
+                            productName:
+                                myProductMap[item.productId],
                             buyerId: u.userId,
                             buyerFirstName: u.firstName || '',
-                            buyerEmail: u.emailAddresses?.[0]?.emailAddress || '',
+                            buyerEmail:
+                                u.emailAddresses?.[0]
+                                    ?.emailAddress || '',
                             orderStatus: order.status,
-                            orderType: order.orderType || 'order',
-                            printStatus: order.printStatus || null,
+                            orderType:
+                                order.orderType || 'order',
+                            printStatus:
+                                order.printStatus || null,
                             quantity: item.quantity,
                             orderedAt: order.createdAt,
                             orderId: order._id,
                             contact: u.contact || null,
                             orderNote: item.orderNote || '',
-                            deliveryType: item.chosenDeliveryType || '',
+                            deliveryType:
+                                item.chosenDeliveryType || '',
                             price: item.price || 0,
-                            printConfiguration: order.printConfiguration || null,
-                            trackingId: order.trackingId || null,
+                            printConfiguration:
+                                order.printConfiguration || null,
+                            trackingId:
+                                order.trackingId || null,
                         })
                     }
                 })
             })
+
             setOrders(results)
             setOrdersUpdatedAt(new Date())
         }
+
         fetchOrders()
     }, [user, myProducts])
 
-    // Unread messages for the needs-attention block — best effort, hidden on
-    // any error.
+    // Best-effort unread-message indicator.
     useEffect(() => {
         if (!user || !isLoaded) return
+
         let cancelled = false
+
         ;(async () => {
             try {
                 const res = await fetch('/api/chat/inbox')
                 if (!res.ok) return
+
                 const data = await res.json()
-                const unread = (data.channels || []).reduce((acc, c) => acc + (c.unreadCount || 0), 0)
-                if (!cancelled) setUnreadMessages(unread)
-            } catch (e) {
-                // Quietly hide the row on error.
+
+                const unread = (data.channels || []).reduce(
+                    (acc, channel) =>
+                        acc + (channel.unreadCount || 0),
+                    0
+                )
+
+                if (!cancelled) {
+                    setUnreadMessages(unread)
+                }
+            } catch {
+                // Hide this optional indicator on error.
             }
         })()
-        return () => { cancelled = true }
+
+        return () => {
+            cancelled = true
+        }
     }, [user, isLoaded])
 
-    const prefix = currencyPrefix(myProducts.find((p) => p?.basePrice?.presentmentCurrency)?.basePrice?.presentmentCurrency)
+    const prefix = currencyPrefix(
+        myProducts.find(
+            p => p?.basePrice?.presentmentCurrency
+        )?.basePrice?.presentmentCurrency
+    )
 
     const ordersThisMonth = useMemo(
-        () => orders.filter((o) => dayjs(o.orderedAt).isSame(dayjs(), 'month')).length,
-        [orders],
+        () =>
+            orders.filter(o =>
+                dayjs(o.orderedAt).isSame(dayjs(), 'month')
+            ).length,
+        [orders]
     )
-    const pendingOrders = useMemo(() => orders.filter((o) => o.orderStatus === 'pending').length, [orders])
 
-    const { grossThisMonth, grossLastMonth } = useMemo(() => {
+    const pendingOrders = useMemo(
+        () =>
+            orders.filter(
+                o => o.orderStatus === 'pending'
+            ).length,
+        [orders]
+    )
+
+    const {
+        grossThisMonth,
+        grossLastMonth,
+    } = useMemo(() => {
         let cur = 0
         let last = 0
         const now = dayjs()
-        myProducts.forEach((product) => {
-            ;(product?.sales || []).forEach((sale) => {
+
+        myProducts.forEach(product => {
+            ;(product?.sales || []).forEach(sale => {
                 if (!sale?.createdAt) return
-                const gross = (sale.quantity || 0) * (sale.price || 0)
+
+                const gross =
+                    (sale.quantity || 0) *
+                    (sale.price || 0)
+
                 const at = dayjs(sale.createdAt)
-                if (at.isSame(now, 'month')) cur += gross
-                else if (at.isSame(now.subtract(1, 'month'), 'month')) last += gross
+
+                if (at.isSame(now, 'month')) {
+                    cur += gross
+                } else if (
+                    at.isSame(
+                        now.subtract(1, 'month'),
+                        'month'
+                    )
+                ) {
+                    last += gross
+                }
             })
         })
-        return { grossThisMonth: cur, grossLastMonth: last }
+
+        return {
+            grossThisMonth: cur,
+            grossLastMonth: last,
+        }
     }, [myProducts])
-    const grossDelta = grossLastMonth > 0 ? Math.round(((grossThisMonth - grossLastMonth) / grossLastMonth) * 100) : null
+
+    const grossDelta =
+        grossLastMonth > 0
+            ? Math.round(
+                (
+                    (grossThisMonth - grossLastMonth) /
+                    grossLastMonth
+                ) * 100
+            )
+            : null
 
     const totalLikes = myProducts.reduce(
-        (acc, p) => acc + (Array.isArray(p.likes) ? p.likes.length : Number(p.likes) || 0),
-        0,
+        (acc, product) =>
+            acc +
+            (
+                Array.isArray(product.likes)
+                    ? product.likes.length
+                    : Number(product.likes) || 0
+            ),
+        0
     )
-    const totalDownloads = myProducts.reduce((acc, p) => acc + (p.downloads || 0), 0)
-    const avgRating = myProducts.length > 0
-        ? (myProducts.reduce((acc, p) => acc + (p.rating || 0), 0) / myProducts.length).toFixed(1)
-        : null
 
-    // Needs-attention triage (§5.2): rows render only when count > 0.
+    const totalDownloads = myProducts.reduce(
+        (acc, product) =>
+            acc + (product.downloads || 0),
+        0
+    )
+
+    const avgRating =
+        myProducts.length > 0
+            ? (
+                myProducts.reduce(
+                    (acc, product) =>
+                        acc + (product.rating || 0),
+                    0
+                ) / myProducts.length
+            ).toFixed(1)
+            : null
+
     const attention = useMemo(() => {
         const rows = []
+
         if (unreadMessages > 0) {
             rows.push({
                 key: 'unread',
-                label: `${unreadMessages} unread message${unreadMessages === 1 ? '' : 's'}`,
+                label:
+                    `${unreadMessages} unread message` +
+                    (unreadMessages === 1 ? '' : 's'),
                 href: '/dashboard/messages',
             })
         }
+
         if (pendingOrders > 0) {
             rows.push({
                 key: 'ship',
-                label: `${pendingOrders} order${pendingOrders === 1 ? '' : 's'} awaiting shipment`,
+                label:
+                    `${pendingOrders} order` +
+                    (pendingOrders === 1 ? '' : 's') +
+                    ' awaiting shipment',
                 href: '#orders',
             })
         }
-        myProducts.forEach((p) => {
-            const lowStock = (p.variantTypes || [])
-                .flatMap((t) => t.options || [])
-                .filter((o) => typeof o.stock === 'number' && o.stock <= 2).length
+
+        myProducts.forEach(product => {
+            const lowStock = (
+                product.variantTypes || []
+            )
+                .flatMap(type => type.options || [])
+                .filter(
+                    option =>
+                        typeof option.stock === 'number' &&
+                        option.stock <= 2
+                ).length
+
             if (lowStock > 0) {
                 rows.push({
-                    key: `stock-${p._id}`,
-                    label: `Low stock: ${p.name}`,
-                    href: `/dashboard/products/edit/${p._id}`,
+                    key: `stock-${product._id}`,
+                    label: `Low stock: ${product.name}`,
+                    href:
+                        `/dashboard/products/edit/${product._id}`,
                 })
             }
         })
+
         return rows.slice(0, 5)
-    }, [unreadMessages, pendingOrders, myProducts])
+    }, [
+        unreadMessages,
+        pendingOrders,
+        myProducts,
+    ])
 
     if (!isLoaded) {
         return (
@@ -192,28 +337,54 @@ function Dashboard() {
         )
     }
 
-    const heroName = displayName && !isRawUserId(displayName) ? displayName : user?.fullName || 'there'
+    const heroName =
+        displayName && !isRawUserId(displayName)
+            ? displayName
+            : user?.fullName || 'there'
 
     return (
         <div className="flex flex-col gap-4">
+            {creatorTermsRequired && (
+                <CreatorTermsCard />
+            )}
+
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-2">
                 <HeroGreeting
-                    salutation={hour === null ? 'Hello,' : salutationFor(hour)}
+                    salutation={
+                        hour === null
+                            ? 'Hello,'
+                            : salutationFor(hour)
+                    }
                     name={heroName}
-                    context={`${dayjs().format('dddd D MMMM YYYY')}, ${ordersThisMonth} order${ordersThisMonth === 1 ? '' : 's'} this month`}
+                    context={
+                        `${dayjs().format('dddd D MMMM YYYY')}, ` +
+                        `${ordersThisMonth} order` +
+                        (ordersThisMonth === 1 ? '' : 's') +
+                        ' this month'
+                    }
                 />
+
                 {attention.length > 0 && (
                     <div className="md:max-w-[280px] shrink-0">
-                        <span className="dash-label">Needs attention</span>
+                        <span className="dash-label">
+                            Needs attention
+                        </span>
+
                         <ul className="mt-1.5 flex flex-col gap-1">
-                            {attention.map((row) => (
+                            {attention.map(row => (
                                 <li key={row.key}>
                                     <Link
                                         href={row.href}
                                         className="flex items-center gap-2 text-[13px] hover:underline"
                                     >
-                                        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--dash-ink)] shrink-0" />
-                                        <span className="truncate">{row.label}</span>
+                                        <span
+                                            aria-hidden="true"
+                                            className="h-1.5 w-1.5 rounded-full bg-[var(--dash-ink)] shrink-0"
+                                        />
+
+                                        <span className="truncate">
+                                            {row.label}
+                                        </span>
                                     </Link>
                                 </li>
                             ))}
@@ -222,7 +393,7 @@ function Dashboard() {
                 )}
             </div>
 
-            {/* Setup checklist (§6) — below needs-attention, above analytics. */}
+            {/* Setup checklist — below needs-attention. */}
             <SetupChecklist
                 user={user}
                 isLoaded={isLoaded}
@@ -231,41 +402,86 @@ function Dashboard() {
                 hasSale={orders.length > 0}
             />
 
-            {/* Tile grid — first-mount stagger only (§4.5). */}
+            {/* First-mount stagger for the analytics tiles. */}
             <motion.div
                 variants={staggerParent}
                 initial="hidden"
                 animate="show"
                 className="grid grid-cols-1 md:grid-cols-3 gap-4"
             >
-                <motion.div variants={staggerChild} className="md:col-span-2 md:row-span-3 min-w-0">
-                    <RevenueCard products={myProducts} prefix={prefix} />
+                <motion.div
+                    variants={staggerChild}
+                    className="md:col-span-2 md:row-span-3 min-w-0"
+                >
+                    <RevenueCard
+                        products={myProducts}
+                        prefix={prefix}
+                    />
                 </motion.div>
-                <motion.div variants={staggerChild} className="min-w-0">
+
+                <motion.div
+                    variants={staggerChild}
+                    className="min-w-0"
+                >
                     <StatTile
                         label="Gross volume"
-                        value={`${prefix}${formatMoney(grossThisMonth)}`}
+                        value={
+                            `${prefix}${formatMoney(grossThisMonth)}`
+                        }
                         variant="ink"
                         delta={grossDelta}
                         hint="this month"
                     />
                 </motion.div>
-                <motion.div variants={staggerChild} className="min-w-0">
-                    <StatTile label="Orders" value={orders.length} hint="all time" />
+
+                <motion.div
+                    variants={staggerChild}
+                    className="min-w-0"
+                >
+                    <StatTile
+                        label="Orders"
+                        value={orders.length}
+                        hint="all time"
+                    />
                 </motion.div>
-                <motion.div variants={staggerChild} className="min-w-0">
+
+                <motion.div
+                    variants={staggerChild}
+                    className="min-w-0"
+                >
                     <DashCard className="h-full">
-                        <span className="dash-label">Store at a glance</span>
+                        <span className="dash-label">
+                            Store at a glance
+                        </span>
+
                         <SegmentPill
                             className="mt-3"
                             segments={[
-                                { label: 'Likes', value: totalLikes, tone: 'sun' },
-                                { label: 'Downloads', value: totalDownloads, tone: 'ink' },
-                                { label: 'Products', value: myProducts.length, tone: 'hatch' },
+                                {
+                                    label: 'Likes',
+                                    value: totalLikes,
+                                    tone: 'sun',
+                                },
+                                {
+                                    label: 'Downloads',
+                                    value: totalDownloads,
+                                    tone: 'ink',
+                                },
+                                {
+                                    label: 'Products',
+                                    value: myProducts.length,
+                                    tone: 'hatch',
+                                },
                             ]}
                         />
+
                         <p className="dash-data dash-soft mt-3">
-                            Avg rating {avgRating ?? 'n/a'}, joined {user?.createdAt ? dayjs(user.createdAt).fromNow(true) : 'recently'} ago
+                            Avg rating {avgRating ?? 'n/a'},
+                            {' '}joined{' '}
+                            {user?.createdAt
+                                ? dayjs(user.createdAt).fromNow(true)
+                                : 'recently'}{' '}
+                            ago
                         </p>
                     </DashCard>
                 </motion.div>
@@ -277,13 +493,25 @@ function Dashboard() {
                     prefix={prefix}
                     updatedAt={ordersUpdatedAt}
                     onPatch={(orderId, patch) =>
-                        setOrders((prev) => prev.map((o) => (o.orderId === orderId ? { ...o, ...patch } : o)))
+                        setOrders(prev =>
+                            prev.map(order =>
+                                order.orderId === orderId
+                                    ? {
+                                        ...order,
+                                        ...patch,
+                                    }
+                                    : order
+                            )
+                        )
                     }
                 />
             </div>
 
             <div id="stripe-payouts">
-                <ExpressWidget user={user} isLoaded={isLoaded} />
+                <ExpressWidget
+                    user={user}
+                    isLoaded={isLoaded}
+                />
             </div>
         </div>
     )

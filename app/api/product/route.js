@@ -12,14 +12,33 @@ import { s3 } from "@/lib/s3";
 import { reserveCreatorQuota, releaseProductQuota, CreatorQuotaError } from "@/lib/creatorQuota";
 import { editableProduct, productForViewer } from "@/lib/productAccess";
 import { shippingCostsInput } from '@/lib/shopShipping';
+import { isCreatorTermsAcceptanceEnabled } from '@/lib/legalFlags';
+import { hasCurrentAcceptance } from '@/lib/termsAcceptance';
 
 export const dynamic = 'force-dynamic';
-const productJson = (body, init = {}) => NextResponse.json(body, { ...init, headers: { ...init.headers, 'Cache-Control': 'private, no-store' } });
+
+const productJson = (body, init = {}) =>
+    NextResponse.json(body, {
+        ...init,
+        headers: {
+            ...init.headers,
+            'Cache-Control': 'private, no-store',
+        },
+    });
+
 const BUCKET_NAME = process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
 
 async function deleteS3Object(key, ownerId) {
     // Legacy shared prefixes are not safe to delete automatically.
-    if (!ownerId || !["models", "images", "viewables"].some(prefix => String(key).startsWith(`${prefix}/${ownerId}/`))) return;
+    if (
+        !ownerId ||
+        !["models", "images", "viewables"].some(prefix =>
+            String(key).startsWith(`${prefix}/${ownerId}/`)
+        )
+    ) {
+        return;
+    }
+
     await s3.send(
         new DeleteObjectCommand({
             Bucket: BUCKET_NAME,
@@ -29,31 +48,86 @@ async function deleteS3Object(key, ownerId) {
 }
 
 async function generateUniqueSlug(baseName, excludeId = null) {
-    let baseSlug = slugify(baseName);
+    const baseSlug = slugify(baseName);
     let slug = baseSlug;
     let attempt = 1;
-    const lookup = () => Product.findOne({ slug, ...(excludeId ? { _id: { $ne: excludeId } } : {}) });
+
+    const lookup = () => Product.findOne({
+        slug,
+        ...(excludeId ? { _id: { $ne: excludeId } } : {}),
+    });
+
     let exists = await lookup();
+
     while (exists) {
         attempt++;
         slug = `${baseSlug}-${attempt}`;
         exists = await lookup();
+
         if (attempt > 100) break;
     }
+
     return slug;
+}
+
+async function creatorTermsGate(userId) {
+    if (!isCreatorTermsAcceptanceEnabled()) {
+        return null;
+    }
+
+    // This route is a creator write boundary. The check must use
+    // the authenticated user's server-side acceptance record.
+    // Client metadata, request-body fields and Clerk unsafeMetadata
+    // do not constitute proof of acceptance.
+    const accepted = await hasCurrentAcceptance(
+        userId,
+        'creator'
+    );
+
+    if (!accepted) {
+        return productJson(
+            {
+                error: 'Accept the Creator Terms before continuing.',
+                code: 'creator_terms_required',
+            },
+            { status: 403 }
+        );
+    }
+
+    return null;
 }
 
 export async function POST(req) {
     let reservation;
     let created = false;
+
     try {
         const { userId } = await auth();
-        if (!userId)
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+        if (!userId) {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
 
         await connectToDatabase();
+
         const input = await req.json();
-        const body = { ...editableProduct(input), creatorUserId: userId };
+
+        // Enforce the creator gate before normalising product
+        // input, reserving quota or creating any product.
+        const termsFailure = await creatorTermsGate(userId);
+
+        if (termsFailure) {
+            return termsFailure;
+        }
+
+        const body = {
+            ...editableProduct(input),
+            creatorUserId: userId,
+        };
+
         const requiredFields = [
             "creatorUserId",
             "name",
@@ -61,31 +135,57 @@ export async function POST(req) {
             "images",
             "basePrice",
             "priceCredits",
-            "productType"
+            "productType",
         ];
 
         const missingFields = requiredFields.filter(field => {
             const value = body[field];
 
-            // Explicit handling per field to avoid treating 0 as missing
             switch (field) {
                 case "creatorUserId":
                 case "name":
                 case "description":
                 case "productType":
-                    return (typeof value !== "string" || !value.trim());
+                    return (
+                        typeof value !== "string" ||
+                        !value.trim()
+                    );
+
                 case "images":
-                    return !Array.isArray(value) || value.length === 0;
+                    return (
+                        !Array.isArray(value) ||
+                        value.length === 0
+                    );
+
                 case "basePrice":
-                    return typeof value !== "object" || value === null;
+                    return (
+                        typeof value !== "object" ||
+                        value === null
+                    );
+
                 case "priceCredits":
-                    return value === undefined || value === null || Number.isNaN(Number(value));
+                    return (
+                        value === undefined ||
+                        value === null ||
+                        Number.isNaN(Number(value))
+                    );
+
                 default:
-                    return value === undefined || value === null;
+                    return (
+                        value === undefined ||
+                        value === null
+                    );
             }
         });
+
         if (missingFields.length > 0) {
-            return NextResponse.json({ error: "Missing required fields", missingFields }, { status: 400 });
+            return NextResponse.json(
+                {
+                    error: "Missing required fields",
+                    missingFields,
+                },
+                { status: 400 }
+            );
         }
 
         const name = sanitizeString(body.name).trim();
@@ -93,50 +193,102 @@ export async function POST(req) {
         const productType = sanitizeString(body.productType).trim();
 
         if (!["shop", "print"].includes(productType)) {
-            return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
+            return NextResponse.json(
+                { error: "Invalid product type" },
+                { status: 400 }
+            );
         }
 
         let userRole = "user";
 
-        const client = await clerkClient()
-        const userObj = await client.users.getUser(userId)
-        if (userObj && userObj.publicMetadata && userObj.publicMetadata.role) {
+        const client = await clerkClient();
+        const userObj = await client.users.getUser(userId);
+
+        if (userObj?.publicMetadata?.role) {
             userRole = userObj.publicMetadata.role;
         }
+
         if (productType === "shop" && userRole !== "admin") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+            return NextResponse.json(
+                { error: "Forbidden" },
+                { status: 403 }
+            );
         }
 
         if (
             !Array.isArray(body.images) ||
-            body.images.some(key => typeof key !== "string" || !key.trim())
+            body.images.some(
+                key => typeof key !== "string" || !key.trim()
+            )
         ) {
-            return NextResponse.json({ error: "Invalid images array" }, { status: 400 });
+            return NextResponse.json(
+                { error: "Invalid images array" },
+                { status: 400 }
+            );
         }
 
         if (
             !Array.isArray(body.paidAssets) ||
-            body.paidAssets.some(key => typeof key !== "string" || !key.trim())
+            body.paidAssets.some(
+                key => typeof key !== "string" || !key.trim()
+            )
         ) {
-            return NextResponse.json({ error: "Invalid paid assets array" }, { status: 400 });
+            return NextResponse.json(
+                { error: "Invalid paid assets array" },
+                { status: 400 }
+            );
         }
 
-        if (typeof body.basePrice !== "object" || isNaN(Number(body.basePrice.presentmentAmount))) {
-            return NextResponse.json({ error: "Invalid basePrice" }, { status: 400 });
+        if (
+            typeof body.basePrice !== "object" ||
+            isNaN(Number(body.basePrice.presentmentAmount))
+        ) {
+            return NextResponse.json(
+                { error: "Invalid basePrice" },
+                { status: 400 }
+            );
         }
 
-        if (body.paidAssets.some(key => !key.startsWith(`models/${userId}/`))) {
-            return NextResponse.json({ error: "Model assets must belong to your account" }, { status: 400 });
+        if (
+            body.paidAssets.some(
+                key => !key.startsWith(`models/${userId}/`)
+            )
+        ) {
+            return NextResponse.json(
+                {
+                    error: "Model assets must belong to your account",
+                },
+                { status: 400 }
+            );
         }
+
         const slug = await generateUniqueSlug(name);
-        // Listing is server-authoritative: admin posts land in the FIT
-        // catalogue, creator posts stay on the creator's page.
-        const listing = userRole === "admin" ? "fit" : "creator";
-        if (userRole === 'admin' && Object.hasOwn(input, 'shippingCosts')) {
-            try { body.shippingCosts = shippingCostsInput(input.shippingCosts); }
-            catch (error) { return NextResponse.json({ error: error.message }, { status: 400 }); }
+
+        // Listing is server-authoritative: admin posts land in
+        // the FIT catalogue, creator posts on the creator's page.
+        const listing =
+            userRole === "admin" ? "fit" : "creator";
+
+        if (
+            userRole === 'admin' &&
+            Object.hasOwn(input, 'shippingCosts')
+        ) {
+            try {
+                body.shippingCosts = shippingCostsInput(
+                    input.shippingCosts
+                );
+            } catch (error) {
+                return NextResponse.json(
+                    { error: error.message },
+                    { status: 400 }
+                );
+            }
         }
-        reservation = await reserveCreatorQuota(userId, "products");
+
+        reservation = await reserveCreatorQuota(
+            userId,
+            "products"
+        );
 
         try {
             const product = await Product.create({
@@ -149,91 +301,173 @@ export async function POST(req) {
             });
 
             created = true;
+
             if (body.creatorUserId) {
                 await User.findOneAndUpdate(
                     { userId: body.creatorUserId },
                     {
-                        $set: { 'metadata.role': 'Creator' },
-                        $addToSet: { creatorProducts: String(product._id) },
-                        $setOnInsert: { 'metadata.displayName': null, userId: body.creatorUserId },
+                        $set: {
+                            'metadata.role': 'Creator',
+                        },
+                        $addToSet: {
+                            creatorProducts: String(product._id),
+                        },
+                        $setOnInsert: {
+                            'metadata.displayName': null,
+                            userId: body.creatorUserId,
+                        },
                     },
-                    { upsert: true, new: true }
+                    {
+                        upsert: true,
+                        new: true,
+                    }
                 );
             }
 
-            return NextResponse.json({ success: true, product }, { status: 201 });
+            return NextResponse.json(
+                { success: true, product },
+                { status: 201 }
+            );
         } catch (err) {
-            if (err.code === 11000 && err.keyPattern && err.keyPattern.slug) {
-                if (reservation && !created) await reservation.release();
-                return NextResponse.json({ error: "A product with this slug already exists. Please try again." }, { status: 409 });
+            if (
+                err.code === 11000 &&
+                err.keyPattern &&
+                err.keyPattern.slug
+            ) {
+                if (reservation && !created) {
+                    await reservation.release();
+                }
+
+                return NextResponse.json(
+                    {
+                        error: "A product with this slug already exists. Please try again.",
+                    },
+                    { status: 409 }
+                );
             }
+
             throw err;
         }
-
     } catch (err) {
-        if (reservation && !created) await reservation.release().catch(console.error);
-        if (err instanceof CreatorQuotaError) return NextResponse.json({ error: err.message }, { status: err.status });
+        if (reservation && !created) {
+            await reservation.release().catch(console.error);
+        }
+
+        if (err instanceof CreatorQuotaError) {
+            return NextResponse.json(
+                { error: err.message },
+                { status: err.status }
+            );
+        }
+
         console.error(err);
-        return NextResponse.json({ error: "Server error" }, { status: 500 });
+
+        return NextResponse.json(
+            { error: "Server error" },
+            { status: 500 }
+        );
     }
 }
 
 export async function PUT(req) {
     try {
         const { userId } = await auth();
-        if (!userId)
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+        if (!userId) {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
 
         await connectToDatabase();
+
         const input = await req.json();
         const body = editableProduct(input);
 
         const { searchParams } = new URL(req.url);
         const productId = searchParams.get("productId");
+
         if (!productId) {
-            return NextResponse.json({ error: "Missing productId" }, { status: 400 });
+            return NextResponse.json(
+                { error: "Missing productId" },
+                { status: 400 }
+            );
         }
 
-        // Fetch previous product for asset comparison
-        const prevProduct = await Product.findById(productId).lean();
+        const prevProduct = await Product.findById(
+            productId
+        ).lean();
+
         if (!prevProduct) {
-            return NextResponse.json({ error: "Product not found" }, { status: 404 });
+            return NextResponse.json(
+                { error: "Product not found" },
+                { status: 404 }
+            );
         }
 
-        // Only the product's owner or an admin may edit it. Checked before any
-        // S3 deletes so a stranger cannot wipe another creator's assets.
+        // Only the owner or an administrator may edit. Check
+        // ownership before performing any S3 deletion.
         let userRole = "user";
-        const client = await clerkClient()
-        const userObj = await client.users.getUser(userId)
-        if (userObj && userObj.publicMetadata && userObj.publicMetadata.role) {
+
+        const client = await clerkClient();
+        const userObj = await client.users.getUser(userId);
+
+        if (userObj?.publicMetadata?.role) {
             userRole = userObj.publicMetadata.role;
         }
-        if (prevProduct.creatorUserId !== userId && userRole !== "admin") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+        if (
+            prevProduct.creatorUserId !== userId &&
+            userRole !== "admin"
+        ) {
+            return NextResponse.json(
+                { error: "Forbidden" },
+                { status: 403 }
+            );
         }
-        // Ownership cannot be transferred through an edit, and neither can
-        // the storefront listing.
+
+        // Ownership and listing type cannot be transferred.
         body.creatorUserId = prevProduct.creatorUserId;
         body.listing = prevProduct.listing;
-        if (userRole === 'admin' && Object.hasOwn(input, 'shippingCosts')) {
-            try { body.shippingCosts = shippingCostsInput(input.shippingCosts); }
-            catch (error) { return NextResponse.json({ error: error.message }, { status: 400 }); }
+
+        if (
+            userRole === 'admin' &&
+            Object.hasOwn(input, 'shippingCosts')
+        ) {
+            try {
+                body.shippingCosts = shippingCostsInput(
+                    input.shippingCosts
+                );
+            } catch (error) {
+                return NextResponse.json(
+                    { error: error.message },
+                    { status: 400 }
+                );
+            }
         }
 
-        // Compare images
         const prevImages = prevProduct.images || [];
         const newImages = body.images || [];
-        const removedImages = prevImages.filter(img => !newImages.includes(img));
 
-        // Compare paid assets
+        const removedImages = prevImages.filter(
+            img => !newImages.includes(img)
+        );
+
         const prevModels = prevProduct.paidAssets || [];
         const newModels = body.paidAssets || [];
-        const removedModels = prevModels.filter(model => !newModels.includes(model));
 
-        // Compare viewable model
+        const removedModels = prevModels.filter(
+            model => !newModels.includes(model)
+        );
+
         const prevViewable = prevProduct.viewableModel || "";
         const newViewable = body.viewableModel || "";
-        const removedViewable = prevViewable && prevViewable !== newViewable ? prevViewable : null;
+
+        const removedViewable =
+            prevViewable && prevViewable !== newViewable
+                ? prevViewable
+                : null;
 
         const requiredFields = [
             "creatorUserId",
@@ -242,7 +476,7 @@ export async function PUT(req) {
             "images",
             "basePrice",
             "priceCredits",
-            "productType"
+            "productType",
         ];
 
         const missingFields = requiredFields.filter(field => {
@@ -253,20 +487,46 @@ export async function PUT(req) {
                 case "name":
                 case "description":
                 case "productType":
-                    return (typeof value !== "string" || !value.trim());
+                    return (
+                        typeof value !== "string" ||
+                        !value.trim()
+                    );
+
                 case "images":
-                    return !Array.isArray(value) || value.length === 0;
+                    return (
+                        !Array.isArray(value) ||
+                        value.length === 0
+                    );
+
                 case "basePrice":
-                    return typeof value !== "object" || value === null;
+                    return (
+                        typeof value !== "object" ||
+                        value === null
+                    );
+
                 case "priceCredits":
-                    return value === undefined || value === null || Number.isNaN(Number(value));
+                    return (
+                        value === undefined ||
+                        value === null ||
+                        Number.isNaN(Number(value))
+                    );
+
                 default:
-                    return value === undefined || value === null;
+                    return (
+                        value === undefined ||
+                        value === null
+                    );
             }
         });
 
         if (missingFields.length > 0) {
-            return NextResponse.json({ error: "Missing required fields", missingFields }, { status: 400 });
+            return NextResponse.json(
+                {
+                    error: "Missing required fields",
+                    missingFields,
+                },
+                { status: 400 }
+            );
         }
 
         const name = sanitizeString(body.name).trim();
@@ -274,37 +534,74 @@ export async function PUT(req) {
         const productType = sanitizeString(body.productType).trim();
 
         if (!["shop", "print"].includes(productType)) {
-            return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
+            return NextResponse.json(
+                { error: "Invalid product type" },
+                { status: 400 }
+            );
         }
 
         if (productType === "shop" && userRole !== "admin") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+            return NextResponse.json(
+                { error: "Forbidden" },
+                { status: 403 }
+            );
         }
 
         if (
             !Array.isArray(body.images) ||
-            body.images.some(key => typeof key !== "string" || !key.trim())
+            body.images.some(
+                key => typeof key !== "string" || !key.trim()
+            )
         ) {
-            return NextResponse.json({ error: "Invalid images array" }, { status: 400 });
+            return NextResponse.json(
+                { error: "Invalid images array" },
+                { status: 400 }
+            );
         }
 
         if (
             !Array.isArray(body.paidAssets) ||
-            body.paidAssets.some(key => typeof key !== "string" || !key.trim())
+            body.paidAssets.some(
+                key => typeof key !== "string" || !key.trim()
+            )
         ) {
-            return NextResponse.json({ error: "Invalid paidAssets array" }, { status: 400 });
+            return NextResponse.json(
+                { error: "Invalid paidAssets array" },
+                { status: 400 }
+            );
         }
 
-        if (typeof body.basePrice !== "object" || isNaN(Number(body.basePrice.presentmentAmount))) {
-            return NextResponse.json({ error: "Invalid basePrice" }, { status: 400 });
+        if (
+            typeof body.basePrice !== "object" ||
+            isNaN(Number(body.basePrice.presentmentAmount))
+        ) {
+            return NextResponse.json(
+                { error: "Invalid basePrice" },
+                { status: 400 }
+            );
         }
 
-        if (body.paidAssets.some(key => !(prevProduct.paidAssets || []).includes(key) && !key.startsWith(`models/${prevProduct.creatorUserId}/`))) {
-            return NextResponse.json({ error: "Model assets must belong to the product owner" }, { status: 400 });
+        if (
+            body.paidAssets.some(
+                key =>
+                    !(prevProduct.paidAssets || []).includes(key) &&
+                    !key.startsWith(
+                        `models/${prevProduct.creatorUserId}/`
+                    )
+            )
+        ) {
+            return NextResponse.json(
+                {
+                    error: "Model assets must belong to the product owner",
+                },
+                { status: 400 }
+            );
         }
-        const slug = name === prevProduct.name && prevProduct.slug
-            ? prevProduct.slug
-            : await generateUniqueSlug(name, productId);
+
+        const slug =
+            name === prevProduct.name && prevProduct.slug
+                ? prevProduct.slug
+                : await generateUniqueSlug(name, productId);
 
         const update = {
             ...body,
@@ -314,66 +611,124 @@ export async function PUT(req) {
             slug,
         };
 
-        const updated = await Product.findByIdAndUpdate(productId, update, { new: true, runValidators: true });
+        const updated = await Product.findByIdAndUpdate(
+            productId,
+            update,
+            {
+                new: true,
+                runValidators: true,
+            }
+        );
+
         if (!updated) {
-            return NextResponse.json({ error: "Product not found" }, { status: 404 });
+            return NextResponse.json(
+                { error: "Product not found" },
+                { status: 404 }
+            );
         }
 
-        for (const key of [...removedImages, ...removedModels, ...(removedViewable ? [removedViewable] : [])]) {
-            await deleteS3Object(key, prevProduct.creatorUserId).catch(console.error);
+        for (
+            const key of [
+                ...removedImages,
+                ...removedModels,
+                ...(removedViewable ? [removedViewable] : []),
+            ]
+        ) {
+            await deleteS3Object(
+                key,
+                prevProduct.creatorUserId
+            ).catch(console.error);
         }
-        return NextResponse.json({ success: true, product: updated }, { status: 200 });
+
+        return NextResponse.json(
+            { success: true, product: updated },
+            { status: 200 }
+        );
     } catch (err) {
         console.error(err);
-        return NextResponse.json({ error: "Server error" }, { status: 500 });
+
+        return NextResponse.json(
+            { error: "Server error" },
+            { status: 500 }
+        );
     }
 }
 
 export async function GET(req) {
     try {
         await connectToDatabase();
+
         const { userId } = await auth();
-        const isAdmin = userId ? (await (await clerkClient()).users.getUser(userId))?.publicMetadata?.role === "admin" : false;
+
+        const isAdmin = userId
+            ? (await (await clerkClient()).users.getUser(userId))
+                ?.publicMetadata?.role === "admin"
+            : false;
+
         const { searchParams } = new URL(req.url);
 
-        const isLikelyClerkUserId = (value) => typeof value === 'string' && /^user_[a-zA-Z0-9]+$/.test(value);
+        const isLikelyClerkUserId = value =>
+            typeof value === 'string' &&
+            /^user_[a-zA-Z0-9]+$/.test(value);
 
-        const isObjectIdString = (value) => typeof value === "string" && /^[0-9a-fA-F]{24}$/.test(value);
+        const isObjectIdString = value =>
+            typeof value === "string" &&
+            /^[0-9a-fA-F]{24}$/.test(value);
 
         const productType = searchParams.get("productType");
         const ids = searchParams.get("ids");
-        const productCategoryParam = searchParams.get("productCategory");
-        const productSubCategoryParam = searchParams.get("productSubCategory");
+        const productCategoryParam =
+            searchParams.get("productCategory");
+        const productSubCategoryParam =
+            searchParams.get("productSubCategory");
         const productId = searchParams.get("productId");
         const slug = searchParams.get("slug");
-        const creatorUserId = searchParams.get("creatorUserId");
-        const fields = searchParams.get("fields"); // comma-separated string
+        const creatorUserId =
+            searchParams.get("creatorUserId");
+        const fields = searchParams.get("fields");
         const search = searchParams.get("search");
         const limit = searchParams.get("limit");
         const listing = searchParams.get("listing");
 
         let filter = {};
-        if (listing === "fit" || listing === "creator") filter.listing = listing;
+
+        if (listing === "fit" || listing === "creator") {
+            filter.listing = listing;
+        }
 
         if (slug) {
-            const projection = isAdmin ? '+shippingCosts' : undefined;
-            const product = await Product.findOne({ slug }).select(projection).lean();
+            const projection = isAdmin
+                ? '+shippingCosts'
+                : undefined;
+
+            const product = await Product.findOne({
+                slug,
+            }).select(projection).lean();
+
             if (!productForViewer(product, userId, isAdmin)) {
-                return productJson({ product: null }, { status: 200 });
+                return productJson(
+                    { product: null },
+                    { status: 200 }
+                );
             }
 
-            // Enrich with creator display name + URL slug.
             let creatorDisplayName = 'Unnamed Store';
             let creatorSlug = product.creatorUserId || null;
 
             if (product.creatorUserId) {
                 const creator = await User.findOne(
                     { userId: product.creatorUserId },
-                    { 'metadata.displayName': 1, _id: 0 }
+                    {
+                        'metadata.displayName': 1,
+                        _id: 0,
+                    }
                 ).lean();
-                const name = (typeof creator?.metadata?.displayName === 'string')
-                    ? creator.metadata.displayName.trim()
-                    : '';
+
+                const name =
+                    typeof creator?.metadata?.displayName === 'string'
+                        ? creator.metadata.displayName.trim()
+                        : '';
+
                 if (name && !isLikelyClerkUserId(name)) {
                     creatorDisplayName = name;
                     creatorSlug = name;
@@ -383,7 +738,11 @@ export async function GET(req) {
             return productJson(
                 {
                     product: {
-                        ...productForViewer(product, userId, isAdmin),
+                        ...productForViewer(
+                            product,
+                            userId,
+                            isAdmin
+                        ),
                         creatorDisplayName,
                         creatorSlug,
                     },
@@ -392,34 +751,55 @@ export async function GET(req) {
             );
         }
 
-        if (productType) filter.productType = productType;
-
-        // Handle search query
-        if (search) {
-            filter.name = { $regex: search.slice(0, 120).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: 'i' }; // Case-insensitive search
+        if (productType) {
+            filter.productType = productType;
         }
 
-        // Determine whether caller is using legacy numeric categories or new name-based ids
+        if (search) {
+            filter.name = {
+                $regex: search
+                    .slice(0, 120)
+                    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+                $options: 'i',
+            };
+        }
+
         let productCategory = productCategoryParam;
         let productSubCategory = productSubCategoryParam;
+
         const usingNumericCategories =
-            (productCategoryParam && !isNaN(Number(productCategoryParam))) ||
-            (productSubCategoryParam && !isNaN(Number(productSubCategoryParam)));
+            (productCategoryParam &&
+                !isNaN(Number(productCategoryParam))) ||
+            (productSubCategoryParam &&
+                !isNaN(Number(productSubCategoryParam)));
 
         if (!usingNumericCategories) {
-            // New path: filter by name-based categoryId / subcategoryId when params are strings
             if (productCategoryParam) {
-                filter.categoryId = literalCategoryFilter(productCategoryParam);
+                filter.categoryId = literalCategoryFilter(
+                    productCategoryParam
+                );
             }
+
             if (productSubCategoryParam) {
-                filter.subcategoryId = literalCategoryFilter(productSubCategoryParam);
+                filter.subcategoryId = literalCategoryFilter(
+                    productSubCategoryParam
+                );
             }
         } else {
-            // Legacy path: resolve indices and filter by numeric category/subcategory
-            if (productCategory && isNaN(Number(productCategory))) {
-                const allCategories = await getAllCategoriesServer(productType);
-                productCategory = allCategories.findIndex(cat => cat === productCategory);
-            } else if (productCategory !== null && productCategory !== undefined) {
+            if (
+                productCategory &&
+                isNaN(Number(productCategory))
+            ) {
+                const allCategories =
+                    await getAllCategoriesServer(productType);
+
+                productCategory = allCategories.findIndex(
+                    cat => cat === productCategory
+                );
+            } else if (
+                productCategory !== null &&
+                productCategory !== undefined
+            ) {
                 productCategory = Number(productCategory);
             }
 
@@ -429,30 +809,56 @@ export async function GET(req) {
                 productCategory !== null &&
                 productCategory !== -1
             ) {
-                const subcats = await getAllSubcategoriesServer(productType, productCategory);
-                productSubCategory = subcats.findIndex(sub => sub === productSubCategory);
-            } else if (productSubCategory !== null && productSubCategory !== undefined) {
-                productSubCategory = Number(productSubCategory);
+                const subcats =
+                    await getAllSubcategoriesServer(
+                        productType,
+                        productCategory
+                    );
+
+                productSubCategory = subcats.findIndex(
+                    sub => sub === productSubCategory
+                );
+            } else if (
+                productSubCategory !== null &&
+                productSubCategory !== undefined
+            ) {
+                productSubCategory =
+                    Number(productSubCategory);
             }
         }
 
         if (ids) {
-            const idArrRaw = ids.split(",").map(id => id.trim()).filter(Boolean);
+            const idArrRaw = ids
+                .split(",")
+                .map(id => id.trim())
+                .filter(Boolean);
+
             const idArr = idArrRaw.filter(isObjectIdString);
+
             if (idArr.length > 0) {
                 filter._id = { $in: idArr };
             } else {
-                // Avoid Mongoose CastErrors when callers pass non-ObjectId ids.
-                return productJson({ products: [] }, { status: 200 });
+                return productJson(
+                    { products: [] },
+                    { status: 200 }
+                );
             }
         }
+
         if (productId) {
             if (!isObjectIdString(productId)) {
-                return productJson({ error: "Invalid productId" }, { status: 400 });
+                return productJson(
+                    { error: "Invalid productId" },
+                    { status: 400 }
+                );
             }
+
             filter._id = productId;
         }
-        if (creatorUserId) filter.creatorUserId = creatorUserId;
+
+        if (creatorUserId) {
+            filter.creatorUserId = creatorUserId;
+        }
 
         if (usingNumericCategories) {
             if (
@@ -464,7 +870,8 @@ export async function GET(req) {
                 productSubCategory !== -1
             ) {
                 filter.category = Number(productCategory);
-                filter.subcategory = Number(productSubCategory);
+                filter.subcategory =
+                    Number(productSubCategory);
             } else if (
                 productCategory !== undefined &&
                 productCategory !== null &&
@@ -474,13 +881,18 @@ export async function GET(req) {
             }
         }
 
-        // The shop and prints landing pages list their whole catalogue; other
-        // unfiltered requests must still identify a category or another lookup mode.
         const hasAnyCategoryFilter =
             usingNumericCategories
-                ? productCategoryParam !== null && productCategoryParam !== undefined
-                : Boolean(productCategoryParam || productSubCategoryParam);
-        const isPublicCatalogueListing = productType === "shop" || productType === "print";
+                ? productCategoryParam !== null &&
+                  productCategoryParam !== undefined
+                : Boolean(
+                    productCategoryParam ||
+                    productSubCategoryParam
+                );
+
+        const isPublicCatalogueListing =
+            productType === "shop" ||
+            productType === "print";
 
         if (
             !ids &&
@@ -490,85 +902,159 @@ export async function GET(req) {
             !isPublicCatalogueListing &&
             !hasAnyCategoryFilter
         ) {
-            return productJson({ error: "Missing productCategory or productSubCategory" }, { status: 400 });
+            return productJson(
+                {
+                    error:
+                        "Missing productCategory or productSubCategory",
+                },
+                { status: 400 }
+            );
         }
 
-        // Public catalogue visibility cannot be bypassed with includeHidden.
-        // Preserve the existing explicit ids/productId/creatorUserId lookup modes.
+        // Explicit IDs and creator lookups retain their existing
+        // visibility contract. General public listings cannot
+        // bypass catalogue moderation.
         if (!ids && !productId && !creatorUserId) {
             filter.hidden = false;
             filter.flaggedForModeration = { $ne: true };
         }
 
-        const projection = isAdmin ? '+shippingCosts' : undefined;
+        const projection = isAdmin
+            ? '+shippingCosts'
+            : undefined;
 
         let query = Product.find(filter).select(projection);
 
-        // Apply limit if provided; the category-less catalogue listings are
-        // bounded at 200 even when the caller passes none.
         if (limit) {
-            query = query.limit(Math.min(200, Math.max(1, Number(limit) || 20)));
-        } else if (isPublicCatalogueListing && !hasAnyCategoryFilter && !ids && !productId && !creatorUserId && !search) {
+            query = query.limit(
+                Math.min(
+                    200,
+                    Math.max(1, Number(limit) || 20)
+                )
+            );
+        } else if (
+            isPublicCatalogueListing &&
+            !hasAnyCategoryFilter &&
+            !ids &&
+            !productId &&
+            !creatorUserId &&
+            !search
+        ) {
             query = query.limit(200);
         }
 
-        const products = (await query.lean()).map(product => productForViewer(product, userId, isAdmin)).filter(Boolean);
+        const products = (await query.lean())
+            .map(product =>
+                productForViewer(product, userId, isAdmin)
+            )
+            .filter(Boolean);
 
         if (productId) {
-            return productJson({ product: products[0] || null }, { status: 200 });
+            return productJson(
+                { product: products[0] || null },
+                { status: 200 }
+            );
         }
 
-        return productJson({ products }, { status: 200 });
+        return productJson(
+            { products },
+            { status: 200 }
+        );
     } catch (err) {
         console.error(err);
-        return productJson({ error: "Server error" }, { status: 500 });
+
+        return productJson(
+            { error: "Server error" },
+            { status: 500 }
+        );
     }
 }
 
 export async function DELETE(req) {
     try {
         const { userId } = await auth();
-        if (!userId)
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+        if (!userId) {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
 
         await connectToDatabase();
+
         const { searchParams } = new URL(req.url);
         const productId = searchParams.get("productId");
+
         if (!productId) {
-            return NextResponse.json({ error: "Missing productId" }, { status: 400 });
+            return NextResponse.json(
+                { error: "Missing productId" },
+                { status: 400 }
+            );
         }
 
         const product = await Product.findById(productId);
+
         if (!product) {
-            return NextResponse.json({ error: "Product not found" }, { status: 404 });
+            return NextResponse.json(
+                { error: "Product not found" },
+                { status: 404 }
+            );
         }
 
         if (product.creatorUserId !== userId) {
-            const client = await clerkClient()
-            const userObj = await client.users.getUser(userId)
+            const client = await clerkClient();
+            const userObj = await client.users.getUser(userId);
+
             if (userObj?.publicMetadata?.role !== "admin") {
-                return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+                return NextResponse.json(
+                    { error: "Forbidden" },
+                    { status: 403 }
+                );
             }
         }
 
         for (const img of product.images || []) {
-            await deleteS3Object(img, product.creatorUserId);
+            await deleteS3Object(
+                img,
+                product.creatorUserId
+            );
         }
 
         for (const model of product.paidAssets || []) {
-            await deleteS3Object(model, product.creatorUserId);
+            await deleteS3Object(
+                model,
+                product.creatorUserId
+            );
         }
 
         if (product.viewableModel) {
-            await deleteS3Object(product.viewableModel, product.creatorUserId);
+            await deleteS3Object(
+                product.viewableModel,
+                product.creatorUserId
+            );
         }
 
-        const deleted = await Product.findByIdAndDelete(productId);
-        if (deleted) await releaseProductQuota(product.creatorUserId);
+        const deleted = await Product.findByIdAndDelete(
+            productId
+        );
 
-        return NextResponse.json({ success: true }, { status: 200 });
+        if (deleted) {
+            await releaseProductQuota(
+                product.creatorUserId
+            );
+        }
+
+        return NextResponse.json(
+            { success: true },
+            { status: 200 }
+        );
     } catch (err) {
         console.error(err);
-        return NextResponse.json({ error: "Server error" }, { status: 500 });
+
+        return NextResponse.json(
+            { error: "Server error" },
+            { status: 500 }
+        );
     }
 }

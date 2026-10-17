@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { buildPageMetadata, PRIVATE_PAGE_ROBOTS } from '@/lib/seo/metadata'
 import { absoluteUrl } from '@/lib/seo/site'
 import { jsonLdString } from '@/lib/jsonLd'
+import { isTermsCheckboxEnabled } from '@/lib/legalFlags'
 import styles from './page.module.css'
 
 const title = '3D Printer Repair Assessment Singapore | FIT'
@@ -38,7 +39,7 @@ export default function PrinterRepairPage() {
   return <main>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(structuredData) }} />
     <nav className={styles.breadcrumb} aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden="true">/</span><span aria-current="page">Printer repair assessment</span></nav>
-    <PrinterRepairFlow />
+    <PrinterRepairFlow termsRequired={isTermsCheckboxEnabled()} />
     <section className={styles.guidance} aria-labelledby="repair-assessment-guidance">
       <h2 id="repair-assessment-guidance">About your printer assessment</h2>
       <div className={styles.questions}>

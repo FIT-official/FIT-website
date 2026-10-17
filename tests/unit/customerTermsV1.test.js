@@ -9,7 +9,8 @@ describe('customer terms v1.0 (/terms)', () => {
     expect(CUSTOMER_TERMS_HTML).toContain('<p><strong>Version 1.0, 18 October 2026</strong></p>')
     expect(CUSTOMER_TERMS_HTML.match(/<h2>/g)).toHaveLength(18)
     expect(CUSTOMER_TERMS_HTML).toContain('<h2>18. Governing law and disputes</h2>')
-    expect(CUSTOMER_TERMS_HTML).toContain('Fix It Today Pte. Ltd. (UEN 53370270D)')
+    expect(CUSTOMER_TERMS_HTML).toContain('Fix It Today Pte. Ltd., UEN 53370270D')
+    expect(CUSTOMER_TERMS_HTML).not.toContain('(UEN 53370270D)')
   })
   it('has no old non-refundable, GST, placeholder or comment text', () => {
     expect(CUSTOMER_TERMS_HTML).not.toMatch(/non-refundable|\bGST\b|sole\s+propriet|TBC|TODO|lorem|<!--|<script/i)

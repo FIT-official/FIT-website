@@ -11,7 +11,7 @@ function PrivacyPage() {
             </div>
             <div className="w-full max-w-2xl flex flex-col">
                 <div className="border border-borderColor rounded p-6 flex flex-col items-start gap-4 bg-white text-xs">
-                    <p>This Privacy Policy outlines how Fix It Today Pte. Ltd. collects, processes, and protects your personal data when you use our website <a href="https://www.fixitoday.com" className="underline" target="_blank" rel="noopener noreferrer">www.fixitoday.com</a> and services. By accessing or using the website, you consent to the practices outlined in this Privacy Policy.</p>
+                    <p>This Privacy Policy outlines how Fix It Today Pte. Ltd., UEN 53370270D, collects, processes, and protects your personal data when you use our website <a href="https://www.fixitoday.com" className="underline" target="_blank" rel="noopener noreferrer">www.fixitoday.com</a> and services. By accessing or using the website, you consent to the practices outlined in this Privacy Policy.</p>
 
                     <h3 className="text-textColor text-sm">Information We Collect</h3>
 

@@ -1,0 +1,12 @@
+{
+  "customer": {
+    "version": "Version 1.0, 18 October 2026",
+    "sha256": "7cdb8f3d1c22612cba613c884b4d60d484c7d109cd06c476bf57f74a000886f6",
+    "bytes": 27526
+  },
+  "creator": {
+    "version": "Version 1.0, 18 October 2026",
+    "sha256": "63f270c97ae7a96c02c884736c5bfbbd4c6d765c91fd6f06692f9feb01cba88a",
+    "bytes": 82975
+  }
+}

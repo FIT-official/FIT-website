@@ -7,6 +7,9 @@ import { REPAIR_BRANDS, REPAIR_FEEDERS, REPAIR_GUIDANCE, REPAIR_MODELS, reconcil
 import { PLANNING_AREAS, areaFromPostalCode, isSgPostalCode } from '@/lib/location/sgAreas'
 import SoftSignInPrompt from '@/components/General/SoftSignInPrompt'
 import useAccountProfile from '@/components/General/useAccountProfile'
+import TermsCheckbox from '@/components/Legal/TermsCheckbox'
+import TermsGatedButton from '@/components/Legal/TermsGatedButton'
+import { CUSTOMER_TERMS_VERSION } from '@/content/legal/customerTermsV1'
 import RepairEstimates from './RepairEstimates'
 import styles from './PrinterRepairFlow.module.css'
 
@@ -14,7 +17,7 @@ const STEPS = ['Your printer', 'Photos & checks', 'Contact & review']
 async function responseJson(response) {
   let body
   try { body = await response.json() } catch { throw new Error('We could not read the response. Please try again.') }
-  if (!response.ok) throw Object.assign(new Error(body.error || 'The request could not be completed. Please try again.'), { status: response.status })
+  if (!response.ok) throw Object.assign(new Error(body.error || 'The request could not be completed. Please try again.'), { status: response.status, code: body.code })
   return body
 }
 async function boundedFetch(url, options = {}) {
@@ -46,7 +49,7 @@ const pendingKey = userId => `fit.printer-repair.pending.${userId}`
 function savePending(userId, payload) { try { sessionStorage.setItem(pendingKey(userId), JSON.stringify(payload)) } catch { /* Keep the same attempt in memory if browser storage is unavailable. */ } }
 function clearPending(userId) { try { sessionStorage.removeItem(pendingKey(userId)) } catch { /* Browser storage is optional. */ } }
 
-export default function PrinterRepairFlow() {
+export default function PrinterRepairFlow({ termsRequired = false }) {
   const { user, isLoaded, isSignedIn } = useUser()
   const [brief, setBrief] = useState({ ...EMPTY_REPAIR_BRIEF })
   const [step, setStep] = useState(0), [errors, setErrors] = useState({})
@@ -61,6 +64,7 @@ export default function PrinterRepairFlow() {
   const [savedReference, setSavedReference] = useState(false)
   const [signInReturnUrl, setSignInReturnUrl] = useState('/printer-repair')
   const [discarding, setDiscarding] = useState(false), [withdrawing, setWithdrawing] = useState(false)
+  const [termsTicked, setTermsTicked] = useState(false), [termsError, setTermsError] = useState(false)
   const heading = useRef(null), errorSummary = useRef(null), files = useRef([])
   const uploaded = useRef(new Map()), active = useRef(null), sending = useRef(false)
   const restoreAccount = useRef(null)
@@ -98,7 +102,7 @@ export default function PrinterRepairFlow() {
   useEffect(() => {
     if (isLoaded && restoreAccount.current && restoreAccount.current !== account.current) {
       photoGeneration.current++; setPhotoBusy(false); active.current?.abort(); files.current.forEach(photo => URL.revokeObjectURL(photo.preview))
-      setPhotos([]); uploaded.current.clear(); setPending(null); setReceipt(null); setBrief({ ...EMPTY_REPAIR_BRIEF }); setStep(0); setErrors({}); setMessage(''); restoreAccount.current = null
+      setPhotos([]); uploaded.current.clear(); setPending(null); setReceipt(null); setBrief({ ...EMPTY_REPAIR_BRIEF }); setStep(0); setErrors({}); setMessage(''); setTermsTicked(false); setTermsError(false); restoreAccount.current = null
     }
     if (!isLoaded || !isSignedIn || !user?.id || restoreAccount.current === user.id) return
     restoreAccount.current = user.id
@@ -184,7 +188,7 @@ export default function PrinterRepairFlow() {
   function discard() {
     try { sessionStorage.removeItem(signInDraftKey) } catch { /* Browser storage is optional. */ }
     photoGeneration.current++; setPhotoBusy(false); setSelectionNotice(''); photos.forEach(photo => URL.revokeObjectURL(photo.preview)); setPhotos([]); uploaded.current.clear()
-    setBrief({ ...EMPTY_REPAIR_BRIEF }); setErrors({}); setStep(0); setMessage('Draft cleared. Nothing was sent.'); setDiscarding(false)
+    setBrief({ ...EMPTY_REPAIR_BRIEF }); setErrors({}); setStep(0); setMessage('Draft cleared. Nothing was sent.'); setDiscarding(false); setTermsTicked(false); setTermsError(false)
     requestAnimationFrame(() => heading.current?.focus())
   }
   async function checkStatus() {
@@ -198,6 +202,7 @@ export default function PrinterRepairFlow() {
   async function submit(event) {
     event.preventDefault()
     if (sending.current || !isLoaded || !isSignedIn || !user?.id || requestsAvailable !== true) return
+    if (termsRequired && !termsTicked) { setTermsError(true); return }
     const checked = validateRepairBrief(brief, { today: pending ? undefined : singaporeToday() })
     if (!pending && !checked.ok) return showErrors(checked.errors)
     sending.current = true; setMessage(''); setErrors({})
@@ -225,14 +230,16 @@ export default function PrinterRepairFlow() {
         setPending(payload); savePending(user.id, payload)
       }
       setBusy('sending')
-      const record = safeReceipt(await boundedFetch('/api/printer-repair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }))
+      const outgoing = termsRequired ? { ...payload, termsAcceptance: { accepted: true, termsVersion: CUSTOMER_TERMS_VERSION } } : payload
+      const record = safeReceipt(await boundedFetch('/api/printer-repair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(outgoing) }))
       clearPending(actorId)
       if (account.current !== actorId) return
       setPending(null); setReceipt(record)
       requestAnimationFrame(() => heading.current?.focus())
     } catch (error) {
       if (account.current !== actorId) return
-      if (payload && !pending && [400, 413].includes(error.status)) { clearPending(actorId); setPending(null); setMessage(`${error.message} You can correct your draft and send again.`) }
+      if (termsRequired && (error.code === 'terms_required' || error.code === 'terms_version_changed')) { setTermsTicked(false); setTermsError(true); setMessage(error.message) }
+      else if (payload && !pending && [400, 413].includes(error.status)) { clearPending(actorId); setPending(null); setMessage(`${error.message} You can correct your draft and send again.`) }
       else if (payload) setMessage(`${error.message} Check the status or retry this same request. Its details are kept unchanged to prevent duplicates.`)
       else setMessage(error.name === 'AbortError' ? 'Upload stopped. Your draft is still here; no assessment request was sent.' : `${error.message} Your draft is still here.`)
     } finally { sending.current = false; setBusy(''); setUploadProgress(''); active.current = null }
@@ -319,6 +326,7 @@ export default function PrinterRepairFlow() {
           <div className={styles.review}><h3>Check your request</h3><dl className={styles.summary}><div><dt>Printer</dt><dd>{brief.brand} {brief.model}</dd></div><div><dt>Issue</dt><dd>{issueLabel}</dd></div><div><dt>Symptoms</dt><dd className={styles.multiline}>{brief.details}</dd></div>{brief.errorCode && <div><dt>Error message</dt><dd>{brief.errorCode}</dd></div>}{brief.troubleshooting && <div><dt>Already tried</dt><dd className={styles.multiline}>{brief.troubleshooting}</dd></div>}<div><dt>Photos</dt><dd>{pending ? pending.photoAssetIds.length : photos.length}</dd></div><div><dt>Drop-off or visit</dt><dd>{REPAIR_HANDOVERS.find(([key]) => key === brief.handover)?.[1]}</dd></div>{brief.handover === 'home_visit' && <div><dt>Visit address</dt><dd>{[brief.street, brief.unitNumber, brief.postalCode].filter(Boolean).join(', ')}</dd></div>}</dl>{photos.length > 0 && <div className={styles.reviewPhotos}>{photos.map(photo => <div key={photo.id} className={styles.thumbnail} style={{ backgroundImage: `url("${photo.preview}")` }} role="img" aria-label={`Review photo ${photo.file.name}`} />)}<button type="button" className={styles.secondary} disabled={locked} onClick={() => { setStep(1); requestAnimationFrame(() => heading.current?.focus()) }}>Edit photos</button></div>}</div>
           <p className={styles.hint}>We will use your contact details to respond to this request. Photos are uploaded privately after you choose to send. <a href="/privacy">Read our privacy policy</a>.</p>
           {!isLoaded ? <p role="status">Loading your account…</p> : !isSignedIn && <div className={styles.signIn}><p>Sign in to send your request and keep its photos private. Your draft stays here while you sign in.</p><SignInButton mode="modal" forceRedirectUrl={signInReturnUrl} signUpForceRedirectUrl={signInReturnUrl}><button type="button" className={styles.secondary} onClick={keepDraftForSignIn}>Sign in to continue</button></SignInButton></div>}
+          {termsRequired && <TermsCheckbox document="customer" checked={termsTicked} onChange={value => { setTermsTicked(value); setTermsError(false) }} error={termsError} />}
         </div>}
         {message && <p role="alert" className={styles.error}>{message}</p>}
         {pending && <p className={styles.note}>This send needs confirmation. Check its status first, or retry exactly the same details.</p>}
@@ -326,7 +334,7 @@ export default function PrinterRepairFlow() {
         {busy && <p role="status" aria-live="polite">{busy === 'uploading' ? uploadProgress || 'Uploading your photos privately.' : busy === 'checking' ? 'Checking the saved request.' : 'Sending your assessment request.'}</p>}
         <div className={styles.actions}>
           {step > 0 && <button type="button" className={styles.secondary} disabled={locked} onClick={() => { setStep(current => current - 1); setErrors({}); requestAnimationFrame(() => heading.current?.focus()) }}>Back</button>}
-          {step < 2 ? <button key="continue" type="button" className={styles.primary} disabled={locked || photoBusy} onClick={nextStep}>Continue</button> : <button key="send" type="submit" className={styles.primary} disabled={Boolean(busy) || !isLoaded || !isSignedIn || requestsAvailable !== true}>{busy === 'uploading' ? 'Uploading…' : busy ? 'Please wait…' : pending ? 'Retry same request' : 'Send assessment request'}</button>}
+          {step < 2 ? <button key="continue" type="button" className={styles.primary} disabled={locked || photoBusy} onClick={nextStep}>Continue</button> : <TermsGatedButton key="send" type="submit" className={styles.primary} termsRequired={termsRequired} termsTicked={termsTicked} onTermsError={() => setTermsError(true)} disabled={Boolean(busy) || !isLoaded || !isSignedIn || requestsAvailable !== true}>{busy === 'uploading' ? 'Uploading…' : busy ? 'Please wait…' : pending ? 'Retry same request' : 'Send assessment request'}</TermsGatedButton>}
           {pending && <button type="button" className={styles.secondary} onClick={checkStatus} disabled={Boolean(busy) || !isSignedIn}>Check request status</button>}
           {busy === 'uploading' && <button type="button" className={styles.secondary} onClick={() => active.current?.abort()}>Stop upload</button>}
         </div>
