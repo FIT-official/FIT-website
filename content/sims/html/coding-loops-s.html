@@ -1,0 +1,1275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Loop Tracer | FIT Coding</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;color:#111;background:var(--fit-paper);font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,.code{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;font-weight:800;border:2px solid #111;background:#fff;border-radius:999px;min-height:44px;padding:9px 17px;cursor:pointer;box-shadow:var(--sh-1)}
+button:hover{background:var(--lvl-secondary-tint)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:focus-visible,input:focus-visible,.code:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button.selected{background:var(--lvl-secondary);box-shadow:var(--sh-2)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+input[type=number],input[type=text]{border:2px solid #111;border-radius:11px;min-height:44px;width:100px;padding:8px;font:600 16px Inter,system-ui,sans-serif}
+input[type=text]{width:min(100%,310px)}
+main{max-width:1340px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:clamp(28px,4vw,43px);line-height:1.1;font-weight:800;margin:9px 0}
+h2{font-size:22px;font-weight:800;margin:0 0 10px}
+h3{font-size:17px;font-weight:800;margin:14px 0 7px}
+p{margin:8px 0}
+.badge{display:inline-block;background:var(--lvl-secondary);color:var(--lvl-secondary-on);font-weight:800;font-size:12px;text-transform:uppercase;border:2px solid #111;border-radius:999px;padding:5px 14px}
+.hud,.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.hud span{border:2px solid #111;border-radius:12px;padding:8px 13px;background:var(--fit-sunken);font-weight:800}
+.layout{display:grid;gap:18px}
+.card{min-width:0;padding:17px;border:2px solid #111;border-radius:24px;box-shadow:var(--sh-2);background:#fff}
+.stage{background:var(--lvl-secondary-tint)}
+.code{background:#171717;color:#fff;border:2px solid #111;border-radius:15px;padding:11px;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;min-height:96px}
+.line{white-space:pre;padding:5px 6px;border-radius:5px}
+.line.active{background:#335a50;outline:1px solid #2EC4A6}
+.lno{display:inline-block;color:#aaa;min-width:32px}
+.kw{color:#ffca6b}.var{color:#8ddaff}.value{color:#aff2a9}.fn{color:#dfa8ff}
+.trace{border-collapse:collapse;width:100%;font-size:14px;margin-top:8px}
+.trace th,.trace td{border:2px solid #111;text-align:center;padding:6px;background:#fff}
+.trace th{background:#b9e9dd}
+.trace input{width:77px;text-align:center}
+.small{font-size:13px;color:var(--fit-ink-3)}
+#plot{display:block;width:100%;height:auto;margin-top:10px}
+#visual{min-height:140px}
+.row{margin:12px 0}
+.group{margin:12px 0;padding:12px;border:2px solid var(--fit-line-soft);border-radius:14px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+.chips button{min-width:49px;padding:7px 12px}
+#feedback{min-height:45px;font-weight:700}
+.good{color:var(--fit-success)}.bad{color:var(--fit-danger)}
+details{background:var(--fit-sunken);border:2px solid #111;border-radius:14px;padding:9px 13px}
+summary{cursor:pointer;font-weight:800;min-height:36px}
+#finish{display:none;text-align:center;padding:36px}
+#finish .stars{font-size:50px;letter-spacing:7px}
+svg text{font-family:Inter,system-ui,sans-serif}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.card{padding:23px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div>
+<span class="badge">Secondary • Python</span>
+<h1>Loop Tracer</h1>
+<p>Follow every iteration. Catch the off-by-one mistakes.</p>
+</div>
+<div class="hud">
+<span id="roundHud">Round 1/6</span>
+<span id="scoreHud">Score: 0</span>
+</div>
+</header>
+<div id="game" class="layout">
+<section class="card stage">
+<h2 id="typeTitle">Trace the loop</h2>
+<p id="question"></p>
+<div id="code" class="code" tabindex="0" aria-label="Python code with line numbers"></div>
+<h3>Iteration diagram</h3>
+<div id="visual"></div>
+<h3>Loop flow</h3>
+<svg viewBox="0 0 440 118" width="100%" role="img" aria-label="A loop checks its condition, executes its body and returns to the condition">
+<rect x="8" y="35" width="110" height="49" rx="12" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="63" y="64" text-anchor="middle" font-weight="800" font-size="14">Start</text>
+<path d="M118 59 H151" stroke="#111" stroke-width="3"/>
+<path d="M143 51 L154 59 L143 67" fill="none" stroke="#111" stroke-width="3"/>
+<path d="M204 16 L259 59 L204 102 L149 59 Z" fill="#2EC4A6" stroke="#111" stroke-width="3"/>
+<text x="204" y="55" font-size="13" text-anchor="middle" font-weight="800">Loop</text>
+<text x="204" y="70" font-size="13" text-anchor="middle">test</text>
+<path d="M259 59 H291" stroke="#111" stroke-width="3"/>
+<rect x="293" y="36" width="91" height="47" rx="12" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="338" y="64" text-anchor="middle" font-size="14" font-weight="800">Body</text>
+<path d="M338 83 V109 H204 V101" fill="none" stroke="#111" stroke-width="3"/>
+<text x="275" y="50" font-size="11">True</text>
+<text x="133" y="26" font-size="12">False → end</text>
+</svg>
+<p class="small">The test decides whether another iteration happens.</p>
+<div class="row">
+<button id="step">Step</button>
+<button id="run">▶ Run</button>
+<button id="reset">Reset trace</button>
+</div>
+<p id="traceStatus" class="small" aria-live="polite"></p>
+</section>
+<section class="card">
+<h2>Your challenge</h2>
+<div id="controls"></div>
+<h3>Live plot</h3>
+<svg id="plot" viewBox="0 0 500 280" role="img" aria-label="Variable values by iteration"></svg>
+<div class="row">
+<button id="hint">Hint (−50 points)</button>
+<button class="check" id="check">Check answer ★</button>
+</div>
+<div id="feedback" aria-live="polite"></div>
+<details>
+<summary>The idea</summary>
+<p><strong>for:</strong> Python's range(start, stop, step) excludes stop. <strong>while:</strong> test the condition before each iteration. <strong>Accumulator:</strong> a variable keeps a running total. Trace values after each completed iteration.</p>
+</details>
+</section>
+</div>
+<section id="finish" class="card">
+<h2>Tracing complete!</h2>
+<div class="stars" id="stars"></div>
+<p id="finalScore"></p>
+<button id="again" class="check">Play again</button>
+</section>
+</main>
+<script>
+"use strict";
+
+const $=id=>document.getElementById(id);
+const MAX_STEPS=10000;
+
+let seed=(Date.now()>>>0)||1;
+let round=0;
+let score=0;
+let tries=0;
+let hinted=false;
+let solved=false;
+let reveal=false;
+let config=null;
+let choices={};
+let execution=null;
+let shown=0;
+let ticket=0;
+let playing=false;
+
+const reduced=()=>
+  matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function rand(){
+  seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+  return seed/4294967296;
+}
+
+function ri(a,b){
+  return a+Math.floor(rand()*(b-a+1));
+}
+
+function shuffle(a){
+  return a.map(x=>({x,k:rand()}))
+    .sort((a,b)=>a.k-b.k)
+    .map(v=>v.x);
+}
+
+function pyRange(a,b,s){
+  const result=[];
+
+  if(
+    !Number.isInteger(a) ||
+    !Number.isInteger(b) ||
+    !Number.isInteger(s) ||
+    s===0
+  ){
+    return result;
+  }
+
+  for(
+    let value=a,count=0;
+    count<MAX_STEPS&&(s>0?value<b:value>b);
+    value+=s,count++
+  ){
+    result.push(value);
+  }
+
+  return result;
+}
+
+function buildRound(){
+  const type=[
+    "trace","range","while",
+    "trace","range","while"
+  ][round];
+
+  if(type==="trace"){
+    let a=ri(1,4);
+    let step=ri(1,3);
+    let count=ri(3,5);
+
+    if(round===3){
+      a=ri(2,5);
+      step=ri(1,2);
+      count=4;
+    }
+
+    config={
+      type,
+      a,
+      step,
+      count,
+      stop:a+step*count,
+      initial:ri(1,5),
+      factor:ri(1,3)
+    };
+
+    choices={};
+  }else if(type==="range"){
+    const start=ri(1,5);
+    const step=ri(2,4);
+    const count=ri(3,5);
+    const stop=start+step*count;
+
+    config={
+      type,start,stop,step,count,
+      target:pyRange(start,stop,step)
+    };
+
+    choices={
+      start:null,
+      stop:null,
+      step:null
+    };
+  }else{
+    const start=ri(0,3);
+    const end=start+ri(3,5);
+    const bug=ri(0,1);
+
+    config={
+      type,
+      start,
+      end,
+      bug,
+      faultyLine:bug===0?3:5,
+      correctFix:bug===0?"x < end":"x += 1"
+    };
+
+    choices={
+      line:null,
+      fix:null
+    };
+  }
+
+  reveal=false;
+  shown=0;
+  refreshExecution();
+}
+
+function rangeDefaults(){
+  const c=config;
+
+  return {
+    start:choices.start===null?c.start+1:choices.start,
+    stop:choices.stop===null?c.stop:choices.stop,
+    step:choices.step===null?1:choices.step
+  };
+}
+
+/*
+  The displayed programme and the teaching AST use
+  exactly the same user-selected arguments and fixes.
+
+  There is no execution of student text.
+*/
+
+function makeAST(){
+  const c=config;
+
+  if(c.type==="trace"){
+    return [
+      {
+        op:"set",
+        name:"total",
+        value:c.initial,
+        line:1
+      },
+      {
+        op:"for",
+        name:"i",
+        start:c.a,
+        stop:c.stop,
+        step:c.step,
+        line:2,
+        body:[
+          {
+            op:"addMul",
+            target:"total",
+            source:"i",
+            factor:c.factor,
+            line:3
+          }
+        ]
+      },
+      {
+        op:"print",
+        name:"total",
+        line:4
+      }
+    ];
+  }
+
+  if(c.type==="range"){
+    const args=rangeDefaults();
+
+    return [
+      {
+        op:"for",
+        name:"i",
+        start:args.start,
+        stop:args.stop,
+        step:args.step,
+        line:1,
+        body:[
+          {
+            op:"print",
+            name:"i",
+            line:2
+          }
+        ]
+      }
+    ];
+  }
+
+  const comparison=
+    c.bug===0 && choices.fix!=="x < end"
+      ? "<="
+      : "<";
+
+  const increment=
+    c.bug===1 && choices.fix!=="x += 1"
+      ? 2
+      : 1;
+
+  return [
+    {
+      op:"set",
+      name:"x",
+      value:c.start,
+      line:1
+    },
+    {
+      op:"set",
+      name:"end",
+      value:c.end,
+      line:2
+    },
+    {
+      op:"while",
+      name:"x",
+      cmp:comparison,
+      limitName:"end",
+      line:3,
+      body:[
+        {
+          op:"print",
+          name:"x",
+          line:4
+        },
+        {
+          op:"update",
+          name:"x",
+          by:increment,
+          line:5
+        }
+      ]
+    }
+  ];
+}
+
+function execute(ast){
+  const state={
+    vars:{},
+    output:[],
+    events:[],
+    steps:0,
+    capped:false
+  };
+
+  function fire(line,iteration){
+    if(state.steps>=MAX_STEPS){
+      state.capped=true;
+      return false;
+    }
+
+    state.steps++;
+
+    state.events.push({
+      line,
+      iteration,
+      vars:{...state.vars},
+      output:[...state.output]
+    });
+
+    return true;
+  }
+
+  function run(list,depth=0,iteration=0){
+    if(depth>20){
+      state.capped=true;
+      return;
+    }
+
+    for(const node of list){
+      if(state.capped) return;
+
+      if(node.op==="set"){
+        state.vars[node.name]=node.value;
+
+        if(!fire(node.line,iteration)) return;
+      }
+
+      if(node.op==="for"){
+        const values=pyRange(
+          node.start,
+          node.stop,
+          node.step
+        );
+
+        for(let k=0;k<values.length;k++){
+          state.vars[node.name]=values[k];
+
+          if(!fire(node.line,k+1)) break;
+
+          run(node.body,depth+1,k+1);
+
+          if(state.capped) break;
+        }
+      }
+
+      if(node.op==="while"){
+        let k=0;
+
+        while(
+          node.cmp==="<"
+            ? state.vars[node.name]<
+              state.vars[node.limitName]
+            : state.vars[node.name]<=
+              state.vars[node.limitName]
+        ){
+          if(!fire(node.line,++k)) break;
+
+          run(node.body,depth+1,k);
+
+          if(state.capped) break;
+        }
+      }
+
+      if(node.op==="addMul"){
+        state.vars[node.target]+=
+          state.vars[node.source]*node.factor;
+
+        if(!fire(node.line,iteration)) return;
+      }
+
+      if(node.op==="update"){
+        state.vars[node.name]+=node.by;
+
+        if(!fire(node.line,iteration)) return;
+      }
+
+      if(node.op==="print"){
+        state.output.push(
+          String(state.vars[node.name])
+        );
+
+        if(!fire(node.line,iteration)) return;
+      }
+    }
+  }
+
+  run(ast);
+
+  return state;
+}
+
+function refreshExecution(){
+  execution=execute(makeAST());
+  shown=0;
+}
+
+function traceRows(){
+  const c=config;
+  const rows=[];
+  const values=pyRange(c.a,c.stop,c.step);
+
+  let total=c.initial;
+
+  for(let k=0;k<values.length;k++){
+    total+=values[k]*c.factor;
+
+    rows.push({
+      iteration:k+1,
+      i:values[k],
+      total
+    });
+  }
+
+  return rows;
+}
+
+function codeLines(){
+  const c=config;
+
+  if(c.type==="trace"){
+    return [
+      `<span class="var">total</span> = <span class="value">${c.initial}</span>`,
+      `<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(${c.a}, ${c.stop}, ${c.step}):`,
+      `    <span class="var">total</span> += <span class="var">i</span> * <span class="value">${c.factor}</span>`,
+      `<span class="fn">print</span>(total)`
+    ];
+  }
+
+  if(c.type==="range"){
+    const args=rangeDefaults();
+
+    return [
+      `<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(${args.start}, ${args.stop}, ${args.step}):`,
+      `    <span class="fn">print</span>(i)`
+    ];
+  }
+
+  const cmp=
+    c.bug===0 && choices.fix!=="x < end"
+      ? "&lt;="
+      : "&lt;";
+
+  const increment=
+    c.bug===1 && choices.fix!=="x += 1"
+      ? 2
+      : 1;
+
+  return [
+    `<span class="var">x</span> = <span class="value">${c.start}</span>`,
+    `<span class="var">end</span> = <span class="value">${c.end}</span>`,
+    `<span class="kw">while</span> x ${cmp} <span class="var">end</span>:`,
+    `    <span class="fn">print</span>(x)`,
+    `    x += <span class="value">${increment}</span>`
+  ];
+}
+
+function codeUI(){
+  const current=shown>0
+    ? execution.events[
+        Math.min(shown-1,execution.events.length-1)
+      ]?.line
+    : -1;
+
+  $("code").innerHTML=codeLines().map((line,i)=>`
+    <div class="line ${current===i+1?"active":""}">
+      <span class="lno">${i+1}</span>${line}
+    </div>
+  `).join("");
+}
+
+function controlsUI(){
+  const c=config;
+
+  if(c.type==="trace"){
+    const rows=traceRows();
+
+    $("controls").innerHTML=`
+      <p>Fill the values <strong>after each iteration</strong>,
+      then enter the final printed output.</p>
+
+      <table class="trace">
+        <thead>
+          <tr>
+            <th>Iteration</th>
+            <th>i</th>
+            <th>total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r,k)=>`
+            <tr>
+              <td>${k+1}</td>
+              <td>
+                <input
+                  data-field="i"
+                  data-index="${k}"
+                  type="number"
+                  aria-label="Iteration ${k+1} i"
+                >
+              </td>
+              <td>
+                <input
+                  data-field="total"
+                  data-index="${k}"
+                  type="number"
+                  aria-label="Iteration ${k+1} total"
+                >
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+
+      <div class="row">
+        <label for="output">Final output:</label>
+        <input type="text" id="output" autocomplete="off">
+      </div>`;
+
+    return;
+  }
+
+  if(c.type==="range"){
+    const keys=["start","stop","step"];
+
+    $("controls").innerHTML=`
+      <p>Choose three range arguments that print this sequence:</p>
+      <div class="group">
+        <strong>${c.target.join(", ")}</strong>
+      </div>
+
+      ${keys.map(key=>{
+        const values=
+          key==="start"
+            ? shuffle([c.start,c.start+1,c.start-1])
+            : key==="step"
+              ? shuffle([c.step,1,c.step+1])
+              : shuffle([
+                  c.stop,
+                  c.stop-1,
+                  c.stop+c.step
+                ]);
+
+        return `
+          <div class="group">
+            <strong>${key}</strong>
+            <div class="chips">
+              ${values.map(value=>`
+                <button
+                  data-key="${key}"
+                  data-value="${value}"
+                  class="${choices[key]===value?"selected":""}"
+                >${value}</button>
+              `).join("")}
+            </div>
+          </div>`;
+      }).join("")}`;
+
+  }else{
+    const fixes=c.bug===0
+      ? ["x < end","x > end","x <= end","x == end"]
+      : ["x += 1","x -= 1","x += 3","x *= 2"];
+
+    $("controls").innerHTML=`
+      <p>Find the faulty line and choose its repair.
+      The intended output is every integer from
+      <strong>${c.start}</strong> up to, but not including,
+      <strong>${c.end}</strong>.</p>
+
+      <div class="group">
+        <strong>Faulty line</strong>
+        <div class="chips">
+          ${[1,2,3,4,5].map(n=>`
+            <button
+              data-line="${n}"
+              class="${choices.line===n?"selected":""}"
+            >Line ${n}</button>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="group">
+        <strong>Replacement statement</strong>
+        <div class="chips">
+          ${shuffle(fixes).map(value=>`
+            <button
+              data-fix="${value.replaceAll('"',"&quot;")}"
+              class="${choices.fix===value?"selected":""}"
+            >${value.replaceAll("<","&lt;").replaceAll(">","&gt;")}</button>
+          `).join("")}
+        </div>
+      </div>`;
+  }
+
+  $("controls").querySelectorAll("[data-key]").forEach(b=>{
+    b.onclick=()=>{
+      choices[b.dataset.key]=+b.dataset.value;
+      update();
+    };
+  });
+
+  $("controls").querySelectorAll("[data-line]").forEach(b=>{
+    b.onclick=()=>{
+      choices.line=+b.dataset.line;
+      update();
+    };
+  });
+
+  $("controls").querySelectorAll("[data-fix]").forEach(b=>{
+    b.onclick=()=>{
+      choices.fix=b.dataset.fix;
+      update();
+    };
+  });
+}
+
+function currentSeries(){
+  const c=config;
+
+  if(c.type==="trace"){
+    return {
+      name:"total",
+      values:traceRows().map(r=>r.total)
+    };
+  }
+
+  if(c.type==="range"){
+    const args=rangeDefaults();
+
+    return {
+      name:"i",
+      values:pyRange(args.start,args.stop,args.step)
+    };
+  }
+
+  const result=execute(makeAST());
+  const values=[];
+
+  for(const event of result.events){
+    if(event.line===4){
+      values.push(event.vars.x);
+    }
+  }
+
+  return {
+    name:"x",
+    values
+  };
+}
+
+/*
+  Before a correct Check, trace-round plots show only
+  iteration positions and a progress marker.
+
+  No accumulator values, final output, answer-derived
+  tick marks, or answer-bearing accessibility text
+  appear in the unrevealed trace round.
+*/
+
+function plotUI(){
+  const c=config;
+  const masked=c.type==="trace"&&!reveal;
+  const series=currentSeries();
+  const values=series.values.slice(0,100);
+  const count=values.length;
+
+  const x0=59,x1=467,y0=210,y1=43;
+
+  const X=i=>
+    x0+(x1-x0)*i/Math.max(1,count-1);
+
+  if(masked){
+    let s=`
+      <text x="16" y="20" font-weight="800">
+        Trace progress by iteration
+      </text>
+      <text x="15" y="36" font-size="11">
+        Value (hidden until checked)
+      </text>
+      <path d="M59 43 V210 H467"
+        stroke="#111" stroke-width="2" fill="none"/>`;
+
+    for(let i=0;i<count;i++){
+      const x=X(i);
+
+      s+=`
+        <line x1="${x}" y1="48" x2="${x}" y2="210"
+          stroke="#e4e2db" stroke-width="1"/>
+        <circle cx="${x}" cy="150" r="5"
+          fill="${i<shown?"#2EC4A6":"#fff"}"
+          stroke="#111" stroke-width="2"/>
+        <text x="${x}" y="229" text-anchor="middle"
+          font-size="11">${i+1}</text>`;
+    }
+
+    s+=`
+      <text x="263" y="254" text-anchor="middle"
+        font-size="13">Iteration number</text>
+      <text x="263" y="96" text-anchor="middle"
+        font-size="14" font-weight="800">
+        Accumulator values hidden
+      </text>`;
+
+    $("plot").innerHTML=s;
+
+    $("plot").setAttribute(
+      "aria-label",
+      `Trace progress: ${Math.min(shown,count)} `+
+      `of ${count} iterations inspected. `+
+      `Accumulator values are hidden until a correct check or hint.`
+    );
+
+    return;
+  }
+
+  const max=Math.max(1,...values,0);
+  const min=Math.min(0,...values);
+  const range=Math.max(1,max-min);
+
+  const Y=value=>
+    y0-(value-min)/range*(y0-y1);
+
+  let s=`
+    <text x="16" y="20" font-weight="800">
+      Variable value by iteration
+    </text>
+    <text x="15" y="36" font-size="11">Value (units)</text>
+    <path d="M59 39 V210 H467"
+      stroke="#111" stroke-width="2" fill="none"/>`;
+
+  for(let j=0;j<=4;j++){
+    const yy=y0-(y0-y1)*j/4;
+    const value=min+range*j/4;
+
+    s+=`
+      <line x1="59" y1="${yy}" x2="467" y2="${yy}"
+        stroke="#ddd"/>
+      <text x="50" y="${yy+4}" text-anchor="end"
+        font-size="11">${+value.toFixed(1)}</text>`;
+  }
+
+  const intervals=Math.min(5,Math.max(1,count-1));
+
+  for(let j=0;j<=intervals;j++){
+    const index=Math.round(
+      j*Math.max(1,count-1)/intervals
+    );
+
+    s+=`
+      <text x="${X(index)}" y="229"
+        text-anchor="middle" font-size="11">
+        ${index+1}
+      </text>`;
+  }
+
+  s+=`
+    <text x="263" y="254" text-anchor="middle"
+      font-size="13">Iteration number</text>`;
+
+  if(count){
+    s+=`
+      <polyline
+        points="${values.map((v,i)=>`${X(i)},${Y(v)}`).join(" ")}"
+        fill="none"
+        stroke="#168466"
+        stroke-width="3"
+      />`;
+
+    values.forEach((v,i)=>{
+      const currentIndex=Math.min(
+        count-1,Math.max(0,shown-1)
+      );
+
+      s+=`
+        <circle
+          cx="${X(i)}"
+          cy="${Y(v)}"
+          r="${i===currentIndex?6:4}"
+          fill="${i===currentIndex?"#FFC83D":"#168466"}"
+          stroke="#111"
+          stroke-width="1.5"
+        />`;
+    });
+  }else{
+    s+=`
+      <text x="260" y="125" text-anchor="middle">
+        No iterations
+      </text>`;
+  }
+
+  s+=`
+    <rect x="357" y="13" width="11" height="11"
+      fill="#168466"/>
+    <text x="374" y="23" font-size="12">${series.name}</text>`;
+
+  $("plot").innerHTML=s;
+
+  $("plot").setAttribute(
+    "aria-label",
+    `${series.name} values by iteration: `+
+    `${values.join(", ")||"no iterations"}.`
+  );
+}
+
+function visualUI(){
+  const c=config;
+
+  if(c.type==="trace"){
+    const rows=traceRows();
+
+    $("visual").innerHTML=`
+      <table class="trace">
+        <tr>
+          <th>Iteration</th>
+          <th>Loop variable i</th>
+          <th>Accumulator</th>
+        </tr>
+        ${rows.map((row,k)=>`
+          <tr>
+            <td>${k+1}</td>
+            <td>${shown>k?row.i:"?"}</td>
+            <td>${reveal?row.total:"?"}</td>
+          </tr>
+        `).join("")}
+      </table>`;
+
+    return;
+  }
+
+  const values=c.type==="range"
+    ? currentSeries().values
+    : Array.from(
+        {length:c.end-c.start},
+        (_,i)=>c.start+i
+      );
+
+  $("visual").innerHTML=`
+    <div class="row">
+      ${values.map((value,i)=>`
+        <span style="
+          display:inline-grid;
+          place-items:center;
+          border:2px solid #111;
+          border-radius:10px;
+          width:46px;
+          height:46px;
+          background:${shown>i?"#2EC4A6":"#fff"};
+          font-weight:800;
+        ">${shown>i?value:"?"}</span>
+      `).join("")}
+    </div>
+    <p class="small">
+      Cells reveal as the programme executes.
+    </p>`;
+}
+
+function update(){
+  stop();
+  refreshExecution();
+
+  if(config.type==="trace"){
+    codeUI();
+    visualUI();
+    plotUI();
+  }else{
+    controlsUI();
+    codeUI();
+    visualUI();
+    plotUI();
+  }
+
+  $("traceStatus").textContent="";
+}
+
+function step(){
+  if(execution.capped){
+    $("traceStatus").textContent=
+      "Loop never stops. Check the condition.";
+    return;
+  }
+
+  if(shown>=execution.events.length){
+    $("traceStatus").textContent=
+      "Execution finished.";
+    return;
+  }
+
+  const event=execution.events[shown++];
+
+  codeUI();
+  visualUI();
+  plotUI();
+
+  if(config.type==="trace"&&!reveal){
+    const variable=
+      Number.isFinite(event.vars.i)
+        ? ` • i = ${event.vars.i}`
+        : "";
+
+    $("traceStatus").textContent=
+      `Executed line ${event.line}${variable}.`;
+  }else{
+    $("traceStatus").textContent=
+      `Executed line ${event.line} • `+
+      Object.entries(event.vars)
+        .map(([k,v])=>`${k} = ${v}`)
+        .join(" • ")+
+      ` • Output: ${event.output.join(", ")||"none yet"}`;
+  }
+}
+
+function stop(){
+  ticket++;
+  playing=false;
+}
+
+async function animate(){
+  if(playing) return;
+
+  stop();
+
+  const activeTicket=ticket;
+  playing=true;
+  shown=0;
+
+  if(reduced()){
+    shown=execution.events.length;
+    codeUI();
+    visualUI();
+    plotUI();
+
+    $("traceStatus").textContent=
+      config.type==="trace"&&!reveal
+        ? "Execution finished. Complete your trace table."
+        : "Execution finished.";
+
+    playing=false;
+    return;
+  }
+
+  while(
+    playing &&
+    activeTicket===ticket &&
+    shown<execution.events.length
+  ){
+    step();
+
+    await new Promise(resolve=>
+      setTimeout(resolve,220)
+    );
+  }
+
+  playing=false;
+
+  if(config.type==="trace"&&!reveal){
+    $("traceStatus").textContent=
+      "Execution finished. Complete your trace table.";
+  }
+}
+
+function feedback(text,good){
+  $("feedback").className=good?"good":"bad";
+  $("feedback").textContent=text;
+}
+
+function revealTrace(){
+  reveal=true;
+  shown=execution.events.length;
+  codeUI();
+  visualUI();
+  plotUI();
+
+  const rows=traceRows();
+
+  $("traceStatus").textContent=
+    `Full trace: ${rows.map(r=>
+      `(${r.iteration}: i=${r.i}, total=${r.total})`
+    ).join(" • ")} • Printed output: ${rows.at(-1).total}`;
+}
+
+function check(){
+  if(solved) return;
+
+  tries++;
+
+  const c=config;
+  let good=false;
+  let reason="";
+
+  if(c.type==="trace"){
+    const rows=traceRows();
+
+    const inputs=[
+      ...$("controls").querySelectorAll(
+        "input[data-field]"
+      )
+    ];
+
+    const wrong=inputs.find(el=>
+      el.value.trim()==="" ||
+      +el.value!==rows[+el.dataset.index][el.dataset.field]
+    );
+
+    const expected=String(rows.at(-1).total);
+    const entered=$("output").value.trim();
+
+    good=!wrong&&entered===expected;
+
+    reason=wrong
+      ? `Look again at iteration ${+wrong.dataset.index+1}. `+
+        `The ${wrong.dataset.field} value is different.`
+      : "Check the final printed total.";
+  }else if(c.type==="range"){
+    const output=execute(makeAST()).output;
+
+    const chosen=Object.values(choices)
+      .every(value=>value!==null);
+
+    good=
+      chosen &&
+      output.length===c.target.length &&
+      output.every((value,i)=>+value===c.target[i]);
+
+    reason=
+      "The current range produces a different sequence. "+
+      "Remember that stop is excluded.";
+  }else{
+    good=
+      choices.line===c.faultyLine &&
+      choices.fix===c.correctFix;
+
+    reason=
+      choices.line!==c.faultyLine
+        ? "The selected line is not the cause. "+
+          "Trace the final iteration."
+        : "That replacement does not produce the intended sequence.";
+  }
+
+  if(!good){
+    feedback(reason,false);
+    return;
+  }
+
+  solved=true;
+
+  const points=hinted?50:tries===1?100:75;
+  score+=points;
+
+  $("scoreHud").textContent=`Score: ${score}`;
+
+  if(c.type==="trace"){
+    revealTrace();
+  }else{
+    refreshExecution();
+    codeUI();
+    visualUI();
+    plotUI();
+  }
+
+  feedback(
+    `★ Correct! ${
+      c.type==="trace"
+        ? "Each update changes the running total."
+        : c.type==="range"
+          ? "Your arguments generate the required sequence."
+          : "The repaired loop stops at the correct boundary."
+    } +${points} points.`,
+    true
+  );
+
+  setTimeout(()=>{
+    if(round===5){
+      finish();
+    }else{
+      round++;
+      load();
+    }
+  },1100);
+}
+
+function hint(){
+  if(solved) return;
+
+  hinted=true;
+
+  if(config.type==="trace"){
+    revealTrace();
+    feedback(
+      "The full trace is now visible. This round is worth 50 points.",
+      false
+    );
+  }else{
+    feedback(
+      config.type==="range"
+        ? "The first value is start. Consecutive values differ by step. Stop must lie beyond the final value."
+        : "Check the loop condition and how much the variable changes each time.",
+      false
+    );
+  }
+}
+
+function load(){
+  stop();
+
+  tries=0;
+  hinted=false;
+  solved=false;
+
+  buildRound();
+
+  $("roundHud").textContent=`Round ${round+1}/6`;
+
+  $("typeTitle").textContent=
+    config.type==="trace"
+      ? "A • Trace and accumulate"
+      : config.type==="range"
+        ? "B • Build a range"
+        : "C • Debug the while loop";
+
+  $("question").textContent=
+    config.type==="trace"
+      ? "Complete the table and work out the final output."
+      : config.type==="range"
+        ? "Use the chips to reconstruct a Python for loop."
+        : "Find the faulty line and choose its replacement.";
+
+  feedback("",true);
+
+  controlsUI();
+  codeUI();
+  visualUI();
+  plotUI();
+}
+
+function finish(){
+  $("game").style.display="none";
+  $("finish").style.display="block";
+
+  $("stars").textContent=
+    score>=520?"★★★":
+    score>=380?"★★☆":"★☆☆";
+
+  $("finalScore").textContent=
+    `Total score: ${score}/600`;
+}
+
+$("check").onclick=check;
+$("hint").onclick=hint;
+
+$("step").onclick=()=>{
+  stop();
+  step();
+};
+
+$("run").onclick=animate;
+
+$("reset").onclick=()=>{
+  stop();
+  shown=0;
+  codeUI();
+  visualUI();
+  plotUI();
+  $("traceStatus").textContent="Trace reset.";
+};
+
+$("again").onclick=()=>{
+  round=0;
+  score=0;
+  seed=(Date.now()>>>0)||1;
+
+  $("scoreHud").textContent="Score: 0";
+  $("game").style.display="grid";
+  $("finish").style.display="none";
+
+  load();
+};
+
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,1361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Loop Cost | FIT Coding</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,.code{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{font:800 14px/1.3 Inter,system-ui,sans-serif;min-height:44px;border:2px solid #111;border-radius:999px;padding:9px 17px;background:#fff;box-shadow:var(--sh-1);cursor:pointer}
+button:hover{background:var(--lvl-jc-tint)}
+button:active{transform:translateY(2px);box-shadow:none}
+button.selected{background:var(--lvl-jc);color:#fff}
+button:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible,input:focus-visible,.code:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+input[type=number]{width:125px;min-height:44px;padding:8px;border:2px solid #111;border-radius:12px;font:600 17px Inter,system-ui,sans-serif}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-jc);cursor:pointer}
+main{max-width:1370px;margin:auto;padding:16px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+h1{font-size:clamp(29px,4vw,43px);margin:8px 0;line-height:1.12;font-weight:800}
+h2{font-size:22px;font-weight:800;margin:0 0 12px}
+h3{font-size:17px;font-weight:800;margin:12px 0 7px}
+p{margin:8px 0}
+.badge{display:inline-block;padding:5px 14px;border:2px solid #111;border-radius:999px;background:var(--lvl-jc);color:var(--lvl-jc-on);text-transform:uppercase;font-size:12px;font-weight:800}
+.hud,.row{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.hud span{padding:8px 13px;border:2px solid #111;background:var(--fit-sunken);border-radius:12px;font-weight:800}
+.layout{display:grid;gap:18px}
+.card{background:#fff;border:2px solid #111;border-radius:24px;box-shadow:var(--sh-2);padding:17px;min-width:0}
+.stage{background:var(--lvl-jc-tint)}
+.code{background:#171717;color:#fff;border:2px solid #111;border-radius:15px;padding:13px;font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto}
+.line{white-space:pre;min-height:27px;border-radius:5px;padding:2px 6px}
+.line.active{background:#453376;outline:1px solid #a693ff}
+.lno{display:inline-block;color:#aaa;width:33px}
+.kw{color:#d6b5ff}.var{color:#86dcff}.fn{color:#9fedac}.literal{color:#ffcf8c}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.group{padding:13px;background:var(--fit-sunken);border:2px solid var(--fit-line-soft);border-radius:15px;margin:12px 0}
+#plot,#budgetPlot,#gridFigure{width:100%;height:auto;display:block}
+.small{font-size:13px;color:var(--fit-ink-3)}
+.row{margin:12px 0}
+#feedback{min-height:46px;font-weight:700}
+.good{color:var(--fit-success)}.bad{color:var(--fit-danger)}
+details{border:2px solid #111;background:var(--fit-sunken);border-radius:15px;padding:9px 14px}
+summary{font-weight:800;cursor:pointer;min-height:36px}
+#finish{display:none;text-align:center;padding:35px}
+.stars{font-size:48px;letter-spacing:8px}
+#readout{font-weight:800}
+svg text{font-family:Inter,system-ui,sans-serif}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.card{padding:23px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div>
+<span class="badge">JC • H2 Computing</span>
+<h1>Loop Cost</h1>
+<p>Count operations, classify growth and optimise loops.</p>
+</div>
+<div class="hud">
+<span id="roundHud">Round 1/6</span>
+<span id="scoreHud">Score: 0</span>
+</div>
+</header>
+<div id="game" class="layout">
+<section class="card stage">
+<h2 id="roundTitle">Operation counting</h2>
+<p id="question"></p>
+<div id="code" class="code" tabindex="0" aria-label="Python loop with line numbers"></div>
+<div class="row">
+<button id="step">Step operation</button>
+<button id="run">▶ Run</button>
+<button id="reset">Reset execution</button>
+</div>
+<div id="execution" aria-live="polite" class="small"></div>
+<h3>Nested-loop grid</h3>
+<svg id="gridFigure" viewBox="0 0 430 205" role="img" aria-label="Grid showing outer and inner loop executions"></svg>
+<p class="small">Each filled cell represents one execution of the counted statement. The figure uses a small sample size.</p>
+<h3>Operation budget</h3>
+<svg id="budgetPlot" viewBox="0 0 480 170" role="img" aria-label="Operations at n equals 1000 compared with an operation budget"></svg>
+</section>
+<section class="card">
+<h2>Investigate the loop</h2>
+<div id="controls"></div>
+<h3>Live growth plot</h3>
+<svg id="plot" viewBox="0 0 520 330" role="img" aria-label="Operation counts against logarithmic n axis with reference curves"></svg>
+<div class="row">
+<button id="hint">Hint (−50 points)</button>
+<button id="check" class="check">Check answer ★</button>
+</div>
+<div id="feedback" aria-live="polite"></div>
+<details>
+<summary>The idea</summary>
+<p>Count how often the marked statement executes, not how many conditions are tested. Sequential loop costs add. Nested loop costs depend on how many inner iterations occur for each outer iteration. The highest-order growth term determines Big-O.</p>
+</details>
+</section>
+</div>
+<section id="finish" class="card">
+<h2>Complexity mastered!</h2>
+<div class="stars" id="stars"></div>
+<p id="finalScore"></p>
+<button id="again" class="check">Play again</button>
+</section>
+</main>
+<script>
+"use strict";
+
+const $=id=>document.getElementById(id);
+const CAP=10000;
+
+let seed=(Date.now()>>>0)||1;
+let round=0;
+let score=0;
+let tries=0;
+let hinted=false;
+let solved=false;
+let config=null;
+let selected=null;
+let nView=20;
+let events=[];
+let cursor=0;
+let playing=false;
+let ticket=0;
+
+const reduced=()=>
+  matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function rand(){
+  seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+  return seed/4294967296;
+}
+
+function ri(a,b){
+  return a+Math.floor(rand()*(b-a+1));
+}
+
+const complexity=[
+  "O(1)",
+  "O(log n)",
+  "O(n)",
+  "O(n log n)",
+  "O(n²)"
+];
+
+/*
+  Teaching-language AST:
+  tick, set, for, while, halve.
+
+  This interpreter never executes the text displayed
+  in the code panel.
+*/
+
+function ast(kind){
+  if(kind==="constant"){
+    return [
+      {op:"tick",line:1}
+    ];
+  }
+
+  if(kind==="linear"){
+    return [
+      {
+        op:"for",
+        variable:"i",
+        start:0,
+        stop:"n",
+        step:1,
+        line:1,
+        body:[
+          {op:"tick",line:2}
+        ]
+      }
+    ];
+  }
+
+  if(kind==="square"){
+    return [
+      {
+        op:"for",
+        variable:"i",
+        start:0,
+        stop:"n",
+        step:1,
+        line:1,
+        body:[
+          {
+            op:"for",
+            variable:"j",
+            start:0,
+            stop:"n",
+            step:1,
+            line:2,
+            body:[
+              {op:"tick",line:3}
+            ]
+          }
+        ]
+      }
+    ];
+  }
+
+  if(kind==="triangle"){
+    return [
+      {
+        op:"for",
+        variable:"i",
+        start:0,
+        stop:"n",
+        step:1,
+        line:1,
+        body:[
+          {
+            op:"for",
+            variable:"j",
+            start:0,
+            stop:"i",
+            step:1,
+            line:2,
+            body:[
+              {op:"tick",line:3}
+            ]
+          }
+        ]
+      }
+    ];
+  }
+
+  if(kind==="offsetTriangle"){
+    return [
+      {
+        op:"for",
+        variable:"i",
+        start:0,
+        stop:"n",
+        step:1,
+        line:1,
+        body:[
+          {
+            op:"for",
+            variable:"j",
+            start:0,
+            stop:"i+1",
+            step:1,
+            line:2,
+            body:[
+              {op:"tick",line:3}
+            ]
+          }
+        ]
+      }
+    ];
+  }
+
+  if(kind==="log"){
+    return [
+      {
+        op:"while",
+        variable:"k",
+        start:"n",
+        line:1,
+        condition:"k>1",
+        body:[
+          {op:"tick",line:2},
+          {op:"halve",variable:"k",line:3}
+        ]
+      }
+    ];
+  }
+
+  if(kind==="nlog"){
+    return [
+      {
+        op:"for",
+        variable:"i",
+        start:0,
+        stop:"n",
+        step:1,
+        line:1,
+        body:[
+          {
+            op:"set",
+            variable:"k",
+            value:"n",
+            line:2
+          },
+          {
+            op:"while",
+            variable:"k",
+            condition:"k>1",
+            line:3,
+            body:[
+              {op:"tick",line:4},
+              {op:"halve",variable:"k",line:5}
+            ]
+          }
+        ]
+      }
+    ];
+  }
+
+  return [];
+}
+
+function execute(tree,n,cap=CAP,record=false){
+  n=Math.max(
+    0,
+    Math.min(1000,Math.trunc(Number(n)||0))
+  );
+
+  const state={
+    vars:{n},
+    count:0,
+    steps:0,
+    capped:false,
+    events:[]
+  };
+
+  function resolve(value){
+    if(typeof value==="number") return value;
+    if(value==="i+1") return (state.vars.i||0)+1;
+    return state.vars[value]||0;
+  }
+
+  function fire(line,tick=false){
+    if(++state.steps>cap){
+      state.capped=true;
+      return false;
+    }
+
+    if(tick) state.count++;
+
+    if(record){
+      state.events.push({
+        line,
+        vars:{...state.vars},
+        count:state.count,
+        tick
+      });
+    }
+
+    return true;
+  }
+
+  function walk(nodes,depth){
+    if(depth>12||state.capped) return;
+
+    for(const node of nodes){
+      if(state.capped) return;
+
+      if(node.op==="tick"){
+        if(!fire(node.line,true)) return;
+      }else if(node.op==="set"){
+        state.vars[node.variable]=resolve(node.value);
+
+        if(!fire(node.line)) return;
+      }else if(node.op==="halve"){
+        state.vars[node.variable]=
+          Math.floor(state.vars[node.variable]/2);
+
+        if(!fire(node.line)) return;
+      }else if(node.op==="for"){
+        const start=resolve(node.start);
+        const stop=resolve(node.stop);
+        const step=node.step;
+
+        if(
+          !Number.isFinite(start) ||
+          !Number.isFinite(stop) ||
+          step<=0
+        ){
+          state.capped=true;
+          return;
+        }
+
+        for(let i=start;i<stop;i+=step){
+          state.vars[node.variable]=i;
+
+          if(!fire(node.line)) break;
+
+          walk(node.body,depth+1);
+
+          if(state.capped) break;
+        }
+      }else if(node.op==="while"){
+        if(node.start!==undefined){
+          state.vars[node.variable]=resolve(node.start);
+        }
+
+        let guard=0;
+
+        while(state.vars[node.variable]>1){
+          if(++guard>cap){
+            state.capped=true;
+            break;
+          }
+
+          if(!fire(node.line)) break;
+
+          walk(node.body,depth+1);
+
+          if(state.capped) break;
+        }
+      }
+    }
+  }
+
+  walk(tree,0);
+  return state;
+}
+
+/*
+  The halving operation is performed using integer
+  division after each counted execution.
+
+  For example, a value of 8 progresses:
+  8 -> 4 -> 2 -> 1.
+  That is three counted executions.
+*/
+
+function exactLog(n){
+  let k=Math.max(0,Math.trunc(Number(n)||0));
+  let c=0;
+
+  while(k>1&&c<CAP){
+    k=Math.floor(k/2);
+    c++;
+  }
+
+  return c;
+}
+
+function count(kind,n){
+  if(!Number.isFinite(n)||n<0) return 0;
+
+  const a=Math.trunc(n);
+
+  if(kind==="constant") return 1;
+  if(kind==="linear") return a;
+  if(kind==="square") return a*a;
+
+  if(kind==="triangle"){
+    return a*(a-1)/2;
+  }
+
+  if(kind==="offsetTriangle"){
+    return a*(a+1)/2;
+  }
+
+  if(kind==="log"){
+    return exactLog(a);
+  }
+
+  if(kind==="nlog"){
+    return a*exactLog(a);
+  }
+
+  return 0;
+}
+
+function operationCount(kind,n){
+  return count(kind,n);
+}
+
+/*
+  Validate analytical counts against the interpreter
+  on small input sizes. The interpreter has a fixed
+  execution cap, so validation uses small n only.
+*/
+
+function verifyCounts(){
+  const kinds=[
+    "constant","linear","square",
+    "triangle","offsetTriangle","log","nlog"
+  ];
+
+  for(const kind of kinds){
+    for(let n=0;n<=12;n++){
+      const actual=execute(ast(kind),n).count;
+      const expected=operationCount(kind,n);
+
+      if(actual!==expected){
+        throw Error("Loop operation model mismatch.");
+      }
+    }
+  }
+}
+
+function makeRound(){
+  const type=[
+    "exact","growth","budget",
+    "exact","growth","budget"
+  ][round];
+
+  if(type==="exact"){
+    const kind=round===0
+      ? "triangle"
+      : "offsetTriangle";
+
+    config={
+      type,
+      kind,
+      n:ri(5,11),
+      budget:5000
+    };
+  }else if(type==="growth"){
+    const alternatives=round===1
+      ? ["log","nlog","square"]
+      : ["constant","linear","nlog"];
+
+    config={
+      type,
+      kind:alternatives[ri(0,alternatives.length-1)],
+      n:ri(20,50),
+      budget:5000
+    };
+  }else{
+    config={
+      type,
+      kind:"square",
+      n:1000,
+      budget:round===2
+        ? ri(1600,2800)
+        : ri(9000,14000)
+    };
+  }
+
+  selected=null;
+
+  /*
+    An exact-count challenge never starts with the
+    plot's current marker at the assessed input size.
+    The exact count and the marked n are concealed
+    from plotted value labels before Check succeeds.
+  */
+
+  nView=type==="exact"?100:config.n;
+
+  cursor=0;
+  events=[];
+}
+
+function programKind(){
+  return config.type==="budget"
+    ? (selected||config.kind)
+    : config.kind;
+}
+
+function codeLines(kind){
+  if(kind==="constant"){
+    return ["operations += 1"];
+  }
+
+  if(kind==="linear"){
+    return [
+      "for i in range(n):",
+      "    operations += 1"
+    ];
+  }
+
+  if(kind==="square"){
+    return [
+      "for i in range(n):",
+      "    for j in range(n):",
+      "        operations += 1"
+    ];
+  }
+
+  if(kind==="triangle"){
+    return [
+      "for i in range(n):",
+      "    for j in range(i):",
+      "        operations += 1"
+    ];
+  }
+
+  if(kind==="offsetTriangle"){
+    return [
+      "for i in range(n):",
+      "    for j in range(i + 1):",
+      "        operations += 1"
+    ];
+  }
+
+  if(kind==="log"){
+    return [
+      "k = n",
+      "while k > 1:",
+      "    operations += 1",
+      "    k //= 2"
+    ];
+  }
+
+  if(kind==="nlog"){
+    return [
+      "for i in range(n):",
+      "    k = n",
+      "    while k > 1:",
+      "        operations += 1",
+      "        k //= 2"
+    ];
+  }
+
+  return [];
+}
+
+function coloured(line){
+  return line
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replace(/\b(for|while|in|range)\b/g,
+      '<span class="kw">$1</span>')
+    .replace(/\b(operations|i|j|k|n)\b/g,
+      '<span class="var">$1</span>')
+    .replace(/\b(\d+)\b/g,
+      '<span class="literal">$1</span>');
+}
+
+function codeUI(){
+  const lines=codeLines(programKind());
+
+  const current=cursor>0
+    ? events[Math.min(cursor-1,events.length-1)]?.line
+    : -1;
+
+  $("code").innerHTML=lines.map((line,i)=>`
+    <div class="line ${current===i+1?"active":""}">
+      <span class="lno">${i+1}</span>${coloured(line)}
+    </div>
+  `).join("");
+}
+
+function choicesUI(){
+  const c=config;
+
+  if(c.type==="exact"){
+    $("controls").innerHTML=`
+      <div class="group">
+        <p>
+          Count the executions of
+          <strong>operations += 1</strong>
+          for n = ${c.n}.
+        </p>
+        <div class="row">
+          <label for="answer">Exact count</label>
+          <input
+            id="answer"
+            type="number"
+            min="0"
+            step="1"
+            placeholder="Your answer"
+          >
+        </div>
+      </div>`;
+  }else if(c.type==="growth"){
+    $("controls").innerHTML=`
+      <p>Choose the tightest growth order of the marked operation.</p>
+      <div class="chips">
+        ${complexity.map(value=>`
+          <button
+            data-class="${value}"
+            class="${selected===value?"selected":""}"
+          >${value}</button>
+        `).join("")}
+      </div>
+
+      <div class="group">
+        <label for="size">
+          Input size n:
+          <strong id="sizeLabel">${nView}</strong>
+        </label>
+
+        <input
+          id="size"
+          type="range"
+          min="1"
+          max="1000"
+          step="1"
+          value="${nView}"
+        >
+
+        <p id="readout" aria-live="polite"></p>
+      </div>`;
+  }else{
+    const opts=[
+      "square","linear","log","nlog"
+    ];
+
+    const labels={
+      square:"Original nested scan",
+      linear:"Single pass",
+      log:"Repeated halving",
+      nlog:"One halving loop per item"
+    };
+
+    $("controls").innerHTML=`
+      <p>
+        The original double loop exceeds the budget.
+        Choose a rewrite whose operation count at
+        n = 1000 stays within
+        <strong>${c.budget.toLocaleString()}</strong>,
+        while visiting every input item.
+      </p>
+
+      <div class="chips">
+        ${opts.map(kind=>`
+          <button
+            data-rewrite="${kind}"
+            class="${selected===kind?"selected":""}"
+          >${labels[kind]}</button>
+        `).join("")}
+      </div>
+
+      <p class="small">
+        A single pass is an admissible replacement.
+        Halving alone omits items.
+      </p>`;
+  }
+
+  $("controls").querySelectorAll("[data-class]").forEach(b=>{
+    b.onclick=()=>{
+      selected=b.dataset.class;
+      choicesUI();
+      plotUI();
+    };
+  });
+
+  $("controls").querySelectorAll("[data-rewrite]").forEach(b=>{
+    b.onclick=()=>{
+      selected=b.dataset.rewrite;
+      stop();
+      cursor=0;
+
+      codeUI();
+      choicesUI();
+      plotUI();
+      budgetUI();
+      gridUI();
+      traceUI();
+    };
+  });
+
+  if($("size")){
+    $("size").oninput=e=>{
+      nView=+e.target.value;
+      $("sizeLabel").textContent=nView;
+      readout();
+      plotUI();
+      gridUI();
+    };
+  }
+
+  readout();
+}
+
+function readout(){
+  if(!$("readout")) return;
+
+  $("readout").textContent=
+    `At n = ${nView}, executions: `+
+    `${operationCount(config.kind,nView).toLocaleString()}.`;
+}
+
+function targetGrowth(kind){
+  if(kind==="constant") return "O(1)";
+  if(kind==="log") return "O(log n)";
+  if(kind==="linear") return "O(n)";
+  if(kind==="nlog") return "O(n log n)";
+
+  return "O(n²)";
+}
+
+/*
+  Exact-count rounds use a separate view of the
+  growth plot before Check.
+
+  It shows reference shapes and a current marker
+  at an unrelated input size, but never gives the
+  challenged n's operation count in text, SVG labels,
+  accessibility text, or execution feedback.
+*/
+
+function publicAlgorithmName(kind){
+  const friendly={
+    constant:"constant", linear:"linear", log:"logarithmic",
+    nlog:"n log n", square:"quadratic (nested loops)",
+    triangle:"triangular (j from i)",
+    offsetTriangle:"offset triangular"
+  };
+  if(solved || config.type==="budget") return friendly[kind];
+  const names=["Algorithm A","Algorithm B","Algorithm C"];
+  const options=config.type==="growth"
+    ? (round===1?["log","nlog","square"]:["constant","linear","nlog"])
+    : ["triangle","offsetTriangle","log","nlog"];
+  return names[Math.max(0,options.indexOf(kind))%names.length];
+}
+
+function plotUI(){
+  const kind=programKind();
+  const exactHidden=
+    config.type==="exact"&&!solved;
+
+  const points=[];
+
+  for(let i=0;i<=60;i++){
+    points.push(
+      Math.max(
+        1,
+        Math.round(Math.pow(1000,i/60))
+      )
+    );
+  }
+
+  const all=points.map(n=>({
+    n,
+    actual:operationCount(kind,n),
+    lin:n,
+    nlog:n*Math.log2(Math.max(1,n)),
+    quad:n*n
+  }));
+
+  const max=Math.max(
+    1,
+    ...all.flatMap(o=>[
+      o.actual,o.lin,o.nlog,o.quad
+    ])
+  );
+
+  const left=57,right=495;
+  const top=46,bottom=262;
+
+  const X=n=>
+    left+
+    Math.log10(Math.max(1,n))/3*(right-left);
+
+  const Y=value=>
+    bottom-
+    Math.max(0,value)/max*(bottom-top);
+
+  let s=`
+    <text x="12" y="19" font-weight="800">
+      Operations against input size
+    </text>
+    <text x="12" y="34" font-size="11">
+      Operations (count)
+    </text>
+    <path d="M57 45 V262 H495"
+      fill="none" stroke="#111" stroke-width="2"/>`;
+
+  for(let i=0;i<=4;i++){
+    const value=max*i/4;
+    const y=Y(value);
+
+    s+=`
+      <line x1="57" y1="${y}" x2="495" y2="${y}"
+        stroke="#ddd"/>
+
+      <text x="49" y="${y+4}"
+        font-size="10" text-anchor="end">
+        ${exactHidden?"–":
+          value>=10000
+            ? (value/1000).toFixed(0)+"k"
+            : Math.round(value)}
+      </text>`;
+  }
+
+  for(const n of [1,10,100,1000]){
+    s+=`
+      <text x="${X(n)}" y="280"
+        font-size="12" text-anchor="middle">${n}</text>
+      <line x1="${X(n)}" y1="45"
+        x2="${X(n)}" y2="262"
+        stroke="#eee"/>`;
+  }
+
+  const lines=[
+    {
+      key:"lin",
+      colour:"#168466",
+      dash:"5 5",
+      label:"n"
+    },
+    {
+      key:"nlog",
+      colour:"#D88613",
+      dash:"5 5",
+      label:"n log₂ n"
+    },
+    {
+      key:"quad",
+      colour:"#D92D20",
+      dash:"5 5",
+      label:"n²"
+    },
+    {
+      key:"actual",
+      colour:"#6A45F5",
+      dash:"",
+      label:"Current"
+    }
+  ];
+
+  for(const line of lines){
+    s+=`
+      <polyline
+        points="${all.map(a=>
+          `${X(a.n).toFixed(1)},${Y(a[line.key]).toFixed(1)}`
+        ).join(" ")}"
+        stroke="${line.colour}"
+        stroke-width="${line.key==="actual"?3.5:1.7}"
+        stroke-dasharray="${line.dash}"
+        fill="none"
+      />`;
+  }
+
+  const x=X(nView);
+  const y=Y(operationCount(kind,nView));
+
+  s+=`
+    <circle cx="${x}" cy="${y}" r="6"
+      fill="#FFC83D" stroke="#111" stroke-width="2"/>
+
+    <text x="275" y="302"
+      font-size="13" text-anchor="middle">
+      Input size n (logarithmic axis)
+    </text>`;
+
+  lines.forEach((line,i)=>{
+    const xx=65+i*108;
+
+    s+=`
+      <line x1="${xx}" y1="320"
+        x2="${xx+20}" y2="320"
+        stroke="${line.colour}"
+        stroke-width="3"
+        stroke-dasharray="${line.dash}"/>
+
+      <text x="${xx+24}" y="324"
+        font-size="11">${line.label}</text>`;
+  });
+
+  $("plot").innerHTML=s;
+
+  if(exactHidden){
+    $("plot").setAttribute(
+      "aria-label",
+      `Growth comparison for ${publicAlgorithmName(kind)}. `+
+      `Dashed reference curves show n, n log n, and n squared. `+
+      `Current marker uses input size ${nView}, `+
+      `not the assessed input size. Exact count is hidden.`
+    );
+  }else{
+    $("plot").setAttribute(
+      "aria-label",
+      `${publicAlgorithmName(kind)}: `+
+      `${operationCount(kind,nView)} operations `+
+      `at input size ${nView}. `+
+      `Reference curves n, n log n and n squared.`
+    );
+  }
+}
+
+function budgetUI(){
+  const c=config;
+  const kind=programKind();
+
+  const exactHidden=
+    c.type==="exact"&&!solved;
+
+  const count1000=operationCount(kind,1000);
+  const max=Math.max(
+    c.budget,count1000,1
+  );
+
+  const x=65;
+  const width=375;
+
+  const barW=Math.min(
+    width,
+    width*count1000/max
+  );
+
+  const threshold=width*c.budget/max;
+
+  $("budgetPlot").innerHTML=`
+    <text x="10" y="20" font-weight="800">
+      At n = 1000
+    </text>
+
+    <text x="10" y="44" font-size="12">
+      Operation count
+    </text>
+
+    <rect
+      x="${x}" y="59"
+      width="${width}" height="33"
+      rx="7" fill="#eee"
+      stroke="#111" stroke-width="2"
+    />
+
+    <rect
+      x="${x}" y="59"
+      width="${barW}" height="33"
+      rx="6"
+      fill="${count1000<=c.budget?"#3DBE6B":"#FF8FB8"}"
+      stroke="#111" stroke-width="1"
+    />
+
+    <line
+      x1="${x+threshold}" y1="49"
+      x2="${x+threshold}" y2="104"
+      stroke="#D92D20" stroke-width="3"
+    />
+
+    <text
+      x="${Math.min(440,Math.max(90,x+threshold))}"
+      y="122"
+      text-anchor="middle"
+      font-size="12"
+    >Budget: ${c.budget.toLocaleString()}</text>
+
+    <text x="65" y="146"
+      font-size="14" font-weight="800">
+      ${exactHidden
+        ? "Reference budget view"
+        : `${count1000.toLocaleString()} executions ${
+            count1000<=c.budget?"✓":"✕"
+          }`}
+    </text>`;
+
+  $("budgetPlot").setAttribute(
+    "aria-label",
+    exactHidden
+      ? "Reference budget comparison at input size 1000. "+
+        "The assessed exact operation count is hidden."
+      : `${count1000} operations at n 1000 `+
+        `compared with budget ${c.budget}.`
+  );
+}
+
+function gridUI(){
+  const kind=programKind();
+  const sample=7;
+  const size=23;
+  const x0=55,y0=20;
+
+  let s=`
+    <text x="10" y="15"
+      font-size="12" font-weight="800">
+      Outer iteration / inner iteration
+    </text>`;
+
+  for(let i=0;i<sample;i++){
+    for(let j=0;j<sample;j++){
+      let active=true;
+
+      if(kind==="triangle") active=j<i;
+      if(kind==="offsetTriangle") active=j<=i;
+      if(kind==="linear") active=j===0;
+      if(kind==="constant") active=i===0&&j===0;
+      if(kind==="log") active=i===0&&j<exactLog(sample);
+      if(kind==="nlog") active=j<exactLog(sample);
+
+      const x=x0+j*39;
+      const y=y0+i*24;
+
+      s+=`
+        <rect
+          x="${x}" y="${y}"
+          width="${size+7}" height="21"
+          rx="4"
+          fill="${active?"#6A45F5":"#fff"}"
+          stroke="#111" stroke-width="1.5"
+        />`;
+
+      if(i===0){
+        s+=`
+          <text x="${x+15}" y="193"
+            text-anchor="middle"
+            font-size="11">${j}</text>`;
+      }
+    }
+  }
+
+  $("gridFigure").innerHTML=s;
+
+  $("gridFigure").setAttribute(
+    "aria-label",
+    `Seven by seven sample grid for ${publicAlgorithmName(kind)}. `+
+    `Purple cells mark counted operations for the sample.`
+  );
+}
+
+function traceUI(){
+  const kind=programKind();
+
+  /*
+    Exact-count challenges are executed at a
+    different input size before a correct Check.
+    The assessed count is never shown by the stepper.
+  */
+
+  const n=
+    config.type==="exact"&&!solved
+      ? 3
+      : Math.min(
+          config.type==="budget"?10:config.n,
+          12
+        );
+
+  const state=execute(
+    ast(kind),n,CAP,true
+  );
+
+  events=state.events;
+  cursor=0;
+
+  codeUI();
+
+  $("execution").textContent=
+    `Ready to execute with n = ${n}.`;
+}
+
+function step(){
+  if(cursor>=events.length){
+    $("execution").textContent=
+      "Execution complete.";
+    return;
+  }
+
+  const event=events[cursor++];
+
+  codeUI();
+
+  $("execution").textContent=
+    `Statement step ${cursor}/${events.length} • `+
+    Object.entries(event.vars)
+      .map(([k,v])=>`${k}=${v}`)
+      .join(", ")+
+    ` • Count so far: ${event.count}`;
+}
+
+function stop(){
+  ticket++;
+  playing=false;
+}
+
+async function run(){
+  stop();
+  traceUI();
+
+  if(reduced()){
+    cursor=events.length;
+    codeUI();
+
+    $("execution").textContent=
+      `Execution finished. Counted `+
+      `${events.at(-1)?.count||0} operations.`;
+
+    return;
+  }
+
+  playing=true;
+  const activeTicket=ticket;
+
+  while(
+    playing &&
+    ticket===activeTicket &&
+    cursor<events.length
+  ){
+    step();
+
+    await new Promise(resolve=>
+      setTimeout(resolve,100)
+    );
+  }
+
+  playing=false;
+}
+
+function feedback(text,good){
+  $("feedback").textContent=text;
+  $("feedback").className=good?"good":"bad";
+}
+
+function check(){
+  if(solved) return;
+
+  tries++;
+
+  const c=config;
+  let good=false;
+  let reason="";
+
+  if(c.type==="exact"){
+    const input=$("answer");
+
+    good=
+      input.value.trim()!=="" &&
+      Number.isInteger(+input.value) &&
+      +input.value===operationCount(c.kind,c.n);
+
+    reason=
+      "Count the inner executions for each outer iteration "+
+      "and add them. Watch whether range(i) includes i.";
+  }else if(c.type==="growth"){
+    good=selected===targetGrowth(c.kind);
+
+    reason=
+      "Compare the number of operations when n grows. "+
+      "Ignore constant multipliers.";
+  }else{
+    good=
+      selected==="linear" &&
+      operationCount(selected,1000)<=c.budget;
+
+    reason=
+      !selected
+        ? "Choose a rewrite first."
+        : selected==="log"
+          ? "Halving does not visit every input item."
+          : selected==="nlog"
+            ? "The extra inner work is unnecessary for this task."
+            : "This option still exceeds the budget.";
+  }
+
+  if(!good){
+    feedback(reason,false);
+    return;
+  }
+
+  solved=true;
+
+  const points=hinted?50:tries===1?100:75;
+  score+=points;
+
+  $("scoreHud").textContent=`Score: ${score}`;
+
+  plotUI();
+  budgetUI();
+  traceUI();
+
+  feedback(
+    `★ Correct! ${
+      c.type==="exact"
+        ? "The inner-loop counts add to your result."
+        : c.type==="growth"
+          ? "The dominant growth term determines complexity."
+          : "A single pass visits every item within budget."
+    } +${points} points.`,
+    true
+  );
+
+  setTimeout(()=>{
+    if(round===5){
+      finish();
+    }else{
+      round++;
+      load();
+    }
+  },1100);
+}
+
+function hint(){
+  hinted=true;
+
+  feedback(
+    config.type==="exact"
+      ? "Draw one row per outer iteration. The number of filled cells changes across rows."
+      : config.type==="growth"
+        ? "A halving loop grows logarithmically. An inner loop per item multiplies the costs."
+        : "The chosen algorithm must fit the budget and visit every item.",
+    false
+  );
+}
+
+function load(){
+  stop();
+
+  tries=0;
+  hinted=false;
+  solved=false;
+
+  makeRound();
+
+  $("roundHud").textContent=`Round ${round+1}/6`;
+
+  $("roundTitle").textContent=
+    config.type==="exact"
+      ? "A • Exact operation count"
+      : config.type==="growth"
+        ? "B • Growth order"
+        : "C • Optimisation budget";
+
+  $("question").textContent=
+    config.type==="exact"
+      ? `For input n = ${config.n}, determine how many times the marked operation executes.`
+      : config.type==="growth"
+        ? "Identify the tightest asymptotic upper bound and explore how the count changes."
+        : "Choose an algorithmic rewrite that meets the stated operation budget.";
+
+  feedback("",true);
+
+  choicesUI();
+  codeUI();
+  gridUI();
+  budgetUI();
+  plotUI();
+  traceUI();
+}
+
+function finish(){
+  $("game").style.display="none";
+  $("finish").style.display="block";
+
+  $("stars").textContent=
+    score>=520?"★★★":
+    score>=380?"★★☆":"★☆☆";
+
+  $("finalScore").textContent=
+    `You earned ${score}/600 points.`;
+}
+
+$("check").onclick=check;
+$("hint").onclick=hint;
+
+$("step").onclick=()=>{
+  stop();
+  step();
+};
+
+$("run").onclick=run;
+
+$("reset").onclick=()=>{
+  stop();
+  traceUI();
+};
+
+$("again").onclick=()=>{
+  round=0;
+  score=0;
+  seed=(Date.now()>>>0)||1;
+
+  $("scoreHud").textContent="Score: 0";
+  $("game").style.display="grid";
+  $("finish").style.display="none";
+
+  load();
+};
+
+verifyCounts();
+load();
+</script>
+</body>
+</html>

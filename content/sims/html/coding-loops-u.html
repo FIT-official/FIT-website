@@ -1,0 +1,1684 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Invariant Hunter | FIT Coding</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,.code{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{font:800 14px/1.3 Inter,system-ui,sans-serif;min-height:44px;border:2px solid #111;border-radius:999px;background:#fff;padding:9px 17px;box-shadow:var(--sh-1);cursor:pointer;text-align:center}
+button:hover{background:var(--lvl-uni-tint)}
+button:active{transform:translateY(2px);box-shadow:none}
+button.selected{background:var(--lvl-uni);color:#fff;box-shadow:var(--sh-2)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,.code:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2);color:#111}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+main{max-width:1370px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:18px}
+h1{font-size:clamp(29px,4vw,43px);font-weight:800;line-height:1.12;margin:8px 0}
+h2{font-size:22px;font-weight:800;margin:0 0 12px}
+h3{font-size:17px;font-weight:800;margin:13px 0 7px}
+p{margin:8px 0}
+.badge{display:inline-block;padding:5px 14px;border:2px solid #111;border-radius:999px;background:var(--lvl-uni);color:var(--lvl-uni-on);font-size:12px;font-weight:800;text-transform:uppercase}
+.hud,.row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.hud span{padding:8px 13px;border:2px solid #111;border-radius:12px;background:var(--fit-sunken);font-weight:800}
+.layout{display:grid;gap:18px}
+.card{padding:17px;min-width:0;border:2px solid #111;border-radius:24px;box-shadow:var(--sh-2);background:#fff}
+.stage{background:var(--lvl-uni-tint)}
+.code{background:#171717;color:#fff;border:2px solid #111;border-radius:15px;padding:12px;font:12px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;min-height:140px}
+.line{white-space:pre;padding:3px 5px;border-radius:5px}
+.line.active{background:#243a70;outline:1px solid #7db1ff}
+.lno{display:inline-block;width:29px;color:#aaa}
+.kw{color:#ffcd91}.name{color:#94dfff}.num{color:#a5e6aa}
+#array,#variantPlot,#intervalPlot{width:100%;height:auto;display:block}
+.group{border:2px solid var(--fit-line-soft);border-radius:14px;padding:12px;margin:10px 0;background:var(--fit-sunken)}
+.options{display:grid;gap:9px;margin-top:10px}
+.options button{border-radius:14px;text-align:left;min-height:51px;overflow-wrap:anywhere;white-space:normal}
+.row{margin:12px 0}
+.small{font-size:13px;color:var(--fit-ink-3)}
+#feedback{min-height:50px;font-weight:800}
+.good{color:var(--fit-success)}.bad{color:var(--fit-danger)}
+#status{min-height:37px;font-size:13px;font-weight:700}
+#invariantTest{padding:10px 12px;background:#fff;border:2px solid #111;border-radius:12px;font-size:14px;font-weight:700;min-height:45px}
+details{border:2px solid #111;border-radius:15px;background:var(--fit-sunken);padding:9px 14px}
+summary{cursor:pointer;font-weight:800;min-height:36px}
+#finish{display:none;text-align:center;padding:35px}
+.stars{font-size:49px;letter-spacing:7px}
+svg text{font-family:Inter,system-ui,sans-serif}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.card{padding:23px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div>
+<span class="badge">University • Algorithms</span>
+<h1>Invariant Hunter</h1>
+<p>Prove progress, test invariants and repair faulty loops.</p>
+</div>
+<div class="hud">
+<span id="roundHud">Round 1/6</span>
+<span id="scoreHud">Score: 0</span>
+</div>
+</header>
+<div id="game" class="layout">
+<section class="card stage">
+<h2 id="roundTitle">Loop invariant</h2>
+<p id="question"></p>
+<div id="code" class="code" tabindex="0" aria-label="C++ algorithm with highlighted execution line"></div>
+<div class="row">
+<button id="step">Step iteration</button>
+<button id="run">▶ Run</button>
+<button id="reset">Reset execution</button>
+<button id="shuffle" aria-label="Generate another test array">New test array</button>
+</div>
+<p id="status" aria-live="polite"></p>
+<h3>Array and pointers</h3>
+<svg id="array" role="img" aria-label="Array cells with loop indices and pointers" viewBox="0 0 500 180"></svg>
+<div id="invariantTest" aria-live="polite">Select a property to test it at loop boundaries.</div>
+<h3>Proof picture</h3>
+<svg viewBox="0 0 480 105" width="100%" role="img" aria-label="A loop invariant holds at entry, is preserved by each iteration and supports the conclusion at exit">
+<rect x="4" y="16" width="135" height="66" rx="13" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="71" y="43" text-anchor="middle" font-size="14" font-weight="800">Initialise</text>
+<text x="71" y="60" text-anchor="middle" font-size="12">Property holds</text>
+<path d="M140 49 H168" stroke="#111" stroke-width="3"/>
+<path d="M159 42 L170 49 L159 56" stroke="#111" stroke-width="3" fill="none"/>
+<rect x="174" y="16" width="137" height="66" rx="13" fill="#1F66E5" stroke="#111" stroke-width="3"/>
+<text x="242" y="43" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">Maintain</text>
+<text x="242" y="60" text-anchor="middle" font-size="12" fill="#fff">One iteration</text>
+<path d="M311 49 H340" stroke="#111" stroke-width="3"/>
+<path d="M331 42 L342 49 L331 56" stroke="#111" stroke-width="3" fill="none"/>
+<rect x="347" y="16" width="129" height="66" rx="13" fill="#3DBE6B" stroke="#111" stroke-width="3"/>
+<text x="411" y="43" text-anchor="middle" font-size="14" font-weight="800">Terminate</text>
+<text x="411" y="60" text-anchor="middle" font-size="12">Use property</text>
+</svg>
+<p class="small">Prove a property initially, maintain it across the loop and use it at termination.</p>
+</section>
+<section class="card">
+<h2>Investigate correctness</h2>
+<div id="controls"></div>
+<h3>Variant value versus iteration</h3>
+<svg id="variantPlot" role="img" aria-label="Loop variant values by iteration" viewBox="0 0 510 255"></svg>
+<h3>Search interval</h3>
+<svg id="intervalPlot" role="img" aria-label="Shaded search interval from lo to hi at each iteration" viewBox="0 0 510 240"></svg>
+<div class="row">
+<button id="hint">Hint (−50 points)</button>
+<button id="check" class="check">Check answer ★</button>
+</div>
+<div id="feedback" aria-live="polite"></div>
+<details>
+<summary>The idea</summary>
+<p>A <strong>loop invariant</strong> must hold before and after every iteration. A <strong>termination variant</strong> is a non-negative integer that strictly decreases while the loop continues. Correct binary search must shrink its interval; an incorrect bound update may leave the interval unchanged.</p>
+</details>
+</section>
+</div>
+<section id="finish" class="card">
+<h2>Proof complete!</h2>
+<div class="stars" id="stars"></div>
+<p id="finalScore"></p>
+<button id="again" class="check">Play again</button>
+</section>
+</main>
+<script>
+"use strict";
+
+const $=id=>document.getElementById(id);
+const CAP=10000;
+
+let seed=(Date.now()>>>0)||1;
+let round=0;
+let score=0;
+let tries=0;
+let hinted=false;
+let solved=false;
+
+let config=null;
+let selected=null;
+let trace=[];
+let cursor=0;
+let playing=false;
+let ticket=0;
+let failed=false;
+
+const reduced=()=>
+  matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function rand(){
+  seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+  return seed/4294967296;
+}
+
+function ri(a,b){
+  return a+Math.floor(rand()*(b-a+1));
+}
+
+function shuffle(a){
+  return a.map(x=>({x,k:rand()}))
+    .sort((a,b)=>a.k-b.k)
+    .map(o=>o.x);
+}
+
+function generateArray(length=12){
+  let value=ri(1,5);
+  const arr=[];
+
+  for(let i=0;i<length;i++){
+    value+=ri(1,4);
+    arr.push(value);
+  }
+
+  return arr;
+}
+
+function generateInsertionArray(index){
+  const arr=generateArray(10);
+  arr[index]=ri(2,12);
+
+  const prefix=arr.slice(0,index).sort((a,b)=>a-b);
+  arr.splice(0,index,...prefix);
+
+  return arr;
+}
+
+function makeRound(){
+  const type=[
+    "invariant","variant","bug",
+    "invariant","variant","bug"
+  ][round];
+
+  const alg=
+    round===0?"sum":
+    round===1?"search":
+    round===2?"search":
+    round===3?"insert":
+    round===4?"insert":"search";
+
+  const index=alg==="insert"?ri(4,7):null;
+
+  const arr=
+    alg==="insert"
+      ? generateInsertionArray(index)
+      : alg==="sum"
+        ? Array.from(
+            {length:ri(7,11)},
+            ()=>ri(1,9)
+          )
+        : generateArray(ri(10,16));
+
+  const target=
+    alg==="search"
+      ? type==="bug"
+        ? arr.at(-1)+ri(1,5)
+        : arr[ri(0,arr.length-1)]
+      : null;
+
+  config={
+    type,
+    alg,
+    arr,
+    target,
+    index,
+    initial:[...arr]
+  };
+
+  selected=null;
+  cursor=0;
+  failed=false;
+}
+
+function candidateList(){
+  const c=config;
+
+  if(c.type==="invariant"){
+    if(c.alg==="sum"){
+      return [
+        {
+          id:"sumPrefix",
+          text:"sum equals the total of the first i elements."
+        },
+        {
+          id:"sumFull",
+          text:"sum always equals the total of the whole array."
+        },
+        {
+          id:"sumRemaining",
+          text:"sum equals the total of elements from i onwards."
+        },
+        {
+          id:"sumIndex",
+          text:"sum always equals i."
+        }
+      ];
+    }
+
+    return [
+      {
+        id:"insertShift",
+        text:"Positions j+2 to index hold elements greater than key, each shifted one place right; A[0..j] is still sorted."
+      },
+      {
+        id:"insertSorted",
+        text:"The entire array is sorted throughout the loop."
+      },
+      {
+        id:"insertKey",
+        text:"key always equals A[j]."
+      },
+      {
+        id:"insertFixed",
+        text:"j stays constant throughout the loop."
+      }
+    ];
+  }
+
+  if(c.type==="variant"){
+    if(c.alg==="search"){
+      return [
+        {
+          id:"width",
+          text:"hi − lo"
+        },
+        {
+          id:"lo",
+          text:"lo"
+        },
+        {
+          id:"hi",
+          text:"hi"
+        },
+        {
+          id:"sumBounds",
+          text:"hi + lo"
+        }
+      ];
+    }
+
+    return [
+      {
+        id:"jplus",
+        text:"j + 1"
+      },
+      {
+        id:"index",
+        text:"index"
+      },
+      {
+        id:"negj",
+        text:"−j"
+      },
+      {
+        id:"key",
+        text:"key"
+      }
+    ];
+  }
+
+  return [
+    {
+      id:"lofix",
+      text:"Line 5: replace lo = mid with lo = mid + 1"
+    },
+    {
+      id:"hifix",
+      text:"Line 7: replace hi = mid with hi = mid - 1"
+    },
+    {
+      id:"midfix",
+      text:"Line 4: replace lo + (hi - lo) / 2 with lo + (hi - lo + 1) / 2"
+    },
+    {
+      id:"cmpfix",
+      text:"Line 5: replace A[mid] < target with A[mid] > target"
+    }
+  ];
+}
+
+function correctId(){
+  if(config.type==="bug"){
+    return "lofix";
+  }
+
+  if(config.type==="invariant"){
+    return config.alg==="sum"
+      ? "sumPrefix"
+      : "insertShift";
+  }
+
+  return config.alg==="search"
+    ? "width"
+    : "jplus";
+}
+
+/*
+  Displayed C++17 snippets are generated from the
+  same limited loop-operation AST as the executor.
+*/
+
+function sourceLines(){
+  const c=config;
+
+  if(c.alg==="sum"){
+    return [
+      "int sum = 0;",
+      "int i = 0;",
+      "while (i < n) {",
+      "    sum += A[i];",
+      "    ++i;",
+      "}"
+    ];
+  }
+
+  if(c.alg==="insert"){
+    return [
+      "int key = A[index];",
+      "int j = index - 1;",
+      "while (j >= 0 && A[j] > key) {",
+      "    A[j + 1] = A[j];",
+      "    --j;",
+      "}",
+      "A[j + 1] = key;"
+    ];
+  }
+
+  const repaired=
+    c.type==="bug"&&selected==="lofix";
+
+  return [
+    "int lo = 0;",
+    "int hi = n;",
+    "while (lo < hi) {",
+    "    int mid = lo + (hi - lo) / 2;",
+    `    if (A[mid] < target) lo = ${c.type==="bug"&&!repaired?"mid":"mid + 1"};`,
+    "    else",
+    "        hi = mid;",
+    "}"
+  ];
+}
+
+function syntax(text){
+  return text
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replace(/\b(int|while|if|else)\b/g,
+      '<span class="kw">$1</span>')
+    .replace(/\b(sum|lo|hi|mid|key|index|target|j|i|n)\b/g,
+      '<span class="name">$1</span>')
+    .replace(/\b(\d+)\b/g,
+      '<span class="num">$1</span>');
+}
+
+function codeUI(){
+  const current=trace[cursor]?.line||0;
+
+  $("code").innerHTML=sourceLines().map((line,i)=>`
+    <div class="line ${current===i+1?"active":""}">
+      <span class="lno">${i+1}</span>${syntax(line)}
+    </div>
+  `).join("");
+}
+
+function ast(){
+  const c=config;
+
+  if(c.alg==="sum"){
+    return {
+      op:"sum",
+      initial:0
+    };
+  }
+
+  if(c.alg==="insert"){
+    return {
+      op:"insert",
+      index:c.index
+    };
+  }
+
+  return {
+    op:"lowerBound",
+    bug:
+      c.type==="bug" &&
+      selected!=="lofix"
+  };
+}
+
+/*
+  Array elements and loop states are copied.
+  Student selections choose between known AST
+  operations; displayed C++ is never executed.
+*/
+
+function executor(){
+  const c=config;
+  const node=ast();
+  const A=[...c.initial];
+  const states=[];
+  const n=A.length;
+
+  let iterations=0;
+  let capped=false;
+
+  function push(state){
+    if(states.length>=CAP){
+      capped=true;
+      return false;
+    }
+
+    states.push({
+      A:[...A],
+      iteration:iterations,
+      ...state
+    });
+
+    return true;
+  }
+
+  if(node.op==="sum"){
+    let sum=0;
+    let i=0;
+
+    while(i<n){
+      if(!push({
+        i,
+        sum,
+        line:3,
+        variant:n-i
+      })){
+        break;
+      }
+
+      sum+=A[i];
+      i++;
+      iterations++;
+    }
+
+    push({
+      i,
+      sum,
+      line:6,
+      variant:0,
+      done:true
+    });
+
+  }else if(node.op==="insert"){
+    const index=node.index;
+    const key=A[index];
+
+    let j=index-1;
+
+    while(j>=0&&A[j]>key){
+      /*
+        This state is captured at a loop boundary,
+        before the next shift operation.
+
+        The insertion invariant must already hold
+        here, including the first boundary where
+        position index contains key.
+      */
+
+      if(!push({
+        j,
+        key,
+        index,
+        line:3,
+        variant:j+1,
+        boundary:true
+      })){
+        break;
+      }
+
+      A[j+1]=A[j];
+      j--;
+      iterations++;
+    }
+
+    /*
+      Capture the final loop boundary before key
+      is inserted. This is the state where the
+      invariant combines with the false loop test
+      to justify inserting key at j+1.
+    */
+
+    if(!capped){
+      push({
+        j,
+        key,
+        index,
+        line:3,
+        variant:Math.max(0,j+1),
+        boundary:true,
+        exitBoundary:true
+      });
+    }
+
+    if(!capped){
+      A[j+1]=key;
+
+      /*
+        This final state represents the statement
+        after the loop. The loop invariant is not
+        retested here because the insertion changes
+        the representation of the shifted suffix.
+      */
+
+      push({
+        j,
+        key,
+        index,
+        line:7,
+        variant:0,
+        done:true,
+        boundary:false
+      });
+    }
+
+  }else{
+    let lo=0;
+    let hi=n;
+    let guard=0;
+
+    while(lo<hi){
+      if(++guard>CAP){
+        capped=true;
+        break;
+      }
+
+      const mid=
+        lo+Math.floor((hi-lo)/2);
+
+      if(!push({
+        lo,
+        hi,
+        mid,
+        line:4,
+        variant:hi-lo
+      })){
+        break;
+      }
+
+      if(A[mid]<c.target){
+        lo=node.bug?mid:mid+1;
+      }else{
+        hi=mid;
+      }
+
+      iterations++;
+    }
+
+    if(!capped){
+      push({
+        lo,
+        hi,
+        mid:null,
+        line:8,
+        variant:0,
+        done:true
+      });
+    }
+  }
+
+  return {
+    states,
+    capped,
+    array:A
+  };
+}
+
+function resetTrace(){
+  stop();
+
+  const result=executor();
+
+  trace=result.states;
+  failed=result.capped;
+  cursor=0;
+
+  codeUI();
+  sceneUI();
+  variantPlot();
+  intervalPlot();
+  testUI();
+
+  $("status").textContent=
+    failed
+      ? "Loop never stops: the interval is not guaranteed to shrink."
+      : "Ready to inspect the loop, one iteration at a time.";
+}
+
+function current(){
+  return trace[
+    Math.min(cursor,trace.length-1)
+  ]||null;
+}
+
+function sceneUI(){
+  const state=current();
+  if(!state) return;
+
+  const A=state.A;
+  const n=A.length;
+  const c=config;
+
+  const gap=4;
+  const w=Math.min(
+    34,
+    (475-(n-1)*gap)/n
+  );
+
+  const start=
+    (500-(n*w+(n-1)*gap))/2;
+
+  let svg="";
+
+  for(let i=0;i<n;i++){
+    const x=start+i*(w+gap);
+    let marked=false;
+
+    if(c.alg==="search"){
+      marked=i>=state.lo&&i<state.hi;
+    }
+
+    if(c.alg==="sum"){
+      marked=i<state.i;
+    }
+
+    if(c.alg==="insert"){
+      marked=i>state.j&&i<=c.index;
+    }
+
+    svg+=`
+      <rect
+        x="${x}" y="55"
+        width="${w}" height="45"
+        rx="6"
+        fill="${marked?"#A6CBFF":"#fff"}"
+        stroke="#111" stroke-width="2"
+      />
+
+      <text x="${x+w/2}" y="83"
+        text-anchor="middle"
+        font-size="${n>13?11:13}"
+        font-weight="800">${A[i]}</text>
+
+      <text x="${x+w/2}" y="117"
+        text-anchor="middle"
+        font-size="11">${i}</text>`;
+
+    const labels=[];
+
+    if(c.alg==="search"){
+      if(i===state.lo) labels.push("lo");
+      if(i===state.hi-1) labels.push("hi−1");
+      if(i===state.mid) labels.push("mid");
+    }else if(c.alg==="sum"){
+      if(i===state.i) labels.push("i");
+    }else{
+      if(i===state.j) labels.push("j");
+      if(i===c.index) labels.push("index");
+    }
+
+    if(labels.length){
+      svg+=`
+        <text x="${x+w/2}" y="42"
+          font-size="10"
+          text-anchor="middle"
+          font-weight="800"
+          fill="#1F66E5">
+          ${labels.join("/")}
+        </text>`;
+    }
+  }
+
+  svg+=`
+    <text x="250" y="146"
+      text-anchor="middle"
+      font-size="12">Array index</text>`;
+
+  if(c.alg==="search"){
+    svg+=`
+      <text x="250" y="167"
+        text-anchor="middle"
+        font-size="13"
+        font-weight="800">
+        Target: ${c.target} • Search interval [lo, hi)
+      </text>`;
+  }
+
+  if(c.alg==="sum"){
+    svg+=`
+      <text x="250" y="167"
+        text-anchor="middle"
+        font-size="13"
+        font-weight="800">
+        Running sum: ${state.sum} • i = ${state.i}
+      </text>`;
+  }
+
+  if(c.alg==="insert"){
+    svg+=`
+      <text x="250" y="167"
+        text-anchor="middle"
+        font-size="13"
+        font-weight="800">
+        key = ${state.key} • j = ${state.j}
+      </text>`;
+  }
+
+  $("array").innerHTML=svg;
+
+  const description=
+    c.alg==="search"
+      ? `lo ${state.lo}, hi ${state.hi}, mid ${state.mid}`
+      : c.alg==="sum"
+        ? `index ${state.i}, sum ${state.sum}`
+        : `index ${c.index}, j ${state.j}, key ${state.key}`;
+
+  $("array").setAttribute(
+    "aria-label",
+    `Array ${A.join(", ")}. ${description}.`
+  );
+}
+
+/*
+  Exact insertion-shift invariant:
+
+  At each loop boundary with current j:
+
+  1. A[0..j] is sorted.
+  2. Every position k from j+2 through index
+     contains the original element A[k-1].
+  3. Each of those shifted elements is greater
+     than key.
+
+  Position j+1 is excluded deliberately.
+
+  At the initial boundary j=index-1, the range
+  j+2..index is empty. The property therefore
+  holds vacuously without incorrectly claiming
+  that A[index] is greater than key.
+
+  After final key insertion, the loop has ended,
+  so its invariant is no longer tested as a
+  loop-boundary assertion.
+*/
+
+function insertionInvariant(state){
+  if(!state.boundary) return true;
+
+  const c=config;
+  const A=state.A;
+  const original=c.initial;
+
+  const j=state.j;
+  const index=c.index;
+  const key=state.key;
+
+  if(!Number.isInteger(j)){
+    return false;
+  }
+
+  if(!Number.isInteger(index)){
+    return false;
+  }
+
+  if(index<0||index>=A.length){
+    return false;
+  }
+
+  if(key!==original[index]){
+    return false;
+  }
+
+  /*
+    The unshifted prefix must remain sorted.
+    For j=-1, the prefix is empty.
+  */
+
+  for(let k=1;k<=j;k++){
+    if(A[k-1]>A[k]){
+      return false;
+    }
+  }
+
+  /*
+    Each shifted position must contain exactly
+    the previous original element and exceed key.
+  */
+
+  for(let k=j+2;k<=index;k++){
+    if(A[k]!==original[k-1]){
+      return false;
+    }
+
+    if(!(A[k]>key)){
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function invariantHolds(id,state){
+  const c=config;
+  const A=state.A;
+
+  if(id==="sumPrefix"){
+    return state.sum===
+      A.slice(0,state.i)
+        .reduce((a,b)=>a+b,0);
+  }
+
+  if(id==="sumFull"){
+    return state.sum===
+      A.reduce((a,b)=>a+b,0);
+  }
+
+  if(id==="sumRemaining"){
+    return state.sum===
+      A.slice(state.i)
+        .reduce((a,b)=>a+b,0);
+  }
+
+  if(id==="sumIndex"){
+    return state.sum===state.i;
+  }
+
+  if(id==="insertShift"){
+    return insertionInvariant(state);
+  }
+
+  if(id==="insertSorted"){
+    return A.every(
+      (value,i)=>i===0||A[i-1]<=value
+    );
+  }
+
+  if(id==="insertKey"){
+    return state.j>=0 &&
+      A[state.j]===state.key;
+  }
+
+  if(id==="insertFixed"){
+    return state.j===c.index-1;
+  }
+
+  return false;
+}
+
+function variantValue(id,state){
+  if(id==="width"){
+    return state.hi-state.lo;
+  }
+
+  if(id==="lo"){
+    return state.lo;
+  }
+
+  if(id==="hi"){
+    return state.hi;
+  }
+
+  if(id==="sumBounds"){
+    return state.lo+state.hi;
+  }
+
+  if(id==="jplus"){
+    return state.j+1;
+  }
+
+  if(id==="index"){
+    return state.index;
+  }
+
+  if(id==="negj"){
+    return -state.j;
+  }
+
+  if(id==="key"){
+    return state.key;
+  }
+
+  return state.variant;
+}
+
+function variantBoundaries(){
+  if(config.alg==="insert"){
+    return trace.filter(
+      state=>state.boundary
+    );
+  }
+
+  return trace;
+}
+
+function variantValid(id){
+  const states=variantBoundaries();
+
+  if(states.length<2||failed){
+    return false;
+  }
+
+  for(let i=0;i<states.length-1;i++){
+    const a=variantValue(id,states[i]);
+    const b=variantValue(id,states[i+1]);
+
+    if(
+      !Number.isFinite(a) ||
+      !Number.isFinite(b) ||
+      a<0 ||
+      b<0 ||
+      !(b<a)
+    ){
+      return false;
+    }
+  }
+
+  return variantValue(
+    id,states.at(-1)
+  )===0;
+}
+
+function testUI(){
+  const state=current();
+  if(!state) return;
+
+  if(!selected||config.type==="bug"){
+    $("invariantTest").textContent=
+      `Iteration ${state.iteration} • `+
+      `${state.done?"Loop terminated":"Loop boundary reached"} • `+
+      `Variant: ${state.variant}`;
+
+    return;
+  }
+
+  if(config.type==="invariant"){
+    if(config.alg==="insert"&&!state.boundary){
+      $("invariantTest").textContent=
+        "Insertion complete. The invariant was checked "+
+        "at loop boundaries before this final statement.";
+
+      return;
+    }
+
+    const good=invariantHolds(selected,state);
+
+    $("invariantTest").textContent=
+      `Iteration ${state.iteration}: `+
+      `${good
+        ? "✓ Property holds at this boundary"
+        : "✕ Counterexample at this boundary"}.`;
+
+    return;
+  }
+
+  const states=variantBoundaries();
+
+  let index=states.findIndex(s=>s===state);
+
+  if(index<0){
+    index=states.length-1;
+  }
+
+  const currentState=states[Math.max(0,index)];
+
+  const value=variantValue(
+    selected,currentState
+  );
+
+  const next=states[index+1];
+
+  const nextValue=next
+    ? variantValue(selected,next)
+    : null;
+
+  const decreasing=
+    next &&
+    nextValue<value &&
+    nextValue>=0;
+
+  $("invariantTest").textContent=
+    `Variant: ${value}. `+
+    (next
+      ? decreasing
+        ? "✓ Strictly decreases on the next iteration"
+        : "✕ Does not strictly decrease on the next iteration"
+      : "Loop exit boundary reached");
+}
+
+function variantPlot(){
+  const c=config;
+
+  const id=
+    c.type==="variant"&&selected
+      ? selected
+      : c.alg==="search"
+        ? "width"
+        : c.alg==="insert"
+          ? "jplus"
+          : "natural";
+
+  const boundaries=
+    c.alg==="insert"
+      ? trace.filter(s=>s.boundary)
+      : trace;
+
+  const values=boundaries.slice(0,40).map(s=>
+    id==="natural"
+      ? s.variant
+      : variantValue(id,s)
+  );
+
+  const min=Math.min(0,...values);
+  const max=Math.max(1,...values);
+  const range=Math.max(1,max-min);
+
+  const left=53,right=485;
+  const top=43,bottom=198;
+
+  const X=i=>
+    left+(right-left)*i/
+      Math.max(1,values.length-1);
+
+  const Y=value=>
+    bottom-(value-min)/range*(bottom-top);
+
+  let svg=`
+    <text x="12" y="19" font-weight="800">
+      Variant at loop boundaries
+    </text>
+
+    <path d="M53 42 V198 H485"
+      fill="none" stroke="#111" stroke-width="2"/>`;
+
+  for(let j=0;j<=4;j++){
+    const value=min+range*j/4;
+    const y=Y(value);
+
+    svg+=`
+      <line x1="53" y1="${y}"
+        x2="485" y2="${y}"
+        stroke="#ddd"/>
+
+      <text x="43" y="${y+4}"
+        font-size="11" text-anchor="end">
+        ${+value.toFixed(1)}
+      </text>`;
+  }
+
+  if(values.length){
+    svg+=`
+      <polyline
+        points="${values.map((v,i)=>
+          `${X(i)},${Y(v)}`
+        ).join(" ")}"
+        fill="none"
+        stroke="#1F66E5"
+        stroke-width="3"
+      />`;
+  }
+
+  values.forEach((value,i)=>{
+    const active=Math.min(
+      cursor,values.length-1
+    );
+
+    svg+=`
+      <circle
+        cx="${X(i)}"
+        cy="${Y(value)}"
+        r="${i===active?6:3.5}"
+        fill="${i===active?"#FFC83D":"#1F66E5"}"
+        stroke="#111"
+        stroke-width="1.5"
+      />`;
+  });
+
+  const tickStep=Math.max(
+    1,
+    Math.ceil(values.length/7)
+  );
+
+  for(let i=0;i<values.length;i+=tickStep){
+    svg+=`
+      <text x="${X(i)}" y="216"
+        font-size="11"
+        text-anchor="middle">${i}</text>`;
+  }
+
+  svg+=`
+    <text x="267" y="242"
+      text-anchor="middle"
+      font-size="12">
+      Iteration number
+    </text>
+
+    <text x="12" y="35"
+      font-size="11">
+      Variant value (count)
+    </text>`;
+
+  if(failed){
+    svg+=`
+      <text x="280" y="35"
+        font-size="11" fill="#D92D20">
+        Non-termination detected
+      </text>`;
+  }
+
+  $("variantPlot").innerHTML=svg;
+
+  $("variantPlot").setAttribute(
+    "aria-label",
+    `Variant values: ${values.join(", ")}. `+
+    (failed?"Loop does not terminate.":"")
+  );
+}
+
+function intervalPlot(){
+  const c=config;
+  const n=c.arr.length;
+
+  const states=trace.slice(0,12);
+
+  let svg=`
+    <text x="12" y="18" font-weight="800">
+      Search interval [lo, hi)
+    </text>`;
+
+  if(c.alg!=="search"){
+    svg+=`
+      <text x="250" y="110"
+        text-anchor="middle"
+        font-size="13">
+        Search intervals appear in binary-search rounds.
+      </text>`;
+
+    $("intervalPlot").innerHTML=svg;
+
+    $("intervalPlot").setAttribute(
+      "aria-label",
+      "Not a binary-search round."
+    );
+
+    return;
+  }
+
+  const left=69,right=477;
+  const width=right-left;
+  const rowHeight=13;
+
+  states.forEach((state,i)=>{
+    const y=29+i*16;
+
+    svg+=`
+      <text x="59" y="${y+11}"
+        text-anchor="end"
+        font-size="10">${i}</text>
+
+      <rect
+        x="${left}" y="${y}"
+        width="${width}"
+        height="${rowHeight}"
+        rx="3" fill="#eee" stroke="#bbb"
+      />
+
+      <rect
+        x="${left+state.lo/n*width}"
+        y="${y}"
+        width="${Math.max(0,(state.hi-state.lo)/n*width)}"
+        height="${rowHeight}"
+        rx="2" fill="#1F66E5"
+      />`;
+
+    if(i===Math.min(cursor,states.length-1)){
+      svg+=`
+        <rect
+          x="${left-2}" y="${y-2}"
+          width="${width+4}"
+          height="${rowHeight+4}"
+          rx="3"
+          fill="none"
+          stroke="#111"
+          stroke-width="2"
+        />`;
+    }
+  });
+
+  const axisY=226;
+
+  svg+=`
+    <path d="M${left} ${axisY-5} V${axisY} H${right}"
+      fill="none" stroke="#111" stroke-width="1.5"/>`;
+
+  for(let i=0;i<=n;i+=Math.max(1,Math.ceil(n/6))){
+    svg+=`
+      <text
+        x="${left+i/n*width}"
+        y="239"
+        text-anchor="middle"
+        font-size="10">${i}</text>`;
+  }
+
+  svg+=`
+    <text x="12" y="218" font-size="10">
+      Iteration
+    </text>`;
+
+  $("intervalPlot").innerHTML=svg;
+
+  $("intervalPlot").setAttribute(
+    "aria-label",
+    states.map((state,i)=>
+      `Iteration ${i}: lo ${state.lo}, hi ${state.hi}`
+    ).join(". ")
+  );
+}
+
+function choicesUI(){
+  const c=config;
+  const items=shuffle(candidateList());
+
+  const question=
+    c.type==="invariant"
+      ? "Choose a property that holds at every loop boundary."
+      : c.type==="variant"
+        ? "Choose a non-negative quantity that strictly decreases on every iteration and reaches zero."
+        : "Choose the faulty statement and its replacement. The search must terminate and return the correct lower-bound position.";
+
+  $("controls").innerHTML=`
+    <div class="group">
+      <p>${question}</p>
+
+      <div class="options">
+        ${items.map(item=>`
+          <button
+            data-choice="${item.id}"
+            class="${selected===item.id?"selected":""}"
+          >
+            ${item.text.replaceAll("<","&lt;").replaceAll(">","&gt;")}
+          </button>
+        `).join("")}
+      </div>
+    </div>`;
+
+  $("controls").querySelectorAll("[data-choice]").forEach(b=>{
+    b.onclick=()=>{
+      selected=b.dataset.choice;
+
+      if(c.type==="bug"){
+        resetTrace();
+      }
+
+      choicesUI();
+      codeUI();
+      testUI();
+      variantPlot();
+      intervalPlot();
+    };
+  });
+}
+
+function advance(){
+  if(cursor>=trace.length-1){
+    $("status").textContent=
+      failed
+        ? "Loop never stops: execution limit reached."
+        : "The loop has terminated.";
+
+    return;
+  }
+
+  cursor++;
+
+  codeUI();
+  sceneUI();
+  testUI();
+  variantPlot();
+  intervalPlot();
+
+  const state=current();
+
+  $("status").textContent=
+    `Iteration ${state.iteration}. `+
+    Object.entries(state)
+      .filter(([key,value])=>
+        [
+          "i","j","sum","lo","hi",
+          "mid","key","variant"
+        ].includes(key) &&
+        value!==null
+      )
+      .map(([key,value])=>`${key}=${value}`)
+      .join(" • ");
+}
+
+function stop(){
+  ticket++;
+  playing=false;
+}
+
+async function run(){
+  if(playing) return;
+
+  stop();
+  cursor=0;
+
+  const activeTicket=ticket;
+
+  if(reduced()){
+    cursor=trace.length-1;
+
+    codeUI();
+    sceneUI();
+    testUI();
+    variantPlot();
+    intervalPlot();
+
+    $("status").textContent=
+      failed
+        ? "Loop never stops: execution cap reached."
+        : "Execution complete.";
+
+    return;
+  }
+
+  playing=true;
+
+  while(
+    playing &&
+    activeTicket===ticket &&
+    cursor<trace.length-1
+  ){
+    advance();
+
+    await new Promise(resolve=>
+      setTimeout(resolve,230)
+    );
+  }
+
+  playing=false;
+
+  if(activeTicket===ticket&&failed){
+    $("status").textContent=
+      "Loop never stops: the interval did not shrink.";
+  }
+}
+
+function feedback(text,good){
+  $("feedback").className=good?"good":"bad";
+  $("feedback").textContent=text;
+}
+
+function check(){
+  if(solved) return;
+
+  tries++;
+
+  let correct=false;
+  let reason="";
+
+  if(config.type==="invariant"){
+    const boundaries=
+      config.alg==="insert"
+        ? trace.filter(state=>state.boundary)
+        : trace;
+
+    correct=
+      selected===correctId() &&
+      boundaries.every(state=>
+        invariantHolds(selected,state)
+      );
+
+    reason=
+      "The chosen property fails at a loop boundary "+
+      "or does not describe the maintained state.";
+
+  }else if(config.type==="variant"){
+    correct=
+      selected===correctId() &&
+      variantValid(selected);
+
+    reason=
+      "The quantity must be bounded below and "+
+      "strictly smaller after every iteration. "+
+      "A constant or increasing quantity cannot "+
+      "establish termination.";
+
+  }else{
+    const result=executor();
+
+    const A=config.initial;
+    const target=config.target;
+
+    const expected=A.findIndex(
+      value=>value>=target
+    );
+
+    const expectedIndex=
+      expected<0?A.length:expected;
+
+    correct=
+      selected==="lofix" &&
+      !result.capped &&
+      result.states.at(-1)?.lo===expectedIndex;
+
+    reason=selected
+      ? "The selected change does not guarantee progress while preserving the correct search result."
+      : "Choose a line and a replacement first.";
+  }
+
+  if(!correct){
+    feedback(reason,false);
+    return;
+  }
+
+  solved=true;
+
+  const points=hinted?50:tries===1?100:75;
+  score+=points;
+
+  $("scoreHud").textContent=
+    `Score: ${score}`;
+
+  feedback(
+    `★ Correct! ${
+      config.type==="invariant"
+        ? "The property is preserved across the loop."
+        : config.type==="variant"
+          ? "The non-negative measure decreases towards termination."
+          : "The search interval shrinks correctly and reaches the required index."
+    } +${points} points.`,
+    true
+  );
+
+  setTimeout(()=>{
+    if(round===5){
+      finish();
+    }else{
+      round++;
+      load();
+    }
+  },1100);
+}
+
+function hint(){
+  hinted=true;
+
+  const c=config;
+
+  feedback(
+    c.type==="invariant"
+      ? c.alg==="insert"
+        ? "At the first boundary, j is index minus one. The shifted range is empty. After each shift, inspect only positions starting at j+2."
+        : "Find a property true before the first iteration and still true after each update."
+      : c.type==="variant"
+        ? "Track the amount of unfinished work. It should drop after each iteration, reaching zero at exit."
+        : "Try a target beyond the last array element. Watch what happens when only one candidate position remains.",
+    false
+  );
+}
+
+function newTest(){
+  stop();
+
+  if(config.type==="bug"){
+    config.arr=generateArray(ri(10,16));
+    config.initial=[...config.arr];
+    config.target=config.arr.at(-1)+ri(1,5);
+
+  }else if(config.alg==="search"){
+    config.arr=generateArray(ri(10,16));
+    config.initial=[...config.arr];
+
+    config.target=config.arr[
+      ri(0,config.arr.length-1)
+    ];
+
+  }else if(config.alg==="sum"){
+    config.arr=Array.from(
+      {length:ri(7,11)},
+      ()=>ri(1,9)
+    );
+
+    config.initial=[...config.arr];
+
+  }else{
+    config.arr=generateInsertionArray(config.index);
+    config.initial=[...config.arr];
+  }
+
+  resetTrace();
+}
+
+function load(){
+  stop();
+
+  tries=0;
+  hinted=false;
+  solved=false;
+
+  makeRound();
+
+  $("roundHud").textContent=
+    `Round ${round+1}/6`;
+
+  $("roundTitle").textContent=
+    config.type==="invariant"
+      ? "A • Invariant proof"
+      : config.type==="variant"
+        ? "B • Termination variant"
+        : "C • Binary search repair";
+
+  $("question").textContent=
+    config.type==="invariant"
+      ? "Identify the property preserved through each iteration."
+      : config.type==="variant"
+        ? "Choose a bound function that proves the loop makes progress."
+        : "The binary search contains a subtle bound-update error. Repair the loop.";
+
+  feedback("",true);
+  choicesUI();
+  resetTrace();
+}
+
+function finish(){
+  $("game").style.display="none";
+  $("finish").style.display="block";
+
+  $("stars").textContent=
+    score>=520?"★★★":
+    score>=380?"★★☆":"★☆☆";
+
+  $("finalScore").textContent=
+    `You earned ${score}/600 points.`;
+}
+
+/*
+  Small deterministic sanity checks on the corrected
+  insertion invariant and lower-bound search.
+*/
+
+function verifyModels(){
+  for(let index=4;index<=7;index++){
+    const savedConfig=config;
+    const savedSelected=selected;
+
+    for(let test=0;test<12;test++){
+      const arr=generateInsertionArray(index);
+
+      config={
+        type:"invariant",
+        alg:"insert",
+        arr,
+        initial:[...arr],
+        index,
+        target:null
+      };
+
+      selected="insertShift";
+
+      const result=executor();
+
+      if(result.capped){
+        throw Error("Insertion loop exceeded its step cap.");
+      }
+
+      const boundaries=result.states.filter(
+        state=>state.boundary
+      );
+
+      if(!boundaries.every(insertionInvariant)){
+        throw Error("Insertion invariant failed.");
+      }
+
+      const prefix=result.array.slice(0,index+1);
+
+      if(!prefix.every(
+        (value,i)=>
+          i===0||prefix[i-1]<=value
+      )){
+        throw Error("Insertion result is not sorted.");
+      }
+    }
+
+    config=savedConfig;
+    selected=savedSelected;
+  }
+}
+
+$("step").onclick=()=>{
+  stop();
+  advance();
+};
+
+$("run").onclick=run;
+$("reset").onclick=resetTrace;
+$("shuffle").onclick=newTest;
+$("check").onclick=check;
+$("hint").onclick=hint;
+
+$("again").onclick=()=>{
+  round=0;
+  score=0;
+  seed=(Date.now()>>>0)||1;
+
+  $("scoreHud").textContent="Score: 0";
+  $("game").style.display="grid";
+  $("finish").style.display="none";
+
+  load();
+};
+
+verifyModels();
+load();
+</script>
+</body>
+</html>

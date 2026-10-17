@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Robot Path | FIT Coding</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,.code,.block{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{min-height:44px;padding:9px 17px;border:2px solid #111;border-radius:999px;background:#fff;cursor:pointer;box-shadow:var(--sh-1);font-family:inherit;font-size:14px;font-weight:800}
+button:hover{background:var(--lvl-primary-tint)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:focus-visible,input:focus-visible,select:focus-visible,.code:focus-visible,.block:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button:disabled{opacity:.42;cursor:not-allowed}
+button.selected{background:var(--lvl-primary)}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+main{max-width:1330px;margin:auto;padding:16px}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+h1{font-size:clamp(27px,4vw,43px);line-height:1.13;margin:8px 0;font-weight:800}
+h2{font-size:21px;margin:0 0 12px;font-weight:800}
+h3{font-size:16px;margin:12px 0 6px;font-weight:800}
+p{margin:8px 0}
+.badge{display:inline-block;padding:5px 13px;background:var(--lvl-primary);color:var(--lvl-primary-on);border:2px solid #111;border-radius:999px;font-size:12px;font-weight:800;text-transform:uppercase}
+.hud{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.counter{padding:8px 13px;background:var(--fit-sunken);border:2px solid #111;border-radius:12px;font-weight:800}
+.layout{display:grid;gap:18px}
+.card{background:#fff;border:2px solid #111;border-radius:24px;padding:17px;box-shadow:var(--sh-2);min-width:0}
+.stage{background:var(--lvl-primary-tint)}
+#maze{width:100%;max-width:440px;display:block;margin:12px auto;aspect-ratio:1}
+.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.small{font-size:13px;color:var(--fit-ink-3)}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:2px solid #111;border-radius:14px;background:#171717;color:#f9f9f9;padding:12px;min-height:80px;overflow-wrap:anywhere}
+.line{padding:4px 7px;border-radius:6px;white-space:pre-wrap}
+.line.current{background:#5b4800;outline:1px solid #FFC83D}
+.num{color:#aeb2ba;display:inline-block;width:29px;user-select:none}
+.kw{color:#ffcf64}.val{color:#91ddff}.fn{color:#a8e8b0}
+#programBlocks{display:grid;gap:9px;margin-top:12px}
+.block{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fff;border:2px solid #111;border-radius:14px;padding:8px;min-height:49px}
+.block.picked{background:#FFF0B3;border-style:dashed}
+.block .name{font-weight:800;flex:1;min-width:100px}
+.block button{min-width:44px;padding:8px}
+.block select{min-height:44px;border:2px solid #111;border-radius:10px;background:#fff;font:inherit}
+.inset{padding-left:19px;border-left:4px solid var(--lvl-primary);margin:4px 0 4px 10px}
+#plot{width:100%;height:auto}
+#idea{background:var(--fit-sunken);border:2px solid #111;border-radius:16px;padding:10px 15px}
+summary{cursor:pointer;font-weight:800;min-height:35px}
+#feedback{min-height:47px;font-weight:700}
+.good{color:var(--fit-success)}.bad{color:var(--fit-danger)}
+#finish{display:none;text-align:center;padding:32px 16px}
+#finish .stars{font-size:51px;letter-spacing:8px}
+.concept{max-width:410px;width:100%;height:auto;display:block;margin:auto}
+svg text{font-family:Inter,system-ui,sans-serif}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.card{padding:22px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div>
+<span class="badge">Primary • Coding</span>
+<h1>Robot Path 🤖</h1>
+<p>Build a programme to guide your robot to the star.</p>
+</div>
+<div class="hud">
+<span class="counter" id="round">Round 1/6</span>
+<span class="counter" id="score">Score: 0</span>
+</div>
+</header>
+<div id="game" class="layout">
+<section class="card stage">
+<h2>Robot maze</h2>
+<p id="task"></p>
+<svg id="maze" role="img" aria-label="Robot maze" viewBox="0 0 400 400"></svg>
+<p id="position" class="small"></p>
+<h3>How a repeat works</h3>
+<svg class="concept" viewBox="0 0 330 100" role="img" aria-label="A repeat sends the robot through the same command three times">
+<rect x="4" y="17" width="94" height="60" rx="12" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+<text x="51" y="43" text-anchor="middle" font-weight="800" font-size="14">Repeat 3</text>
+<text x="51" y="60" text-anchor="middle" font-size="12">times</text>
+<path d="M100 47 H135" stroke="#111" stroke-width="3"/>
+<path d="M126 39 L137 47 L126 55" fill="none" stroke="#111" stroke-width="3"/>
+<rect x="140" y="17" width="89" height="60" rx="12" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="184" y="43" text-anchor="middle" font-size="14" font-weight="800">Move</text>
+<text x="184" y="60" text-anchor="middle" font-size="14">↑</text>
+<path d="M230 47 H263 Q282 47 282 67 Q282 89 184 89 Q115 89 115 76" fill="none" stroke="#111" stroke-width="3"/>
+<text x="293" y="39" font-size="12" font-weight="800">↻</text>
+</svg>
+<p class="small">A repeat block can make several moves using fewer blocks.</p>
+</section>
+<section class="card">
+<h2>Build your programme</h2>
+<div class="row" id="palette">
+<button data-add="move">↑ Move</button>
+<button data-add="left">↶ Left</button>
+<button data-add="right">↷ Right</button>
+<button data-add="repeat">↻ Repeat</button>
+</div>
+<p class="small">Tap a block to pick it, then add a command after it. Tap a repeat block before adding commands inside it. Use ↑ and ↓ to reorder blocks, or drag them.</p>
+<div id="programBlocks" aria-label="Programme blocks"></div>
+<h3>Code</h3>
+<div id="code" class="code" tabindex="0" aria-label="Current structured programme"></div>
+<div class="row">
+<button id="step">Step</button>
+<button id="run">▶ Run</button>
+<button id="reset">Reset robot</button>
+<button id="clear">Clear blocks</button>
+</div>
+<h3>Live plot</h3>
+<svg id="plot" role="img" aria-label="Blocks used and moves made" viewBox="0 0 480 230"></svg>
+<div class="row">
+<button id="hint">Hint (−50 points)</button>
+<button class="check" id="check">Check ★</button>
+</div>
+<div id="feedback" aria-live="polite"></div>
+<details id="idea">
+<summary>The idea</summary>
+<p>Commands run in order. A repeat runs its inside commands several times. The robot must stay on the safe path and reach the star. A repeat counts as one block, but its commands still move the robot.</p>
+</details>
+</section>
+</div>
+<section id="finish" class="card">
+<h2>Mission complete!</h2>
+<div class="stars" id="stars"></div>
+<p id="total"></p>
+<button id="again" class="check">Play again</button>
+</section>
+</main>
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+const DIR = [[0,-1],[1,0],[0,1],[-1,0]];
+const ARROW = ["↑","→","↓","←"];
+const MAX_STEPS = 10000;
+
+let seed = 1;
+let roundIndex = 0;
+let score = 0;
+let tries = 0;
+let hinted = false;
+let solved = false;
+let rounds = [];
+let program = [];
+let robot = null;
+let steps = [];
+let cursor = 0;
+let picked = -1;
+let playing = false;
+let runToken = 0;
+let nextId = 1;
+
+const reduced = () =>
+  matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function rand(){
+  seed = (Math.imul(seed,1664525)+1013904223)>>>0;
+  return seed/4294967296;
+}
+
+function ri(a,b){
+  return a+Math.floor(rand()*(b-a+1));
+}
+
+function makeRounds(){
+  rounds = [];
+
+  for(let k=0;k<6;k++){
+    const length = 2+(k%3);
+    const vertical = k===2 || k===5;
+    let path=[];
+
+    if(k<2){
+      for(let x=0;x<=length;x++) path.push([x,2]);
+    }else if(k===2){
+      for(let y=0;y<=length;y++) path.push([2,y]);
+    }else if(k===3){
+      for(let x=0;x<=3;x++) path.push([x,1]);
+      for(let y=2;y<=3;y++) path.push([3,y]);
+    }else{
+      path=[
+        [0,1],[1,1],[2,1],[3,1],
+        [3,2],[3,3],[3,4]
+      ];
+    }
+
+    const needsRepeat = k>=3;
+
+    const r = {
+      path,
+      start:path[0],
+      end:path[path.length-1],
+      dir:vertical?2:1,
+      limit:needsRepeat?5:7,
+      needsRepeat
+    };
+
+    rounds.push(r);
+  }
+
+  for(let i=0;i<rounds.length;i++){
+    const r=rounds[i];
+    const shortest=searchSolution(r,true);
+    const withoutRepeat=searchSolution(r,false);
+    if(shortest===null || shortest>r.limit){
+      throw Error("A robot round has no solution within its block limit.");
+    }
+    if(r.needsRepeat&&withoutRepeat!==null&&withoutRepeat<=r.limit){
+      throw Error("A repeat-required round has a non-repeat solution.");
+    }
+    if(i===5 && (shortest!==5 || withoutRepeat!==null&&withoutRepeat<=7)){
+      throw Error("Round 6 must take five blocks and require a repeat.");
+    }
+  }
+}
+
+/* Exhaustive search of all programme ASTs by block count.
+   Repeat bodies may contain sequences and nested repeats.
+   Repeat counts match the selectable values in the editor. */
+function searchSolution(r,allowRepeat){
+  const safe=new Set(r.path.map(p=>p.join(",")));
+  const max=allowRepeat?r.limit:Math.max(r.limit,7);
+  const repeatValues=[2,3,4,5,6];
+  const sequences=new Map([[0,[[]]]]);
+  const actions=new Map();
+
+  function actionsAt(cost){
+    if(actions.has(cost)) return actions.get(cost);
+    const out=[];
+    if(cost===1){
+      for(const type of ["move","left","right"]){
+        out.push({type});
+      }
+    }
+    if(allowRepeat&&cost>=2){
+      for(const body of programmes(cost-1)){
+        for(const n of repeatValues){
+          out.push({type:"repeat",n,children:body});
+        }
+      }
+    }
+    actions.set(cost,out);
+    return out;
+  }
+
+  function programmes(cost){
+    if(sequences.has(cost)) return sequences.get(cost);
+    const out=[];
+    for(let first=1;first<=cost;first++){
+      for(const action of actionsAt(first)){
+        for(const tail of programmes(cost-first)){
+          out.push([action,...tail]);
+        }
+      }
+    }
+    sequences.set(cost,out);
+    return out;
+  }
+
+  function execute(state,body){
+    let s=state;
+    for(const command of body){
+      if(command.type==="repeat"){
+        for(let k=0;k<command.n;k++){
+          s=execute(s,command.children);
+          if(!s) return null;
+        }
+      }else{
+        let {x,y,d}=s;
+        if(command.type==="left") d=(d+3)%4;
+        if(command.type==="right") d=(d+1)%4;
+        if(command.type==="move"){
+          x+=DIR[d][0];
+          y+=DIR[d][1];
+          if(!safe.has(x+","+y)) return null;
+        }
+        s={x,y,d};
+      }
+    }
+    return s;
+  }
+
+  const start={x:r.start[0],y:r.start[1],d:r.dir};
+  for(let cost=1;cost<=max;cost++){
+    for(const body of programmes(cost)){
+      const end=execute(start,body);
+      if(end&&end.x===r.end[0]&&end.y===r.end[1]){
+        return cost;
+      }
+    }
+  }
+  return null;
+}
+
+function newRobot(){
+  const r=rounds[roundIndex];
+  return {
+    x:r.start[0],
+    y:r.start[1],
+    d:r.dir,
+    moves:0,
+    failed:false,
+    reason:""
+  };
+}
+
+function node(t){
+  return {
+    id:nextId++,
+    type:t,
+    n:3,
+    children:[]
+  };
+}
+
+function countBlocks(list=program){
+  return list.reduce(
+    (sum,b)=>sum+1+
+      (b.type==="repeat"?countBlocks(b.children):0),
+    0
+  );
+}
+
+function hasRepeat(list=program){
+  return list.some(b=>
+    b.type==="repeat" ||
+    (b.children&&hasRepeat(b.children))
+  );
+}
+
+function emit(list,out,depth=0){
+  for(const b of list){
+    if(out.length>=MAX_STEPS) return;
+
+    if(b.type==="repeat"){
+      for(let i=0;i<b.n;i++){
+        emit(b.children,out,depth+1);
+        if(out.length>=MAX_STEPS) return;
+      }
+    }else{
+      out.push({
+        type:b.type,
+        id:b.id,
+        depth
+      });
+    }
+  }
+}
+
+function trace(){
+  const out=[];
+  emit(program,out);
+  return out;
+}
+
+function simulate(){
+  const r=newRobot();
+  const sequence=trace();
+  const visited=[[r.x,r.y]];
+  const safe=new Set(
+    rounds[roundIndex].path.map(p=>p.join(","))
+  );
+
+  for(const t of sequence){
+    if(t.type==="left") r.d=(r.d+3)%4;
+    if(t.type==="right") r.d=(r.d+1)%4;
+
+    if(t.type==="move"){
+      r.x+=DIR[r.d][0];
+      r.y+=DIR[r.d][1];
+      r.moves++;
+
+      if(!safe.has(r.x+","+r.y)){
+        r.failed=true;
+        r.reason="The robot walked away from the safe path.";
+        break;
+      }
+
+      visited.push([r.x,r.y]);
+    }
+  }
+
+  return {r,visited,sequence};
+}
+
+function locate(id,list=program,parent=null){
+  for(let i=0;i<list.length;i++){
+    if(list[i].id===id){
+      return {list,i,parent};
+    }
+
+    if(list[i].type==="repeat"){
+      const found=locate(id,list[i].children,list[i]);
+      if(found) return found;
+    }
+  }
+
+  return null;
+}
+
+function add(t){
+  if(countBlocks()>=12){
+    message("That is enough blocks for this programme.",false);
+    return;
+  }
+
+  const n=node(t);
+
+  if(picked>=0){
+    const loc=locate(picked);
+
+    if(loc){
+      if(loc.list[loc.i].type==="repeat"){
+        loc.list[loc.i].children.push(n);
+      }else{
+        loc.list.splice(loc.i+1,0,n);
+      }
+    }else{
+      program.push(n);
+    }
+  }else{
+    program.push(n);
+  }
+
+  picked=-1;
+  redraw();
+}
+
+function shift(id,d){
+  const loc=locate(id);
+  if(!loc) return;
+
+  const j=loc.i+d;
+  if(j<0||j>=loc.list.length) return;
+
+  [loc.list[loc.i],loc.list[j]]=
+    [loc.list[j],loc.list[loc.i]];
+
+  redraw();
+}
+
+function programUI(){
+  let html="";
+
+  function part(list,inside=false){
+    for(const b of list){
+      const name={
+        move:"↑ Move",
+        left:"↶ Turn left",
+        right:"↷ Turn right",
+        repeat:"↻ Repeat"
+      }[b.type];
+
+      html+=`
+      <div class="${inside?"inset":""}">
+        <div
+          class="block ${picked===b.id?"picked":""}"
+          draggable="true"
+          data-id="${b.id}"
+          tabindex="0"
+          role="button"
+          aria-label="Select ${name} block"
+        >
+          <span class="name">${name}</span>`;
+
+      if(b.type==="repeat"){
+        html+=`
+          <label>
+            Times
+            <select
+              data-n="${b.id}"
+              aria-label="Repeat count"
+            >
+              ${[2,3,4,5,6].map(x=>`
+                <option ${x===b.n?"selected":""}>${x}</option>
+              `).join("")}
+            </select>
+          </label>`;
+      }
+
+      html+=`
+          <button data-up="${b.id}" aria-label="Move block up">↑</button>
+          <button data-down="${b.id}" aria-label="Move block down">↓</button>
+          <button data-delete="${b.id}" aria-label="Remove block">×</button>
+        </div>`;
+
+      if(b.type==="repeat"){
+        part(b.children,true);
+        html+=`
+          <button
+            data-inside="${b.id}"
+            aria-label="Add move inside repeat"
+          >+ Move inside</button>`;
+      }
+
+      html+="</div>";
+    }
+  }
+
+  part(program);
+
+  $("programBlocks").innerHTML=html||
+    "<p class='small'>Your programme is empty. Add a block above.</p>";
+
+  $("programBlocks").querySelectorAll("[data-id]").forEach(el=>{
+    const choose=()=>{
+      picked=picked===+el.dataset.id?-1:+el.dataset.id;
+      programUI();
+    };
+
+    el.addEventListener("click",e=>{
+      if(e.target.closest("button,select")) return;
+      choose();
+    });
+
+    el.addEventListener("keydown",e=>{
+      if(
+        (e.key==="Enter"||e.key===" ") &&
+        e.target===el
+      ){
+        e.preventDefault();
+        choose();
+      }
+    });
+
+    el.addEventListener("dragstart",e=>{
+      e.dataTransfer.setData("text/plain",el.dataset.id);
+    });
+
+    el.addEventListener("dragover",e=>e.preventDefault());
+
+    el.addEventListener("drop",e=>{
+      e.preventDefault();
+
+      const source=locate(
+        +e.dataTransfer.getData("text/plain")
+      );
+
+      const target=locate(+el.dataset.id);
+
+      if(!source||!target||source.list!==target.list){
+        return;
+      }
+
+      if(source.list[source.i].id===target.list[target.i].id){
+        return;
+      }
+
+      const item=source.list.splice(source.i,1)[0];
+      const index=source.list.findIndex(
+        x=>x.id===+el.dataset.id
+      );
+
+      if(index>=0){
+        source.list.splice(index,0,item);
+      }else{
+        source.list.push(item);
+      }
+
+      redraw();
+    });
+  });
+
+  $("programBlocks").querySelectorAll("[data-delete]").forEach(e=>{
+    e.onclick=()=>{
+      const a=locate(+e.dataset.delete);
+      if(a){
+        a.list.splice(a.i,1);
+        redraw();
+      }
+    };
+  });
+
+  $("programBlocks").querySelectorAll("[data-up]").forEach(e=>{
+    e.onclick=()=>shift(+e.dataset.up,-1);
+  });
+
+  $("programBlocks").querySelectorAll("[data-down]").forEach(e=>{
+    e.onclick=()=>shift(+e.dataset.down,1);
+  });
+
+  $("programBlocks").querySelectorAll("[data-inside]").forEach(e=>{
+    e.onclick=()=>{
+      const a=locate(+e.dataset.inside);
+      if(!a||countBlocks()>=12) return;
+      a.list[a.i].children.push(node("move"));
+      redraw();
+    };
+  });
+
+  $("programBlocks").querySelectorAll("[data-n]").forEach(e=>{
+    e.onchange=()=>{
+      const a=locate(+e.dataset.n);
+      if(!a) return;
+      a.list[a.i].n=+e.value;
+      redraw();
+    };
+  });
+}
+
+function codeUI(){
+  const lines=[];
+  let number=1;
+
+  function build(list,indent=""){
+    for(const b of list){
+      if(b.type==="repeat"){
+        lines.push({
+          id:b.id,
+          code:indent+
+            `<span class="kw">repeat</span> `+
+            `<span class="val">${b.n}</span> {`
+        });
+
+        build(b.children,indent+"  ");
+
+        lines.push({
+          id:-1,
+          code:indent+"}"
+        });
+      }else{
+        const fn={
+          move:"move_forward",
+          left:"turn_left",
+          right:"turn_right"
+        }[b.type];
+
+        lines.push({
+          id:b.id,
+          code:indent+
+            `<span class="fn">${fn}</span>()`
+        });
+      }
+    }
+  }
+
+  build(program);
+
+  const current=steps[cursor];
+
+  $("code").innerHTML=lines.map(x=>`
+    <div class="line ${current&&current.id===x.id?"current":""}">
+      <span class="num">${number++}</span>${x.code}
+    </div>
+  `).join("")||
+    '<span class="small">Add your first command.</span>';
+}
+
+function mazeUI(){
+  const r=rounds[roundIndex];
+  const safe=new Set(r.path.map(p=>p.join(",")));
+  let s="";
+
+  for(let y=0;y<6;y++){
+    for(let x=0;x<6;x++){
+      const onPath=safe.has(x+","+y);
+
+      s+=`
+        <rect
+          x="${x*62+14}"
+          y="${y*62+14}"
+          width="57"
+          height="57"
+          rx="9"
+          fill="${onPath?"#fff":"#E5E1D7"}"
+          stroke="#111"
+          stroke-width="2"
+        />`;
+    }
+  }
+
+  const sx=r.end[0]*62+43;
+  const sy=r.end[1]*62+43;
+
+  s+=`
+    <text
+      x="${sx}"
+      y="${sy+10}"
+      font-size="39"
+      text-anchor="middle"
+    >⭐</text>`;
+
+  const rx=robot.x*62+43;
+  const ry=robot.y*62+43;
+
+  s+=`
+    <g transform="translate(${rx},${ry})">
+      <rect
+        x="-22" y="-21" width="44" height="42"
+        rx="12" fill="#FFC83D"
+        stroke="#111" stroke-width="3"
+      />
+      <circle cx="-9" cy="-4" r="4" fill="#111"/>
+      <circle cx="9" cy="-4" r="4" fill="#111"/>
+      <path d="M-9 10 Q0 17 9 10"
+        fill="none" stroke="#111" stroke-width="3"/>
+      <text y="-30" text-anchor="middle"
+        font-weight="800" font-size="22">${ARROW[robot.d]}</text>
+    </g>`;
+
+  $("maze").innerHTML=s;
+
+  $("maze").setAttribute(
+    "aria-label",
+    `Robot at column ${robot.x+1}, row ${robot.y+1}, `+
+    `facing ${ARROW[robot.d]}. `+
+    `Star at column ${r.end[0]+1}, row ${r.end[1]+1}.`
+  );
+
+  $("position").textContent=
+    `Robot: column ${robot.x+1}, row ${robot.y+1} • `+
+    `Facing ${ARROW[robot.d]} • Moves ${robot.moves}`;
+}
+
+function plotUI(){
+  const used=countBlocks();
+  const moves=simulate().r.moves;
+  const limit=rounds[roundIndex].limit;
+
+  const max=Math.max(limit+2,used,moves,5);
+  const base=184;
+  const scale=130/max;
+
+  const bars=[
+    {v:used,x:105,c:"#FFC83D",label:"Blocks used"},
+    {v:moves,x:300,c:"#3DBE6B",label:"Moves made"}
+  ];
+
+  let s=`
+    <text x="12" y="19" font-weight="800">
+      Programme size and movement
+    </text>
+    <path d="M55 35 V184 H464"
+      fill="none" stroke="#111" stroke-width="2"/>`;
+
+  const tickStep=Math.max(1,Math.ceil(max/5));
+
+  for(let v=0;v<=max;v+=tickStep){
+    const y=base-v*scale;
+
+    s+=`
+      <text x="45" y="${y+5}" text-anchor="end"
+        font-size="12">${v}</text>
+      <line x1="55" y1="${y}" x2="464" y2="${y}"
+        stroke="#ddd"/>`;
+  }
+
+  for(const b of bars){
+    const h=b.v*scale;
+
+    s+=`
+      <rect
+        x="${b.x}" y="${base-h}"
+        width="80" height="${h}"
+        rx="4" fill="${b.c}"
+        stroke="#111" stroke-width="2"
+      />
+      <text x="${b.x+40}" y="${base-h-8}"
+        text-anchor="middle" font-size="15"
+        font-weight="800">${b.v}</text>
+      <text x="${b.x+40}" y="207"
+        text-anchor="middle" font-size="12">${b.label}</text>`;
+  }
+
+  const ly=base-limit*scale;
+
+  s+=`
+    <line x1="56" y1="${ly}" x2="207" y2="${ly}"
+      stroke="#D92D20" stroke-width="2"
+      stroke-dasharray="6 4"/>
+    <text x="62" y="${Math.max(34,ly-7)}"
+      font-size="11" fill="#D92D20">
+      Block limit: ${limit}
+    </text>
+    <text x="12" y="34" font-size="11">
+      Count (blocks / moves)
+    </text>`;
+
+  $("plot").innerHTML=s;
+
+  $("plot").setAttribute(
+    "aria-label",
+    `${used} blocks used, ${moves} moves made, `+
+    `block limit ${limit}.`
+  );
+}
+
+function redraw(){
+  runToken++;
+  playing=false;
+  steps=trace();
+  cursor=0;
+  robot=newRobot();
+
+  programUI();
+  codeUI();
+  mazeUI();
+  plotUI();
+}
+
+function message(text,good){
+  $("feedback").textContent=text;
+  $("feedback").className=good?"good":"bad";
+}
+
+function stop(){
+  runToken++;
+  playing=false;
+}
+
+function step(){
+  if(!steps.length){
+    message("Add some blocks first.",false);
+    return;
+  }
+
+  if(cursor>=steps.length){
+    message("The programme has finished.",true);
+    return;
+  }
+
+  if(cursor>=MAX_STEPS){
+    message("Loop never stops. Check your repeat.",false);
+    return;
+  }
+
+  const t=steps[cursor++];
+
+  if(t.type==="left") robot.d=(robot.d+3)%4;
+  if(t.type==="right") robot.d=(robot.d+1)%4;
+
+  if(t.type==="move"){
+    robot.x+=DIR[robot.d][0];
+    robot.y+=DIR[robot.d][1];
+    robot.moves++;
+
+    const safe=rounds[roundIndex].path.some(
+      p=>p[0]===robot.x&&p[1]===robot.y
+    );
+
+    if(!safe){
+      robot.failed=true;
+      robot.reason="The robot has left the safe path.";
+      cursor=steps.length;
+    }
+  }
+
+  codeUI();
+  mazeUI();
+
+  if(robot.failed){
+    message(robot.reason,false);
+  }else if(cursor>=steps.length){
+    message(
+      "Programme complete. Press Check to test your solution.",
+      true
+    );
+  }
+}
+
+async function run(){
+  if(playing) return;
+
+  stop();
+  steps=trace();
+  cursor=0;
+  robot=newRobot();
+  playing=true;
+
+  const ticket=runToken;
+
+  if(reduced()){
+    while(cursor<steps.length&&cursor<MAX_STEPS){
+      step();
+      if(robot.failed) break;
+    }
+
+    playing=false;
+    return;
+  }
+
+  while(
+    cursor<steps.length &&
+    cursor<MAX_STEPS &&
+    playing &&
+    ticket===runToken
+  ){
+    step();
+
+    if(robot.failed) break;
+
+    await new Promise(resolve=>setTimeout(resolve,170));
+  }
+
+  if(ticket===runToken) playing=false;
+}
+
+function check(){
+  if(solved) return;
+
+  const r=rounds[roundIndex];
+  const result=simulate();
+  tries++;
+
+  if(!program.length){
+    message("Add blocks to make your robot move.",false);
+    return;
+  }
+
+  if(result.sequence.length>=MAX_STEPS){
+    message("Loop never stops. Use fewer repeats.",false);
+    return;
+  }
+
+  if(result.r.failed){
+    message(result.r.reason,false);
+    return;
+  }
+
+  if(
+    result.r.x!==r.end[0] ||
+    result.r.y!==r.end[1]
+  ){
+    message("The robot has not reached the star yet.",false);
+    return;
+  }
+
+  if(countBlocks()>r.limit){
+    message(
+      `The path works, but uses ${countBlocks()} blocks. `+
+      `The limit is ${r.limit}. Try a repeat.`,
+      false
+    );
+    return;
+  }
+
+  if(r.needsRepeat&&!hasRepeat()){
+    message("This round needs a repeat block.",false);
+    return;
+  }
+
+  solved=true;
+
+  const points=hinted?50:tries===1?100:75;
+  score+=points;
+
+  $("score").textContent=`Score: ${score}`;
+
+  message(
+    `★ Correct! Your ${result.r.moves} moves reach the star `+
+    `using ${countBlocks()} blocks. +${points} points.`,
+    true
+  );
+
+  setTimeout(()=>{
+    if(roundIndex===5){
+      finish();
+    }else{
+      roundIndex++;
+      load();
+    }
+  },850);
+}
+
+function hint(){
+  if(solved) return;
+
+  hinted=true;
+
+  const r=rounds[roundIndex];
+
+  message(
+    r.needsRepeat
+      ? "Look for several moves in the same direction. "+
+        "Put Move inside Repeat, and turn at the corner."
+      : "Face the star first. Add a Move for each safe square.",
+    false
+  );
+}
+
+function load(){
+  stop();
+
+  tries=0;
+  hinted=false;
+  solved=false;
+  picked=-1;
+  program=[];
+  robot=newRobot();
+
+  $("round").textContent=`Round ${roundIndex+1}/6`;
+
+  const r=rounds[roundIndex];
+
+  $("task").textContent=
+    `Reach the star without leaving the pale path. `+
+    `Use at most ${r.limit} blocks.`+
+    (r.needsRepeat?" Use a Repeat block.":"");
+
+  message("",true);
+  redraw();
+}
+
+function finish(){
+  $("game").style.display="none";
+  $("finish").style.display="block";
+
+  $("stars").textContent=
+    score>=520?"★★★":
+    score>=380?"★★☆":"★☆☆";
+
+  $("total").textContent=
+    `You earned ${score} out of 600 points.`;
+}
+
+$("palette").addEventListener("click",e=>{
+  const b=e.target.closest("[data-add]");
+  if(b) add(b.dataset.add);
+});
+
+$("step").onclick=()=>{
+  stop();
+  step();
+};
+
+$("run").onclick=run;
+
+$("reset").onclick=()=>{
+  stop();
+  cursor=0;
+  robot=newRobot();
+  codeUI();
+  mazeUI();
+  message("Robot reset.",true);
+};
+
+$("clear").onclick=()=>{
+  program=[];
+  redraw();
+};
+
+$("check").onclick=check;
+$("hint").onclick=hint;
+
+$("again").onclick=()=>{
+  roundIndex=0;
+  score=0;
+  seed=(Date.now()>>>0)||1;
+
+  makeRounds();
+
+  $("score").textContent="Score: 0";
+  $("game").style.display="grid";
+  $("finish").style.display="none";
+
+  load();
+};
+
+seed=(Date.now()>>>0)||1;
+makeRounds();
+load();
+</script>
+</body>
+</html>

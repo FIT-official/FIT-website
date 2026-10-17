@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blink &amp; Sense | FIT Coding</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,.code{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{font:800 14px/1.3 Inter,system-ui,sans-serif;min-height:44px;border:2px solid #111;border-radius:999px;padding:9px 17px;background:#fff;box-shadow:var(--sh-1);cursor:pointer}
+button:hover{background:var(--lvl-poly-tint)}
+button:active{transform:translateY(2px);box-shadow:none}
+button.selected{background:var(--lvl-poly)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,.code:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+.check{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-poly)}
+main{max-width:1340px;margin:auto;padding:16px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+h1{font-size:clamp(29px,4vw,43px);font-weight:800;line-height:1.13;margin:9px 0}
+h2{font-size:22px;font-weight:800;margin:0 0 12px}
+h3{font-size:17px;font-weight:800;margin:12px 0 7px}
+p{margin:8px 0}
+.badge{display:inline-block;border:2px solid #111;border-radius:999px;background:var(--lvl-poly);color:var(--lvl-poly-on);padding:5px 14px;font-size:12px;font-weight:800;text-transform:uppercase}
+.hud,.row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.hud span{background:var(--fit-sunken);border:2px solid #111;border-radius:12px;padding:8px 13px;font-weight:800}
+.layout{display:grid;gap:18px}
+.card{background:#fff;padding:17px;border:2px solid #111;border-radius:24px;box-shadow:var(--sh-2);min-width:0}
+.stage{background:var(--lvl-poly-tint)}
+.code{border:2px solid #111;border-radius:14px;background:#171717;color:#fff;padding:12px;font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto}
+.line{white-space:pre;padding:3px 5px;border-radius:5px}
+.line.active{background:#773e26}
+.lno{display:inline-block;color:#aaa;width:27px}
+.kw{color:#ffc18c}.name{color:#92dfff}.number{color:#abe9ad}
+#board{display:block;width:100%;max-width:460px;height:auto;margin:auto}
+#plot{width:100%;height:auto;display:block}
+.group{background:var(--fit-sunken);border:2px solid var(--fit-line-soft);border-radius:15px;padding:13px;margin:11px 0}
+.stepper{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:9px 0}
+.stepper button{min-width:44px;padding:7px}
+.stepper output{border:2px solid #111;background:#fff;border-radius:9px;padding:9px;min-width:83px;text-align:center;font-weight:800}
+.row{margin:12px 0}
+.small{font-size:13px;color:var(--fit-ink-3)}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.metric{padding:12px;border:2px solid #111;border-radius:14px;background:#fff}
+.metric strong{display:block;font-size:20px}
+#feedback{min-height:45px;font-weight:800}
+.good{color:var(--fit-success)}.bad{color:var(--fit-danger)}
+details{border:2px solid #111;border-radius:15px;padding:9px 14px;background:var(--fit-sunken)}
+summary{cursor:pointer;font-weight:800;min-height:35px}
+#finish{display:none;text-align:center;padding:35px}
+.stars{font-size:48px;letter-spacing:7px}
+svg text{font-family:Inter,system-ui,sans-serif}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.card{padding:22px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div><span class="badge">Polytechnic • Embedded Systems</span><h1>Blink &amp; Sense</h1><p>Keep an LED blinking while your controller watches a sensor.</p></div>
+<div class="hud"><span id="roundHud">Round 1/6</span><span id="scoreHud">Score: 0</span></div>
+</header>
+<div id="game" class="layout">
+<section class="card stage">
+<h2>Microcontroller simulator</h2>
+<p id="mission"></p>
+<svg id="board" viewBox="0 0 450 270" role="img" aria-label="Simulated microcontroller board with LED, light sensor and inputs"></svg>
+<h3>Arduino-style C++ sketch</h3>
+<div id="code" class="code" tabindex="0" aria-label="Selected C++ sketch with line numbers"></div>
+<div class="row"><button id="step">Step 10 ms</button><button id="run">▶ Run simulation</button><button id="reset">Reset time</button></div>
+<p id="timeStatus" class="small" aria-live="polite"></p>
+<h3>Timing idea</h3>
+<svg viewBox="0 0 440 95" width="100%" role="img" aria-label="Blocking delay stalls sensor checks while millis timing continues checking">
+<text x="12" y="15" font-size="12" font-weight="800">delay()</text>
+<rect x="95" y="5" width="148" height="23" rx="5" fill="#FF8FB8" stroke="#111" stroke-width="2"/>
+<text x="169" y="21" font-size="11" text-anchor="middle">Waiting</text>
+<rect x="246" y="5" width="90" height="23" rx="5" fill="#3DBE6B" stroke="#111" stroke-width="2"/>
+<text x="291" y="21" text-anchor="middle" font-size="11">Sense</text>
+<text x="12" y="55" font-size="12" font-weight="800">millis()</text>
+<path d="M95 47 H427" stroke="#111" stroke-width="2"/>
+<g fill="#3DBE6B" stroke="#111" stroke-width="1.5">
+<rect x="95" y="37" width="45" height="22" rx="4"/><rect x="150" y="37" width="45" height="22" rx="4"/><rect x="205" y="37" width="45" height="22" rx="4"/><rect x="260" y="37" width="45" height="22" rx="4"/><rect x="315" y="37" width="45" height="22" rx="4"/><rect x="370" y="37" width="45" height="22" rx="4"/>
+</g>
+<text x="250" y="79" font-size="12" text-anchor="middle">Repeated quick sensor checks</text>
+</svg>
+<p class="small">Ideal timing model; no switch bounce, electrical noise or hardware scheduling overhead.</p>
+</section>
+<section class="card">
+<h2>Configure the loop</h2>
+<div class="group"><strong>Timing method</strong><div class="row"><button id="delayBtn" data-method="delay">Blocking delay()</button><button id="millisBtn" data-method="millis">Non-blocking millis()</button></div></div>
+<div class="group">
+<label for="interval">LED half-period (ms)</label>
+<div class="stepper"><button data-step="interval:-100" aria-label="Decrease interval by 100">−−</button><button data-step="interval:-10" aria-label="Decrease interval by 10">−</button><output id="intervalText"></output><button data-step="interval:10" aria-label="Increase interval by 10">+</button><button data-step="interval:100" aria-label="Increase interval by 100">++</button></div>
+<input type="range" min="50" max="1000" step="10" id="interval" aria-label="LED half-period">
+</div>
+<div class="group">
+<label for="threshold">Light sensor threshold (0–1023)</label>
+<div class="stepper"><button data-step="threshold:-100" aria-label="Decrease threshold by 100">−−</button><button data-step="threshold:-10" aria-label="Decrease threshold by 10">−</button><output id="thresholdText"></output><button data-step="threshold:10" aria-label="Increase threshold by 10">+</button><button data-step="threshold:100" aria-label="Increase threshold by 100">++</button></div>
+<input type="range" min="100" max="900" step="10" id="threshold" aria-label="Sensor threshold">
+</div>
+<div class="metrics">
+<div class="metric">Blink period<strong id="period">—</strong></div>
+<div class="metric">Sensor response<strong id="response">—</strong></div>
+</div>
+<h3>Live plot</h3>
+<svg id="plot" viewBox="0 0 510 300" role="img" aria-label="LED state and sensor reading versus time"></svg>
+<div class="row"><button id="hint">Hint (−50 points)</button><button id="check" class="check">Check answer ★</button></div>
+<div id="feedback" aria-live="polite"></div>
+<details><summary>The idea</summary><p>The loop() function repeats for as long as the board runs. delay() prevents other code from executing while waiting. millis() allows the programme to check the clock and sensor repeatedly without blocking.</p></details>
+</section>
+</div>
+<section id="finish" class="card">
+<h2>Controller calibrated!</h2><div class="stars" id="stars"></div><p id="finalScore"></p><button id="again" class="check">Play again</button>
+</section>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+let seed=(Date.now()>>>0)||1,round=0,score=0,tries=0,hinted=false,solved=false;
+let config=null,method="delay",interval=300,threshold=500,t=0,frames=[],playing=false,ticket=0,activeLine=0;
+const CAP=10000;
+const reduced=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function ri(a,b){return a+Math.floor(rand()*(b-a+1))}
+function snap(x){return Math.round(x/10)*10}
+function buildRound(){
+ const half=ri(2,8)*100;
+ const light=ri(2,7)*100;
+ config={half,light,response:30,period:half*2};
+ interval=Math.min(1000,half+100);
+ threshold=Math.min(900,light+100);
+ method="delay";t=0;activeLine=0;
+}
+function sensorAt(time){
+ const eventTime=400;
+ return time<eventTime?Math.min(1023,config.light+200):Math.max(0,config.light-200);
+}
+function ast(){
+ return method==="delay"?
+ [{op:"loop",body:[
+  {op:"toggle",line:3},
+  {op:"sleep",ms:interval,line:4},
+  {op:"read",line:5},
+  {op:"compare",threshold,line:6}
+ ]}]:
+ [{op:"loop",body:[
+  {op:"read",line:3},
+  {op:"compare",threshold,line:4},
+  {op:"clockCheck",ms:interval,line:5},
+  {op:"toggleWhenDue",line:6}
+ ]}];
+}
+function simulate(){
+ const tree=ast();
+ const duration=2200,tick=10;
+ let led=0,dark=false,previous=0,nextWake=0,reads=[],changes=[],data=[],lastToggle=0,loopSteps=0,capped=false;
+ const body=tree[0].body;
+ const methodNow=method;
+ for(let time=0;time<=duration;time+=tick){
+  if(++loopSteps>CAP){capped=true;break}
+  const sensor=sensorAt(time);
+  if(methodNow==="millis"){
+   for(const node of body){
+    if(++loopSteps>CAP){capped=true;break}
+    if(node.op==="read"){reads.push(time)}
+    if(node.op==="compare"){dark=sensor<threshold}
+    if(node.op==="toggleWhenDue"&&time-lastToggle>=interval){
+     led=1-led;lastToggle=time;changes.push(time);
+    }
+   }
+  }else{
+   if(time>=nextWake){
+    for(const node of body){
+     if(++loopSteps>CAP){capped=true;break}
+     if(node.op==="toggle"){led=1-led;changes.push(time)}
+     if(node.op==="sleep"){nextWake=time+interval}
+     if(node.op==="read"){reads.push(time)}
+     if(node.op==="compare"){dark=sensor<threshold}
+    }
+   }
+  }
+  data.push({time,led,sensor,dark,read:reads.at(-1)===time});
+  if(capped)break;
+ }
+ const eventTime=400;
+ const sensorChanged=reads.find(x=>x>=eventTime);
+ const response=sensorChanged===undefined?Infinity:sensorChanged-eventTime;
+ const period=interval*2;
+ return{data,reads,changes,response,period,capped};
+}
+function codeLines(){
+ if(method==="delay")return[
+  "const int LED = 13, LDR = A0;",
+  "void loop() {",
+  "  digitalWrite(LED, !digitalRead(LED));",
+  `  delay(${interval});`,
+  "  int light = analogRead(LDR);",
+  `  bool dark = light < ${threshold};`,
+  "}"
+ ];
+ return[
+  "unsigned long lastToggle = 0;",
+  "void loop() {",
+  "  int light = analogRead(LDR);",
+  `  bool dark = light < ${threshold};`,
+  `  if (millis() - lastToggle >= ${interval}) {`,
+  "    digitalWrite(LED, !digitalRead(LED));",
+  "    lastToggle = millis(); }",
+  "}"
+ ];
+}
+function colour(s){
+ return s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+ .replace(/\b(void|int|bool|const|unsigned|long|if)\b/g,'<span class="kw">$1</span>')
+ .replace(/\b(loop|digitalWrite|digitalRead|analogRead|millis|delay)\b/g,'<span class="name">$1</span>')
+ .replace(/\b(\d+)\b/g,'<span class="number">$1</span>');
+}
+function codeUI(){
+ $("code").innerHTML=codeLines().map((s,i)=>`<div class="line ${i+1===activeLine?"active":""}"><span class="lno">${i+1}</span>${colour(s)}</div>`).join("");
+}
+function boardUI(){
+ const result=simulate(),frame=result.data.findLast(o=>o.time<=t)||result.data[0],led=frame?.led||0,dark=frame?.dark||false;
+ const value=frame?.sensor||0;
+ $("board").innerHTML=`
+ <rect x="35" y="25" width="375" height="210" rx="22" fill="#2F9777" stroke="#111" stroke-width="5"/>
+ <rect x="57" y="47" width="98" height="46" rx="8" fill="#1A2929" stroke="#111" stroke-width="4"/>
+ <text x="106" y="76" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">CPU</text>
+ <g fill="#111">${Array.from({length:10},(_,i)=>`<rect x="${64+i*32}" y="26" width="12" height="17" rx="2"/>`).join("")}</g>
+ <rect x="83" y="115" width="111" height="71" rx="10" fill="#ddd" stroke="#111" stroke-width="3"/>
+ <text x="138" y="145" text-anchor="middle" font-weight="800" font-size="13">Controller</text>
+ <text x="138" y="163" text-anchor="middle" font-size="12">loop()</text>
+ <circle cx="309" cy="90" r="31" fill="${led?"#FFC83D":"#c5c5c5"}" stroke="#111" stroke-width="4"/>
+ <circle cx="309" cy="90" r="13" fill="${led?"#FFDD00":"#888"}" stroke="#111" stroke-width="2"/>
+ <text x="309" y="139" text-anchor="middle" font-size="13" font-weight="800">LED: ${led?"ON":"OFF"}</text>
+ <rect x="240" y="156" width="141" height="60" rx="12" fill="#fff" stroke="#111" stroke-width="3"/>
+ <text x="310" y="176" text-anchor="middle" font-size="12">Light sensor</text>
+ <text x="310" y="198" text-anchor="middle" font-size="17" font-weight="800">${value}</text>
+ <path d="M195 152 H237" fill="none" stroke="#111" stroke-width="4"/>
+ <text x="215" y="130" text-anchor="middle" font-size="12">${dark?"DARK":"BRIGHT"}</text>`;
+ $("board").setAttribute("aria-label",`At ${t} milliseconds LED ${led?"on":"off"}, sensor reading ${value}, detection ${dark?"dark":"bright"}.`);
+}
+function plotUI(){
+ const result=simulate(),d=result.data,maxT=2200;
+ const left=56,right=490,top=46,bottom=236;
+ const X=time=>left+(right-left)*time/maxT;
+ const YLed=v=>145-v*76;
+ const YSensor=v=>bottom-v/1023*75;
+ let s=`<text x="12" y="19" font-weight="800">LED and light sensor over time</text><path d="M56 44 V236 H490" fill="none" stroke="#111" stroke-width="2"/>`;
+ [0,500,1000,1500,2000].forEach(x=>{
+  const xx=X(x);
+  s+=`<line x1="${xx}" y1="45" x2="${xx}" y2="236" stroke="#ddd"/><text x="${xx}" y="254" font-size="11" text-anchor="middle">${x}</text>`;
+ });
+ [0,1].forEach(v=>s+=`<text x="45" y="${YLed(v)+4}" font-size="11" text-anchor="end">${v}</text>`);
+ [0,512,1023].forEach(v=>s+=`<text x="45" y="${YSensor(v)+4}" font-size="11" text-anchor="end">${v}</text>`);
+ const ledPoints=d.map(o=>`${X(o.time)},${YLed(o.led)}`).join(" ");
+ const sensorPoints=d.map(o=>`${X(o.time)},${YSensor(o.sensor)}`).join(" ");
+ s+=`<polyline points="${ledPoints}" fill="none" stroke="#FF6B3D" stroke-width="2.7"/>
+ <polyline points="${sensorPoints}" fill="none" stroke="#1F66E5" stroke-width="2.7"/>
+ <line x1="${X(400)}" y1="45" x2="${X(400)}" y2="236" stroke="#111" stroke-dasharray="5 5"/>
+ <rect x="${X(400)}" y="155" width="${X(400+config.response)-X(400)}" height="80" fill="#3DBE6B" opacity=".18"/>
+ <text x="${X(400)+5}" y="167" font-size="10">Response window</text>
+ <line x1="${X(t)}" y1="45" x2="${X(t)}" y2="236" stroke="#111" stroke-width="2"/>
+ <text x="274" y="278" text-anchor="middle" font-size="13">Time (ms)</text>
+ <text x="60" y="39" font-size="11">LED state (0/1)</text>
+ <text x="60" y="157" font-size="11">Sensor reading (0–1023)</text>
+ <line x1="326" y1="18" x2="349" y2="18" stroke="#FF6B3D" stroke-width="3"/><text x="353" y="22" font-size="11">LED</text>
+ <line x1="405" y1="18" x2="429" y2="18" stroke="#1F66E5" stroke-width="3"/><text x="433" y="22" font-size="11">Sensor</text>`;
+ $("plot").innerHTML=s;
+ $("plot").setAttribute("aria-label",`LED period ${result.period} milliseconds. Sensor response ${result.response} milliseconds. Current playback time ${t} milliseconds.`);
+}
+function controlsUI(){
+ $("interval").value=interval;$("threshold").value=threshold;
+ $("intervalText").textContent=`${interval} ms`;
+ $("thresholdText").textContent=String(threshold);
+ $("delayBtn").classList.toggle("selected",method==="delay");
+ $("millisBtn").classList.toggle("selected",method==="millis");
+ const result=simulate();
+ $("period").textContent=`${result.period} ms`;
+ $("response").textContent=Number.isFinite(result.response)?`${result.response} ms`:"Not detected";
+}
+function redraw(){
+ stop();t=0;activeLine=0;
+ controlsUI();codeUI();boardUI();plotUI();
+ $("timeStatus").textContent="Ready at 0 ms.";
+}
+function change(key,v){
+ if(key==="interval")interval=Math.max(50,Math.min(1000,snap(v)));
+ if(key==="threshold")threshold=Math.max(100,Math.min(900,snap(v)));
+ redraw();
+}
+function step(){
+ t=Math.min(2200,t+10);
+ activeLine=method==="delay"?(t%interval===0?3:4):(t%interval===0?6:3);
+ codeUI();boardUI();plotUI();
+ $("timeStatus").textContent=`Simulated time: ${t} ms.`;
+}
+function stop(){ticket++;playing=false}
+async function run(){
+ if(playing)return;
+ stop();t=0;
+ if(reduced()){t=2200;activeLine=0;codeUI();boardUI();plotUI();$("timeStatus").textContent="Simulation complete.";return}
+ playing=true;const id=ticket;
+ while(playing&&id===ticket&&t<2200){
+  t=Math.min(2200,t+50);
+  activeLine=method==="delay"?(t%interval===0?3:4):3;
+  codeUI();boardUI();plotUI();
+  $("timeStatus").textContent=`Simulated time: ${t} ms.`;
+  await new Promise(r=>setTimeout(r,45));
+ }
+ playing=false;
+}
+function feedback(t,good){$("feedback").className=good?"good":"bad";$("feedback").textContent=t}
+function check(){
+ if(solved)return;
+ tries++;
+ const r=simulate();
+ const correctPeriod=r.period===config.period;
+ const correctSensor=threshold>=config.light-190&&threshold<=config.light+190&&sensorAt(0)>=threshold&&sensorAt(400)<threshold;
+ const fast=r.response<=config.response;
+ const correct=method==="millis"&&correctPeriod&&correctSensor&&fast&&!r.capped;
+ if(!correct){
+  if(!correctPeriod){feedback(`Your blink period is ${r.period} ms. It does not match the required period. Each full blink needs two toggles.`,false);return}
+  if(!correctSensor){feedback("The threshold does not reliably distinguish the two sensor levels.",false);return}
+  if(!fast){feedback(`Sensor response is ${r.response} ms, outside the ${config.response} ms requirement. Try non-blocking timing.`,false);return}
+  feedback("The loop still blocks sensor checks. Change the timing method.",false);return;
+ }
+ solved=true;const points=hinted?50:tries===1?100:75;score+=points;
+ $("scoreHud").textContent=`Score: ${score}`;
+ feedback(`★ Correct! The LED blinks at ${r.period} ms and the sensor is checked within ${config.response} ms. +${points} points.`,true);
+ setTimeout(()=>{if(round===5)finish();else{round++;load()}},1050);
+}
+function hint(){
+ hinted=true;
+ feedback("A full blink cycle takes two half-periods. For quick sensor reactions, compare millis() with the previous toggle time instead of waiting in delay(). Set the threshold between the bright and dark readings.",false);
+}
+function load(){
+ stop();tries=0;hinted=false;solved=false;buildRound();
+ $("roundHud").textContent=`Round ${round+1}/6`;
+ $("mission").textContent=`Target LED period: ${config.period} ms. Detect the light change within ${config.response} ms.`;
+ feedback("",true);redraw();
+}
+function finish(){
+ $("game").style.display="none";$("finish").style.display="block";
+ $("stars").textContent=score>=520?"★★★":score>=380?"★★☆":"★☆☆";
+ $("finalScore").textContent=`Total score: ${score}/600`;
+}
+document.querySelectorAll("[data-method]").forEach(b=>b.onclick=()=>{method=b.dataset.method;redraw()});
+document.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>{
+ const [key,diff]=b.dataset.step.split(":");change(key,(key==="interval"?interval:threshold)+Number(diff));
+});
+$("interval").oninput=e=>change("interval",+e.target.value);
+$("threshold").oninput=e=>change("threshold",+e.target.value);
+$("step").onclick=()=>{stop();step()};
+$("run").onclick=run;$("reset").onclick=redraw;
+$("check").onclick=check;$("hint").onclick=hint;
+$("again").onclick=()=>{round=0;score=0;seed=(Date.now()>>>0)||1;$("scoreHud").textContent="Score: 0";$("game").style.display="grid";$("finish").style.display="none";load()};
+load();
+</script>
+</body>
+</html>

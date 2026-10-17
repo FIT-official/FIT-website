@@ -32,6 +32,8 @@ const statistics = {
   minutes: '10–15',
   status: 'draft'
 }
+// Coding: loops family (p, jc fix3; s, u fix1/v2; poly v1). Status per game set by FIT Social vetting (all KATs + 7 checks).
+const codingLoops = { subject: 'Computing', concept: 'coding-loops', accent: '#1F66E5', minutes: '10–15', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -347,4 +349,24 @@ export const htmlSims = [
     activityPrompt: 'Play all rounds, then explain why a confidence level describes long-run interval coverage rather than the probability that a fixed interval contains the parameter.',
     tags: ['University', 'Statistics', 'regression', 'residuals', 'confidence intervals', 'coverage', 'extrapolation']
   },
+  { ...codingLoops, id: 'coding-loops-p', status: 'draft', title: 'Robot Path', level: 'Primary', topic: 'Sequencing and repeat loops', symbol: '🤖', height: 1200,
+    syllabusRef: 'MOE Primary: computational thinking (sequencing and repeat loops in block coding)',
+    approach: 'Drag move, turn and repeat blocks to steer a robot along a safe path to the star, using a repeat to fit within the block limit.',
+    activityPrompt: 'Play all rounds, then explain how spotting a repeated pattern let you use fewer blocks.', tags: ['coding', 'loops', 'sequencing', 'repeat', 'block coding'] },
+  { ...codingLoops, id: 'coding-loops-s', title: 'Loop Tracer', level: 'Secondary', topic: 'for and while loops in Python', symbol: '🔁', height: 1250,
+    syllabusRef: 'MOE O-Level Computing: iteration (for loops with range(), while loops, accumulators and off-by-one errors)',
+    approach: 'Trace Python for loops with range() in a trace table, then find and fix the bug that makes a while loop stop too early or never end.',
+    activityPrompt: 'Play all rounds, then explain why range(2, 8, 2) never produces the value 8.', tags: ['coding', 'loops', 'Python', 'trace table', 'while loop'] },
+  { ...codingLoops, id: 'coding-loops-jc', title: 'Loop Cost', level: 'JC', topic: 'Nested loops and time complexity', symbol: '⏱️', height: 1400,
+    syllabusRef: 'H2 Computing: algorithm analysis (nested loops, counting operations and Big-O time complexity)',
+    approach: 'Count exactly how many times an inner statement runs, classify how the work grows with n, and pick a loop that fits an operation budget.',
+    activityPrompt: 'Play all rounds, then explain why two nested loops over n items grow as O(n²).', tags: ['coding', 'loops', 'nested loops', 'time complexity', 'Big-O'] },
+  { ...codingLoops, id: 'coding-loops-poly', title: 'Blink & Sense', level: 'Poly', topic: 'Control loops on a microcontroller', symbol: '💡', height: 1550,
+    syllabusRef: 'Poly embedded systems: the forever loop(), non-blocking timing with millis() and reading a sensor in a loop (generic)',
+    approach: 'Program a simulated microcontroller board to blink an LED on time with millis() instead of delay(), and react to a light sensor inside the loop.',
+    activityPrompt: 'Play all rounds, then explain why delay() makes a board miss sensor changes while millis() does not.', tags: ['coding', 'loops', 'embedded systems', 'millis', 'sensor'] },
+  { ...codingLoops, id: 'coding-loops-u', title: 'Invariant Hunter', level: 'University', topic: 'Loop invariants and termination', symbol: '🧭', height: 1550,
+    syllabusRef: 'University, Algorithms',
+    approach: 'Choose the loop invariant and the variant that prove classic loops correct and terminating: summation, binary search and the insertion-sort inner loop.',
+    activityPrompt: 'Play all rounds, then explain how an invariant and a variant together prove a loop is correct.', tags: ['University', 'Algorithms', 'loop invariant', 'termination', 'correctness'] },
 ]
