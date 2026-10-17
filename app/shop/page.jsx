@@ -1,4 +1,5 @@
 import { jsonLdString } from '@/lib/jsonLd'
+import FitAddressLine from '@/components/General/FitAddressLine'
 import ShopPage from "./ShopPage";
 import Link from 'next/link';
 import { SITE_URL } from '@/lib/seo/site';
@@ -52,6 +53,7 @@ async function ShopLayout({ searchParams }) {
                 </div>
             </section>
             <ShopPage initialProducts={products} />
+            <FitAddressLine />
         </>
     )
 }

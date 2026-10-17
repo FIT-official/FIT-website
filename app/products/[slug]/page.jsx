@@ -1,3 +1,4 @@
+import FitAddressLine from '@/components/General/FitAddressLine'
 import { cache } from 'react'
 import { notFound, permanentRedirect } from 'next/navigation'
 import { connectToDatabase } from '@/lib/db'
@@ -76,6 +77,7 @@ export default async function ProductPageLayout({ params }) {
                 initialProduct={publicProductSeed(product)}
                 initialGlobalDiscountRules={globalDiscountRules}
             />
+            <FitAddressLine />
         </>
     )
 }

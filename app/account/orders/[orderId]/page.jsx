@@ -1,3 +1,4 @@
+import FitAddressLine from '@/components/General/FitAddressLine'
 import OrderPage from "./OrderPage";
 import { auth } from "@clerk/nextjs/server";
 import { connectToDatabase } from "@/lib/db";
@@ -45,7 +46,7 @@ export async function generateMetadata(props) {
 
 async function OrderLayout(props) {
     const params = await props.params;
-    return <OrderPage orderId={params.orderId} />
+    return <><OrderPage orderId={params.orderId} /><FitAddressLine /></>
 }
 
 export default OrderLayout

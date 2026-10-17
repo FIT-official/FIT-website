@@ -1,3 +1,4 @@
+import FitAddressLine from '@/components/General/FitAddressLine'
 import CheckOut from "./CheckOut";
 
 export const metadata = {
@@ -23,7 +24,7 @@ export const metadata = {
 
 function CheckoutLayout() {
     return (
-        <CheckOut />
+        <><CheckOut /><FitAddressLine /></>
     )
 }
 

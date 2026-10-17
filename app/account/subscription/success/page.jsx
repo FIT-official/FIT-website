@@ -1,3 +1,4 @@
+import FitAddressLine from '@/components/General/FitAddressLine'
 import SubscriptionChangeSuccess from "./SubscriptionChangeSuccess";
 
 export const metadata = {
@@ -23,7 +24,7 @@ export const metadata = {
 
 function SubscriptionSuccessLayout() {
     return (
-        <SubscriptionChangeSuccess />
+        <><SubscriptionChangeSuccess /><FitAddressLine /></>
     )
 }
 

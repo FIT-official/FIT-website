@@ -1,3 +1,4 @@
+import FitAddressLine from '@/components/General/FitAddressLine'
 import { jsonLdString } from '@/lib/jsonLd'
 import PrintPage from "./PrintPage";
 import Link from 'next/link';
@@ -42,6 +43,7 @@ async function PrintLayout({ searchParams } = {}) {
                 </div>
             </section>
             <PrintPage initialProducts={products} />
+            <FitAddressLine />
         </>
     )
 }

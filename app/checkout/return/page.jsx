@@ -1,3 +1,4 @@
+import FitAddressLine from '@/components/General/FitAddressLine'
 import Return from "./Return";
 
 export const metadata = {
@@ -23,7 +24,7 @@ export const metadata = {
 
 function ReturnLayout() {
     return (
-        <Return />
+        <><Return /><FitAddressLine /></>
     )
 }
 

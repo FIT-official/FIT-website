@@ -1,3 +1,4 @@
+import FitAddressLine from '@/components/General/FitAddressLine'
 import PrinterRepairFlow from '@/components/Services/PrinterRepairFlow'
 import Link from 'next/link'
 import { buildPageMetadata, PRIVATE_PAGE_ROBOTS } from '@/lib/seo/metadata'
@@ -47,5 +48,6 @@ export default function PrinterRepairPage() {
       </div>
       <p className={styles.links}><Link href="/blog/3d-printer-repair">Read the 3D printer repair and maintenance guide</Link><Link href="/blog/3d-printing-filament-types-guide">Compare filament materials</Link></p>
     </section>
+    <FitAddressLine />
   </main>
 }

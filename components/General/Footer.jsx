@@ -1,4 +1,5 @@
 'use client'
+import FitAddressLine from '@/components/General/FitAddressLine'
 import Logo from '../Logo'
 import { FaLinkedin, FaWhatsapp } from 'react-icons/fa'
 import { HiOutlineMail } from 'react-icons/hi'
@@ -50,6 +51,7 @@ function Footer() {
                             <Link href='mailto:fixittoday.contact@gmail.com' className='footerLink'>
                                 <HiOutlineMail size={16} className='flex' /> Email
                             </Link>
+                            <FitAddressLine className='text-sm text-lightColor' />
                             {/* <Link href='https://instagram.com' target="_blank" rel="noopener noreferrer" className='footerLink'>
                                 <FaInstagram size={16} className='flex' /> Instagram
                             </Link> */}

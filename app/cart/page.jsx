@@ -1,3 +1,4 @@
+import FitAddressLine from '@/components/General/FitAddressLine'
 import Cart from "./Cart";
 
 export const metadata = {
@@ -23,7 +24,7 @@ export const metadata = {
 
 function CartLayout() {
     return (
-        <Cart />
+        <><Cart /><FitAddressLine /></>
     )
 }
 
