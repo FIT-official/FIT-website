@@ -351,7 +351,7 @@ export const htmlSims = [
     activityPrompt: 'Play all rounds, then explain why a confidence level describes long-run interval coverage rather than the probability that a fixed interval contains the parameter.',
     tags: ['University', 'Statistics', 'regression', 'residuals', 'confidence intervals', 'coverage', 'extrapolation']
   },
-  { ...codingLoops, id: 'coding-loops-p', status: 'draft', title: 'Robot Path', level: 'Primary', topic: 'Sequencing and repeat loops', symbol: '🤖', height: 1200,
+  { ...codingLoops, id: 'coding-loops-p', title: 'Robot Path', level: 'Primary', topic: 'Sequencing and repeat loops', symbol: '🤖', height: 1200,
     syllabusRef: 'MOE Primary: computational thinking (sequencing and repeat loops in block coding)',
     approach: 'Drag move, turn and repeat blocks to steer a robot along a safe path to the star, using a repeat to fit within the block limit.',
     activityPrompt: 'Play all rounds, then explain how spotting a repeated pattern let you use fewer blocks.', tags: ['coding', 'loops', 'sequencing', 'repeat', 'block coding'] },
