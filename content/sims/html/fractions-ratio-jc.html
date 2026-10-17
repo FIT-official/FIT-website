@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Series Ladder</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+button{min-height:46px;border:2px solid #111;border-radius:999px;background:white;color:#111;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;padding:9px 15px;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.5;cursor:default}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+input{min-height:48px;width:100%;min-width:0;border:2px solid #111;border-radius:12px;font:600 17px Inter,system-ui,sans-serif;padding:9px}
+input[type=range]{padding:0;accent-color:var(--lvl-jc);cursor:pointer}
+svg{width:100%;height:auto;display:block;max-width:100%}
+.shell{max-width:1240px;margin:auto;padding:18px 15px 40px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px}
+.badge{border:2px solid #111;background:var(--lvl-jc);color:var(--lvl-jc-on);border-radius:999px;font-size:12px;font-weight:800;text-transform:uppercase;padding:7px 12px}
+.hud{display:flex;gap:9px;flex-wrap:wrap}
+.hud span{font-size:14px;font-weight:800;padding:7px 12px;background:var(--fit-sunken);border-radius:999px}
+h1{font-size:clamp(27px,5vw,39px);line-height:1.15;font-weight:800;margin:13px 0 5px}
+h2{font-size:20px;font-weight:800;margin:0 0 12px}
+h3{font-size:15px;font-weight:800;margin:10px 0}
+p{margin:8px 0}
+.lead{color:var(--fit-ink-2);margin-bottom:18px}
+.board{display:grid;grid-template-columns:minmax(0,1fr);gap:17px}
+.card{min-width:0;border:2px solid #111;border-radius:var(--r-lg);padding:18px;background:#fff;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-jc-tint)}
+.question{font-size:19px;font-weight:800;line-height:1.4}
+.scene{display:grid;gap:13px;min-height:225px;align-content:center}
+.tiles{display:flex;flex-wrap:wrap;gap:9px}
+.tile{border:2px solid #111;border-radius:13px;background:white;padding:10px 13px;font-weight:800;min-width:70px;text-align:center}
+.tile.unknown{background:var(--fit-sun)}
+.panel{display:grid;gap:16px;align-content:start}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+label{display:block;font-weight:800;font-size:13px;margin:6px 0}
+.choices,.actions,.steps{display:flex;gap:8px;flex-wrap:wrap}
+.choices button{flex:1 1 100px}
+.choices button[aria-pressed=true]{background:var(--lvl-jc);color:white}
+.steps{margin-top:12px;align-items:center}
+.steps button{min-width:47px;padding:8px}
+.steps input{flex:1 1 100px;width:90px}
+.action{flex:1;background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2);font-weight:800}
+.action:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.feedback{min-height:65px;border:2px solid var(--fit-line-soft);border-radius:16px;padding:13px;font-weight:600;margin:15px 0 0}
+.feedback.good{border-color:var(--fit-success);background:#E5F8ED}
+.feedback.bad{border-color:var(--fit-danger);background:#FFF0EE}
+.plot{border:2px solid #111;border-radius:15px;background:#fff}
+.plotcard{display:grid;gap:13px}
+.small{font-size:13px;color:var(--fit-ink-3)}
+.concept{display:flex;align-items:center;gap:12px;background:var(--fit-sunken);border-radius:15px;padding:12px;margin-top:15px}
+.concept svg{width:120px;flex:0 0 120px}
+.concept p{font-size:13px}
+details{border:2px solid var(--fit-line-soft);border-radius:15px;margin-top:18px;padding:9px 14px}
+summary{font-weight:800;cursor:pointer;min-height:38px}
+footer{text-align:center;color:var(--fit-ink-3);font-size:12px;margin-top:18px}
+.finish{text-align:center;padding:40px 16px}
+.stars{font-size:47px;color:#B98A09}
+.hidden{display:none!important}
+@media(min-width:900px){.board{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}.stage{min-height:520px}}
+@media(max-width:420px){.card{padding:14px}.concept svg{width:89px;flex-basis:89px}}
+@media(prefers-reduced-motion:no-preference){button{transition:transform var(--dur-1) var(--ease-out),box-shadow var(--dur-1) var(--ease-out)}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header><span class="badge">JC · Maths</span>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score 0</span></div></header>
+<h1>Series Ladder</h1>
+<p class="lead">Find the pattern, accumulate the terms and see what survives.</p>
+<main id="game" class="board">
+<section class="card stage">
+<h2 id="sceneTitle">Sequence workbench</h2>
+<p class="question" id="question"></p>
+<div class="scene" id="scene"></div>
+<div class="concept">
+<svg viewBox="0 0 128 65" role="img" aria-label="An increasing row of blocks for successive terms">
+<rect x="5" y="43" width="21" height="14" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+<rect x="36" y="33" width="21" height="24" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+<rect x="67" y="23" width="21" height="34" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+<rect x="98" y="13" width="21" height="44" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+</svg>
+<p>A partial sum adds the first n terms. A convergent series approaches a finite limit.</p>
+</div>
+</section>
+<section class="panel">
+<div class="card">
+<h2>Your solution</h2>
+<div id="controls"></div>
+<div class="actions" style="margin-top:15px">
+<button id="hint">Hint − points</button>
+<button id="check" class="action">Check</button>
+<button id="next" class="action hidden">Next round →</button>
+</div>
+<p id="feedback" class="feedback" aria-live="polite">Work out the values, then press Check.</p>
+</div>
+<div class="card plotcard">
+<div><h2>Live partial sums</h2>
+<svg id="sumPlot" class="plot" viewBox="0 0 420 270" role="img" aria-label="Partial sums against term index"></svg></div>
+<div><h2>Cancellation view</h2>
+<svg id="cancelPlot" class="plot" viewBox="0 0 420 208" role="img" aria-label="Positive and negative partial fraction contributions"></svg></div>
+</div>
+</section>
+</main>
+<section id="finish" class="card finish hidden" aria-live="polite">
+<h2>All six ladders climbed!</h2><div id="stars" class="stars"></div>
+<p id="result"></p><button class="action" id="again">Play again</button>
+</section>
+<details><summary>The maths</summary>
+<p>AP: Tₙ = a + (n − 1)d and Sₙ = n[2a + (n − 1)d]/2.</p>
+<p>GP: Tₙ = arⁿ⁻¹. For r ≠ 1, Sₙ = a(1 − rⁿ)/(1 − r). If |r| is less than 1, S∞ = a/(1 − r). If r = 1, Sₙ = na.</p>
+<p>Partial fractions: 1/[(k+p)(k+q)] = A/(k+p) + B/(k+q), where A = 1/(q−p) and B = −A. Adjacent terms may cancel when summed.</p>
+</details>
+<footer>Fix It Today</footer>
+</div>
+<script>
+/* FIT-CALC-BEGIN fractions-ratio */
+const FITCalcRatio = (function () {
+'use strict';
+
+const err = (error, reason) => ({ error, reason });
+const C = reason => err('ConstraintViolation', reason);
+const M = reason => err('MathError', reason);
+const R = reason => err('RuntimeError', reason);
+const N = reason => err('NotSupported', reason);
+const isErr = x => !!(x && x.error);
+const finite = (...xs) => xs.every(x => typeof x === 'number' && Number.isFinite(x));
+const nums = (...xs) => finite(...xs) ? null : C('non_finite_input');
+const integer = (x, cap = 1000000) =>
+  !Number.isInteger(x) ? C('not_an_integer') :
+  Math.abs(x) > cap ? C('value_too_large') : null;
+const positiveN = x => Number.isInteger(x) && x > 0;
+const safe = x => Number.isFinite(x) ? null : R('numerical_overflow');
+
+function gcd(a, b) {
+  a = Math.abs(a); b = Math.abs(b);
+  while (b !== 0) { const t = a % b; a = b; b = t; }
+  return a;
+}
+function F(n, d) {
+  if (d < 0) { n = -n; d = -d; }
+  const g = gcd(n, d);
+  return { num: n / g, den: d / g };
+}
+function validFraction(f, cap = 1000000) {
+  if (!f || typeof f !== 'object') return C('invalid_fraction');
+  const e = nums(f.num, f.den);
+  if (e) return e;
+  return integer(f.num, cap) || integer(f.den, cap) ||
+    (f.den === 0 ? M('zero_denominator') : null);
+}
+function validParts(parts, exactTwo = false) {
+  if (!Array.isArray(parts) ||
+      (exactTwo ? parts.length !== 2 : parts.length < 2 || parts.length > 6))
+    return C(exactTwo ? 'ratio_must_have_2_parts' : 'parts_out_of_range_2_6');
+  for (const p of parts) {
+    if (!finite(p)) return C('non_finite_input');
+    const e = integer(p);
+    if (e) return e;
+    if (p <= 0) return C('part_not_positive');
+  }
+  return null;
+}
+function validN(n, max = 100000) {
+  return !Number.isInteger(n) || n < 1 || n > max ?
+    C('n_not_positive_integer') : null;
+}
+function result(value) {
+  return finite(value) ? null : R('numerical_overflow');
+}
+function fractionalSum(a, b, sign) {
+  return F(a.num * b.den + sign * b.num * a.den, a.den * b.den);
+}
+function gpSum(a, r, n) {
+  if (r === 1) return a * n;
+  if (r > 0) return a * Math.expm1(n * Math.log(r)) / (r - 1);
+  return a * (1 - Math.pow(r, n)) / (1 - r);
+}
+
+/**
+ * simplify({num,den}): integers, |parts|<=1e6; no units.
+ * Returns reduced num/den and input gcd; zero denominator is invalid.
+ * Hand check: -18/-24 -> 3/4, gcd 6.
+ */
+function simplify({ num, den } = {}) {
+  const e = validFraction({ num, den });
+  if (e) return e;
+  return { ...F(num, den), gcd: gcd(num, den) };
+}
+
+/**
+ * frac_op({a,b,op}): rational arithmetic, no units; reduced fraction,
+ * decimal and non-negative mixed number (negative -> null).
+ * Hand check: 2/3 + 3/4 = 17/12 = 1 5/12.
+ * Errors: unsupported op, invalid fractions, zero divisor.
+ */
+function frac_op({ a, b, op } = {}) {
+  if (!['add','subtract','multiply','divide'].includes(op)) return N('op_not_supported');
+  const e = validFraction(a) || validFraction(b);
+  if (e) return e;
+  a = F(a.num,a.den); b = F(b.num,b.den);
+  if (op === 'divide' && b.num === 0) return M('division_by_zero');
+  const f = op === 'add' ? fractionalSum(a,b,1) :
+    op === 'subtract' ? fractionalSum(a,b,-1) :
+    op === 'multiply' ? F(a.num*b.num,a.den*b.den) :
+    F(a.num*b.den,a.den*b.num);
+  const decimal = f.num/f.den;
+  const whole = Math.floor(decimal);
+  const mixed = f.num < 0 ? null :
+    { whole, num: f.num-whole*f.den, den: f.den };
+  return { ...f, decimal, mixed };
+}
+
+/**
+ * compare({a,b}): fractions, no units; relation and exact difference a-b.
+ * Hand check: 5/6 > 3/4; difference 1/12.
+ * Errors: invalid fractions.
+ */
+function compare({ a, b } = {}) {
+  const e = validFraction(a) || validFraction(b);
+  if (e) return e;
+  a = F(a.num,a.den); b = F(b.num,b.den);
+  const d = fractionalSum(a,b,-1);
+  return { result: d.num < 0 ? '<' : d.num > 0 ? '>' : '=', difference:d };
+}
+
+/**
+ * fraction_of({num,den,quantity}): fraction times a finite quantity,
+ * retaining the quantity's units.
+ * Hand check: 3/8 of 64 counters = 24 counters.
+ * Errors: invalid fraction or numerical overflow.
+ */
+function fraction_of({ num, den, quantity } = {}) {
+  const e = validFraction({num,den}) || nums(quantity);
+  if (e) return e;
+  const value = (num/den)*quantity;
+  return result(value) || {value};
+}
+
+/**
+ * ratio_simplify({parts}): 2..6 positive integer parts, no units.
+ * Hand check: [12,18,30] -> [2,3,5].
+ * Errors: invalid ratio or oversized parts.
+ */
+function ratio_simplify({parts} = {}) {
+  const e = validParts(parts);
+  if (e) return e;
+  const g = parts.reduce((a,b) => gcd(a,b));
+  return {parts:parts.map(p => p/g)};
+}
+
+/**
+ * share({total,parts}): divide a non-negative total in a 2..6-part ratio.
+ * Shares and unit_value have the total's units.
+ * Hand check: $120 in 2:3 -> $48 and $72; unit $24.
+ * Errors: negative_total, invalid ratio, non-finite input.
+ */
+function share({total,parts} = {}) {
+  const e = validParts(parts) || nums(total);
+  if (e) return e;
+  if (total < 0) return C('negative_total');
+  const unit_value = total/parts.reduce((a,b)=>a+b,0);
+  const shares = parts.map(p=>p*unit_value);
+  return shares.every(Number.isFinite) ?
+    {unit_value,shares} : R('numerical_overflow');
+}
+
+/**
+ * ratio_unchanged({before,after,unchanged_index,change}):
+ * two positive ratios and signed change in the changing quantity's units.
+ * Returns four quantities in those units. Both unchanged values are equal.
+ * Hand check: 3:5 -> 3:4, index 0, change -5:
+ * before [15,25], after [15,20].
+ * Errors: non-unique equal ratios or no positive solution.
+ */
+function ratio_unchanged({before,after,unchanged_index,change} = {}) {
+  const e = validParts(before,true) || validParts(after,true) || nums(change);
+  if (e) return e;
+  if (unchanged_index !== 0 && unchanged_index !== 1) return C('index_out_of_range');
+  const [p,q] = before, [r,s] = after;
+  const determinant = p*s-q*r;
+  if (determinant === 0) return M('ratios_inconsistent');
+  let u, before_values, after_values;
+  if (unchanged_index === 0) {
+    u = change*p*r/determinant;
+    before_values = [u,u*q/p];
+    after_values = [u,u*s/r];
+  } else {
+    u = -change*q*s/determinant;
+    before_values = [u*p/q,u];
+    after_values = [u*r/s,u];
+  }
+  if (![...before_values,...after_values].every(x => Number.isFinite(x) && x > 0))
+    return M('no_positive_solution');
+  return {before_values,after_values};
+}
+
+/**
+ * proportion({kind,x1,y1,x2}): y=kx, k/x, kx², k/x² or k√x.
+ * x values share units; y values share units; k has implied units.
+ * Hand check: inverse, x1=2,y1=12,x2=3 -> k=24,y2=8.
+ * Errors: unsupported kind, division by zero, negative square root.
+ */
+function proportion({kind,x1,y1,x2} = {}) {
+  if (!['direct','inverse','square','inverse_square','sqrt'].includes(kind))
+    return N('kind_not_supported');
+  const e = nums(x1,y1,x2);
+  if (e) return e;
+  if (kind === 'sqrt' && (x1 < 0 || x2 < 0)) return M('sqrt_of_negative');
+  if ((['direct','square','sqrt'].includes(kind) && x1 === 0) ||
+      (['inverse','inverse_square'].includes(kind) && (x1 === 0 || x2 === 0)))
+    return M('division_by_zero');
+  const k = kind === 'direct' ? y1/x1 :
+    kind === 'inverse' ? y1*x1 :
+    kind === 'square' ? y1/(x1*x1) :
+    kind === 'inverse_square' ? y1*x1*x1 : y1/Math.sqrt(x1);
+  const y2 = kind === 'direct' ? k*x2 :
+    kind === 'inverse' ? k/x2 :
+    kind === 'square' ? k*x2*x2 :
+    kind === 'inverse_square' ? k/(x2*x2) : k*Math.sqrt(x2);
+  return result(k) || result(y2) || {k,y2};
+}
+
+/**
+ * map_scale({scale_denominator,map_cm?,map_area_cm2?}):
+ * scale 1:n; optional map length cm and area cm².
+ * Outputs real_km and real_area_km2, null when omitted.
+ * Hand check: 1:50000, 4 cm, 6 cm² -> 2 km, 1.5 km².
+ * Errors: scale_not_positive, negative_length, non-finite input.
+ */
+function map_scale({scale_denominator,map_cm,map_area_cm2} = {}) {
+  const e = nums(scale_denominator,
+    ...(map_cm === undefined ? [] : [map_cm]),
+    ...(map_area_cm2 === undefined ? [] : [map_area_cm2]));
+  if (e) return e;
+  if (scale_denominator <= 0) return C('scale_not_positive');
+  if ((map_cm !== undefined && map_cm < 0) ||
+      (map_area_cm2 !== undefined && map_area_cm2 < 0)) return C('negative_length');
+  const real_km = map_cm === undefined ? null : map_cm*scale_denominator/100000;
+  const real_area_km2 = map_area_cm2 === undefined ? null :
+    map_area_cm2*scale_denominator*scale_denominator/1e10;
+  return (real_km !== null && result(real_km)) ||
+    (real_area_km2 !== null && result(real_area_km2)) ||
+    {real_km,real_area_km2};
+}
+
+/**
+ * percent_change({original,new}): finite values in matching units.
+ * Returns absolute change in those units and signed percent.
+ * Hand check: 80 -> 92: change 12, percent 15.
+ * Errors: zero original or non-finite input.
+ */
+function percent_change({original,new: next} = {}) {
+  const e = nums(original,next);
+  if (e) return e;
+  if (original === 0) return M('division_by_zero');
+  const change = next-original, percent = change/Math.abs(original)*100;
+  return result(percent) || result(change) || {change,percent};
+}
+
+/**
+ * reverse_percent({final,percent}): final amount and percent adjustment;
+ * returns original in the final amount's units.
+ * Hand check: $72 after 20% discount -> $90.
+ * Errors: percent_below_minus_100 or division_by_zero at -100.
+ */
+function reverse_percent({final,percent} = {}) {
+  const e = nums(final,percent);
+  if (e) return e;
+  if (percent < -100) return C('percent_below_minus_100');
+  if (percent === -100) return M('division_by_zero');
+  const original = final/(1+percent/100);
+  return result(original) || {original};
+}
+
+/**
+ * compound({principal,rate_percent,years,per_year=1}):
+ * compounded value and interest in dollars; time in years.
+ * Interest is added at each compounding period.
+ * Hand check: $1000, 10%, 2 years, annual -> $1210, $210.
+ * Errors: invalid principal, time, rate or frequency.
+ */
+function compound({principal,rate_percent,years,per_year=1} = {}) {
+  const e = nums(principal,rate_percent,years,per_year);
+  if (e) return e;
+  if (principal < 0) return C('negative_principal');
+  if (years < 0) return C('negative_time');
+  if (!Number.isInteger(per_year) || per_year < 1 || per_year > 365)
+    return C('per_year_out_of_range_1_365');
+  if (rate_percent <= -100*per_year) return C('rate_out_of_range');
+  const amount = principal*Math.pow(1+rate_percent/(100*per_year),per_year*years);
+  return result(amount) || result(amount-principal) ||
+    {amount,interest:amount-principal};
+}
+
+/**
+ * ap({a,d,n}): arithmetic progression; a,d in term units, n integer.
+ * Returns nth term and first n terms' sum, in term units.
+ * Hand check: a=2,d=3,n=5 -> term 14, sum 40.
+ * Errors: n_not_positive_integer or numerical_overflow.
+ */
+function ap({a,d,n} = {}) {
+  const e = nums(a,d) || validN(n);
+  if (e) return e;
+  const nth_term = a+(n-1)*d, sum_n = n*(2*a+(n-1)*d)/2;
+  return result(nth_term) || result(sum_n) || {nth_term,sum_n};
+}
+
+/**
+ * gp({a,r,n}): geometric progression; a in term units, r dimensionless.
+ * Returns nth term, partial sum, finite sum to infinity if |r|<1,
+ * and Boolean convergence. For r=1 the partial sum is n*a.
+ * Hand check: a=8,r=1/2,n=3 -> term 2, sum 14, limit 16.
+ * Errors: n_not_positive_integer or numerical_overflow.
+ */
+function gp({a,r,n} = {}) {
+  const e = nums(a,r) || validN(n);
+  if (e) return e;
+  const nth_term = a*Math.pow(r,n-1);
+  const sum_n = gpSum(a,r,n);
+  const converges = Math.abs(r)<1;
+  const sum_infinity = converges ? a/(1-r) : null;
+  return result(nth_term) || result(sum_n) ||
+    (converges && result(sum_infinity)) ||
+    {nth_term,sum_n,sum_infinity,converges};
+}
+
+/**
+ * gp_terms_to_exceed({a,r,target}): positive geometric terms.
+ * Returns least integer n>=1 with S_n strictly above target.
+ * Hand check: a=2,r=2,target=14 -> n=4.
+ * Errors: a_and_r_must_be_positive, target_never_exceeded,
+ * iteration_limit.
+ */
+function gp_terms_to_exceed({a,r,target} = {}) {
+  const e = nums(a,r,target);
+  if (e) return e;
+  if (a <= 0 || r <= 0) return C('a_and_r_must_be_positive');
+  if (r < 1 && a/(1-r) <= target) return M('target_never_exceeded');
+  const above = n => {
+    if (n === 0) return 0 > target;
+    const s = gpSum(a,r,n);
+    return s > target;
+  };
+  if (above(1)) return {n:1};
+  let lo=1, hi=2;
+  while (!above(hi)) {
+    lo=hi; hi*=2;
+    if (hi > 10000000) return R('iteration_limit');
+  }
+  while (hi-lo>1) {
+    const mid=Math.floor((lo+hi)/2);
+    if (above(mid)) hi=mid; else lo=mid;
+  }
+  while (hi>1 && above(hi-1)) hi--;
+  while (!above(hi)) {
+    if (++hi>10000000) return R('iteration_limit');
+  }
+  return {n:hi};
+}
+
+/**
+ * telescoping({p,q,n}): sum 1/((k+p)(k+q)), k=1..n.
+ * Integer p,q>=0, p<q, n 1..10000. Outputs A,B (partial
+ * fraction coefficients), finite sum and infinite limit.
+ * Hand check: p=0,q=1,n=3 -> A=1,B=-1,S=3/4,limit=1.
+ * Errors: invalid p,q,n or size.
+ */
+function telescoping({p,q,n} = {}) {
+  if (!Number.isInteger(p) || !Number.isInteger(q) || p<0 || q<0)
+    return C('p_q_must_be_non_negative_integers');
+  if (p>=q) return C('p_must_be_less_than_q');
+  if (p>1000000 || q>1000000) return C('value_too_large');
+  const e=validN(n,10000);
+  if (e) return e;
+  const A=1/(q-p), B=-A;
+  let sum_n=0, gap=0;
+  for (let k=1;k<=n;k++) sum_n+=1/((k+p)*(k+q));
+  for (let k=p+1;k<=q;k++) gap+=1/k;
+  const sum_infinity=gap/(q-p);
+  return {A,B,sum_n,sum_infinity};
+}
+
+/**
+ * dilute_ratio({concentrate_parts,water_parts,total_volume_ml}):
+ * ratio concentrate:water; volumes add in ml.
+ * Outputs concentrate_ml, water_ml, fraction_concentrate.
+ * Hand check: 1:3 in 800 ml -> 200 ml,600 ml,1/4.
+ * Errors: part_not_positive, negative_volume.
+ */
+function dilute_ratio({concentrate_parts,water_parts,total_volume_ml} = {}) {
+  const e=nums(concentrate_parts,water_parts,total_volume_ml);
+  if (e) return e;
+  if (concentrate_parts<=0 || water_parts<0) return C('part_not_positive');
+  if (total_volume_ml<0) return C('negative_volume');
+  const fraction_concentrate=concentrate_parts/(concentrate_parts+water_parts);
+  const concentrate_ml=fraction_concentrate*total_volume_ml;
+  const water_ml=total_volume_ml-concentrate_ml;
+  return result(concentrate_ml) || result(water_ml) ||
+    {concentrate_ml,water_ml,fraction_concentrate};
+}
+
+/**
+ * mix({c_a,c_b,target}): two strengths/prices in matching units.
+ * Alligation parts are absolute concentration differences.
+ * Assumes volumes add and mixture strength is volume-weighted.
+ * Hand check: 20% and 80% to make 50% -> parts 30:30, A=1/2.
+ * Errors: concentrations_equal, target_outside_range.
+ */
+function mix({c_a,c_b,target} = {}) {
+  const e=nums(c_a,c_b,target);
+  if (e) return e;
+  if (c_a===c_b) return M('concentrations_equal');
+  if (target<Math.min(c_a,c_b) || target>Math.max(c_a,c_b))
+    return M('target_outside_range');
+  const parts_a=Math.abs(c_b-target);
+  const parts_b=Math.abs(target-c_a);
+  const fraction_a=(c_b-target)/(c_b-c_a);
+  return {parts_a,parts_b,fraction_a};
+}
+
+/**
+ * best_buy({options:[{price,quantity},...]}): 1..6 packs.
+ * Price in dollars, quantity in a shared positive unit.
+ * Returns dollars per unit and zero-based best_index.
+ * Hand check: [{price:6,quantity:3},{price:9,quantity:6}]
+ * -> unit prices [2,1.5], best index 1.
+ * Errors: invalid count, negative_price, quantity_not_positive.
+ */
+function best_buy({options} = {}) {
+  if (!Array.isArray(options) || options.length<1 || options.length>6)
+    return C('options_out_of_range_1_6');
+  const unit_prices=[];
+  for (const o of options) {
+    const e=o && nums(o.price,o.quantity);
+    if (!o || e) return e || C('invalid_option');
+    if (o.price<0) return C('negative_price');
+    if (o.quantity<=0) return C('quantity_not_positive');
+    const u=o.price/o.quantity;
+    if (!Number.isFinite(u)) return R('numerical_overflow');
+    unit_prices.push(u);
+  }
+  let best_index=0;
+  for (let i=1;i<unit_prices.length;i++)
+    if (unit_prices[i]<unit_prices[best_index]) best_index=i;
+  return {unit_prices,best_index};
+}
+
+/**
+ * continued_fraction({num,den}): exact signed rational, parts <=1e9.
+ * Floor-convention Euclidean terms and [numerator,denominator]
+ * convergents. Final term >=2 when more than one term exists.
+ * Hand check: 43/30 -> [1,2,3,4]; final convergent [43,30].
+ * Errors: invalid integer, size or zero_denominator.
+ */
+function continued_fraction({num,den} = {}) {
+  const e=validFraction({num,den},1000000000);
+  if (e) return e;
+  const f=F(num,den);
+  let a=f.num,b=f.den;
+  const terms=[],convergents=[];
+  let pm2=0,pm1=1,qm2=1,qm1=0;
+  while (b!==0) {
+    const term=Math.floor(a/b);
+    const rem=a-term*b;
+    terms.push(term);
+    const p=term*pm1+pm2, q=term*qm1+qm2;
+    convergents.push([p,q]);
+    pm2=pm1;pm1=p;qm2=qm1;qm1=q;
+    a=b;b=rem;
+  }
+  return {terms,convergents};
+}
+
+/**
+ * cf_sqrt({n}): integer 1..1e6, periodic CF of positive sqrt(n).
+ * Returns floor root, shortest periodic tail and square flag.
+ * Hand check: sqrt(2) -> a0=1,period=[2],is_square=false.
+ * Errors: n_not_positive_integer or period_limit.
+ */
+function cf_sqrt({n} = {}) {
+  if (!Number.isInteger(n) || n<1 || n>1000000)
+    return C('n_not_positive_integer');
+  const a0=Math.floor(Math.sqrt(n));
+  if (a0*a0===n) return {a0,period:[],is_square:true};
+  let m=0,d=1,a=a0;
+  const period=[];
+  for (let i=0;i<10000;i++) {
+    m=d*a-m;
+    d=(n-m*m)/d;
+    a=Math.floor((a0+m)/d);
+    period.push(a);
+    if (a===2*a0) return {a0,period,is_square:false};
+  }
+  return R('period_limit');
+}
+
+/**
+ * best_approximation({value,max_den}): finite real number,
+ * 1<=denominator<=max_den<=10000. Nearest rational, ties use
+ * smaller denominator. Signed approx_error=value-num/den.
+ * Hand check: 3.14, max_den=10 -> 22/7, signed error -0.002857...
+ * Errors: max_den_out_of_range_1_10000, value_too_large.
+ */
+function best_approximation({value,max_den} = {}) {
+  const e=nums(value);
+  if (e) return e;
+  if (!Number.isInteger(max_den) || max_den<1 || max_den>10000)
+    return C('max_den_out_of_range_1_10000');
+  if (Math.abs(value)>1000000000) return C('value_too_large');
+  let bestP=0,bestQ=1,bestError=Infinity;
+  for (let q=1;q<=max_den;q++) {
+    const p=Math.round(value*q);
+    const error=Math.abs(value-p/q);
+    if (error<bestError-1e-15 ||
+        (Math.abs(error-bestError)<=1e-15 && q<bestQ)) {
+      bestP=p;bestQ=q;bestError=error;
+    }
+  }
+  const f=F(bestP,bestQ);
+  return {num:f.num,den:f.den,approx_error:value-f.num/f.den};
+}
+
+/**
+ * egyptian({num,den}): proper positive fraction, parts <=1e6.
+ * Greedy distinct unit fractions, using exact integer arithmetic.
+ * Hand check: 4/13 -> 1/4 + 1/18 + 1/468.
+ * Errors: fraction_out_of_range_0_1, denominator_too_large,
+ * term_limit, and standard fraction validation.
+ */
+function egyptian({num,den} = {}) {
+  const e=validFraction({num,den});
+  if (e) return e;
+  const f=F(num,den);
+  if (f.num<=0 || f.num>=f.den) return C('fraction_out_of_range_0_1');
+  let a=BigInt(f.num),b=BigInt(f.den);
+  const maximum=BigInt(Number.MAX_SAFE_INTEGER);
+  const denominators=[];
+  while (a>0n) {
+    if (denominators.length>=12) return R('term_limit');
+    const unit=(b+a-1n)/a;
+    if (unit>maximum) return R('denominator_too_large');
+    denominators.push(Number(unit));
+    a=a*unit-b;
+    b=b*unit;
+    if (a>0n) {
+      const bgcd=(x,y)=>{while(y){const z=x%y;x=y;y=z;}return x;};
+      const g=bgcd(a,b);
+      a/=g;b/=g;
+    }
+  }
+  return {denominators};
+}
+
+/**
+ * mediant({a,b}): positive-denominator rational pair.
+ * Returns reduced (a.num+b.num)/(a.den+b.den).
+ * Hand check: between 1/2 and 2/3 -> 3/5.
+ * Errors: denominator_not_positive, invalid parts.
+ */
+function mediant({a,b} = {}) {
+  if (!a || !b) return C('invalid_fraction');
+  if (finite(a.den) && a.den<=0 || finite(b.den) && b.den<=0)
+    return C('denominator_not_positive');
+  const e=validFraction(a) || validFraction(b);
+  if (e) return e;
+  return F(a.num+b.num,a.den+b.den);
+}
+
+/**
+ * stern_walk({path}): optional educational helper for the
+ * Stern-Brocot tree. L/R moves from root 1/1, with formal
+ * boundary sentinels 0/1 and 1/0. Returns current reduced
+ * fraction and visited nodes; all values dimensionless.
+ * Hand check: path "LR" visits 1/1,1/2,2/3.
+ * Errors: direction_not_supported, path_limit.
+ */
+function stern_walk({path=''} = {}) {
+  if (typeof path!=='string' || /[^LR]/.test(path)) return N('direction_not_supported');
+  if (path.length>32) return R('path_limit');
+  let ln=0,ld=1,rn=1,rd=0,cn=1,cd=1;
+  const nodes=[[1,1]];
+  for (const step of path) {
+    if (step==='L') {rn=cn;rd=cd;}
+    else {ln=cn;ld=cd;}
+    cn=ln+rn;cd=ld+rd;
+    if (!Number.isSafeInteger(cn) || !Number.isSafeInteger(cd))
+      return R('numerical_overflow');
+    nodes.push([cn,cd]);
+  }
+  return {num:cn,den:cd,nodes};
+}
+
+return Object.freeze({
+  API_VERSION:1,
+  simplify,frac_op,compare,fraction_of,ratio_simplify,share,
+  ratio_unchanged,proportion,map_scale,percent_change,
+  reverse_percent,compound,ap,gp,gp_terms_to_exceed,
+  telescoping,dilute_ratio,mix,best_buy,continued_fraction,
+  cf_sqrt,best_approximation,egyptian,mediant,stern_walk
+});
+})();
+/* FIT-CALC-END fractions-ratio */
+
+(function(){
+'use strict';
+const C=FITCalcRatio,$=id=>document.getElementById(id);
+let seed=1,round=0,score=0,tries=0,hinted=false,locked=false,d={},values={},selected='';
+const sequence=['ap','gp','converge','threshold','telescope','tune'];
+const rnd=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return(seed>>>0)/4294967296;};
+const pick=(a,b)=>a+Math.floor(rnd()*(b-a+1));
+const fmt=x=>Number.isInteger(x)?String(x):Number(x.toPrecision(5)).toString();
+const near=(x,y,t=.002)=>x!==null&&Number.isFinite(x)&&Math.abs(x-y)<=t;
+function generate(){
+  const mode=sequence[round];d={mode};values={};selected='';tries=0;hinted=false;locked=false;
+  if(mode==='ap'){
+    const a=pick(2,8),difference=pick(2,6),n=pick(7,10);
+    d={mode,a,difference,n,t2:C.ap({a,d:difference,n:2}).nth_term,t5:C.ap({a,d:difference,n:5}).nth_term,
+       sum:C.ap({a,d:difference,n}).sum_n};
+  }else if(mode==='gp'){
+    const a=pick(2,5),ratio=pick(2,3),n=pick(4,5);
+    d={mode,a,ratio,n,t3:C.gp({a,r:ratio,n:3}).nth_term,sum:C.gp({a,r:ratio,n}).sum_n};
+  }else if(mode==='converge'){
+    const a=pick(3,8),ratio=[-.5,.5,.75,1,-1,1.2][pick(0,5)];
+    d={mode,a,ratio,...C.gp({a,r:ratio,n:6})};
+  }else if(mode==='threshold'){
+    const a=pick(2,5),ratio=[1.5,2][pick(0,1)],least=pick(5,7);
+    const target=C.gp({a,r:ratio,n:least-1}).sum_n;
+    d={mode,a,ratio,target,least};
+  }else if(mode==='telescope'){
+    const p=pick(0,2),q=p+pick(1,3),n=pick(4,8);
+    d={mode,p,q,n,...C.telescoping({p,q,n})};
+  }else{
+    const a=12,ratios=[.2,.4,.6,.8],ratio=ratios[pick(0,3)];
+    const target=C.gp({a,r:ratio,n:8}).sum_infinity;
+    d={mode,a,ratio,target};
+    values.rate='.1';
+  }
+}
+function field(id,label,step='any'){
+  return `<div><label for="${id}">${label}</label><input type="number" id="${id}" inputmode="decimal" step="${step}" placeholder="Enter value"></div>`;
+}
+function bind(){
+  $('controls').querySelectorAll('input').forEach(el=>{
+    const update=()=>{values[el.id]=el.value;draw();};
+    el.addEventListener('input',update);
+  });
+}
+function choices(items){
+  const row=document.createElement('div');row.className='choices';
+  items.forEach(item=>{
+    const b=document.createElement('button');
+    b.type='button';b.textContent=item.label;b.setAttribute('aria-pressed','false');
+    b.addEventListener('click',()=>{
+      selected=item.id;
+      Array.from(row.children).forEach((x,i)=>x.setAttribute('aria-pressed',items[i].id===selected?'true':'false'));
+      draw();
+    });
+    row.append(b);
+  });
+  $('controls').append(row);
+}
+function stepper(id,step=1,coarse=5){
+  const host=document.createElement('div');host.className='steps';
+  [-coarse,-step,step,coarse].forEach((n,i)=>{
+    const b=document.createElement('button');b.type='button';
+    b.textContent=['−−','−','+','++'][i];
+    b.setAttribute('aria-label',`${n>0?'Increase':'Decrease'} by ${Math.abs(n)}`);
+    b.addEventListener('click',()=>{
+      const el=$(id);el.value=String(Math.max(0,Number(el.value||0)+n));
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+    });
+    host.append(b);
+  });
+  $('controls').append(host);
+}
+function tiles(items){
+  return '<div class="tiles">'+items.map(item=>`<span class="tile ${item.unknown?'unknown':''}">${item.label}</span>`).join('')+'</div>';
+}
+function render(){
+  $('round').textContent=`Round ${round+1}/6`;$('score').textContent=`Score ${score}`;
+  $('feedback').className='feedback';$('feedback').textContent='Work out the values, then press Check.';
+  $('hint').disabled=false;$('check').classList.remove('hidden');$('next').classList.add('hidden');
+  const x=d;
+  if(x.mode==='ap'){
+    $('sceneTitle').textContent='Arithmetic staircase';
+    $('question').textContent=`An arithmetic progression has the second and fifth terms shown. Find its common difference d and the sum of the first ${x.n} terms.`;
+    $('scene').innerHTML=tiles([{label:`T₂ = ${x.t2}`},{label:'T₃ = ?',unknown:true},{label:'T₄ = ?',unknown:true},{label:`T₅ = ${x.t5}`}])+
+      '<p class="small">Each step changes by the same amount.</p>';
+    $('controls').innerHTML='<div class="fields">'+field('difference','Common difference d','1')+field('sum','Sum Sₙ','1')+'</div>';
+    bind();stepper('difference',1,2);
+  }else if(x.mode==='gp'){
+    $('sceneTitle').textContent='Multiplying ladder';
+    $('question').textContent=`A geometric progression has first term ${x.a} and third term ${x.t3}. Its ratio is positive. Find r and the sum of the first ${x.n} terms.`;
+    $('scene').innerHTML=tiles([{label:`T₁ = ${x.a}`},{label:'T₂ = ?',unknown:true},{label:`T₃ = ${x.t3}`},{label:'T₄ = ?',unknown:true}]);
+    $('controls').innerHTML='<div class="fields">'+field('ratio','Common ratio r','0.1')+field('sum','Sum Sₙ','1')+'</div>';
+    bind();stepper('ratio',.1,.5);
+  }else if(x.mode==='converge'){
+    $('sceneTitle').textContent='Finite or infinite?';
+    $('question').textContent=`For the series with a = ${x.a} and r = ${x.ratio}, does the sum to infinity converge? If yes, enter its value.`;
+    $('scene').innerHTML=tiles([{label:`a = ${x.a}`},{label:`r = ${x.ratio}`},{label:'S∞ = ?',unknown:true}]);
+    $('controls').innerHTML='<h3>Does the sum converge?</h3>';
+    choices([{id:'yes',label:'Yes'},{id:'no',label:'No'}]);
+    $('controls').insertAdjacentHTML('beforeend','<div class="fields">'+field('infinity','Sum to infinity, if it exists','0.01')+'</div>');
+    bind();
+  }else if(x.mode==='threshold'){
+    $('sceneTitle').textContent='Strictly exceeds';
+    $('question').textContent=`A geometric series begins at a = ${x.a}, with r = ${x.ratio}. Find the smallest positive integer n for which Sₙ is strictly greater than ${fmt(x.target)}.`;
+    $('scene').innerHTML=tiles([{label:`a = ${x.a}`},{label:`r = ${x.ratio}`},{label:`Threshold ${fmt(x.target)}`},{label:'Least n = ?',unknown:true}]);
+    $('controls').innerHTML='<div class="fields">'+field('least','Least positive n','1')+'</div>';
+    bind();stepper('least',1,5);
+  }else if(x.mode==='telescope'){
+    $('sceneTitle').textContent='Method of differences';
+    $('question').textContent=`For Σ from k = 1 to ${x.n} of 1/[(k + ${x.p})(k + ${x.q})], find coefficients A, B and the finite sum.`;
+    $('scene').innerHTML=tiles([{label:`p = ${x.p}`},{label:`q = ${x.q}`},{label:`n = ${x.n}`},{label:'A / (k+p) + B / (k+q)'}]);
+    $('controls').innerHTML='<div class="fields">'+field('A','Coefficient A','0.001')+field('B','Coefficient B','0.001')+field('sum','Finite sum Sₙ','0.001')+'</div>';
+    bind();
+  }else{
+    $('sceneTitle').textContent='Design a convergent series';
+    $('question').textContent=`The first term is ${x.a}. Choose a positive ratio r less than 1 so the sum to infinity equals ${fmt(x.target)}.`;
+    $('scene').innerHTML=tiles([{label:`a = ${x.a}`},{label:`Target S∞ = ${fmt(x.target)}`},{label:'Find r',unknown:true}]);
+    $('controls').innerHTML='<label for="rate">Common ratio r</label><input id="rate" type="range" min="0.1" max="0.9" step="0.05" value="0.1"><p id="rateDisplay" class="tile">Your r: 0.10</p>';
+    $('rate').addEventListener('input',()=>{
+      values.rate=$('rate').value;
+      $('rateDisplay').textContent='Your r: '+Number(values.rate).toFixed(2);
+      draw();
+    });
+  }
+  draw();
+}
+function plotAxes(title,xlabel,ylabel,width=420,height=270){
+  let s=`<rect x="0" y="0" width="${width}" height="${height}" rx="13" fill="#fff"/>
+  <text x="15" y="19" font-size="14" font-weight="800">${title}</text>
+  <path d="M49 30V${height-45}H${width-18}" stroke="#111" stroke-width="2.5" fill="none"/>
+  <text x="${width/2}" y="${height-9}" font-size="12" text-anchor="middle">${xlabel}</text>
+  <text x="17" y="${height/2}" text-anchor="middle" font-size="12" transform="rotate(-90 17 ${height/2})">${ylabel}</text>`;
+  return s;
+}
+function drawSums(){
+  const x=d;
+  let series='gp',a=x.a||6,r=x.ratio===undefined?.5:x.ratio,dd=0;
+  if(x.mode==='ap'){series='ap';dd=x.difference;}
+  if(x.mode==='telescope'){series='tel';a=0;}
+  if(x.mode==='tune')r=Number(values.rate||.1);
+  const maxN=x.mode==='threshold'?Math.max(12,x.least+3):x.mode==='telescope'?Math.max(12,x.n+3):12;
+  const pts=[];
+  for(let n=1;n<=maxN;n++){
+    const v=series==='ap'?C.ap({a,d:dd,n}):series==='tel'?C.telescoping({p:x.p,q:x.q,n}):C.gp({a,r,n});
+    if(v.error)break;
+    pts.push([n,v.sum_n]);
+  }
+  if(!pts.length)return;
+  const rawLimit=series==='gp'?C.gp({a,r,n:1}).sum_infinity:
+    series==='tel'?C.telescoping({p:x.p,q:x.q,n:1}).sum_infinity:null;
+  let lo=Math.min(0,...pts.map(p=>p[1])),hi=Math.max(1,...pts.map(p=>p[1]));
+  if(rawLimit!==null){lo=Math.min(lo,rawLimit);hi=Math.max(hi,rawLimit);}
+  if(x.mode==='threshold'){lo=Math.min(lo,x.target);hi=Math.max(hi,x.target);}
+  let spread=hi-lo;if(spread<.001)spread=1;lo-=spread*.13;hi+=spread*.13;
+  const X=n=>49+(n-1)/(maxN-1)*350,Y=y=>225-(y-lo)/(hi-lo)*190;
+  let s=plotAxes('Accumulated terms','n (term index)','Sₙ (units)');
+  for(let i=0;i<=4;i++){
+    const n=1+i*(maxN-1)/4,y=lo+(hi-lo)*i/4;
+    s+=`<text x="${X(n)}" y="243" font-size="10" text-anchor="middle">${fmt(n)}</text>
+    <text x="43" y="${Y(y)+4}" text-anchor="end" font-size="10">${fmt(y)}</text>`;
+  }
+  s+=`<polyline fill="none" stroke="#6A45F5" stroke-width="3.5" points="${pts.map(p=>`${X(p[0])},${Y(p[1])}`).join(' ')}"/>`;
+  pts.forEach(p=>s+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="3.3" fill="#6A45F5"/>`);
+  if(rawLimit!==null&&Number.isFinite(rawLimit)){
+    s+=`<path d="M49 ${Y(rawLimit)}H399" stroke="#3DBE6B" stroke-width="2.5" stroke-dasharray="6 4"/>`;
+  }
+  if(x.mode==='threshold'){
+    s+=`<path d="M49 ${Y(x.target)}H399" stroke="#FF8FB8" stroke-width="3" stroke-dasharray="5 4"/>`;
+  }
+  const candidate=Number(values.least||0);
+  if(x.mode==='threshold'&&candidate>=1&&candidate<=maxN&&Number.isInteger(candidate)){
+    const v=C.gp({a,r,n:candidate});
+    if(!v.error)s+=`<circle cx="${X(candidate)}" cy="${Y(v.sum_n)}" r="8" fill="#FF8FB8" stroke="#111" stroke-width="3"/>`;
+  }
+  s+='<text x="219" y="33" font-size="10">Purple: Sₙ · Green: limit · Pink: target/player</text>';
+  $('sumPlot').innerHTML=s;
+  $('sumPlot').setAttribute('aria-label','Partial sums as a function of n. Green dashed line is a finite limit when it exists. Pink is the target or current candidate.');
+}
+function drawCancellation(){
+  const p=d.mode==='telescope'?d.p:0,q=d.mode==='telescope'?d.q:1;
+  const out=C.telescoping({p,q,n:5});
+  const count=5;
+  let s=plotAxes('Positive and negative contributions','k (term index)','Value',420,208);
+  const mid=111,scale=70;
+  s+=`<path d="M49 ${mid}H401" stroke="#111" stroke-dasharray="4 3"/>`;
+  for(let k=1;k<=count;k++){
+    const plus=C.fraction_of({num:1,den:k+p,quantity:out.A}).value;
+    const minus=C.fraction_of({num:1,den:k+q,quantity:out.B}).value;
+    const x=65+(k-1)*67;
+    s+=`<rect x="${x}" y="${mid-Math.min(65,Math.abs(plus)*scale)}" width="21" height="${Math.min(65,Math.abs(plus)*scale)}" fill="#3DBE6B" stroke="#111" stroke-width="1.3"/>
+    <rect x="${x+24}" y="${mid}" width="21" height="${Math.min(65,Math.abs(minus)*scale)}" fill="#FF8FB8" stroke="#111" stroke-width="1.3"/>
+    <text x="${x+22}" y="188" font-size="11" text-anchor="middle">${k}</text>`;
+  }
+  s+='<text x="70" y="31" font-size="10">Green: +A/(k+p) · Pink: B/(k+q)</text>';
+  $('cancelPlot').innerHTML=s;
+  $('cancelPlot').setAttribute('aria-label','For each k, positive partial fraction contributions are shown above the centre line and negative ones below.');
+}
+function draw(){drawSums();drawCancellation();}
+function number(id){
+  if(!Object.prototype.hasOwnProperty.call(values,id)||values[id]==='')return null;
+  const x=Number(values[id]);return Number.isFinite(x)?x:null;
+}
+function check(){
+  if(locked)return;
+  tries++;
+  const x=d;
+  let good=false,why='',wrong='';
+  if(x.mode==='ap'){
+    good=near(number('difference'),x.difference,1e-9)&&near(number('sum'),x.sum,.001);
+    why=`The common difference is ${x.difference}; S${x.n} = ${fmt(x.sum)}.`;
+    wrong='Use the gap between the second and fifth terms over three steps. Then sum the AP.';
+  }else if(x.mode==='gp'){
+    good=near(number('ratio'),x.ratio,.001)&&near(number('sum'),x.sum,.001);
+    why=`The positive common ratio is ${x.ratio}; S${x.n} = ${fmt(x.sum)}.`;
+    wrong='The third term is the first term multiplied by r twice. Use the positive r.';
+  }else if(x.mode==='converge'){
+    good=selected===(x.converges?'yes':'no')&&
+      (!x.converges||near(number('infinity'),x.sum_infinity,.002));
+    why=x.converges?`|r| is below 1, so S∞ = ${fmt(x.sum_infinity)}.`:'|r| is at least 1, so no finite sum to infinity exists.';
+    wrong='Convergence requires |r| < 1. If it converges, calculate a/(1−r).';
+  }else if(x.mode==='threshold'){
+    good=near(number('least'),x.least,0);
+    why=`S${x.least-1} = ${fmt(C.gp({a:x.a,r:x.ratio,n:x.least-1}).sum_n)}, which does not exceed the target. The next sum does.`;
+    wrong='Strictly greater does not include equality. Check both Sₙ and the preceding sum.';
+  }else if(x.mode==='telescope'){
+    good=near(number('A'),x.A,.002)&&near(number('B'),x.B,.002)&&near(number('sum'),x.sum_n,.002);
+    why=`A = ${fmt(x.A)}, B = ${fmt(x.B)}, and S${x.n} = ${fmt(x.sum_n)}.`;
+    wrong='Equate numerator coefficients before summing. The two partial fraction coefficients are opposites.';
+  }else{
+    const candidate=Number(values.rate||.1);
+    const outcome=C.gp({a:x.a,r:candidate,n:8});
+    good=!outcome.error&&near(outcome.sum_infinity,x.target,.001);
+    why=`r = ${fmt(candidate)} gives the requested finite sum to infinity.`;
+    wrong='Move r and watch the green limit line. Increasing r towards 1 raises the limit.';
+  }
+  $('feedback').className='feedback '+(good?'good':'bad');
+  if(good){
+    locked=true;
+    const points=hinted||tries>2?50:tries===2?75:100;
+    score+=points;$('score').textContent=`Score ${score}`;
+    $('feedback').textContent=`★ Correct! +${points} points. ${why}`;
+    $('hint').disabled=true;$('check').classList.add('hidden');$('next').classList.remove('hidden');
+    $('next').textContent=round===5?'See stars ★':'Next round →';
+  }else $('feedback').textContent=wrong;
+}
+function hint(){
+  if(locked)return;
+  hinted=true;
+  const h={
+    ap:'An AP adds d at every step. Use the nth-term formula for its sum.',
+    gp:'For a positive r, divide neighbouring terms or solve r² from the first and third.',
+    converge:'The absolute size of r, not only its sign, decides convergence.',
+    threshold:'An exact threshold is not exceeded until the following term is added.',
+    telescope:'Multiply both sides by the two denominators and match coefficients.',
+    tune:'The closer a positive r gets to 1, the greater the infinite sum.'
+  };
+  $('feedback').className='feedback';
+  $('feedback').textContent='Hint: '+h[d.mode]+' Maximum 50 points.';
+}
+function next(){
+  if(round===5){
+    $('game').classList.add('hidden');$('finish').classList.remove('hidden');
+    const stars=score>=500?3:score>=350?2:1;
+    $('stars').textContent='★'.repeat(stars)+'☆'.repeat(3-stars);
+    $('result').textContent=`You earned ${score} of 600 points.`;
+  }else{round++;generate();render();}
+}
+function restart(){
+  seed=(Date.now()>>>0)||9876543;round=0;score=0;
+  $('finish').classList.add('hidden');$('game').classList.remove('hidden');
+  generate();render();
+}
+$('check').addEventListener('click',check);
+$('hint').addEventListener('click',hint);
+$('next').addEventListener('click',next);
+$('again').addEventListener('click',restart);
+restart();
+})();
+</script>
+</body>
+</html>

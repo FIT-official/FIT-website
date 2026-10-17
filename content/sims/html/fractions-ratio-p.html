@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fraction Kitchen</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input,[role=button]{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+button{min-height:46px;border:2px solid #111;border-radius:999px;background:white;font:800 15px inherit;cursor:pointer;padding:10px 17px;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.48;cursor:default}
+button:focus:not(:focus-visible),input:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+input{min-height:46px;min-width:0;width:100%;border:2px solid #111;border-radius:12px;background:white;font:600 18px inherit;padding:9px}
+input[type=range]{accent-color:var(--lvl-primary);padding:0}
+svg{display:block;max-width:100%;height:auto;overflow:visible}
+svg [role=button]{cursor:pointer;stroke-width:3;outline:none}
+svg [role=button]:focus-visible{stroke:#111;stroke-width:7}
+.shell{max-width:1220px;margin:auto;padding:18px 15px 44px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.badge{border:2px solid #111;border-radius:999px;background:var(--lvl-primary);color:var(--lvl-primary-on);padding:7px 12px;font-size:12px;font-weight:800;text-transform:uppercase}
+.hud{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.hud span{font-weight:800;background:var(--fit-sunken);padding:7px 12px;border-radius:999px}
+h1{font-size:clamp(27px,5vw,39px);font-weight:800;line-height:1.12;margin:7px 0}
+h2{font-size:20px;line-height:1.25;margin:0 0 10px;font-weight:800}
+p{margin:7px 0}
+.lead{font-size:16px;color:var(--fit-ink-2);margin-bottom:18px}
+.board{display:grid;grid-template-columns:minmax(0,1fr);gap:17px}
+.card{min-width:0;border:2px solid #111;border-radius:var(--r-lg);background:#fff;box-shadow:var(--sh-2);padding:19px}
+.stage{background:var(--lvl-primary-tint);min-height:330px}
+.scene{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:12px;margin:14px 0}
+.scene>div{min-width:0;text-align:center}
+.scene svg{width:min(100%,270px);margin:auto}
+.prompt{font-size:19px;font-weight:800;line-height:1.35}
+.small{color:var(--fit-ink-3);font-size:13px}
+.panel{display:grid;gap:15px;align-content:start}
+.choices,.stepper,.actions{display:flex;gap:9px;flex-wrap:wrap}
+.choices button{flex:1 1 100px}
+.choices button[aria-pressed=true]{background:var(--lvl-primary)}
+.stepper{align-items:center}
+.stepper button{min-width:50px;padding:8px 12px}
+.stepper input{flex:1 1 115px;width:100px}
+.inputrow{display:flex;gap:10px;align-items:center}
+.inputrow input{width:45%}
+.action{border:3px solid #111;background:var(--fit-sun);font-weight:800;box-shadow:var(--sh-2);flex:1}
+.action:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.ghost{background:white}
+.feedback{min-height:62px;padding:12px;border:2px solid var(--fit-line-soft);border-radius:var(--r-md);font-weight:600}
+.feedback.good{border-color:var(--fit-success);background:#E5F8ED}
+.feedback.bad{border-color:var(--fit-danger);background:#FFF0EE}
+.plot{width:100%;border:2px solid #111;border-radius:16px;background:#fff}
+.legend{font-size:13px;color:var(--fit-ink-2)}
+.legend span{display:inline-block;width:12px;height:12px;border:2px solid #111;margin-right:4px;vertical-align:middle}
+.concept{display:flex;gap:12px;align-items:center;background:var(--fit-sunken);border-radius:16px;padding:12px;margin-top:13px}
+.concept svg{flex:0 0 120px;width:120px}
+.concept p{font-size:13px}
+details{margin-top:14px;border:2px solid var(--fit-line-soft);border-radius:15px;padding:10px 14px}
+summary{cursor:pointer;font-weight:800;min-height:35px;padding:5px}
+footer{margin-top:20px;color:var(--fit-ink-3);font-size:12px;text-align:center}
+.finish{text-align:center;padding:32px 16px}
+.stars{font-size:48px;letter-spacing:8px;color:#B98A09}
+.hidden{display:none!important}
+@media(min-width:900px){.board{grid-template-columns:minmax(0,1.12fr) minmax(0,1fr)}.scene{min-height:265px}}
+@media(max-width:420px){.card{padding:14px}.scene svg{max-width:240px}.concept svg{flex-basis:90px;width:90px}.stepper button{min-width:45px}}
+@media(prefers-reduced-motion:no-preference){button{transition:transform var(--dur-1) var(--ease-out),box-shadow var(--dur-1) var(--ease-out)}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header>
+<span class="badge">Primary · Maths</span>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score 0</span></div>
+</header>
+<h1>Fraction Kitchen</h1>
+<p class="lead">Make equal parts, compare portions and share fairly.</p>
+<main id="game" class="board">
+<section class="card stage">
+<h2 id="sceneTitle">The kitchen</h2>
+<p id="question" class="prompt"></p>
+<div id="scene" class="scene"></div>
+<div class="concept">
+<svg role="img" aria-label="Two equal halves beside four equal quarters" viewBox="0 0 128 57">
+<rect x="3" y="5" width="56" height="22" rx="3" fill="#FF8FB8" stroke="#111" stroke-width="3"/>
+<path d="M31 5V27" stroke="#111" stroke-width="3"/>
+<rect x="69" y="5" width="56" height="22" rx="3" fill="#FF8FB8" stroke="#111" stroke-width="3"/>
+<path d="M83 5V27M97 5V27M111 5V27" stroke="#111" stroke-width="3"/>
+<text x="31" y="47" font-size="12" font-weight="800" text-anchor="middle">2 parts</text>
+<text x="97" y="47" font-size="12" font-weight="800" text-anchor="middle">4 parts</text>
+</svg>
+<p>Equal parts must have equal size. More cuts do not mean more food.</p>
+</div>
+</section>
+<section class="panel">
+<div class="card">
+<h2>Your answer</h2>
+<div id="controls"></div>
+<div class="actions" style="margin-top:15px">
+<button id="hint" class="ghost">Hint − points</button>
+<button id="check" class="action">Check</button>
+<button id="next" class="action hidden">Next round →</button>
+</div>
+<p class="feedback" id="feedback" aria-live="polite">Choose your answer, then press Check.</p>
+</div>
+<div class="card">
+<h2>Fraction strip wall</h2>
+<svg id="plot" class="plot" role="img" aria-label="Fraction strips with equal-sized divisions" viewBox="0 0 420 328"></svg>
+<p class="legend"><span style="background:#FF8FB8"></span>Your current portion <span style="background:#FFC83D"></span>Whole</p>
+</div>
+</section>
+</main>
+<section id="finish" class="card finish hidden" aria-live="polite">
+<h2>Kitchen complete!</h2>
+<div id="stars" class="stars"></div>
+<p id="result"></p>
+<button id="again" class="action">Play again</button>
+</section>
+<details><summary>The maths</summary>
+<p>Fractions count equal parts: numerator ÷ denominator. Equivalent fractions have the same value, even when cut differently. To find a fraction of a set, multiply the set by that fraction. For a ratio, share the total according to the number of equal units.</p>
+</details>
+<footer>Fix It Today</footer>
+</div>
+<script>
+/* FIT-CALC-BEGIN fractions-ratio */
+const FITCalcRatio = (function () {
+'use strict';
+
+const err = (error, reason) => ({ error, reason });
+const C = reason => err('ConstraintViolation', reason);
+const M = reason => err('MathError', reason);
+const R = reason => err('RuntimeError', reason);
+const N = reason => err('NotSupported', reason);
+const isErr = x => !!(x && x.error);
+const finite = (...xs) => xs.every(x => typeof x === 'number' && Number.isFinite(x));
+const nums = (...xs) => finite(...xs) ? null : C('non_finite_input');
+const integer = (x, cap = 1000000) =>
+  !Number.isInteger(x) ? C('not_an_integer') :
+  Math.abs(x) > cap ? C('value_too_large') : null;
+const positiveN = x => Number.isInteger(x) && x > 0;
+const safe = x => Number.isFinite(x) ? null : R('numerical_overflow');
+
+function gcd(a, b) {
+  a = Math.abs(a); b = Math.abs(b);
+  while (b !== 0) { const t = a % b; a = b; b = t; }
+  return a;
+}
+function F(n, d) {
+  if (d < 0) { n = -n; d = -d; }
+  const g = gcd(n, d);
+  return { num: n / g, den: d / g };
+}
+function validFraction(f, cap = 1000000) {
+  if (!f || typeof f !== 'object') return C('invalid_fraction');
+  const e = nums(f.num, f.den);
+  if (e) return e;
+  return integer(f.num, cap) || integer(f.den, cap) ||
+    (f.den === 0 ? M('zero_denominator') : null);
+}
+function validParts(parts, exactTwo = false) {
+  if (!Array.isArray(parts) ||
+      (exactTwo ? parts.length !== 2 : parts.length < 2 || parts.length > 6))
+    return C(exactTwo ? 'ratio_must_have_2_parts' : 'parts_out_of_range_2_6');
+  for (const p of parts) {
+    if (!finite(p)) return C('non_finite_input');
+    const e = integer(p);
+    if (e) return e;
+    if (p <= 0) return C('part_not_positive');
+  }
+  return null;
+}
+function validN(n, max = 100000) {
+  return !Number.isInteger(n) || n < 1 || n > max ?
+    C('n_not_positive_integer') : null;
+}
+function result(value) {
+  return finite(value) ? null : R('numerical_overflow');
+}
+function fractionalSum(a, b, sign) {
+  return F(a.num * b.den + sign * b.num * a.den, a.den * b.den);
+}
+function gpSum(a, r, n) {
+  if (r === 1) return a * n;
+  if (r > 0) return a * Math.expm1(n * Math.log(r)) / (r - 1);
+  return a * (1 - Math.pow(r, n)) / (1 - r);
+}
+
+/**
+ * simplify({num,den}): integers, |parts|<=1e6; no units.
+ * Returns reduced num/den and input gcd; zero denominator is invalid.
+ * Hand check: -18/-24 -> 3/4, gcd 6.
+ */
+function simplify({ num, den } = {}) {
+  const e = validFraction({ num, den });
+  if (e) return e;
+  return { ...F(num, den), gcd: gcd(num, den) };
+}
+
+/**
+ * frac_op({a,b,op}): rational arithmetic, no units; reduced fraction,
+ * decimal and non-negative mixed number (negative -> null).
+ * Hand check: 2/3 + 3/4 = 17/12 = 1 5/12.
+ * Errors: unsupported op, invalid fractions, zero divisor.
+ */
+function frac_op({ a, b, op } = {}) {
+  if (!['add','subtract','multiply','divide'].includes(op)) return N('op_not_supported');
+  const e = validFraction(a) || validFraction(b);
+  if (e) return e;
+  a = F(a.num,a.den); b = F(b.num,b.den);
+  if (op === 'divide' && b.num === 0) return M('division_by_zero');
+  const f = op === 'add' ? fractionalSum(a,b,1) :
+    op === 'subtract' ? fractionalSum(a,b,-1) :
+    op === 'multiply' ? F(a.num*b.num,a.den*b.den) :
+    F(a.num*b.den,a.den*b.num);
+  const decimal = f.num/f.den;
+  const whole = Math.floor(decimal);
+  const mixed = f.num < 0 ? null :
+    { whole, num: f.num-whole*f.den, den: f.den };
+  return { ...f, decimal, mixed };
+}
+
+/**
+ * compare({a,b}): fractions, no units; relation and exact difference a-b.
+ * Hand check: 5/6 > 3/4; difference 1/12.
+ * Errors: invalid fractions.
+ */
+function compare({ a, b } = {}) {
+  const e = validFraction(a) || validFraction(b);
+  if (e) return e;
+  a = F(a.num,a.den); b = F(b.num,b.den);
+  const d = fractionalSum(a,b,-1);
+  return { result: d.num < 0 ? '<' : d.num > 0 ? '>' : '=', difference:d };
+}
+
+/**
+ * fraction_of({num,den,quantity}): fraction times a finite quantity,
+ * retaining the quantity's units.
+ * Hand check: 3/8 of 64 counters = 24 counters.
+ * Errors: invalid fraction or numerical overflow.
+ */
+function fraction_of({ num, den, quantity } = {}) {
+  const e = validFraction({num,den}) || nums(quantity);
+  if (e) return e;
+  const value = (num/den)*quantity;
+  return result(value) || {value};
+}
+
+/**
+ * ratio_simplify({parts}): 2..6 positive integer parts, no units.
+ * Hand check: [12,18,30] -> [2,3,5].
+ * Errors: invalid ratio or oversized parts.
+ */
+function ratio_simplify({parts} = {}) {
+  const e = validParts(parts);
+  if (e) return e;
+  const g = parts.reduce((a,b) => gcd(a,b));
+  return {parts:parts.map(p => p/g)};
+}
+
+/**
+ * share({total,parts}): divide a non-negative total in a 2..6-part ratio.
+ * Shares and unit_value have the total's units.
+ * Hand check: $120 in 2:3 -> $48 and $72; unit $24.
+ * Errors: negative_total, invalid ratio, non-finite input.
+ */
+function share({total,parts} = {}) {
+  const e = validParts(parts) || nums(total);
+  if (e) return e;
+  if (total < 0) return C('negative_total');
+  const unit_value = total/parts.reduce((a,b)=>a+b,0);
+  const shares = parts.map(p=>p*unit_value);
+  return shares.every(Number.isFinite) ?
+    {unit_value,shares} : R('numerical_overflow');
+}
+
+/**
+ * ratio_unchanged({before,after,unchanged_index,change}):
+ * two positive ratios and signed change in the changing quantity's units.
+ * Returns four quantities in those units. Both unchanged values are equal.
+ * Hand check: 3:5 -> 3:4, index 0, change -5:
+ * before [15,25], after [15,20].
+ * Errors: non-unique equal ratios or no positive solution.
+ */
+function ratio_unchanged({before,after,unchanged_index,change} = {}) {
+  const e = validParts(before,true) || validParts(after,true) || nums(change);
+  if (e) return e;
+  if (unchanged_index !== 0 && unchanged_index !== 1) return C('index_out_of_range');
+  const [p,q] = before, [r,s] = after;
+  const determinant = p*s-q*r;
+  if (determinant === 0) return M('ratios_inconsistent');
+  let u, before_values, after_values;
+  if (unchanged_index === 0) {
+    u = change*p*r/determinant;
+    before_values = [u,u*q/p];
+    after_values = [u,u*s/r];
+  } else {
+    u = -change*q*s/determinant;
+    before_values = [u*p/q,u];
+    after_values = [u*r/s,u];
+  }
+  if (![...before_values,...after_values].every(x => Number.isFinite(x) && x > 0))
+    return M('no_positive_solution');
+  return {before_values,after_values};
+}
+
+/**
+ * proportion({kind,x1,y1,x2}): y=kx, k/x, kx², k/x² or k√x.
+ * x values share units; y values share units; k has implied units.
+ * Hand check: inverse, x1=2,y1=12,x2=3 -> k=24,y2=8.
+ * Errors: unsupported kind, division by zero, negative square root.
+ */
+function proportion({kind,x1,y1,x2} = {}) {
+  if (!['direct','inverse','square','inverse_square','sqrt'].includes(kind))
+    return N('kind_not_supported');
+  const e = nums(x1,y1,x2);
+  if (e) return e;
+  if (kind === 'sqrt' && (x1 < 0 || x2 < 0)) return M('sqrt_of_negative');
+  if ((['direct','square','sqrt'].includes(kind) && x1 === 0) ||
+      (['inverse','inverse_square'].includes(kind) && (x1 === 0 || x2 === 0)))
+    return M('division_by_zero');
+  const k = kind === 'direct' ? y1/x1 :
+    kind === 'inverse' ? y1*x1 :
+    kind === 'square' ? y1/(x1*x1) :
+    kind === 'inverse_square' ? y1*x1*x1 : y1/Math.sqrt(x1);
+  const y2 = kind === 'direct' ? k*x2 :
+    kind === 'inverse' ? k/x2 :
+    kind === 'square' ? k*x2*x2 :
+    kind === 'inverse_square' ? k/(x2*x2) : k*Math.sqrt(x2);
+  return result(k) || result(y2) || {k,y2};
+}
+
+/**
+ * map_scale({scale_denominator,map_cm?,map_area_cm2?}):
+ * scale 1:n; optional map length cm and area cm².
+ * Outputs real_km and real_area_km2, null when omitted.
+ * Hand check: 1:50000, 4 cm, 6 cm² -> 2 km, 1.5 km².
+ * Errors: scale_not_positive, negative_length, non-finite input.
+ */
+function map_scale({scale_denominator,map_cm,map_area_cm2} = {}) {
+  const e = nums(scale_denominator,
+    ...(map_cm === undefined ? [] : [map_cm]),
+    ...(map_area_cm2 === undefined ? [] : [map_area_cm2]));
+  if (e) return e;
+  if (scale_denominator <= 0) return C('scale_not_positive');
+  if ((map_cm !== undefined && map_cm < 0) ||
+      (map_area_cm2 !== undefined && map_area_cm2 < 0)) return C('negative_length');
+  const real_km = map_cm === undefined ? null : map_cm*scale_denominator/100000;
+  const real_area_km2 = map_area_cm2 === undefined ? null :
+    map_area_cm2*scale_denominator*scale_denominator/1e10;
+  return (real_km !== null && result(real_km)) ||
+    (real_area_km2 !== null && result(real_area_km2)) ||
+    {real_km,real_area_km2};
+}
+
+/**
+ * percent_change({original,new}): finite values in matching units.
+ * Returns absolute change in those units and signed percent.
+ * Hand check: 80 -> 92: change 12, percent 15.
+ * Errors: zero original or non-finite input.
+ */
+function percent_change({original,new: next} = {}) {
+  const e = nums(original,next);
+  if (e) return e;
+  if (original === 0) return M('division_by_zero');
+  const change = next-original, percent = change/Math.abs(original)*100;
+  return result(percent) || result(change) || {change,percent};
+}
+
+/**
+ * reverse_percent({final,percent}): final amount and percent adjustment;
+ * returns original in the final amount's units.
+ * Hand check: $72 after 20% discount -> $90.
+ * Errors: percent_below_minus_100 or division_by_zero at -100.
+ */
+function reverse_percent({final,percent} = {}) {
+  const e = nums(final,percent);
+  if (e) return e;
+  if (percent < -100) return C('percent_below_minus_100');
+  if (percent === -100) return M('division_by_zero');
+  const original = final/(1+percent/100);
+  return result(original) || {original};
+}
+
+/**
+ * compound({principal,rate_percent,years,per_year=1}):
+ * compounded value and interest in dollars; time in years.
+ * Interest is added at each compounding period.
+ * Hand check: $1000, 10%, 2 years, annual -> $1210, $210.
+ * Errors: invalid principal, time, rate or frequency.
+ */
+function compound({principal,rate_percent,years,per_year=1} = {}) {
+  const e = nums(principal,rate_percent,years,per_year);
+  if (e) return e;
+  if (principal < 0) return C('negative_principal');
+  if (years < 0) return C('negative_time');
+  if (!Number.isInteger(per_year) || per_year < 1 || per_year > 365)
+    return C('per_year_out_of_range_1_365');
+  if (rate_percent <= -100*per_year) return C('rate_out_of_range');
+  const amount = principal*Math.pow(1+rate_percent/(100*per_year),per_year*years);
+  return result(amount) || result(amount-principal) ||
+    {amount,interest:amount-principal};
+}
+
+/**
+ * ap({a,d,n}): arithmetic progression; a,d in term units, n integer.
+ * Returns nth term and first n terms' sum, in term units.
+ * Hand check: a=2,d=3,n=5 -> term 14, sum 40.
+ * Errors: n_not_positive_integer or numerical_overflow.
+ */
+function ap({a,d,n} = {}) {
+  const e = nums(a,d) || validN(n);
+  if (e) return e;
+  const nth_term = a+(n-1)*d, sum_n = n*(2*a+(n-1)*d)/2;
+  return result(nth_term) || result(sum_n) || {nth_term,sum_n};
+}
+
+/**
+ * gp({a,r,n}): geometric progression; a in term units, r dimensionless.
+ * Returns nth term, partial sum, finite sum to infinity if |r|<1,
+ * and Boolean convergence. For r=1 the partial sum is n*a.
+ * Hand check: a=8,r=1/2,n=3 -> term 2, sum 14, limit 16.
+ * Errors: n_not_positive_integer or numerical_overflow.
+ */
+function gp({a,r,n} = {}) {
+  const e = nums(a,r) || validN(n);
+  if (e) return e;
+  const nth_term = a*Math.pow(r,n-1);
+  const sum_n = gpSum(a,r,n);
+  const converges = Math.abs(r)<1;
+  const sum_infinity = converges ? a/(1-r) : null;
+  return result(nth_term) || result(sum_n) ||
+    (converges && result(sum_infinity)) ||
+    {nth_term,sum_n,sum_infinity,converges};
+}
+
+/**
+ * gp_terms_to_exceed({a,r,target}): positive geometric terms.
+ * Returns least integer n>=1 with S_n strictly above target.
+ * Hand check: a=2,r=2,target=14 -> n=4.
+ * Errors: a_and_r_must_be_positive, target_never_exceeded,
+ * iteration_limit.
+ */
+function gp_terms_to_exceed({a,r,target} = {}) {
+  const e = nums(a,r,target);
+  if (e) return e;
+  if (a <= 0 || r <= 0) return C('a_and_r_must_be_positive');
+  if (r < 1 && a/(1-r) <= target) return M('target_never_exceeded');
+  const above = n => {
+    if (n === 0) return 0 > target;
+    const s = gpSum(a,r,n);
+    return s > target;
+  };
+  if (above(1)) return {n:1};
+  let lo=1, hi=2;
+  while (!above(hi)) {
+    lo=hi; hi*=2;
+    if (hi > 10000000) return R('iteration_limit');
+  }
+  while (hi-lo>1) {
+    const mid=Math.floor((lo+hi)/2);
+    if (above(mid)) hi=mid; else lo=mid;
+  }
+  while (hi>1 && above(hi-1)) hi--;
+  while (!above(hi)) {
+    if (++hi>10000000) return R('iteration_limit');
+  }
+  return {n:hi};
+}
+
+/**
+ * telescoping({p,q,n}): sum 1/((k+p)(k+q)), k=1..n.
+ * Integer p,q>=0, p<q, n 1..10000. Outputs A,B (partial
+ * fraction coefficients), finite sum and infinite limit.
+ * Hand check: p=0,q=1,n=3 -> A=1,B=-1,S=3/4,limit=1.
+ * Errors: invalid p,q,n or size.
+ */
+function telescoping({p,q,n} = {}) {
+  if (!Number.isInteger(p) || !Number.isInteger(q) || p<0 || q<0)
+    return C('p_q_must_be_non_negative_integers');
+  if (p>=q) return C('p_must_be_less_than_q');
+  if (p>1000000 || q>1000000) return C('value_too_large');
+  const e=validN(n,10000);
+  if (e) return e;
+  const A=1/(q-p), B=-A;
+  let sum_n=0, gap=0;
+  for (let k=1;k<=n;k++) sum_n+=1/((k+p)*(k+q));
+  for (let k=p+1;k<=q;k++) gap+=1/k;
+  const sum_infinity=gap/(q-p);
+  return {A,B,sum_n,sum_infinity};
+}
+
+/**
+ * dilute_ratio({concentrate_parts,water_parts,total_volume_ml}):
+ * ratio concentrate:water; volumes add in ml.
+ * Outputs concentrate_ml, water_ml, fraction_concentrate.
+ * Hand check: 1:3 in 800 ml -> 200 ml,600 ml,1/4.
+ * Errors: part_not_positive, negative_volume.
+ */
+function dilute_ratio({concentrate_parts,water_parts,total_volume_ml} = {}) {
+  const e=nums(concentrate_parts,water_parts,total_volume_ml);
+  if (e) return e;
+  if (concentrate_parts<=0 || water_parts<0) return C('part_not_positive');
+  if (total_volume_ml<0) return C('negative_volume');
+  const fraction_concentrate=concentrate_parts/(concentrate_parts+water_parts);
+  const concentrate_ml=fraction_concentrate*total_volume_ml;
+  const water_ml=total_volume_ml-concentrate_ml;
+  return result(concentrate_ml) || result(water_ml) ||
+    {concentrate_ml,water_ml,fraction_concentrate};
+}
+
+/**
+ * mix({c_a,c_b,target}): two strengths/prices in matching units.
+ * Alligation parts are absolute concentration differences.
+ * Assumes volumes add and mixture strength is volume-weighted.
+ * Hand check: 20% and 80% to make 50% -> parts 30:30, A=1/2.
+ * Errors: concentrations_equal, target_outside_range.
+ */
+function mix({c_a,c_b,target} = {}) {
+  const e=nums(c_a,c_b,target);
+  if (e) return e;
+  if (c_a===c_b) return M('concentrations_equal');
+  if (target<Math.min(c_a,c_b) || target>Math.max(c_a,c_b))
+    return M('target_outside_range');
+  const parts_a=Math.abs(c_b-target);
+  const parts_b=Math.abs(target-c_a);
+  const fraction_a=(c_b-target)/(c_b-c_a);
+  return {parts_a,parts_b,fraction_a};
+}
+
+/**
+ * best_buy({options:[{price,quantity},...]}): 1..6 packs.
+ * Price in dollars, quantity in a shared positive unit.
+ * Returns dollars per unit and zero-based best_index.
+ * Hand check: [{price:6,quantity:3},{price:9,quantity:6}]
+ * -> unit prices [2,1.5], best index 1.
+ * Errors: invalid count, negative_price, quantity_not_positive.
+ */
+function best_buy({options} = {}) {
+  if (!Array.isArray(options) || options.length<1 || options.length>6)
+    return C('options_out_of_range_1_6');
+  const unit_prices=[];
+  for (const o of options) {
+    const e=o && nums(o.price,o.quantity);
+    if (!o || e) return e || C('invalid_option');
+    if (o.price<0) return C('negative_price');
+    if (o.quantity<=0) return C('quantity_not_positive');
+    const u=o.price/o.quantity;
+    if (!Number.isFinite(u)) return R('numerical_overflow');
+    unit_prices.push(u);
+  }
+  let best_index=0;
+  for (let i=1;i<unit_prices.length;i++)
+    if (unit_prices[i]<unit_prices[best_index]) best_index=i;
+  return {unit_prices,best_index};
+}
+
+/**
+ * continued_fraction({num,den}): exact signed rational, parts <=1e9.
+ * Floor-convention Euclidean terms and [numerator,denominator]
+ * convergents. Final term >=2 when more than one term exists.
+ * Hand check: 43/30 -> [1,2,3,4]; final convergent [43,30].
+ * Errors: invalid integer, size or zero_denominator.
+ */
+function continued_fraction({num,den} = {}) {
+  const e=validFraction({num,den},1000000000);
+  if (e) return e;
+  const f=F(num,den);
+  let a=f.num,b=f.den;
+  const terms=[],convergents=[];
+  let pm2=0,pm1=1,qm2=1,qm1=0;
+  while (b!==0) {
+    const term=Math.floor(a/b);
+    const rem=a-term*b;
+    terms.push(term);
+    const p=term*pm1+pm2, q=term*qm1+qm2;
+    convergents.push([p,q]);
+    pm2=pm1;pm1=p;qm2=qm1;qm1=q;
+    a=b;b=rem;
+  }
+  return {terms,convergents};
+}
+
+/**
+ * cf_sqrt({n}): integer 1..1e6, periodic CF of positive sqrt(n).
+ * Returns floor root, shortest periodic tail and square flag.
+ * Hand check: sqrt(2) -> a0=1,period=[2],is_square=false.
+ * Errors: n_not_positive_integer or period_limit.
+ */
+function cf_sqrt({n} = {}) {
+  if (!Number.isInteger(n) || n<1 || n>1000000)
+    return C('n_not_positive_integer');
+  const a0=Math.floor(Math.sqrt(n));
+  if (a0*a0===n) return {a0,period:[],is_square:true};
+  let m=0,d=1,a=a0;
+  const period=[];
+  for (let i=0;i<10000;i++) {
+    m=d*a-m;
+    d=(n-m*m)/d;
+    a=Math.floor((a0+m)/d);
+    period.push(a);
+    if (a===2*a0) return {a0,period,is_square:false};
+  }
+  return R('period_limit');
+}
+
+/**
+ * best_approximation({value,max_den}): finite real number,
+ * 1<=denominator<=max_den<=10000. Nearest rational, ties use
+ * smaller denominator. Signed approx_error=value-num/den.
+ * Hand check: 3.14, max_den=10 -> 22/7, signed error -0.002857...
+ * Errors: max_den_out_of_range_1_10000, value_too_large.
+ */
+function best_approximation({value,max_den} = {}) {
+  const e=nums(value);
+  if (e) return e;
+  if (!Number.isInteger(max_den) || max_den<1 || max_den>10000)
+    return C('max_den_out_of_range_1_10000');
+  if (Math.abs(value)>1000000000) return C('value_too_large');
+  let bestP=0,bestQ=1,bestError=Infinity;
+  for (let q=1;q<=max_den;q++) {
+    const p=Math.round(value*q);
+    const error=Math.abs(value-p/q);
+    if (error<bestError-1e-15 ||
+        (Math.abs(error-bestError)<=1e-15 && q<bestQ)) {
+      bestP=p;bestQ=q;bestError=error;
+    }
+  }
+  const f=F(bestP,bestQ);
+  return {num:f.num,den:f.den,approx_error:value-f.num/f.den};
+}
+
+/**
+ * egyptian({num,den}): proper positive fraction, parts <=1e6.
+ * Greedy distinct unit fractions, using exact integer arithmetic.
+ * Hand check: 4/13 -> 1/4 + 1/18 + 1/468.
+ * Errors: fraction_out_of_range_0_1, denominator_too_large,
+ * term_limit, and standard fraction validation.
+ */
+function egyptian({num,den} = {}) {
+  const e=validFraction({num,den});
+  if (e) return e;
+  const f=F(num,den);
+  if (f.num<=0 || f.num>=f.den) return C('fraction_out_of_range_0_1');
+  let a=BigInt(f.num),b=BigInt(f.den);
+  const maximum=BigInt(Number.MAX_SAFE_INTEGER);
+  const denominators=[];
+  while (a>0n) {
+    if (denominators.length>=12) return R('term_limit');
+    const unit=(b+a-1n)/a;
+    if (unit>maximum) return R('denominator_too_large');
+    denominators.push(Number(unit));
+    a=a*unit-b;
+    b=b*unit;
+    if (a>0n) {
+      const bgcd=(x,y)=>{while(y){const z=x%y;x=y;y=z;}return x;};
+      const g=bgcd(a,b);
+      a/=g;b/=g;
+    }
+  }
+  return {denominators};
+}
+
+/**
+ * mediant({a,b}): positive-denominator rational pair.
+ * Returns reduced (a.num+b.num)/(a.den+b.den).
+ * Hand check: between 1/2 and 2/3 -> 3/5.
+ * Errors: denominator_not_positive, invalid parts.
+ */
+function mediant({a,b} = {}) {
+  if (!a || !b) return C('invalid_fraction');
+  if (finite(a.den) && a.den<=0 || finite(b.den) && b.den<=0)
+    return C('denominator_not_positive');
+  const e=validFraction(a) || validFraction(b);
+  if (e) return e;
+  return F(a.num+b.num,a.den+b.den);
+}
+
+/**
+ * stern_walk({path}): optional educational helper for the
+ * Stern-Brocot tree. L/R moves from root 1/1, with formal
+ * boundary sentinels 0/1 and 1/0. Returns current reduced
+ * fraction and visited nodes; all values dimensionless.
+ * Hand check: path "LR" visits 1/1,1/2,2/3.
+ * Errors: direction_not_supported, path_limit.
+ */
+function stern_walk({path=''} = {}) {
+  if (typeof path!=='string' || /[^LR]/.test(path)) return N('direction_not_supported');
+  if (path.length>32) return R('path_limit');
+  let ln=0,ld=1,rn=1,rd=0,cn=1,cd=1;
+  const nodes=[[1,1]];
+  for (const step of path) {
+    if (step==='L') {rn=cn;rd=cd;}
+    else {ln=cn;ld=cd;}
+    cn=ln+rn;cd=ld+rd;
+    if (!Number.isSafeInteger(cn) || !Number.isSafeInteger(cd))
+      return R('numerical_overflow');
+    nodes.push([cn,cd]);
+  }
+  return {num:cn,den:cd,nodes};
+}
+
+return Object.freeze({
+  API_VERSION:1,
+  simplify,frac_op,compare,fraction_of,ratio_simplify,share,
+  ratio_unchanged,proportion,map_scale,percent_change,
+  reverse_percent,compound,ap,gp,gp_terms_to_exceed,
+  telescoping,dilute_ratio,mix,best_buy,continued_fraction,
+  cf_sqrt,best_approximation,egyptian,mediant,stern_walk
+});
+})();
+/* FIT-CALC-END fractions-ratio */
+
+(function(){
+'use strict';
+const C=FITCalcRatio;
+const $=id=>document.getElementById(id);
+let seed=1234567,round=0,score=0,tries=0,hinted=false,locked=false,data={},answer=null;
+let marked=new Set(),selection='',value='',other='';
+const patterns=['shade','compare','counters','unequal','quantity','sharing'];
+const palette=['#FF8FB8','#FFC83D','#3DBE6B','#E2ECFD'];
+const rnd=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return (seed>>>0)/4294967296;};
+const pick=(a,b)=>a+Math.floor(rnd()*(b-a+1));
+const money=n=>'$'+n.toFixed(2);
+const fmt=n=>Number.isInteger(n)?String(n):Number(n.toPrecision(4)).toString();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fault=e=>e.error==='MathError'?'This calculation has no valid answer.':'This setting is outside the allowed range.';
+function make(){
+  const t=patterns[round];
+  data={type:t};
+  if(t==='shade'){
+    const den=[3,5,7,9,11,12][pick(0,5)];
+    data={type:t,den,goal:pick(1,den-1),food:['pizza','cake','chocolate'][pick(0,2)]};
+    marked=new Set();
+  }else if(t==='compare'){
+    const d1=pick(3,8),d2=pick(4,12);
+    data={type:t,a:{num:pick(1,d1-1),den:d1},b:{num:pick(1,d2-1),den:d2}};
+    if(pick(0,2)===0){data.a={num:2,den:3};data.b={num:6,den:9};}
+    answer=C.compare({a:data.a,b:data.b}).result;
+  }else if(t==='counters'){
+    const den=[6,8,10,12][pick(0,3)];
+    data={type:t,total:den,red:pick(1,den-1)};
+  }else if(t==='unequal'){
+    data={type:t,n:pick(5,9),bad:pick(0,1)};
+  }else if(t==='quantity'){
+    const den=[4,6,8,12][pick(0,3)];
+    const num=pick(1,den-1);
+    data={type:t,num,den,total:den*pick(2,4)};
+    answer=C.fraction_of({num,den,quantity:data.total}).value;
+  }else{
+    const lost=pick(2,8);
+    data={type:t,before:[3,5],after:[3,4],unchanged_index:0,change:-lost};
+    const out=C.ratio_unchanged(data);
+    answer=out.before_values[1];
+  }
+  value='';other='';selection='';
+  tries=0;hinted=false;locked=false;
+}
+function button(label,fn,pressed=false){
+  const b=document.createElement('button');
+  b.type='button';b.textContent=label;
+  b.setAttribute('aria-pressed',pressed?'true':'false');
+  b.addEventListener('click',fn);
+  return b;
+}
+function sector(cx,cy,r,start,end){
+  const a=(start-90)*Math.PI/180,b=(end-90)*Math.PI/180;
+  const x1=cx+r*Math.cos(a),y1=cy+r*Math.sin(a);
+  const x2=cx+r*Math.cos(b),y2=cy+r*Math.sin(b);
+  return `M${cx} ${cy}L${x1} ${y1}A${r} ${r} 0 ${end-start>180?1:0} 1 ${x2} ${y2}Z`;
+}
+function pie(n,filled,interactive=false,unequal=false){
+  const weights=Array.from({length:n},(_,i)=>unequal?(i%2===0?1.5:.5):1);
+  const total=weights.reduce((a,b)=>a+b,0);
+  let angle=0;
+  let s=`<svg viewBox="0 0 250 240" role="img" aria-label="${n} ${unequal?'unequal':'equal'} slices; ${filled} marked">`;
+  for(let i=0;i<n;i++){
+    const span=weights[i]/total*360, end=angle+span;
+    const fill=interactive?marked.has(i):i<filled;
+    s+=`<path data-slice="${i}" d="${sector(125,119,102,angle,end)}" fill="${fill?palette[0]:'#fff'}" stroke="#111" stroke-width="3" stroke-linejoin="round" ${interactive?'role="button" tabindex="0" aria-label="Slice '+(i+1)+'"':''}/>`;
+    angle=end;
+  }
+  s+='</svg>';
+  return s;
+}
+function bar(parts,colour){
+  const sum=parts.reduce((a,b)=>a+b,0),unit=270/sum;
+  let x=12,s='<svg viewBox="0 0 294 73" role="img" aria-label="Ratio bar with '+parts.join(' and ')+' equal units">';
+  parts.forEach((p,j)=>{
+    for(let i=0;i<p;i++){
+      s+=`<rect x="${x}" y="10" width="${unit}" height="37" fill="${j?colour:'#FFC83D'}" stroke="#111" stroke-width="2"/>`;
+      x+=unit;
+    }
+  });
+  s+='</svg>';
+  return s;
+}
+function counters(total,red,hidden=false){
+  let s=`<svg viewBox="0 0 300 182" role="img" aria-label="Bag of ${total} counters">`;
+  s+='<path d="M35 12Q150 37 265 12L282 145Q150 184 18 145Z" fill="#fff" stroke="#111" stroke-width="4"/>';
+  for(let i=0;i<total;i++){
+    const col=i%6,row=Math.floor(i/6);
+    s+=`<circle cx="${60+col*37}" cy="${57+row*36}" r="14" fill="${!hidden&&i<red?'#FF8FB8':'#FFDD00'}" stroke="#111" stroke-width="2.5"/>`;
+  }
+  return s+'</svg>';
+}
+function textInput(id,place='Your answer',step='1'){
+  return `<input id="${id}" type="number" inputmode="decimal" step="${step}" placeholder="${place}" aria-label="${place}">`;
+}
+function numericControls(two=false){
+  $('controls').innerHTML=`
+    <div class="stepper">
+      <button data-step="-5" aria-label="Decrease by five">−−</button>
+      <button data-step="-1" aria-label="Decrease by one">−</button>
+      ${textInput('entry','Number')}
+      <button data-step="1" aria-label="Increase by one">+</button>
+      <button data-step="5" aria-label="Increase by five">++</button>
+    </div>${two?'<div class="inputrow" style="margin-top:10px"><span>over</span>'+textInput('denEntry','Denominator')+'</div>':''}`;
+  $('entry').addEventListener('input',e=>{value=e.target.value;plot();});
+  if(two)$('denEntry').addEventListener('input',e=>{other=e.target.value;plot();});
+  $('controls').querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{
+    const n=Number($('entry').value||0)+Number(b.dataset.step);
+    $('entry').value=String(Math.max(0,n));
+    value=$('entry').value;plot();
+  }));
+}
+function choices(items){
+  $('controls').innerHTML='<div id="choiceButtons" class="choices"></div>';
+  items.forEach(item=>$('choiceButtons').append(button(item.label,()=>{
+    selection=item.id;
+    $('choiceButtons').querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-pressed',items[i].id===selection?'true':'false'));
+    plot();
+  })));
+}
+function render(){
+  $('round').textContent=`Round ${round+1}/6`;
+  $('score').textContent=`Score ${score}`;
+  $('feedback').className='feedback';
+  $('feedback').textContent='Choose your answer, then press Check.';
+  $('check').classList.remove('hidden');
+  $('hint').disabled=false;
+  $('next').classList.add('hidden');
+  const d=data,t=d.type;
+  if(t==='shade'){
+    $('sceneTitle').textContent='Slice by slice';
+    $('question').textContent=`Tap slices to shade ${d.goal}/${d.den} of the ${d.food}.`;
+    $('scene').innerHTML=`<div style="width:280px">${pie(d.den,0,true)}<strong>${d.den} equal slices</strong></div>`;
+    $('controls').innerHTML='<p>Tap any slice to colour or clear it. Your selection appears in the strip wall.</p>';
+    $('scene').querySelectorAll('[data-slice]').forEach(el=>{
+      const toggle=()=>{
+        const i=Number(el.dataset.slice);
+        if(marked.has(i))marked.delete(i);else marked.add(i);
+        el.setAttribute('fill',marked.has(i)?palette[0]:'#fff');
+        plot();
+      };
+      el.addEventListener('click',toggle);
+      el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+    });
+  }else if(t==='compare'){
+    $('sceneTitle').textContent='Two plates';
+    $('question').textContent='Which plate has the larger coloured portion? They are the same-sized plates.';
+    $('scene').innerHTML=`<div style="width:47%"><strong>Plate A</strong>${pie(d.a.den,d.a.num)}<span>${d.a.den} equal slices</span></div><div style="width:47%"><strong>Plate B</strong>${pie(d.b.den,d.b.num)}<span>${d.b.den} equal slices</span></div>`;
+    choices([{id:'>',label:'A has more'},{id:'=',label:'Equal portions'},{id:'<',label:'B has more'}]);
+  }else if(t==='counters'){
+    $('sceneTitle').textContent='Counter bag';
+    $('question').textContent='What fraction of the counters is pink? Any equivalent fraction is fine.';
+    $('scene').innerHTML=`<div style="width:300px">${counters(d.total,d.red)}<strong>${d.total} counters altogether</strong></div>`;
+    numericControls(true);
+  }else if(t==='unequal'){
+    $('sceneTitle').textContent='Fair slices?';
+    $('question').textContent='One cake has unequal slices. Which cake is NOT a correct fraction model?';
+    $('scene').innerHTML=`<div style="width:47%"><strong>Cake A</strong>${pie(d.n,2,false,d.bad===0)}</div><div style="width:47%"><strong>Cake B</strong>${pie(d.n,2,false,d.bad===1)}</div>`;
+    choices([{id:'0',label:'Cake A'},{id:'1',label:'Cake B'}]);
+  }else if(t==='quantity'){
+    $('sceneTitle').textContent='Fill the lunch boxes';
+    $('question').textContent=`There are ${d.total} snacks. How many snacks are ${d.num}/${d.den} of the total?`;
+    $('scene').innerHTML=`<div style="width:300px">${counters(d.total,0,true)}<strong>${d.total} snacks</strong></div>`;
+    numericControls();
+  }else{
+    $('sceneTitle').textContent='The sticker swap';
+    $('question').textContent=`Ali and Ben have stickers in the ratio 3:5. Ali keeps the same number. Ben gives away ${-d.change} stickers. Their new ratio is 3:4. How many stickers did Ben have at first?`;
+    $('scene').innerHTML=`<div style="width:100%"><strong>Before: Ali : Ben = 3 : 5</strong>${bar(d.before,'#FF8FB8')}<strong>After: Ali : Ben = 3 : 4</strong>${bar(d.after,'#FF8FB8')}</div>`;
+    numericControls();
+  }
+  plot();
+}
+function playerFraction(){
+  const d=data;
+  if(d.type==='shade')return {num:marked.size,den:d.den};
+  if(d.type==='compare')return selection==='>'?d.a:selection==='<'?d.b:{num:0,den:1};
+  if(d.type==='counters'&&Number(other)>0&&value!=='')return {num:Number(value),den:Number(other)};
+  if(d.type==='quantity'&&value!=='')return {num:Number(value),den:d.total};
+  return {num:0,den:1};
+}
+function plot(){
+  const f=playerFraction();
+  let s='<rect x="0" y="0" width="420" height="328" rx="14" fill="#fff"/>';
+  s+='<text x="14" y="18" font-size="14" font-weight="800">Equal-part strip wall</text>';
+  const left=56,width=342;
+  for(let den=1;den<=12;den++){
+    const y=23+den*23;
+    s+=`<text x="40" y="${y+12}" text-anchor="end" font-size="11" fill="#333">${den===1?'whole':den+'ths'}</text>`;
+    const w=C.fraction_of({num:1,den,quantity:width}).value;
+    for(let i=0;i<den;i++)
+      s+=`<rect x="${left+i*w}" y="${y}" width="${w}" height="18" fill="${den===1?'#FFC83D':'#fff'}" stroke="#111" stroke-width="1"/>`;
+    const frac=C.fraction_of({num:f.num,den:f.den,quantity:den});
+    if(!frac.error && frac.value>=0 && frac.value<=den){
+      const fractionWidth=C.fraction_of({num:f.num,den:f.den,quantity:width});
+      if(!fractionWidth.error && Number.isFinite(fractionWidth.value))
+        s+=`<rect x="${left}" y="${y+2}" width="${Math.max(0,fractionWidth.value)}" height="14" fill="#FF8FB8" opacity=".65"/>`;
+    }
+  }
+  s+='<text x="56" y="319" font-size="11">0</text><text x="398" y="319" text-anchor="end" font-size="11">1 whole</text>';
+  $('plot').innerHTML=s;
+  $('plot').setAttribute('aria-label',`Fraction wall from wholes to twelfths. Current selection ${f.num}/${f.den}.`);
+}
+function checkAnswer(){
+  if(locked)return;
+  tries++;
+  const d=data,t=d.type;
+  let good=false,why='',wrong='';
+  if(t==='shade'){
+    const r=C.compare({a:{num:marked.size,den:d.den},b:{num:d.goal,den:d.den}});
+    good=r.result==='=';
+    why=`You shaded ${marked.size} of ${d.den} equal slices.`;
+    wrong=`You shaded ${marked.size} slices. ${r.result==='<'?'Try shading more.':'Try clearing some.'}`;
+  }else if(t==='compare'){
+    good=selection===answer;
+    why=`The fractions compare as ${d.a.num}/${d.a.den} ${answer} ${d.b.num}/${d.b.den}.`;
+    wrong='Count the coloured parts and remember that slice sizes differ.';
+  }else if(t==='counters'){
+    const a={num:Number(value),den:Number(other)};
+    const r=value!==''&&other!==''?C.compare({a,b:{num:d.red,den:d.total}}):null;
+    good=!!r&&!r.error&&r.result==='=';
+    const f=C.simplify({num:d.red,den:d.total});
+    why=`${d.red} of ${d.total} are pink, so the fraction is ${f.num}/${f.den}.`;
+    wrong='Count pink counters first, then all counters. Both numbers matter.';
+  }else if(t==='unequal'){
+    good=selection===String(d.bad);
+    why='A fraction model needs equal-sized slices, not just equal numbers of slices.';
+    wrong='Look for slices with different angles or areas.';
+  }else if(t==='quantity'){
+    good=value!==''&&Number(value)===answer;
+    why=`${d.num}/${d.den} of ${d.total} gives ${fmt(answer)} snacks.`;
+    wrong='Find how many items one equal part holds, then take the requested parts.';
+  }else{
+    good=value!==''&&Number(value)===answer;
+    why=`Ali kept ${fmt(C.ratio_unchanged(d).before_values[0])}; Ben began with ${fmt(answer)}.`;
+    wrong='Ali stays unchanged. Find one ratio unit using the stickers Ben gave away.';
+  }
+  if(good){
+    locked=true;
+    const points=hinted||tries>2?50:tries===2?75:100;
+    score+=points;$('score').textContent=`Score ${score}`;
+    $('feedback').className='feedback good';
+    $('feedback').textContent=`★ Correct! +${points} points. ${why}`;
+    $('check').classList.add('hidden');$('next').classList.remove('hidden');$('hint').disabled=true;
+    $('next').textContent=round===5?'See stars ★':'Next round →';
+  }else{
+    $('feedback').className='feedback bad';
+    $('feedback').textContent=wrong;
+  }
+}
+function hint(){
+  if(locked)return;
+  hinted=true;
+  const help={
+    shade:'Every slice must be the same size. Count the slices you have shaded.',
+    compare:'Try thinking of both fractions as parts of one whole.',
+    counters:'Put the number of pink counters on top of the total.',
+    unequal:'Look at the areas, not only the dividing lines.',
+    quantity:'Find one part first. The total is split into equal groups.',
+    sharing:'Ali has the same amount before and after. Compare Ben’s unit bars.'
+  };
+  $('feedback').className='feedback';
+  $('feedback').textContent='Hint: '+help[data.type]+' This round now earns up to 50 points.';
+}
+function finish(){
+  $('game').classList.add('hidden');$('finish').classList.remove('hidden');
+  const n=score>=500?3:score>=350?2:1;
+  $('stars').textContent='★'.repeat(n)+'☆'.repeat(3-n);
+  $('result').textContent=`You earned ${score} out of 600 points.`;
+  $('round').textContent='6/6 complete';
+}
+function next(){
+  if(round===5){finish();return;}
+  round++;make();render();
+}
+function restart(){
+  seed=(Date.now()>>>0)||1234567;
+  round=0;score=0;
+  $('finish').classList.add('hidden');$('game').classList.remove('hidden');
+  make();render();
+}
+$('check').addEventListener('click',checkAnswer);
+$('hint').addEventListener('click',hint);
+$('next').addEventListener('click',next);
+$('again').addEventListener('click',restart);
+restart();
+})();
+</script>
+</body>
+</html>

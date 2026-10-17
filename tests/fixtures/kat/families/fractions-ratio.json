@@ -1,0 +1,1575 @@
+{
+  "tool": "fractions-ratio",
+  "owner": "FIT Site",
+  "version": "2026-10-18",
+  "tolerance": {
+    "rel": 1e-06,
+    "abs_when_expected_zero": 1e-09,
+    "note": "numbers relative 1e-6 (7 s.f.), zero absolute 1e-9; integers (numerators, denominators, terms, n, indices), strings, booleans, nulls, lists and error objects exact; errors {error: schema class, reason: lower_snake_case} (KAT_SCHEMA 17:46)"
+  },
+  "calc_module": "lib/sims/families/fractions-ratio.calc.js",
+  "convention": "Module FITCalcRatio (lib/sims/families/fractions-ratio.calc.js); op = function name, fields exactly as the family prompt. Fractions are {num, den} integers, |value| <= 1,000,000 (continued_fraction 1e9); results in lowest terms with den > 0 (sign on num), 0 = 0/1. mixed = {whole, num, den} with 0 <= num < den for results >= 0, null for negative results. compare result is '<', '=' or '>' for a vs b; difference = a - b. Ratios: 2-6 positive integer parts. ratio_unchanged: the quantity at unchanged_index keeps its value, the other quantity changes by the signed 'change'; before:after part ratios given; MathError ratios_inconsistent when the two ratios are equal, no_positive_solution when any amount <= 0. proportion kinds direct y=kx, inverse y=k/x, square y=kx^2, inverse_square y=k/x^2, sqrt y=k sqrt(x). map_scale 1:n with map lengths in cm, real in km and km^2 (null when the map input is omitted). percent_change percent = (new - original)/|original| x 100. reverse_percent original = final/(1 + p/100). compound A = P(1 + r/(100 m))^(m t), per_year m default 1. gp: r = 1 gives S = na; sum_infinity only when |r| < 1 (else null, converges false). gp_terms_to_exceed: least n with S_n strictly greater than target (a, r > 0). telescoping: sum_{k=1}^{n} 1/((k+p)(k+q)), 0 <= p < q integers, A = 1/(q-p), B = -A. mix: alligation, fraction_a = (c_b - t)/(c_b - c_a). best_buy: lowest price per unit, ties to the lowest index. continued_fraction: Euclidean-algorithm terms with the floor convention (a0 may be negative, later terms positive; with more than one term the last is at least 2), convergents [p, q]. cf_sqrt: a0 and the shortest repeating period (perfect square -> period [], is_square true). best_approximation: closest p/q with 1 <= q <= max_den (ties to the smaller q), approx_error = value - p/q (named approx_error so it is never read as an error object). egyptian: greedy (Fibonacci-Sylvester) with exact integers; a denominator above 2^53 - 1 -> RuntimeError denominator_too_large. mediant (a+c)/(b+d) in lowest terms.",
+  "oracle": "script-verified textbook formulae (Singapore primary and secondary mathematics; H2 Mathematics series; Hardy and Wright, An Introduction to the Theory of Numbers; Khinchin, Continued Fractions). Builder = hand-written integer gcd arithmetic, closed-form series, Euclid continued fractions, the periodic surd algorithm, Fraction.limit_denominator, ceiling-division greedy; check() = fractions.Fraction, sympy solve/summation/apart/continued_fraction_periodic, brute-force denominator search, term-by-term sums and loop compounding.",
+  "cases": [
+    {
+      "id": "simplify",
+      "desc": "simplest form",
+      "op": "simplify",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.simplify",
+      "input": {
+        "num": 84,
+        "den": 126
+      },
+      "expected": {
+        "num": 2,
+        "den": 3,
+        "gcd": 42
+      },
+      "edge": false,
+      "hand_check": "gcd 42 -> 2/3"
+    },
+    {
+      "id": "simplify-neg-den",
+      "desc": "negative denominator moves to the numerator",
+      "op": "simplify",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.simplify",
+      "input": {
+        "num": 6,
+        "den": -8
+      },
+      "expected": {
+        "num": -3,
+        "den": 4,
+        "gcd": 2
+      },
+      "edge": true,
+      "hand_check": "-3/4, gcd 2"
+    },
+    {
+      "id": "simplify-zero-num",
+      "desc": "zero numerator",
+      "op": "simplify",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.simplify",
+      "input": {
+        "num": 0,
+        "den": 7
+      },
+      "expected": {
+        "num": 0,
+        "den": 1,
+        "gcd": 7
+      },
+      "edge": true,
+      "hand_check": "0/1, gcd(0,7) = 7"
+    },
+    {
+      "id": "simplify-zero-den",
+      "desc": "zero denominator",
+      "op": "simplify",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.simplify",
+      "input": {
+        "num": 3,
+        "den": 0
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "zero_denominator"
+      },
+      "edge": true,
+      "hand_check": "MathError zero_denominator"
+    },
+    {
+      "id": "simplify-not-int",
+      "desc": "non-integer numerator",
+      "op": "simplify",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.simplify",
+      "input": {
+        "num": 1.5,
+        "den": 4
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "not_an_integer"
+      },
+      "edge": true,
+      "hand_check": "ConstraintViolation not_an_integer"
+    },
+    {
+      "id": "add-unlike",
+      "desc": "add with unlike denominators",
+      "op": "frac_op",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.frac_op",
+      "input": {
+        "a": {
+          "num": 3,
+          "den": 4
+        },
+        "b": {
+          "num": 5,
+          "den": 6
+        },
+        "op": "add"
+      },
+      "expected": {
+        "num": 19,
+        "den": 12,
+        "decimal": 1.583333,
+        "mixed": {
+          "whole": 1,
+          "num": 7,
+          "den": 12
+        }
+      },
+      "edge": false,
+      "hand_check": "9/12 + 10/12 = 19/12 = 1 7/12"
+    },
+    {
+      "id": "subtract-negative",
+      "desc": "subtraction giving a negative",
+      "op": "frac_op",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.frac_op",
+      "input": {
+        "a": {
+          "num": 2,
+          "den": 5
+        },
+        "b": {
+          "num": 3,
+          "den": 4
+        },
+        "op": "subtract"
+      },
+      "expected": {
+        "num": -7,
+        "den": 20,
+        "decimal": -0.35,
+        "mixed": null
+      },
+      "edge": true,
+      "hand_check": "8/20 - 15/20 = -7/20; mixed null"
+    },
+    {
+      "id": "multiply",
+      "desc": "multiply and simplify",
+      "op": "frac_op",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.frac_op",
+      "input": {
+        "a": {
+          "num": 4,
+          "den": 9
+        },
+        "b": {
+          "num": 15,
+          "den": 8
+        },
+        "op": "multiply"
+      },
+      "expected": {
+        "num": 5,
+        "den": 6,
+        "decimal": 0.8333333,
+        "mixed": {
+          "whole": 0,
+          "num": 5,
+          "den": 6
+        }
+      },
+      "edge": false,
+      "hand_check": "60/72 = 5/6"
+    },
+    {
+      "id": "divide-whole",
+      "desc": "division giving a whole number",
+      "op": "frac_op",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.frac_op",
+      "input": {
+        "a": {
+          "num": 3,
+          "den": 4
+        },
+        "b": {
+          "num": 3,
+          "den": 8
+        },
+        "op": "divide"
+      },
+      "expected": {
+        "num": 2,
+        "den": 1,
+        "decimal": 2.0,
+        "mixed": {
+          "whole": 2,
+          "num": 0,
+          "den": 1
+        }
+      },
+      "edge": true,
+      "hand_check": "3/4 x 8/3 = 2; mixed whole 2, num 0"
+    },
+    {
+      "id": "divide-zero",
+      "desc": "divide by zero",
+      "op": "frac_op",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.frac_op",
+      "input": {
+        "a": {
+          "num": 3,
+          "den": 4
+        },
+        "b": {
+          "num": 0,
+          "den": 5
+        },
+        "op": "divide"
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "division_by_zero"
+      },
+      "edge": true,
+      "hand_check": "MathError division_by_zero"
+    },
+    {
+      "id": "op-bad",
+      "desc": "unsupported operation",
+      "op": "frac_op",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.frac_op",
+      "input": {
+        "a": {
+          "num": 1,
+          "den": 2
+        },
+        "b": {
+          "num": 1,
+          "den": 3
+        },
+        "op": "power"
+      },
+      "expected": {
+        "error": "NotSupported",
+        "reason": "op_not_supported"
+      },
+      "edge": true,
+      "hand_check": "NotSupported op_not_supported"
+    },
+    {
+      "id": "compare",
+      "desc": "compare 5/8 and 3/5",
+      "op": "compare",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.compare",
+      "input": {
+        "a": {
+          "num": 5,
+          "den": 8
+        },
+        "b": {
+          "num": 3,
+          "den": 5
+        }
+      },
+      "expected": {
+        "result": ">",
+        "difference": {
+          "num": 1,
+          "den": 40
+        }
+      },
+      "edge": false,
+      "hand_check": "25/40 vs 24/40 -> '>', difference 1/40"
+    },
+    {
+      "id": "compare-equal",
+      "desc": "equivalent fractions",
+      "op": "compare",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.compare",
+      "input": {
+        "a": {
+          "num": 6,
+          "den": 9
+        },
+        "b": {
+          "num": 10,
+          "den": 15
+        }
+      },
+      "expected": {
+        "result": "=",
+        "difference": {
+          "num": 0,
+          "den": 1
+        }
+      },
+      "edge": true,
+      "hand_check": "both 2/3 -> '=', difference 0/1"
+    },
+    {
+      "id": "fraction-of",
+      "desc": "3/8 of 56 sweets",
+      "op": "fraction_of",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.fraction_of",
+      "input": {
+        "num": 3,
+        "den": 8,
+        "quantity": 56
+      },
+      "expected": {
+        "value": 21.0
+      },
+      "edge": false,
+      "hand_check": "21"
+    },
+    {
+      "id": "ratio-simplify",
+      "desc": "simplify a three-part ratio",
+      "op": "ratio_simplify",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.ratio_simplify",
+      "input": {
+        "parts": [
+          18,
+          24,
+          30
+        ]
+      },
+      "expected": {
+        "parts": [
+          3,
+          4,
+          5
+        ]
+      },
+      "edge": false,
+      "hand_check": "gcd 6 -> 3:4:5"
+    },
+    {
+      "id": "ratio-zero-part",
+      "desc": "zero part refused",
+      "op": "ratio_simplify",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.ratio_simplify",
+      "input": {
+        "parts": [
+          3,
+          0
+        ]
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "part_not_positive"
+      },
+      "edge": true,
+      "hand_check": "ConstraintViolation part_not_positive"
+    },
+    {
+      "id": "share",
+      "desc": "share $84 in the ratio 2:3:2",
+      "op": "share",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.share",
+      "input": {
+        "total": 84,
+        "parts": [
+          2,
+          3,
+          2
+        ]
+      },
+      "expected": {
+        "unit_value": 12.0,
+        "shares": [
+          24.0,
+          36.0,
+          24.0
+        ]
+      },
+      "edge": false,
+      "hand_check": "unit 12 -> 24, 36, 24"
+    },
+    {
+      "id": "share-one-part",
+      "desc": "a single part is not a ratio",
+      "op": "share",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.share",
+      "input": {
+        "total": 84,
+        "parts": [
+          7
+        ]
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "parts_out_of_range_2_6"
+      },
+      "edge": true,
+      "hand_check": "ConstraintViolation parts_out_of_range_2_6"
+    },
+    {
+      "id": "unchanged",
+      "desc": "one spends, the other keeps the same",
+      "op": "ratio_unchanged",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.ratio_unchanged",
+      "input": {
+        "before": [
+          3,
+          5
+        ],
+        "after": [
+          1,
+          3
+        ],
+        "unchanged_index": 1,
+        "change": -40
+      },
+      "expected": {
+        "before_values": [
+          90.0,
+          150.0
+        ],
+        "after_values": [
+          50.0,
+          150.0
+        ]
+      },
+      "edge": false,
+      "hand_check": "5u = 3v, 3u - 40 = v -> v = 50: before 90, 150; after 50, 150"
+    },
+    {
+      "id": "unchanged-gain",
+      "desc": "the first stays, the second gains",
+      "op": "ratio_unchanged",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.ratio_unchanged",
+      "input": {
+        "before": [
+          4,
+          3
+        ],
+        "after": [
+          2,
+          3
+        ],
+        "unchanged_index": 0,
+        "change": 36
+      },
+      "expected": {
+        "before_values": [
+          48.0,
+          36.0
+        ],
+        "after_values": [
+          48.0,
+          72.0
+        ]
+      },
+      "edge": false,
+      "hand_check": "4u = 2v, 3u + 36 = 3v -> u = 12: before 48, 36; after 48, 72"
+    },
+    {
+      "id": "unchanged-same",
+      "desc": "ratio unchanged but an amount changed",
+      "op": "ratio_unchanged",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.ratio_unchanged",
+      "input": {
+        "before": [
+          2,
+          3
+        ],
+        "after": [
+          4,
+          6
+        ],
+        "unchanged_index": 1,
+        "change": 10
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "ratios_inconsistent"
+      },
+      "edge": true,
+      "hand_check": "2:3 = 4:6 -> denominator 0 -> MathError ratios_inconsistent"
+    },
+    {
+      "id": "unchanged-impossible",
+      "desc": "would need negative amounts",
+      "op": "ratio_unchanged",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.ratio_unchanged",
+      "input": {
+        "before": [
+          3,
+          5
+        ],
+        "after": [
+          1,
+          3
+        ],
+        "unchanged_index": 1,
+        "change": 40
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "no_positive_solution"
+      },
+      "edge": true,
+      "hand_check": "v = -50 -> MathError no_positive_solution"
+    },
+    {
+      "id": "prop-direct",
+      "desc": "direct proportion",
+      "op": "proportion",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.proportion",
+      "input": {
+        "kind": "direct",
+        "x1": 4,
+        "y1": 30,
+        "x2": 7
+      },
+      "expected": {
+        "k": 7.5,
+        "y2": 52.5
+      },
+      "edge": false,
+      "hand_check": "k = 7.5, y2 = 52.5"
+    },
+    {
+      "id": "prop-inverse",
+      "desc": "inverse proportion: workers and days",
+      "op": "proportion",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.proportion",
+      "input": {
+        "kind": "inverse",
+        "x1": 6,
+        "y1": 15,
+        "x2": 9
+      },
+      "expected": {
+        "k": 90,
+        "y2": 10.0
+      },
+      "edge": false,
+      "hand_check": "k = 90, y2 = 10"
+    },
+    {
+      "id": "prop-square",
+      "desc": "y proportional to x^2",
+      "op": "proportion",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.proportion",
+      "input": {
+        "kind": "square",
+        "x1": 3,
+        "y1": 36,
+        "x2": 5
+      },
+      "expected": {
+        "k": 4.0,
+        "y2": 100.0
+      },
+      "edge": false,
+      "hand_check": "k = 4, y2 = 100"
+    },
+    {
+      "id": "prop-inv-sq",
+      "desc": "inverse square",
+      "op": "proportion",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.proportion",
+      "input": {
+        "kind": "inverse_square",
+        "x1": 2,
+        "y1": 50,
+        "x2": 5
+      },
+      "expected": {
+        "k": 200,
+        "y2": 8.0
+      },
+      "edge": false,
+      "hand_check": "k = 200, y2 = 8"
+    },
+    {
+      "id": "prop-sqrt",
+      "desc": "y proportional to sqrt x",
+      "op": "proportion",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.proportion",
+      "input": {
+        "kind": "sqrt",
+        "x1": 16,
+        "y1": 12,
+        "x2": 25
+      },
+      "expected": {
+        "k": 3.0,
+        "y2": 15.0
+      },
+      "edge": false,
+      "hand_check": "k = 3, y2 = 15"
+    },
+    {
+      "id": "prop-inverse-zero",
+      "desc": "inverse with x2 = 0",
+      "op": "proportion",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.proportion",
+      "input": {
+        "kind": "inverse",
+        "x1": 6,
+        "y1": 15,
+        "x2": 0
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "division_by_zero"
+      },
+      "edge": true,
+      "hand_check": "MathError division_by_zero"
+    },
+    {
+      "id": "prop-kind",
+      "desc": "unknown kind",
+      "op": "proportion",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.proportion",
+      "input": {
+        "kind": "cube",
+        "x1": 1,
+        "y1": 1,
+        "x2": 2
+      },
+      "expected": {
+        "error": "NotSupported",
+        "reason": "kind_not_supported"
+      },
+      "edge": true,
+      "hand_check": "NotSupported kind_not_supported"
+    },
+    {
+      "id": "map",
+      "desc": "map length and area",
+      "op": "map_scale",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.map_scale",
+      "input": {
+        "scale_denominator": 50000,
+        "map_cm": 7.4,
+        "map_area_cm2": 12
+      },
+      "expected": {
+        "real_km": 3.7,
+        "real_area_km2": 3.0
+      },
+      "edge": false,
+      "hand_check": "7.4 x 50000 cm = 3.7 km; 12 x 2.5e9 cm^2 = 3 km^2"
+    },
+    {
+      "id": "map-length-only",
+      "desc": "area omitted",
+      "op": "map_scale",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.map_scale",
+      "input": {
+        "scale_denominator": 25000,
+        "map_cm": 3
+      },
+      "expected": {
+        "real_km": 0.75,
+        "real_area_km2": null
+      },
+      "edge": true,
+      "hand_check": "0.75 km; area null"
+    },
+    {
+      "id": "pct-up",
+      "desc": "percentage increase",
+      "op": "percent_change",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.percent_change",
+      "input": {
+        "original": 80,
+        "new": 92
+      },
+      "expected": {
+        "change": 12,
+        "percent": 15.0
+      },
+      "edge": false,
+      "hand_check": "+12, +15 %"
+    },
+    {
+      "id": "pct-down",
+      "desc": "percentage decrease",
+      "op": "percent_change",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.percent_change",
+      "input": {
+        "original": 250,
+        "new": 190
+      },
+      "expected": {
+        "change": -60,
+        "percent": -24.0
+      },
+      "edge": false,
+      "hand_check": "-60, -24 %"
+    },
+    {
+      "id": "pct-zero",
+      "desc": "original zero",
+      "op": "percent_change",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.percent_change",
+      "input": {
+        "original": 0,
+        "new": 5
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "division_by_zero"
+      },
+      "edge": true,
+      "hand_check": "MathError division_by_zero"
+    },
+    {
+      "id": "reverse",
+      "desc": "price after 15% discount is $68",
+      "op": "reverse_percent",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.reverse_percent",
+      "input": {
+        "final": 68,
+        "percent": -15
+      },
+      "expected": {
+        "original": 80.0
+      },
+      "edge": false,
+      "hand_check": "68/0.85 = 80"
+    },
+    {
+      "id": "reverse-gst",
+      "desc": "after a 9% increase",
+      "op": "reverse_percent",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.reverse_percent",
+      "input": {
+        "final": 327,
+        "percent": 9
+      },
+      "expected": {
+        "original": 300.0
+      },
+      "edge": false,
+      "hand_check": "327/1.09 = 300"
+    },
+    {
+      "id": "reverse-minus-100",
+      "desc": "-100% has no original",
+      "op": "reverse_percent",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.reverse_percent",
+      "input": {
+        "final": 10,
+        "percent": -100
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "division_by_zero"
+      },
+      "edge": true,
+      "hand_check": "MathError division_by_zero"
+    },
+    {
+      "id": "compound",
+      "desc": "compound interest yearly",
+      "op": "compound",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.compound",
+      "input": {
+        "principal": 5000,
+        "rate_percent": 3.2,
+        "years": 4
+      },
+      "expected": {
+        "amount": 5671.381,
+        "interest": 671.3806
+      },
+      "edge": false,
+      "hand_check": "5000 x 1.032^4"
+    },
+    {
+      "id": "compound-monthly",
+      "desc": "compounded monthly",
+      "op": "compound",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.compound",
+      "input": {
+        "principal": 12000,
+        "rate_percent": 2.4,
+        "years": 3,
+        "per_year": 12
+      },
+      "expected": {
+        "amount": 12894.94,
+        "interest": 894.9369
+      },
+      "edge": false,
+      "hand_check": "12000 x 1.002^36"
+    },
+    {
+      "id": "compound-zero-years",
+      "desc": "no time passes",
+      "op": "compound",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.compound",
+      "input": {
+        "principal": 900,
+        "rate_percent": 5,
+        "years": 0
+      },
+      "expected": {
+        "amount": 900.0,
+        "interest": 0.0
+      },
+      "edge": true,
+      "hand_check": "amount 900, interest 0"
+    },
+    {
+      "id": "ap",
+      "desc": "arithmetic progression",
+      "op": "ap",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.ap",
+      "input": {
+        "a": 7,
+        "d": 4,
+        "n": 20
+      },
+      "expected": {
+        "nth_term": 83,
+        "sum_n": 900.0
+      },
+      "edge": false,
+      "hand_check": "T20 = 83, S20 = 900"
+    },
+    {
+      "id": "gp",
+      "desc": "convergent geometric progression",
+      "op": "gp",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.gp",
+      "input": {
+        "a": 81,
+        "r": 0.6666666666666666,
+        "n": 6
+      },
+      "expected": {
+        "nth_term": 10.66667,
+        "sum_n": 221.6667,
+        "sum_infinity": 243.0,
+        "converges": true
+      },
+      "edge": false,
+      "hand_check": "T6 = 81 (2/3)^5 = 32/3; S6 = 243(1 - (2/3)^6); S_inf = 243"
+    },
+    {
+      "id": "gp-diverge",
+      "desc": "r = -1.5 diverges",
+      "op": "gp",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.gp",
+      "input": {
+        "a": 4,
+        "r": -1.5,
+        "n": 5
+      },
+      "expected": {
+        "nth_term": 20.25,
+        "sum_n": 13.75,
+        "sum_infinity": null,
+        "converges": false
+      },
+      "edge": true,
+      "hand_check": "sum_infinity null, converges false"
+    },
+    {
+      "id": "gp-r1",
+      "desc": "r = 1",
+      "op": "gp",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.gp",
+      "input": {
+        "a": 3,
+        "r": 1,
+        "n": 10
+      },
+      "expected": {
+        "nth_term": 3,
+        "sum_n": 30,
+        "sum_infinity": null,
+        "converges": false
+      },
+      "edge": true,
+      "hand_check": "S = 30, diverges"
+    },
+    {
+      "id": "gp-n0",
+      "desc": "n = 0 refused",
+      "op": "gp",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.gp",
+      "input": {
+        "a": 3,
+        "r": 0.5,
+        "n": 0
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "n_not_positive_integer"
+      },
+      "edge": true,
+      "hand_check": "ConstraintViolation n_not_positive_integer"
+    },
+    {
+      "id": "exceed",
+      "desc": "least n with S_n > 1000",
+      "op": "gp_terms_to_exceed",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.gp_terms_to_exceed",
+      "input": {
+        "a": 5,
+        "r": 1.3,
+        "target": 1000
+      },
+      "expected": {
+        "n": 16
+      },
+      "edge": false,
+      "hand_check": "5(1.3^n - 1)/0.3 > 1000"
+    },
+    {
+      "id": "exceed-exact",
+      "desc": "S_3 equals the target exactly, so n = 4",
+      "op": "gp_terms_to_exceed",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.gp_terms_to_exceed",
+      "input": {
+        "a": 1,
+        "r": 2,
+        "target": 7
+      },
+      "expected": {
+        "n": 4
+      },
+      "edge": true,
+      "hand_check": "1 + 2 + 4 = 7 is not > 7 -> n = 4"
+    },
+    {
+      "id": "exceed-never",
+      "desc": "sum to infinity below the target",
+      "op": "gp_terms_to_exceed",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.gp_terms_to_exceed",
+      "input": {
+        "a": 10,
+        "r": 0.5,
+        "target": 20
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "target_never_exceeded"
+      },
+      "edge": true,
+      "hand_check": "S_inf = 20 <= 20 -> MathError target_never_exceeded"
+    },
+    {
+      "id": "exceed-converging",
+      "desc": "converging series still passes 19",
+      "op": "gp_terms_to_exceed",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.gp_terms_to_exceed",
+      "input": {
+        "a": 10,
+        "r": 0.5,
+        "target": 19
+      },
+      "expected": {
+        "n": 5
+      },
+      "edge": false,
+      "hand_check": "20(1 - 0.5^n) > 19 -> 0.5^n < 0.05 -> n = 5"
+    },
+    {
+      "id": "tele",
+      "desc": "sum of 1/(k(k+1)) to 50 terms",
+      "op": "telescoping",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.telescoping",
+      "input": {
+        "p": 0,
+        "q": 1,
+        "n": 50
+      },
+      "expected": {
+        "A": 1.0,
+        "B": -1.0,
+        "sum_n": 0.9803922,
+        "sum_infinity": 1.0
+      },
+      "edge": false,
+      "hand_check": "1 - 1/51"
+    },
+    {
+      "id": "tele-gap",
+      "desc": "1/((k+1)(k+3)) to 20 terms",
+      "op": "telescoping",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.telescoping",
+      "input": {
+        "p": 1,
+        "q": 3,
+        "n": 20
+      },
+      "expected": {
+        "A": 0.5,
+        "B": -0.5,
+        "sum_n": 0.3722003,
+        "sum_infinity": 0.4166667
+      },
+      "edge": false,
+      "hand_check": "(1/2)(1/2 + 1/3 - 1/22 - 1/23); S_inf = 5/12"
+    },
+    {
+      "id": "tele-equal",
+      "desc": "p = q refused",
+      "op": "telescoping",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.telescoping",
+      "input": {
+        "p": 2,
+        "q": 2,
+        "n": 5
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "p_must_be_less_than_q"
+      },
+      "edge": true,
+      "hand_check": "ConstraintViolation p_must_be_less_than_q"
+    },
+    {
+      "id": "dilute",
+      "desc": "squash 1:4 to make 750 ml",
+      "op": "dilute_ratio",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.dilute_ratio",
+      "input": {
+        "concentrate_parts": 1,
+        "water_parts": 4,
+        "total_volume_ml": 750
+      },
+      "expected": {
+        "concentrate_ml": 150.0,
+        "water_ml": 600.0,
+        "fraction_concentrate": 0.2
+      },
+      "edge": false,
+      "hand_check": "150 ml + 600 ml"
+    },
+    {
+      "id": "mix",
+      "desc": "mix 12% and 30% to make 18%",
+      "op": "mix",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.mix",
+      "input": {
+        "c_a": 12,
+        "c_b": 30,
+        "target": 18
+      },
+      "expected": {
+        "parts_a": 12,
+        "parts_b": 6,
+        "fraction_a": 0.6666667
+      },
+      "edge": false,
+      "hand_check": "alligation 12 : 6 -> fraction_a 2/3"
+    },
+    {
+      "id": "mix-endpoint",
+      "desc": "target equals one solution",
+      "op": "mix",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.mix",
+      "input": {
+        "c_a": 12,
+        "c_b": 30,
+        "target": 30
+      },
+      "expected": {
+        "parts_a": 0,
+        "parts_b": 18,
+        "fraction_a": 0.0
+      },
+      "edge": true,
+      "hand_check": "fraction_a 0 (a result)"
+    },
+    {
+      "id": "mix-outside",
+      "desc": "target outside the range",
+      "op": "mix",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.mix",
+      "input": {
+        "c_a": 12,
+        "c_b": 30,
+        "target": 35
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "target_outside_range"
+      },
+      "edge": true,
+      "hand_check": "MathError target_outside_range"
+    },
+    {
+      "id": "best-buy",
+      "desc": "three pack sizes",
+      "op": "best_buy",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.best_buy",
+      "input": {
+        "options": [
+          {
+            "price": 3.2,
+            "quantity": 400
+          },
+          {
+            "price": 5.5,
+            "quantity": 750
+          },
+          {
+            "price": 7.8,
+            "quantity": 1000
+          }
+        ]
+      },
+      "expected": {
+        "unit_prices": [
+          0.008,
+          0.007333333,
+          0.0078
+        ],
+        "best_index": 1
+      },
+      "edge": false,
+      "hand_check": "0.008, 0.007333, 0.0078 per g -> index 1"
+    },
+    {
+      "id": "best-buy-tie",
+      "desc": "equal unit prices: lowest index",
+      "op": "best_buy",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.best_buy",
+      "input": {
+        "options": [
+          {
+            "price": 2,
+            "quantity": 500
+          },
+          {
+            "price": 4,
+            "quantity": 1000
+          }
+        ]
+      },
+      "expected": {
+        "unit_prices": [
+          0.004,
+          0.004
+        ],
+        "best_index": 0
+      },
+      "edge": true,
+      "hand_check": "both 0.004 -> index 0"
+    },
+    {
+      "id": "cf",
+      "desc": "continued fraction of 415/93",
+      "op": "continued_fraction",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.continued_fraction",
+      "input": {
+        "num": 415,
+        "den": 93
+      },
+      "expected": {
+        "terms": [
+          4,
+          2,
+          6,
+          7
+        ],
+        "convergents": [
+          [
+            4,
+            1
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            58,
+            13
+          ],
+          [
+            415,
+            93
+          ]
+        ]
+      },
+      "edge": false,
+      "hand_check": "[4; 2, 6, 7]; convergents 4, 9/2, 58/13, 415/93"
+    },
+    {
+      "id": "cf-neg",
+      "desc": "negative fraction uses floor",
+      "op": "continued_fraction",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.continued_fraction",
+      "input": {
+        "num": -7,
+        "den": 3
+      },
+      "expected": {
+        "terms": [
+          -3,
+          1,
+          2
+        ],
+        "convergents": [
+          [
+            -3,
+            1
+          ],
+          [
+            -2,
+            1
+          ],
+          [
+            -7,
+            3
+          ]
+        ]
+      },
+      "edge": true,
+      "hand_check": "floor(-7/3) = -3, remainder 2/3 -> [-3; 1, 2]"
+    },
+    {
+      "id": "cf-integer",
+      "desc": "an integer",
+      "op": "continued_fraction",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.continued_fraction",
+      "input": {
+        "num": 12,
+        "den": 4
+      },
+      "expected": {
+        "terms": [
+          3
+        ],
+        "convergents": [
+          [
+            3,
+            1
+          ]
+        ]
+      },
+      "edge": true,
+      "hand_check": "[3]; convergents [[3, 1]]"
+    },
+    {
+      "id": "cf-sqrt",
+      "desc": "sqrt 23",
+      "op": "cf_sqrt",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.cf_sqrt",
+      "input": {
+        "n": 23
+      },
+      "expected": {
+        "a0": 4,
+        "period": [
+          1,
+          3,
+          1,
+          8
+        ],
+        "is_square": false
+      },
+      "edge": false,
+      "hand_check": "[4; (1, 3, 1, 8)]"
+    },
+    {
+      "id": "cf-sqrt-long",
+      "desc": "sqrt 94",
+      "op": "cf_sqrt",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.cf_sqrt",
+      "input": {
+        "n": 94
+      },
+      "expected": {
+        "a0": 9,
+        "period": [
+          1,
+          2,
+          3,
+          1,
+          1,
+          5,
+          1,
+          8,
+          1,
+          5,
+          1,
+          1,
+          3,
+          2,
+          1,
+          18
+        ],
+        "is_square": false
+      },
+      "edge": false,
+      "hand_check": "period of length 16"
+    },
+    {
+      "id": "cf-sqrt-square",
+      "desc": "perfect square",
+      "op": "cf_sqrt",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.cf_sqrt",
+      "input": {
+        "n": 49
+      },
+      "expected": {
+        "a0": 7,
+        "period": [],
+        "is_square": true
+      },
+      "edge": true,
+      "hand_check": "a0 7, period [], is_square true"
+    },
+    {
+      "id": "best-pi",
+      "desc": "best approximation to pi with q <= 120",
+      "op": "best_approximation",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.best_approximation",
+      "input": {
+        "value": 3.141592653589793,
+        "max_den": 120
+      },
+      "expected": {
+        "num": 355,
+        "den": 113,
+        "approx_error": -2.667642e-07
+      },
+      "edge": false,
+      "hand_check": "355/113"
+    },
+    {
+      "id": "best-e",
+      "desc": "best approximation to e with q <= 50",
+      "op": "best_approximation",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.best_approximation",
+      "input": {
+        "value": 2.718281828459045,
+        "max_den": 50
+      },
+      "expected": {
+        "num": 106,
+        "den": 39,
+        "approx_error": 0.0003331105
+      },
+      "edge": false,
+      "hand_check": "106/39 (a semiconvergent-checked brute force)"
+    },
+    {
+      "id": "best-den1",
+      "desc": "max_den 1 rounds to the nearest integer",
+      "op": "best_approximation",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.best_approximation",
+      "input": {
+        "value": 2.71,
+        "max_den": 1
+      },
+      "expected": {
+        "num": 3,
+        "den": 1,
+        "approx_error": -0.29
+      },
+      "edge": true,
+      "hand_check": "3/1"
+    },
+    {
+      "id": "best-cap",
+      "desc": "max_den too large",
+      "op": "best_approximation",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.best_approximation",
+      "input": {
+        "value": 0.3,
+        "max_den": 20000
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "max_den_out_of_range_1_10000"
+      },
+      "edge": true,
+      "hand_check": "ConstraintViolation max_den_out_of_range_1_10000"
+    },
+    {
+      "id": "egypt",
+      "desc": "greedy Egyptian fraction of 4/13",
+      "op": "egyptian",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.egyptian",
+      "input": {
+        "num": 4,
+        "den": 13
+      },
+      "expected": {
+        "denominators": [
+          4,
+          18,
+          468
+        ]
+      },
+      "edge": false,
+      "hand_check": "1/4 + 1/18 + 1/468"
+    },
+    {
+      "id": "egypt-unit",
+      "desc": "already a unit fraction",
+      "op": "egyptian",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.egyptian",
+      "input": {
+        "num": 1,
+        "den": 9
+      },
+      "expected": {
+        "denominators": [
+          9
+        ]
+      },
+      "edge": true,
+      "hand_check": "[9]"
+    },
+    {
+      "id": "egypt-huge",
+      "desc": "5/121 overflows safe integers",
+      "op": "egyptian",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.egyptian",
+      "input": {
+        "num": 5,
+        "den": 121
+      },
+      "expected": {
+        "error": "RuntimeError",
+        "reason": "denominator_too_large"
+      },
+      "edge": true,
+      "hand_check": "greedy: 25, 757, 763309, 873960180913, then a 25-digit denominator -> RuntimeError denominator_too_large"
+    },
+    {
+      "id": "egypt-improper",
+      "desc": "not between 0 and 1",
+      "op": "egyptian",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.egyptian",
+      "input": {
+        "num": 7,
+        "den": 5
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "fraction_out_of_range_0_1"
+      },
+      "edge": true,
+      "hand_check": "ConstraintViolation fraction_out_of_range_0_1"
+    },
+    {
+      "id": "mediant",
+      "desc": "mediant of 1/3 and 1/2",
+      "op": "mediant",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.mediant",
+      "input": {
+        "a": {
+          "num": 1,
+          "den": 3
+        },
+        "b": {
+          "num": 1,
+          "den": 2
+        }
+      },
+      "expected": {
+        "num": 2,
+        "den": 5
+      },
+      "edge": false,
+      "hand_check": "2/5"
+    },
+    {
+      "id": "mediant-simplifies",
+      "desc": "mediant reduces",
+      "op": "mediant",
+      "sim": "fractions-ratio",
+      "sim_hook": "FITCalcRatio.mediant",
+      "input": {
+        "a": {
+          "num": 1,
+          "den": 2
+        },
+        "b": {
+          "num": 3,
+          "den": 4
+        }
+      },
+      "expected": {
+        "num": 2,
+        "den": 3
+      },
+      "edge": true,
+      "hand_check": "4/6 -> 2/3"
+    }
+  ]
+}

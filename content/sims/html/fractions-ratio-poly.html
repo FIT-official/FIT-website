@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mix Master</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+button{min-height:46px;border:2px solid #111;border-radius:999px;background:#fff;color:#111;font:800 15px Inter,system-ui,sans-serif;padding:10px 15px;cursor:pointer;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.5;cursor:default}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+input{min-width:0;min-height:48px;width:100%;border:2px solid #111;border-radius:12px;padding:9px;font:600 18px Inter,system-ui,sans-serif}
+input[type=range]{accent-color:var(--lvl-poly);padding:0}
+svg{display:block;width:100%;height:auto;max-width:100%}
+.shell{max-width:1210px;margin:auto;padding:18px 15px 40px}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.badge{border:2px solid #111;border-radius:999px;background:var(--lvl-poly);color:var(--lvl-poly-on);text-transform:uppercase;font-size:12px;font-weight:800;padding:7px 12px}
+.hud{display:flex;gap:9px;flex-wrap:wrap}
+.hud span{background:var(--fit-sunken);border-radius:999px;padding:7px 12px;font-size:14px;font-weight:800}
+h1{font-size:clamp(28px,5vw,39px);line-height:1.15;font-weight:800;margin:13px 0 6px}
+h2{font-size:20px;font-weight:800;margin:0 0 12px}
+p{margin:8px 0}
+.lead{color:var(--fit-ink-2);margin-bottom:19px}
+.board{display:grid;grid-template-columns:minmax(0,1fr);gap:17px}
+.card{min-width:0;background:white;border:2px solid #111;border-radius:var(--r-lg);padding:18px;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-poly-tint);min-height:385px}
+.question{font-size:19px;font-weight:800;line-height:1.4}
+.scene{display:grid;align-content:center;min-height:218px;gap:12px}
+.scene svg{max-height:265px}
+.tags,.choices,.actions,.stepper{display:flex;gap:9px;flex-wrap:wrap}
+.tags span{padding:7px 11px;border:2px solid #111;border-radius:999px;background:white;font-weight:800;font-size:13px}
+.choices button{flex:1 1 105px}
+.choices button[aria-pressed=true]{background:var(--lvl-poly)}
+.stepper{align-items:center;margin-top:12px}
+.stepper button{min-width:47px;padding:8px}
+.stepper input{flex:1 1 95px;width:90px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+label{display:block;font-size:13px;font-weight:800;margin:7px 0}
+.panel{display:grid;gap:16px;align-content:start}
+.action{background:var(--fit-sun);border:3px solid #111;font-weight:800;box-shadow:var(--sh-2);flex:1}
+.action:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.feedback{min-height:65px;margin-top:14px;padding:13px;border-radius:16px;border:2px solid var(--fit-line-soft);font-weight:600}
+.feedback.good{background:#E5F8ED;border-color:var(--fit-success)}
+.feedback.bad{background:#FFF0EE;border-color:var(--fit-danger)}
+.plot{border:2px solid #111;border-radius:15px;background:white}
+.concept{display:flex;align-items:center;gap:12px;background:var(--fit-sunken);padding:12px;border-radius:16px;margin-top:15px}
+.concept svg{width:118px;flex:0 0 118px}
+.concept p{font-size:13px}
+.small{font-size:13px;color:var(--fit-ink-3)}
+details{margin-top:18px;padding:9px 14px;border:2px solid var(--fit-line-soft);border-radius:16px}
+summary{font-weight:800;cursor:pointer;min-height:38px}
+footer{text-align:center;color:var(--fit-ink-3);font-size:12px;margin-top:18px}
+.finish{text-align:center;padding:38px 16px}
+.stars{font-size:48px;letter-spacing:6px;color:#B98A09}
+.hidden{display:none!important}
+@media(min-width:900px){.board{grid-template-columns:minmax(0,1.07fr) minmax(0,1fr)}.stage{min-height:520px}}
+@media(max-width:420px){.card{padding:14px}.concept svg{width:90px;flex-basis:90px}.stepper button{min-width:44px}}
+@media(prefers-reduced-motion:no-preference){button{transition:transform var(--dur-1) var(--ease-out),box-shadow var(--dur-1) var(--ease-out)}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header><span class="badge">Poly · Maths</span>
+<div class="hud"><span id="round">Round 1/6</span><span id="score">Score 0</span></div></header>
+<h1>Mix Master</h1>
+<p class="lead">Measure carefully. Make the target. Keep an eye on cost.</p>
+<main id="game" class="board">
+<section class="card stage">
+<h2 id="sceneTitle">The mixing bench</h2>
+<p class="question" id="question"></p>
+<div id="scene" class="scene"></div>
+<div class="concept">
+<svg role="img" aria-label="Two differently filled vessels feeding one mixing container" viewBox="0 0 128 65">
+<rect x="5" y="9" width="30" height="39" rx="4" stroke="#111" stroke-width="3" fill="#FFE6DC"/>
+<rect x="8" y="28" width="24" height="17" fill="#FF6B3D"/>
+<rect x="91" y="9" width="30" height="39" rx="4" stroke="#111" stroke-width="3" fill="#FFE6DC"/>
+<rect x="94" y="20" width="24" height="25" fill="#2EC4A6"/>
+<path d="M36 42L51 55H77L90 42" stroke="#111" stroke-width="3" fill="none"/>
+<path d="M51 55V61H77V55" stroke="#111" stroke-width="3" fill="#FFC83D"/>
+</svg>
+<p>Assumption: volumes add when solutions mix, and their strengths combine by volume.</p>
+</div>
+</section>
+<section class="panel">
+<div class="card">
+<h2>Set the mixture</h2>
+<div id="controls"></div>
+<div class="actions" style="margin-top:15px">
+<button id="hint">Hint − points</button>
+<button id="check" class="action">Check</button>
+<button id="next" class="action hidden">Next round →</button>
+</div>
+<p id="feedback" class="feedback" aria-live="polite">Adjust the mixture or choose a supplier.</p>
+</div>
+<div class="card">
+<h2>Strength versus mixture</h2>
+<svg class="plot" id="plot" viewBox="0 0 420 270" role="img" aria-label="Mixture strength versus percentage of solution A"></svg>
+<p class="small">Orange: mixture strength · Pink: your proposed mix · Green dashed: target</p>
+</div>
+</section>
+</main>
+<section class="card finish hidden" id="finish" aria-live="polite">
+<h2>Mixing shift complete!</h2><div class="stars" id="stars"></div>
+<p id="result"></p><button class="action" id="again">Play again</button>
+</section>
+<details><summary>The maths</summary>
+<p>Dilution: concentrate volume = total volume × (concentrate parts ÷ all parts). The remaining volume is water.</p>
+<p>Alligation: for strengths A, B and target T, the mixing ratio A:B is |B − T| : |T − A|. This works only if T lies between the two source strengths.</p>
+<p>Unit price = dollars ÷ quantity. Mark-up percentage compares the increased selling price with the original cost.</p>
+</details>
+<footer>Fix It Today</footer>
+</div>
+<script>
+/* FIT-CALC-BEGIN fractions-ratio */
+const FITCalcRatio = (function () {
+'use strict';
+
+const err = (error, reason) => ({ error, reason });
+const C = reason => err('ConstraintViolation', reason);
+const M = reason => err('MathError', reason);
+const R = reason => err('RuntimeError', reason);
+const N = reason => err('NotSupported', reason);
+const isErr = x => !!(x && x.error);
+const finite = (...xs) => xs.every(x => typeof x === 'number' && Number.isFinite(x));
+const nums = (...xs) => finite(...xs) ? null : C('non_finite_input');
+const integer = (x, cap = 1000000) =>
+  !Number.isInteger(x) ? C('not_an_integer') :
+  Math.abs(x) > cap ? C('value_too_large') : null;
+const positiveN = x => Number.isInteger(x) && x > 0;
+const safe = x => Number.isFinite(x) ? null : R('numerical_overflow');
+
+function gcd(a, b) {
+  a = Math.abs(a); b = Math.abs(b);
+  while (b !== 0) { const t = a % b; a = b; b = t; }
+  return a;
+}
+function F(n, d) {
+  if (d < 0) { n = -n; d = -d; }
+  const g = gcd(n, d);
+  return { num: n / g, den: d / g };
+}
+function validFraction(f, cap = 1000000) {
+  if (!f || typeof f !== 'object') return C('invalid_fraction');
+  const e = nums(f.num, f.den);
+  if (e) return e;
+  return integer(f.num, cap) || integer(f.den, cap) ||
+    (f.den === 0 ? M('zero_denominator') : null);
+}
+function validParts(parts, exactTwo = false) {
+  if (!Array.isArray(parts) ||
+      (exactTwo ? parts.length !== 2 : parts.length < 2 || parts.length > 6))
+    return C(exactTwo ? 'ratio_must_have_2_parts' : 'parts_out_of_range_2_6');
+  for (const p of parts) {
+    if (!finite(p)) return C('non_finite_input');
+    const e = integer(p);
+    if (e) return e;
+    if (p <= 0) return C('part_not_positive');
+  }
+  return null;
+}
+function validN(n, max = 100000) {
+  return !Number.isInteger(n) || n < 1 || n > max ?
+    C('n_not_positive_integer') : null;
+}
+function result(value) {
+  return finite(value) ? null : R('numerical_overflow');
+}
+function fractionalSum(a, b, sign) {
+  return F(a.num * b.den + sign * b.num * a.den, a.den * b.den);
+}
+function gpSum(a, r, n) {
+  if (r === 1) return a * n;
+  if (r > 0) return a * Math.expm1(n * Math.log(r)) / (r - 1);
+  return a * (1 - Math.pow(r, n)) / (1 - r);
+}
+
+/**
+ * simplify({num,den}): integers, |parts|<=1e6; no units.
+ * Returns reduced num/den and input gcd; zero denominator is invalid.
+ * Hand check: -18/-24 -> 3/4, gcd 6.
+ */
+function simplify({ num, den } = {}) {
+  const e = validFraction({ num, den });
+  if (e) return e;
+  return { ...F(num, den), gcd: gcd(num, den) };
+}
+
+/**
+ * frac_op({a,b,op}): rational arithmetic, no units; reduced fraction,
+ * decimal and non-negative mixed number (negative -> null).
+ * Hand check: 2/3 + 3/4 = 17/12 = 1 5/12.
+ * Errors: unsupported op, invalid fractions, zero divisor.
+ */
+function frac_op({ a, b, op } = {}) {
+  if (!['add','subtract','multiply','divide'].includes(op)) return N('op_not_supported');
+  const e = validFraction(a) || validFraction(b);
+  if (e) return e;
+  a = F(a.num,a.den); b = F(b.num,b.den);
+  if (op === 'divide' && b.num === 0) return M('division_by_zero');
+  const f = op === 'add' ? fractionalSum(a,b,1) :
+    op === 'subtract' ? fractionalSum(a,b,-1) :
+    op === 'multiply' ? F(a.num*b.num,a.den*b.den) :
+    F(a.num*b.den,a.den*b.num);
+  const decimal = f.num/f.den;
+  const whole = Math.floor(decimal);
+  const mixed = f.num < 0 ? null :
+    { whole, num: f.num-whole*f.den, den: f.den };
+  return { ...f, decimal, mixed };
+}
+
+/**
+ * compare({a,b}): fractions, no units; relation and exact difference a-b.
+ * Hand check: 5/6 > 3/4; difference 1/12.
+ * Errors: invalid fractions.
+ */
+function compare({ a, b } = {}) {
+  const e = validFraction(a) || validFraction(b);
+  if (e) return e;
+  a = F(a.num,a.den); b = F(b.num,b.den);
+  const d = fractionalSum(a,b,-1);
+  return { result: d.num < 0 ? '<' : d.num > 0 ? '>' : '=', difference:d };
+}
+
+/**
+ * fraction_of({num,den,quantity}): fraction times a finite quantity,
+ * retaining the quantity's units.
+ * Hand check: 3/8 of 64 counters = 24 counters.
+ * Errors: invalid fraction or numerical overflow.
+ */
+function fraction_of({ num, den, quantity } = {}) {
+  const e = validFraction({num,den}) || nums(quantity);
+  if (e) return e;
+  const value = (num/den)*quantity;
+  return result(value) || {value};
+}
+
+/**
+ * ratio_simplify({parts}): 2..6 positive integer parts, no units.
+ * Hand check: [12,18,30] -> [2,3,5].
+ * Errors: invalid ratio or oversized parts.
+ */
+function ratio_simplify({parts} = {}) {
+  const e = validParts(parts);
+  if (e) return e;
+  const g = parts.reduce((a,b) => gcd(a,b));
+  return {parts:parts.map(p => p/g)};
+}
+
+/**
+ * share({total,parts}): divide a non-negative total in a 2..6-part ratio.
+ * Shares and unit_value have the total's units.
+ * Hand check: $120 in 2:3 -> $48 and $72; unit $24.
+ * Errors: negative_total, invalid ratio, non-finite input.
+ */
+function share({total,parts} = {}) {
+  const e = validParts(parts) || nums(total);
+  if (e) return e;
+  if (total < 0) return C('negative_total');
+  const unit_value = total/parts.reduce((a,b)=>a+b,0);
+  const shares = parts.map(p=>p*unit_value);
+  return shares.every(Number.isFinite) ?
+    {unit_value,shares} : R('numerical_overflow');
+}
+
+/**
+ * ratio_unchanged({before,after,unchanged_index,change}):
+ * two positive ratios and signed change in the changing quantity's units.
+ * Returns four quantities in those units. Both unchanged values are equal.
+ * Hand check: 3:5 -> 3:4, index 0, change -5:
+ * before [15,25], after [15,20].
+ * Errors: non-unique equal ratios or no positive solution.
+ */
+function ratio_unchanged({before,after,unchanged_index,change} = {}) {
+  const e = validParts(before,true) || validParts(after,true) || nums(change);
+  if (e) return e;
+  if (unchanged_index !== 0 && unchanged_index !== 1) return C('index_out_of_range');
+  const [p,q] = before, [r,s] = after;
+  const determinant = p*s-q*r;
+  if (determinant === 0) return M('ratios_inconsistent');
+  let u, before_values, after_values;
+  if (unchanged_index === 0) {
+    u = change*p*r/determinant;
+    before_values = [u,u*q/p];
+    after_values = [u,u*s/r];
+  } else {
+    u = -change*q*s/determinant;
+    before_values = [u*p/q,u];
+    after_values = [u*r/s,u];
+  }
+  if (![...before_values,...after_values].every(x => Number.isFinite(x) && x > 0))
+    return M('no_positive_solution');
+  return {before_values,after_values};
+}
+
+/**
+ * proportion({kind,x1,y1,x2}): y=kx, k/x, kx², k/x² or k√x.
+ * x values share units; y values share units; k has implied units.
+ * Hand check: inverse, x1=2,y1=12,x2=3 -> k=24,y2=8.
+ * Errors: unsupported kind, division by zero, negative square root.
+ */
+function proportion({kind,x1,y1,x2} = {}) {
+  if (!['direct','inverse','square','inverse_square','sqrt'].includes(kind))
+    return N('kind_not_supported');
+  const e = nums(x1,y1,x2);
+  if (e) return e;
+  if (kind === 'sqrt' && (x1 < 0 || x2 < 0)) return M('sqrt_of_negative');
+  if ((['direct','square','sqrt'].includes(kind) && x1 === 0) ||
+      (['inverse','inverse_square'].includes(kind) && (x1 === 0 || x2 === 0)))
+    return M('division_by_zero');
+  const k = kind === 'direct' ? y1/x1 :
+    kind === 'inverse' ? y1*x1 :
+    kind === 'square' ? y1/(x1*x1) :
+    kind === 'inverse_square' ? y1*x1*x1 : y1/Math.sqrt(x1);
+  const y2 = kind === 'direct' ? k*x2 :
+    kind === 'inverse' ? k/x2 :
+    kind === 'square' ? k*x2*x2 :
+    kind === 'inverse_square' ? k/(x2*x2) : k*Math.sqrt(x2);
+  return result(k) || result(y2) || {k,y2};
+}
+
+/**
+ * map_scale({scale_denominator,map_cm?,map_area_cm2?}):
+ * scale 1:n; optional map length cm and area cm².
+ * Outputs real_km and real_area_km2, null when omitted.
+ * Hand check: 1:50000, 4 cm, 6 cm² -> 2 km, 1.5 km².
+ * Errors: scale_not_positive, negative_length, non-finite input.
+ */
+function map_scale({scale_denominator,map_cm,map_area_cm2} = {}) {
+  const e = nums(scale_denominator,
+    ...(map_cm === undefined ? [] : [map_cm]),
+    ...(map_area_cm2 === undefined ? [] : [map_area_cm2]));
+  if (e) return e;
+  if (scale_denominator <= 0) return C('scale_not_positive');
+  if ((map_cm !== undefined && map_cm < 0) ||
+      (map_area_cm2 !== undefined && map_area_cm2 < 0)) return C('negative_length');
+  const real_km = map_cm === undefined ? null : map_cm*scale_denominator/100000;
+  const real_area_km2 = map_area_cm2 === undefined ? null :
+    map_area_cm2*scale_denominator*scale_denominator/1e10;
+  return (real_km !== null && result(real_km)) ||
+    (real_area_km2 !== null && result(real_area_km2)) ||
+    {real_km,real_area_km2};
+}
+
+/**
+ * percent_change({original,new}): finite values in matching units.
+ * Returns absolute change in those units and signed percent.
+ * Hand check: 80 -> 92: change 12, percent 15.
+ * Errors: zero original or non-finite input.
+ */
+function percent_change({original,new: next} = {}) {
+  const e = nums(original,next);
+  if (e) return e;
+  if (original === 0) return M('division_by_zero');
+  const change = next-original, percent = change/Math.abs(original)*100;
+  return result(percent) || result(change) || {change,percent};
+}
+
+/**
+ * reverse_percent({final,percent}): final amount and percent adjustment;
+ * returns original in the final amount's units.
+ * Hand check: $72 after 20% discount -> $90.
+ * Errors: percent_below_minus_100 or division_by_zero at -100.
+ */
+function reverse_percent({final,percent} = {}) {
+  const e = nums(final,percent);
+  if (e) return e;
+  if (percent < -100) return C('percent_below_minus_100');
+  if (percent === -100) return M('division_by_zero');
+  const original = final/(1+percent/100);
+  return result(original) || {original};
+}
+
+/**
+ * compound({principal,rate_percent,years,per_year=1}):
+ * compounded value and interest in dollars; time in years.
+ * Interest is added at each compounding period.
+ * Hand check: $1000, 10%, 2 years, annual -> $1210, $210.
+ * Errors: invalid principal, time, rate or frequency.
+ */
+function compound({principal,rate_percent,years,per_year=1} = {}) {
+  const e = nums(principal,rate_percent,years,per_year);
+  if (e) return e;
+  if (principal < 0) return C('negative_principal');
+  if (years < 0) return C('negative_time');
+  if (!Number.isInteger(per_year) || per_year < 1 || per_year > 365)
+    return C('per_year_out_of_range_1_365');
+  if (rate_percent <= -100*per_year) return C('rate_out_of_range');
+  const amount = principal*Math.pow(1+rate_percent/(100*per_year),per_year*years);
+  return result(amount) || result(amount-principal) ||
+    {amount,interest:amount-principal};
+}
+
+/**
+ * ap({a,d,n}): arithmetic progression; a,d in term units, n integer.
+ * Returns nth term and first n terms' sum, in term units.
+ * Hand check: a=2,d=3,n=5 -> term 14, sum 40.
+ * Errors: n_not_positive_integer or numerical_overflow.
+ */
+function ap({a,d,n} = {}) {
+  const e = nums(a,d) || validN(n);
+  if (e) return e;
+  const nth_term = a+(n-1)*d, sum_n = n*(2*a+(n-1)*d)/2;
+  return result(nth_term) || result(sum_n) || {nth_term,sum_n};
+}
+
+/**
+ * gp({a,r,n}): geometric progression; a in term units, r dimensionless.
+ * Returns nth term, partial sum, finite sum to infinity if |r|<1,
+ * and Boolean convergence. For r=1 the partial sum is n*a.
+ * Hand check: a=8,r=1/2,n=3 -> term 2, sum 14, limit 16.
+ * Errors: n_not_positive_integer or numerical_overflow.
+ */
+function gp({a,r,n} = {}) {
+  const e = nums(a,r) || validN(n);
+  if (e) return e;
+  const nth_term = a*Math.pow(r,n-1);
+  const sum_n = gpSum(a,r,n);
+  const converges = Math.abs(r)<1;
+  const sum_infinity = converges ? a/(1-r) : null;
+  return result(nth_term) || result(sum_n) ||
+    (converges && result(sum_infinity)) ||
+    {nth_term,sum_n,sum_infinity,converges};
+}
+
+/**
+ * gp_terms_to_exceed({a,r,target}): positive geometric terms.
+ * Returns least integer n>=1 with S_n strictly above target.
+ * Hand check: a=2,r=2,target=14 -> n=4.
+ * Errors: a_and_r_must_be_positive, target_never_exceeded,
+ * iteration_limit.
+ */
+function gp_terms_to_exceed({a,r,target} = {}) {
+  const e = nums(a,r,target);
+  if (e) return e;
+  if (a <= 0 || r <= 0) return C('a_and_r_must_be_positive');
+  if (r < 1 && a/(1-r) <= target) return M('target_never_exceeded');
+  const above = n => {
+    if (n === 0) return 0 > target;
+    const s = gpSum(a,r,n);
+    return s > target;
+  };
+  if (above(1)) return {n:1};
+  let lo=1, hi=2;
+  while (!above(hi)) {
+    lo=hi; hi*=2;
+    if (hi > 10000000) return R('iteration_limit');
+  }
+  while (hi-lo>1) {
+    const mid=Math.floor((lo+hi)/2);
+    if (above(mid)) hi=mid; else lo=mid;
+  }
+  while (hi>1 && above(hi-1)) hi--;
+  while (!above(hi)) {
+    if (++hi>10000000) return R('iteration_limit');
+  }
+  return {n:hi};
+}
+
+/**
+ * telescoping({p,q,n}): sum 1/((k+p)(k+q)), k=1..n.
+ * Integer p,q>=0, p<q, n 1..10000. Outputs A,B (partial
+ * fraction coefficients), finite sum and infinite limit.
+ * Hand check: p=0,q=1,n=3 -> A=1,B=-1,S=3/4,limit=1.
+ * Errors: invalid p,q,n or size.
+ */
+function telescoping({p,q,n} = {}) {
+  if (!Number.isInteger(p) || !Number.isInteger(q) || p<0 || q<0)
+    return C('p_q_must_be_non_negative_integers');
+  if (p>=q) return C('p_must_be_less_than_q');
+  if (p>1000000 || q>1000000) return C('value_too_large');
+  const e=validN(n,10000);
+  if (e) return e;
+  const A=1/(q-p), B=-A;
+  let sum_n=0, gap=0;
+  for (let k=1;k<=n;k++) sum_n+=1/((k+p)*(k+q));
+  for (let k=p+1;k<=q;k++) gap+=1/k;
+  const sum_infinity=gap/(q-p);
+  return {A,B,sum_n,sum_infinity};
+}
+
+/**
+ * dilute_ratio({concentrate_parts,water_parts,total_volume_ml}):
+ * ratio concentrate:water; volumes add in ml.
+ * Outputs concentrate_ml, water_ml, fraction_concentrate.
+ * Hand check: 1:3 in 800 ml -> 200 ml,600 ml,1/4.
+ * Errors: part_not_positive, negative_volume.
+ */
+function dilute_ratio({concentrate_parts,water_parts,total_volume_ml} = {}) {
+  const e=nums(concentrate_parts,water_parts,total_volume_ml);
+  if (e) return e;
+  if (concentrate_parts<=0 || water_parts<0) return C('part_not_positive');
+  if (total_volume_ml<0) return C('negative_volume');
+  const fraction_concentrate=concentrate_parts/(concentrate_parts+water_parts);
+  const concentrate_ml=fraction_concentrate*total_volume_ml;
+  const water_ml=total_volume_ml-concentrate_ml;
+  return result(concentrate_ml) || result(water_ml) ||
+    {concentrate_ml,water_ml,fraction_concentrate};
+}
+
+/**
+ * mix({c_a,c_b,target}): two strengths/prices in matching units.
+ * Alligation parts are absolute concentration differences.
+ * Assumes volumes add and mixture strength is volume-weighted.
+ * Hand check: 20% and 80% to make 50% -> parts 30:30, A=1/2.
+ * Errors: concentrations_equal, target_outside_range.
+ */
+function mix({c_a,c_b,target} = {}) {
+  const e=nums(c_a,c_b,target);
+  if (e) return e;
+  if (c_a===c_b) return M('concentrations_equal');
+  if (target<Math.min(c_a,c_b) || target>Math.max(c_a,c_b))
+    return M('target_outside_range');
+  const parts_a=Math.abs(c_b-target);
+  const parts_b=Math.abs(target-c_a);
+  const fraction_a=(c_b-target)/(c_b-c_a);
+  return {parts_a,parts_b,fraction_a};
+}
+
+/**
+ * best_buy({options:[{price,quantity},...]}): 1..6 packs.
+ * Price in dollars, quantity in a shared positive unit.
+ * Returns dollars per unit and zero-based best_index.
+ * Hand check: [{price:6,quantity:3},{price:9,quantity:6}]
+ * -> unit prices [2,1.5], best index 1.
+ * Errors: invalid count, negative_price, quantity_not_positive.
+ */
+function best_buy({options} = {}) {
+  if (!Array.isArray(options) || options.length<1 || options.length>6)
+    return C('options_out_of_range_1_6');
+  const unit_prices=[];
+  for (const o of options) {
+    const e=o && nums(o.price,o.quantity);
+    if (!o || e) return e || C('invalid_option');
+    if (o.price<0) return C('negative_price');
+    if (o.quantity<=0) return C('quantity_not_positive');
+    const u=o.price/o.quantity;
+    if (!Number.isFinite(u)) return R('numerical_overflow');
+    unit_prices.push(u);
+  }
+  let best_index=0;
+  for (let i=1;i<unit_prices.length;i++)
+    if (unit_prices[i]<unit_prices[best_index]) best_index=i;
+  return {unit_prices,best_index};
+}
+
+/**
+ * continued_fraction({num,den}): exact signed rational, parts <=1e9.
+ * Floor-convention Euclidean terms and [numerator,denominator]
+ * convergents. Final term >=2 when more than one term exists.
+ * Hand check: 43/30 -> [1,2,3,4]; final convergent [43,30].
+ * Errors: invalid integer, size or zero_denominator.
+ */
+function continued_fraction({num,den} = {}) {
+  const e=validFraction({num,den},1000000000);
+  if (e) return e;
+  const f=F(num,den);
+  let a=f.num,b=f.den;
+  const terms=[],convergents=[];
+  let pm2=0,pm1=1,qm2=1,qm1=0;
+  while (b!==0) {
+    const term=Math.floor(a/b);
+    const rem=a-term*b;
+    terms.push(term);
+    const p=term*pm1+pm2, q=term*qm1+qm2;
+    convergents.push([p,q]);
+    pm2=pm1;pm1=p;qm2=qm1;qm1=q;
+    a=b;b=rem;
+  }
+  return {terms,convergents};
+}
+
+/**
+ * cf_sqrt({n}): integer 1..1e6, periodic CF of positive sqrt(n).
+ * Returns floor root, shortest periodic tail and square flag.
+ * Hand check: sqrt(2) -> a0=1,period=[2],is_square=false.
+ * Errors: n_not_positive_integer or period_limit.
+ */
+function cf_sqrt({n} = {}) {
+  if (!Number.isInteger(n) || n<1 || n>1000000)
+    return C('n_not_positive_integer');
+  const a0=Math.floor(Math.sqrt(n));
+  if (a0*a0===n) return {a0,period:[],is_square:true};
+  let m=0,d=1,a=a0;
+  const period=[];
+  for (let i=0;i<10000;i++) {
+    m=d*a-m;
+    d=(n-m*m)/d;
+    a=Math.floor((a0+m)/d);
+    period.push(a);
+    if (a===2*a0) return {a0,period,is_square:false};
+  }
+  return R('period_limit');
+}
+
+/**
+ * best_approximation({value,max_den}): finite real number,
+ * 1<=denominator<=max_den<=10000. Nearest rational, ties use
+ * smaller denominator. Signed approx_error=value-num/den.
+ * Hand check: 3.14, max_den=10 -> 22/7, signed error -0.002857...
+ * Errors: max_den_out_of_range_1_10000, value_too_large.
+ */
+function best_approximation({value,max_den} = {}) {
+  const e=nums(value);
+  if (e) return e;
+  if (!Number.isInteger(max_den) || max_den<1 || max_den>10000)
+    return C('max_den_out_of_range_1_10000');
+  if (Math.abs(value)>1000000000) return C('value_too_large');
+  let bestP=0,bestQ=1,bestError=Infinity;
+  for (let q=1;q<=max_den;q++) {
+    const p=Math.round(value*q);
+    const error=Math.abs(value-p/q);
+    if (error<bestError-1e-15 ||
+        (Math.abs(error-bestError)<=1e-15 && q<bestQ)) {
+      bestP=p;bestQ=q;bestError=error;
+    }
+  }
+  const f=F(bestP,bestQ);
+  return {num:f.num,den:f.den,approx_error:value-f.num/f.den};
+}
+
+/**
+ * egyptian({num,den}): proper positive fraction, parts <=1e6.
+ * Greedy distinct unit fractions, using exact integer arithmetic.
+ * Hand check: 4/13 -> 1/4 + 1/18 + 1/468.
+ * Errors: fraction_out_of_range_0_1, denominator_too_large,
+ * term_limit, and standard fraction validation.
+ */
+function egyptian({num,den} = {}) {
+  const e=validFraction({num,den});
+  if (e) return e;
+  const f=F(num,den);
+  if (f.num<=0 || f.num>=f.den) return C('fraction_out_of_range_0_1');
+  let a=BigInt(f.num),b=BigInt(f.den);
+  const maximum=BigInt(Number.MAX_SAFE_INTEGER);
+  const denominators=[];
+  while (a>0n) {
+    if (denominators.length>=12) return R('term_limit');
+    const unit=(b+a-1n)/a;
+    if (unit>maximum) return R('denominator_too_large');
+    denominators.push(Number(unit));
+    a=a*unit-b;
+    b=b*unit;
+    if (a>0n) {
+      const bgcd=(x,y)=>{while(y){const z=x%y;x=y;y=z;}return x;};
+      const g=bgcd(a,b);
+      a/=g;b/=g;
+    }
+  }
+  return {denominators};
+}
+
+/**
+ * mediant({a,b}): positive-denominator rational pair.
+ * Returns reduced (a.num+b.num)/(a.den+b.den).
+ * Hand check: between 1/2 and 2/3 -> 3/5.
+ * Errors: denominator_not_positive, invalid parts.
+ */
+function mediant({a,b} = {}) {
+  if (!a || !b) return C('invalid_fraction');
+  if (finite(a.den) && a.den<=0 || finite(b.den) && b.den<=0)
+    return C('denominator_not_positive');
+  const e=validFraction(a) || validFraction(b);
+  if (e) return e;
+  return F(a.num+b.num,a.den+b.den);
+}
+
+/**
+ * stern_walk({path}): optional educational helper for the
+ * Stern-Brocot tree. L/R moves from root 1/1, with formal
+ * boundary sentinels 0/1 and 1/0. Returns current reduced
+ * fraction and visited nodes; all values dimensionless.
+ * Hand check: path "LR" visits 1/1,1/2,2/3.
+ * Errors: direction_not_supported, path_limit.
+ */
+function stern_walk({path=''} = {}) {
+  if (typeof path!=='string' || /[^LR]/.test(path)) return N('direction_not_supported');
+  if (path.length>32) return R('path_limit');
+  let ln=0,ld=1,rn=1,rd=0,cn=1,cd=1;
+  const nodes=[[1,1]];
+  for (const step of path) {
+    if (step==='L') {rn=cn;rd=cd;}
+    else {ln=cn;ld=cd;}
+    cn=ln+rn;cd=ld+rd;
+    if (!Number.isSafeInteger(cn) || !Number.isSafeInteger(cd))
+      return R('numerical_overflow');
+    nodes.push([cn,cd]);
+  }
+  return {num:cn,den:cd,nodes};
+}
+
+return Object.freeze({
+  API_VERSION:1,
+  simplify,frac_op,compare,fraction_of,ratio_simplify,share,
+  ratio_unchanged,proportion,map_scale,percent_change,
+  reverse_percent,compound,ap,gp,gp_terms_to_exceed,
+  telescoping,dilute_ratio,mix,best_buy,continued_fraction,
+  cf_sqrt,best_approximation,egyptian,mediant,stern_walk
+});
+})();
+/* FIT-CALC-END fractions-ratio */
+
+(function(){
+'use strict';
+const C=FITCalcRatio,$=id=>document.getElementById(id);
+let seed=1,round=0,score=0,tries=0,hinted=false,locked=false,d={},value='',value2='',selection='';
+const modes=['dilute','mix','buy','impossible','markup','mix_volume'];
+const rnd=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return(seed>>>0)/4294967296;};
+const pick=(a,b)=>a+Math.floor(rnd()*(b-a+1));
+const money=n=>'$'+n.toFixed(2);
+const fmt=n=>Number.isInteger(n)?String(n):Number(n.toPrecision(5)).toString();
+const near=(a,b,t=.015)=>a!==null&&Number.isFinite(a)&&Math.abs(a-b)<=t;
+function generate(){
+  const mode=modes[round];d={mode};value='';value2='';selection='';
+  tries=0;hinted=false;locked=false;
+  if(mode==='dilute'){
+    const cp=1,wp=[3,4,5][pick(0,2)],total_volume_ml=(1+wp)*pick(2,5)*100;
+    const out=C.dilute_ratio({concentrate_parts:cp,water_parts:wp,total_volume_ml});
+    d={mode,cp,wp,total_volume_ml,...out};
+  }else if(mode==='mix'){
+    const c_a=pick(1,3)*10,c_b=80,target=c_a+pick(2,4)*10;
+    const out=C.mix({c_a,c_b,target});
+    d={mode,c_a,c_b,target,...out};
+  }else if(mode==='buy'){
+    const options=[
+      {price:18,quantity:120},
+      {price:28,quantity:200},
+      {price:45,quantity:350}
+    ];
+    const out=C.best_buy({options});
+    d={mode,options,...out};
+  }else if(mode==='impossible'){
+    const c_a=pick(1,2)*10,c_b=pick(5,7)*10,target=c_b+10;
+    const out=C.mix({c_a,c_b,target});
+    d={mode,c_a,c_b,target,out};
+  }else if(mode==='markup'){
+    const cost=pick(4,10)*20,markup=[15,20,25][pick(0,2)];
+    const addition=C.fraction_of({num:markup,den:100,quantity:cost}).value;
+    const selling=cost+addition;
+    d={mode,cost,markup,selling};
+  }else{
+    const c_a=20,c_b=80,target=[35,50,65][pick(0,2)],total_volume_ml=800;
+    const out=C.mix({c_a,c_b,target});
+    const volume_a=C.fraction_of({
+      num:Math.round(out.fraction_a*100),den:100,quantity:total_volume_ml
+    }).value;
+    d={mode,c_a,c_b,target,total_volume_ml,volume_a,...out};
+  }
+}
+function field(id,label,step='1'){
+  return `<div><label for="${id}">${label}</label><input id="${id}" type="number" inputmode="decimal" step="${step}" placeholder="Enter value"></div>`;
+}
+function controls(html){
+  $('controls').innerHTML=html;
+  const a=$('a1'),b=$('a2');
+  if(a)a.addEventListener('input',()=>{value=a.value;draw();});
+  if(b)b.addEventListener('input',()=>{value2=b.value;draw();});
+}
+function stepper(){
+  if(!$('a1'))return;
+  const box=document.createElement('div');box.className='stepper';
+  [-100,-10,10,100].forEach((delta,i)=>{
+    const b=document.createElement('button');b.type='button';
+    b.textContent=['−−','−','+','++'][i];
+    b.setAttribute('aria-label',(delta<0?'Decrease':'Increase')+' by '+Math.abs(delta));
+    b.addEventListener('click',()=>{
+      const el=$('a1');el.value=String(Math.max(0,Number(el.value||0)+delta));
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+    });
+    box.append(b);
+  });
+  $('controls').append(box);
+}
+function choices(items){
+  const box=document.createElement('div');box.className='choices';
+  items.forEach(item=>{
+    const b=document.createElement('button');b.type='button';b.textContent=item.label;
+    b.setAttribute('aria-pressed','false');
+    b.addEventListener('click',()=>{
+      selection=item.id;
+      Array.from(box.children).forEach((c,i)=>c.setAttribute('aria-pressed',items[i].id===selection?'true':'false'));
+      draw();
+    });
+    box.append(b);
+  });
+  $('controls').append(box);
+}
+function vessels(a,b,amount=null){
+  return `<svg viewBox="0 0 380 230" role="img" aria-label="Two measuring vessels containing solutions of strength ${a} and ${b} percent">
+  <path d="M36 34V184Q36 194 46 194H125Q135 194 135 184V34" stroke="#111" stroke-width="4" fill="#fff"/>
+  <rect x="39" y="100" width="93" height="91" fill="#FF6B3D"/>
+  <path d="M244 34V184Q244 194 254 194H333Q343 194 343 184V34" stroke="#111" stroke-width="4" fill="#fff"/>
+  <rect x="247" y="77" width="93" height="114" fill="#2EC4A6"/>
+  <text x="85" y="19" text-anchor="middle" font-size="15" font-weight="800">Solution A</text>
+  <text x="294" y="19" text-anchor="middle" font-size="15" font-weight="800">Solution B</text>
+  <text x="85" y="151" text-anchor="middle" font-size="18" font-weight="800">${a}%</text>
+  <text x="294" y="146" text-anchor="middle" font-size="18" font-weight="800">${b}%</text>
+  <path d="M153 117H225" stroke="#111" stroke-width="4"/><path d="M213 105L225 117L213 129" stroke="#111" stroke-width="4" fill="none"/>
+  <text x="189" y="147" text-anchor="middle" font-size="12">Mix</text>
+  ${amount===null?'':`<text x="190" y="216" text-anchor="middle" font-size="13" font-weight="800">Batch ${amount} ml</text>`}
+  </svg>`;
+}
+function dilutionTank(x){
+  const shown=value===''?0:Number(value);
+  const fraction=Number.isFinite(shown)&&shown>=0?
+    C.fraction_of({num:1,den:x.total_volume_ml,quantity:Math.min(shown,x.total_volume_ml)}).value:0;
+  const width=Number.isFinite(fraction)?Math.max(0,Math.min(300,fraction*300)):0;
+  return `<svg viewBox="0 0 380 220" role="img" aria-label="Tank of ${x.total_volume_ml} millilitres. Proposed concentrate amount ${value||'none'} millilitres">
+  <rect x="36" y="38" width="308" height="124" rx="11" fill="#fff" stroke="#111" stroke-width="4"/>
+  <rect x="40" y="42" width="${width}" height="116" fill="#FF6B3D"/>
+  <rect x="${40+width}" y="42" width="${300-width}" height="116" fill="#E2ECFD"/>
+  <path d="M36 179H344" stroke="#111" stroke-width="3"/>
+  <text x="40" y="200" font-size="13">0 ml</text>
+  <text x="343" y="200" text-anchor="end" font-size="13">${x.total_volume_ml} ml</text>
+  <text x="190" y="24" text-anchor="middle" font-size="15" font-weight="800">Concentrate and water</text>
+  </svg>`;
+}
+function render(){
+  $('round').textContent=`Round ${round+1}/6`;$('score').textContent=`Score ${score}`;
+  $('feedback').className='feedback';$('feedback').textContent='Adjust the mixture or choose a supplier.';
+  $('hint').disabled=false;$('check').classList.remove('hidden');$('next').classList.add('hidden');
+  const x=d;
+  if(x.mode==='dilute'){
+    $('sceneTitle').textContent='Prepare the cleaner';
+    $('question').textContent=`Make ${x.total_volume_ml} ml of cleaner with concentrate : water = ${x.cp}:${x.wp}. How much concentrate and how much water are needed?`;
+    $('scene').innerHTML=dilutionTank(x);
+    controls('<div class="fields">'+field('a1','Concentrate (ml)')+field('a2','Water (ml)')+'</div>');
+    stepper();
+  }else if(x.mode==='mix'){
+    $('sceneTitle').textContent='Blend two strengths';
+    $('question').textContent=`Mix ${x.c_a}% solution A and ${x.c_b}% solution B to make ${x.target}%. What percentage of the final mixture must be solution A?`;
+    $('scene').innerHTML=vessels(x.c_a,x.c_b);
+    controls('<div class="fields">'+field('a1','Solution A (%)','1')+'</div>');
+    stepper();
+  }else if(x.mode==='buy'){
+    $('sceneTitle').textContent='Supplier comparison';
+    $('question').textContent='Each supplier offers the same liquid. Which one is cheapest per ml?';
+    $('scene').innerHTML='<div class="tags">'+x.options.map((o,i)=>`<span>Supplier ${i+1}: ${money(o.price)} / ${o.quantity} ml</span>`).join('')+'</div>';
+    controls('<p>Select the lowest unit cost.</p>');
+    choices(x.options.map((_,i)=>({id:String(i),label:'Supplier '+(i+1)})));
+  }else if(x.mode==='impossible'){
+    $('sceneTitle').textContent='Impossible order?';
+    $('question').textContent=`Can you mix ${x.c_a}% and ${x.c_b}% solutions to obtain ${x.target}% without adding another ingredient?`;
+    $('scene').innerHTML=vessels(x.c_a,x.c_b);
+    controls('<p>Decide whether the requested strength is reachable.</p>');
+    choices([{id:'yes',label:'Possible'},{id:'no',label:'Impossible'}]);
+  }else if(x.mode==='markup'){
+    $('sceneTitle').textContent='Paint-shop pricing';
+    $('question').textContent=`A paint batch costs ${money(x.cost)}. The shop adds a ${x.markup}% mark-up on cost. Find the selling price.`;
+    $('scene').innerHTML=`<div class="tags"><span>Cost: ${money(x.cost)}</span><span>Mark-up: ${x.markup}%</span><span>Selling price: ?</span></div>`;
+    controls('<div class="fields">'+field('a1','Selling price ($)','0.01')+'</div>');
+    stepper();
+  }else{
+    $('sceneTitle').textContent='Large-batch blend';
+    $('question').textContent=`Make ${x.total_volume_ml} ml of a ${x.target}% mixture using ${x.c_a}% solution A and ${x.c_b}% solution B. Find how many ml of A to pour.`;
+    $('scene').innerHTML=vessels(x.c_a,x.c_b,x.total_volume_ml);
+    controls('<div class="fields">'+field('a1','Solution A (ml)','1')+'</div>');
+    stepper();
+  }
+  draw();
+}
+function strength(ca,cb,percentA){
+  const a=C.frac_op({
+    a:{num:ca*percentA,den:100},
+    b:{num:cb*(100-percentA),den:100},op:'add'
+  });
+  return a.error?null:a.decimal;
+}
+function draw(){
+  const x=d,ca=x.c_a===undefined?20:x.c_a,cb=x.c_b===undefined?80:x.c_b;
+  const target=x.target===undefined?50:x.target;
+  let currentPercent=null;
+  if(value!==''&&Number.isFinite(Number(value))){
+    if(x.mode==='mix')currentPercent=Number(value);
+    if(x.mode==='mix_volume')
+      currentPercent=C.fraction_of({num:Number(value),den:x.total_volume_ml,quantity:100}).value;
+    if(x.mode==='dilute')
+      currentPercent=C.fraction_of({num:Number(value),den:x.total_volume_ml,quantity:100}).value;
+  }
+  const X=p=>50+p*3.48,Y=v=>220-v*1.7;
+  let s=`<rect x="0" y="0" width="420" height="270" rx="13" fill="#fff"/>
+  <text x="15" y="20" font-size="14" font-weight="800">Alligation line</text>
+  <path d="M50 32V220H398" fill="none" stroke="#111" stroke-width="2.5"/>
+  <text x="223" y="258" text-anchor="middle" font-size="12">Solution A (% of volume)</text>
+  <text x="17" y="127" text-anchor="middle" font-size="12" transform="rotate(-90 17 127)">Strength (%)</text>`;
+  for(let t=0;t<=100;t+=25){
+    s+=`<path d="M${X(t)} 220V224M46 ${Y(t)}H399" stroke="#E4E2DB" stroke-width="1"/>
+    <text x="${X(t)}" y="238" text-anchor="middle" font-size="10">${t}</text>
+    <text x="43" y="${Y(t)+4}" text-anchor="end" font-size="10">${t}</text>`;
+  }
+  const line=[];
+  for(let p=0;p<=100;p+=2){
+    const y=strength(ca,cb,p);
+    if(y!==null)line.push(`${X(p)},${Y(y)}`);
+  }
+  s+=`<polyline points="${line.join(' ')}" fill="none" stroke="#FF6B3D" stroke-width="4"/>`;
+  s+=`<path d="M50 ${Y(target)}H398" stroke="#3DBE6B" stroke-width="2.5" stroke-dasharray="7 5"/>`;
+  if(currentPercent!==null&&currentPercent>=0&&currentPercent<=100){
+    const currentStrength=strength(ca,cb,currentPercent);
+    if(currentStrength!==null){
+      s+=`<circle cx="${X(currentPercent)}" cy="${Y(currentStrength)}" r="8" fill="#FF8FB8" stroke="#111" stroke-width="3"/>`;
+    }
+  }
+  s+='<text x="189" y="36" font-size="10">Orange: strength · Green: target · Pink: input</text>';
+  $('plot').innerHTML=s;
+  $('plot').setAttribute('aria-label',`Strength changes from ${cb} percent at zero solution A to ${ca} percent at 100 percent solution A. Target strength ${target} percent. Candidate marker reflects your input.`);
+  if(x.mode==='dilute'){
+    const scene=$('scene');scene.innerHTML=dilutionTank(x);
+  }
+}
+function nval(s){return s===''?null:Number(s);}
+function check(){
+  if(locked)return;
+  tries++;
+  const x=d,v=nval(value),w=nval(value2);
+  let good=false,why='',wrong='';
+  if(x.mode==='dilute'){
+    good=near(v,x.concentrate_ml)&&near(w,x.water_ml);
+    why=`Use ${fmt(x.concentrate_ml)} ml concentrate and ${fmt(x.water_ml)} ml water.`;
+    wrong='The two volumes must add to the total and follow the stated ratio.';
+  }else if(x.mode==='mix'){
+    good=near(v,x.fraction_a*100,.015);
+    why=`Solution A makes up ${fmt(x.fraction_a*100)}% of the final blend.`;
+    wrong='A target nearer solution B needs a smaller portion of solution A.';
+  }else if(x.mode==='buy'){
+    good=selection===String(x.best_index);
+    why=`Supplier ${x.best_index+1} costs ${money(x.unit_prices[x.best_index])} per ml.`;
+    wrong='Compare the price for one ml, not one container.';
+  }else if(x.mode==='impossible'){
+    good=selection==='no'&&x.out.error==='MathError';
+    why='The target is outside the range of the two supplied strengths. Mixing alone cannot reach it.';
+    wrong='Every blend lies between the strengths of the two ingredients.';
+  }else if(x.mode==='markup'){
+    good=near(v,x.selling);
+    const checked=C.percent_change({original:x.cost,new:x.selling});
+    why=`The mark-up is ${fmt(checked.percent)}%, giving ${money(x.selling)}.`;
+    wrong='A mark-up is calculated on the cost, then added to that cost.';
+  }else{
+    good=near(v,x.volume_a);
+    why=`Solution A is ${fmt(x.fraction_a*100)}% of the blend, or ${fmt(x.volume_a)} ml.`;
+    wrong='Use alligation first to find the fraction of A, then multiply by the total ml.';
+  }
+  $('feedback').className='feedback '+(good?'good':'bad');
+  if(good){
+    locked=true;
+    const points=hinted||tries>2?50:tries===2?75:100;
+    score+=points;$('score').textContent=`Score ${score}`;
+    $('feedback').textContent=`★ Correct! +${points} points. ${why}`;
+    $('hint').disabled=true;$('check').classList.add('hidden');$('next').classList.remove('hidden');
+    $('next').textContent=round===5?'See stars ★':'Next round →';
+  }else $('feedback').textContent=wrong;
+}
+function hint(){
+  if(locked)return;
+  hinted=true;
+  const h={
+    dilute:'Add the ratio parts to find the number of equal portions.',
+    mix:'Use the difference between each source strength and the target.',
+    buy:'Convert all quotations to dollars per ml.',
+    impossible:'A blend cannot be stronger than its strongest source or weaker than its weakest.',
+    markup:'Find the percentage of the cost that is added, then include the original cost.',
+    mix_volume:'Find the fraction of A from the strength line, then apply it to the total volume.'
+  };
+  $('feedback').className='feedback';$('feedback').textContent='Hint: '+h[d.mode]+' Maximum 50 points.';
+}
+function next(){
+  if(round===5){
+    $('game').classList.add('hidden');$('finish').classList.remove('hidden');
+    const stars=score>=500?3:score>=350?2:1;
+    $('stars').textContent='★'.repeat(stars)+'☆'.repeat(3-stars);
+    $('result').textContent=`You scored ${score}/600.`;
+  }else{round++;generate();render();}
+}
+function restart(){
+  seed=(Date.now()>>>0)||7654321;round=0;score=0;
+  $('game').classList.remove('hidden');$('finish').classList.add('hidden');
+  generate();render();
+}
+$('check').addEventListener('click',check);
+$('hint').addEventListener('click',hint);
+$('next').addEventListener('click',next);
+$('again').addEventListener('click',restart);
+restart();
+})();
+</script>
+</body>
+</html>
