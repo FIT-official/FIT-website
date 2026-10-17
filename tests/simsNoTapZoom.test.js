@@ -23,10 +23,10 @@ describe('mobile tap guard (no double-tap zoom on controls, page zoom kept)', ()
   it('covers the quick-tap controls', () => {
     for (const t of ['button', '[role=button]', 'a', 'input', 'select', 'textarea', 'label', 'summary', 'canvas', 'svg', '[onclick]', '.controls', '.btn', '.stepper', '.chips']) expect(targets).toContain(t)
   })
-  it('leaves html, body and plain text zoomable and never disables pinch-zoom', () => {
-    for (const t of ['html', 'body', '*', 'p', 'h1', 'h2', 'div', 'main', 'iframe']) expect(targets).not.toContain(t)
-    expect(NO_TAP_ZOOM_CSS).not.toMatch(/(^|[},])\s*(html|body|\*)\s*[,{]/)
-    expect(NO_TAP_ZOOM_CSS.match(/touch-action/g)).toHaveLength(1)
+  it('makes the whole sim document quick-tap (html, body, every element) without blocking pinch-zoom', () => {
+    expect(NO_TAP_ZOOM_CSS.startsWith(':where(html,body,*){touch-action:manipulation}')).toBe(true) // zero specificity: a sim's own none/pan-y still wins
+    expect(NO_TAP_ZOOM_CSS).not.toMatch(/touch-action:(auto|none)|!important[^}]*touch-action|touch-action[^;}]*!important/)
+    for (const t of ['html', 'body', '*', 'p', 'h1', 'h2', 'div', 'main']) expect(targets).not.toContain(t) // the wrapper list stays scoped
     expect(NO_TAP_ZOOM_CSS + SIM_VIEWPORT).not.toMatch(/user-scalable|maximum-scale/)
   })
   it('hides the tap highlight box and mouse/touch focus outline but keeps a keyboard focus ring', () => {
@@ -57,9 +57,19 @@ describe('mobile tap guard (no double-tap zoom on controls, page zoom kept)', ()
     expect(rule[1]).toBe(TAP_TARGETS)
     expect(css).toContain(':focus:not(:focus-visible){outline:none}')
     expect(css).toMatch(/font-size:max\(16px,1em\)!important/)
-    expect(css).not.toMatch(/(^|[}\s,])(html|body)\s*(,[^{]*)?\{[^}]*touch-action/)
+    expect(css).not.toMatch(/(^|[}\s,])(html|body)\s*(,[^{]*)?\{[^}]*touch-action/) // headings/descriptions outside the frame stay zoomable
+    expect(css).toContain('iframe,[data-sim-frame],[data-sim-frame] *{touch-action:manipulation}')
+    expect(readFileSync('components/sims/GameShellStage.jsx', 'utf8')).toMatch(/<div data-sim-frame="" className=\{styles\.stage\}/)
+    expect(readFileSync('components/sims/GameShell.module.css', 'utf8')).toContain('.stage,.frame,.utilities,.progress,.levels,.score{touch-action:manipulation}')
     expect(readFileSync('app/layout.jsx', 'utf8')).toMatch(/export const viewport = \{ width: 'device-width', initialScale: 1 \}/)
   })
+
+  it('no sim file, sim stylesheet or wrapper resets touch-action to auto', () => {
+    const offenders = []
+    const walk = dir => { for (const name of readdirSync(dir)) { const p = path.join(dir, name); if (statSync(p).isDirectory()) walk(p); else if (/\.(html|jsx?|mjs|css)$/.test(name) && /touch-action\s*:\s*auto/i.test(readFileSync(p, 'utf8'))) offenders.push(p) } }
+    for (const dir of ['content/sims/html', 'public/simulations', 'components/sims', 'components/ClassroomSimulations', 'lib/sims']) walk(dir)
+    expect(offenders).toEqual([])
+  }, 30000)
 
   it('no source or sim file disables pinch-zoom', () => {
     const offenders = []
