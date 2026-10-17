@@ -192,7 +192,7 @@ const molesEntries = [
 ];
 
 // Forces lab family (calc: lib/sims/families/forces.calc.js, inlined in each file); ChatGPT registry snippet, ids renamed forces-lab-* (FIT Site 01:15). SCRATCH.
-const forcesLab = {subject: 'Physics',concept: 'forces',accent: '#FF6B3D',minutes: '10–15',status: 'draft'}
+const forcesLab = {subject: 'Physics',concept: 'forces',accent: '#FF6B3D',minutes: '10–15',status: 'live'}
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
