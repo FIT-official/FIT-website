@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tree Diagram Trials | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input{font:inherit}
+button{min-height:44px;cursor:pointer;border:2px solid #111;border-radius:999px;background:#fff;padding:9px 15px;font-weight:800;box-shadow:var(--sh-1);color:#111}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+button.primary{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
+button.primary:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button.accent{background:var(--lvl-secondary)}
+input[type="number"],input[type="text"]{border:2px solid #111;border-radius:var(--r-sm);padding:10px 12px;min-height:46px;min-width:0;width:110px;background:#fff;color:#111;font-weight:700;font-size:17px}
+input[type="range"]{width:100%;accent-color:#118A72;min-height:44px;cursor:pointer}
+.wrap{max-width:1230px;margin:auto;padding:18px 16px 48px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-size:13px;font-weight:900;letter-spacing:.12em}
+.hud{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-weight:800}
+.badge,.stat{display:inline-block;border:2px solid #111;border-radius:999px;padding:7px 12px;font-size:12px}
+.badge{background:var(--lvl-secondary);color:var(--lvl-secondary-on);text-transform:uppercase;font-weight:900}
+.stat{background:#fff}
+h1{font-size:clamp(29px,5vw,46px);line-height:1.08;margin:16px 0 19px;letter-spacing:-.045em;font-weight:800}
+h2{margin:0 0 12px;font-size:20px;font-weight:800;line-height:1.2}
+h3{font-size:16px;margin:0 0 10px;font-weight:800}
+p{margin:0 0 12px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.panel{min-width:0;background:white;border:2px solid #111;border-radius:var(--r-lg);box-shadow:var(--sh-2);padding:20px}
+.stage{background:var(--lvl-secondary-tint)}
+.question{font-size:18px;line-height:1.35;font-weight:800;min-height:55px}
+.muted{font-size:13px;color:var(--fit-ink-3)}
+.scene{margin:15px 0;padding:12px;border:2px solid #111;border-radius:16px;background:white;min-width:0;overflow:hidden}
+.scene svg,.chart svg{display:block;width:100%;height:auto}
+.scene svg{max-height:340px}
+.mathinput{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0}
+.mathinput label{font-size:14px;font-weight:800;min-width:160px}
+.grid6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:12px 0}
+.cell{padding:0;min-height:44px;min-width:0;border-radius:8px;font-size:14px;box-shadow:none;background:white}
+.cell.chosen{background:#2EC4A6}
+.cell:disabled{opacity:1;cursor:default}
+.cell-label{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));text-align:center;font-weight:800;font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;font-weight:700;margin-top:10px}
+.key{width:20px;height:10px;display:inline-block;margin-right:4px;vertical-align:middle;border:1px solid #111}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin:16px 0 0}
+.stepper{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.stepper output{font-size:23px;font-weight:900;min-width:55px;text-align:center}
+.feedback{min-height:60px;background:#fff;border:2px solid var(--fit-line-soft);border-radius:12px;padding:12px;margin-top:15px;font-weight:600}
+.feedback.good{background:#E7FAEF;border-color:var(--fit-success)}
+.feedback.bad{background:#FFF0EF;border-color:var(--fit-danger)}
+details{border:2px solid #111;border-radius:16px;background:var(--fit-sunken);padding:13px 16px;margin-top:16px}
+summary{font-weight:800;cursor:pointer}
+.concept{padding-top:16px;border-top:2px solid var(--fit-line-soft);margin-top:18px}
+.concept svg{max-width:290px;width:100%;display:block;margin:auto}
+.end{display:none;text-align:center;padding:45px 16px}
+.stars{font-size:51px;letter-spacing:4px;color:#CB9100}
+select{min-height:44px;border:2px solid #111;border-radius:999px;padding:8px 12px;background:white;font-size:15px;font-weight:700}
+.chart{min-height:300px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:420px){.panel{padding:13px}.mathinput label{min-width:100%}.cell{font-size:12px}.question{font-size:16px}.hud{gap:5px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+<div class="brand">FIT / MATHS LAB</div>
+<div class="hud"><span class="badge">Secondary</span><span class="stat" id="round">Round 1/6</span><span class="stat" id="score">Score 0</span></div>
+</header>
+<h1>Tree Diagram Trials</h1>
+<div class="layout" id="game">
+<section class="panel stage">
+<h2 id="type">Combined events</h2>
+<p class="question" id="question"></p>
+<div class="scene" id="scene"></div>
+<div id="inputs"></div>
+<div class="concept">
+<h3 id="conceptTitle">Concept figure</h3>
+<div id="conceptFigure"></div>
+<p class="muted" id="caption"></p>
+</div>
+</section>
+<section class="panel">
+<h2>Experimental probability</h2>
+<div class="chart" id="plot"></div>
+<div class="stepper">
+<span style="font-weight:800">Trials:</span>
+<button id="batchDown" aria-label="Fewer trials per batch">−</button>
+<output id="batchOut">100</output>
+<button id="batchUp" aria-label="More trials per batch">+</button>
+</div>
+<div class="actions">
+<button class="accent" id="run">Run trials ▶</button>
+<button id="reset">Clear trial data</button>
+</div>
+<p class="muted" id="trialText">No trials yet.</p>
+<div class="actions">
+<button id="hint">Hint − points</button>
+<button class="primary" id="check">Check ✓</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Complete the challenge to score points.</div>
+<details>
+<summary>The maths</summary>
+<p><strong>Tree:</strong> P(A and B) = P(A) × P(B | A).</p>
+<p><strong>Without replacement:</strong> the bag loses one counter after the first draw.</p>
+<p><strong>Independent events:</strong> P(B | A) = P(B). Mutually exclusive events cannot occur together.</p>
+<p><strong>Possibility diagram:</strong> probability = favourable outcomes ÷ equally likely outcomes.</p>
+<p><strong>Expected frequency:</strong> E = np. Typical random variation is measured using √[np(1 − p)].</p>
+<p><strong>Graph:</strong> observed relative frequency = successes ÷ trials. The horizontal dashed line is theoretical probability; the horizontal axis uses a base-10 logarithmic scale.</p>
+</details>
+</section>
+</div>
+<section class="panel end" id="end">
+<h2>Six trials completed!</h2>
+<div class="stars" id="stars"></div>
+<p id="finalScore"></p>
+<button id="again" class="primary">Play again ↻</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+let seed=120359,round=0,score=0,tries=0,hinted=false,won=false,kind="A";
+let r=0,b=0,replace=false,threshold=0,criterion="",nGoal=100,pTrue=0;
+let shaded=new Set(),draws=0,successes=0,history=[],batch=100,observed=0;
+let expectedAnswer=0,consistentAnswer=true;
+const batches=[1,10,100,1000];
+function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function pick(a){return a[Math.floor(rand()*a.length)]}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){let t=a%b;a=b;b=t}return a||1}
+function frac(a,b){if(b===0)return "—";let g=gcd(a,b);return a/g+"/"+b/g}
+function parseFraction(s){
+if(!s||!String(s).trim())return NaN;
+let parts=String(s).trim().split("/");
+if(parts.length>2||parts.some(x=>x.trim()===""))return NaN;
+let a=Number(parts[0]),d=parts.length===2?Number(parts[1]):1;
+return Number.isFinite(a)&&Number.isFinite(d)&&d!==0?a/d:NaN;
+}
+function escapeText(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;")}
+function svgWrap(body,label,height=300){
+return '<svg viewBox="0 0 440 '+height+'" role="img" aria-label="'+escapeText(label)+'">'+body+'</svg>';
+}
+function msg(s,status=""){$("feedback").textContent=s;$("feedback").className="feedback "+status}
+function counterScene(){
+let s='<rect x="12" y="22" width="416" height="264" rx="23" fill="#fff" stroke="#111" stroke-width="3"/>';
+s+='<path d="M37 92 Q220 137 403 92 L388 225 Q220 274 52 225 Z" fill="#F4F3EF" stroke="#111" stroke-width="3"/>';
+for(let i=0;i<r+b;i++){
+let x=88+(i%6)*53,y=146+Math.floor(i/6)*53;
+s+='<circle cx="'+x+'" cy="'+y+'" r="21" fill="'+(i<r?"#FF6681":"#65B7F6")+'" stroke="#111" stroke-width="3"/>';
+s+='<text x="'+x+'" y="'+(y+5)+'" text-anchor="middle" font-size="13" font-weight="800">'+(i<r?"R":"B")+'</text>';
+}
+s+='<text x="220" y="51" text-anchor="middle" font-size="17" font-weight="800">Bag of counters</text>';
+s+='<text x="220" y="271" text-anchor="middle" font-size="14">Two draws '+(replace?"with":"without")+' replacement</text>';
+return svgWrap(s,r+" red and "+b+" blue counters, two draws "+(replace?"with":"without")+" replacement",300);
+}
+function tree(){
+let t=r+b,secondDen=t-(replace?0:1),redAfter=r-(replace?0:1);
+let miss="?",pr=frac(r,t),pb=frac(b,t),rr=frac(redAfter,secondDen);
+let firstR=145,firstB=260;
+let s='<g stroke="#111" stroke-width="3" fill="none"><path d="M22 165 L155 78 M22 165 L155 256"/><path d="M157 78 L306 28 M157 78 L306 123 M157 256 L306 213 M157 256 L306 302"/></g>';
+let nodes=[[22,165,"Start"],[155,78,"R"],[155,256,"B"],[306,28,"RR"],[306,123,"RB"],[306,213,"BR"],[306,302,"BB"]];
+nodes.forEach(z=>{
+s+='<circle cx="'+z[0]+'" cy="'+z[1]+'" r="17" stroke="#111" stroke-width="2" fill="'+(z[2].includes("R")?"#FF6681":"#65B7F6")+'"/>';
+s+='<text x="'+z[0]+'" y="'+(z[1]+5)+'" font-size="12" text-anchor="middle" font-weight="800">'+z[2]+'</text>';
+});
+const labels=[[90,100,pr],[85,232,pb],[225,39,miss],[225,118,frac(secondDen-redAfter,secondDen)],
+[220,225,frac(r,secondDen)],[220,295,frac(b-(replace?0:1),secondDen)]];
+labels.forEach(z=>{
+s+='<rect x="'+(z[0]-32)+'" y="'+(z[1]-17)+'" width="66" height="26" rx="8" fill="'+(z[2]==="?"?"#FFDD00":"white")+'" stroke="#111"/>'+
+'<text x="'+z[0]+'" y="'+z[1]+'" text-anchor="middle" font-size="13" font-weight="800">'+z[2]+'</text>';
+});
+return svgWrap(s,"Two-draw tree. The red to red branch probability is missing. Other branches are labelled.",335);
+}
+function venn(){
+return svgWrap('<circle cx="175" cy="140" r="90" stroke="#111" stroke-width="3" fill="#FF6681" fill-opacity=".45"/>'+
+'<circle cx="260" cy="140" r="90" stroke="#111" stroke-width="3" fill="#65B7F6" fill-opacity=".45"/>'+
+'<text x="136" y="129" font-size="17" font-weight="800">A</text><text x="292" y="129" font-size="17" font-weight="800">B</text>'+
+'<text x="215" y="148" font-size="14" font-weight="800">A ∩ B</text>'+
+'<text x="220" y="261" font-size="14" text-anchor="middle">Overlapping events can occur together.</text>',
+"Venn diagram with overlapping events A and B",285);
+}
+function diceScene(){
+let s='<rect x="12" y="8" width="416" height="290" rx="20" fill="#fff" stroke="#111" stroke-width="3"/>';
+for(let d=0;d<2;d++){
+const x=d?240:85;
+s+='<rect x="'+x+'" y="60" width="115" height="115" rx="19" fill="'+(d?"#65B7F6":"#FF6681")+'" stroke="#111" stroke-width="4"/>';
+for(let j=0;j<6;j++){
+let xx=x+30+(j%3)*27,yy=87+Math.floor(j/3)*48;
+s+='<circle cx="'+xx+'" cy="'+yy+'" r="5" fill="#111"/>';
+}
+}
+s+='<text x="143" y="215" text-anchor="middle" font-weight="800">Die 1</text><text x="299" y="215" text-anchor="middle" font-weight="800">Die 2</text>';
+s+='<text x="220" y="262" text-anchor="middle" font-size="14">36 equally likely ordered outcomes</text>';
+return svgWrap(s,"Two fair six-sided dice",305);
+}
+function countFavourable(){
+let c=0;
+for(let a=1;a<=6;a++)for(let b=1;b<=6;b++)if(qualifies(a,b))c++;
+return c;
+}
+function qualifies(a,b){return criterion==="sum"?a+b>=threshold:a===b}
+function makeCells(){
+let html='<p class="muted">Columns: second die 1–6. Rows: first die 1–6. Tap all favourable cells.</p>'+
+'<div class="cell-label">'+[1,2,3,4,5,6].map(x=>'<span>'+x+'</span>').join("")+'</div>'+
+'<div class="grid6" id="cells">';
+for(let a=1;a<=6;a++)for(let b=1;b<=6;b++){
+const key=a+"-"+b;
+html+='<button class="cell'+(shaded.has(key)?" chosen":"")+
+'" aria-pressed="'+shaded.has(key)+'" aria-label="Die 1 '+a+', die 2 '+b+
+'" data-a="'+a+'" data-b="'+b+'" '+(won?"disabled":"")+'>'+a+","+b+'</button>';
+}
+return html+'</div><div class="mathinput"><label for="probability">Probability of the event</label>'+
+'<input id="probability" type="text" inputmode="decimal" placeholder="e.g. 1/6" autocomplete="off"></div>';
+}
+function makeInputs(){
+if(kind==="A")$("inputs").innerHTML=
+'<div class="mathinput"><label for="branch">Missing branch P(R on draw 2 | R on draw 1)</label>'+
+'<input id="branch" type="text" placeholder="fraction" inputmode="decimal" autocomplete="off"></div>'+
+'<div class="mathinput"><label for="joint">P(two red counters)</label>'+
+'<input id="joint" type="text" placeholder="fraction" inputmode="decimal" autocomplete="off"></div>';
+if(kind==="B"){
+$("inputs").innerHTML=makeCells();
+$("cells").onclick=e=>{
+let cell=e.target.closest("[data-a]");
+if(!cell||won)return;
+let key=cell.dataset.a+"-"+cell.dataset.b;
+if(shaded.has(key))shaded.delete(key);else shaded.add(key);
+cell.classList.toggle("chosen",shaded.has(key));
+cell.setAttribute("aria-pressed",shaded.has(key));
+};
+}
+if(kind==="C")$("inputs").innerHTML=
+'<div class="mathinput"><label for="expected">Expected event count</label>'+
+'<input type="number" min="0" max="1000" step="1" id="expected" placeholder="count"></div>'+
+'<div class="mathinput"><label for="judgement">Does the simulated count fall within the stated typical range?</label>'+
+'<select id="judgement"><option value="">Choose…</option><option value="yes">Yes</option><option value="no">No</option></select></div>'+
+'<p class="muted" id="observedText">Run the trials to collect a result.</p>';
+}
+function plot(){
+let points=history.map(q=>[Math.log10(Math.max(1,q.n)),q.s/q.n]);
+let w=450,h=323,left=69,right=424,top=38,bottom=261;
+const X=n=>left+(Math.log10(Math.max(1,n))/3)*(right-left);
+const Y=v=>bottom-v*(bottom-top);
+let s='<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Relative frequency chart: '+draws+
+' trials, '+successes+' successes. Dashed theoretical probability line.">';
+s+='<text x="245" y="17" text-anchor="middle" font-size="16" font-weight="800">Relative frequency convergence</text>';
+for(let i=0;i<=4;i++){
+let v=i/4,y=Y(v);
+s+='<line x1="'+left+'" x2="'+right+'" y1="'+y+'" y2="'+y+'" stroke="#E1E1E1"/>'+
+'<text x="60" y="'+(y+4)+'" font-size="11" text-anchor="end">'+v.toFixed(2)+'</text>';
+}
+[1,10,100,1000].forEach(v=>{
+let x=X(v);
+s+='<line x1="'+x+'" x2="'+x+'" y1="'+top+'" y2="'+bottom+'" stroke="#ECECEC"/>'+
+'<text x="'+x+'" y="278" font-size="12" text-anchor="middle">'+v+'</text>';
+});
+s+='<line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+bottom+'" stroke="#111" stroke-width="2"/>';
+s+='<line x1="'+left+'" y1="'+bottom+'" x2="'+right+'" y2="'+bottom+'" stroke="#111" stroke-width="2"/>';
+if(won)s+='<line x1="'+left+'" x2="'+right+'" y1="'+Y(pTrue)+'" y2="'+Y(pTrue)+'" stroke="#D92D20" stroke-width="2.5" stroke-dasharray="8 5"/>';
+if(points.length){
+s+='<polyline fill="none" stroke="#088D75" stroke-width="2.8" points="'+points.map(q=>(left+q[0]/3*(right-left))+","+Y(q[1])).join(" ")+'"/>';
+let v=points[points.length-1];
+s+='<circle cx="'+(left+v[0]/3*(right-left))+'" cy="'+Y(v[1])+'" r="6" fill="#FFDD00" stroke="#111" stroke-width="2"/>';
+}
+s+='<text transform="translate(17 157) rotate(-90)" text-anchor="middle" font-size="12">Relative frequency (proportion)</text>'+
+'<text x="247" y="308" text-anchor="middle" font-size="12">Number of trials n (log scale)</text>';
+s+='<line x1="88" y1="33" x2="113" y2="33" stroke="#D92D20" stroke-dasharray="5 4" stroke-width="2"/>'+
+'<text x="117" y="37" font-size="10">Theory</text>'+
+'<line x1="194" y1="33" x2="215" y2="33" stroke="#088D75" stroke-width="3"/>'+
+'<text x="219" y="37" font-size="10">Trials</text></svg>';
+$("plot").innerHTML=s;
+$("trialText").textContent=draws?
+"Observed "+successes+" successes in "+draws+" trials (relative frequency "+(successes/draws).toFixed(3)+").":
+"No trials yet.";
+}
+function simulateOne(){
+if(kind==="A"){
+const t=r+b;
+const first=rand()*t<r;
+if(replace){return first&&rand()<r/t}
+let redLeft=r-(first?1:0);
+return first&&rand()<redLeft/(t-1);
+}
+if(kind==="B"){
+return qualifies(1+Math.floor(rand()*6),1+Math.floor(rand()*6));
+}
+return 1+Math.floor(rand()*6)+1+Math.floor(rand()*6)>=threshold;
+}
+function runTrials(){
+let limit=kind==="C"?nGoal:1000;
+let count=Math.min(batch,limit-draws);
+if(count<=0){msg("Trial limit reached. Reset to run again.");return}
+let milestone=draws?Math.floor(Math.log10(draws)):0;
+for(let i=0;i<count;i++){
+draws++;if(simulateOne())successes++;
+if(draws===1||draws===10||draws===100||draws===1000||draws%10===0&&draws<=100||
+draws%25===0&&draws>100||i===count-1){
+history.push({n:draws,s:successes});
+}
+}
+if(history.length>150)history=history.filter((_,i)=>i%2===0||i===history.length-1);
+observed=successes;
+if(kind==="C"){
+const sd=Math.sqrt(nGoal*pTrue*(1-pTrue));
+consistentAnswer=Math.abs(observed-expectedAnswer)<=2.5*sd+1e-9;
+$("observedText").textContent="Observed event count: "+observed+". Typical range: expected count ± 2.5 standard deviations (rounded to whole counts for display).";
+}
+plot();
+}
+function resetTrials(){draws=successes=observed=0;history=[];plot();if(kind==="C")$("observedText").textContent="Run the trials to collect a result."}
+function startRound(){
+won=false;hinted=false;tries=0;shaded=new Set();kind=["A","B","C"][round%3];
+batch=100;$("batchOut").textContent=batch;
+$("round").textContent="Round "+(round+1)+"/6";
+$("score").textContent="Score "+score;
+$("next").hidden=true;$("check").hidden=false;$("hint").disabled=false;
+if(kind==="A"){
+r=pick([2,3,4,5,6]);b=pick([2,3,4,5]);
+replace=round===0?false:true;
+pTrue=r/(r+b)*(r-(replace?0:1))/(r+b-(replace?0:1));
+$("type").textContent="Counter bag · probability tree";
+$("question").textContent="Two counters are drawn "+(replace?"with":"without")+" replacement. Complete the missing branch and calculate the chance of drawing red twice.";
+$("scene").innerHTML=counterScene()+tree();
+$("conceptTitle").textContent="Tree branches";
+$("conceptFigure").innerHTML=venn();
+$("caption").textContent="A path probability is the product of its branch probabilities.";
+}else if(kind==="B"){
+criterion=round===1?"sum":"equal";
+threshold=pick([8,9,10]);
+pTrue=countFavourable()/36;
+$("type").textContent="Possibility diagram · combined events";
+$("question").textContent=criterion==="sum"?
+"Two fair dice are thrown. Shade every outcome for which the sum is at least "+threshold+". Then find its probability.":
+"Two fair dice are thrown. Shade every outcome with matching numbers, then find its probability.";
+$("scene").innerHTML=diceScene();
+$("conceptTitle").textContent="Outcome space";
+$("conceptFigure").innerHTML=svgWrap('<rect x="95" y="25" width="240" height="200" rx="13" fill="#fff" stroke="#111" stroke-width="3"/>'+
+Array.from({length:6},(_,i)=>'<line x1="'+(135+i*40)+'" x2="'+(135+i*40)+'" y1="25" y2="225" stroke="#111" stroke-width="1"/>').join("")+
+Array.from({length:4},(_,i)=>'<line x1="95" x2="335" y1="'+(65+i*40)+'" y2="'+(65+i*40)+'" stroke="#111"/>').join(""),
+"Possibility diagram grid",245);
+$("caption").textContent="Each cell represents one equally likely ordered pair.";
+}else{
+threshold=pick([7,8,9]);
+nGoal=pick([100,200,400]);
+pTrue=Array.from({length:6},(_,a)=>Array.from({length:6},(_,b)=>a+b+2>=threshold?1:0).reduce((x,y)=>x+y,0)).reduce((x,y)=>x+y,0)/36;
+expectedAnswer=nGoal*pTrue;
+$("type").textContent="Expected frequency · prediction";
+$("question").textContent="Two dice are thrown "+nGoal+" times. Count an event when their sum is at least "+threshold+". Predict the expected number and judge the simulated result using a ±2.5 SD range.";
+$("scene").innerHTML=diceScene();
+$("conceptTitle").textContent="Random variation";
+$("conceptFigure").innerHTML=svgWrap('<path d="M45 200 Q80 200 105 158 Q155 42 215 45 Q275 42 325 158 Q350 200 395 200" fill="#2EC4A6" fill-opacity=".25" stroke="#111" stroke-width="3"/>'+
+'<line x1="215" y1="45" x2="215" y2="205" stroke="#D92D20" stroke-dasharray="7 4" stroke-width="2"/>'+
+'<text x="215" y="225" text-anchor="middle" font-size="14">Expected count</text>',"Bell-shaped illustration of variation around an expected count",240);
+$("caption").textContent="Simulated counts vary around the expected count; they need not be equal.";
+}
+makeInputs();resetTrials();msg(kind==="C"?"Run trials, then enter a prediction and judge the result.":"Complete the diagram and fraction.");
+}
+function check(){
+if(won)return;
+tries++;
+let ok=false,detail="";
+if(kind==="A"){
+const t=r+b,branch=(r-(replace?0:1))/(t-(replace?0:1));
+const v=parseFraction($("branch").value),j=parseFraction($("joint").value);
+ok=Number.isFinite(v)&&Number.isFinite(j)&&Math.abs(v-branch)<1e-8&&Math.abs(j-pTrue)<1e-8;
+detail=!Number.isFinite(v)||!Number.isFinite(j)?"Enter both fractions.":Math.abs(v-branch)>1e-8?
+"Check the number of red counters remaining and the new bag total.":
+"Multiply the probabilities along the red–red path.";
+}else if(kind==="B"){
+let need=countFavourable();
+let correct=0,wrong=0;
+for(let a=1;a<=6;a++)for(let b=1;b<=6;b++){
+let selected=shaded.has(a+"-"+b),needed=qualifies(a,b);
+if(selected&&needed)correct++;
+if(selected&&!needed)wrong++;
+}
+let v=parseFraction($("probability").value);
+ok=correct===need&&wrong===0&&Number.isFinite(v)&&Math.abs(v-pTrue)<1e-8;
+detail=wrong?"Some shaded cells do not meet the event condition.":
+correct!==need?"You have "+(need-correct)+" more favourable cells to shade.":
+Number.isFinite(v)?"Recount the selected cells and divide by 36.":"Enter the probability as a fraction.";
+}else{
+let v=Number($("expected").value),judge=$("judgement").value;
+ok=draws===nGoal&&$("expected").value.trim()!==""&&Math.abs(v-expectedAnswer)<.51&&
+judge===(consistentAnswer?"yes":"no");
+detail=draws!==nGoal?"Run all "+nGoal+" trials before judging the result.":
+$("expected").value.trim()===""||Math.abs(v-expectedAnswer)>=.51?
+"Expected frequency is number of trials multiplied by the event probability.":
+"Compare the observed count with the expected count ± 2.5 standard deviations.";
+}
+if(ok){
+won=true;plot();let gain=hinted?50:tries===1?100:tries===2?75:50;score+=gain;
+$("score").textContent="Score "+score;
+msg("★ Correct! "+(kind==="A"?"Multiply conditional probabilities along a path.":
+kind==="B"?"All "+countFavourable()+" favourable outcomes are identified.":
+"The prediction uses np, and the random result was judged using its sampling variation.")+" +"+gain+" points.","good");
+$("check").hidden=true;$("hint").disabled=true;$("next").hidden=false;
+$("next").textContent=round===5?"View stars ★":"Next round →";
+}else msg(detail,"bad");
+}
+$("run").onclick=()=>{
+$("run").disabled=true;runTrials();
+if(matchMedia("(prefers-reduced-motion: reduce)").matches)$("run").disabled=false;
+else setTimeout(()=>$("run").disabled=false,180);
+};
+$("reset").onclick=resetTrials;
+$("batchDown").onclick=()=>{batch=batches[Math.max(0,batches.indexOf(batch)-1)];$("batchOut").textContent=batch};
+$("batchUp").onclick=()=>{batch=batches[Math.min(3,batches.indexOf(batch)+1)];$("batchOut").textContent=batch};
+$("hint").onclick=()=>{
+if(won)return;hinted=true;$("hint").disabled=true;
+msg(kind==="A"?"Draw 1 changes the bag only when the counter is not returned.":
+kind==="B"?"Inspect all 36 ordered pairs; the first coordinate is the row.":
+"Count favourable outcomes out of 36, then multiply their fraction by the number of trials.");
+};
+$("check").onclick=check;
+$("next").onclick=()=>{
+round++;if(round<6)startRound();
+else{
+$("game").hidden=true;$("end").style.display="block";$("round").textContent="Finished";
+let stars=score>=500?3:score>=350?2:1;
+$("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
+$("finalScore").textContent="Final score: "+score+"/600. You explored trees, sample spaces and experimental probability.";
+}
+};
+$("again").onclick=()=>{round=score=0;seed=(seed+10177)>>>0;$("game").hidden=false;$("end").style.display="none";startRound()};
+startRound();
+})();
+</script>
+</body>
+</html>

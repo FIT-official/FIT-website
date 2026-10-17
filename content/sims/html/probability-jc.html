@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Distribution Duel | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input,select{font:inherit}
+button{border:2px solid #111;border-radius:999px;background:#fff;color:#111;padding:9px 16px;min-height:44px;cursor:pointer;font-weight:800;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.5;cursor:default}
+button.primary{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
+button.primary:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button.accent{background:var(--lvl-jc);color:#fff}
+button:focus-visible,input:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+input[type="range"]{width:100%;min-height:44px;accent-color:var(--lvl-jc);cursor:pointer}
+input[type="text"]{border:2px solid #111;border-radius:12px;min-height:46px;padding:8px 12px;width:135px;max-width:100%;font-weight:800;font-size:17px}
+select{border:2px solid #111;border-radius:999px;min-height:44px;padding:8px 12px;background:#fff;font-weight:700}
+.wrap{max-width:1280px;margin:auto;padding:18px 16px 48px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-size:13px;font-weight:900;letter-spacing:.12em}
+.hud{display:flex;flex-wrap:wrap;gap:8px;font-weight:800}
+.badge,.stat{display:inline-block;border:2px solid #111;border-radius:999px;padding:7px 13px;font-size:12px}
+.badge{background:var(--lvl-jc);color:var(--lvl-jc-on);text-transform:uppercase;font-weight:900}
+h1{font-size:clamp(30px,5vw,47px);line-height:1.08;letter-spacing:-.045em;font-weight:800;margin:16px 0 19px}
+h2{font-size:20px;line-height:1.2;font-weight:800;margin:0 0 12px}
+h3{font-size:16px;font-weight:800;margin:0 0 10px}
+p{margin:0 0 12px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.panel{min-width:0;border:2px solid #111;border-radius:24px;background:#fff;padding:20px;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-jc-tint)}
+.question{font-weight:800;font-size:18px;line-height:1.38;min-height:85px}
+.diagram{background:#fff;border:2px solid #111;border-radius:16px;padding:10px;margin:15px 0;overflow:hidden}
+.diagram svg,.chart svg{width:100%;height:auto;display:block}
+.chart{border:2px solid var(--fit-line-soft);border-radius:16px;margin-bottom:15px;padding:8px;background:#fff}
+.control{margin:15px 0;border:2px solid var(--fit-line-soft);border-radius:16px;padding:14px;background:#fff}
+.control-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:800}
+.control strong{font-size:20px}
+.steppers{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin:7px 0}
+.steppers button{min-width:46px;padding:7px 9px}
+.range-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--fit-ink-3);font-weight:700}
+.readings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.reading{border:2px solid #111;border-radius:14px;padding:12px;background:#fff}
+.reading span{display:block;font-size:12px;color:var(--fit-ink-3);font-weight:800}
+.reading strong{display:block;font-size:18px}
+.table{width:100%;border-collapse:collapse;text-align:center;table-layout:fixed}
+.table td,.table th{padding:9px 4px;border:2px solid #111;font-size:14px}
+.table th{background:#F4F3EF}
+.table .highlight{background:#FFDFFF}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin:16px 0 0}
+.answer{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0}
+.answer label{font-weight:800}
+.feedback{min-height:62px;padding:12px;border:2px solid var(--fit-line-soft);border-radius:12px;background:white;margin-top:15px;font-weight:600}
+.feedback.good{border-color:var(--fit-success);background:#E7FAEF}
+.feedback.bad{border-color:var(--fit-danger);background:#FFF0EF}
+.concept{margin-top:19px;padding-top:15px;border-top:2px solid var(--fit-line-soft)}
+.concept svg{display:block;width:100%;max-width:320px;margin:auto}
+.muted{font-size:13px;color:var(--fit-ink-3)}
+details{margin-top:16px;border:2px solid #111;border-radius:16px;padding:12px 16px;background:var(--fit-sunken)}
+summary{font-weight:800;cursor:pointer;min-height:28px}
+.end{display:none;text-align:center;padding:44px}
+.stars{font-size:54px;color:#D39600;letter-spacing:4px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:440px){.panel{padding:13px}.control{padding:10px}.question{font-size:16px}.reading strong{font-size:15px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+<div class="brand">FIT / MATHS LAB</div>
+<div class="hud"><span class="badge">JC · H2</span><span class="stat" id="round">Round 1/6</span><span class="stat" id="score">Score 0</span></div>
+</header>
+<h1>Distribution Duel</h1>
+<div class="layout" id="game">
+<section class="panel stage">
+<h2 id="type">Distribution challenge</h2>
+<p class="question" id="question"></p>
+<div class="diagram" id="diagram"></div>
+<div id="controls"></div>
+<div class="concept">
+<h3 id="conceptTitle">Concept figure</h3>
+<div id="concept"></div>
+<p class="muted" id="caption"></p>
+</div>
+</section>
+<section class="panel">
+<h2>Live probability analysis</h2>
+<div id="plot1" class="chart"></div>
+<div id="plot2" class="chart"></div>
+<div class="actions">
+<button id="hint">Hint − points</button>
+<button id="check" class="primary">Check ✓</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div class="feedback" id="feedback" aria-live="polite">Adjust the parameters and examine both plots.</div>
+<details>
+<summary>The maths</summary>
+<p><strong>Binomial:</strong> P(X = x) = C(n,x)pˣ(1−p)ⁿ⁻ˣ. E(X) = np and Var(X) = np(1−p).</p>
+<p><strong>Normal:</strong> Z = (X−μ)/σ and F(x) = Φ((x−μ)/σ). The shaded density area is a probability, not a bar height.</p>
+<p><strong>Conditional:</strong> P(A | B) = P(A∩B)/P(B). Events A and B are independent if P(A∩B) = P(A)P(B).</p>
+<p><strong>Numerical method:</strong> normal probabilities use a polynomial approximation to erf with maximum absolute error about 1.5 × 10⁻⁷. Binomial probabilities use a stable recurrence.</p>
+</details>
+</section>
+</div>
+<section class="panel end" id="end">
+<h2>Distribution duel complete</h2>
+<div class="stars" id="stars"></div>
+<p id="final"></p>
+<button id="again" class="primary">Play again ↻</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+let seed=664241,round=0,score=0,tries=0,hinted=false,won=false,kind="A";
+let n=10,p=.5,mu=8,sigma=2,k=4,limit=0,targetE=0,targetV=0,targetProb=0;
+let trueN=0,trueP=0,trueMu=0,trueSigma=0,cutoff=0,mode="moments",tail=.1;
+let counts={ab:0,aOnly:0,bOnly:0,neither:0},conditionAnswer=0,independent=false;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function pick(a){return a[Math.floor(rand()*a.length)]}
+function gcd(a,b){while(b){let t=a%b;a=b;b=t}return a||1}
+function frac(a,b){let g=gcd(a,b);return a/g+"/"+b/g}
+function parse(s){let a=String(s||"").trim().split("/");if(a.length>2||a.some(x=>!x.trim()))return NaN;let x=Number(a[0]),y=a.length===2?Number(a[1]):1;return Number.isFinite(x)&&Number.isFinite(y)&&y!==0?x/y:NaN}
+function round3(x){return Number(x.toFixed(3))}
+function fmt(x){return Number.isFinite(x)?Math.abs(x)<.0001&&x!==0?x.toExponential(3):x.toFixed(4):"—"}
+function msg(t,c=""){$("feedback").textContent=t;$("feedback").className="feedback "+c}
+function erf(x){
+const sign=x<0?-1:1,a=Math.abs(x),t=1/(1+.3275911*a);
+const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-a*a);
+return sign*y;
+}
+function cdfNormal(x,m,s){return clamp(.5*(1+erf((x-m)/(s*Math.SQRT2))),0,1)}
+function pdfNormal(x,m,s){let z=(x-m)/s;return Math.exp(-.5*z*z)/(s*Math.sqrt(2*Math.PI))}
+function binomial(n,p){
+let a=Array(n+1).fill(0);
+if(p<=0){a[0]=1;return a}
+if(p>=1){a[n]=1;return a}
+a[0]=Math.pow(1-p,n);
+for(let i=1;i<=n;i++)a[i]=a[i-1]*(n-i+1)/i*p/(1-p);
+return a;
+}
+function ctl(id,label,min,max,step,value){
+return '<div class="control"><div class="control-head"><label for="'+id+'">'+label+'</label><strong id="'+id+'Value">'+value+'</strong></div>'+
+'<div class="steppers"><button data-control="'+id+'" data-delta="'+(-step*5)+'" aria-label="'+label+' coarse decrease">−−</button>'+
+'<button data-control="'+id+'" data-delta="'+(-step)+'" aria-label="'+label+' decrease">−</button>'+
+'<button data-control="'+id+'" data-delta="'+step+'" aria-label="'+label+' increase">+</button>'+
+'<button data-control="'+id+'" data-delta="'+(step*5)+'" aria-label="'+label+' coarse increase">++</button></div>'+
+'<input type="range" id="'+id+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+value+'">'+
+'<div class="range-labels"><span>'+min+'</span><span>'+max+'</span></div></div>';
+}
+function getVal(id){return Number($(id).value)}
+function parameterUpdate(){
+if(kind==="A"){n=getVal("n");p=getVal("p")/100}
+if(kind==="B"){mu=getVal("mu");sigma=getVal("sigma")}
+$("controls").querySelectorAll('input[type="range"]').forEach(el=>{
+$(el.id+"Value").textContent=Number(el.value).toFixed(el.id==="n"||el.id==="p"?0:2)+(el.id==="p"?"%":"");
+});
+draw();
+}
+function setupControls(){
+if(kind==="A"){
+$("controls").innerHTML=ctl("n","Number of trials n",4,24,1,n)+ctl("p","Success chance p (%)",5,95,5,Math.round(p*100));
+}else if(kind==="B"){
+$("controls").innerHTML=ctl("mu","Mean μ",0,20,.25,mu)+ctl("sigma","Standard deviation σ",.5,5,.25,sigma);
+}else{
+$("controls").innerHTML='<div class="answer"><label for="conditional">P(A | B)</label>'+
+'<input id="conditional" type="text" inputmode="decimal" placeholder="a/b" autocomplete="off"></div>'+
+'<div class="answer"><label for="independence">Are A and B independent?</label>'+
+'<select id="independence"><option value="">Choose…</option><option value="yes">Yes</option><option value="no">No</option></select></div>';
+}
+$("controls").oninput=e=>{if(e.target.matches('input[type="range"]'))parameterUpdate()};
+$("controls").onclick=e=>{
+let btn=e.target.closest("[data-control]");if(!btn)return;
+let el=$(btn.dataset.control);
+el.value=clamp(Number(el.value)+Number(btn.dataset.delta),Number(el.min),Number(el.max));
+parameterUpdate();
+};
+}
+function tableDiagram(){
+const x=counts;
+return '<table class="table" aria-label="Two-way frequency table for events A and B">'+
+'<tr><th>Count</th><th>B</th><th>Not B</th><th>Total</th></tr>'+
+'<tr><th>A</th><td class="highlight">'+x.ab+'</td><td>'+x.aOnly+'</td><td>'+(x.ab+x.aOnly)+'</td></tr>'+
+'<tr><th>Not A</th><td>'+x.bOnly+'</td><td>'+x.neither+'</td><td>'+(x.bOnly+x.neither)+'</td></tr>'+
+'<tr><th>Total</th><td>'+(x.ab+x.bOnly)+'</td><td>'+(x.aOnly+x.neither)+'</td><td>'+Object.values(x).reduce((a,b)=>a+b,0)+'</td></tr></table>';
+}
+function diagram(){
+if(kind==="A"){
+const a=binomial(n,p);
+let s='<svg viewBox="0 0 440 125" role="img" aria-label="Binomial experiment with '+n+' independent trials">'+
+'<text x="220" y="23" text-anchor="middle" font-size="16" font-weight="800">Independent Bernoulli trials</text>';
+for(let i=0;i<Math.min(n,12);i++){
+let x=24+i*33;
+s+='<rect x="'+x+'" y="44" width="27" height="36" rx="9" fill="'+(i%2?"#FF8FB8":"#6A45F5")+'" stroke="#111" stroke-width="2"/>'+
+'<text x="'+(x+13.5)+'" y="67" text-anchor="middle" font-weight="800" fill="'+(i%2?"#111":"#fff")+'">?</text>';
+}
+s+='<text x="220" y="109" text-anchor="middle" font-size="12">Success / failure on each trial</text></svg>';
+$("diagram").innerHTML=s;
+}else if(kind==="B"){
+$("diagram").innerHTML='<svg viewBox="0 0 440 122" role="img" aria-label="Normal distribution sampling scale">'+
+'<path d="M25 86 C100 86 119 12 220 12 C321 12 340 86 415 86" fill="#6A45F5" fill-opacity=".15" stroke="#111" stroke-width="3"/>'+
+'<line x1="22" y1="86" x2="418" y2="86" stroke="#111" stroke-width="2"/>'+
+'<line x1="220" y1="13" x2="220" y2="93" stroke="#6A45F5" stroke-width="2" stroke-dasharray="6 4"/>'+
+'<text x="220" y="108" text-anchor="middle" font-weight="800">μ</text></svg>';
+}else $("diagram").innerHTML=tableDiagram();
+}
+function concept(){
+let svg="";
+if(kind==="A"){
+svg='<svg viewBox="0 0 330 103" role="img" aria-label="Binomial success or failure split">'+
+'<circle cx="48" cy="50" r="18" fill="#FFDD00" stroke="#111" stroke-width="3"/>'+
+'<path d="M66 50 L170 20 M66 50 L170 80" stroke="#111" stroke-width="3" fill="none"/>'+
+'<rect x="170" y="3" width="145" height="35" rx="12" fill="#ECE7FF" stroke="#111" stroke-width="2"/>'+
+'<rect x="170" y="62" width="145" height="35" rx="12" fill="#FFDCE9" stroke="#111" stroke-width="2"/>'+
+'<text x="242" y="26" font-size="14" text-anchor="middle" font-weight="800">Success p</text>'+
+'<text x="242" y="85" font-size="14" text-anchor="middle" font-weight="800">Failure 1−p</text></svg>';
+$("caption").textContent="Independent trials use the same success probability.";
+}else if(kind==="B"){
+svg='<svg viewBox="0 0 330 125" role="img" aria-label="Normal curve and shaded right tail">'+
+'<path d="M15 92 Q65 92 98 49 Q165 -24 232 49 Q265 92 315 92" fill="none" stroke="#111" stroke-width="3"/>'+
+'<path d="M210 38 Q265 92 315 92 L210 92 Z" fill="#FF8FB8" stroke="#111" stroke-width="2"/>'+
+'<line x1="12" x2="318" y1="92" y2="92" stroke="#111" stroke-width="2"/>'+
+'<text x="210" y="110" text-anchor="middle" font-size="13" font-weight="800">Cut-off</text></svg>';
+$("caption").textContent="Standardise with z = (x − μ)/σ and use the area under the curve.";
+}else{
+svg='<svg viewBox="0 0 330 130" role="img" aria-label="Venn diagram for intersecting events">'+
+'<circle cx="128" cy="57" r="54" fill="#FF8FB8" fill-opacity=".55" stroke="#111" stroke-width="3"/>'+
+'<circle cx="200" cy="57" r="54" fill="#6A45F5" fill-opacity=".32" stroke="#111" stroke-width="3"/>'+
+'<text x="103" y="61" font-weight="800">A</text><text x="224" y="61" font-weight="800">B</text>'+
+'<text x="164" y="64" font-size="12" font-weight="800" text-anchor="middle">A∩B</text></svg>';
+$("caption").textContent="Conditioning on B restricts the sample space to B.";
+}
+$("concept").innerHTML=svg;
+}
+function plotFrame(title,unit,data,options={}){
+const W=480,H=285,L=67,R=463,T=36,B=228;
+const xmin=options.xmin??0,xmax=options.xmax??1;
+let ymin=0,ymax=Math.max(.01,options.ymax??Math.max(...data.map(q=>q[1]))*1.12);
+const X=x=>L+(x-xmin)/(xmax-xmin)*(R-L);
+const Y=y=>B-clamp(y/ymax,0,1)*(B-T);
+let s='<svg viewBox="0 0 480 285" role="img" aria-label="'+title+
+'. '+(options.aria||"Current plot")+'">';
+s+='<text x="241" y="19" text-anchor="middle" font-size="15" font-weight="800">'+title+'</text>';
+for(let i=0;i<=4;i++){
+let v=i*ymax/4,yy=Y(v);
+s+='<line x1="'+L+'" x2="'+R+'" y1="'+yy+'" y2="'+yy+'" stroke="#E6E6E6"/>'+
+'<text x="'+(L-8)+'" y="'+(yy+4)+'" text-anchor="end" font-size="10">'+v.toFixed(ymax>2?1:2)+'</text>';
+}
+for(let i=0;i<=4;i++){
+let x=xmin+(xmax-xmin)*i/4;
+s+='<text x="'+X(x)+'" y="245" text-anchor="middle" font-size="11">'+(options.integer?Math.round(x):x.toFixed(1))+'</text>';
+}
+s+='<line x1="'+L+'" x2="'+L+'" y1="'+T+'" y2="'+B+'" stroke="#111" stroke-width="2"/>'+
+'<line x1="'+L+'" x2="'+R+'" y1="'+B+'" y2="'+B+'" stroke="#111" stroke-width="2"/>';
+if(options.bars){
+const width=(R-L)/data.length*.75;
+data.forEach(([x,y])=>{
+let px=X(x),yy=Y(y),shaded=options.shade?options.shade(x):false;
+s+='<rect x="'+(px-width/2)+'" y="'+yy+'" width="'+width+'" height="'+(B-yy)+
+'" fill="'+(shaded?"#FF8FB8":"#9D8AF7")+'" stroke="#111" stroke-width="1"/>';
+});
+}else{
+if(options.fill){
+let region=data.filter(q=>options.shade(q[0]));
+if(region.length){
+let pts=region.map(q=>X(q[0])+","+Y(q[1])).join(" ");
+s+='<polygon points="'+X(region[0][0])+","+B+" "+pts+" "+X(region[region.length-1][0])+","+B+'" fill="#FF8FB8" fill-opacity=".75"/>';
+}
+}
+s+='<polyline points="'+data.map(q=>X(q[0])+","+Y(q[1])).join(" ")+'" fill="none" stroke="#6A45F5" stroke-width="3"/>';
+}
+if(options.marker!==undefined&&options.marker>=xmin&&options.marker<=xmax){
+let x=X(options.marker);
+s+='<line x1="'+x+'" x2="'+x+'" y1="'+T+'" y2="'+B+'" stroke="#D92D20" stroke-width="2" stroke-dasharray="5 4"/>';
+}
+s+='<text x="264" y="275" font-size="12" text-anchor="middle">'+(options.xunit||"x (value)")+'</text>'+
+'<text transform="translate(13 132) rotate(-90)" font-size="11" text-anchor="middle">'+unit+'</text>';
+s+='<rect x="282" y="29" width="10" height="10" fill="#FF8FB8"/><text x="295" y="38" font-size="10">Event</text>'+
+'<line x1="352" y1="34" x2="367" y2="34" stroke="#D92D20" stroke-dasharray="4 3" stroke-width="2"/>'+
+'<text x="370" y="38" font-size="10">Marker</text></svg>';
+return s;
+}
+function drawBinomial(){
+const values=binomial(n,p),event=values.slice(0,k+1).reduce((a,b)=>a+b,0);
+let series=values.map((y,x)=>[x,y]);
+$("plot1").innerHTML=plotFrame("Binomial probability mass","P(X = x) (probability)",series,{
+xmin:-.6,xmax:n+.6,ymax:Math.max(...values)*1.2,bars:true,shade:x=>x<=k,integer:true,
+marker:k,xunit:"Number of successes x",aria:"The event is shaded and its probability is "+fmt(event)
+});
+let c=0,points=series.map(([x,y])=>{c+=y;return [x,c]});
+$("plot2").innerHTML=plotFrame("Cumulative distribution F(x)","F(x) (probability)",points,{
+xmin:-.6,xmax:n+.6,ymax:1,integer:true,marker:k,xunit:"Number of successes x",
+aria:"Cumulative mass at each integer"
+});
+}
+function drawNormal(){
+const lo=Math.min(mu-4*sigma,cutoff-2*sigma);
+const hi=Math.max(mu+4*sigma,cutoff+2*sigma);
+let points=[],cum=[];
+for(let i=0;i<=220;i++){
+let x=lo+(hi-lo)*i/220;
+points.push([x,pdfNormal(x,mu,sigma)]);
+cum.push([x,cdfNormal(x,mu,sigma)]);
+}
+const ev=1-cdfNormal(cutoff,mu,sigma);
+$("plot1").innerHTML=plotFrame("Normal density · shaded tail","Density (per x unit)",points,{
+xmin:lo,xmax:hi,ymax:Math.max(...points.map(q=>q[1]))*1.12,fill:true,shade:x=>x>=cutoff,
+marker:cutoff,xunit:"Outcome x (units)",aria:"Right-tail probability "+fmt(ev)
+});
+$("plot2").innerHTML=plotFrame("Cumulative distribution F(x)","F(x) (probability)",cum,{
+xmin:lo,xmax:hi,ymax:1,marker:cutoff,xunit:"Outcome x (units)",
+aria:"CDF at the cut-off "+fmt(cdfNormal(cutoff,mu,sigma))
+});
+}
+function drawConditional(){
+const vals=[counts.ab,counts.aOnly,counts.bOnly,counts.neither];
+const sum=vals.reduce((a,b)=>a+b,0);
+const bars=vals.map((v,i)=>[i+1,v/sum]);
+$("plot1").innerHTML=plotFrame("Joint outcome probabilities","Probability (proportion)",bars,{
+xmin:.35,xmax:4.65,ymax:Math.max(.05,...bars.map(q=>q[1]))*1.3,bars:true,integer:true,
+shade:x=>x===1,marker:1,xunit:"Cell: 1 AB, 2 A only, 3 B only, 4 neither",
+aria:"Four joint frequency cells"
+});
+let z=0;
+let cum=bars.map(([x,y])=>{z+=y;return [x,z]});
+$("plot2").innerHTML=plotFrame("Cumulative joint-cell proportions","Cumulative proportion",cum,{
+xmin:.35,xmax:4.65,ymax:1,integer:true,marker:2,xunit:"Cell index (ordered 1–4)",aria:"Running sum of joint cells"
+});
+}
+function draw(){
+diagram();
+if(kind==="A")drawBinomial();
+if(kind==="B")drawNormal();
+if(kind==="C")drawConditional();
+}
+function setup(){
+won=false;hinted=false;tries=0;kind=["A","B","C"][round%3];
+$("round").textContent="Round "+(round+1)+"/6";
+$("score").textContent="Score "+score;
+$("check").hidden=false;$("next").hidden=true;$("hint").disabled=false;
+if(kind==="A"){
+mode=round===0?"moments":"probability";
+trueN=pick([8,10,12,16,20]);
+trueP=pick([.2,.3,.4,.5,.6,.7]);
+k=pick([2,3,4,5]);
+targetE=round3(trueN*trueP);
+targetV=round3(trueN*trueP*(1-trueP));
+targetProb=binomial(trueN,trueP).slice(0,k+1).reduce((a,b)=>a+b,0);
+n=trueN===10?14:10;p=trueP===.5?.25:.5;
+$("type").textContent="Binomial · parameter tuning";
+$("question").textContent=mode==="moments"?
+"Set n and p so that E(X) = "+targetE.toFixed(2)+" and Var(X) = "+targetV.toFixed(3)+". The shaded region represents X ≤ "+k+".":
+"Set n and p to make P(X ≤ "+k+") = "+targetProb.toFixed(5)+
+" (tolerance ±0.00005). Find a matching binomial model.";
+$("conceptTitle").textContent="Bernoulli trial tree";
+}else if(kind==="B"){
+trueMu=pick([5,7,9,11,13,15]);
+trueSigma=pick([1,1.5,2,2.5,3]);
+tail=round===1?.1:.25;
+const z=tail===.1?1.2815515655446004:.6744897501960817;
+cutoff=round3(trueMu+z*trueSigma);
+mu=trueMu+2;sigma=trueSigma===2?3:2;
+$("type").textContent="Normal · tail area";
+$("question").textContent="Choose μ and σ for X ~ N(μ, σ²) such that P(X > "+
+cutoff.toFixed(3)+") = "+tail.toFixed(2)+
+" (tolerance ±0.001). Use the density and CDF plots.";
+$("conceptTitle").textContent="Standard normal area";
+}else{
+let t=pick([20,30,40,50]);
+if(round===2){
+const a=pick([8,12,16]),b=pick([4,8]);
+counts={ab:a,aOnly:a,bOnly:b,neither:b};
+independent=true;
+}else{
+counts={ab:pick([12,16,20]),aOnly:pick([5,8,10]),bOnly:pick([4,7,9]),neither:pick([18,22,27])};
+independent=false;
+}
+let total=Object.values(counts).reduce((a,b)=>a+b,0);
+conditionAnswer=counts.ab/(counts.ab+counts.bOnly);
+const actualIndependent=Math.abs(counts.ab/total-
+(counts.ab+counts.aOnly)*(counts.ab+counts.bOnly)/(total*total))<1e-10;
+independent=actualIndependent;
+$("type").textContent="Conditional probability · independence";
+$("question").textContent="Use the two-way table to calculate P(A | B). Enter an equivalent fraction and decide whether A and B are independent.";
+$("conceptTitle").textContent="Conditional sample space";
+}
+setupControls();concept();draw();msg("Work through the model and check your result.");
+}
+function check(){
+if(won)return;
+tries++;let ok=false,detail="";
+if(kind==="A"){
+if(mode==="moments"){
+let de=n*p-targetE,dv=n*p*(1-p)-targetV;
+ok=Math.abs(de)<1e-8&&Math.abs(dv)<1e-8;
+detail=Math.abs(de)>=1e-8?"Your expected value is "+Math.abs(de).toFixed(3)+(de>0?" too high.":" too low."):
+"Expected value matches; adjust variance by changing p while preserving np.";
+}else{
+let event=binomial(n,p).slice(0,k+1).reduce((a,b)=>a+b,0);
+let diff=event-targetProb;ok=Math.abs(diff)<=.00005;
+detail="Your shaded probability is "+Math.abs(diff).toFixed(5)+(diff>0?" too high.":" too low.");
+}
+}else if(kind==="B"){
+let actual=1-cdfNormal(cutoff,mu,sigma),diff=actual-tail;
+ok=Math.abs(diff)<=.001;
+detail="Your right-tail probability is "+Math.abs(diff).toFixed(5)+(diff>0?" too high.":" too low.")+
+" Adjust μ or σ.";
+}else{
+const val=parse($("conditional").value),choice=$("independence").value;
+ok=Number.isFinite(val)&&Math.abs(val-conditionAnswer)<1e-9&&choice===(independent?"yes":"no");
+detail=!Number.isFinite(val)?"Enter P(A | B) as a fraction.":
+Math.abs(val-conditionAnswer)>=1e-9?"Condition on column B, then count the entries also in row A.":
+"Compare P(A∩B) with P(A) × P(B) to test independence.";
+}
+if(ok){
+won=true;let gain=hinted?50:tries===1?100:tries===2?75:50;
+score+=gain;$("score").textContent="Score "+score;
+msg("★ Correct! "+(kind==="A"?"Binomial mass follows the independent-trials model.":
+kind==="B"?"The tail area is determined by the standardised cut-off.":
+"Condition on B first, then test the product rule.")+" +"+gain+" points.","good");
+$("check").hidden=true;$("next").hidden=false;$("hint").disabled=true;
+$("next").textContent=round===5?"See results ★":"Next round →";
+}else msg(detail,"bad");
+}
+$("hint").onclick=()=>{
+if(won)return;
+hinted=true;$("hint").disabled=true;
+msg(kind==="A"?(mode==="moments"?"Use Var(X) = E(X)(1−p) to narrow down p, then find n.":"Add binomial probabilities from x=0 to x=k and tune the parameters."):
+kind==="B"?"Write P(Z > (a−μ)/σ) as a standard normal probability; the target determines the standardised cut-off.":
+"Conditional probability uses the B-column total as the denominator.");
+};
+$("check").onclick=check;
+$("next").onclick=()=>{
+round++;if(round<6)setup();else{
+$("game").hidden=true;$("end").style.display="block";$("round").textContent="Finished";
+let stars=score>=500?3:score>=350?2:1;
+$("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
+$("final").textContent="Score: "+score+" / 600. You worked with discrete, continuous and conditional probability.";
+}
+};
+$("again").onclick=()=>{round=score=0;seed=(seed+18257)>>>0;$("game").hidden=false;$("end").style.display="none";setup()};
+setup();
+})();
+</script>
+</body>
+</html>

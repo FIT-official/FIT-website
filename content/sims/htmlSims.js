@@ -7,6 +7,7 @@ const circuits = { subject: 'Physics', concept: 'circuits', accent: '#FFC83D', m
 const energy = { subject: 'Physics', concept: 'energy', accent: '#3DBE6B', minutes: '10–15', status: 'live' }
 const waves = { subject: 'Physics', concept: 'waves', accent: '#1F66E5', minutes: '10–15', status: 'live' }
 const reactions = { subject: 'Chemistry', concept: 'chemical-reactions', accent: '#FF8FB8', minutes: '10–15', status: 'live' }
+const probability = { subject: 'Maths', concept: 'probability', accent: '#8B5CF6', minutes: '10–15', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -88,4 +89,24 @@ export const htmlSims = [
     syllabusRef: 'University, Physical Chemistry',
     approach: 'Set temperature and initial amounts to hit an equilibrium conversion from ΔH° and ΔS°, then use Q and K to restore equilibrium by pressure.',
     activityPrompt: 'Play all rounds, then explain how the sign of Q − K decides the direction of shift.', tags: ['University', 'Physical Chemistry', 'equilibrium', 'Gibbs energy'] },
+  { ...probability, id: 'probability-p', title: 'Spinner Maker', level: 'Primary', topic: 'Chance', symbol: '🎡', height: 1120,
+    syllabusRef: 'Primary Mathematics: chance and likelihood (impossible, unlikely, even chance, likely, certain)',
+    approach: 'Colour an 8-sector spinner to match a chance word or an exact chance, then spin to compare with what happens.',
+    activityPrompt: 'Play all rounds, then explain what makes a spinner fair.', tags: ['probability', 'chance', 'fair', 'spinner'] },
+  { ...probability, id: 'probability-s', title: 'Tree Diagram Trials', level: 'Secondary', topic: 'Probability of combined events', symbol: '🌳', height: 1520,
+    syllabusRef: 'MOE Secondary Mathematics: Probability (combined events, tree and possibility diagrams, expected frequency)',
+    approach: 'Complete tree diagrams with and without replacement, shade possibility diagrams, and compare expected and simulated frequencies.',
+    activityPrompt: 'Play all rounds, then explain how drawing without replacement changes the second-branch probabilities.', tags: ['probability', 'tree diagrams', 'combined events', 'expected frequency'] },
+  { ...probability, id: 'probability-jc', title: 'Distribution Duel', level: 'JC', topic: 'Binomial and normal distributions', symbol: '🔔', height: 1230,
+    syllabusRef: 'H2 Mathematics: Probability and distributions (binomial, normal, conditional probability)',
+    approach: 'Tune binomial and normal parameters to hit target probabilities and moments, and use a two-way table for conditional probability and independence.',
+    activityPrompt: 'Play all rounds, then explain how σ changes a normal tail probability for a fixed cut-off.', tags: ['probability', 'binomial distribution', 'normal distribution', 'conditional probability'] },
+  { ...probability, id: 'probability-poly', title: 'Quality Control', level: 'Poly', topic: 'Acceptance sampling', symbol: '🏭', height: 1380,
+    syllabusRef: 'Poly applied statistics: binomial probability and acceptance sampling (generic)',
+    approach: 'Choose a sample size and acceptance number that accept good batches and reject bad ones, reading the operating-characteristic curve.',
+    activityPrompt: 'Play all rounds, then explain why a larger sample separates good and bad batches better.', tags: ['probability', 'quality control', 'binomial', 'OC curve'] },
+  { ...probability, id: 'probability-u', title: 'Bayes Lab', level: 'University', topic: 'Bayes’ theorem and Bayesian updating', symbol: '🧮', height: 1420,
+    syllabusRef: 'University, Probability and Statistics',
+    approach: 'Set prevalence to hit a target positive predictive value, then choose a Beta prior so the posterior mean and credible interval match.',
+    activityPrompt: 'Play all rounds, then explain why a positive test can still mean a low chance of disease.', tags: ['University', 'Probability and Statistics', 'Bayes', 'Beta–Binomial'] },
 ]

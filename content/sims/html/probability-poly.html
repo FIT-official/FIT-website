@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quality Control | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input{font:inherit}
+button{min-height:44px;cursor:pointer;border:2px solid #111;border-radius:999px;padding:9px 15px;font-weight:800;background:#fff;box-shadow:var(--sh-1);color:#111}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.5;cursor:default}
+button.primary{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+button.primary:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button.accent{background:var(--lvl-poly)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+input[type="range"]{width:100%;min-height:44px;accent-color:var(--lvl-poly);cursor:pointer}
+.wrap{max-width:1220px;margin:auto;padding:18px 16px 50px}
+header{display:flex;justify-content:space-between;flex-wrap:wrap;align-items:center;gap:12px}
+.brand{font-weight:900;letter-spacing:.12em;font-size:13px}
+.hud{display:flex;gap:8px;flex-wrap:wrap;font-weight:800}
+.badge,.stat{display:inline-block;border:2px solid #111;border-radius:999px;padding:7px 13px;font-size:12px}
+.badge{background:var(--lvl-poly);color:var(--lvl-poly-on);text-transform:uppercase;font-weight:900}
+h1{font-size:clamp(31px,5vw,48px);line-height:1.08;letter-spacing:-.045em;font-weight:800;margin:16px 0 20px}
+h2{font-size:20px;font-weight:800;margin:0 0 12px}
+h3{font-size:16px;font-weight:800;margin:0 0 10px}
+p{margin:0 0 12px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.panel{min-width:0;padding:20px;border:2px solid #111;border-radius:24px;background:#fff;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-poly-tint)}
+.question{font-size:18px;font-weight:800;line-height:1.36;min-height:83px}
+.factory{border:2px solid #111;border-radius:16px;background:white;padding:8px;margin:16px 0}
+.factory svg{width:100%;height:auto;display:block}
+.controls{display:grid;gap:13px}
+.control{border:2px solid #111;border-radius:16px;background:white;padding:14px}
+.control-header{display:flex;justify-content:space-between;align-items:center;font-weight:800;gap:8px}
+.control-header output{font-size:25px;font-weight:900}
+.steppers{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin:9px 0}
+.steppers button{min-width:45px;padding:8px}
+.range-limits{display:flex;justify-content:space-between;color:var(--fit-ink-3);font-size:12px}
+.targets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:15px 0}
+.target{background:#fff;border:2px solid #111;border-radius:14px;padding:12px}
+.target strong{display:block;font-size:16px}
+.target span{font-size:12px;display:block;color:var(--fit-ink-3);font-weight:700}
+.target .value{font-size:22px;font-weight:900;color:#111}
+.goodtext{color:#137A45!important}.badtext{color:#BC291F!important}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.feedback{padding:12px;border:2px solid var(--fit-line-soft);border-radius:12px;min-height:63px;margin-top:15px;background:white;font-weight:600}
+.feedback.good{background:#E7FAEF;border-color:var(--fit-success)}
+.feedback.bad{background:#FFF0EF;border-color:var(--fit-danger)}
+.plot svg{width:100%;height:auto;display:block}
+.plot{margin-top:7px;border:2px solid var(--fit-line-soft);border-radius:16px;padding:7px}
+.muted{font-size:13px;color:var(--fit-ink-3)}
+.concept{margin-top:18px;padding-top:16px;border-top:2px solid var(--fit-line-soft)}
+.concept svg{width:100%;height:auto;max-width:320px;display:block;margin:auto}
+details{margin-top:16px;border:2px solid #111;background:var(--fit-sunken);border-radius:16px;padding:12px 16px}
+summary{cursor:pointer;font-weight:800;min-height:30px}
+.end{display:none;text-align:center;padding:42px 16px}
+.stars{font-size:53px;letter-spacing:4px;color:#D39900}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:440px){.panel{padding:13px}.control{padding:10px}.question{font-size:16px}.target .value{font-size:17px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+<div class="brand">FIT / APPLIED MATHS</div>
+<div class="hud"><span class="badge">Polytechnic</span><span class="stat" id="round">Round 1/6</span><span class="stat" id="score">Score 0</span></div>
+</header>
+<h1>Quality Control</h1>
+<div class="layout" id="game">
+<section class="panel stage">
+<h2>Acceptance sampling</h2>
+<p id="question" class="question"></p>
+<div class="factory" id="factory"></div>
+<div class="controls">
+<div class="control">
+<div class="control-header"><label for="sample">Sample size n</label><output id="sampleValue">20</output></div>
+<div class="steppers">
+<button data-id="sample" data-delta="-25" aria-label="Reduce sample size by 25">−−</button>
+<button data-id="sample" data-delta="-5" aria-label="Reduce sample size by 5">−</button>
+<button data-id="sample" data-delta="5" aria-label="Increase sample size by 5">+</button>
+<button data-id="sample" data-delta="25" aria-label="Increase sample size by 25">++</button>
+</div>
+<input id="sample" type="range" min="20" max="200" step="5" value="20">
+<div class="range-limits"><span>20 parts</span><span>200 parts</span></div>
+</div>
+<div class="control">
+<div class="control-header"><label for="acceptance">Acceptance number c</label><output id="acceptanceValue">4</output></div>
+<div class="steppers">
+<button data-id="acceptance" data-delta="-5" aria-label="Reduce acceptance number by five">−−</button>
+<button data-id="acceptance" data-delta="-1" aria-label="Reduce acceptance number by one">−</button>
+<button data-id="acceptance" data-delta="1" aria-label="Increase acceptance number by one">+</button>
+<button data-id="acceptance" data-delta="5" aria-label="Increase acceptance number by five">++</button>
+</div>
+<input id="acceptance" type="range" min="0" max="20" step="1" value="4">
+<div class="range-limits"><span>0 defects</span><span>20 defects</span></div>
+</div>
+</div>
+<div class="concept">
+<h3>Sampling decision</h3>
+<svg viewBox="0 0 325 127" role="img" aria-label="Sampled products are counted as defective or good; a decision follows">
+<rect x="6" y="39" width="104" height="48" rx="13" fill="#FF6B3D" stroke="#111" stroke-width="3"/>
+<text x="58" y="59" text-anchor="middle" font-size="13" font-weight="800">Inspect</text>
+<text x="58" y="75" text-anchor="middle" font-size="13">n parts</text>
+<path d="M111 62 L172 62 L161 53 M172 62 L161 71" fill="none" stroke="#111" stroke-width="3"/>
+<rect x="175" y="39" width="143" height="48" rx="13" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="246" y="58" text-anchor="middle" font-size="13" font-weight="800">Count defects</text>
+<text x="246" y="76" text-anchor="middle" font-size="12">Accept if X ≤ c</text>
+</svg>
+<p class="muted">Accepting a sample does not prove the entire batch is defect-free.</p>
+</div>
+</section>
+<section class="panel">
+<h2>Operating-characteristic curve</h2>
+<div id="plot" class="plot"></div>
+<div class="targets">
+<div class="target">
+<strong>Good batch</strong>
+<span id="goodRate">Defect rate 1%</span>
+<span>Must accept ≥95%</span>
+<div class="value" id="good">—</div>
+<div id="goodStatus" class="muted"></div>
+</div>
+<div class="target">
+<strong>Bad batch</strong>
+<span id="badRate">Defect rate 8%</span>
+<span>Must reject ≥90%</span>
+<div class="value" id="bad">—</div>
+<div id="badStatus" class="muted"></div>
+</div>
+</div>
+<div class="actions">
+<button id="sampleRun" class="accent">Inspect a sample ▶</button>
+<button id="inspectTen">Inspect 10 samples</button>
+</div>
+<p id="runs" class="muted">No experimental samples yet.</p>
+<div class="actions">
+<button id="hint">Hint − points</button>
+<button id="check" class="primary">Check plan ✓</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Choose a sampling plan that meets both requirements.</div>
+<details>
+<summary>The maths</summary>
+<p>Assume independent defects with constant defect probability p. This is a binomial approximation to large-lot sampling.</p>
+<p>Let X be the defects in n inspected parts: X ~ B(n,p).</p>
+<p>Probability of accepting a batch: Pₐ(p) = P(X ≤ c) = Σ from x = 0 to c of C(n,x)pˣ(1−p)ⁿ⁻ˣ.</p>
+<p>Probability of rejecting a batch: Pᵣ(p) = 1 − Pₐ(p).</p>
+<p>An OC curve plots Pₐ against the true percentage of defective parts. It is calculated exactly under the binomial model using recurrence, without Monte Carlo error.</p>
+</details>
+</section>
+</div>
+<section class="panel end" id="end">
+<h2>Production quality secured!</h2>
+<div class="stars" id="stars"></div>
+<p id="final"></p>
+<button id="again" class="primary">Play again ↻</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+let seed=93008,round=0,score=0,tries=0,hinted=false,won=false;
+let n=20,c=4,goodA=0,badA=0,runCount=0,passCount=0,failCount=0,product="electronic modules";
+let batchLimit=200;const PLANS=[[1,8],[1.5,10],[0.5,5],[2,12],[1,6],[1.5,8]];let PG=1,PB=8;
+const products=["electronic modules","machined fasteners","sealed cartridges","sensor boards","plastic housings","precision bearings"];
+function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function acceptance(n,c,p){
+if(c>=n)return 1;
+if(c<0)return 0;
+if(p<=0)return 1;
+if(p>=1)return 0;
+let t=Math.pow(1-p,n),sum=t;
+for(let x=1;x<=c;x++){
+t=t*(n-x+1)/x*p/(1-p);
+sum+=t;
+}
+return clamp(sum,0,1);
+}
+function factory(){
+let s='<svg viewBox="0 0 470 238" role="img" aria-label="Production conveyor with sampled parts and quality inspection gates">'+
+'<rect x="12" y="29" width="446" height="170" rx="22" fill="#F4F3EF" stroke="#111" stroke-width="3"/>'+
+'<rect x="21" y="112" width="426" height="58" rx="15" fill="#B2BAC8" stroke="#111" stroke-width="3"/>';
+for(let x=32;x<444;x+=31){
+s+='<circle cx="'+x+'" cy="183" r="11" fill="#6B6B6B" stroke="#111" stroke-width="2"/>';
+}
+for(let i=0;i<8;i++){
+const x=30+i*52;
+s+='<rect x="'+x+'" y="122" width="36" height="35" rx="7" fill="'+(i===4?"#FF8FB8":"#FFC83D")+'" stroke="#111" stroke-width="2.5"/>'+
+'<circle cx="'+(x+18)+'" cy="139" r="6" fill="white" stroke="#111" stroke-width="2"/>';
+}
+s+='<rect x="173" y="42" width="128" height="48" rx="12" fill="#FF6B3D" stroke="#111" stroke-width="3"/>'+
+'<text x="237" y="62" text-anchor="middle" font-size="14" font-weight="800">INSPECTION</text>'+
+'<text x="237" y="79" text-anchor="middle" font-size="12" font-weight="700">Count defects</text>'+
+'<path d="M238 90 L238 115" stroke="#111" stroke-width="3" stroke-dasharray="5 3"/>'+
+'<text x="235" y="224" text-anchor="middle" font-size="13" font-weight="700">'+product+'</text></svg>';
+$("factory").innerHTML=s;
+}
+function chart(){
+const W=480,H=320,L=66,R=457,T=37,B=262;
+const X=p=>L+p/15*(R-L),Y=v=>B-clamp(v,0,1)*(B-T);
+let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Probability of acceptance versus percentage defective, with marked points at 1 and 8 percent and a current sample plan.">';
+s+='<text x="244" y="19" text-anchor="middle" font-weight="800" font-size="15">OC curve · binomial model</text>';
+for(let i=0;i<=5;i++){
+let v=i/5,yy=Y(v);
+s+='<line x1="'+L+'" x2="'+R+'" y1="'+yy+'" y2="'+yy+'" stroke="#E7E7E7"/>'+
+'<text x="'+(L-7)+'" y="'+(yy+4)+'" font-size="11" text-anchor="end">'+v.toFixed(1)+'</text>';
+}
+[0,3,6,9,12,15].forEach(v=>{
+s+='<text x="'+X(v)+'" y="281" font-size="11" text-anchor="middle">'+v+'</text>';
+});
+s+='<line x1="'+L+'" x2="'+L+'" y1="'+T+'" y2="'+B+'" stroke="#111" stroke-width="2"/>'+
+'<line x1="'+L+'" x2="'+R+'" y1="'+B+'" y2="'+B+'" stroke="#111" stroke-width="2"/>';
+s+='<polyline fill="none" stroke="#E44F24" stroke-width="3.5" points="'+
+Array.from({length:151},(_,i)=>{
+const v=i/10;return X(v)+","+Y(acceptance(n,c,v/100));
+}).join(" ")+'"/>';
+s+='<line x1="'+X(PG)+'" x2="'+X(PG)+'" y1="'+T+'" y2="'+B+'" stroke="#1E9E5A" stroke-dasharray="4 5" stroke-width="2"/>';
+s+='<line x1="'+X(PB)+'" x2="'+X(PB)+'" y1="'+T+'" y2="'+B+'" stroke="#D92D20" stroke-dasharray="4 5" stroke-width="2"/>';
+s+='<rect x="'+(X(PG)-5)+'" y="'+(Y(goodA)-5)+'" width="10" height="10" fill="#1E9E5A" stroke="#111" stroke-width="2"/>';
+s+='<circle cx="'+X(PB)+'" cy="'+Y(badA)+'" r="6" fill="#D92D20" stroke="#111" stroke-width="2"/>';
+s+='<text x="275" y="31" font-size="10">— OC curve</text>'+
+'<text x="347" y="31" font-size="10" fill="#137A45">■ '+PG+'% good</text>'+
+'<text x="419" y="31" font-size="10" fill="#B12D24">● '+PB+'% bad</text>';
+s+='<text transform="translate(13 153) rotate(-90)" text-anchor="middle" font-size="12">P(acceptance) (proportion)</text>'+
+'<text x="260" y="312" text-anchor="middle" font-size="12">Defective parts p (%)</text></svg>';
+$("plot").innerHTML=s;
+}
+function update(){
+n=Number($("sample").value);c=Number($("acceptance").value);
+$("sampleValue").textContent=n;
+$("acceptanceValue").textContent=c;
+goodA=acceptance(n,c,PG/100);badA=acceptance(n,c,PB/100);
+$("good").textContent=(100*goodA).toFixed(2)+"% accept";
+$("bad").textContent=(100*(1-badA)).toFixed(2)+"% reject";
+$("goodStatus").textContent=goodA>=.95-1e-12?"✓ Requirement met":"✕ Below 95%";
+$("badStatus").textContent=1-badA>=.9-1e-12?"✓ Requirement met":"✕ Below 90%";
+$("goodStatus").className=goodA>=.95-1e-12?"goodtext":"badtext";
+$("badStatus").className=1-badA>=.9-1e-12?"goodtext":"badtext";
+chart();
+}
+function setValue(id,delta){
+const el=$(id);
+el.value=clamp(Number(el.value)+delta,Number(el.min),Number(el.max));
+update();
+}
+document.querySelectorAll("[data-id]").forEach(button=>{
+button.onclick=()=>{if(!won)setValue(button.dataset.id,Number(button.dataset.delta))};
+});
+$("sample").oninput=()=>{if(!won)update()};
+$("acceptance").oninput=()=>{if(!won)update()};
+function experiment(times){
+let accepted=0,rejected=0;
+for(let trial=0;trial<times;trial++){
+let defects=0;
+for(let i=0;i<n;i++)if(rand()<PB/100)defects++;
+if(defects<=c)accepted++;else rejected++;
+}
+runCount+=times;passCount+=accepted;failCount+=rejected;
+$("runs").textContent="At "+PB+"% defects: "+passCount+" samples accepted, "+failCount+
+" rejected in "+runCount+" experiments. Experimental rejection: "+(100*failCount/runCount).toFixed(1)+"%.";
+}
+$("sampleRun").onclick=()=>experiment(1);
+$("inspectTen").onclick=()=>experiment(10);
+function reset(){
+won=false;tries=0;hinted=false;
+product=products[round];PG=PLANS[round][0];PB=PLANS[round][1];$("goodRate").textContent="Defect rate "+PG+"%";$("badRate").textContent="Defect rate "+PB+"%";
+$("question").textContent="Your factory produces "+product+
+". Choose a plan (n,c) that accepts a good batch with "+PG+"% defects at least 95% of the time and rejects a bad batch with "+PB+"% defects at least 90% of the time.";
+$("round").textContent="Round "+(round+1)+"/6";
+$("score").textContent="Score "+score;
+$("sample").value=20;
+$("acceptance").value=4;
+$("sample").disabled=false;$("acceptance").disabled=false;
+$("hint").disabled=false;$("check").hidden=false;$("next").hidden=true;
+runCount=passCount=failCount=0;$("runs").textContent="No experimental samples yet.";
+factory();update();msg("Select n and c to meet both acceptance-sampling requirements.");
+}
+function msg(t,type=""){$("feedback").textContent=t;$("feedback").className="feedback "+type}
+$("hint").onclick=()=>{
+if(won)return;hinted=true;$("hint").disabled=true;
+msg("Increasing n makes good and bad batches easier to distinguish. Increasing c makes both types more likely to be accepted. Balance both effects.");
+};
+$("check").onclick=()=>{
+if(won)return;tries++;
+if(goodA>=.95-1e-12&&1-badA>=.9-1e-12){
+won=true;const gain=hinted?50:tries===1?100:tries===2?75:50;
+score+=gain;$("score").textContent="Score "+score;
+$("sample").disabled=true;$("acceptance").disabled=true;$("hint").disabled=true;
+$("check").hidden=true;$("next").hidden=false;
+$("next").textContent=round===5?"See results ★":"Next round →";
+msg("★ Sampling plan approved! n = "+n+", c = "+c+
+". Your OC curve satisfies both risk limits. +"+gain+" points.","good");
+}else{
+const parts=[];
+if(goodA<.95)parts.push("Good-batch acceptance is "+(100*(.95-goodA)).toFixed(2)+" percentage points too low");
+if(1-badA<.9)parts.push("Bad-batch rejection is "+(100*(badA-.1)).toFixed(2)+" percentage points too low");
+msg(parts.join(". ")+". Adjust the plan and try again.","bad");
+}
+};
+$("next").onclick=()=>{
+round++;if(round<6)reset();else{
+$("game").hidden=true;$("end").style.display="block";$("round").textContent="Finished";
+let stars=score>=500?3:score>=350?2:1;
+$("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
+$("final").textContent="Score: "+score+" / 600. You completed six acceptance-sampling decisions.";
+}
+};
+$("again").onclick=()=>{round=score=0;seed=(seed+11359)>>>0;$("game").hidden=false;$("end").style.display="none";reset()};
+reset();
+})();
+</script>
+</body>
+</html>

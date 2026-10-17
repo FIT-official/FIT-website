@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bayes Lab | FIT</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+button,input{font:inherit}
+button{min-height:44px;cursor:pointer;border:2px solid #111;border-radius:999px;padding:9px 15px;font-weight:800;background:#fff;box-shadow:var(--sh-1);color:#111}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.5;cursor:default}
+button.primary{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
+button.primary:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button.accent{background:var(--lvl-uni);color:white}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+input[type="range"]{width:100%;min-height:44px;accent-color:var(--lvl-uni);cursor:pointer}
+.wrap{max-width:1240px;margin:auto;padding:18px 16px 48px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-size:13px;font-weight:900;letter-spacing:.12em}
+.hud{display:flex;flex-wrap:wrap;gap:8px;font-weight:800}
+.badge,.stat{display:inline-block;border:2px solid #111;border-radius:999px;padding:7px 12px;font-size:12px}
+.badge{background:var(--lvl-uni);color:var(--lvl-uni-on);text-transform:uppercase;font-weight:900}
+.stat{background:#fff}
+h1{font-size:clamp(31px,5vw,48px);line-height:1.08;letter-spacing:-.045em;font-weight:800;margin:16px 0 20px}
+h2{font-size:20px;font-weight:800;margin:0 0 12px}
+h3{font-size:16px;font-weight:800;margin:0 0 10px}
+p{margin:0 0 12px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.panel{min-width:0;border:2px solid #111;border-radius:24px;background:white;box-shadow:var(--sh-2);padding:20px}
+.stage{background:var(--lvl-uni-tint)}
+.question{font-size:18px;font-weight:800;line-height:1.4;min-height:92px}
+.controls{display:grid;gap:13px;margin-top:16px}
+.control{border:2px solid #111;border-radius:16px;background:white;padding:12px 14px}
+.control-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;font-weight:800}
+.control output{font-size:22px;font-weight:900}
+.stepper{display:flex;justify-content:center;align-items:center;gap:7px;margin:10px 0;flex-wrap:wrap}
+.stepper button{min-width:45px;padding:8px}
+.limits{display:flex;justify-content:space-between;font-size:12px;color:var(--fit-ink-3);font-weight:600}
+.scene{border:2px solid #111;border-radius:16px;padding:10px;background:#fff;margin:15px 0}
+.scene svg{width:100%;height:auto;display:block}
+.gridscene{border:2px solid #111;border-radius:16px;background:white;padding:12px;margin-top:15px}
+.gridscene svg{width:100%;height:auto;display:block}
+.gridLegend{display:flex;flex-wrap:wrap;gap:8px 13px;font-size:12px;font-weight:800;margin:12px 0 0}
+.key{display:inline-block;width:14px;height:14px;border:2px solid #111;border-radius:3px;vertical-align:-2px;margin-right:5px}
+.muted{font-size:13px;color:var(--fit-ink-3)}
+.plot{border:2px solid var(--fit-line-soft);border-radius:16px;background:white;padding:7px;margin:0 0 14px}
+.plot svg{width:100%;height:auto;display:block}
+.figures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:15px 0}
+.figurebox{border:2px solid #111;border-radius:13px;padding:11px;background:white}
+.figurebox span{display:block;font-size:12px;font-weight:800;color:var(--fit-ink-3)}
+.figurebox strong{font-size:17px;display:block;font-weight:900}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.feedback{min-height:66px;padding:12px;border:2px solid var(--fit-line-soft);border-radius:12px;background:white;margin-top:14px;font-weight:600}
+.feedback.good{background:#E7FAEF;border-color:var(--fit-success)}
+.feedback.bad{background:#FFF0EF;border-color:var(--fit-danger)}
+.concept{margin-top:17px;border-top:2px solid var(--fit-line-soft);padding-top:15px}
+.concept svg{display:block;max-width:320px;width:100%;height:auto;margin:auto}
+details{border:2px solid #111;border-radius:16px;padding:12px 16px;margin-top:15px;background:var(--fit-sunken)}
+summary{cursor:pointer;font-weight:800;min-height:30px}
+.end{display:none;text-align:center;padding:42px 16px}
+.stars{font-size:53px;color:#D39B00;letter-spacing:5px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:440px){.panel{padding:13px}.control{padding:10px}.question{font-size:16px}.figurebox strong{font-size:14px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+<div class="brand">FIT / PROBABILITY LAB</div>
+<div class="hud">
+<span class="badge">University, Probability and Statistics</span>
+<span class="stat" id="round">Round 1/6</span>
+<span class="stat" id="score">Score 0</span>
+</div>
+</header>
+<h1>Bayes Lab</h1>
+<div class="layout" id="game">
+<section class="panel stage">
+<h2 id="type">Bayesian reasoning</h2>
+<p id="question" class="question"></p>
+<div id="scene" class="scene"></div>
+<div id="controls" class="controls"></div>
+<div class="concept">
+<h3 id="conceptTitle">Concept figure</h3>
+<div id="conceptFigure"></div>
+<p class="muted" id="caption"></p>
+</div>
+</section>
+<section class="panel">
+<h2>Live Bayesian analysis</h2>
+<div id="plot1" class="plot"></div>
+<div id="plot2" class="plot"></div>
+<div id="data" class="figures"></div>
+<div class="actions">
+<button id="hint">Hint − points</button>
+<button id="check" class="primary">Check ✓</button>
+<button id="next" hidden>Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite">Adjust the model and examine the changes.</div>
+<details>
+<summary>The maths</summary>
+<p><strong>Bayes' theorem:</strong> P(D | +) = P(+ | D)P(D) / P(+).</p>
+<p>For a test with prevalence π, sensitivity Se and specificity Sp:</p>
+<p>P(D | +) = Seπ / [Seπ + (1−Sp)(1−π)].</p>
+<p><strong>Beta–Binomial:</strong> θ ~ Beta(α,β) and k successes from n independent Bernoulli trials give θ | data ~ Beta(α+k, β+n−k).</p>
+<p>Posterior mean = (α+k)/(α+β+n).</p>
+<p>The equal-tailed 95% credible interval uses the posterior's 2.5th and 97.5th percentiles.</p>
+<p>Beta probabilities are evaluated using the regularised incomplete beta function and continued fractions; quantiles use bisection. Density plots use the log-gamma function.</p>
+<p><strong>Assumptions:</strong> fixed test accuracy within a scenario; independent, identically distributed Bernoulli observations for the updating model.</p>
+</details>
+</section>
+</div>
+<section class="panel end" id="end">
+<h2>Bayesian research complete!</h2>
+<div class="stars" id="stars"></div>
+<p id="final"></p>
+<button id="again" class="primary">Play again ↻</button>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+let seed=483919,round=0,score=0,tries=0,hinted=false,won=false,kind="A";
+let prevalence=.05,sensitivity=.9,specificity=.95,targetPPV=0,targetPrevalence=.02;
+let alpha=2,beta=2,trueAlpha=0,trueBeta=0,k=0,nObs=20;
+let targetMean=0,targetLow=0,targetHigh=0,posteriorMean=0,ciLow=0,ciHigh=0;
+let nGrid=1000;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+function rand(){seed=(Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296}
+function pick(a){return a[Math.floor(rand()*a.length)]}
+function fmt(x){return x.toFixed(4)}
+function msg(t,type=""){$("feedback").textContent=t;$("feedback").className="feedback "+type}
+function ppv(pi,se,sp){
+const pos=se*pi+(1-sp)*(1-pi);
+return pos>0?clamp(se*pi/pos,0,1):0;
+}
+function valuePanel(name,value){
+return '<div class="figurebox"><span>'+name+'</span><strong>'+value+'</strong></div>';
+}
+function logGamma(z){
+const a=[
+.99999999999980993,676.5203681218851,-1259.1392167224028,
+771.32342877765313,-176.61502916214059,12.507343278686905,
+-.13857109526572012,9.984369578019572e-6,1.5056327351493116e-7
+];
+if(z<.5)return Math.log(Math.PI)-Math.log(Math.sin(Math.PI*z))-logGamma(1-z);
+z-=1;
+let x=a[0];
+for(let i=1;i<a.length;i++)x+=a[i]/(z+i);
+const t=z+7.5;
+return .5*Math.log(2*Math.PI)+(z+.5)*Math.log(t)-t+Math.log(x);
+}
+function logBeta(a,b){return logGamma(a)+logGamma(b)-logGamma(a+b)}
+function betaPDF(x,a,b){
+if(x<=0||x>=1)return 0;
+const logarithm=(a-1)*Math.log(x)+(b-1)*Math.log1p(-x)-logBeta(a,b);
+return Math.exp(clamp(logarithm,-740,700));
+}
+function betaContinuedFraction(a,b,x){
+const MAX=300,EPS=3e-14,FPMIN=1e-300;
+let qab=a+b,qap=a+1,qam=a-1;
+let c=1,d=1-qab*x/qap;
+if(Math.abs(d)<FPMIN)d=FPMIN;
+d=1/d;let h=d;
+for(let m=1;m<=MAX;m++){
+let m2=2*m;
+let aa=m*(b-m)*x/((qam+m2)*(a+m2));
+d=1+aa*d;if(Math.abs(d)<FPMIN)d=FPMIN;
+c=1+aa/c;if(Math.abs(c)<FPMIN)c=FPMIN;
+d=1/d;h*=d*c;
+aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+d=1+aa*d;if(Math.abs(d)<FPMIN)d=FPMIN;
+c=1+aa/c;if(Math.abs(c)<FPMIN)c=FPMIN;
+d=1/d;let delta=d*c;h*=delta;
+if(Math.abs(delta-1)<EPS)break;
+}
+return h;
+}
+function betaCDF(x,a,b){
+if(x<=0)return 0;
+if(x>=1)return 1;
+if(!(a>0&&b>0))return 0;
+let bt=Math.exp(logGamma(a+b)-logGamma(a)-logGamma(b)+
+a*Math.log(x)+b*Math.log1p(-x));
+let threshold=(a+1)/(a+b+2);
+const result=x<threshold?
+bt*betaContinuedFraction(a,b,x)/a:
+1-bt*betaContinuedFraction(b,a,1-x)/b;
+return clamp(result,0,1);
+}
+function betaQuantile(q,a,b){
+if(q<=0)return 0;if(q>=1)return 1;
+let lo=0,hi=1;
+for(let i=0;i<60;i++){
+let mid=(lo+hi)/2;
+if(betaCDF(mid,a,b)<q)lo=mid;else hi=mid;
+}
+return (lo+hi)/2;
+}
+function posterior(){
+const A=alpha+k,B=beta+nObs-k;
+posteriorMean=A/(A+B);
+ciLow=betaQuantile(.025,A,B);
+ciHigh=betaQuantile(.975,A,B);
+}
+function control(id,label,min,max,step,value,suffix=""){
+return '<div class="control"><div class="control-head"><label for="'+id+'">'+label+
+'</label><output id="'+id+'Out">'+(value*suffixFactor(suffix)).toFixed(suffix==="%"?1:0)+suffix+'</output></div>'+
+'<div class="stepper"><button data-id="'+id+'" data-step="'+(-step*5)+'" aria-label="'+label+' coarse decrease">−−</button>'+
+'<button data-id="'+id+'" data-step="'+(-step)+'" aria-label="'+label+' decrease">−</button>'+
+'<button data-id="'+id+'" data-step="'+step+'" aria-label="'+label+' increase">+</button>'+
+'<button data-id="'+id+'" data-step="'+(step*5)+'" aria-label="'+label+' coarse increase">++</button></div>'+
+'<input type="range" id="'+id+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+value+'">'+
+'<div class="limits"><span>'+min*suffixFactor(suffix)+suffix+'</span><span>'+max*suffixFactor(suffix)+suffix+'</span></div></div>';
+}
+function suffixFactor(s){return s==="%"?100:1}
+function controlUpdate(){
+if(kind==="A")prevalence=Number($("prevalence").value)/1000;
+else{alpha=Number($("alpha").value);beta=Number($("beta").value);posterior()}
+$("controls").querySelectorAll('input[type="range"]').forEach(el=>{
+$(el.id+"Out").textContent=el.id==="prevalence"?
+(Number(el.value)/10).toFixed(1)+"%":el.value;
+});
+draw();
+}
+function initControls(){
+if(kind==="A"){
+$("controls").innerHTML=control("prevalence","Prevalence π",1,500,1,Math.round(prevalence*1000));
+$("prevalenceOut").textContent=(prevalence*100).toFixed(1)+"%";
+$("controls").querySelector(".limits").innerHTML="<span>0.1%</span><span>50%</span>";
+}else{
+$("controls").innerHTML=control("alpha","Prior successes α",1,12,1,alpha)+
+control("beta","Prior failures β",1,12,1,beta);
+}
+$("controls").oninput=e=>{
+if(e.target.matches('input[type="range"]'))controlUpdate();
+};
+$("controls").onclick=e=>{
+let btn=e.target.closest("[data-id]");if(!btn||won)return;
+const el=$(btn.dataset.id);
+el.value=clamp(Number(el.value)+Number(btn.dataset.step),Number(el.min),Number(el.max));
+controlUpdate();
+};
+}
+function naturalFrequency(){
+const p=prevalence,se=sensitivity,sp=specificity;
+const diseased=Math.round(nGrid*p);
+const tp=Math.round(diseased*se),fn=diseased-tp;
+const healthy=nGrid-diseased;
+const tn=Math.round(healthy*sp),fp=healthy-tn;
+const box=8,space=1.5,cols=40;
+let content='<svg viewBox="0 0 390 276" role="img" aria-label="One thousand people shown as a natural-frequency grid with positive, negative, true and false test results">'+
+'<text x="195" y="17" text-anchor="middle" font-size="15" font-weight="800">1,000-person frequency grid</text>';
+const colours=["#1F66E5","#FF8FB8","#3DBE6B","#E4E2DB"];
+const sizes=[tp,fn,fp,tn];
+let index=0;
+for(let group=0;group<4;group++){
+for(let i=0;i<sizes[group];i++){
+const col=index%cols,row=Math.floor(index/cols);
+const x=5+col*(box+space),y=28+row*(box+space);
+content+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+
+'" width="'+box+'" height="'+box+'" rx="2" fill="'+colours[group]+'"/>';
+index++;
+}
+}
+content+='</svg>';
+$("scene").innerHTML=content+
+'<div class="gridLegend"><span><i class="key" style="background:#1F66E5"></i>True positive</span>'+
+'<span><i class="key" style="background:#FF8FB8"></i>False negative</span>'+
+'<span><i class="key" style="background:#3DBE6B"></i>False positive</span>'+
+'<span><i class="key" style="background:#E4E2DB"></i>True negative</span></div>'+
+'<p class="muted">Icon totals are rounded to whole people for illustration; probability calculations use unrounded values.</p>';
+$("data").innerHTML=valuePanel("Test sensitivity",Math.round(sensitivity*100)+"%")+
+valuePanel("Test specificity",Math.round(specificity*100)+"%")+
+valuePanel("People in illustration",nGrid.toLocaleString("en-GB"))+
+valuePanel("Positive tests in grid",tp+fp);
+}
+function betaScene(){
+const total=nObs,successes=k;
+let s='<svg viewBox="0 0 390 127" role="img" aria-label="'+k+' successes in '+nObs+' Bernoulli observations">'+
+'<text x="195" y="20" text-anchor="middle" font-size="15" font-weight="800">Observed Bernoulli outcomes</text>';
+for(let i=0;i<total;i++){
+let x=13+(i%10)*37,y=36+Math.floor(i/10)*35;
+s+='<rect x="'+x+'" y="'+y+'" width="30" height="27" rx="8" stroke="#111" stroke-width="2" fill="'+
+(i<successes?"#1F66E5":"#FF8FB8")+'"/>';
+s+='<text x="'+(x+15)+'" y="'+(y+19)+'" text-anchor="middle" font-size="16" font-weight="800" fill="'+
+(i<successes?"#fff":"#111")+'">'+(i<successes?"✓":"×")+'</text>';
+}
+s+='</svg>';
+$("scene").innerHTML=s+
+'<div class="gridLegend"><span><i class="key" style="background:#1F66E5"></i>Success</span>'+
+'<span><i class="key" style="background:#FF8FB8"></i>Failure</span></div>';
+$("data").innerHTML=valuePanel("Observed successes",k+" / "+nObs)+
+valuePanel("Observed failures",nObs-k+" / "+nObs)+
+valuePanel("Prior distribution","Beta(α, β)")+
+valuePanel("Posterior distribution","Beta(α+k, β+n−k)");
+}
+function chartFrame(title,xlabel,ylabel,aria){
+const W=470,H=295,L=64,R=452,T=39,B=236;
+let s='<svg viewBox="0 0 470 295" role="img" aria-label="'+aria+'">';
+s+='<text x="235" y="20" font-size="15" font-weight="800" text-anchor="middle">'+title+'</text>';
+s+='<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+B+'" stroke="#111" stroke-width="2"/>'+
+'<line x1="'+L+'" y1="'+B+'" x2="'+R+'" y2="'+B+'" stroke="#111" stroke-width="2"/>';
+s+='<text transform="translate(13 143) rotate(-90)" font-size="12" text-anchor="middle">'+ylabel+'</text>'+
+'<text x="257" y="286" font-size="12" text-anchor="middle">'+xlabel+'</text>';
+return {s,W,H,L,R,T,B};
+}
+function betaChart(){
+const A=alpha+k,B=beta+nObs-k;
+let points=[],prior=[],post=[],ymax=0;
+for(let i=0;i<=200;i++){
+let x=Math.max(.000001,Math.min(.999999,i/200));
+let a=betaPDF(x,alpha,beta),b=betaPDF(x,A,B);
+prior.push([x,a]);post.push([x,b]);ymax=Math.max(ymax,a,b);
+}
+ymax=Math.max(1,ymax*1.15);
+const f=chartFrame("Prior and posterior density","θ (success probability)","Density (per unit θ)",
+"Prior and posterior beta density curves with a shaded equal-tailed credible interval");
+const {L,R,T,B:yBottom}=f;
+const X=x=>L+x*(R-L),Y=y=>yBottom-clamp(y/ymax,0,1)*(yBottom-T);
+let s=f.s;
+for(let i=0;i<=4;i++){
+const y=i*ymax/4,yy=Y(y);
+s+='<line x1="'+L+'" x2="'+R+'" y1="'+yy+'" y2="'+yy+'" stroke="#E9E9E9"/>'+
+'<text x="'+(L-7)+'" y="'+(yy+4)+'" text-anchor="end" font-size="10">'+y.toFixed(1)+'</text>';
+s+='<text x="'+X(i/4)+'" y="254" text-anchor="middle" font-size="11">'+(i/4).toFixed(2)+'</text>';
+}
+s+='<rect x="'+X(ciLow)+'" y="'+T+'" width="'+(X(ciHigh)-X(ciLow))+
+'" height="'+(yBottom-T)+'" fill="#E2ECFD"/>';
+s+='<polyline points="'+prior.map(q=>X(q[0])+","+Y(q[1])).join(" ")+
+'" fill="none" stroke="#D94B7A" stroke-width="3"/>';
+s+='<polyline points="'+post.map(q=>X(q[0])+","+Y(q[1])).join(" ")+
+'" fill="none" stroke="#1F66E5" stroke-width="3"/>';
+s+='<line x1="'+X(posteriorMean)+'" x2="'+X(posteriorMean)+'" y1="'+T+'" y2="'+yBottom+
+'" stroke="#111" stroke-width="2" stroke-dasharray="6 4"/>';
+s+='<line x1="80" x2="103" y1="33" y2="33" stroke="#D94B7A" stroke-width="3"/>'+
+'<text x="107" y="37" font-size="10">Prior</text>'+
+'<line x1="166" x2="189" y1="33" y2="33" stroke="#1F66E5" stroke-width="3"/>'+
+'<text x="193" y="37" font-size="10">Posterior</text>'+
+'<rect x="286" y="27" width="12" height="12" fill="#E2ECFD" stroke="#111"/>'+
+'<text x="302" y="37" font-size="10">95% CI</text></svg>';
+$("plot1").innerHTML=s;
+}
+function ppvChart(){
+const f=chartFrame("PPV versus prevalence","Prevalence π (%) · log scale","PPV (proportion)",
+"Positive predictive value as a function of prevalence, with current setting marked");
+let {s,L,R,T,B}=f;
+const xmin=Math.log10(.001),xmax=Math.log10(.5);
+const X=p=>L+(Math.log10(clamp(p,.001,.5))-xmin)/(xmax-xmin)*(R-L);
+const Y=p=>B-clamp(p,0,1)*(B-T);
+for(let i=0;i<=4;i++){
+let v=i/4,yy=Y(v);
+s+='<line x1="'+L+'" x2="'+R+'" y1="'+yy+'" y2="'+yy+'" stroke="#E7E7E7"/>'+
+'<text x="'+(L-8)+'" y="'+(yy+4)+'" font-size="11" text-anchor="end">'+v.toFixed(2)+'</text>';
+}
+[.001,.005,.01,.05,.1,.5].forEach(v=>{
+let x=X(v);
+s+='<line x1="'+x+'" x2="'+x+'" y1="'+T+'" y2="'+B+'" stroke="#EEEEEE"/>'+
+'<text x="'+x+'" y="255" font-size="10" text-anchor="middle">'+(v*100).toFixed(1)+'</text>';
+});
+let series=[];
+for(let i=0;i<=200;i++){
+let p=Math.pow(10,xmin+(xmax-xmin)*i/200);
+series.push([X(p),Y(ppv(p,sensitivity,specificity))]);
+}
+s+='<polyline fill="none" stroke="#1F66E5" stroke-width="3.5" points="'+
+series.map(q=>q.join(",")).join(" ")+'"/>';
+let current=kind==="A"?prevalence:.05;
+let x=X(current),y=Y(ppv(current,sensitivity,specificity));
+s+='<line x1="'+x+'" x2="'+x+'" y1="'+T+'" y2="'+B+'" stroke="#D92D20" stroke-width="2" stroke-dasharray="5 4"/>'+
+'<circle cx="'+x+'" cy="'+y+'" r="7" fill="#FFDD00" stroke="#111" stroke-width="2"/>'+
+'<line x1="85" y1="31" x2="111" y2="31" stroke="#1F66E5" stroke-width="3"/>'+
+'<text x="115" y="35" font-size="10">Model</text>'+
+'<circle cx="183" cy="31" r="5" fill="#FFDD00" stroke="#111" stroke-width="2"/>'+
+'<text x="193" y="35" font-size="10">Current point</text></svg>';
+$("plot2").innerHTML=s;
+}
+function diagnosticChart(){
+const p=prevalence,se=sensitivity,sp=specificity;
+const truePositive=p*se,falsePositive=(1-p)*(1-sp);
+let f=chartFrame("Positive-test contributions","Source of positive result","Joint probability (proportion)",
+"Relative contributions of true positive and false positive test results");
+const {L,R,T,B}=f;
+const ymax=Math.max(.03,truePositive,falsePositive)*1.25;
+const Y=v=>B-v/ymax*(B-T);
+let s=f.s;
+for(let i=0;i<=4;i++){
+let v=i*ymax/4,y=Y(v);
+s+='<line x1="'+L+'" x2="'+R+'" y1="'+y+'" y2="'+y+'" stroke="#E6E6E6"/>'+
+'<text x="'+(L-7)+'" y="'+(y+4)+'" font-size="10" text-anchor="end">'+v.toFixed(3)+'</text>';
+}
+[[truePositive,137,"D and +","#1F66E5"],[falsePositive,322,"Not D and +","#3DBE6B"]].forEach(q=>{
+let h=B-Y(q[0]);
+s+='<rect x="'+(q[1]-46)+'" y="'+Y(q[0])+'" width="92" height="'+h+
+'" fill="'+q[3]+'" stroke="#111" stroke-width="2" rx="5"/>'+
+'<text x="'+q[1]+'" y="255" text-anchor="middle" font-size="12" font-weight="700">'+q[2]+'</text>';
+});
+s+='</svg>';$("plot1").innerHTML=s;
+}
+function concept(){
+if(kind==="A"){
+$("conceptTitle").textContent="Diagnostic probability tree";
+$("conceptFigure").innerHTML='<svg viewBox="0 0 330 155" role="img" aria-label="Diagnostic test tree separating disease and no disease, then positive and negative outcomes">'+
+'<g stroke="#111" stroke-width="3" fill="none"><path d="M25 79 L120 37 M25 79 L120 121"/>'+
+'<path d="M127 37 L232 16 M127 37 L232 65 M127 121 L232 101 M127 121 L232 147"/></g>'+
+'<g font-weight="800" font-size="12"><text x="12" y="71">Start</text><text x="124" y="28">D</text>'+
+'<text x="120" y="145">Not D</text><text x="237" y="19">D and +</text>'+
+'<text x="237" y="68">D and −</text><text x="237" y="103">Not D and +</text>'+
+'<text x="237" y="150">Not D and −</text></g>'+
+'<circle cx="25" cy="79" r="7" fill="#FFDD00" stroke="#111" stroke-width="2"/>'+
+'<circle cx="120" cy="37" r="7" fill="#1F66E5" stroke="#111" stroke-width="2"/>'+
+'<circle cx="120" cy="121" r="7" fill="#FF8FB8" stroke="#111" stroke-width="2"/></svg>';
+$("caption").textContent="A positive result can originate from either a true positive or a false positive.";
+}else{
+$("conceptTitle").textContent="Conjugate Bayesian update";
+$("conceptFigure").innerHTML='<svg viewBox="0 0 330 128" role="img" aria-label="Prior and observed data combine to form posterior">'+
+'<rect x="4" y="25" width="90" height="60" rx="14" fill="#FF8FB8" stroke="#111" stroke-width="3"/>'+
+'<rect x="120" y="25" width="90" height="60" rx="14" fill="#FFC83D" stroke="#111" stroke-width="3"/>'+
+'<rect x="236" y="25" width="90" height="60" rx="14" fill="#1F66E5" stroke="#111" stroke-width="3"/>'+
+'<g text-anchor="middle" font-size="13" font-weight="800"><text x="49" y="61">Prior</text>'+
+'<text x="165" y="61">Data</text><text x="281" y="61" fill="white">Posterior</text></g>'+
+'<path d="M96 54 L117 54 M108 46 L108 62" stroke="#111" stroke-width="3"/>'+
+'<path d="M211 54 L233 54 M224 46 L233 54 L224 62" stroke="#111" stroke-width="3" fill="none"/>'+
+'<text x="165" y="111" text-anchor="middle" font-size="12">Update beliefs with observed outcomes</text></svg>';
+$("caption").textContent="For the Beta–Binomial model, successful and unsuccessful observations add to prior parameters.";
+}
+}
+function draw(){
+if(kind==="A"){
+naturalFrequency();diagnosticChart();ppvChart();
+}else{
+betaScene();betaChart();ppvChart();
+}
+}
+function start(){
+won=false;tries=0;hinted=false;
+kind=round%2===0?"A":"B";
+$("round").textContent="Round "+(round+1)+"/6";
+$("score").textContent="Score "+score;
+$("check").hidden=false;$("next").hidden=true;$("hint").disabled=false;
+if(kind==="A"){
+targetPrevalence=pick([.005,.01,.02,.03,.05,.08,.1,.15,.2]);
+sensitivity=pick([.8,.9,.95]);
+specificity=pick([.9,.95,.98,.99]);
+targetPPV=ppv(targetPrevalence,sensitivity,specificity);
+prevalence=targetPrevalence===.05?.1:.05;
+$("type").textContent="Diagnostic tests · base rates";
+$("question").textContent="A test has sensitivity "+Math.round(sensitivity*100)+"% and specificity "+
+Math.round(specificity*100)+"%. Set the population prevalence so that "+
+"P(D | positive) = "+targetPPV.toFixed(4)+" (tolerance ±0.0005).";
+}else{
+trueAlpha=pick([2,3,4,5,6,7,8,9]);
+trueBeta=pick([2,3,4,5,6,7,8,9]);
+nObs=20;k=pick([5,7,9,11,13,15]);
+const A=trueAlpha+k,B=trueBeta+nObs-k;
+targetMean=A/(A+B);
+targetLow=betaQuantile(.025,A,B);
+targetHigh=betaQuantile(.975,A,B);
+alpha=trueAlpha===2?4:2;
+beta=trueBeta===2?5:2;
+posterior();
+$("type").textContent="Beta–Binomial · prior updating";
+$("question").textContent="You observe "+k+" successes in "+nObs+
+" Bernoulli trials. Choose α and β of a Beta prior so that the posterior mean is "+
+targetMean.toFixed(4)+" and its 95% equal-tailed credible interval is ["+
+targetLow.toFixed(4)+", "+targetHigh.toFixed(4)+
+"]. Match the mean within ±0.0001 and both interval endpoints within ±0.0005.";
+}
+initControls();concept();draw();
+msg("Use the controls and both plots to investigate the model.");
+}
+function check(){
+if(won)return;
+tries++;let ok=false,detail="";
+if(kind==="A"){
+const current=ppv(prevalence,sensitivity,specificity);
+const diff=current-targetPPV;
+ok=Math.abs(diff)<=.0005;
+detail="Your positive predictive value is "+Math.abs(diff).toFixed(5)+
+(diff>0?" too high.":" too low.")+" Remember that prevalence affects the denominator.";
+}else{
+const meanDiff=posteriorMean-targetMean;
+const lowDiff=ciLow-targetLow,highDiff=ciHigh-targetHigh;
+ok=Math.abs(meanDiff)<=.0001&&Math.abs(lowDiff)<=.0005&&Math.abs(highDiff)<=.0005;
+detail=Math.abs(meanDiff)>.0001?
+"Posterior mean is "+Math.abs(meanDiff).toFixed(5)+(meanDiff>0?" too high.":" too low."):
+"Posterior mean matches. Your credible interval differs; adjust the prior concentration α + β while maintaining the mean.";
+}
+if(ok){
+won=true;const gain=hinted?50:tries===1?100:tries===2?75:50;
+score+=gain;$("score").textContent="Score "+score;
+$("hint").disabled=true;$("check").hidden=true;$("next").hidden=false;
+$("controls").querySelectorAll("input").forEach(el=>el.disabled=true);
+$("next").textContent=round===5?"See results ★":"Next round →";
+msg("★ Correct! "+(kind==="A"?
+"The base rate, sensitivity and false-positive rate together determine PPV.":
+"Conjugate updating adds observations to the two Beta parameters.")+
+" +"+gain+" points.","good");
+}else msg(detail,"bad");
+}
+$("hint").onclick=()=>{
+if(won)return;hinted=true;$("hint").disabled=true;
+msg(kind==="A"?
+"Use PPV = Seπ / [Seπ+(1−Sp)(1−π)]. A rarer condition generally produces more false positives relative to true positives.":
+"The posterior parameters are α+k and β+n−k. First match the posterior mean, then tune the prior's total concentration.");
+};
+$("check").onclick=check;
+$("next").onclick=()=>{
+round++;
+if(round<6)start();
+else{
+$("game").hidden=true;$("end").style.display="block";
+$("round").textContent="Finished";
+let stars=score>=500?3:score>=350?2:1;
+$("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
+$("final").textContent="Final score: "+score+
+" / 600. You completed six challenges on Bayes' theorem, base rates and posterior updating.";
+}
+};
+$("again").onclick=()=>{
+round=score=0;seed=(seed+14387)>>>0;
+$("game").hidden=false;$("end").style.display="none";
+start();
+};
+start();
+})();
+</script>
+</body>
+</html>
