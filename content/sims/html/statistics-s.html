@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en-GB">
 <head>
@@ -1725,40 +1724,7 @@ const FITCalcStats = (function () {
         cx: x(v), cy: baseline - 18 - count * 24,
         r: 10, fill: COLORS[i % COLORS.length],
         stroke: '#111', 'stroke-width': 2.5,
-        tabindex: 0, role: 'slider', class: 'drag',
-        'aria-label': 'Data card ' + (i + 1) +
-          ', ' + v + ' centimetres',
-        'aria-valuemin': game.minValue,
-        'aria-valuemax': game.maxValue,
-        'aria-valuenow': v
-      });
-
-      dot.addEventListener('keydown', e => {
-        if (game.solved) return;
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-          e.preventDefault();
-          moveCard(i, v - 1);
-        }
-        if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-          e.preventDefault();
-          moveCard(i, v + 1);
-        }
-      });
-
-      dot.addEventListener('pointerdown', e => {
-        if (game.solved) return;
-        e.preventDefault();
-        dot.setPointerCapture(e.pointerId);
-      });
-
-      dot.addEventListener('pointermove', e => {
-        if (game.solved || !dot.hasPointerCapture(e.pointerId)) return;
-        const rect = svg.getBoundingClientRect();
-        const relativeX = (e.clientX - rect.left) * 400 / rect.width;
-        const value = game.minValue +
-          (relativeX - left) / (right - left) *
-          (game.maxValue - game.minValue);
-        moveCard(i, Math.round(value));
+        'aria-hidden': 'true', 'pointer-events': 'none'
       });
 
       svg.appendChild(dot);
@@ -1824,51 +1790,6 @@ const FITCalcStats = (function () {
         fill: COLORS[i], stroke: '#111',
         'stroke-width': 2
       }));
-
-      const hit = S('rect', {
-        x: x1, y: top, width: x2 - x1,
-        height: plotH, fill: 'transparent',
-        class: 'drag', tabindex: 0, role: 'slider',
-        'aria-valuemin': 0, 'aria-valuemax': 3,
-        'aria-valuenow': density,
-        'aria-label': 'Histogram frequency density for class ' +
-          game.edges[i] + ' to ' + game.edges[i + 1]
-      });
-
-      hit.addEventListener('keydown', e => {
-        if (game.solved) return;
-        if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
-          e.preventDefault();
-          game.histogramBars[i] = clamp(
-            Number((density + 0.05).toFixed(2)), 0, 3);
-          draw();
-        }
-        if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
-          e.preventDefault();
-          game.histogramBars[i] = clamp(
-            Number((density - 0.05).toFixed(2)), 0, 3);
-          draw();
-        }
-      });
-
-      hit.addEventListener('pointerdown', e => {
-        if (game.solved) return;
-        e.preventDefault();
-        hit.setPointerCapture(e.pointerId);
-      });
-
-      hit.addEventListener('pointermove', e => {
-        if (game.solved || !hit.hasPointerCapture(e.pointerId)) return;
-        const rect = svg.getBoundingClientRect();
-        const py = (e.clientY - rect.top) * 300 / rect.height;
-        const newDensity = clamp(
-          Math.round((bottom - py) / plotH * maxDensity * 20) / 20,
-          0, 3);
-        game.histogramBars[i] = newDensity;
-        renderPlot();
-      });
-
-      svg.appendChild(hit);
     });
 
     line(svg, left, top, left, bottom, '#111', 3);
