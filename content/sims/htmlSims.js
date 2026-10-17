@@ -53,7 +53,7 @@ const fractionsRatio = {
   concept: 'fractions-ratio',
   accent: '#8B5CF6',
   minutes: '10–15',
-  status: 'draft'
+  status: 'live'
 };
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
