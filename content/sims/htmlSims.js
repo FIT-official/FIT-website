@@ -55,6 +55,142 @@ const fractionsRatio = {
   minutes: '10–15',
   status: 'live'
 };
+// Moles family (calc: lib/sims/families/moles.calc.js, inlined in each file); ChatGPT registry snippet (fix1), status draft.
+const moles = {
+  subject: 'Chemistry',
+  concept: 'moles',
+  accent: '#14B8A6',
+  minutes: '10–15',
+  status: 'draft'
+};
+
+const molesEntries = [
+  {
+    ...moles,
+    id: 'moles-p',
+    title: 'Bead Builder',
+    subject: 'Science',
+    level: 'Primary',
+    topic: 'Counting in groups and conservation of mass',
+    symbol: '🧩',
+    height: 1965,
+    syllabusRef: 'Primary Science: Matter and conservation',
+    approach: 'Build models from coloured beads, count complete groups, identify limiting materials and account for every bead before and after building.',
+    activityPrompt: 'Complete six building challenges. Explain how the available materials determine the number of complete models and why unused beads must still be counted.',
+    tags: [
+      'Primary',
+      'Science',
+      'moles',
+      'counting',
+      'groups',
+      'models',
+      'conservation of mass',
+      'limiting materials'
+    ]
+  },
+  {
+    ...moles,
+    id: 'moles-s',
+    title: 'Mole Bridge',
+    level: 'Secondary',
+    topic: 'Moles, mass, gas volume, concentration and chemical formulae',
+    symbol: '⚗️',
+    height: 2184,
+    syllabusRef: 'Secondary Chemistry: Mole concept and stoichiometry',
+    approach: 'Move between mass, amount of substance, particle count, gas volume and concentration, then apply balanced equations to formulae, limiting reactants, yield and purity.',
+    activityPrompt: 'Complete six mole-concept challenges. Show how each calculation uses the mole as the link between measured quantities and chemical particles.',
+    tags: [
+      'Secondary',
+      'Chemistry',
+      'moles',
+      'stoichiometry',
+      'molar mass',
+      'gas volume',
+      'concentration',
+      'chemical formulae',
+      'limiting reactants',
+      'yield',
+      'purity'
+    ]
+  },
+  {
+    ...moles,
+    id: 'moles-jc',
+    title: 'Analysis Bench',
+    level: 'JC',
+    topic: 'Combustion analysis, titration and ideal gas calculations',
+    symbol: '🔬',
+    height: 2454,
+    syllabusRef: 'JC Chemistry: Stoichiometry and analytical chemistry',
+    approach: 'Interpret experimental measurements, calculate empirical formulae, perform direct and back titration, apply the ideal gas equation and identify physically inconsistent results.',
+    activityPrompt: 'Complete six analytical investigations. Show the stoichiometric calculations and explain why negative elemental masses or apparent purity above 100% require investigation.',
+    tags: [
+      'JC',
+      'Chemistry',
+      'moles',
+      'stoichiometry',
+      'combustion analysis',
+      'empirical formula',
+      'titration',
+      'back titration',
+      'ideal gas',
+      'purity',
+      'data validation'
+    ]
+  },
+  {
+    ...moles,
+    id: 'moles-poly',
+    title: 'Solution Prep Lab',
+    level: 'Poly',
+    topic: 'Solution preparation, dilution and concentration quality control',
+    symbol: '🧪',
+    height: 2517,
+    syllabusRef: 'Polytechnic Applied Science: Laboratory stoichiometry and solution preparation',
+    approach: 'Prepare standard solutions, calculate hydrated-salt and purity corrections, design single-step and serial dilutions, reject infeasible procedures and convert concentration units.',
+    activityPrompt: 'Complete six laboratory assignments. Calculate the required quantities, select appropriate volumetric procedures and verify that every reported concentration uses the correct units.',
+    tags: [
+      'Polytechnic',
+      'Applied Science',
+      'moles',
+      'stoichiometry',
+      'solution preparation',
+      'hydrated salts',
+      'reagent purity',
+      'dilution',
+      'serial dilution',
+      'concentration',
+      'quality control'
+    ]
+  },
+  {
+    ...moles,
+    id: 'moles-u',
+    title: 'Reactor Ledger',
+    level: 'University',
+    topic: 'Reaction balancing, atom economy and process stoichiometry',
+    symbol: '🏭',
+    height: 2479,
+    syllabusRef: 'University, Chemistry',
+    approach: 'Use elemental balance matrices, reaction coefficients and process material balances to analyse atom economy, conversion, yield, selectivity and parallel reaction networks.',
+    activityPrompt: 'Complete six reactor engineering challenges. Balance reactions, identify underdetermined systems, compare reaction routes, calculate outlet compositions and demonstrate conservation of mass.',
+    tags: [
+      'University',
+      'Chemistry',
+      'moles',
+      'stoichiometry',
+      'reaction balancing',
+      'atom economy',
+      'material balance',
+      'chemical reactor',
+      'conversion',
+      'yield',
+      'selectivity',
+      'reaction networks'
+    ]
+  }
+];
+
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -535,4 +671,5 @@ export const htmlSims = [
     activityPrompt: 'Play all rounds, then explain why a convergent can approximate a real number exceptionally well.',
     tags: ['University', 'Number Theory', 'continued fractions', 'approximation']
   },
+  ...molesEntries,
 ]

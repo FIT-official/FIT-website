@@ -1,0 +1,2535 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reactor Ledger | University Chemistry | Fix It Today</title>
+<style>
+:root{
+  --fit-ink:#111111;
+  --fit-ink-2:#3D3D3D;
+  --fit-ink-3:#6B6B6B;
+  --fit-paper:#FEFEFE;
+  --fit-white:#FFFFFF;
+  --fit-sunken:#F4F3EF;
+  --fit-line-soft:#E4E2DB;
+  --fit-sun:#FFC83D;
+  --fit-pink:#FF8FB8;
+  --fit-green:#3DBE6B;
+  --fit-focus:#1F66E5;
+  --fit-success:#1E9E5A;
+  --fit-danger:#D92D20;
+  --lvl-primary:#FFC83D;
+  --lvl-primary-tint:#FFF4D6;
+  --lvl-primary-on:#111111;
+  --lvl-secondary:#2EC4A6;
+  --lvl-secondary-tint:#DDF7F1;
+  --lvl-secondary-on:#111111;
+  --lvl-jc:#6A45F5;
+  --lvl-jc-tint:#ECE7FF;
+  --lvl-jc-on:#FFFFFF;
+  --lvl-poly:#FF6B3D;
+  --lvl-poly-tint:#FFE6DC;
+  --lvl-poly-on:#111111;
+  --lvl-uni:#1F66E5;
+  --lvl-uni-tint:#E2ECFD;
+  --lvl-uni-on:#FFFFFF;
+  --r-sm:12px;
+  --r-md:16px;
+  --r-lg:24px;
+  --r-xl:32px;
+  --r-pill:999px;
+  --bw:2px;
+  --bw-strong:3px;
+  --sh-1:0 2px 0 #111;
+  --sh-2:0 4px 0 #111;
+  --sh-3:0 6px 0 #111;
+  --ease-out:cubic-bezier(.2,.8,.2,1);
+  --dur-1:120ms;
+  --dur-2:180ms;
+}
+*{box-sizing:border-box}
+html{scroll-behaviour:smooth}
+body{
+  margin:0;
+  background:var(--fit-paper);
+  color:var(--fit-ink);
+  font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+main{max-width:1280px;margin:auto;padding:20px 14px 42px}
+h1{
+  font-size:clamp(2.2rem,5vw,3.5rem);
+  font-weight:850;
+  letter-spacing:-.045em;
+  line-height:1.08;
+  margin:12px 0;
+}
+h2{font-size:1.35rem;line-height:1.2;font-weight:800;margin:0 0 12px}
+h3{font-size:1rem;font-weight:800;margin:17px 0 8px}
+p{margin:7px 0 14px}
+button,input,select{font:inherit}
+button{
+  min-height:48px;
+  min-width:44px;
+  padding:9px 16px;
+  border:2px solid var(--fit-ink);
+  border-radius:999px;
+  background:white;
+  color:var(--fit-ink);
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:var(--sh-1);
+  touch-action:manipulation;
+}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.48;cursor:default}
+button.primary{
+  border-width:3px;
+  background:var(--lvl-uni);
+  color:var(--lvl-uni-on);
+  box-shadow:var(--sh-2);
+}
+button.choice[aria-pressed="true"]{
+  background:var(--lvl-uni);
+  color:white;
+}
+input,select{
+  display:block;
+  width:100%;
+  min-width:0;
+  min-height:48px;
+  padding:9px 12px;
+  border:2px solid var(--fit-ink);
+  border-radius:12px;
+  background:white;
+  color:var(--fit-ink);
+  font-weight:700;
+}
+input[type="number"]{font-variant-numeric:tabular-nums}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+.hud,.stats,.actions,.choices,.legend{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:9px;
+}
+.hud{justify-content:space-between}
+.badge,.stat,.tag{
+  display:inline-flex;
+  align-items:center;
+  border:2px solid var(--fit-ink);
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:12px;
+  font-weight:800;
+}
+.badge{
+  background:var(--lvl-uni);
+  color:var(--lvl-uni-on);
+  text-transform:uppercase;
+}
+.stat,.tag{background:white}
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:18px;
+  margin-top:20px;
+}
+.card{
+  min-width:0;
+  padding:18px;
+  border:2px solid var(--fit-ink);
+  border-radius:24px;
+  background:white;
+  box-shadow:var(--sh-2);
+}
+.stage{
+  background:var(--lvl-uni-tint);
+  border-radius:32px;
+  box-shadow:var(--sh-3);
+}
+.figure{
+  margin:14px 0;
+  overflow:hidden;
+  border:2px solid var(--fit-ink);
+  border-radius:18px;
+  background:white;
+}
+svg{display:block;width:100%;height:auto}
+.equation{
+  padding:13px;
+  margin:12px 0;
+  border:2px solid var(--fit-ink);
+  border-radius:16px;
+  background:white;
+  font-weight:800;
+  overflow-wrap:anywhere;
+}
+.data-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin:13px 0;
+}
+.data-item{
+  min-width:0;
+  padding:11px 12px;
+  border:2px solid var(--fit-ink);
+  border-radius:14px;
+  background:white;
+}
+.data-item small{
+  display:block;
+  font-size:11px;
+  font-weight:800;
+  color:var(--fit-ink-3);
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+.data-item strong{
+  display:block;
+  margin-top:4px;
+  overflow-wrap:anywhere;
+}
+.answer{margin:13px 0}
+.answer label{display:block;margin-bottom:6px;font-weight:800}
+.answer .note{margin-top:5px;color:var(--fit-ink-3);font-size:12px}
+.choices{margin:10px 0 16px}
+.feedback{
+  min-height:75px;
+  margin:15px 0;
+  padding:13px;
+  border:2px solid var(--fit-ink);
+  border-radius:16px;
+  background:var(--fit-sunken);
+  font-weight:700;
+}
+.feedback.good{background:#E1F8E9}
+.feedback.bad{background:#FFE7E5}
+.concept{
+  padding:13px;
+  border:2px solid var(--fit-ink);
+  border-radius:16px;
+  background:white;
+  font-size:14px;
+}
+.concept strong{display:block;margin-bottom:5px}
+.concept p{margin:0}
+.plot-label{font-size:11px;font-weight:700;fill:#3D3D3D}
+.plot-value{font-size:12px;font-weight:800;fill:#111}
+.legend{
+  margin:10px 0;
+  font-size:12px;
+  font-weight:800;
+}
+.swatch{
+  display:inline-block;
+  width:13px;
+  height:13px;
+  margin-right:5px;
+  border:1px solid #111;
+  background:var(--colour);
+  vertical-align:-2px;
+}
+details{
+  margin-top:16px;
+  padding:12px;
+  border:2px solid var(--fit-ink);
+  border-radius:16px;
+}
+summary{cursor:pointer;font-weight:800}
+details p{font-size:14px}
+.end{text-align:center;padding:34px 20px}
+.stars{font-size:3rem;color:#A77500;letter-spacing:7px}
+.hidden{display:none!important}
+footer{
+  margin-top:28px;
+  text-align:center;
+  font-size:12px;
+  color:var(--fit-ink-3);
+}
+@media(min-width:900px){
+  main{padding:28px 24px 44px}
+  .layout{
+    grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);
+  }
+  .card{padding:23px}
+}
+@media(max-width:450px){
+  .data-grid{grid-template-columns:1fr}
+  .actions button{flex:1 1 auto}
+}
+@media(prefers-reduced-motion:no-preference){
+  button{transition:transform var(--dur-1),box-shadow var(--dur-1)}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behaviour:auto}
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="hud">
+    <span class="badge">University · Chemistry</span>
+    <div class="stats">
+      <span class="stat" id="round">Round 1/6</span>
+      <span class="stat" id="score">Score 0</span>
+    </div>
+  </div>
+  <h1>Reactor Ledger</h1>
+  <p>Balance reaction networks, assess atom economy and close material balances using conversion, yield and selectivity.</p>
+</header>
+
+<div id="game" class="layout">
+  <section class="card stage">
+    <span class="tag" id="tag">PROCESS STOICHIOMETRY</span>
+    <h2 id="title">Engineering challenge</h2>
+    <p id="description"></p>
+
+    <div id="equation" class="equation"></div>
+    <div id="given" class="data-grid"></div>
+
+    <div class="figure">
+      <svg id="scene" viewBox="0 0 480 320"
+        role="img" aria-label="Interactive chemical process diagram"></svg>
+    </div>
+
+    <div class="concept">
+      <strong>Modelling principle</strong>
+      <p id="concept"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 id="task">Your challenge</h2>
+    <p id="question"></p>
+
+    <div id="inputs"></div>
+
+    <div class="actions">
+      <button type="button" class="primary" id="check">Check analysis</button>
+      <button type="button" id="hint">Hint − points</button>
+      <button type="button" id="next" class="hidden">Next round →</button>
+    </div>
+
+    <div id="feedback" class="feedback" aria-live="polite">
+      Enter your answers, then check your analysis.
+    </div>
+
+    <h3 id="plot-title">Live quantitative model</h3>
+    <svg id="plot" viewBox="0 0 480 275"
+      role="img" aria-label="Quantitative process graph"></svg>
+    <div id="legend" class="legend"></div>
+
+    <details>
+      <summary>Worked method and assumptions</summary>
+      <div id="science"></div>
+    </details>
+  </section>
+</div>
+
+<section id="end" class="card end hidden">
+  <span class="badge">University · Chemistry</span>
+  <h2>Reactor audit complete!</h2>
+  <div id="stars" class="stars" aria-label="Star rating"></div>
+  <p id="result"></p>
+  <p>A sound stoichiometric model respects elemental conservation, reaction independence, physically feasible feed rates and consistent definitions of process performance.</p>
+  <button type="button" class="primary" id="replay">Run another audit</button>
+</section>
+
+<footer>Fix It Today</footer>
+</main>
+
+<script>
+/* FIT-CALC-BEGIN moles */
+const FITCalcMoles = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+  const AR = Object.freeze({
+    H: 1, He: 4, Li: 7, B: 11, C: 12, N: 14, O: 16,
+    F: 19, Ne: 20, Na: 23, Mg: 24, Al: 27, Si: 28,
+    P: 31, S: 32, Cl: 35.5, Ar: 40, K: 39, Ca: 40,
+    Cr: 52, Mn: 55, Fe: 56, Cu: 64, Zn: 65, Br: 80,
+    Ag: 108, I: 127, Ba: 137, Pb: 207
+  });
+  const NA = 6.02e23;
+  const VM = 24;
+  const R = 8.31;
+  const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+  const error = (c, reason) => ({ error: c, reason });
+  const cv = reason => error('ConstraintViolation', reason);
+  const me = reason => error('MathError', reason);
+  const rt = reason => error('RuntimeError', reason);
+  const ns = reason => error('NotSupported', reason);
+  const isError = x => !!x && typeof x === 'object' && own(x, 'error');
+  const finite = x => typeof x === 'number' && Number.isFinite(x);
+  const whole = x => Number.isSafeInteger(x);
+  const positiveInteger = x => whole(x) && x > 0;
+  const numeric = (...xs) => xs.every(finite);
+  const ok = x => {
+    function check(v) {
+      if (typeof v === 'number') return Number.isFinite(v);
+      if (v === null || typeof v !== 'object') return true;
+      return Object.values(v).every(check);
+    }
+    return check(x) ? x : cv('number_out_of_range');
+  };
+
+  function parseInternal(formula) {
+    if (typeof formula !== 'string' ||
+        formula.length < 1 || formula.length > 40) {
+      return cv('formula_syntax_error');
+    }
+    const parts = formula.split(/[.·]/);
+    if (parts.some(p => !p)) return cv('formula_syntax_error');
+    const result = {};
+    let failure = null;
+
+    function add(into, symbol, amount) {
+      const value = (into[symbol] || 0) + amount;
+      if (!whole(value) || value < 1) {
+        failure = cv('formula_syntax_error');
+        return;
+      }
+      into[symbol] = value;
+    }
+
+    for (const part of parts) {
+      let i = 0;
+
+      function number() {
+        const start = i;
+        while (i < part.length && /[0-9]/.test(part[i])) i++;
+        if (i === start) return 1;
+        const n = Number(part.slice(start, i));
+        if (!positiveInteger(n)) failure = cv('formula_syntax_error');
+        return n;
+      }
+
+      const multiplier = /[0-9]/.test(part[0]) ? number() : 1;
+
+      function sequence(closing, depth) {
+        const map = {};
+        let entries = 0;
+        if (depth > 20) {
+          failure = cv('formula_syntax_error');
+          return map;
+        }
+
+        while (i < part.length && !failure) {
+          const ch = part[i];
+          if (ch === ')' || ch === ']') {
+            if (ch !== closing) failure = cv('formula_syntax_error');
+            break;
+          }
+
+          if (ch === '(' || ch === '[') {
+            i++;
+            const sub = sequence(ch === '(' ? ')' : ']', depth + 1);
+            if (failure) break;
+            if (i >= part.length || part[i] !== (ch === '(' ? ')' : ']')) {
+              failure = cv('formula_syntax_error');
+              break;
+            }
+            i++;
+            const n = number();
+            if (failure) break;
+            for (const symbol of Object.keys(sub)) {
+              add(map, symbol, sub[symbol] * n);
+            }
+            entries++;
+          } else if (/[A-Z]/.test(ch)) {
+            let symbol = part[i++];
+            if (i < part.length && /[a-z]/.test(part[i])) {
+              symbol += part[i++];
+            }
+            if (!own(AR, symbol)) {
+              failure = ns('element_not_in_table');
+              break;
+            }
+            const n = number();
+            if (failure) break;
+            add(map, symbol, n);
+            entries++;
+          } else {
+            failure = cv('formula_syntax_error');
+            break;
+          }
+        }
+
+        if (entries === 0 && !failure) failure = cv('formula_syntax_error');
+        return map;
+      }
+
+      const sub = sequence(null, 0);
+      if (failure) return failure;
+      if (i !== part.length) return cv('formula_syntax_error');
+      for (const symbol of Object.keys(sub)) {
+        add(result, symbol, sub[symbol] * multiplier);
+      }
+      if (failure) return failure;
+    }
+
+    return result;
+  }
+
+  function massInternal(formula) {
+    const elements = parseInternal(formula);
+    if (isError(elements)) return elements;
+    let mass = 0;
+    for (const [symbol, count] of Object.entries(elements)) {
+      mass += AR[symbol] * count;
+    }
+    return Number.isFinite(mass) ? mass : cv('number_out_of_range');
+  }
+
+  function formulaText(counts) {
+    return Object.entries(counts)
+      .map(([s, n]) => s + (n === 1 ? '' : String(n))).join('');
+  }
+
+  /**
+   * Example: Ca(OH)2 -> {Ca:1,O:2,H:2}.
+   * Input: formula (ASCII chemical formula, 1–40 characters).
+   * Output: elements (symbol -> whole-number count).
+   * Nested brackets and hydrate parts are expanded.
+   * Errors: formula_syntax_error; element_not_in_table.
+   */
+  function parse_formula({ formula } = {}) {
+    const elements = parseInternal(formula);
+    return isError(elements) ? elements : { elements };
+  }
+
+  /**
+   * Example: CuSO4.5H2O -> 250 g/mol.
+   * Input: formula. Output: M_g_mol (g/mol).
+   * Assumption: fixed school relative atomic masses.
+   * Errors: formula_syntax_error; element_not_in_table.
+   */
+  function molar_mass({ formula } = {}) {
+    const M = massInternal(formula);
+    return isError(M) ? M : { M_g_mol: M };
+  }
+
+  /**
+   * Example: 9 g H2O -> 0.5 mol, 3.01e23 molecules.
+   * Inputs: formula, mass_g (g, >=0).
+   * Outputs: n_mol (mol), particles (formula units).
+   * Errors: negative_mass; invalid_number; formula errors.
+   */
+  function moles({ formula, mass_g } = {}) {
+    if (!finite(mass_g)) return cv('invalid_number');
+    if (mass_g < 0) return cv('negative_mass');
+    const M = massInternal(formula);
+    if (isError(M)) return M;
+    return ok({ n_mol: mass_g / M, particles: mass_g / M * NA });
+  }
+
+  /**
+   * Example: 0.25 mol CO2 -> 11 g.
+   * Inputs: formula, n_mol (mol). Output: mass_g (g).
+   * Errors: negative_amount; invalid_number; formula errors.
+   */
+  function mass_from_moles({ formula, n_mol } = {}) {
+    if (!finite(n_mol)) return cv('invalid_number');
+    if (n_mol < 0) return cv('negative_amount');
+    const M = massInternal(formula);
+    return isError(M) ? M : ok({ mass_g: n_mol * M });
+  }
+
+  /**
+   * Example: 0.5 mol -> 12 dm3 at r.t.p.
+   * Exactly one input: n_mol (mol) or volume_dm3 (dm3).
+   * Outputs: both fields. Assumes 24 dm3/mol.
+   * Errors: give_exactly_one_of_n_or_volume; negative_amount.
+   */
+  function gas_rtp(x = {}) {
+    const hasN = x.n_mol !== undefined;
+    const hasV = x.volume_dm3 !== undefined;
+    if (hasN === hasV) return cv('give_exactly_one_of_n_or_volume');
+    const v = hasN ? x.n_mol : x.volume_dm3;
+    if (!finite(v)) return cv('invalid_number');
+    if (v < 0) return cv('negative_amount');
+    return ok(hasN
+      ? { n_mol: v, volume_dm3: v * VM }
+      : { n_mol: v / VM, volume_dm3: v });
+  }
+
+  /**
+   * Example: 0.05 mol NaCl in 250 cm3 -> 0.2 mol/dm3,
+   * 11.7 g/dm3.
+   * Inputs: n_mol (mol), volume_cm3 (cm3), optional formula.
+   * Outputs: c_mol_dm3, c_g_dm3 (null without formula).
+   * Errors: volume_not_positive; negative_amount; formula errors.
+   */
+  function concentration({ n_mol, volume_cm3, formula } = {}) {
+    if (!numeric(n_mol, volume_cm3)) return cv('invalid_number');
+    if (volume_cm3 <= 0) return cv('volume_not_positive');
+    if (n_mol < 0) return cv('negative_amount');
+    const c = n_mol / (volume_cm3 / 1000);
+    if (formula === undefined) {
+      return ok({ c_mol_dm3: c, c_g_dm3: null });
+    }
+    const M = massInternal(formula);
+    return isError(M) ? M :
+      ok({ c_mol_dm3: c, c_g_dm3: c * M });
+  }
+
+  /**
+   * Example: H2O -> H 11.111...%, O 88.888...%.
+   * Input: formula. Output: percent (element -> mass %).
+   * Errors: formula_syntax_error; element_not_in_table.
+   */
+  function percent_composition({ formula } = {}) {
+    const elements = parseInternal(formula);
+    if (isError(elements)) return elements;
+    const M = massInternal(formula);
+    if (isError(M)) return M;
+    const percent = {};
+    for (const [s, n] of Object.entries(elements)) {
+      percent[s] = 100 * n * AR[s] / M;
+    }
+    return ok({ percent });
+  }
+
+  /**
+   * Example: elements [C,H,O], masses [2.4,0.6,1.6]
+   * -> C2H6O, ratio {C:2,H:6,O:1}.
+   * Inputs: elements (symbols), masses_g (g or mass percentages).
+   * Uses first multiplier 1..6 whose ratios are within 0.1
+   * of integers. Outputs: formula, ratio.
+   * Errors: elements_and_masses_mismatch; mass_not_positive;
+   * element_not_in_table; no_whole_number_ratio.
+   */
+  function empirical_formula({ elements, masses_g } = {}) {
+    if (!Array.isArray(elements) || !Array.isArray(masses_g) ||
+        elements.length < 2 || elements.length !== masses_g.length ||
+        new Set(elements).size !== elements.length ||
+        elements.length > Object.keys(AR).length) {
+      return cv('elements_and_masses_mismatch');
+    }
+    for (const s of elements) {
+      if (typeof s !== 'string' || !own(AR, s)) {
+        return ns('element_not_in_table');
+      }
+    }
+    if (!masses_g.every(finite)) return cv('invalid_number');
+    if (masses_g.some(x => x <= 0)) return cv('mass_not_positive');
+    const amounts = masses_g.map((m, i) => m / AR[elements[i]]);
+    const smallest = Math.min(...amounts);
+    const ratios = amounts.map(x => x / smallest);
+    if (!ratios.every(Number.isFinite)) return cv('number_out_of_range');
+    for (let k = 1; k <= 6; k++) {
+      const rounded = ratios.map(x => Math.round(x * k));
+      if (rounded.every((n, i) =>
+        positiveInteger(n) && Math.abs(ratios[i] * k - n) <= 0.1 + 1e-12)) {
+        const ratio = {};
+        elements.forEach((s, i) => { ratio[s] = rounded[i]; });
+        return { formula: formulaText(ratio), ratio };
+      }
+    }
+    return rt('no_whole_number_ratio');
+  }
+
+  /**
+   * Example: empirical CH2, Mr 28 -> multiplier 2, C2H4.
+   * Inputs: empirical (formula), M_g_mol (g/mol).
+   * Outputs: multiplier (integer), formula.
+   * Errors: not_a_whole_multiple; value_not_positive;
+   * formula errors.
+   */
+  function molecular_formula({ empirical, M_g_mol } = {}) {
+    if (!finite(M_g_mol)) return cv('invalid_number');
+    if (M_g_mol <= 0) return cv('value_not_positive');
+    const elements = parseInternal(empirical);
+    if (isError(elements)) return elements;
+    const M = massInternal(empirical);
+    const ratio = M_g_mol / M;
+    const k = Math.round(ratio);
+    if (!positiveInteger(k) || Math.abs(ratio - k) > 0.05) {
+      return me('not_a_whole_multiple');
+    }
+    const counts = {};
+    for (const [s, n] of Object.entries(elements)) {
+      if (!positiveInteger(n * k)) return cv('number_out_of_range');
+      counts[s] = n * k;
+    }
+    return { multiplier: k, formula: formulaText(counts) };
+  }
+
+  /**
+   * Example: 4 g H2 + 32 g O2 -> 36 g H2O; exact ratio.
+   * Inputs: reactants [{formula,coeff,mass_g}], products
+   * [{formula,coeff}]; coefficients are balanced integers.
+   * Outputs: limiting_index, extent_mol, exact_ratio,
+   * product_moles, product_masses_g, excess_left_g.
+   * Mass conservation checked when products are supplied.
+   * Errors: species_out_of_range; coefficient_not_positive_integer;
+   * mass_not_positive; reaction_not_balanced; formula errors.
+   */
+  function limiting({ reactants, products } = {}) {
+    if (!Array.isArray(reactants) || !Array.isArray(products) ||
+        reactants.length < 1 || reactants.length > 6 ||
+        products.length > 6) return cv('species_out_of_range');
+    const all = [...reactants, ...products];
+    if (all.some(x => !x || !positiveInteger(x.coeff))) {
+      return cv('coefficient_not_positive_integer');
+    }
+    if (reactants.some(x => !finite(x.mass_g))) return cv('invalid_number');
+    if (reactants.some(x => x.mass_g <= 0)) return cv('mass_not_positive');
+    const masses = [];
+    for (const x of all) {
+      const M = massInternal(x.formula);
+      if (isError(M)) return M;
+      masses.push(M);
+    }
+    if (products.length) {
+      const before = reactants.reduce((s, x, i) =>
+        s + x.coeff * masses[i], 0);
+      const after = products.reduce((s, x, j) =>
+        s + x.coeff * masses[reactants.length + j], 0);
+      if (Math.abs(before - after) >
+          1e-9 * Math.max(1, before, after)) {
+        return cv('reaction_not_balanced');
+      }
+    }
+    const extents = reactants.map((x, i) =>
+      (x.mass_g / masses[i]) / x.coeff);
+    const extent = Math.min(...extents);
+    const ties = extents.map((x, i) =>
+      Math.abs(x - extent) <=
+        1e-9 * Math.max(Math.abs(x), Math.abs(extent), 1e-30) ? i : -1)
+      .filter(i => i >= 0);
+    const limiting_index = ties[0];
+    const product_moles = products.map(x => x.coeff * extent);
+    const product_masses_g = products.map((x, j) =>
+      product_moles[j] * masses[reactants.length + j]);
+    const excess_left_g = reactants.map((x, i) => {
+      const remaining = x.mass_g - x.coeff * extent * masses[i];
+      return i === limiting_index ||
+        Math.abs(remaining) < 1e-9 ? 0 : Math.max(0, remaining);
+    });
+    return ok({
+      limiting_index, extent_mol: extent,
+      exact_ratio: ties.length > 1,
+      product_moles, product_masses_g, excess_left_g
+    });
+  }
+
+  /**
+   * Example: actual 8 g, theoretical 10 g -> 80%, false.
+   * Inputs: actual_g, theoretical_g (g).
+   * Outputs: percent, over_100. Above 100 is allowed.
+   * Errors: theoretical_not_positive; negative_mass.
+   */
+  function percent_yield({ actual_g, theoretical_g } = {}) {
+    if (!numeric(actual_g, theoretical_g)) return cv('invalid_number');
+    if (theoretical_g <= 0) return cv('theoretical_not_positive');
+    if (actual_g < 0) return cv('negative_mass');
+    const percent = 100 * actual_g / theoretical_g;
+    return ok({ percent, over_100: percent > 100 });
+  }
+
+  /**
+   * Example: 4 g pure in 5 g sample -> 80%.
+   * Inputs: pure_g, sample_g (g). Output: percent.
+   * Errors: mass_not_positive; negative_mass; pure_exceeds_sample.
+   */
+  function purity({ pure_g, sample_g } = {}) {
+    if (!numeric(pure_g, sample_g)) return cv('invalid_number');
+    if (sample_g <= 0) return cv('mass_not_positive');
+    if (pure_g < 0) return cv('negative_mass');
+    if (pure_g > sample_g) return cv('pure_exceeds_sample');
+    return ok({ percent: 100 * pure_g / sample_g });
+  }
+
+  /**
+   * Example: p=99720 Pa, V=0.003 m3, T=300 K
+   * -> n=0.12 mol.
+   * Exactly three inputs: p_Pa, V_m3, T_K, n_mol.
+   * Output: all four, including the solved field.
+   * Assumption: ideal gas, R=8.31 J/(K mol).
+   * Errors: give_exactly_three_values; below_absolute_zero;
+   * value_not_positive.
+   */
+  function ideal_gas(x = {}) {
+    const names = ['p_Pa', 'V_m3', 'T_K', 'n_mol'];
+    const present = names.filter(k => x[k] !== undefined);
+    if (present.length !== 3) return cv('give_exactly_three_values');
+    if (x.T_K !== undefined && finite(x.T_K) && x.T_K < 0) {
+      return cv('below_absolute_zero');
+    }
+    if (present.some(k => !finite(x[k]))) return cv('invalid_number');
+    if (present.some(k => x[k] <= 0)) return cv('value_not_positive');
+    const result = { ...x };
+    const missing = names.find(k => x[k] === undefined);
+    if (missing === 'n_mol') result.n_mol = x.p_Pa * x.V_m3 / (R * x.T_K);
+    if (missing === 'p_Pa') result.p_Pa = x.n_mol * R * x.T_K / x.V_m3;
+    if (missing === 'V_m3') result.V_m3 = x.n_mol * R * x.T_K / x.p_Pa;
+    if (missing === 'T_K') result.T_K = x.p_Pa * x.V_m3 / (x.n_mol * R);
+    return ok({
+      p_Pa: result.p_Pa, V_m3: result.V_m3,
+      T_K: result.T_K, n_mol: result.n_mol
+    });
+  }
+
+  /**
+   * Example: 4.6 g sample, 8.8 g CO2, 5.4 g H2O
+   * -> C 2.4 g, H 0.6 g, O 1.6 g, C2H6O.
+   * Inputs: mass_sample_g, mass_CO2_g, mass_H2O_g (g).
+   * Outputs: mass_C_g, mass_H_g, mass_O_g, formula.
+   * All combustion products are collected; sample contains C,H,O.
+   * Errors: negative_mass; mass_not_positive;
+   * masses_inconsistent; empirical ratio errors.
+   */
+  function combustion({ mass_sample_g, mass_CO2_g, mass_H2O_g } = {}) {
+    if (!numeric(mass_sample_g, mass_CO2_g, mass_H2O_g)) {
+      return cv('invalid_number');
+    }
+    if ([mass_sample_g, mass_CO2_g, mass_H2O_g].some(x => x < 0)) {
+      return cv('negative_mass');
+    }
+    if (mass_sample_g <= 0 || mass_CO2_g <= 0) {
+      return cv('mass_not_positive');
+    }
+    const C = mass_CO2_g * 12 / 44;
+    const H = mass_H2O_g * 2 / 18;
+    let O = mass_sample_g - C - H;
+    if (O < -1e-6) return cv('masses_inconsistent');
+    if (Math.abs(O) <= 1e-6) O = 0;
+    const elements = ['C'];
+    const masses_g = [C];
+    if (H > 0) { elements.push('H'); masses_g.push(H); }
+    if (O > 0) { elements.push('O'); masses_g.push(O); }
+    let formula;
+    if (elements.length === 1) {
+      formula = 'C';
+    } else {
+      const empirical = empirical_formula({ elements, masses_g });
+      if (isError(empirical)) return empirical;
+      formula = empirical.formula;
+    }
+    return ok({
+      mass_C_g: C, mass_H_g: H, mass_O_g: O, formula
+    });
+  }
+
+  /**
+   * Example: 0.1 mol/dm3, 20 cm3 titrant, 25 cm3 analyte,
+   * coefficients 1:1 -> 0.002 mol and 0.08 mol/dm3.
+   * Inputs: c_titrant_mol_dm3, v_titrant_cm3,
+   * v_analyte_cm3, analyte_coeff, titrant_coeff.
+   * Outputs: n_titrant_mol, n_analyte_mol,
+   * c_analyte_mol_dm3. Volumes in cm3.
+   * Errors: value_not_positive; coefficient_not_positive_integer.
+   */
+  function titration(x = {}) {
+    const { c_titrant_mol_dm3: c, v_titrant_cm3: v,
+      v_analyte_cm3: a, analyte_coeff: ac,
+      titrant_coeff: tc } = x;
+    if (!numeric(c, v, a, ac, tc)) return cv('invalid_number');
+    if (c <= 0 || v <= 0 || a <= 0) return cv('value_not_positive');
+    if (!positiveInteger(ac) || !positiveInteger(tc)) {
+      return cv('coefficient_not_positive_integer');
+    }
+    const nt = c * v / 1000;
+    const na = nt * ac / tc;
+    return ok({
+      n_titrant_mol: nt, n_analyte_mol: na,
+      c_analyte_mol_dm3: na / (a / 1000)
+    });
+  }
+
+  /**
+   * Example: 0.01 mol acid, 0.1 mol/dm3 alkali, 20 cm3,
+   * ratios 1 and 0.5, CaCO3 sample 0.5 g
+   * -> acid left .002, reacted .008, pure .4 g, purity 80%.
+   * Inputs: acid_total_mol, alkali_c_mol_dm_dm3,
+   * alkali_v_cm3, acid_per_alkali, sample_per_acid,
+   * sample_formula, sample_mass_g.
+   * Outputs: acid_left_mol, acid_reacted_mol, sample_mol,
+   * pure_mass_g, purity_percent. Acid is in excess.
+   * Errors: value_not_positive; titre_exceeds_acid_added;
+   * formula errors. Purity above 100 remains a result.
+   */
+  function back_titration(x = {}) {
+    const { acid_total_mol: total, alkali_c_mol_dm3: c,
+      alkali_v_cm3: v, acid_per_alkali: a,
+      sample_per_acid: s, sample_formula: formula,
+      sample_mass_g: sample } = x;
+    if (!numeric(total, c, v, a, s, sample)) {
+      return cv('invalid_number');
+    }
+    if ([total, c, v, a, s, sample].some(z => z <= 0)) {
+      return cv('value_not_positive');
+    }
+    const M = massInternal(formula);
+    if (isError(M)) return M;
+    const left = c * v / 1000 * a;
+    if (left > total + 1e-12) return cv('titre_exceeds_acid_added');
+    const reacted = Math.max(0, total - left);
+    const amount = reacted * s;
+    const pure = amount * M;
+    return ok({
+      acid_left_mol: left, acid_reacted_mol: reacted,
+      sample_mol: amount, pure_mass_g: pure,
+      purity_percent: 100 * pure / sample
+    });
+  }
+
+  /**
+   * Example: 0.1 mol/dm3 NaCl, 250 cm3, 100% purity
+   * -> 1.4625 g.
+   * Inputs: formula, c_mol_dm3, volume_cm3,
+   * optional purity_percent (default 100).
+   * Output: mass_g to weigh (g).
+   * Errors: purity_out_of_range; value_not_positive;
+   * formula errors.
+   */
+  function solution_prep(x = {}) {
+    const { formula, c_mol_dm3: c, volume_cm3: v } = x;
+    const p = x.purity_percent === undefined ? 100 : x.purity_percent;
+    if (!finite(p)) return cv('invalid_number');
+    if (p <= 0 || p > 100) return cv('purity_out_of_range');
+    if (!numeric(c, v)) return cv('invalid_number');
+    if (c <= 0 || v <= 0) return cv('value_not_positive');
+    const M = massInternal(formula);
+    return isError(M) ? M : ok({ mass_g: c * v / 1000 * M * 100 / p });
+  }
+
+  /**
+   * Example: c1=.2, v1=50 cm3, c2=.05
+   * -> v2=200 cm3, water=150 cm3.
+   * Inputs: c1, c2 (same concentration units), v1_cm3.
+   * Outputs: v2_cm3, water_cm3.
+   * Errors: cannot_concentrate_by_dilution; value_not_positive.
+   */
+  function dilution({ c1, v1_cm3, c2 } = {}) {
+    if (!numeric(c1, v1_cm3, c2)) return cv('invalid_number');
+    if (c2 > c1) return cv('cannot_concentrate_by_dilution');
+    if (c1 <= 0 || v1_cm3 <= 0 || c2 <= 0) {
+      return cv('value_not_positive');
+    }
+    const v2 = c1 * v1_cm3 / c2;
+    return ok({ v2_cm3: v2, water_cm3: v2 - v1_cm3 });
+  }
+
+  /**
+   * Example: c0=1, factor=10, steps=3
+   * -> [1,0.1,0.01,0.001].
+   * Inputs: c0 (concentration), factor (>1), steps (1..12).
+   * Output: concentrations, including starting value.
+   * Errors: factor_must_exceed_1; steps_out_of_range_1_12;
+   * value_not_positive.
+   */
+  function serial_dilution({ c0, factor, steps } = {}) {
+    if (!numeric(c0, factor, steps)) return cv('invalid_number');
+    if (factor <= 1) return cv('factor_must_exceed_1');
+    if (!whole(steps) || steps < 1 || steps > 12) {
+      return cv('steps_out_of_range_1_12');
+    }
+    if (c0 <= 0) return cv('value_not_positive');
+    const concentrations = [c0];
+    for (let i = 0; i < steps; i++) {
+      concentrations.push(concentrations[i] / factor);
+    }
+    return ok({ concentrations });
+  }
+
+  /**
+   * Example: NaCl, 58.5 mg/dm3 -> 0.001 mol/dm3.
+   * Inputs: value, from_unit, to_unit, optional formula.
+   * Units: mol_dm3, g_dm3, mg_dm3, ppm, percent_wv.
+   * Dilute aqueous solution: 1 ppm=1 mg/dm3;
+   * 1% w/v=10 g/dm3.
+   * Output: value in requested unit.
+   * Errors: unit_not_supported; formula_required;
+   * negative_amount; formula errors.
+   */
+  function convert_concentration({ value, from_unit, to_unit, formula } = {}) {
+    const units = ['mol_dm3', 'g_dm3', 'mg_dm3', 'ppm', 'percent_wv'];
+    if (!units.includes(from_unit) || !units.includes(to_unit)) {
+      return ns('unit_not_supported');
+    }
+    if (from_unit !== to_unit &&
+        (from_unit === 'mol_dm3' || to_unit === 'mol_dm3') &&
+        formula === undefined) return cv('formula_required');
+    if (!finite(value)) return cv('invalid_number');
+    if (value < 0) return cv('negative_amount');
+    if (from_unit === to_unit) return { value };
+    let M = 1;
+    if (from_unit === 'mol_dm3' || to_unit === 'mol_dm3') {
+      M = massInternal(formula);
+      if (isError(M)) return M;
+    }
+    const toGrams = {
+      mol_dm3: M, g_dm3: 1, mg_dm3: 0.001,
+      ppm: 0.001, percent_wv: 10
+    };
+    return ok({ value: value * toGrams[from_unit] / toGrams[to_unit] });
+  }
+
+  function gcdBig(a, b) {
+    a = a < 0n ? -a : a;
+    b = b < 0n ? -b : b;
+    while (b !== 0n) { const t = a % b; a = b; b = t; }
+    return a === 0n ? 1n : a;
+  }
+
+  function frac(n, d = 1n) {
+    if (d < 0n) { n = -n; d = -d; }
+    if (n === 0n) return [0n, 1n];
+    const g = gcdBig(n, d);
+    return [n / g, d / g];
+  }
+
+  const fadd = (a, b) =>
+    frac(a[0] * b[1] + b[0] * a[1], a[1] * b[1]);
+  const fneg = a => [-a[0], a[1]];
+  const fsub = (a, b) => fadd(a, fneg(b));
+  const fmul = (a, b) => frac(a[0] * b[0], a[1] * b[1]);
+  const fdiv = (a, b) => frac(a[0] * b[1], a[1] * b[0]);
+  const lcmBig = (a, b) => a / gcdBig(a, b) * b;
+
+  /**
+   * Example: FeS2 + O2 -> Fe2O3 + SO2
+   * -> [4,11,2,8].
+   * Inputs: reactants and products, arrays of formula strings,
+   * 1–6 on each side. Output: coefficients, smallest positive
+   * integers in input order. Exact rational null-space RREF.
+   * Errors: species_out_of_range; no_unique_balance;
+   * cannot_balance; coefficient_out_of_range; formula errors.
+   */
+  function balance({ reactants, products } = {}) {
+    if (!Array.isArray(reactants) || !Array.isArray(products) ||
+        reactants.length < 1 || reactants.length > 6 ||
+        products.length < 1 || products.length > 6) {
+      return cv('species_out_of_range');
+    }
+    const names = [...reactants, ...products];
+    const maps = [];
+    const symbols = [];
+    for (const formula of names) {
+      const map = parseInternal(formula);
+      if (isError(map)) return map;
+      maps.push(map);
+      for (const symbol of Object.keys(map)) {
+        if (!symbols.includes(symbol)) symbols.push(symbol);
+      }
+    }
+    const n = names.length;
+    const matrix = symbols.map(s => maps.map((map, j) =>
+      frac(BigInt((map[s] || 0) * (j < reactants.length ? 1 : -1)))));
+    const pivots = [];
+    let row = 0;
+    for (let col = 0; col < n && row < matrix.length; col++) {
+      let chosen = row;
+      while (chosen < matrix.length && matrix[chosen][col][0] === 0n) {
+        chosen++;
+      }
+      if (chosen === matrix.length) continue;
+      [matrix[row], matrix[chosen]] = [matrix[chosen], matrix[row]];
+      const divisor = matrix[row][col];
+      matrix[row] = matrix[row].map(x => fdiv(x, divisor));
+      for (let r = 0; r < matrix.length; r++) {
+        if (r === row || matrix[r][col][0] === 0n) continue;
+        const factor = matrix[r][col];
+        matrix[r] = matrix[r].map((x, k) =>
+          fsub(x, fmul(factor, matrix[row][k])));
+      }
+      pivots.push(col);
+      row++;
+    }
+    if (n - pivots.length !== 1) return me('no_unique_balance');
+    const free = Array.from({ length: n }, (_, i) => i)
+      .find(i => !pivots.includes(i));
+    const values = Array.from({ length: n }, () => frac(0n));
+    values[free] = frac(1n);
+    for (let r = pivots.length - 1; r >= 0; r--) {
+      let sum = frac(0n);
+      for (let c = pivots[r] + 1; c < n; c++) {
+        sum = fadd(sum, fmul(matrix[r][c], values[c]));
+      }
+      values[pivots[r]] = fneg(sum);
+    }
+    let denominator = 1n;
+    for (const x of values) {
+      denominator = lcmBig(denominator, x[1]);
+    }
+    let ints = values.map(x => x[0] * (denominator / x[1]));
+    if (ints.some(x => x === 0n)) return me('cannot_balance');
+    if (ints.every(x => x < 0n)) ints = ints.map(x => -x);
+    if (!ints.every(x => x > 0n)) return me('cannot_balance');
+    let divisor = ints[0];
+    for (const x of ints.slice(1)) divisor = gcdBig(divisor, x);
+    ints = ints.map(x => x / divisor);
+    if (ints.some(x => x > BigInt(Number.MAX_SAFE_INTEGER))) {
+      return cv('coefficient_out_of_range');
+    }
+    return { coefficients: ints.map(Number) };
+  }
+
+  /**
+   * Example: 2Mg + O2 -> 2MgO, desired 2MgO -> 100%.
+   * Inputs: reactants [{formula,coeff}], desired {formula,coeff}.
+   * Output: percent (mass of desired product / input mass).
+   * Assumes the supplied equation is balanced.
+   * Errors: coefficient_not_positive_integer; species_out_of_range;
+   * formula errors.
+   */
+  function atom_economy({ reactants, desired } = {}) {
+    if (!Array.isArray(reactants) || reactants.length < 1 ||
+        reactants.length > 6 || !desired) return cv('species_out_of_range');
+    if ([...reactants, desired].some(x =>
+      !x || !positiveInteger(x.coeff))) {
+      return cv('coefficient_not_positive_integer');
+    }
+    let inputMass = 0;
+    for (const x of reactants) {
+      const M = massInternal(x.formula);
+      if (isError(M)) return M;
+      inputMass += M * x.coeff;
+    }
+    const desiredM = massInternal(desired.formula);
+    if (isError(desiredM)) return desiredM;
+    return ok({ percent: 100 * desired.coeff * desiredM / inputMass });
+  }
+
+  /**
+   * Example: feed=10, left=4, product=4.5, both nu=1
+   * -> conversion=.6, yield=.45, selectivity=.75.
+   * Inputs: n_feed_mol, n_left_mol, n_product_mol (mol);
+   * optional nu_reactant, nu_product (default 1).
+   * Outputs: conversion, yield, selectivity as fractions.
+   * Zero conversion gives selectivity:null.
+   * Errors: left_exceeds_feed; value_not_positive;
+   * negative_amount; coefficient_not_positive_integer.
+   */
+  function conversion_yield(x = {}) {
+    const { n_feed_mol: feed, n_left_mol: left,
+      n_product_mol: product } = x;
+    const nr = x.nu_reactant === undefined ? 1 : x.nu_reactant;
+    const np = x.nu_product === undefined ? 1 : x.nu_product;
+    if (!numeric(feed, left, product, nr, np)) {
+      return cv('invalid_number');
+    }
+    if (left > feed) return cv('left_exceeds_feed');
+    if (feed <= 0) return cv('value_not_positive');
+    if (left < 0 || product < 0) return cv('negative_amount');
+    if (!positiveInteger(nr) || !positiveInteger(np)) {
+      return cv('coefficient_not_positive_integer');
+    }
+    const conversion = (feed - left) / feed;
+    const yieldValue = product * nr / np / feed;
+    return ok({
+      conversion, yield: yieldValue,
+      selectivity: conversion === 0 ? null : yieldValue / conversion
+    });
+  }
+
+  /**
+   * Example: recipe {white:2,red:1}, stock {white:7,red:2}
+   * -> made=2, leftover {white:3,red:0}, limiting ['red'].
+   * Inputs: recipe counts >=1, stock counts >=0, safe integers.
+   * Outputs: made (whole models), leftover, limiting.
+   * Errors: count_not_whole_number.
+   */
+  function build_count({ recipe, stock } = {}) {
+    if (!recipe || !stock || Array.isArray(recipe) ||
+        Array.isArray(stock) || typeof recipe !== 'object' ||
+        typeof stock !== 'object' || !Object.keys(recipe).length) {
+      return cv('count_not_whole_number');
+    }
+    if (Object.values(recipe).some(x => !positiveInteger(x)) ||
+        Object.values(stock).some(x => !whole(x) || x < 0)) {
+      return cv('count_not_whole_number');
+    }
+    const made = Math.min(...Object.keys(recipe).map(s =>
+      Math.floor((stock[s] || 0) / recipe[s])));
+    const leftover = {};
+    for (const s of [...new Set([
+      ...Object.keys(recipe), ...Object.keys(stock)
+    ])]) {
+      leftover[s] = (stock[s] || 0) - made * (recipe[s] || 0);
+    }
+    const limiting = Object.keys(recipe).filter(s =>
+      leftover[s] < recipe[s]);
+    return { made, leftover, limiting };
+  }
+
+  /**
+   * Example: 29 items in groups of 12 -> 2 groups, 5 left.
+   * Inputs: count (whole >=0), group_size (whole >=1).
+   * Outputs: groups, left (whole counts).
+   * Errors: group_size_not_positive_integer; count_not_whole_number.
+   */
+  function groups({ count, group_size } = {}) {
+    if (!positiveInteger(group_size)) {
+      return cv('group_size_not_positive_integer');
+    }
+    if (!whole(count) || count < 0) return cv('count_not_whole_number');
+    return {
+      groups: Math.floor(count / group_size),
+      left: count % group_size
+    };
+  }
+
+  /**
+   * Example: 2 white + 1 red per model, stock 7 white/2 red,
+   * plan 2 -> used 4 white/2 red, left 3 white/0 red.
+   * Inputs: recipe and stock as in build_count; models (whole >=0).
+   * Outputs: used, leftover, possible, total_before, total_after.
+   * Totals are bead mass units assuming equal-mass beads.
+   * Errors: count_not_whole_number.
+   */
+  function build_plan({ recipe, stock, models } = {}) {
+    const base = build_count({ recipe, stock });
+    if (isError(base)) return base;
+    if (!whole(models) || models < 0) return cv('count_not_whole_number');
+    const used = {};
+    const leftover = {};
+    let total_before = 0;
+    let total_after = 0;
+    let possible = true;
+    for (const s of [...new Set([
+      ...Object.keys(recipe), ...Object.keys(stock)
+    ])]) {
+      const n = models * (recipe[s] || 0);
+      used[s] = n;
+      leftover[s] = (stock[s] || 0) - n;
+      if (leftover[s] < 0) possible = false;
+      total_before += stock[s] || 0;
+      total_after += n + leftover[s];
+    }
+    return ok({ used, leftover, possible, total_before, total_after });
+  }
+
+  /**
+   * Example: 5.28 g vapour, 0.12 mol -> 44 g/mol.
+   * Inputs: mass_g (g, >=0), n_mol (mol, >0).
+   * Output: M_g_mol. Errors: negative_mass; value_not_positive.
+   */
+  function molar_mass_from_sample({ mass_g, n_mol } = {}) {
+    if (!numeric(mass_g, n_mol)) return cv('invalid_number');
+    if (mass_g < 0) return cv('negative_mass');
+    if (n_mol <= 0) return cv('value_not_positive');
+    return ok({ M_g_mol: mass_g / n_mol });
+  }
+
+  /**
+   * Example: acid .01 mol, 0.1 mol/dm3 alkali, 20 cm3,
+   * ratio 1 -> .008 mol acid remaining.
+   * Inputs: acid_initial_mol, alkali_c_mol_dm3,
+   * alkali_v_cm3, acid_per_alkali.
+   * Output: acid_remaining_mol, clamped at zero.
+   * Errors: value_not_positive; negative_amount.
+   */
+  function acid_remaining(x = {}) {
+    const { acid_initial_mol: acid, alkali_c_mol_dm3: c,
+      alkali_v_cm3: v, acid_per_alkali: ratio } = x;
+    if (!numeric(acid, c, v, ratio)) return cv('invalid_number');
+    if (acid <= 0 || c <= 0 || ratio <= 0) {
+      return cv('value_not_positive');
+    }
+    if (v < 0) return cv('negative_amount');
+    return ok({
+      acid_remaining_mol: Math.max(0, acid - c * v / 1000 * ratio)
+    });
+  }
+
+  /**
+   * Example: C2H4 feed 10 mol, O2 feed 20 mol,
+   * conversion .6 and desired selectivity .75:
+   * 4 mol C2H4 left, 4.5 mol C2H4O, 3 mol CO2,
+   * 3 mol H2O, 13.25 mol O2 left; both sides 920 g.
+   * Inputs: feed_C2H4_mol, feed_O2_mol, conversion,
+   * desired_selectivity (fractions 0..1).
+   * Outputs: inlet_mol, outlet_mol, inlet_masses_g,
+   * outlet_masses_g, mass_in_g, mass_out_g.
+   * Reactions: C2H4 + 0.5O2 -> C2H4O;
+   * C2H4 + 3O2 -> 2CO2 + 2H2O.
+   * Errors: value_not_positive; fraction_out_of_range;
+   * insufficient_oxygen.
+   */
+  function reactor_streams(x = {}) {
+    const { feed_C2H4_mol: feed, feed_O2_mol: oxygen,
+      conversion: conv, desired_selectivity: sel } = x;
+    if (!numeric(feed, oxygen, conv, sel)) return cv('invalid_number');
+    if (feed <= 0 || oxygen <= 0) return cv('value_not_positive');
+    if (conv < 0 || conv > 1 || sel < 0 || sel > 1) {
+      return cv('fraction_out_of_range');
+    }
+    const used = feed * conv;
+    const desired = used * sel;
+    const burned = used - desired;
+    const oxygenUsed = desired * 0.5 + burned * 3;
+    if (oxygenUsed > oxygen + 1e-10) {
+      return cv('insufficient_oxygen');
+    }
+    const inlet_mol = { C2H4: feed, O2: oxygen };
+    const outlet_mol = {
+      C2H4: feed - used, O2: Math.max(0, oxygen - oxygenUsed),
+      C2H4O: desired, CO2: burned * 2, H2O: burned * 2
+    };
+    const inlet_masses_g = {};
+    const outlet_masses_g = {};
+    for (const [s, n] of Object.entries(inlet_mol)) {
+      inlet_masses_g[s] = n * massInternal(s);
+    }
+    for (const [s, n] of Object.entries(outlet_mol)) {
+      outlet_masses_g[s] = n * massInternal(s);
+    }
+    const mass_in_g = Object.values(inlet_masses_g)
+      .reduce((a, b) => a + b, 0);
+    const mass_out_g = Object.values(outlet_masses_g)
+      .reduce((a, b) => a + b, 0);
+    return ok({
+      inlet_mol, outlet_mol, inlet_masses_g, outlet_masses_g,
+      mass_in_g, mass_out_g
+    });
+  }
+
+  return Object.freeze({
+    API_VERSION,
+    parse_formula, molar_mass, moles, mass_from_moles,
+    gas_rtp, concentration, percent_composition,
+    empirical_formula, molecular_formula, limiting,
+    percent_yield, purity, ideal_gas, combustion,
+    titration, back_titration, solution_prep, dilution,
+    serial_dilution, convert_concentration, balance,
+    atom_economy, conversion_yield, build_count, groups,
+    build_plan, molar_mass_from_sample, acid_remaining,
+    reactor_streams
+  });
+})();
+/* FIT-CALC-END moles */
+
+(function () {
+  'use strict';
+
+  const C = FITCalcMoles;
+  const $ = id => document.getElementById(id);
+
+  const COLOURS = Object.freeze({
+    blue:'#1F66E5',
+    purple:'#6A45F5',
+    teal:'#2EC4A6',
+    orange:'#FF6B3D',
+    yellow:'#FFC83D',
+    pink:'#FF8FB8',
+    green:'#3DBE6B',
+    grey:'#6B6B6B',
+    red:'#D92D20'
+  });
+
+  const ROUTE_A = Object.freeze({
+    reactants:[
+      {formula:'C2H4',coeff:2},
+      {formula:'O2',coeff:1}
+    ],
+    desired:{formula:'C2H4O',coeff:2}
+  });
+
+  const ROUTE_B = Object.freeze({
+    reactants:[
+      {formula:'C2H4',coeff:1},
+      {formula:'H2O2',coeff:1}
+    ],
+    desired:{formula:'C2H4O',coeff:1}
+  });
+
+  const REACTOR_CASE = Object.freeze({
+    feed_C2H4_mol:10,
+    feed_O2_mol:20,
+    conversion:0.6,
+    desired_selectivity:0.75
+  });
+
+  const TARGET_CASE = Object.freeze({
+    feed_C2H4_mol:12,
+    feed_O2_mol:40,
+    conversion:0.625,
+    desired_selectivity:0.8
+  });
+
+  const ROUNDS = [
+    {
+      type:'balance',
+      tag:'ELEMENT MATRIX · EQUATION BALANCING',
+      title:'Balance an oxidation reaction',
+      description:'Pyrite is oxidised to iron(III) oxide and sulfur dioxide. Determine the smallest positive integer coefficients that conserve every element.',
+      equation:'a FeS₂ + b O₂ → c Fe₂O₃ + d SO₂',
+      given:[
+        ['Reactants','FeS₂ and O₂'],
+        ['Products','Fe₂O₃ and SO₂'],
+        ['Element rows','Fe, S, O'],
+        ['Unknown coefficients','a, b, c, d']
+      ],
+      task:'Solve the stoichiometric matrix',
+      question:'Find the smallest positive integer values of a, b, c and d.',
+      concept:'Every conserved element supplies a homogeneous linear equation. A conventional chemical equation is obtained from a positive null-space vector, scaled to the smallest whole numbers.',
+      science:'Iron balance: a = 2c. Sulfur balance: 2a = d. Oxygen balance: 2b = 3c + 2d. Solving yields a:b:c:d = 4:11:2:8. The result is 4FeS₂ + 11O₂ → 2Fe₂O₃ + 8SO₂.',
+      hint:'Use the iron and sulfur rows first: a = 2c and d = 2a. Then substitute into the oxygen row.',
+      fields:[
+        {key:'a',label:'Coefficient a — FeS₂',initial:'1',integer:true},
+        {key:'b',label:'Coefficient b — O₂',initial:'1',integer:true},
+        {key:'c',label:'Coefficient c — Fe₂O₃',initial:'1',integer:true},
+        {key:'d',label:'Coefficient d — SO₂',initial:'1',integer:true}
+      ]
+    },
+    {
+      type:'economy',
+      tag:'ATOM ECONOMY · ROUTE SELECTION',
+      title:'Compare routes to ethylene oxide',
+      description:'Two idealised reactions produce ethylene oxide, C₂H₄O. Compare how efficiently each uses the mass of its reactants.',
+      equation:'Atom economy (%) = desired product mass / total reactant mass × 100',
+      given:[
+        ['Route A','2C₂H₄ + O₂ → 2C₂H₄O'],
+        ['Route B','C₂H₄ + H₂O₂ → C₂H₄O + H₂O'],
+        ['Desired product','C₂H₄O'],
+        ['Assumption','Stoichiometric, theoretical reaction']
+      ],
+      task:'Select the better atom economy',
+      question:'Calculate the atom economy of both routes, then select the route with the greater theoretical atom economy.',
+      concept:'Atom economy depends on the balanced reaction, not the measured conversion, product yield or operating cost. A high atom economy does not guarantee a high practical yield.',
+      science:'Route A: desired mass = 2 × 44 = 88 g; reactants = 2 × 28 + 32 = 88 g, so atom economy is 100%. Route B: desired mass = 44 g; reactants = 28 + 34 = 62 g, so atom economy is approximately 70.97%. Route A has the higher theoretical atom economy.',
+      hint:'M(C₂H₄)=28, M(O₂)=32, M(H₂O₂)=34 and M(C₂H₄O)=44 g mol⁻¹. Use the coefficients shown for each route.',
+      fields:[
+        {key:'routeA',label:'Route A atom economy (%)',initial:'0'},
+        {key:'routeB',label:'Route B atom economy (%)',initial:'0'}
+      ],
+      choices:[
+        {value:'A',label:'Route A is better'},
+        {value:'B',label:'Route B is better'},
+        {value:'equal',label:'Both are equal'}
+      ]
+    },
+    {
+      type:'reactor',
+      tag:'COMPETING REACTIONS · MATERIAL BALANCE',
+      title:'Close a reactor material balance',
+      description:'Ethylene reacts with oxygen to form ethylene oxide, while some ethylene undergoes complete combustion. Calculate the outlet stream and check conservation of mass.',
+      equation:'C₂H₄ + ½O₂ → C₂H₄O     |     C₂H₄ + 3O₂ → 2CO₂ + 2H₂O',
+      given:[
+        ['Ethylene feed','10.0 mol'],
+        ['Oxygen feed','20.0 mol'],
+        ['Ethylene conversion','60.0%'],
+        ['Desired-product selectivity','75.0%']
+      ],
+      task:'Complete the outlet ledger',
+      question:'Calculate all five outlet amounts in moles and the total inlet and outlet masses in grams.',
+      concept:'Conversion determines how much feed reacts. Selectivity allocates that reacted feed among competing pathways. Every independent reaction must conserve atoms.',
+      science:'6 mol C₂H₄ reacts. Desired pathway: 6 × 0.75 = 4.5 mol C₂H₄O. Combustion consumes 1.5 mol C₂H₄ and produces 3 mol CO₂ and 3 mol H₂O. Oxygen consumed = 4.5 × 0.5 + 1.5 × 3 = 6.75 mol. Outlet: C₂H₄ 4 mol, O₂ 13.25 mol, C₂H₄O 4.5 mol, CO₂ 3 mol, H₂O 3 mol. Inlet and outlet both have mass 920 g.',
+      hint:'First calculate reacted ethylene: 10 × 0.60. Allocate 75% to desired product and 25% to combustion. Apply each oxygen coefficient separately.',
+      fields:[
+        {key:'ethene',label:'Outlet C₂H₄ (mol)',initial:'0'},
+        {key:'oxygen',label:'Outlet O₂ (mol)',initial:'0'},
+        {key:'oxide',label:'Outlet C₂H₄O (mol)',initial:'0'},
+        {key:'carbonDioxide',label:'Outlet CO₂ (mol)',initial:'0'},
+        {key:'water',label:'Outlet H₂O (mol)',initial:'0'},
+        {key:'massIn',label:'Total inlet mass (g)',initial:'0'},
+        {key:'massOut',label:'Total outlet mass (g)',initial:'0'}
+      ]
+    },
+    {
+      type:'nonunique',
+      tag:'NULL SPACE · MODEL IDENTIFIABILITY',
+      title:'Recognise an underdetermined balance',
+      description:'A proposed reaction contains four species but only two independent elemental balances. Determine whether the coefficients can be uniquely fixed from atom conservation alone.',
+      equation:'a H₂ + b O₂ → c H₂O + d H₂O₂',
+      given:[
+        ['Hydrogen balance','2a − 2c − 2d = 0'],
+        ['Oxygen balance','2b − c − 2d = 0'],
+        ['Unknowns','a, b, c, d'],
+        ['Independent element rows','H and O']
+      ],
+      task:'Audit equation identifiability',
+      question:'Find the rank of the element-balance matrix and the dimension of its null space. Decide whether there is a unique set of smallest positive coefficients.',
+      concept:'A one-dimensional null space typically fixes a reaction coefficient ratio up to scale. With two or more degrees of freedom, elemental conservation alone does not identify a unique ratio.',
+      science:'The signed element matrix has two linearly independent rows and four columns. Its rank is 2, and nullity = 4 − 2 = 2. There are infinitely many positive balanced coefficient sets, so a unique ratio cannot be identified from conservation alone.',
+      hint:'The two element-balance equations are independent. Use nullity = number of columns − matrix rank.',
+      fields:[
+        {key:'rank',label:'Matrix rank',initial:'0',integer:true},
+        {key:'nullity',label:'Null-space dimension',initial:'0',integer:true}
+      ],
+      choices:[
+        {value:'unique',label:'Unique positive coefficient ratio'},
+        {value:'nonunique',label:'Multiple balanced coefficient ratios'},
+        {value:'impossible',label:'No balanced equation exists'}
+      ]
+    },
+    {
+      type:'metrics',
+      tag:'CONVERSION · YIELD · SELECTIVITY',
+      title:'Evaluate process performance',
+      description:'A reactor receives ethylene and discharges unreacted ethylene together with desired product. Calculate the three independent performance measures.',
+      equation:'X = reacted/feed     ·     Y = desired product/feed     ·     S = Y/X',
+      given:[
+        ['Ethylene feed','10.0 mol'],
+        ['Unreacted ethylene','4.0 mol'],
+        ['Ethylene oxide produced','4.5 mol'],
+        ['Desired reaction stoichiometry','1 C₂H₄ → 1 C₂H₄O']
+      ],
+      task:'Separate the three metrics',
+      question:'Determine ethylene conversion, desired-product yield and selectivity, each expressed as a percentage.',
+      concept:'Conversion describes disappearance of reactant, yield describes desired product relative to its stoichiometric feed potential, and selectivity describes which fraction of reacted feed forms the desired product.',
+      science:'Ethylene reacted = 10 − 4 = 6 mol. Conversion = 6/10 = 60%. Desired-product yield = 4.5/10 = 45%. Selectivity = 4.5/6 = 75%. These definitions use equal reactant/product stoichiometric coefficients for the desired reaction.',
+      hint:'Calculate reacted feed first. Yield uses the original 10 mol denominator; selectivity uses the reacted 6 mol denominator.',
+      fields:[
+        {key:'conversion',label:'Conversion (%)',initial:'0'},
+        {key:'yield',label:'Desired-product yield (%)',initial:'0'},
+        {key:'selectivity',label:'Desired-product selectivity (%)',initial:'0'}
+      ]
+    },
+    {
+      type:'target',
+      tag:'INVERSE REACTOR DESIGN · CLOSURE TEST',
+      title:'Size the feed for a production target',
+      description:'A reactor must produce 6.00 mol of ethylene oxide. The intended operating point has 62.5% ethylene conversion and 80.0% selectivity. Oxygen is supplied at 40.0 mol.',
+      equation:'Desired product = ethylene feed × conversion × selectivity',
+      given:[
+        ['C₂H₄O production target','6.00 mol'],
+        ['Ethylene conversion','62.5%'],
+        ['Desired-product selectivity','80.0%'],
+        ['Available O₂ feed','40.0 mol']
+      ],
+      task:'Design and validate the inlet stream',
+      question:'Determine the required ethylene feed, the unreacted oxygen outlet, and the total outlet mass. Then decide whether the final mass balance closes.',
+      concept:'Solve the production equation backwards for the feed. Apply both reactions to the resulting inlet stream, calculate residual oxygen and verify that total input and output masses agree.',
+      science:'Required ethylene feed = 6/(0.625 × 0.8) = 12 mol. Ethylene reacted = 7.5 mol, of which 6 mol forms oxide and 1.5 mol burns. Oxygen consumed = 6 × 0.5 + 1.5 × 3 = 7.5 mol, leaving 32.5 mol oxygen. Other outlets are 4.5 mol C₂H₄, 6 mol C₂H₄O, 3 mol CO₂ and 3 mol H₂O. Inlet mass = 12 × 28 + 40 × 32 = 1616 g. Outlet mass also equals 1616 g.',
+      hint:'Rearrange production = feed × X × S. For the outlet oxygen, add consumption by both pathways and subtract from the 40 mol feed.',
+      fields:[
+        {key:'feed',label:'Required C₂H₄ feed (mol)',initial:'0'},
+        {key:'oxygenLeft',label:'Remaining outlet O₂ (mol)',initial:'0'},
+        {key:'outletMass',label:'Total outlet mass (g)',initial:'0'}
+      ],
+      choices:[
+        {value:'balanced',label:'The mass balance closes'},
+        {value:'unbalanced',label:'The mass balance does not close'}
+      ]
+    }
+  ];
+
+  let round = 0;
+  let score = 0;
+  let tries = 0;
+  let hinted = false;
+  let solved = false;
+  let answers = {};
+  let selectedChoice = '';
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, c => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    })[c]);
+  }
+
+  function numberText(value, digits = 5) {
+    if (!Number.isFinite(value)) return '—';
+    if (value === 0) return '0';
+    if (Math.abs(value) >= 1e6 || Math.abs(value) < 0.0001) {
+      return value.toExponential(Math.max(1,digits-2));
+    }
+    return String(Number(value.toPrecision(digits)));
+  }
+
+  function inputNumber(key) {
+    const value = answers[key];
+    if (value === undefined || value === null ||
+        String(value).trim() === '') return NaN;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : NaN;
+  }
+
+  function displayNumber(key) {
+    return numberText(inputNumber(key));
+  }
+
+  function near(actual, expected, tolerance = 0.012) {
+    return Number.isFinite(actual) &&
+      Math.abs(actual-expected) <=
+        Math.max(1e-10,Math.abs(expected)*tolerance);
+  }
+
+  function isValid(result) {
+    return !!result &&
+      !Object.prototype.hasOwnProperty.call(result,'error');
+  }
+
+  function feedback(message, kind = '') {
+    $('feedback').textContent = message;
+    $('feedback').className = 'feedback' + (kind ? ' ' + kind : '');
+  }
+
+  function field(definition) {
+    const key = escapeHtml(definition.key);
+    return `<div class="answer">
+      <label for="answer-${key}">${escapeHtml(definition.label)}</label>
+      <input
+        id="answer-${key}"
+        type="number"
+        step="${definition.integer ? '1' : 'any'}"
+        inputmode="${definition.integer ? 'numeric' : 'decimal'}"
+        data-answer="${key}"
+        value="${escapeHtml(answers[definition.key] ?? '')}"
+      >
+      ${definition.note
+        ? `<div class="note">${escapeHtml(definition.note)}</div>`
+        : ''}
+    </div>`;
+  }
+
+  function choicesHTML(options) {
+    return `<h3>Process decision</h3>
+      <div class="choices" role="group"
+        aria-label="Choose your process decision">
+        ${options.map(option => `
+          <button type="button" class="choice"
+            data-choice="${escapeHtml(option.value)}"
+            aria-pressed="${selectedChoice===option.value}">
+            ${escapeHtml(option.label)}
+          </button>
+        `).join('')}
+      </div>`;
+  }
+
+  function sceneBase() {
+    return `<rect x="9" y="9" width="462" height="302"
+      rx="20" fill="white" stroke="#111" stroke-width="3"/>`;
+  }
+
+  function processArrow(x1,y1,x2,y2) {
+    const angle = Math.atan2(y2-y1,x2-x1);
+    const length = 11;
+    const a = angle + Math.PI*0.8;
+    const b = angle - Math.PI*0.8;
+    return `<path d="M${x1} ${y1}L${x2} ${y2}
+      M${x2+length*Math.cos(a)} ${y2+length*Math.sin(a)}
+      L${x2} ${y2}
+      L${x2+length*Math.cos(b)} ${y2+length*Math.sin(b)}"
+      fill="none" stroke="#111" stroke-width="3"
+      stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+
+  function node(x,y,width,height,title,body,fill='#E2ECFD') {
+    return `<rect x="${x}" y="${y}" width="${width}" height="${height}"
+      rx="12" fill="${fill}" stroke="#111" stroke-width="2.5"/>
+      <text x="${x+width/2}" y="${y+24}" text-anchor="middle"
+        font-size="12" font-weight="800">${escapeHtml(title)}</text>
+      <text x="${x+width/2}" y="${y+height-16}" text-anchor="middle"
+        font-size="13" font-weight="800">${escapeHtml(body)}</text>`;
+  }
+
+  function drawBalanceScene(nonunique) {
+    const formulas = nonunique
+      ? ['H₂','O₂','H₂O','H₂O₂']
+      : ['FeS₂','O₂','Fe₂O₃','SO₂'];
+
+    const coefficients = nonunique
+      ? ['a','b','c','d']
+      : ['a','b','c','d'].map(key => displayNumber(key));
+
+    let svg = sceneBase();
+
+    svg += `<text x="240" y="34" text-anchor="middle"
+      font-size="14" font-weight="800">
+      ${nonunique ? 'ELEMENTAL BALANCE MATRIX' : 'BALANCED REACTION MODEL'}
+    </text>`;
+
+    const xs = [41,151,272,381];
+
+    formulas.forEach((formula,i) => {
+      const x=xs[i];
+      const width=i===2?90:81;
+      const colour=i<2?'#E2ECFD':'#DDF7F1';
+
+      svg += `
+        <rect x="${x-13}" y="61" width="${width}"
+          height="86" rx="12" fill="${colour}"
+          stroke="#111" stroke-width="2"/>
+        <text x="${x+(width-26)/2-13}" y="87"
+          text-anchor="middle" font-size="13" font-weight="800">
+          ${coefficients[i]}
+        </text>
+        <text x="${x+(width-26)/2-13}" y="120"
+          text-anchor="middle" font-size="15" font-weight="900">
+          ${formula}
+        </text>`;
+    });
+
+    svg += `
+      <text x="241" y="107" text-anchor="middle"
+        font-size="28" font-weight="900">→</text>
+      <text x="135" y="112" text-anchor="middle"
+        font-size="22" font-weight="800">+</text>
+      <text x="369" y="112" text-anchor="middle"
+        font-size="22" font-weight="800">+</text>`;
+
+    if (nonunique) {
+      svg += `
+        <rect x="32" y="174" width="416" height="101" rx="12"
+          fill="#ECE7FF" stroke="#111" stroke-width="2"/>
+        <text x="45" y="198" font-size="12" font-weight="800">
+          H BALANCE
+        </text>
+        <text x="45" y="220" font-size="15" font-weight="700">
+          2a − 2c − 2d = 0
+        </text>
+        <text x="45" y="245" font-size="12" font-weight="800">
+          O BALANCE
+        </text>
+        <text x="45" y="266" font-size="15" font-weight="700">
+          2b − c − 2d = 0
+        </text>
+        <text x="310" y="210" font-size="12" font-weight="800">
+          RANK: ${displayNumber('rank')}
+        </text>
+        <text x="310" y="247" font-size="12" font-weight="800">
+          NULLITY: ${displayNumber('nullity')}
+        </text>`;
+    } else {
+      svg += `
+        <rect x="32" y="173" width="416" height="110" rx="12"
+          fill="#ECE7FF" stroke="#111" stroke-width="2"/>
+        <text x="47" y="195" font-size="12" font-weight="800">
+          ELEMENT CONSERVATION
+        </text>
+        <text x="47" y="220" font-size="14" font-weight="700">
+          Fe: a = 2c
+        </text>
+        <text x="47" y="244" font-size="14" font-weight="700">
+          S: 2a = d
+        </text>
+        <text x="244" y="220" font-size="14" font-weight="700">
+          O: 2b = 3c + 2d
+        </text>
+        <text x="244" y="252" font-size="12" font-weight="800">
+          Smallest positive integers
+        </text>`;
+    }
+
+    $('scene').innerHTML=svg;
+    $('scene').setAttribute('aria-label',nonunique
+      ? 'Elemental balance equations for hydrogen, oxygen, water and hydrogen peroxide, with four unknown coefficients and two element balances.'
+      : `Pyrite oxidation coefficients entered: ${coefficients.join(', ')}.`);
+  }
+
+  function drawEconomyScene() {
+    const a=inputNumber('routeA');
+    const b=inputNumber('routeB');
+
+    let svg=sceneBase();
+
+    svg+=`
+      ${node(27,57,188,101,'ROUTE A','2C₂H₄ + O₂','#DDF7F1')}
+      ${node(265,57,188,101,'ROUTE B','C₂H₄ + H₂O₂','#FFF4D6')}
+      ${processArrow(121,165,121,211)}
+      ${processArrow(359,165,359,211)}
+      ${node(27,219,188,68,'C₂H₄O',numberText(a)+'%','#E2ECFD')}
+      ${node(265,219,188,68,'C₂H₄O + H₂O',numberText(b)+'%','#FFE6DC')}
+      <text x="240" y="38" text-anchor="middle"
+        font-size="14" font-weight="800">COMPETING SYNTHETIC ROUTES</text>
+      <text x="240" y="305" text-anchor="middle"
+        font-size="11" font-weight="700">
+        Atom economy measures theoretical mass utilisation.
+      </text>`;
+
+    $('scene').innerHTML=svg;
+    $('scene').setAttribute('aria-label',
+      `Two ethylene oxide synthesis routes. Entered atom economies: route A ${numberText(a)} per cent and route B ${numberText(b)} per cent.`);
+  }
+
+  function drawReactorScene(target) {
+    const feed=target ? inputNumber('feed') : REACTOR_CASE.feed_C2H4_mol;
+    const oxygen=target ? TARGET_CASE.feed_O2_mol : REACTOR_CASE.feed_O2_mol;
+    const conversion=target ? TARGET_CASE.conversion : REACTOR_CASE.conversion;
+    const selectivity=target
+      ? TARGET_CASE.desired_selectivity
+      : REACTOR_CASE.desired_selectivity;
+
+    const validFeed=Number.isFinite(feed)&&feed>0;
+    const proposed=validFeed
+      ? C.reactor_streams({
+          feed_C2H4_mol:feed,
+          feed_O2_mol:oxygen,
+          conversion,
+          desired_selectivity:selectivity
+        })
+      : null;
+
+    let svg=sceneBase();
+
+    svg+=`
+      ${node(22,57,139,76,'ETHYLENE',
+        (validFeed?numberText(feed):'—')+' mol','#E2ECFD')}
+      ${node(22,161,139,76,'OXYGEN',
+        numberText(oxygen)+' mol','#FFF4D6')}
+      ${processArrow(163,94,203,142)}
+      ${processArrow(163,197,203,161)}
+
+      <rect x="203" y="100" width="111" height="105"
+        rx="15" fill="#1F66E5" stroke="#111" stroke-width="3"/>
+      <text x="258" y="129" text-anchor="middle"
+        fill="white" font-size="13" font-weight="800">REACTOR</text>
+      <text x="258" y="152" text-anchor="middle"
+        fill="white" font-size="12">X = ${numberText(100*conversion)}%</text>
+      <text x="258" y="172" text-anchor="middle"
+        fill="white" font-size="12">S = ${numberText(100*selectivity)}%</text>
+      ${processArrow(316,151,343,151)}
+      ${node(346,52,111,76,'DESIRED',
+        target?'6 mol C₂H₄O':displayNumber('oxide')+' mol',
+        '#DDF7F1')}
+      ${node(346,144,111,76,'BYPRODUCTS',
+        target?'CO₂ + H₂O':'CO₂ + H₂O',
+        '#FFE6DC')}
+      <text x="240" y="35" text-anchor="middle"
+        font-size="14" font-weight="800">
+        PARALLEL-REACTION NETWORK
+      </text>
+      <rect x="30" y="259" width="419" height="36"
+        rx="11" fill="#F4F3EF" stroke="#111" stroke-width="2"/>
+      <text x="239" y="282" text-anchor="middle"
+        font-size="12" font-weight="800">
+        ${target?'Production target: 6.00 mol oxide':'Two reaction extents; one conserved total mass'}
+      </text>`;
+
+    if(validFeed && proposed && !proposed.error){
+      svg+=`
+        <text x="258" y="242" text-anchor="middle"
+          font-size="11" font-weight="800">
+          Model inlet: ${numberText(proposed.mass_in_g)} g
+        </text>`;
+    }
+
+    $('scene').innerHTML=svg;
+    $('scene').setAttribute('aria-label',
+      target
+        ? `Reactor with entered ethylene feed ${validFeed?numberText(feed):'blank'} moles, oxygen feed 40 moles, conversion 62.5 per cent, selectivity 80 per cent and desired product target 6 moles.`
+        : 'Reactor with 10 moles ethylene and 20 moles oxygen entering parallel desired and combustion reactions at 60 per cent conversion and 75 per cent selectivity.');
+  }
+
+  function drawMetricsScene() {
+    const conversion=inputNumber('conversion');
+    const productYield=inputNumber('yield');
+    const selectivity=inputNumber('selectivity');
+
+    let svg=sceneBase();
+
+    const items=[
+      ['CONVERSION',conversion,COLOURS.blue],
+      ['DESIRED YIELD',productYield,COLOURS.teal],
+      ['SELECTIVITY',selectivity,COLOURS.purple]
+    ];
+
+    items.forEach(([label,value,colour],i)=>{
+      const y=57+i*76;
+      const width=Number.isFinite(value)
+        ? Math.max(0,Math.min(295,295*value/100))
+        : 0;
+
+      svg+=`
+        <text x="34" y="${y}" font-size="12" font-weight="800">
+          ${label}
+        </text>
+        <rect x="34" y="${y+12}" width="295" height="31"
+          rx="8" fill="#F4F3EF" stroke="#111" stroke-width="2"/>
+        <rect x="34" y="${y+12}" width="${width}" height="31"
+          rx="8" fill="${colour}" stroke="#111" stroke-width="1.5"/>
+        <text x="347" y="${y+34}" font-size="17" font-weight="900">
+          ${numberText(value)}%
+        </text>`;
+    });
+
+    svg+=`
+      <text x="240" y="34" text-anchor="middle"
+        font-size="14" font-weight="800">
+        PROCESS PERFORMANCE DASHBOARD
+      </text>
+      <text x="240" y="298" text-anchor="middle"
+        font-size="12" font-weight="700">
+        All percentages refer to the specified mole basis.
+      </text>`;
+
+    $('scene').innerHTML=svg;
+    $('scene').setAttribute('aria-label',
+      `Performance bar chart with entered conversion ${numberText(conversion)} per cent, yield ${numberText(productYield)} per cent and selectivity ${numberText(selectivity)} per cent.`);
+  }
+
+  function drawScene() {
+    const type=ROUNDS[round].type;
+
+    if(type==='balance')drawBalanceScene(false);
+    else if(type==='economy')drawEconomyScene();
+    else if(type==='reactor')drawReactorScene(false);
+    else if(type==='nonunique')drawBalanceScene(true);
+    else if(type==='metrics')drawMetricsScene();
+    else drawReactorScene(true);
+  }
+
+  function graphBase(yLabel,xLabel,maxY,ticks=4) {
+    let svg=`
+      <rect x="0" y="0" width="480" height="275"
+        rx="12" fill="white"/>
+      <path d="M65 27V220H459" fill="none"
+        stroke="#111" stroke-width="2"/>
+      <text x="14" y="18" class="plot-label">
+        ${escapeHtml(yLabel)}
+      </text>
+      <text x="262" y="258" text-anchor="middle"
+        class="plot-label">${escapeHtml(xLabel)}</text>`;
+
+    for(let i=0;i<=ticks;i++){
+      const y=220-185*i/ticks;
+      svg+=`
+        <line x1="65" y1="${y}" x2="459" y2="${y}"
+          stroke="#E4E2DB" stroke-width="1"/>
+        <text x="56" y="${y+4}" text-anchor="end"
+          class="plot-label">${numberText(maxY*i/ticks,3)}</text>`;
+    }
+
+    return svg;
+  }
+
+  function pathFromPoints(points,colour,dash='') {
+    if(!points.length)return '';
+    const d=points.map(([x,y],i)=>
+      `${i===0?'M':'L'}${x.toFixed(2)} ${y.toFixed(2)}`
+    ).join(' ');
+    return `<path d="${d}" fill="none"
+      stroke="${colour}" stroke-width="3"
+      stroke-linecap="round" stroke-linejoin="round"
+      ${dash?`stroke-dasharray="${dash}"`:''}/>`;
+  }
+
+  function marker(x,y,colour,label,anchor='start') {
+    const dx=anchor==='end'?-9:9;
+    return `<circle cx="${x}" cy="${y}" r="6"
+      fill="${colour}" stroke="#111" stroke-width="2"/>
+      <text x="${x+dx}" y="${Math.max(17,y-10)}"
+        text-anchor="${anchor}" class="plot-label">
+        ${escapeHtml(label)}
+      </text>`;
+  }
+
+  function graphLegend(items) {
+    $('legend').innerHTML=items.map(([label,colour])=>
+      `<span><i class="swatch" style="--colour:${colour}"></i>${escapeHtml(label)}</span>`
+    ).join('');
+  }
+
+  function bar(x,value,max,colour,label,width=62) {
+    const amount=Number.isFinite(value)?Math.max(0,value):0;
+    const height=185*Math.min(amount/max,1);
+
+    return `<rect x="${x}" y="${220-height}"
+      width="${width}" height="${height}" rx="6"
+      fill="${colour}" stroke="#111" stroke-width="2"/>
+      <text x="${x+width/2}" y="${Math.max(19,212-height)}"
+        text-anchor="middle" class="plot-value">
+        ${numberText(amount,4)}
+      </text>
+      <text x="${x+width/2}" y="238" text-anchor="middle"
+        class="plot-label">${escapeHtml(label)}</text>`;
+  }
+
+  function drawBalancePlot(nonunique) {
+    $('plot-title').textContent=nonunique
+      ? 'Rank and null-space dimension'
+      : 'Elemental balance constraints';
+
+    if(nonunique){
+      let svg=graphBase('Dimension (count)','Matrix structure',4,4);
+      svg+=bar(109,2,4,COLOURS.blue,'Rank',80);
+      svg+=bar(270,2,4,COLOURS.purple,'Nullity',80);
+
+      const rank=inputNumber('rank');
+      const nullity=inputNumber('nullity');
+
+      if(Number.isFinite(rank)){
+        const y=220-185*Math.max(0,Math.min(rank,4))/4;
+        svg+=`<path d="M95 ${y}H203" fill="none"
+          stroke="${COLOURS.orange}" stroke-width="2"
+          stroke-dasharray="5 4"/>`;
+      }
+      if(Number.isFinite(nullity)){
+        const y=220-185*Math.max(0,Math.min(nullity,4))/4;
+        svg+=`<path d="M258 ${y}H365" fill="none"
+          stroke="${COLOURS.orange}" stroke-width="2"
+          stroke-dasharray="5 4"/>`;
+      }
+
+      $('plot').innerHTML=svg;
+      $('plot').setAttribute('aria-label',
+        'Signed elemental matrix with four columns, rank two and null-space dimension two.');
+
+      graphLegend([
+        ['Matrix rank',COLOURS.blue],
+        ['Nullity',COLOURS.purple],
+        ['Your entries',COLOURS.orange]
+      ]);
+      return;
+    }
+
+    const correct=C.balance({
+      reactants:['FeS2','O2'],
+      products:['Fe2O3','SO2']
+    });
+
+    const proposed=['a','b','c','d'].map(inputNumber);
+    const reference=correct.coefficients;
+
+    let svg=graphBase('Stoichiometric coefficient',
+      'Chemical species',12,4);
+
+    const names=['FeS₂','O₂','Fe₂O₃','SO₂'];
+
+    reference.forEach((value,i)=>{
+      const x=75+i*98;
+      svg+=bar(x,value,12,COLOURS.blue,names[i],48);
+
+      const entered=proposed[i];
+      if(Number.isFinite(entered)&&entered>=0){
+        const y=220-185*Math.min(entered,12)/12;
+        svg+=`<path d="M${x-6} ${y}H${x+54}"
+          fill="none" stroke="${COLOURS.orange}"
+          stroke-width="2.5" stroke-dasharray="5 3"/>`;
+      }
+    });
+
+    $('plot').innerHTML=svg;
+    $('plot').setAttribute('aria-label',
+      'Stoichiometric coefficients in order: pyrite four, oxygen eleven, iron(III) oxide two and sulfur dioxide eight.');
+
+    graphLegend([
+      ['Balanced coefficients',COLOURS.blue],
+      ['Your proposed coefficients',COLOURS.orange]
+    ]);
+  }
+
+  function drawEconomyPlot() {
+    $('plot-title').textContent='Theoretical atom economy by route';
+
+    const a=C.atom_economy(ROUTE_A);
+    const b=C.atom_economy(ROUTE_B);
+
+    let svg=graphBase('Atom economy (%)',
+      'Synthesis pathway',110,5);
+
+    svg+=bar(125,a.percent,110,COLOURS.teal,'Route A',85);
+    svg+=bar(294,b.percent,110,COLOURS.orange,'Route B',85);
+
+    const proposedA=inputNumber('routeA');
+    const proposedB=inputNumber('routeB');
+
+    [
+      [125,proposedA],
+      [294,proposedB]
+    ].forEach(([x,value])=>{
+      if(!Number.isFinite(value)||value<0)return;
+      const y=220-185*Math.min(value,110)/110;
+      svg+=`<path d="M${x-5} ${y}H${x+90}"
+        fill="none" stroke="${COLOURS.purple}"
+        stroke-width="2.5" stroke-dasharray="5 4"/>`;
+    });
+
+    $('plot').innerHTML=svg;
+    $('plot').setAttribute('aria-label',
+      `Atom economy comparison: route A ${numberText(a.percent)} per cent and route B ${numberText(b.percent)} per cent.`);
+
+    graphLegend([
+      ['Route A',COLOURS.teal],
+      ['Route B',COLOURS.orange],
+      ['Your estimates',COLOURS.purple]
+    ]);
+  }
+
+  function drawReactorPlot(target) {
+    $('plot-title').textContent=target
+      ? 'Mass conservation at the target operating point'
+      : 'Inlet and outlet species masses';
+
+    const result=C.reactor_streams(target?TARGET_CASE:REACTOR_CASE);
+    const max=target?1700:1000;
+
+    let svg=graphBase('Total stream mass (g)',
+      'Reactor boundary',max,5);
+
+    const inletEntries=Object.entries(result.inlet_masses_g);
+    const outletEntries=Object.entries(result.outlet_masses_g);
+
+    const colours=[
+      COLOURS.blue,
+      COLOURS.orange,
+      COLOURS.teal,
+      COLOURS.pink,
+      COLOURS.yellow
+    ];
+
+    function stackedColumn(entries,x) {
+      let bottom=220;
+      let content='';
+
+      entries.forEach(([name,value],i)=>{
+        const height=185*value/max;
+        bottom-=height;
+
+        content+=`<rect x="${x}" y="${bottom}" width="100"
+          height="${height}" fill="${colours[i%colours.length]}"
+          stroke="#111" stroke-width="1.5">
+          <title>${escapeHtml(name)}: ${numberText(value)} g</title>
+        </rect>`;
+      });
+
+      return content;
+    }
+
+    svg+=stackedColumn(inletEntries,118);
+    svg+=stackedColumn(outletEntries,298);
+
+    svg+=`
+      <text x="168" y="238" text-anchor="middle"
+        class="plot-label">Inlet</text>
+      <text x="348" y="238" text-anchor="middle"
+        class="plot-label">Outlet</text>
+      <text x="168" y="${Math.max(19,212-185*result.mass_in_g/max)}"
+        text-anchor="middle" class="plot-value">
+        ${numberText(result.mass_in_g)} g
+      </text>
+      <text x="348" y="${Math.max(19,212-185*result.mass_out_g/max)}"
+        text-anchor="middle" class="plot-value">
+        ${numberText(result.mass_out_g)} g
+      </text>`;
+
+    const userMass=inputNumber(target?'outletMass':'massOut');
+
+    if(Number.isFinite(userMass)&&userMass>=0){
+      const y=220-185*Math.min(userMass,max)/max;
+
+      svg+=`<path d="M276 ${y}H419" fill="none"
+        stroke="${COLOURS.purple}" stroke-width="2.5"
+        stroke-dasharray="6 4"/>`;
+    }
+
+    $('plot').innerHTML=svg;
+    $('plot').setAttribute('aria-label',
+      `Mass balance chart showing inlet mass ${numberText(result.mass_in_g)} grams and outlet mass ${numberText(result.mass_out_g)} grams, represented as stacked species masses.`);
+
+    graphLegend([
+      ['Ethylene',COLOURS.blue],
+      ['Oxygen',COLOURS.orange],
+      ['Ethylene oxide',COLOURS.teal],
+      ['Carbon dioxide',COLOURS.pink],
+      ['Water',COLOURS.yellow],
+      ['Your outlet estimate',COLOURS.purple]
+    ]);
+  }
+
+  function drawMetricsPlot() {
+    $('plot-title').textContent='Yield and selectivity versus conversion';
+
+    const reference=C.conversion_yield({
+      n_feed_mol:10,
+      n_left_mol:4,
+      n_product_mol:4.5
+    });
+
+    let svg=graphBase('Performance (%)',
+      'Ethylene conversion (%)',100,4);
+
+    const yieldPoints=[];
+    const selectivityPoints=[];
+
+    for(let x=0;x<=100;x+=2){
+      const conversion=x/100;
+      const product=10*conversion*reference.selectivity;
+      const result=conversion===0
+        ? {yield:0,selectivity:reference.selectivity}
+        : C.conversion_yield({
+            n_feed_mol:10,
+            n_left_mol:10*(1-conversion),
+            n_product_mol:product
+          });
+
+      const px=65+394*x/100;
+
+      yieldPoints.push([
+        px,
+        220-185*result.yield
+      ]);
+      selectivityPoints.push([
+        px,
+        220-185*result.selectivity
+      ]);
+    }
+
+    svg+=pathFromPoints(yieldPoints,COLOURS.teal);
+    svg+=pathFromPoints(selectivityPoints,COLOURS.purple,'6 4');
+
+    const measuredX=65+394*reference.conversion;
+    const measuredYieldY=220-185*reference.yield;
+    const measuredSelectivityY=220-185*reference.selectivity;
+
+    svg+=marker(
+      measuredX,
+      measuredYieldY,
+      COLOURS.yellow,
+      'Measured yield'
+    );
+
+    svg+=marker(
+      measuredX,
+      measuredSelectivityY,
+      COLOURS.orange,
+      'Measured selectivity',
+      'end'
+    );
+
+    const yourConversion=inputNumber('conversion');
+    const yourYield=inputNumber('yield');
+
+    if(Number.isFinite(yourConversion)&&
+       Number.isFinite(yourYield)&&
+       yourConversion>=0&&yourConversion<=100&&
+       yourYield>=0&&yourYield<=100){
+
+      const x=65+394*yourConversion/100;
+      const y=220-185*yourYield/100;
+
+      svg+=`<rect x="${x-6}" y="${y-6}" width="12"
+        height="12" fill="${COLOURS.blue}"
+        stroke="#111" stroke-width="2"/>`;
+    }
+
+    for(let x=0;x<=100;x+=20){
+      svg+=`<text x="${65+394*x/100}" y="239"
+        text-anchor="middle" class="plot-label">${x}</text>`;
+    }
+
+    $('plot').innerHTML=svg;
+    $('plot').setAttribute('aria-label',
+      'Graph of desired-product yield increasing with conversion at fixed selectivity 75 per cent, with selectivity represented by a horizontal line. Measured conversion is 60 per cent, yield 45 per cent and selectivity 75 per cent.');
+
+    graphLegend([
+      ['Yield at constant selectivity',COLOURS.teal],
+      ['Selectivity',COLOURS.purple],
+      ['Reference operating point',COLOURS.yellow],
+      ['Your conversion and yield',COLOURS.blue]
+    ]);
+  }
+
+  function drawPlot() {
+    const type=ROUNDS[round].type;
+
+    if(type==='balance')drawBalancePlot(false);
+    else if(type==='economy')drawEconomyPlot();
+    else if(type==='reactor')drawReactorPlot(false);
+    else if(type==='nonunique')drawBalancePlot(true);
+    else if(type==='metrics')drawMetricsPlot();
+    else drawReactorPlot(true);
+  }
+
+  function beginRound() {
+    const scenario=ROUNDS[round];
+
+    tries=0;
+    hinted=false;
+    solved=false;
+    selectedChoice='';
+    answers={};
+
+    for(const definition of scenario.fields){
+      answers[definition.key]=definition.initial??'';
+    }
+
+    $('round').textContent=`Round ${round+1}/${ROUNDS.length}`;
+    $('score').textContent=`Score ${score}`;
+    $('tag').textContent=scenario.tag;
+    $('title').textContent=scenario.title;
+    $('description').textContent=scenario.description;
+    $('equation').textContent=scenario.equation;
+    $('task').textContent=scenario.task;
+    $('question').textContent=scenario.question;
+    $('concept').textContent=scenario.concept;
+    $('science').textContent=scenario.science;
+
+    $('given').innerHTML=scenario.given.map(([label,value])=>`
+      <div class="data-item">
+        <small>${escapeHtml(label)}</small>
+        <strong>${escapeHtml(value)}</strong>
+      </div>
+    `).join('');
+
+    $('inputs').innerHTML=
+      scenario.fields.map(field).join('')+
+      (scenario.choices?choicesHTML(scenario.choices):'');
+
+    $('check').disabled=false;
+    $('hint').disabled=false;
+    $('next').classList.add('hidden');
+
+    feedback('Enter your answers, then check your analysis.');
+    drawScene();
+    drawPlot();
+  }
+
+  function checkRound() {
+    if(solved)return;
+
+    const type=ROUNDS[round].type;
+    let correct=false;
+    let explanation='';
+
+    if(type==='balance'){
+      const result=C.balance({
+        reactants:['FeS2','O2'],
+        products:['Fe2O3','SO2']
+      });
+
+      const entered=['a','b','c','d'].map(inputNumber);
+
+      correct=isValid(result)&&
+        entered.every((value,i)=>
+          Number.isSafeInteger(value)&&
+          value===result.coefficients[i]
+        );
+
+      explanation=
+        `Smallest coefficients: ${result.coefficients.join(':')}. `+
+        'Every element is conserved.';
+
+    }else if(type==='economy'){
+      const a=C.atom_economy(ROUTE_A);
+      const b=C.atom_economy(ROUTE_B);
+
+      correct=
+        isValid(a)&&
+        isValid(b)&&
+        near(inputNumber('routeA'),a.percent)&&
+        near(inputNumber('routeB'),b.percent)&&
+        selectedChoice==='A';
+
+      explanation=
+        `Route A ${numberText(a.percent)}%; `+
+        `Route B ${numberText(b.percent)}%. `+
+        'Route A has the higher theoretical atom economy.';
+
+    }else if(type==='reactor'){
+      const result=C.reactor_streams(REACTOR_CASE);
+
+      correct=
+        isValid(result)&&
+        near(inputNumber('ethene'),result.outlet_mol.C2H4)&&
+        near(inputNumber('oxygen'),result.outlet_mol.O2)&&
+        near(inputNumber('oxide'),result.outlet_mol.C2H4O)&&
+        near(inputNumber('carbonDioxide'),result.outlet_mol.CO2)&&
+        near(inputNumber('water'),result.outlet_mol.H2O)&&
+        near(inputNumber('massIn'),result.mass_in_g)&&
+        near(inputNumber('massOut'),result.mass_out_g);
+
+      explanation=
+        `Outlets: C₂H₄ ${numberText(result.outlet_mol.C2H4)}, `+
+        `O₂ ${numberText(result.outlet_mol.O2)}, `+
+        `C₂H₄O ${numberText(result.outlet_mol.C2H4O)}, `+
+        `CO₂ ${numberText(result.outlet_mol.CO2)}, `+
+        `H₂O ${numberText(result.outlet_mol.H2O)} mol. `+
+        `Inlet and outlet masses are both ${numberText(result.mass_in_g)} g.`;
+
+    }else if(type==='nonunique'){
+      const result=C.balance({
+        reactants:['H2','O2'],
+        products:['H2O','H2O2']
+      });
+
+      correct=
+        result.error==='MathError'&&
+        result.reason==='no_unique_balance'&&
+        inputNumber('rank')===2&&
+        inputNumber('nullity')===2&&
+        selectedChoice==='nonunique';
+
+      explanation=
+        'The matrix has rank 2 and nullity 2. '+
+        'Element conservation alone does not determine one unique positive coefficient ratio.';
+
+    }else if(type==='metrics'){
+      const result=C.conversion_yield({
+        n_feed_mol:10,
+        n_left_mol:4,
+        n_product_mol:4.5
+      });
+
+      correct=
+        isValid(result)&&
+        near(inputNumber('conversion'),100*result.conversion)&&
+        near(inputNumber('yield'),100*result.yield)&&
+        near(inputNumber('selectivity'),100*result.selectivity);
+
+      explanation=
+        `Conversion ${numberText(100*result.conversion)}%, `+
+        `yield ${numberText(100*result.yield)}%, `+
+        `selectivity ${numberText(100*result.selectivity)}%.`;
+
+    }else if(type==='target'){
+      const requiredFeed=
+        6/(TARGET_CASE.conversion*TARGET_CASE.desired_selectivity);
+
+      const result=C.reactor_streams({
+        feed_C2H4_mol:requiredFeed,
+        feed_O2_mol:TARGET_CASE.feed_O2_mol,
+        conversion:TARGET_CASE.conversion,
+        desired_selectivity:TARGET_CASE.desired_selectivity
+      });
+
+      const massCloses=isValid(result)&&
+        Math.abs(result.mass_in_g-result.mass_out_g)<1e-8;
+
+      correct=
+        isValid(result)&&
+        near(inputNumber('feed'),requiredFeed)&&
+        near(inputNumber('oxygenLeft'),result.outlet_mol.O2)&&
+        near(inputNumber('outletMass'),result.mass_out_g)&&
+        massCloses&&
+        selectedChoice==='balanced';
+
+      explanation=
+        `Ethylene feed ${numberText(requiredFeed)} mol; `+
+        `oxygen outlet ${numberText(result.outlet_mol.O2)} mol; `+
+        `total outlet mass ${numberText(result.mass_out_g)} g. `+
+        'The mass balance closes.';
+    }
+
+    tries++;
+
+    if(!correct){
+      feedback(
+        'Not quite. Recheck the signed reaction coefficients, conversion basis, stoichiometric ratios and material balance.',
+        'bad'
+      );
+      return;
+    }
+
+    solved=true;
+    const awarded=hinted?50:tries===1?100:tries===2?75:50;
+    score+=awarded;
+
+    $('score').textContent=`Score ${score}`;
+    $('check').disabled=true;
+    $('hint').disabled=true;
+    $('next').classList.remove('hidden');
+    $('next').textContent=round===ROUNDS.length-1
+      ? 'View results →'
+      : 'Next round →';
+
+    $('inputs').querySelectorAll('input,select,button').forEach(control=>{
+      control.disabled=true;
+    });
+
+    feedback(`Correct. +${awarded} points. ${explanation}`,'good');
+
+    drawScene();
+    drawPlot();
+  }
+
+  function finish() {
+    $('game').classList.add('hidden');
+    $('end').classList.remove('hidden');
+
+    const stars=score>=500?3:score>=375?2:1;
+
+    $('stars').textContent='★'.repeat(stars)+'☆'.repeat(3-stars);
+    $('stars').setAttribute(
+      'aria-label',
+      `${stars} out of three stars`
+    );
+
+    $('result').textContent=
+      `You earned ${score} out of ${ROUNDS.length*100} possible points.`;
+
+    $('end').scrollIntoView({
+      behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'auto'
+        : 'smooth',
+      block:'start'
+    });
+  }
+
+  $('inputs').addEventListener('input',event=>{
+    if(solved)return;
+
+    const control=event.target.closest('[data-answer]');
+    if(!control)return;
+
+    answers[control.dataset.answer]=control.value;
+
+    drawScene();
+    drawPlot();
+  });
+
+  $('inputs').addEventListener('click',event=>{
+    if(solved)return;
+
+    const button=event.target.closest('[data-choice]');
+    if(!button)return;
+
+    selectedChoice=button.dataset.choice;
+
+    $('inputs').querySelectorAll('[data-choice]').forEach(control=>{
+      control.setAttribute(
+        'aria-pressed',
+        String(control.dataset.choice===selectedChoice)
+      );
+    });
+  });
+
+  $('check').addEventListener('click',checkRound);
+
+  $('hint').addEventListener('click',()=>{
+    if(solved||hinted)return;
+
+    hinted=true;
+    $('hint').disabled=true;
+
+    feedback(ROUNDS[round].hint);
+  });
+
+  $('next').addEventListener('click',()=>{
+    if(!solved)return;
+
+    if(round===ROUNDS.length-1){
+      finish();
+      return;
+    }
+
+    round++;
+    beginRound();
+  });
+
+  $('replay').addEventListener('click',()=>{
+    round=0;
+    score=0;
+
+    $('end').classList.add('hidden');
+    $('game').classList.remove('hidden');
+
+    beginRound();
+
+    window.scrollTo({
+      top:0,
+      behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'auto'
+        : 'smooth'
+    });
+  });
+
+  beginRound();
+})();
+</script>
+</body>
+</html>

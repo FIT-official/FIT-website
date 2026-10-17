@@ -1,0 +1,2380 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Analysis Bench | JC Chemistry | Fix It Today</title>
+<style>
+:root{
+  --fit-ink:#111111;
+  --fit-ink-2:#3D3D3D;
+  --fit-ink-3:#6B6B6B;
+  --fit-paper:#FEFEFE;
+  --fit-white:#FFFFFF;
+  --fit-sunken:#F4F3EF;
+  --fit-line-soft:#E4E2DB;
+  --fit-sun:#FFC83D;
+  --fit-pink:#FF8FB8;
+  --fit-green:#3DBE6B;
+  --fit-focus:#1F66E5;
+  --fit-success:#1E9E5A;
+  --fit-danger:#D92D20;
+  --lvl-primary:#FFC83D;
+  --lvl-primary-tint:#FFF4D6;
+  --lvl-primary-on:#111111;
+  --lvl-secondary:#2EC4A6;
+  --lvl-secondary-tint:#DDF7F1;
+  --lvl-secondary-on:#111111;
+  --lvl-jc:#6A45F5;
+  --lvl-jc-tint:#ECE7FF;
+  --lvl-jc-on:#FFFFFF;
+  --lvl-poly:#FF6B3D;
+  --lvl-poly-tint:#FFE6DC;
+  --lvl-poly-on:#111111;
+  --lvl-uni:#1F66E5;
+  --lvl-uni-tint:#E2ECFD;
+  --lvl-uni-on:#FFFFFF;
+  --r-sm:12px;
+  --r-md:16px;
+  --r-lg:24px;
+  --r-xl:32px;
+  --r-pill:999px;
+  --bw:2px;
+  --bw-strong:3px;
+  --sh-1:0 2px 0 #111;
+  --sh-2:0 4px 0 #111;
+  --sh-3:0 6px 0 #111;
+  --ease-out:cubic-bezier(.2,.8,.2,1);
+  --dur-1:120ms;
+  --dur-2:180ms
+}
+*{box-sizing:border-box}
+html{scroll-behaviour:smooth}
+body{
+  margin:0;
+  background:var(--fit-paper);
+  color:var(--fit-ink);
+  font:400 16px/1.48 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif
+}
+main{max-width:1250px;margin:0 auto;padding:20px 14px 40px}
+h1{font-weight:850;font-size:clamp(2.2rem,5vw,3.4rem);letter-spacing:-.045em;line-height:1.08;margin:12px 0}
+h2{font-size:1.3rem;line-height:1.25;font-weight:800;margin:0 0 12px}
+h3{font-size:1rem;font-weight:800;margin:17px 0 8px}
+p{margin:7px 0 13px}
+button,input,select{font:inherit}
+button{
+  min-width:44px;
+  min-height:48px;
+  padding:9px 16px;
+  border:2px solid var(--fit-ink);
+  border-radius:999px;
+  color:var(--fit-ink);
+  background:white;
+  cursor:pointer;
+  font-weight:800;
+  box-shadow:var(--sh-1);
+  touch-action:manipulation
+}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.5;cursor:default}
+button.primary{
+  border-width:3px;
+  background:var(--lvl-jc);
+  color:var(--lvl-jc-on);
+  box-shadow:var(--sh-2)
+}
+button.choice[aria-pressed="true"]{
+  background:var(--lvl-jc);
+  color:white
+}
+input,select{
+  display:block;
+  width:100%;
+  min-width:0;
+  min-height:48px;
+  border:2px solid var(--fit-ink);
+  border-radius:12px;
+  padding:9px 12px;
+  background:white;
+  color:var(--fit-ink);
+  font-weight:700
+}
+input[type="number"]{font-variant-numeric:tabular-nums}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+.hud,.stats,.actions,.choices,.legend{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:9px
+}
+.hud{justify-content:space-between}
+.badge,.stat,.tag{
+  display:inline-flex;
+  align-items:center;
+  border:2px solid #111;
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:12px;
+  font-weight:800
+}
+.badge{
+  background:var(--lvl-jc);
+  color:white;
+  text-transform:uppercase
+}
+.stat,.tag{background:white}
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:18px;
+  margin-top:20px
+}
+.card{
+  min-width:0;
+  border:2px solid #111;
+  border-radius:24px;
+  padding:18px;
+  background:white;
+  box-shadow:var(--sh-2)
+}
+.stage{
+  background:var(--lvl-jc-tint);
+  border-radius:32px;
+  box-shadow:var(--sh-3)
+}
+.figure{
+  overflow:hidden;
+  border:2px solid #111;
+  border-radius:18px;
+  margin:14px 0;
+  background:white
+}
+svg{display:block;width:100%;height:auto}
+.equation{
+  padding:13px;
+  margin:12px 0;
+  border:2px solid #111;
+  border-radius:16px;
+  background:white;
+  font-weight:800;
+  overflow-wrap:anywhere
+}
+.data-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin:13px 0
+}
+.data-item{
+  min-width:0;
+  padding:11px 12px;
+  border:2px solid #111;
+  border-radius:14px;
+  background:white
+}
+.data-item small{
+  display:block;
+  color:var(--fit-ink-3);
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.03em
+}
+.data-item strong{
+  display:block;
+  margin-top:4px;
+  overflow-wrap:anywhere
+}
+.answer{margin:13px 0}
+.answer label{display:block;margin-bottom:6px;font-weight:800}
+.answer .note{font-size:12px;color:var(--fit-ink-3);margin:5px 0}
+.choices{margin:10px 0 15px}
+.feedback{
+  min-height:72px;
+  border:2px solid #111;
+  border-radius:16px;
+  background:var(--fit-sunken);
+  padding:13px;
+  margin:15px 0;
+  font-weight:700
+}
+.feedback.good{background:#E1F8E9}
+.feedback.bad{background:#FFE7E5}
+.concept{
+  padding:13px;
+  border:2px solid #111;
+  border-radius:16px;
+  background:white;
+  font-size:14px
+}
+.concept strong{display:block;margin-bottom:5px}
+.concept p{margin:0}
+.plot-label{font-size:11px;font-weight:700;fill:#3D3D3D}
+.plot-value{font-size:12px;font-weight:800;fill:#111}
+.legend{font-size:12px;font-weight:800;margin:10px 0}
+.swatch{
+  display:inline-block;
+  width:13px;
+  height:13px;
+  margin-right:5px;
+  border:1px solid #111;
+  background:var(--colour);
+  vertical-align:-2px
+}
+details{
+  border:2px solid #111;
+  border-radius:16px;
+  padding:12px;
+  margin-top:15px
+}
+summary{font-weight:800;cursor:pointer}
+details p{font-size:14px}
+.hidden{display:none!important}
+.end{text-align:center;padding:32px 20px}
+.stars{font-size:3rem;color:#9B7100;letter-spacing:7px}
+footer{text-align:center;font-size:12px;color:var(--fit-ink-3);margin-top:28px}
+@media(min-width:900px){
+  main{padding:27px 22px 42px}
+  .layout{grid-template-columns:minmax(0,1.06fr) minmax(0,1fr)}
+  .card{padding:23px}
+}
+@media(max-width:450px){
+  .data-grid{grid-template-columns:1fr}
+  .actions button{flex:1 1 auto}
+}
+@media(prefers-reduced-motion:no-preference){
+  button{transition:transform var(--dur-1),box-shadow var(--dur-1)}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behaviour:auto}
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="hud">
+    <span class="badge">JC · Chemistry</span>
+    <div class="stats">
+      <span class="stat" id="round">Round 1/6</span>
+      <span class="stat" id="score">Score 0</span>
+    </div>
+  </div>
+  <h1>Analysis Bench</h1>
+  <p>Analyse combustion products, investigate titrations and test whether experimental data are physically possible.</p>
+</header>
+
+<div id="game" class="layout">
+  <section class="card stage">
+    <span class="tag" id="tag">ANALYTICAL CHEMISTRY</span>
+    <h2 id="title">Laboratory challenge</h2>
+    <p id="description"></p>
+    <div id="equation" class="equation"></div>
+    <div id="given" class="data-grid"></div>
+
+    <div class="figure">
+      <svg id="scene" viewBox="0 0 460 295"
+        role="img" aria-label="Interactive analytical chemistry apparatus"></svg>
+    </div>
+
+    <div class="concept">
+      <strong>Reasoning checkpoint</strong>
+      <p id="concept"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 id="task">Your challenge</h2>
+    <p id="question"></p>
+
+    <div id="inputs"></div>
+
+    <div class="actions">
+      <button type="button" class="primary" id="check">Check analysis</button>
+      <button type="button" id="hint">Hint − points</button>
+      <button type="button" id="next" class="hidden">Next round →</button>
+    </div>
+
+    <div id="feedback" class="feedback" aria-live="polite">
+      Enter your calculations, then check your analysis.
+    </div>
+
+    <h3 id="plot-title">Live analytical graph</h3>
+    <svg id="plot" viewBox="0 0 460 265"
+      role="img" aria-label="Graph of the current chemistry experiment"></svg>
+    <div id="legend" class="legend"></div>
+
+    <details>
+      <summary>Worked chemistry and assumptions</summary>
+      <div id="science"></div>
+    </details>
+  </section>
+</div>
+
+<section id="end" class="card end hidden">
+  <span class="badge">JC · Chemistry</span>
+  <h2>Analysis complete!</h2>
+  <div class="stars" id="stars" aria-label="Star rating"></div>
+  <p id="result"></p>
+  <p>Check the chemistry and the physical constraints. A calculation can be mathematically correct while describing an impossible experiment.</p>
+  <button type="button" class="primary" id="replay">Repeat the analysis</button>
+</section>
+
+<footer>Fix It Today</footer>
+</main>
+
+<script>
+/* FIT-CALC-BEGIN moles */
+const FITCalcMoles = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+  const AR = Object.freeze({
+    H: 1, He: 4, Li: 7, B: 11, C: 12, N: 14, O: 16,
+    F: 19, Ne: 20, Na: 23, Mg: 24, Al: 27, Si: 28,
+    P: 31, S: 32, Cl: 35.5, Ar: 40, K: 39, Ca: 40,
+    Cr: 52, Mn: 55, Fe: 56, Cu: 64, Zn: 65, Br: 80,
+    Ag: 108, I: 127, Ba: 137, Pb: 207
+  });
+  const NA = 6.02e23;
+  const VM = 24;
+  const R = 8.31;
+  const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+  const error = (c, reason) => ({ error: c, reason });
+  const cv = reason => error('ConstraintViolation', reason);
+  const me = reason => error('MathError', reason);
+  const rt = reason => error('RuntimeError', reason);
+  const ns = reason => error('NotSupported', reason);
+  const isError = x => !!x && typeof x === 'object' && own(x, 'error');
+  const finite = x => typeof x === 'number' && Number.isFinite(x);
+  const whole = x => Number.isSafeInteger(x);
+  const positiveInteger = x => whole(x) && x > 0;
+  const numeric = (...xs) => xs.every(finite);
+  const ok = x => {
+    function check(v) {
+      if (typeof v === 'number') return Number.isFinite(v);
+      if (v === null || typeof v !== 'object') return true;
+      return Object.values(v).every(check);
+    }
+    return check(x) ? x : cv('number_out_of_range');
+  };
+
+  function parseInternal(formula) {
+    if (typeof formula !== 'string' ||
+        formula.length < 1 || formula.length > 40) {
+      return cv('formula_syntax_error');
+    }
+    const parts = formula.split(/[.·]/);
+    if (parts.some(p => !p)) return cv('formula_syntax_error');
+    const result = {};
+    let failure = null;
+
+    function add(into, symbol, amount) {
+      const value = (into[symbol] || 0) + amount;
+      if (!whole(value) || value < 1) {
+        failure = cv('formula_syntax_error');
+        return;
+      }
+      into[symbol] = value;
+    }
+
+    for (const part of parts) {
+      let i = 0;
+
+      function number() {
+        const start = i;
+        while (i < part.length && /[0-9]/.test(part[i])) i++;
+        if (i === start) return 1;
+        const n = Number(part.slice(start, i));
+        if (!positiveInteger(n)) failure = cv('formula_syntax_error');
+        return n;
+      }
+
+      const multiplier = /[0-9]/.test(part[0]) ? number() : 1;
+
+      function sequence(closing, depth) {
+        const map = {};
+        let entries = 0;
+        if (depth > 20) {
+          failure = cv('formula_syntax_error');
+          return map;
+        }
+
+        while (i < part.length && !failure) {
+          const ch = part[i];
+          if (ch === ')' || ch === ']') {
+            if (ch !== closing) failure = cv('formula_syntax_error');
+            break;
+          }
+
+          if (ch === '(' || ch === '[') {
+            i++;
+            const sub = sequence(ch === '(' ? ')' : ']', depth + 1);
+            if (failure) break;
+            if (i >= part.length || part[i] !== (ch === '(' ? ')' : ']')) {
+              failure = cv('formula_syntax_error');
+              break;
+            }
+            i++;
+            const n = number();
+            if (failure) break;
+            for (const symbol of Object.keys(sub)) {
+              add(map, symbol, sub[symbol] * n);
+            }
+            entries++;
+          } else if (/[A-Z]/.test(ch)) {
+            let symbol = part[i++];
+            if (i < part.length && /[a-z]/.test(part[i])) {
+              symbol += part[i++];
+            }
+            if (!own(AR, symbol)) {
+              failure = ns('element_not_in_table');
+              break;
+            }
+            const n = number();
+            if (failure) break;
+            add(map, symbol, n);
+            entries++;
+          } else {
+            failure = cv('formula_syntax_error');
+            break;
+          }
+        }
+
+        if (entries === 0 && !failure) failure = cv('formula_syntax_error');
+        return map;
+      }
+
+      const sub = sequence(null, 0);
+      if (failure) return failure;
+      if (i !== part.length) return cv('formula_syntax_error');
+      for (const symbol of Object.keys(sub)) {
+        add(result, symbol, sub[symbol] * multiplier);
+      }
+      if (failure) return failure;
+    }
+
+    return result;
+  }
+
+  function massInternal(formula) {
+    const elements = parseInternal(formula);
+    if (isError(elements)) return elements;
+    let mass = 0;
+    for (const [symbol, count] of Object.entries(elements)) {
+      mass += AR[symbol] * count;
+    }
+    return Number.isFinite(mass) ? mass : cv('number_out_of_range');
+  }
+
+  function formulaText(counts) {
+    return Object.entries(counts)
+      .map(([s, n]) => s + (n === 1 ? '' : String(n))).join('');
+  }
+
+  /**
+   * Example: Ca(OH)2 -> {Ca:1,O:2,H:2}.
+   * Input: formula (ASCII chemical formula, 1–40 characters).
+   * Output: elements (symbol -> whole-number count).
+   * Nested brackets and hydrate parts are expanded.
+   * Errors: formula_syntax_error; element_not_in_table.
+   */
+  function parse_formula({ formula } = {}) {
+    const elements = parseInternal(formula);
+    return isError(elements) ? elements : { elements };
+  }
+
+  /**
+   * Example: CuSO4.5H2O -> 250 g/mol.
+   * Input: formula. Output: M_g_mol (g/mol).
+   * Assumption: fixed school relative atomic masses.
+   * Errors: formula_syntax_error; element_not_in_table.
+   */
+  function molar_mass({ formula } = {}) {
+    const M = massInternal(formula);
+    return isError(M) ? M : { M_g_mol: M };
+  }
+
+  /**
+   * Example: 9 g H2O -> 0.5 mol, 3.01e23 molecules.
+   * Inputs: formula, mass_g (g, >=0).
+   * Outputs: n_mol (mol), particles (formula units).
+   * Errors: negative_mass; invalid_number; formula errors.
+   */
+  function moles({ formula, mass_g } = {}) {
+    if (!finite(mass_g)) return cv('invalid_number');
+    if (mass_g < 0) return cv('negative_mass');
+    const M = massInternal(formula);
+    if (isError(M)) return M;
+    return ok({ n_mol: mass_g / M, particles: mass_g / M * NA });
+  }
+
+  /**
+   * Example: 0.25 mol CO2 -> 11 g.
+   * Inputs: formula, n_mol (mol). Output: mass_g (g).
+   * Errors: negative_amount; invalid_number; formula errors.
+   */
+  function mass_from_moles({ formula, n_mol } = {}) {
+    if (!finite(n_mol)) return cv('invalid_number');
+    if (n_mol < 0) return cv('negative_amount');
+    const M = massInternal(formula);
+    return isError(M) ? M : ok({ mass_g: n_mol * M });
+  }
+
+  /**
+   * Example: 0.5 mol -> 12 dm3 at r.t.p.
+   * Exactly one input: n_mol (mol) or volume_dm3 (dm3).
+   * Outputs: both fields. Assumes 24 dm3/mol.
+   * Errors: give_exactly_one_of_n_or_volume; negative_amount.
+   */
+  function gas_rtp(x = {}) {
+    const hasN = x.n_mol !== undefined;
+    const hasV = x.volume_dm3 !== undefined;
+    if (hasN === hasV) return cv('give_exactly_one_of_n_or_volume');
+    const v = hasN ? x.n_mol : x.volume_dm3;
+    if (!finite(v)) return cv('invalid_number');
+    if (v < 0) return cv('negative_amount');
+    return ok(hasN
+      ? { n_mol: v, volume_dm3: v * VM }
+      : { n_mol: v / VM, volume_dm3: v });
+  }
+
+  /**
+   * Example: 0.05 mol NaCl in 250 cm3 -> 0.2 mol/dm3,
+   * 11.7 g/dm3.
+   * Inputs: n_mol (mol), volume_cm3 (cm3), optional formula.
+   * Outputs: c_mol_dm3, c_g_dm3 (null without formula).
+   * Errors: volume_not_positive; negative_amount; formula errors.
+   */
+  function concentration({ n_mol, volume_cm3, formula } = {}) {
+    if (!numeric(n_mol, volume_cm3)) return cv('invalid_number');
+    if (volume_cm3 <= 0) return cv('volume_not_positive');
+    if (n_mol < 0) return cv('negative_amount');
+    const c = n_mol / (volume_cm3 / 1000);
+    if (formula === undefined) {
+      return ok({ c_mol_dm3: c, c_g_dm3: null });
+    }
+    const M = massInternal(formula);
+    return isError(M) ? M :
+      ok({ c_mol_dm3: c, c_g_dm3: c * M });
+  }
+
+  /**
+   * Example: H2O -> H 11.111...%, O 88.888...%.
+   * Input: formula. Output: percent (element -> mass %).
+   * Errors: formula_syntax_error; element_not_in_table.
+   */
+  function percent_composition({ formula } = {}) {
+    const elements = parseInternal(formula);
+    if (isError(elements)) return elements;
+    const M = massInternal(formula);
+    if (isError(M)) return M;
+    const percent = {};
+    for (const [s, n] of Object.entries(elements)) {
+      percent[s] = 100 * n * AR[s] / M;
+    }
+    return ok({ percent });
+  }
+
+  /**
+   * Example: elements [C,H,O], masses [2.4,0.6,1.6]
+   * -> C2H6O, ratio {C:2,H:6,O:1}.
+   * Inputs: elements (symbols), masses_g (g or mass percentages).
+   * Uses first multiplier 1..6 whose ratios are within 0.1
+   * of integers. Outputs: formula, ratio.
+   * Errors: elements_and_masses_mismatch; mass_not_positive;
+   * element_not_in_table; no_whole_number_ratio.
+   */
+  function empirical_formula({ elements, masses_g } = {}) {
+    if (!Array.isArray(elements) || !Array.isArray(masses_g) ||
+        elements.length < 2 || elements.length !== masses_g.length ||
+        new Set(elements).size !== elements.length ||
+        elements.length > Object.keys(AR).length) {
+      return cv('elements_and_masses_mismatch');
+    }
+    for (const s of elements) {
+      if (typeof s !== 'string' || !own(AR, s)) {
+        return ns('element_not_in_table');
+      }
+    }
+    if (!masses_g.every(finite)) return cv('invalid_number');
+    if (masses_g.some(x => x <= 0)) return cv('mass_not_positive');
+    const amounts = masses_g.map((m, i) => m / AR[elements[i]]);
+    const smallest = Math.min(...amounts);
+    const ratios = amounts.map(x => x / smallest);
+    if (!ratios.every(Number.isFinite)) return cv('number_out_of_range');
+    for (let k = 1; k <= 6; k++) {
+      const rounded = ratios.map(x => Math.round(x * k));
+      if (rounded.every((n, i) =>
+        positiveInteger(n) && Math.abs(ratios[i] * k - n) <= 0.1 + 1e-12)) {
+        const ratio = {};
+        elements.forEach((s, i) => { ratio[s] = rounded[i]; });
+        return { formula: formulaText(ratio), ratio };
+      }
+    }
+    return rt('no_whole_number_ratio');
+  }
+
+  /**
+   * Example: empirical CH2, Mr 28 -> multiplier 2, C2H4.
+   * Inputs: empirical (formula), M_g_mol (g/mol).
+   * Outputs: multiplier (integer), formula.
+   * Errors: not_a_whole_multiple; value_not_positive;
+   * formula errors.
+   */
+  function molecular_formula({ empirical, M_g_mol } = {}) {
+    if (!finite(M_g_mol)) return cv('invalid_number');
+    if (M_g_mol <= 0) return cv('value_not_positive');
+    const elements = parseInternal(empirical);
+    if (isError(elements)) return elements;
+    const M = massInternal(empirical);
+    const ratio = M_g_mol / M;
+    const k = Math.round(ratio);
+    if (!positiveInteger(k) || Math.abs(ratio - k) > 0.05) {
+      return me('not_a_whole_multiple');
+    }
+    const counts = {};
+    for (const [s, n] of Object.entries(elements)) {
+      if (!positiveInteger(n * k)) return cv('number_out_of_range');
+      counts[s] = n * k;
+    }
+    return { multiplier: k, formula: formulaText(counts) };
+  }
+
+  /**
+   * Example: 4 g H2 + 32 g O2 -> 36 g H2O; exact ratio.
+   * Inputs: reactants [{formula,coeff,mass_g}], products
+   * [{formula,coeff}]; coefficients are balanced integers.
+   * Outputs: limiting_index, extent_mol, exact_ratio,
+   * product_moles, product_masses_g, excess_left_g.
+   * Mass conservation checked when products are supplied.
+   * Errors: species_out_of_range; coefficient_not_positive_integer;
+   * mass_not_positive; reaction_not_balanced; formula errors.
+   */
+  function limiting({ reactants, products } = {}) {
+    if (!Array.isArray(reactants) || !Array.isArray(products) ||
+        reactants.length < 1 || reactants.length > 6 ||
+        products.length > 6) return cv('species_out_of_range');
+    const all = [...reactants, ...products];
+    if (all.some(x => !x || !positiveInteger(x.coeff))) {
+      return cv('coefficient_not_positive_integer');
+    }
+    if (reactants.some(x => !finite(x.mass_g))) return cv('invalid_number');
+    if (reactants.some(x => x.mass_g <= 0)) return cv('mass_not_positive');
+    const masses = [];
+    for (const x of all) {
+      const M = massInternal(x.formula);
+      if (isError(M)) return M;
+      masses.push(M);
+    }
+    if (products.length) {
+      const before = reactants.reduce((s, x, i) =>
+        s + x.coeff * masses[i], 0);
+      const after = products.reduce((s, x, j) =>
+        s + x.coeff * masses[reactants.length + j], 0);
+      if (Math.abs(before - after) >
+          1e-9 * Math.max(1, before, after)) {
+        return cv('reaction_not_balanced');
+      }
+    }
+    const extents = reactants.map((x, i) =>
+      (x.mass_g / masses[i]) / x.coeff);
+    const extent = Math.min(...extents);
+    const ties = extents.map((x, i) =>
+      Math.abs(x - extent) <=
+        1e-9 * Math.max(Math.abs(x), Math.abs(extent), 1e-30) ? i : -1)
+      .filter(i => i >= 0);
+    const limiting_index = ties[0];
+    const product_moles = products.map(x => x.coeff * extent);
+    const product_masses_g = products.map((x, j) =>
+      product_moles[j] * masses[reactants.length + j]);
+    const excess_left_g = reactants.map((x, i) => {
+      const remaining = x.mass_g - x.coeff * extent * masses[i];
+      return i === limiting_index ||
+        Math.abs(remaining) < 1e-9 ? 0 : Math.max(0, remaining);
+    });
+    return ok({
+      limiting_index, extent_mol: extent,
+      exact_ratio: ties.length > 1,
+      product_moles, product_masses_g, excess_left_g
+    });
+  }
+
+  /**
+   * Example: actual 8 g, theoretical 10 g -> 80%, false.
+   * Inputs: actual_g, theoretical_g (g).
+   * Outputs: percent, over_100. Above 100 is allowed.
+   * Errors: theoretical_not_positive; negative_mass.
+   */
+  function percent_yield({ actual_g, theoretical_g } = {}) {
+    if (!numeric(actual_g, theoretical_g)) return cv('invalid_number');
+    if (theoretical_g <= 0) return cv('theoretical_not_positive');
+    if (actual_g < 0) return cv('negative_mass');
+    const percent = 100 * actual_g / theoretical_g;
+    return ok({ percent, over_100: percent > 100 });
+  }
+
+  /**
+   * Example: 4 g pure in 5 g sample -> 80%.
+   * Inputs: pure_g, sample_g (g). Output: percent.
+   * Errors: mass_not_positive; negative_mass; pure_exceeds_sample.
+   */
+  function purity({ pure_g, sample_g } = {}) {
+    if (!numeric(pure_g, sample_g)) return cv('invalid_number');
+    if (sample_g <= 0) return cv('mass_not_positive');
+    if (pure_g < 0) return cv('negative_mass');
+    if (pure_g > sample_g) return cv('pure_exceeds_sample');
+    return ok({ percent: 100 * pure_g / sample_g });
+  }
+
+  /**
+   * Example: p=99720 Pa, V=0.003 m3, T=300 K
+   * -> n=0.12 mol.
+   * Exactly three inputs: p_Pa, V_m3, T_K, n_mol.
+   * Output: all four, including the solved field.
+   * Assumption: ideal gas, R=8.31 J/(K mol).
+   * Errors: give_exactly_three_values; below_absolute_zero;
+   * value_not_positive.
+   */
+  function ideal_gas(x = {}) {
+    const names = ['p_Pa', 'V_m3', 'T_K', 'n_mol'];
+    const present = names.filter(k => x[k] !== undefined);
+    if (present.length !== 3) return cv('give_exactly_three_values');
+    if (x.T_K !== undefined && finite(x.T_K) && x.T_K < 0) {
+      return cv('below_absolute_zero');
+    }
+    if (present.some(k => !finite(x[k]))) return cv('invalid_number');
+    if (present.some(k => x[k] <= 0)) return cv('value_not_positive');
+    const result = { ...x };
+    const missing = names.find(k => x[k] === undefined);
+    if (missing === 'n_mol') result.n_mol = x.p_Pa * x.V_m3 / (R * x.T_K);
+    if (missing === 'p_Pa') result.p_Pa = x.n_mol * R * x.T_K / x.V_m3;
+    if (missing === 'V_m3') result.V_m3 = x.n_mol * R * x.T_K / x.p_Pa;
+    if (missing === 'T_K') result.T_K = x.p_Pa * x.V_m3 / (x.n_mol * R);
+    return ok({
+      p_Pa: result.p_Pa, V_m3: result.V_m3,
+      T_K: result.T_K, n_mol: result.n_mol
+    });
+  }
+
+  /**
+   * Example: 4.6 g sample, 8.8 g CO2, 5.4 g H2O
+   * -> C 2.4 g, H 0.6 g, O 1.6 g, C2H6O.
+   * Inputs: mass_sample_g, mass_CO2_g, mass_H2O_g (g).
+   * Outputs: mass_C_g, mass_H_g, mass_O_g, formula.
+   * All combustion products are collected; sample contains C,H,O.
+   * Errors: negative_mass; mass_not_positive;
+   * masses_inconsistent; empirical ratio errors.
+   */
+  function combustion({ mass_sample_g, mass_CO2_g, mass_H2O_g } = {}) {
+    if (!numeric(mass_sample_g, mass_CO2_g, mass_H2O_g)) {
+      return cv('invalid_number');
+    }
+    if ([mass_sample_g, mass_CO2_g, mass_H2O_g].some(x => x < 0)) {
+      return cv('negative_mass');
+    }
+    if (mass_sample_g <= 0 || mass_CO2_g <= 0) {
+      return cv('mass_not_positive');
+    }
+    const C = mass_CO2_g * 12 / 44;
+    const H = mass_H2O_g * 2 / 18;
+    let O = mass_sample_g - C - H;
+    if (O < -1e-6) return cv('masses_inconsistent');
+    if (Math.abs(O) <= 1e-6) O = 0;
+    const elements = ['C'];
+    const masses_g = [C];
+    if (H > 0) { elements.push('H'); masses_g.push(H); }
+    if (O > 0) { elements.push('O'); masses_g.push(O); }
+    let formula;
+    if (elements.length === 1) {
+      formula = 'C';
+    } else {
+      const empirical = empirical_formula({ elements, masses_g });
+      if (isError(empirical)) return empirical;
+      formula = empirical.formula;
+    }
+    return ok({
+      mass_C_g: C, mass_H_g: H, mass_O_g: O, formula
+    });
+  }
+
+  /**
+   * Example: 0.1 mol/dm3, 20 cm3 titrant, 25 cm3 analyte,
+   * coefficients 1:1 -> 0.002 mol and 0.08 mol/dm3.
+   * Inputs: c_titrant_mol_dm3, v_titrant_cm3,
+   * v_analyte_cm3, analyte_coeff, titrant_coeff.
+   * Outputs: n_titrant_mol, n_analyte_mol,
+   * c_analyte_mol_dm3. Volumes in cm3.
+   * Errors: value_not_positive; coefficient_not_positive_integer.
+   */
+  function titration(x = {}) {
+    const { c_titrant_mol_dm3: c, v_titrant_cm3: v,
+      v_analyte_cm3: a, analyte_coeff: ac,
+      titrant_coeff: tc } = x;
+    if (!numeric(c, v, a, ac, tc)) return cv('invalid_number');
+    if (c <= 0 || v <= 0 || a <= 0) return cv('value_not_positive');
+    if (!positiveInteger(ac) || !positiveInteger(tc)) {
+      return cv('coefficient_not_positive_integer');
+    }
+    const nt = c * v / 1000;
+    const na = nt * ac / tc;
+    return ok({
+      n_titrant_mol: nt, n_analyte_mol: na,
+      c_analyte_mol_dm3: na / (a / 1000)
+    });
+  }
+
+  /**
+   * Example: 0.01 mol acid, 0.1 mol/dm3 alkali, 20 cm3,
+   * ratios 1 and 0.5, CaCO3 sample 0.5 g
+   * -> acid left .002, reacted .008, pure .4 g, purity 80%.
+   * Inputs: acid_total_mol, alkali_c_mol_dm_dm3,
+   * alkali_v_cm3, acid_per_alkali, sample_per_acid,
+   * sample_formula, sample_mass_g.
+   * Outputs: acid_left_mol, acid_reacted_mol, sample_mol,
+   * pure_mass_g, purity_percent. Acid is in excess.
+   * Errors: value_not_positive; titre_exceeds_acid_added;
+   * formula errors. Purity above 100 remains a result.
+   */
+  function back_titration(x = {}) {
+    const { acid_total_mol: total, alkali_c_mol_dm3: c,
+      alkali_v_cm3: v, acid_per_alkali: a,
+      sample_per_acid: s, sample_formula: formula,
+      sample_mass_g: sample } = x;
+    if (!numeric(total, c, v, a, s, sample)) {
+      return cv('invalid_number');
+    }
+    if ([total, c, v, a, s, sample].some(z => z <= 0)) {
+      return cv('value_not_positive');
+    }
+    const M = massInternal(formula);
+    if (isError(M)) return M;
+    const left = c * v / 1000 * a;
+    if (left > total + 1e-12) return cv('titre_exceeds_acid_added');
+    const reacted = Math.max(0, total - left);
+    const amount = reacted * s;
+    const pure = amount * M;
+    return ok({
+      acid_left_mol: left, acid_reacted_mol: reacted,
+      sample_mol: amount, pure_mass_g: pure,
+      purity_percent: 100 * pure / sample
+    });
+  }
+
+  /**
+   * Example: 0.1 mol/dm3 NaCl, 250 cm3, 100% purity
+   * -> 1.4625 g.
+   * Inputs: formula, c_mol_dm3, volume_cm3,
+   * optional purity_percent (default 100).
+   * Output: mass_g to weigh (g).
+   * Errors: purity_out_of_range; value_not_positive;
+   * formula errors.
+   */
+  function solution_prep(x = {}) {
+    const { formula, c_mol_dm3: c, volume_cm3: v } = x;
+    const p = x.purity_percent === undefined ? 100 : x.purity_percent;
+    if (!finite(p)) return cv('invalid_number');
+    if (p <= 0 || p > 100) return cv('purity_out_of_range');
+    if (!numeric(c, v)) return cv('invalid_number');
+    if (c <= 0 || v <= 0) return cv('value_not_positive');
+    const M = massInternal(formula);
+    return isError(M) ? M : ok({ mass_g: c * v / 1000 * M * 100 / p });
+  }
+
+  /**
+   * Example: c1=.2, v1=50 cm3, c2=.05
+   * -> v2=200 cm3, water=150 cm3.
+   * Inputs: c1, c2 (same concentration units), v1_cm3.
+   * Outputs: v2_cm3, water_cm3.
+   * Errors: cannot_concentrate_by_dilution; value_not_positive.
+   */
+  function dilution({ c1, v1_cm3, c2 } = {}) {
+    if (!numeric(c1, v1_cm3, c2)) return cv('invalid_number');
+    if (c2 > c1) return cv('cannot_concentrate_by_dilution');
+    if (c1 <= 0 || v1_cm3 <= 0 || c2 <= 0) {
+      return cv('value_not_positive');
+    }
+    const v2 = c1 * v1_cm3 / c2;
+    return ok({ v2_cm3: v2, water_cm3: v2 - v1_cm3 });
+  }
+
+  /**
+   * Example: c0=1, factor=10, steps=3
+   * -> [1,0.1,0.01,0.001].
+   * Inputs: c0 (concentration), factor (>1), steps (1..12).
+   * Output: concentrations, including starting value.
+   * Errors: factor_must_exceed_1; steps_out_of_range_1_12;
+   * value_not_positive.
+   */
+  function serial_dilution({ c0, factor, steps } = {}) {
+    if (!numeric(c0, factor, steps)) return cv('invalid_number');
+    if (factor <= 1) return cv('factor_must_exceed_1');
+    if (!whole(steps) || steps < 1 || steps > 12) {
+      return cv('steps_out_of_range_1_12');
+    }
+    if (c0 <= 0) return cv('value_not_positive');
+    const concentrations = [c0];
+    for (let i = 0; i < steps; i++) {
+      concentrations.push(concentrations[i] / factor);
+    }
+    return ok({ concentrations });
+  }
+
+  /**
+   * Example: NaCl, 58.5 mg/dm3 -> 0.001 mol/dm3.
+   * Inputs: value, from_unit, to_unit, optional formula.
+   * Units: mol_dm3, g_dm3, mg_dm3, ppm, percent_wv.
+   * Dilute aqueous solution: 1 ppm=1 mg/dm3;
+   * 1% w/v=10 g/dm3.
+   * Output: value in requested unit.
+   * Errors: unit_not_supported; formula_required;
+   * negative_amount; formula errors.
+   */
+  function convert_concentration({ value, from_unit, to_unit, formula } = {}) {
+    const units = ['mol_dm3', 'g_dm3', 'mg_dm3', 'ppm', 'percent_wv'];
+    if (!units.includes(from_unit) || !units.includes(to_unit)) {
+      return ns('unit_not_supported');
+    }
+    if (from_unit !== to_unit &&
+        (from_unit === 'mol_dm3' || to_unit === 'mol_dm3') &&
+        formula === undefined) return cv('formula_required');
+    if (!finite(value)) return cv('invalid_number');
+    if (value < 0) return cv('negative_amount');
+    if (from_unit === to_unit) return { value };
+    let M = 1;
+    if (from_unit === 'mol_dm3' || to_unit === 'mol_dm3') {
+      M = massInternal(formula);
+      if (isError(M)) return M;
+    }
+    const toGrams = {
+      mol_dm3: M, g_dm3: 1, mg_dm3: 0.001,
+      ppm: 0.001, percent_wv: 10
+    };
+    return ok({ value: value * toGrams[from_unit] / toGrams[to_unit] });
+  }
+
+  function gcdBig(a, b) {
+    a = a < 0n ? -a : a;
+    b = b < 0n ? -b : b;
+    while (b !== 0n) { const t = a % b; a = b; b = t; }
+    return a === 0n ? 1n : a;
+  }
+
+  function frac(n, d = 1n) {
+    if (d < 0n) { n = -n; d = -d; }
+    if (n === 0n) return [0n, 1n];
+    const g = gcdBig(n, d);
+    return [n / g, d / g];
+  }
+
+  const fadd = (a, b) =>
+    frac(a[0] * b[1] + b[0] * a[1], a[1] * b[1]);
+  const fneg = a => [-a[0], a[1]];
+  const fsub = (a, b) => fadd(a, fneg(b));
+  const fmul = (a, b) => frac(a[0] * b[0], a[1] * b[1]);
+  const fdiv = (a, b) => frac(a[0] * b[1], a[1] * b[0]);
+  const lcmBig = (a, b) => a / gcdBig(a, b) * b;
+
+  /**
+   * Example: FeS2 + O2 -> Fe2O3 + SO2
+   * -> [4,11,2,8].
+   * Inputs: reactants and products, arrays of formula strings,
+   * 1–6 on each side. Output: coefficients, smallest positive
+   * integers in input order. Exact rational null-space RREF.
+   * Errors: species_out_of_range; no_unique_balance;
+   * cannot_balance; coefficient_out_of_range; formula errors.
+   */
+  function balance({ reactants, products } = {}) {
+    if (!Array.isArray(reactants) || !Array.isArray(products) ||
+        reactants.length < 1 || reactants.length > 6 ||
+        products.length < 1 || products.length > 6) {
+      return cv('species_out_of_range');
+    }
+    const names = [...reactants, ...products];
+    const maps = [];
+    const symbols = [];
+    for (const formula of names) {
+      const map = parseInternal(formula);
+      if (isError(map)) return map;
+      maps.push(map);
+      for (const symbol of Object.keys(map)) {
+        if (!symbols.includes(symbol)) symbols.push(symbol);
+      }
+    }
+    const n = names.length;
+    const matrix = symbols.map(s => maps.map((map, j) =>
+      frac(BigInt((map[s] || 0) * (j < reactants.length ? 1 : -1)))));
+    const pivots = [];
+    let row = 0;
+    for (let col = 0; col < n && row < matrix.length; col++) {
+      let chosen = row;
+      while (chosen < matrix.length && matrix[chosen][col][0] === 0n) {
+        chosen++;
+      }
+      if (chosen === matrix.length) continue;
+      [matrix[row], matrix[chosen]] = [matrix[chosen], matrix[row]];
+      const divisor = matrix[row][col];
+      matrix[row] = matrix[row].map(x => fdiv(x, divisor));
+      for (let r = 0; r < matrix.length; r++) {
+        if (r === row || matrix[r][col][0] === 0n) continue;
+        const factor = matrix[r][col];
+        matrix[r] = matrix[r].map((x, k) =>
+          fsub(x, fmul(factor, matrix[row][k])));
+      }
+      pivots.push(col);
+      row++;
+    }
+    if (n - pivots.length !== 1) return me('no_unique_balance');
+    const free = Array.from({ length: n }, (_, i) => i)
+      .find(i => !pivots.includes(i));
+    const values = Array.from({ length: n }, () => frac(0n));
+    values[free] = frac(1n);
+    for (let r = pivots.length - 1; r >= 0; r--) {
+      let sum = frac(0n);
+      for (let c = pivots[r] + 1; c < n; c++) {
+        sum = fadd(sum, fmul(matrix[r][c], values[c]));
+      }
+      values[pivots[r]] = fneg(sum);
+    }
+    let denominator = 1n;
+    for (const x of values) {
+      denominator = lcmBig(denominator, x[1]);
+    }
+    let ints = values.map(x => x[0] * (denominator / x[1]));
+    if (ints.some(x => x === 0n)) return me('cannot_balance');
+    if (ints.every(x => x < 0n)) ints = ints.map(x => -x);
+    if (!ints.every(x => x > 0n)) return me('cannot_balance');
+    let divisor = ints[0];
+    for (const x of ints.slice(1)) divisor = gcdBig(divisor, x);
+    ints = ints.map(x => x / divisor);
+    if (ints.some(x => x > BigInt(Number.MAX_SAFE_INTEGER))) {
+      return cv('coefficient_out_of_range');
+    }
+    return { coefficients: ints.map(Number) };
+  }
+
+  /**
+   * Example: 2Mg + O2 -> 2MgO, desired 2MgO -> 100%.
+   * Inputs: reactants [{formula,coeff}], desired {formula,coeff}.
+   * Output: percent (mass of desired product / input mass).
+   * Assumes the supplied equation is balanced.
+   * Errors: coefficient_not_positive_integer; species_out_of_range;
+   * formula errors.
+   */
+  function atom_economy({ reactants, desired } = {}) {
+    if (!Array.isArray(reactants) || reactants.length < 1 ||
+        reactants.length > 6 || !desired) return cv('species_out_of_range');
+    if ([...reactants, desired].some(x =>
+      !x || !positiveInteger(x.coeff))) {
+      return cv('coefficient_not_positive_integer');
+    }
+    let inputMass = 0;
+    for (const x of reactants) {
+      const M = massInternal(x.formula);
+      if (isError(M)) return M;
+      inputMass += M * x.coeff;
+    }
+    const desiredM = massInternal(desired.formula);
+    if (isError(desiredM)) return desiredM;
+    return ok({ percent: 100 * desired.coeff * desiredM / inputMass });
+  }
+
+  /**
+   * Example: feed=10, left=4, product=4.5, both nu=1
+   * -> conversion=.6, yield=.45, selectivity=.75.
+   * Inputs: n_feed_mol, n_left_mol, n_product_mol (mol);
+   * optional nu_reactant, nu_product (default 1).
+   * Outputs: conversion, yield, selectivity as fractions.
+   * Zero conversion gives selectivity:null.
+   * Errors: left_exceeds_feed; value_not_positive;
+   * negative_amount; coefficient_not_positive_integer.
+   */
+  function conversion_yield(x = {}) {
+    const { n_feed_mol: feed, n_left_mol: left,
+      n_product_mol: product } = x;
+    const nr = x.nu_reactant === undefined ? 1 : x.nu_reactant;
+    const np = x.nu_product === undefined ? 1 : x.nu_product;
+    if (!numeric(feed, left, product, nr, np)) {
+      return cv('invalid_number');
+    }
+    if (left > feed) return cv('left_exceeds_feed');
+    if (feed <= 0) return cv('value_not_positive');
+    if (left < 0 || product < 0) return cv('negative_amount');
+    if (!positiveInteger(nr) || !positiveInteger(np)) {
+      return cv('coefficient_not_positive_integer');
+    }
+    const conversion = (feed - left) / feed;
+    const yieldValue = product * nr / np / feed;
+    return ok({
+      conversion, yield: yieldValue,
+      selectivity: conversion === 0 ? null : yieldValue / conversion
+    });
+  }
+
+  /**
+   * Example: recipe {white:2,red:1}, stock {white:7,red:2}
+   * -> made=2, leftover {white:3,red:0}, limiting ['red'].
+   * Inputs: recipe counts >=1, stock counts >=0, safe integers.
+   * Outputs: made (whole models), leftover, limiting.
+   * Errors: count_not_whole_number.
+   */
+  function build_count({ recipe, stock } = {}) {
+    if (!recipe || !stock || Array.isArray(recipe) ||
+        Array.isArray(stock) || typeof recipe !== 'object' ||
+        typeof stock !== 'object' || !Object.keys(recipe).length) {
+      return cv('count_not_whole_number');
+    }
+    if (Object.values(recipe).some(x => !positiveInteger(x)) ||
+        Object.values(stock).some(x => !whole(x) || x < 0)) {
+      return cv('count_not_whole_number');
+    }
+    const made = Math.min(...Object.keys(recipe).map(s =>
+      Math.floor((stock[s] || 0) / recipe[s])));
+    const leftover = {};
+    for (const s of [...new Set([
+      ...Object.keys(recipe), ...Object.keys(stock)
+    ])]) {
+      leftover[s] = (stock[s] || 0) - made * (recipe[s] || 0);
+    }
+    const limiting = Object.keys(recipe).filter(s =>
+      leftover[s] < recipe[s]);
+    return { made, leftover, limiting };
+  }
+
+  /**
+   * Example: 29 items in groups of 12 -> 2 groups, 5 left.
+   * Inputs: count (whole >=0), group_size (whole >=1).
+   * Outputs: groups, left (whole counts).
+   * Errors: group_size_not_positive_integer; count_not_whole_number.
+   */
+  function groups({ count, group_size } = {}) {
+    if (!positiveInteger(group_size)) {
+      return cv('group_size_not_positive_integer');
+    }
+    if (!whole(count) || count < 0) return cv('count_not_whole_number');
+    return {
+      groups: Math.floor(count / group_size),
+      left: count % group_size
+    };
+  }
+
+  /**
+   * Example: 2 white + 1 red per model, stock 7 white/2 red,
+   * plan 2 -> used 4 white/2 red, left 3 white/0 red.
+   * Inputs: recipe and stock as in build_count; models (whole >=0).
+   * Outputs: used, leftover, possible, total_before, total_after.
+   * Totals are bead mass units assuming equal-mass beads.
+   * Errors: count_not_whole_number.
+   */
+  function build_plan({ recipe, stock, models } = {}) {
+    const base = build_count({ recipe, stock });
+    if (isError(base)) return base;
+    if (!whole(models) || models < 0) return cv('count_not_whole_number');
+    const used = {};
+    const leftover = {};
+    let total_before = 0;
+    let total_after = 0;
+    let possible = true;
+    for (const s of [...new Set([
+      ...Object.keys(recipe), ...Object.keys(stock)
+    ])]) {
+      const n = models * (recipe[s] || 0);
+      used[s] = n;
+      leftover[s] = (stock[s] || 0) - n;
+      if (leftover[s] < 0) possible = false;
+      total_before += stock[s] || 0;
+      total_after += n + leftover[s];
+    }
+    return ok({ used, leftover, possible, total_before, total_after });
+  }
+
+  /**
+   * Example: 5.28 g vapour, 0.12 mol -> 44 g/mol.
+   * Inputs: mass_g (g, >=0), n_mol (mol, >0).
+   * Output: M_g_mol. Errors: negative_mass; value_not_positive.
+   */
+  function molar_mass_from_sample({ mass_g, n_mol } = {}) {
+    if (!numeric(mass_g, n_mol)) return cv('invalid_number');
+    if (mass_g < 0) return cv('negative_mass');
+    if (n_mol <= 0) return cv('value_not_positive');
+    return ok({ M_g_mol: mass_g / n_mol });
+  }
+
+  /**
+   * Example: acid .01 mol, 0.1 mol/dm3 alkali, 20 cm3,
+   * ratio 1 -> .008 mol acid remaining.
+   * Inputs: acid_initial_mol, alkali_c_mol_dm3,
+   * alkali_v_cm3, acid_per_alkali.
+   * Output: acid_remaining_mol, clamped at zero.
+   * Errors: value_not_positive; negative_amount.
+   */
+  function acid_remaining(x = {}) {
+    const { acid_initial_mol: acid, alkali_c_mol_dm3: c,
+      alkali_v_cm3: v, acid_per_alkali: ratio } = x;
+    if (!numeric(acid, c, v, ratio)) return cv('invalid_number');
+    if (acid <= 0 || c <= 0 || ratio <= 0) {
+      return cv('value_not_positive');
+    }
+    if (v < 0) return cv('negative_amount');
+    return ok({
+      acid_remaining_mol: Math.max(0, acid - c * v / 1000 * ratio)
+    });
+  }
+
+  /**
+   * Example: C2H4 feed 10 mol, O2 feed 20 mol,
+   * conversion .6 and desired selectivity .75:
+   * 4 mol C2H4 left, 4.5 mol C2H4O, 3 mol CO2,
+   * 3 mol H2O, 13.25 mol O2 left; both sides 920 g.
+   * Inputs: feed_C2H4_mol, feed_O2_mol, conversion,
+   * desired_selectivity (fractions 0..1).
+   * Outputs: inlet_mol, outlet_mol, inlet_masses_g,
+   * outlet_masses_g, mass_in_g, mass_out_g.
+   * Reactions: C2H4 + 0.5O2 -> C2H4O;
+   * C2H4 + 3O2 -> 2CO2 + 2H2O.
+   * Errors: value_not_positive; fraction_out_of_range;
+   * insufficient_oxygen.
+   */
+  function reactor_streams(x = {}) {
+    const { feed_C2H4_mol: feed, feed_O2_mol: oxygen,
+      conversion: conv, desired_selectivity: sel } = x;
+    if (!numeric(feed, oxygen, conv, sel)) return cv('invalid_number');
+    if (feed <= 0 || oxygen <= 0) return cv('value_not_positive');
+    if (conv < 0 || conv > 1 || sel < 0 || sel > 1) {
+      return cv('fraction_out_of_range');
+    }
+    const used = feed * conv;
+    const desired = used * sel;
+    const burned = used - desired;
+    const oxygenUsed = desired * 0.5 + burned * 3;
+    if (oxygenUsed > oxygen + 1e-10) {
+      return cv('insufficient_oxygen');
+    }
+    const inlet_mol = { C2H4: feed, O2: oxygen };
+    const outlet_mol = {
+      C2H4: feed - used, O2: Math.max(0, oxygen - oxygenUsed),
+      C2H4O: desired, CO2: burned * 2, H2O: burned * 2
+    };
+    const inlet_masses_g = {};
+    const outlet_masses_g = {};
+    for (const [s, n] of Object.entries(inlet_mol)) {
+      inlet_masses_g[s] = n * massInternal(s);
+    }
+    for (const [s, n] of Object.entries(outlet_mol)) {
+      outlet_masses_g[s] = n * massInternal(s);
+    }
+    const mass_in_g = Object.values(inlet_masses_g)
+      .reduce((a, b) => a + b, 0);
+    const mass_out_g = Object.values(outlet_masses_g)
+      .reduce((a, b) => a + b, 0);
+    return ok({
+      inlet_mol, outlet_mol, inlet_masses_g, outlet_masses_g,
+      mass_in_g, mass_out_g
+    });
+  }
+
+  return Object.freeze({
+    API_VERSION,
+    parse_formula, molar_mass, moles, mass_from_moles,
+    gas_rtp, concentration, percent_composition,
+    empirical_formula, molecular_formula, limiting,
+    percent_yield, purity, ideal_gas, combustion,
+    titration, back_titration, solution_prep, dilution,
+    serial_dilution, convert_concentration, balance,
+    atom_economy, conversion_yield, build_count, groups,
+    build_plan, molar_mass_from_sample, acid_remaining,
+    reactor_streams
+  });
+})();
+/* FIT-CALC-END moles */
+
+(function () {
+  'use strict';
+
+  const C = FITCalcMoles;
+  const $ = id => document.getElementById(id);
+
+  const colours = {
+    purple:'#6A45F5',
+    teal:'#2EC4A6',
+    pink:'#FF8FB8',
+    blue:'#85C8FF',
+    yellow:'#FFC83D',
+    green:'#3DBE6B',
+    grey:'#6B6B6B',
+    red:'#D92D20'
+  };
+
+  const experiments = [
+    {
+      type:'combustion',
+      tag:'COMBUSTION ANALYSIS',
+      title:'Reconstruct an unknown compound',
+      description:'A 4.6 g sample containing only carbon, hydrogen and oxygen is completely burnt. The carbon dioxide and water formed are collected.',
+      equation:'C in sample → CO₂     ·     H in sample → H₂O',
+      given:[
+        ['Original sample','4.6 g'],
+        ['Carbon dioxide','8.8 g'],
+        ['Water','5.4 g'],
+        ['Elements present','C, H and O']
+      ],
+      task:'Determine its composition',
+      question:'Find the masses of carbon, hydrogen and oxygen in the original sample. Then identify its empirical formula.',
+      concept:'The carbon in CO₂ came from the sample, as did the hydrogen in H₂O. Obtain the oxygen mass by subtracting carbon and hydrogen masses from the original sample mass.',
+      science:'Carbon mass = 8.8 × 12/44 = 2.4 g. Hydrogen mass = 5.4 × 2/18 = 0.6 g. Oxygen mass = 4.6 − 2.4 − 0.6 = 1.6 g. Element mole ratio: 2.4/12 : 0.6/1 : 1.6/16 = 0.2 : 0.6 : 0.1 = 2 : 6 : 1. The empirical formula is C₂H₆O.',
+      hint:'For carbon use 12/44 of the CO₂ mass. For hydrogen use 2/18 of the water mass. Oxygen is the remaining sample mass.',
+      fields:[
+        {key:'carbon',label:'Mass of carbon in the sample (g)',initial:'0'},
+        {key:'hydrogen',label:'Mass of hydrogen in the sample (g)',initial:'0'},
+        {key:'oxygen',label:'Mass of oxygen in the sample (g)',initial:'0'}
+      ],
+      selection:{
+        key:'formula',
+        label:'Empirical formula',
+        options:['','CH₂O','C₂H₆O','CH₃O','C₂H₄O']
+      }
+    },
+    {
+      type:'combustion-invalid',
+      tag:'COMBUSTION · DATA VALIDATION',
+      title:'Investigate an impossible report',
+      description:'An analyst reports combustion-product masses that may not agree with the original sample. Assume the sample contains only C, H and O.',
+      equation:'m(O in sample) = m(sample) − m(C) − m(H)',
+      given:[
+        ['Original sample','2.8 g'],
+        ['Carbon dioxide','8.8 g'],
+        ['Water','5.4 g'],
+        ['Claim','Complete collection']
+      ],
+      task:'Audit the raw measurements',
+      question:'Calculate the implied mass of oxygen in the original sample and decide whether the measurements can describe a physically possible sample.',
+      concept:'A negative mass of an element cannot exist. An impossible result is a reason to investigate measurements or assumptions, not to report a plausible-looking formula.',
+      science:'Carbon accounts for 2.4 g and hydrogen for 0.6 g. Together they require 3.0 g, but the reported sample mass is only 2.8 g. The residual oxygen mass would be −0.2 g. Therefore the reported measurements are inconsistent with the stated assumptions.',
+      hint:'The carbon and hydrogen masses are identical to the previous round. Subtract both from 2.8 g and check the sign.',
+      fields:[
+        {key:'oxygen',label:'Implied oxygen mass (g; negative permitted)',initial:'0'}
+      ],
+      choices:[
+        {value:'valid',label:'Physically possible'},
+        {value:'invalid',label:'Data inconsistent'}
+      ]
+    },
+    {
+      type:'back',
+      tag:'BACK TITRATION',
+      title:'Carbonate purity investigation',
+      description:'A sample containing calcium carbonate is treated with excess hydrochloric acid. The unreacted acid is determined by titration with sodium hydroxide.',
+      equation:'CaCO₃ + 2HCl → CaCl₂ + CO₂ + H₂O',
+      given:[
+        ['Sample mass','0.500 g'],
+        ['HCl initially added','0.0100 mol'],
+        ['NaOH concentration','0.100 mol dm⁻³'],
+        ['NaOH titre','20.0 cm³']
+      ],
+      task:'Calculate the sample purity',
+      question:'Find the unreacted HCl, HCl consumed by the carbonate, and percentage purity of calcium carbonate.',
+      concept:'Back titration works backwards: determine how much excess acid remains, subtract that from the amount added, then use the reaction ratio to find the sample amount.',
+      science:'NaOH at 0.100 mol dm⁻³ × 0.0200 dm³ = 0.00200 mol, so 0.00200 mol HCl remains. HCl reacted = 0.0100 − 0.00200 = 0.00800 mol. CaCO₃ amount = 0.00400 mol. M(CaCO₃) = 100 g mol⁻¹, giving 0.400 g pure CaCO₃. Purity = 0.400/0.500 × 100 = 80%.',
+      hint:'One mole of NaOH neutralises one mole of HCl. Two moles of HCl react with one mole of CaCO₃.',
+      fields:[
+        {key:'left',label:'HCl remaining (mol)',initial:'0'},
+        {key:'reacted',label:'HCl consumed (mol)',initial:'0'},
+        {key:'purity',label:'CaCO₃ purity (%)',initial:'0'}
+      ]
+    },
+    {
+      type:'back-invalid',
+      tag:'BACK TITRATION · QUALITY CONTROL',
+      title:'A purity greater than 100%',
+      description:'The same titres are submitted for a smaller carbonate sample. Decide whether this result can be accepted.',
+      equation:'Purity (%) = mass of pure CaCO₃ / sample mass × 100',
+      given:[
+        ['Sample mass','0.300 g'],
+        ['HCl initially added','0.0100 mol'],
+        ['NaOH concentration','0.100 mol dm⁻³'],
+        ['NaOH titre','20.0 cm³']
+      ],
+      task:'Detect an impossible purity',
+      question:'Calculate the apparent percentage purity. Then decide whether the report is acceptable without further investigation.',
+      concept:'A calculated purity above 100% signals inconsistent data or assumptions. Preserve the calculated value and flag it rather than silently forcing it to 100%.',
+      science:'The titres imply 0.400 g CaCO₃, just as in the previous round. But the entire sample weighs only 0.300 g. Apparent purity = 0.400/0.300 × 100 = 133.33%. Such a purity is impossible; sample mass, titration data, reactions or other assumptions must be reviewed.',
+      hint:'The amount of calcium carbonate inferred from the acid is still 0.004 mol. Divide its mass by 0.300 g.',
+      fields:[
+        {key:'purity',label:'Apparent purity (%)',initial:'0'}
+      ],
+      choices:[
+        {value:'accept',label:'Accept the report'},
+        {value:'investigate',label:'Flag for investigation'}
+      ]
+    },
+    {
+      type:'gas',
+      tag:'IDEAL GAS & MOLAR MASS',
+      title:'Identify a gaseous sample',
+      description:'A pure gaseous compound is contained in a calibrated vessel at a measured pressure and temperature. The gas sample is weighed.',
+      equation:'pV = nRT     ·     M = m/n',
+      given:[
+        ['Pressure','99,720 Pa'],
+        ['Volume','0.00300 m³'],
+        ['Temperature','300 K'],
+        ['Gas mass','5.28 g']
+      ],
+      task:'Calculate amount and molar mass',
+      question:'Find the amount of gas using the ideal gas equation, then determine its molar mass.',
+      concept:'Use SI units in pV = nRT: pressure in pascals, volume in cubic metres and absolute temperature in kelvin. The gas constant is 8.31 J mol⁻¹ K⁻¹.',
+      science:'n = (99,720 × 0.00300)/(8.31 × 300) = 0.120 mol. Molar mass = 5.28/0.120 = 44.0 g mol⁻¹. Molar mass alone does not uniquely identify a chemical compound.',
+      hint:'Calculate n = pV/(RT) with R = 8.31, then divide 5.28 g by your result.',
+      fields:[
+        {key:'amount',label:'Gas amount, n (mol)',initial:'0'},
+        {key:'molarMass',label:'Molar mass, M (g mol⁻¹)',initial:'0'}
+      ]
+    },
+    {
+      type:'titration',
+      tag:'DIRECT ACID–BASE TITRATION',
+      title:'Determine carbonate concentration',
+      description:'A 25.0 cm³ aliquot of sodium carbonate solution is titrated against standard hydrochloric acid.',
+      equation:'Na₂CO₃ + 2HCl → 2NaCl + H₂O + CO₂',
+      given:[
+        ['HCl concentration','0.100 mol dm⁻³'],
+        ['HCl titre','20.0 cm³'],
+        ['Na₂CO₃ aliquot','25.0 cm³'],
+        ['Mole ratio','1 Na₂CO₃ : 2 HCl']
+      ],
+      task:'Determine the analyte concentration',
+      question:'Calculate the amount of HCl used, the amount of Na₂CO₃ neutralised, and the molar concentration of the sodium carbonate solution.',
+      concept:'Equation coefficients determine the mole ratio. The ratio here is not 1:1: two moles of hydrochloric acid react with one mole of sodium carbonate.',
+      science:'HCl amount = 0.100 × 0.0200 = 0.00200 mol. Na₂CO₃ amount = 0.00200/2 = 0.00100 mol. Sodium carbonate concentration = 0.00100/0.0250 = 0.0400 mol dm⁻³.',
+      hint:'Convert both volumes to dm³. Calculate acid moles first, halve that quantity for carbonate moles, then divide by 0.0250 dm³.',
+      fields:[
+        {key:'acidMoles',label:'HCl amount (mol)',initial:'0'},
+        {key:'carbonateMoles',label:'Na₂CO₃ amount (mol)',initial:'0'},
+        {key:'concentration',label:'Na₂CO₃ concentration (mol dm⁻³)',initial:'0'}
+      ]
+    }
+  ];
+
+  let round = 0;
+  let score = 0;
+  let tries = 0;
+  let hinted = false;
+  let solved = false;
+  let answers = {};
+  let selectedDecision = '';
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, c => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    })[c]);
+  }
+
+  function numberText(value, digits = 4) {
+    if (!Number.isFinite(value)) return '—';
+    if (value === 0) return '0';
+    if (Math.abs(value) >= 1e6 || Math.abs(value) < 0.001) {
+      return value.toExponential(digits - 1);
+    }
+    return String(Number(value.toPrecision(digits)));
+  }
+
+  function near(actual, expected, tolerance = 0.012) {
+    return Number.isFinite(actual) &&
+      Math.abs(actual - expected) <=
+        Math.max(1e-10, Math.abs(expected) * tolerance);
+  }
+
+  function inputNumber(key) {
+    if (answers[key] === undefined ||
+        String(answers[key]).trim() === '') return NaN;
+    const result = Number(answers[key]);
+    return Number.isFinite(result) ? result : NaN;
+  }
+
+  function displayNumber(key) {
+    const n = inputNumber(key);
+    return Number.isFinite(n) ? numberText(n) : '—';
+  }
+
+  function feedback(message, kind = '') {
+    $('feedback').textContent = message;
+    $('feedback').className = 'feedback' + (kind ? ' ' + kind : '');
+  }
+
+  function validResult(result) {
+    return result && !Object.prototype.hasOwnProperty.call(result, 'error');
+  }
+
+  function field(definition) {
+    const key = escapeHtml(definition.key);
+    return `<div class="answer">
+      <label for="answer-${key}">${escapeHtml(definition.label)}</label>
+      <input
+        id="answer-${key}"
+        type="number"
+        step="any"
+        inputmode="decimal"
+        data-answer="${key}"
+        value="${escapeHtml(answers[definition.key] ?? '')}"
+      >
+      ${definition.note
+        ? `<div class="note">${escapeHtml(definition.note)}</div>`
+        : ''}
+    </div>`;
+  }
+
+  function choicesHTML(options) {
+    return `<h3>Interpretation</h3>
+      <div class="choices" role="group" aria-label="Choose your conclusion">
+        ${options.map(option => `
+          <button type="button" class="choice"
+            data-decision="${escapeHtml(option.value)}"
+            aria-pressed="${selectedDecision === option.value}">
+            ${escapeHtml(option.label)}
+          </button>
+        `).join('')}
+      </div>`;
+  }
+
+  function makeInputs() {
+    const scenario = experiments[round];
+    let html = scenario.fields.map(field).join('');
+
+    if (scenario.selection) {
+      const selection = scenario.selection;
+      html += `<div class="answer">
+        <label for="answer-${escapeHtml(selection.key)}">
+          ${escapeHtml(selection.label)}
+        </label>
+        <select id="answer-${escapeHtml(selection.key)}"
+          data-select="${escapeHtml(selection.key)}">
+          ${selection.options.map(option => `
+            <option value="${escapeHtml(option)}"
+              ${answers[selection.key] === option ? 'selected' : ''}>
+              ${option ? escapeHtml(option) : 'Choose a formula'}
+            </option>
+          `).join('')}
+        </select>
+      </div>`;
+    }
+
+    if (scenario.choices) html += choicesHTML(scenario.choices);
+    return html;
+  }
+
+  function combustionData() {
+    const sample = round === 1 ? 2.8 : 4.6;
+    const mass_C_g = 8.8 * 12 / 44;
+    const mass_H_g = 5.4 * 2 / 18;
+    const mass_O_g = sample - mass_C_g - mass_H_g;
+
+    return {
+      sample,
+      mass_C_g,
+      mass_H_g,
+      mass_O_g,
+      calculated:C.combustion({
+        mass_sample_g:sample,
+        mass_CO2_g:8.8,
+        mass_H2O_g:5.4
+      })
+    };
+  }
+
+  function backData() {
+    const sample = round === 3 ? 0.3 : 0.5;
+    return C.back_titration({
+      acid_total_mol:0.010,
+      alkali_c_mol_dm3:0.100,
+      alkali_v_cm3:20,
+      acid_per_alkali:1,
+      sample_per_acid:0.5,
+      sample_formula:'CaCO3',
+      sample_mass_g:sample
+    });
+  }
+
+  function gasData() {
+    const gas = C.ideal_gas({
+      p_Pa:99720,
+      V_m3:0.003,
+      T_K:300
+    });
+    return {
+      ...gas,
+      M_g_mol:C.molar_mass_from_sample({
+        mass_g:5.28,
+        n_mol:gas.n_mol
+      }).M_g_mol
+    };
+  }
+
+  function titrationData() {
+    return C.titration({
+      c_titrant_mol_dm3:0.100,
+      v_titrant_cm3:20,
+      v_analyte_cm3:25,
+      analyte_coeff:1,
+      titrant_coeff:2
+    });
+  }
+
+  function apparatusBase() {
+    return `<rect x="9" y="9" width="442" height="277"
+      rx="20" fill="#FFFFFF" stroke="#111" stroke-width="3"/>`;
+  }
+
+  function drawCombustionScene() {
+    const data = combustionData();
+    const invalid = round === 1;
+    const enteredOxygen = inputNumber('oxygen');
+
+    let svg = apparatusBase();
+    svg += `
+      <rect x="25" y="35" width="123" height="83" rx="13"
+        fill="#FFF4D6" stroke="#111" stroke-width="3"/>
+      <text x="86" y="55" text-anchor="middle"
+        font-size="11" font-weight="800">SAMPLE</text>
+      <text x="86" y="86" text-anchor="middle"
+        font-size="24" font-weight="900">${data.sample} g</text>
+      <path d="M154 77H212" stroke="#111" stroke-width="4"/>
+      <path d="M198 67L213 77L198 87"
+        fill="none" stroke="#111" stroke-width="4"/>
+
+      <rect x="217" y="32" width="217" height="97" rx="13"
+        fill="#ECE7FF" stroke="#111" stroke-width="3"/>
+      <text x="325" y="52" text-anchor="middle"
+        font-size="11" font-weight="800">COLLECTED PRODUCTS</text>
+      <rect x="230" y="64" width="91" height="53" rx="9"
+        fill="#FF8FB8" stroke="#111" stroke-width="2"/>
+      <rect x="330" y="64" width="91" height="53" rx="9"
+        fill="#85C8FF" stroke="#111" stroke-width="2"/>
+      <text x="275" y="84" text-anchor="middle"
+        font-size="12" font-weight="800">CO₂</text>
+      <text x="275" y="105" text-anchor="middle"
+        font-size="14" font-weight="900">8.8 g</text>
+      <text x="376" y="84" text-anchor="middle"
+        font-size="12" font-weight="800">H₂O</text>
+      <text x="376" y="105" text-anchor="middle"
+        font-size="14" font-weight="900">5.4 g</text>
+
+      <path d="M230 141V169" stroke="#111" stroke-width="3"/>
+      <path d="M220 157L230 170L240 157"
+        fill="none" stroke="#111" stroke-width="3"/>
+
+      <rect x="29" y="183" width="401" height="54" rx="12"
+        fill="#F4F3EF" stroke="#111" stroke-width="2"/>
+      <text x="44" y="201" font-size="12" font-weight="800">
+        YOUR OXYGEN MASS
+      </text>
+      <text x="44" y="224" font-size="20" font-weight="900"
+        fill="${Number.isFinite(enteredOxygen) && enteredOxygen < 0
+          ? colours.red : '#111'}">
+        ${displayNumber('oxygen')} g
+      </text>
+
+      <text x="229" y="266" text-anchor="middle"
+        font-size="12" font-weight="800">
+        ${invalid ? 'Check mass conservation before accepting the data'
+          : 'All sample mass must be assigned to C, H and O'}
+      </text>`;
+
+    if (invalid) {
+      svg += `<path d="M358 194L375 222H341Z"
+        fill="#FFC83D" stroke="#111" stroke-width="2"/>
+        <text x="358" y="216" text-anchor="middle"
+          font-size="17" font-weight="900">!</text>`;
+    }
+
+    $('scene').innerHTML = svg;
+    $('scene').setAttribute('aria-label',
+      `Combustion analysis of ${data.sample} grams of sample, producing 8.8 grams of carbon dioxide and 5.4 grams of water. Entered oxygen mass ${displayNumber('oxygen')} grams.`);
+  }
+
+  function drawBackScene() {
+    const data = backData();
+    const entered = inputNumber('purity');
+    const barWidth = Number.isFinite(entered)
+      ? Math.max(0,Math.min(240,240*entered/150))
+      : 0;
+    const invalid = round === 3;
+
+    let svg = apparatusBase();
+    svg += `
+      <rect x="66" y="31" width="43" height="139" rx="6"
+        fill="#E2ECFD" stroke="#111" stroke-width="3"/>
+      <rect x="77" y="43" width="21" height="105" rx="3"
+        fill="#85C8FF" stroke="#111" stroke-width="1.5"/>
+      <path d="M65 170H111L96 190H80Z"
+        fill="#E4E2DB" stroke="#111" stroke-width="3"/>
+      <path d="M88 190V209" stroke="#111" stroke-width="3"/>
+      <path d="M84 203L88 212L92 203" stroke="#111" stroke-width="2"/>
+      <path d="M39 212H138L122 260H55Z"
+        fill="#ECE7FF" stroke="#111" stroke-width="3"/>
+      <path d="M49 226H128L120 250H58Z"
+        fill="#C7B9FF" stroke="#111" stroke-width="1"/>
+      <text x="88" y="279" text-anchor="middle"
+        font-size="11" font-weight="800">NaOH TITRATION</text>
+
+      <rect x="173" y="31" width="252" height="83" rx="12"
+        fill="#FFF4D6" stroke="#111" stroke-width="3"/>
+      <text x="189" y="54" font-size="12" font-weight="800">
+        ADDED HCl
+      </text>
+      <text x="189" y="78" font-size="21" font-weight="900">
+        0.0100 mol
+      </text>
+      <text x="189" y="99" font-size="12">
+        Titre: 20.0 cm³ NaOH
+      </text>
+
+      <rect x="173" y="129" width="252" height="141" rx="12"
+        fill="#FFFFFF" stroke="#111" stroke-width="3"/>
+      <text x="189" y="150" font-size="12" font-weight="800">
+        REPORTED PURITY
+      </text>
+      <rect x="189" y="167" width="216" height="29" rx="7"
+        fill="#F4F3EF" stroke="#111" stroke-width="2"/>
+      <rect x="189" y="167" width="${Math.min(barWidth,216)}"
+        height="29" rx="7" fill="${invalid ? '#FF8FB8' : '#6A45F5'}"
+        stroke="#111" stroke-width="2"/>
+      <path d="M333 160V205" fill="none"
+        stroke="#D92D20" stroke-width="2" stroke-dasharray="5 3"/>
+      <text x="335" y="215" font-size="10" fill="#D92D20">
+        100% limit
+      </text>
+      <text x="189" y="243" font-size="22" font-weight="900">
+        ${displayNumber('purity')}%
+      </text>
+      <text x="189" y="260" font-size="11">
+        Sample: ${invalid ? '0.300' : '0.500'} g
+      </text>`;
+
+    $('scene').innerHTML = svg;
+    $('scene').setAttribute('aria-label',
+      `Back-titration apparatus with a 20 cubic centimetre sodium hydroxide titre; calculated pure calcium carbonate mass ${numberText(data.pure_mass_g)} grams and entered purity ${displayNumber('purity')} per cent.`);
+  }
+
+  function drawGasScene() {
+    const amount = inputNumber('amount');
+    const pressure = 99720;
+    const volume = 0.003;
+    let svg = apparatusBase();
+
+    svg += `
+      <rect x="51" y="36" width="240" height="207" rx="20"
+        fill="#E2ECFD" stroke="#111" stroke-width="4"/>
+      <path d="M68 55H274M68 222H274"
+        stroke="#111" stroke-width="2"/>
+      <circle cx="92" cy="77" r="8" fill="#FF8FB8" stroke="#111" stroke-width="2"/>
+      <circle cx="170" cy="81" r="8" fill="#FF8FB8" stroke="#111" stroke-width="2"/>
+      <circle cx="246" cy="100" r="8" fill="#FF8FB8" stroke="#111" stroke-width="2"/>
+      <circle cx="123" cy="142" r="8" fill="#FF8FB8" stroke="#111" stroke-width="2"/>
+      <circle cx="206" cy="152" r="8" fill="#FF8FB8" stroke="#111" stroke-width="2"/>
+      <circle cx="89" cy="199" r="8" fill="#FF8FB8" stroke="#111" stroke-width="2"/>
+      <circle cx="258" cy="202" r="8" fill="#FF8FB8" stroke="#111" stroke-width="2"/>
+      <text x="171" y="120" text-anchor="middle"
+        font-size="20" font-weight="900">GAS SAMPLE</text>
+      <text x="171" y="180" text-anchor="middle"
+        font-size="13" font-weight="800">5.28 g</text>
+
+      <rect x="308" y="45" width="124" height="63" rx="12"
+        fill="#FFF4D6" stroke="#111" stroke-width="3"/>
+      <text x="370" y="66" text-anchor="middle"
+        font-size="11" font-weight="800">PRESSURE</text>
+      <text x="370" y="90" text-anchor="middle"
+        font-size="15" font-weight="900">99,720 Pa</text>
+
+      <rect x="308" y="123" width="124" height="63" rx="12"
+        fill="#DDF7F1" stroke="#111" stroke-width="3"/>
+      <text x="370" y="144" text-anchor="middle"
+        font-size="11" font-weight="800">TEMPERATURE</text>
+      <text x="370" y="170" text-anchor="middle"
+        font-size="18" font-weight="900">300 K</text>
+
+      <rect x="308" y="201" width="124" height="63" rx="12"
+        fill="#ECE7FF" stroke="#111" stroke-width="3"/>
+      <text x="370" y="223" text-anchor="middle"
+        font-size="11" font-weight="800">YOUR AMOUNT</text>
+      <text x="370" y="247" text-anchor="middle"
+        font-size="16" font-weight="900">${displayNumber('amount')} mol</text>
+
+      <text x="171" y="270" text-anchor="middle"
+        font-size="12" font-weight="800">V = ${(volume*1000).toFixed(2)} dm³</text>`;
+
+    $('scene').innerHTML = svg;
+    $('scene').setAttribute('aria-label',
+      `Sealed vessel containing 5.28 grams of gas at ${pressure} pascals, 300 kelvin and ${volume} cubic metres; entered gas amount ${numberText(amount)} moles.`);
+  }
+
+  function drawTitrationScene() {
+    const c = inputNumber('concentration');
+    const fill = Number.isFinite(c)
+      ? Math.max(0,Math.min(114,114*c/0.10))
+      : 0;
+
+    let svg = apparatusBase();
+    svg += `
+      <rect x="51" y="31" width="52" height="147" rx="5"
+        fill="#E2ECFD" stroke="#111" stroke-width="3"/>
+      <rect x="63" y="41" width="28" height="115" rx="3"
+        fill="#85C8FF" stroke="#111" stroke-width="1.5"/>
+      <path d="M76 177V213" fill="none"
+        stroke="#111" stroke-width="4"/>
+      <path d="M70 205L76 218L82 205"
+        fill="none" stroke="#111" stroke-width="3"/>
+
+      <path d="M31 223H124L110 269H44Z"
+        fill="#E2ECFD" stroke="#111" stroke-width="3"/>
+      <path d="M42 238H114L107 259H49Z"
+        fill="#DDF7F1" stroke="#111" stroke-width="1"/>
+
+      <rect x="152" y="36" width="278" height="105" rx="14"
+        fill="#FFF4D6" stroke="#111" stroke-width="3"/>
+      <text x="167" y="58" font-size="12" font-weight="800">
+        0.100 mol dm⁻³ HCl
+      </text>
+      <text x="167" y="82" font-size="19" font-weight="900">
+        20.0 cm³ titre
+      </text>
+      <text x="167" y="110" font-size="12">
+        25.0 cm³ Na₂CO₃ aliquot
+      </text>
+
+      <rect x="152" y="157" width="278" height="110" rx="14"
+        fill="#ECE7FF" stroke="#111" stroke-width="3"/>
+      <text x="168" y="179" font-size="12" font-weight="800">
+        YOUR CARBONATE CONCENTRATION
+      </text>
+      <rect x="168" y="193" width="245" height="23" rx="7"
+        fill="#F4F3EF" stroke="#111" stroke-width="2"/>
+      <rect x="168" y="193" width="${Math.min(245,fill*2.15)}"
+        height="23" rx="7" fill="#6A45F5"
+        stroke="#111" stroke-width="2"/>
+      <text x="168" y="247" font-size="18" font-weight="900">
+        ${displayNumber('concentration')} mol dm⁻³
+      </text>`;
+
+    $('scene').innerHTML = svg;
+    $('scene').setAttribute('aria-label',
+      `Hydrochloric acid titration of 25 cubic centimetres of sodium carbonate solution, with entered concentration ${displayNumber('concentration')} moles per cubic decimetre.`);
+  }
+
+  function drawScene() {
+    const type = experiments[round].type;
+    if (type.startsWith('combustion')) drawCombustionScene();
+    else if (type.startsWith('back')) drawBackScene();
+    else if (type === 'gas') drawGasScene();
+    else drawTitrationScene();
+  }
+
+  function graphBase(yLabel, xLabel, maxY, ticks = 4) {
+    let svg = `
+      <rect x="0" y="0" width="460" height="265"
+        rx="12" fill="white"/>
+      <path d="M64 27V214H436" fill="none"
+        stroke="#111" stroke-width="2"/>
+      <text x="16" y="18" class="plot-label">
+        ${escapeHtml(yLabel)}
+      </text>
+      <text x="251" y="250" text-anchor="middle"
+        class="plot-label">${escapeHtml(xLabel)}</text>`;
+
+    for (let i = 0; i <= ticks; i++) {
+      const y = 214 - 180 * i / ticks;
+      svg += `
+        <line x1="64" y1="${y}" x2="436" y2="${y}"
+          stroke="#E4E2DB" stroke-width="1"/>
+        <text x="55" y="${y+4}" text-anchor="end"
+          class="plot-label">${numberText(maxY*i/ticks,3)}</text>`;
+    }
+    return svg;
+  }
+
+  function graphBar(x, value, maxY, colour, label, width = 66) {
+    const safeValue = Number.isFinite(value)
+      ? Math.max(0,value) : 0;
+    const height = Math.min(180,180*safeValue/maxY);
+    return `
+      <rect x="${x}" y="${214-height}" width="${width}"
+        height="${height}" rx="6" fill="${colour}"
+        stroke="#111" stroke-width="2"/>
+      <text x="${x+width/2}" y="${Math.max(18,206-height)}"
+        text-anchor="middle" class="plot-value">
+        ${numberText(safeValue,3)}
+      </text>
+      <text x="${x+width/2}" y="232" text-anchor="middle"
+        class="plot-label">${escapeHtml(label)}</text>`;
+  }
+
+  function pathFromPoints(points, colour, dash = '') {
+    if (!points.length) return '';
+    const d = points.map(([x,y],i) =>
+      `${i===0?'M':'L'}${x.toFixed(2)} ${y.toFixed(2)}`
+    ).join(' ');
+    return `<path d="${d}" fill="none"
+      stroke="${colour}" stroke-width="3"
+      stroke-linecap="round" stroke-linejoin="round"
+      ${dash ? `stroke-dasharray="${dash}"` : ''}/>`;
+  }
+
+  function graphLegend(items) {
+    $('legend').innerHTML = items.map(([label,colour]) =>
+      `<span><i class="swatch" style="--colour:${colour}"></i>${escapeHtml(label)}</span>`
+    ).join('');
+  }
+
+  function drawCombustionPlot() {
+    const data = combustionData();
+    const invalid = round === 1;
+
+    const maxY = invalid ? 3.5 : 5;
+    let svg = graphBase('Element mass (g)','Sample composition',maxY,5);
+
+    svg += graphBar(87,data.mass_C_g,maxY,colours.grey,'Carbon');
+    svg += graphBar(180,data.mass_H_g,maxY,colours.blue,'Hydrogen');
+
+    if (invalid) {
+      svg += `
+        <rect x="273" y="181" width="67" height="33"
+          rx="6" fill="#FFE7E5" stroke="#D92D20"
+          stroke-width="2" stroke-dasharray="5 3"/>
+        <text x="307" y="198" text-anchor="middle"
+          font-size="12" font-weight="800" fill="#D92D20">
+          ${numberText(data.mass_O_g)} g
+        </text>
+        <text x="307" y="232" text-anchor="middle"
+          class="plot-label">Oxygen</text>`;
+    } else {
+      svg += graphBar(273,data.mass_O_g,maxY,colours.pink,'Oxygen');
+    }
+
+    const entered = inputNumber('oxygen');
+    if (Number.isFinite(entered)) {
+      svg += `<text x="424" y="24" text-anchor="end"
+        class="plot-label">Your O result: ${numberText(entered)} g</text>`;
+    }
+
+    $('plot').innerHTML = svg;
+    $('plot').setAttribute('aria-label',invalid
+      ? 'Calculated carbon mass 2.4 grams and hydrogen mass 0.6 grams exceed the reported sample mass of 2.8 grams; oxygen residual is negative 0.2 grams.'
+      : 'Elemental composition showing 2.4 grams carbon, 0.6 grams hydrogen and 1.6 grams oxygen.');
+
+    graphLegend([
+      ['Carbon',colours.grey],
+      ['Hydrogen',colours.blue],
+      ['Oxygen',invalid ? colours.red : colours.pink]
+    ]);
+  }
+
+  function drawBackPlot() {
+    const scenario = experiments[round];
+    const result = backData();
+    let svg = graphBase('HCl remaining (mol)','NaOH added (cm³)',0.010,5);
+
+    const points = [];
+    for (let v = 0; v <= 110; v += 2) {
+      const r = C.acid_remaining({
+        acid_initial_mol:0.010,
+        alkali_c_mol_dm3:0.100,
+        alkali_v_cm3:v,
+        acid_per_alkali:1
+      });
+      const x = 64 + 372*v/110;
+      const y = 214 - 180*r.acid_remaining_mol/0.010;
+      points.push([x,y]);
+    }
+
+    svg += pathFromPoints(points,colours.purple);
+    const measuredX = 64 + 372*20/110;
+    const measuredY = 214 - 180*result.acid_left_mol/0.010;
+
+    svg += `
+      <line x1="${measuredX}" y1="30"
+        x2="${measuredX}" y2="214"
+        stroke="#111" stroke-dasharray="5 4"/>
+      <circle cx="${measuredX}" cy="${measuredY}" r="6"
+        fill="${colours.yellow}" stroke="#111" stroke-width="2"/>
+      <text x="${measuredX+8}" y="${measuredY-9}"
+        class="plot-label">Measured titre</text>`;
+
+    for (let v = 0; v <= 100; v += 20) {
+      const x = 64 + 372*v/110;
+      svg += `<text x="${x}" y="232" text-anchor="middle"
+        class="plot-label">${v}</text>`;
+    }
+
+    $('plot').innerHTML = svg;
+    $('plot').setAttribute('aria-label',
+      'Line graph of hydrochloric acid remaining versus sodium hydroxide titre from zero to 110 cubic centimetres, with the measured titre at 20 cubic centimetres and 0.002 moles of acid remaining.');
+
+    graphLegend([
+      ['Remaining acid',colours.purple],
+      ['Measured titre',colours.yellow]
+    ]);
+  }
+
+  function drawGasPlot() {
+    const gas = gasData();
+    let svg = graphBase('Pressure (kPa)','Volume (dm³)',320,4);
+    const points = [];
+
+    for (let volumeDm3 = 1; volumeDm3 <= 6; volumeDm3 += 0.1) {
+      const result = C.ideal_gas({
+        n_mol:gas.n_mol,
+        V_m3:volumeDm3/1000,
+        T_K:300
+      });
+
+      const x = 64 + 372*(volumeDm3-1)/5;
+      const y = 214 - 180*(result.p_Pa/1000)/320;
+      points.push([x,y]);
+    }
+
+    svg += pathFromPoints(points,colours.purple);
+
+    const measuredX = 64 + 372*(3-1)/5;
+    const measuredY = 214 - 180*(99720/1000)/320;
+
+    svg += `
+      <circle cx="${measuredX}" cy="${measuredY}"
+        r="6" fill="${colours.yellow}"
+        stroke="#111" stroke-width="2"/>
+      <text x="${measuredX+10}" y="${measuredY-12}"
+        class="plot-label">Measured state</text>`;
+
+    for (let v = 1; v <= 6; v++) {
+      const x = 64 + 372*(v-1)/5;
+      svg += `<text x="${x}" y="232"
+        text-anchor="middle" class="plot-label">${v}</text>`;
+    }
+
+    $('plot').innerHTML = svg;
+    $('plot').setAttribute('aria-label',
+      'Ideal gas isothermal pressure-volume curve for 0.12 moles at 300 kelvin, with measured pressure 99.72 kilopascals and volume 3 cubic decimetres.');
+
+    graphLegend([
+      ['Isothermal ideal gas curve',colours.purple],
+      ['Measured state',colours.yellow]
+    ]);
+  }
+
+  function drawTitrationPlot() {
+    let svg = graphBase('Na₂CO₃ conc. (mol dm⁻³)',
+      'HCl titre (cm³)',0.075,5);
+    const points = [];
+
+    for (let volume = 0; volume <= 35; volume += 1) {
+      const c = volume === 0 ? 0 :
+        C.titration({
+          c_titrant_mol_dm3:0.100,
+          v_titrant_cm3:volume,
+          v_analyte_cm3:25,
+          analyte_coeff:1,
+          titrant_coeff:2
+        }).c_analyte_mol_dm3;
+
+      points.push([
+        64 + 372*volume/35,
+        214 - 180*c/0.075
+      ]);
+    }
+
+    svg += pathFromPoints(points,colours.purple);
+
+    const measured = titrationData();
+    const measuredX = 64 + 372*20/35;
+    const measuredY = 214 -
+      180*measured.c_analyte_mol_dm3/0.075;
+
+    svg += `
+      <circle cx="${measuredX}" cy="${measuredY}"
+        r="6" fill="${colours.yellow}"
+        stroke="#111" stroke-width="2"/>
+      <text x="${measuredX-9}" y="${measuredY-12}"
+        text-anchor="end" class="plot-label">Measured titre</text>`;
+
+    for (let v = 0; v <= 35; v += 5) {
+      const x = 64 + 372*v/35;
+      svg += `<text x="${x}" y="232" text-anchor="middle"
+        class="plot-label">${v}</text>`;
+    }
+
+    $('plot').innerHTML = svg;
+    $('plot').setAttribute('aria-label',
+      'Graph of calculated sodium carbonate concentration against hydrochloric acid titre for a 25 cubic centimetre aliquot, using a two-to-one acid-to-carbonate mole ratio.');
+
+    graphLegend([
+      ['Inferred concentration',colours.purple],
+      ['Measured titre',colours.yellow]
+    ]);
+  }
+
+  function drawPlot() {
+    const type = experiments[round].type;
+    $('plot-title').textContent = type.startsWith('combustion')
+      ? 'Elemental mass balance'
+      : type.startsWith('back')
+        ? 'Back-titration: residual acid'
+        : type === 'gas'
+          ? 'Isothermal pressure–volume relation'
+          : 'Titration concentration curve';
+
+    if (type.startsWith('combustion')) drawCombustionPlot();
+    else if (type.startsWith('back')) drawBackPlot();
+    else if (type === 'gas') drawGasPlot();
+    else drawTitrationPlot();
+  }
+
+  function startRound() {
+    const scenario = experiments[round];
+
+    tries = 0;
+    hinted = false;
+    solved = false;
+    selectedDecision = '';
+    answers = {};
+
+    for (const item of scenario.fields) {
+      answers[item.key] = item.initial ?? '';
+    }
+    if (scenario.selection) {
+      answers[scenario.selection.key] = '';
+    }
+
+    $('round').textContent = `Round ${round+1}/6`;
+    $('score').textContent = `Score ${score}`;
+    $('tag').textContent = scenario.tag;
+    $('title').textContent = scenario.title;
+    $('description').textContent = scenario.description;
+    $('equation').textContent = scenario.equation;
+    $('task').textContent = scenario.task;
+    $('question').textContent = scenario.question;
+    $('concept').textContent = scenario.concept;
+    $('science').textContent = scenario.science;
+
+    $('given').innerHTML = scenario.given.map(([label,value]) =>
+      `<div class="data-item">
+        <small>${escapeHtml(label)}</small>
+        <strong>${escapeHtml(value)}</strong>
+      </div>`
+    ).join('');
+
+    $('inputs').innerHTML = makeInputs();
+    $('check').disabled = false;
+    $('hint').disabled = false;
+    $('next').classList.add('hidden');
+
+    feedback('Enter your calculations, then check your analysis.');
+    drawScene();
+    drawPlot();
+  }
+
+  function checkRound() {
+    if (solved) return;
+
+    const scenario = experiments[round];
+    let correct = false;
+    let explanation = '';
+
+    if (scenario.type === 'combustion') {
+      const result = combustionData().calculated;
+
+      correct = validResult(result) &&
+        near(inputNumber('carbon'),result.mass_C_g) &&
+        near(inputNumber('hydrogen'),result.mass_H_g) &&
+        near(inputNumber('oxygen'),result.mass_O_g) &&
+        answers.formula === result.formula;
+
+      explanation =
+        `Carbon ${numberText(result.mass_C_g)} g, ` +
+        `hydrogen ${numberText(result.mass_H_g)} g, ` +
+        `oxygen ${numberText(result.mass_O_g)} g. ` +
+        `Empirical formula: ${result.formula}.`;
+
+    } else if (scenario.type === 'combustion-invalid') {
+      const data = combustionData();
+
+      correct =
+        near(inputNumber('oxygen'),data.mass_O_g) &&
+        selectedDecision === 'invalid' &&
+        data.calculated.error === 'ConstraintViolation' &&
+        data.calculated.reason === 'masses_inconsistent';
+
+      explanation =
+        `Implied oxygen mass ${numberText(data.mass_O_g)} g. ` +
+        'A negative elemental mass is impossible, so the measurements are inconsistent.';
+
+    } else if (scenario.type === 'back') {
+      const result = backData();
+
+      correct = validResult(result) &&
+        near(inputNumber('left'),result.acid_left_mol) &&
+        near(inputNumber('reacted'),result.acid_reacted_mol) &&
+        near(inputNumber('purity'),result.purity_percent);
+
+      explanation =
+        `${numberText(result.acid_left_mol)} mol HCl remains; ` +
+        `${numberText(result.acid_reacted_mol)} mol reacted. ` +
+        `Calculated purity: ${numberText(result.purity_percent)}%.`;
+
+    } else if (scenario.type === 'back-invalid') {
+      const result = backData();
+
+      correct = validResult(result) &&
+        near(inputNumber('purity'),result.purity_percent) &&
+        selectedDecision === 'investigate' &&
+        result.purity_percent > 100;
+
+      explanation =
+        `Apparent purity is ${numberText(result.purity_percent)}%. ` +
+        'That exceeds 100%, so the data or assumptions must be investigated.';
+
+    } else if (scenario.type === 'gas') {
+      const result = gasData();
+
+      correct =
+        near(inputNumber('amount'),result.n_mol) &&
+        near(inputNumber('molarMass'),result.M_g_mol);
+
+      explanation =
+        `Gas amount ${numberText(result.n_mol)} mol; ` +
+        `molar mass ${numberText(result.M_g_mol)} g mol⁻¹.`;
+
+    } else if (scenario.type === 'titration') {
+      const result = titrationData();
+
+      correct =
+        near(inputNumber('acidMoles'),result.n_titrant_mol) &&
+        near(inputNumber('carbonateMoles'),result.n_analyte_mol) &&
+        near(inputNumber('concentration'),result.c_analyte_mol_dm3);
+
+      explanation =
+        `HCl ${numberText(result.n_titrant_mol)} mol; ` +
+        `Na₂CO₃ ${numberText(result.n_analyte_mol)} mol; ` +
+        `concentration ${numberText(result.c_analyte_mol_dm3)} mol dm⁻³.`;
+    }
+
+    tries++;
+
+    if (!correct) {
+      feedback(
+        'Not quite. Check the stoichiometric ratios, mass balance and whether your conclusion agrees with the calculations.',
+        'bad'
+      );
+      return;
+    }
+
+    solved = true;
+    const awarded = hinted ? 50 : tries === 1 ? 100 : tries === 2 ? 75 : 50;
+    score += awarded;
+
+    $('score').textContent = `Score ${score}`;
+    $('check').disabled = true;
+    $('hint').disabled = true;
+    $('next').classList.remove('hidden');
+    $('next').textContent = round === experiments.length-1
+      ? 'View results →'
+      : 'Next round →';
+
+    $('inputs').querySelectorAll('input,select,button').forEach(control => {
+      control.disabled = true;
+    });
+
+    feedback(`Correct. +${awarded} points. ${explanation}`,'good');
+    drawScene();
+    drawPlot();
+  }
+
+  function endGame() {
+    $('game').classList.add('hidden');
+    $('end').classList.remove('hidden');
+
+    const stars = score >= 500 ? 3 : score >= 375 ? 2 : 1;
+    $('stars').textContent = '★'.repeat(stars) + '☆'.repeat(3-stars);
+    $('stars').setAttribute('aria-label',`${stars} out of three stars`);
+    $('result').textContent =
+      `You earned ${score} out of 600 possible points.`;
+
+    $('end').scrollIntoView({
+      behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'auto' : 'smooth',
+      block:'start'
+    });
+  }
+
+  $('inputs').addEventListener('input',event => {
+    if (solved) return;
+    const control = event.target.closest('[data-answer]');
+    if (!control) return;
+
+    answers[control.dataset.answer] = control.value;
+    drawScene();
+    drawPlot();
+  });
+
+  $('inputs').addEventListener('change',event => {
+    if (solved) return;
+    const control = event.target.closest('[data-select]');
+    if (!control) return;
+
+    answers[control.dataset.select] = control.value;
+  });
+
+  $('inputs').addEventListener('click',event => {
+    if (solved) return;
+    const control = event.target.closest('[data-decision]');
+    if (!control) return;
+
+    selectedDecision = control.dataset.decision;
+
+    $('inputs').querySelectorAll('[data-decision]').forEach(button => {
+      button.setAttribute(
+        'aria-pressed',
+        String(button.dataset.decision === selectedDecision)
+      );
+    });
+  });
+
+  $('check').addEventListener('click',checkRound);
+
+  $('hint').addEventListener('click',() => {
+    if (solved || hinted) return;
+    hinted = true;
+    $('hint').disabled = true;
+    feedback(experiments[round].hint);
+  });
+
+  $('next').addEventListener('click',() => {
+    if (!solved) return;
+    if (round === experiments.length-1) {
+      endGame();
+      return;
+    }
+    round++;
+    startRound();
+  });
+
+  $('replay').addEventListener('click',() => {
+    round = 0;
+    score = 0;
+    $('end').classList.add('hidden');
+    $('game').classList.remove('hidden');
+    startRound();
+
+    window.scrollTo({
+      top:0,
+      behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'auto' : 'smooth'
+    });
+  });
+
+  startRound();
+})();
+</script>
+</body>
+</html>

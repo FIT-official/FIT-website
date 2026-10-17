@@ -1,0 +1,2418 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solution Prep Lab | Polytechnic Chemistry | Fix It Today</title>
+<style>
+:root{
+  --fit-ink:#111111;
+  --fit-ink-2:#3D3D3D;
+  --fit-ink-3:#6B6B6B;
+  --fit-paper:#FEFEFE;
+  --fit-white:#FFFFFF;
+  --fit-sunken:#F4F3EF;
+  --fit-line-soft:#E4E2DB;
+  --fit-sun:#FFC83D;
+  --fit-pink:#FF8FB8;
+  --fit-green:#3DBE6B;
+  --fit-focus:#1F66E5;
+  --fit-success:#1E9E5A;
+  --fit-danger:#D92D20;
+  --lvl-primary:#FFC83D;
+  --lvl-primary-tint:#FFF4D6;
+  --lvl-primary-on:#111111;
+  --lvl-secondary:#2EC4A6;
+  --lvl-secondary-tint:#DDF7F1;
+  --lvl-secondary-on:#111111;
+  --lvl-jc:#6A45F5;
+  --lvl-jc-tint:#ECE7FF;
+  --lvl-jc-on:#FFFFFF;
+  --lvl-poly:#FF6B3D;
+  --lvl-poly-tint:#FFE6DC;
+  --lvl-poly-on:#111111;
+  --lvl-uni:#1F66E5;
+  --lvl-uni-tint:#E2ECFD;
+  --lvl-uni-on:#FFFFFF;
+  --r-sm:12px;
+  --r-md:16px;
+  --r-lg:24px;
+  --r-xl:32px;
+  --r-pill:999px;
+  --bw:2px;
+  --bw-strong:3px;
+  --sh-1:0 2px 0 #111;
+  --sh-2:0 4px 0 #111;
+  --sh-3:0 6px 0 #111;
+  --ease-out:cubic-bezier(.2,.8,.2,1);
+  --dur-1:120ms;
+  --dur-2:180ms
+}
+*{box-sizing:border-box}
+html{scroll-behaviour:smooth}
+body{
+  margin:0;
+  background:var(--fit-paper);
+  color:var(--fit-ink);
+  font:400 16px/1.48 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif
+}
+main{max-width:1260px;margin:auto;padding:18px 14px 40px}
+h1{
+  font-size:clamp(2.2rem,5vw,3.4rem);
+  font-weight:850;
+  letter-spacing:-.045em;
+  line-height:1.08;
+  margin:12px 0
+}
+h2{font-size:1.35rem;line-height:1.2;font-weight:800;margin:0 0 12px}
+h3{font-size:1rem;font-weight:800;margin:17px 0 8px}
+p{margin:7px 0 14px}
+button,input,select{font:inherit}
+button{
+  min-width:44px;
+  min-height:48px;
+  padding:9px 15px;
+  border:2px solid var(--fit-ink);
+  border-radius:999px;
+  background:white;
+  color:var(--fit-ink);
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:var(--sh-1);
+  touch-action:manipulation
+}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{cursor:default;opacity:.48}
+button.primary{
+  background:var(--lvl-poly);
+  color:var(--lvl-poly-on);
+  border-width:3px;
+  box-shadow:var(--sh-2)
+}
+button.choice[aria-pressed="true"]{background:var(--lvl-poly)}
+input,select{
+  display:block;
+  width:100%;
+  min-width:0;
+  min-height:48px;
+  border:2px solid var(--fit-ink);
+  border-radius:12px;
+  padding:9px 12px;
+  background:white;
+  color:var(--fit-ink);
+  font-weight:700
+}
+input[type="number"]{font-variant-numeric:tabular-nums}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+.hud,.stats,.actions,.choices,.legend{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:9px
+}
+.hud{justify-content:space-between}
+.badge,.stat,.tag{
+  display:inline-flex;
+  align-items:center;
+  border:2px solid #111;
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:12px;
+  font-weight:800
+}
+.badge{
+  background:var(--lvl-poly);
+  color:var(--lvl-poly-on);
+  text-transform:uppercase
+}
+.stat,.tag{background:white}
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:18px;
+  margin-top:20px
+}
+.card{
+  min-width:0;
+  padding:18px;
+  border:2px solid #111;
+  border-radius:24px;
+  background:white;
+  box-shadow:var(--sh-2)
+}
+.stage{
+  background:var(--lvl-poly-tint);
+  border-radius:32px;
+  box-shadow:var(--sh-3)
+}
+.figure{
+  margin:14px 0;
+  overflow:hidden;
+  border:2px solid #111;
+  border-radius:18px;
+  background:white
+}
+svg{display:block;width:100%;height:auto}
+.equation{
+  padding:13px;
+  margin:12px 0;
+  border:2px solid #111;
+  border-radius:16px;
+  background:white;
+  font-weight:800;
+  overflow-wrap:anywhere
+}
+.data-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin:13px 0
+}
+.data-item{
+  min-width:0;
+  padding:11px 12px;
+  border:2px solid #111;
+  border-radius:14px;
+  background:white
+}
+.data-item small{
+  display:block;
+  font-size:11px;
+  font-weight:800;
+  color:var(--fit-ink-3);
+  text-transform:uppercase;
+  letter-spacing:.03em
+}
+.data-item strong{
+  display:block;
+  margin-top:4px;
+  overflow-wrap:anywhere
+}
+.answer{margin:13px 0}
+.answer label{display:block;margin-bottom:6px;font-weight:800}
+.answer .note{margin:5px 0;font-size:12px;color:var(--fit-ink-3)}
+.choices{margin:10px 0 16px}
+.feedback{
+  min-height:75px;
+  padding:13px;
+  margin:15px 0;
+  border:2px solid #111;
+  border-radius:16px;
+  background:var(--fit-sunken);
+  font-weight:700
+}
+.feedback.good{background:#E1F8E9}
+.feedback.bad{background:#FFE7E5}
+.concept{
+  padding:13px;
+  border:2px solid #111;
+  border-radius:16px;
+  background:white;
+  font-size:14px
+}
+.concept strong{display:block;margin-bottom:5px}
+.concept p{margin:0}
+.plot-label{font-size:11px;font-weight:700;fill:#3D3D3D}
+.plot-value{font-size:12px;font-weight:800;fill:#111}
+.legend{margin:10px 0;font-size:12px;font-weight:800}
+.swatch{
+  display:inline-block;
+  width:13px;
+  height:13px;
+  margin-right:5px;
+  border:1px solid #111;
+  background:var(--colour);
+  vertical-align:-2px
+}
+details{
+  border:2px solid #111;
+  border-radius:16px;
+  padding:12px;
+  margin-top:16px
+}
+summary{cursor:pointer;font-weight:800}
+details p{font-size:14px}
+.hidden{display:none!important}
+.end{text-align:center;padding:32px 20px}
+.stars{font-size:3rem;color:#9B7100;letter-spacing:7px}
+footer{
+  text-align:center;
+  margin-top:28px;
+  font-size:12px;
+  color:var(--fit-ink-3)
+}
+@media(min-width:900px){
+  main{padding:27px 22px 42px}
+  .layout{grid-template-columns:minmax(0,1.06fr) minmax(0,1fr)}
+  .card{padding:23px}
+}
+@media(max-width:450px){
+  .data-grid{grid-template-columns:1fr}
+  .actions button{flex:1 1 auto}
+}
+@media(prefers-reduced-motion:no-preference){
+  button{transition:transform var(--dur-1),box-shadow var(--dur-1)}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behaviour:auto}
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="hud">
+    <span class="badge">Poly · Applied Science</span>
+    <div class="stats">
+      <span class="stat" id="round">Round 1/6</span>
+      <span class="stat" id="score">Score 0</span>
+    </div>
+  </div>
+  <h1>Solution Prep Lab</h1>
+  <p>Work as a laboratory technician. Prepare standards, check reagent purity, plan dilutions and report concentrations with the correct units.</p>
+</header>
+
+<div id="game" class="layout">
+  <section class="card stage">
+    <span class="tag" id="tag">SOLUTION PREPARATION</span>
+    <h2 id="title">Laboratory assignment</h2>
+    <p id="description"></p>
+
+    <div id="equation" class="equation"></div>
+    <div id="given" class="data-grid"></div>
+
+    <div class="figure">
+      <svg id="scene" viewBox="0 0 460 300"
+        role="img" aria-label="Interactive solution preparation apparatus"></svg>
+    </div>
+
+    <div class="concept">
+      <strong>Laboratory checkpoint</strong>
+      <p id="concept"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 id="task">Your challenge</h2>
+    <p id="question"></p>
+
+    <div id="inputs"></div>
+
+    <div class="actions">
+      <button type="button" class="primary" id="check">Check procedure</button>
+      <button type="button" id="hint">Hint − points</button>
+      <button type="button" id="next" class="hidden">Next round →</button>
+    </div>
+
+    <div id="feedback" class="feedback" aria-live="polite">
+      Enter your calculations, then check your procedure.
+    </div>
+
+    <h3 id="plot-title">Live laboratory graph</h3>
+    <svg id="plot" viewBox="0 0 460 265"
+      role="img" aria-label="Quantitative graph for the current experiment"></svg>
+    <div id="legend" class="legend"></div>
+
+    <details>
+      <summary>Worked method and assumptions</summary>
+      <div id="science"></div>
+    </details>
+  </section>
+</div>
+
+<section id="end" class="card end hidden">
+  <span class="badge">Poly · Applied Science</span>
+  <h2>Laboratory assessment complete!</h2>
+  <div id="stars" class="stars" aria-label="Star rating"></div>
+  <p id="result"></p>
+  <p>Successful solution preparation requires correct calculations, suitable laboratory technique and an understanding of what dilution can and cannot achieve.</p>
+  <button type="button" class="primary" id="replay">Repeat the laboratory assessment</button>
+</section>
+
+<footer>Fix It Today</footer>
+</main>
+
+<script>
+/* FIT-CALC-BEGIN moles */
+const FITCalcMoles = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+  const AR = Object.freeze({
+    H: 1, He: 4, Li: 7, B: 11, C: 12, N: 14, O: 16,
+    F: 19, Ne: 20, Na: 23, Mg: 24, Al: 27, Si: 28,
+    P: 31, S: 32, Cl: 35.5, Ar: 40, K: 39, Ca: 40,
+    Cr: 52, Mn: 55, Fe: 56, Cu: 64, Zn: 65, Br: 80,
+    Ag: 108, I: 127, Ba: 137, Pb: 207
+  });
+  const NA = 6.02e23;
+  const VM = 24;
+  const R = 8.31;
+  const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+  const error = (c, reason) => ({ error: c, reason });
+  const cv = reason => error('ConstraintViolation', reason);
+  const me = reason => error('MathError', reason);
+  const rt = reason => error('RuntimeError', reason);
+  const ns = reason => error('NotSupported', reason);
+  const isError = x => !!x && typeof x === 'object' && own(x, 'error');
+  const finite = x => typeof x === 'number' && Number.isFinite(x);
+  const whole = x => Number.isSafeInteger(x);
+  const positiveInteger = x => whole(x) && x > 0;
+  const numeric = (...xs) => xs.every(finite);
+  const ok = x => {
+    function check(v) {
+      if (typeof v === 'number') return Number.isFinite(v);
+      if (v === null || typeof v !== 'object') return true;
+      return Object.values(v).every(check);
+    }
+    return check(x) ? x : cv('number_out_of_range');
+  };
+
+  function parseInternal(formula) {
+    if (typeof formula !== 'string' ||
+        formula.length < 1 || formula.length > 40) {
+      return cv('formula_syntax_error');
+    }
+    const parts = formula.split(/[.·]/);
+    if (parts.some(p => !p)) return cv('formula_syntax_error');
+    const result = {};
+    let failure = null;
+
+    function add(into, symbol, amount) {
+      const value = (into[symbol] || 0) + amount;
+      if (!whole(value) || value < 1) {
+        failure = cv('formula_syntax_error');
+        return;
+      }
+      into[symbol] = value;
+    }
+
+    for (const part of parts) {
+      let i = 0;
+
+      function number() {
+        const start = i;
+        while (i < part.length && /[0-9]/.test(part[i])) i++;
+        if (i === start) return 1;
+        const n = Number(part.slice(start, i));
+        if (!positiveInteger(n)) failure = cv('formula_syntax_error');
+        return n;
+      }
+
+      const multiplier = /[0-9]/.test(part[0]) ? number() : 1;
+
+      function sequence(closing, depth) {
+        const map = {};
+        let entries = 0;
+        if (depth > 20) {
+          failure = cv('formula_syntax_error');
+          return map;
+        }
+
+        while (i < part.length && !failure) {
+          const ch = part[i];
+          if (ch === ')' || ch === ']') {
+            if (ch !== closing) failure = cv('formula_syntax_error');
+            break;
+          }
+
+          if (ch === '(' || ch === '[') {
+            i++;
+            const sub = sequence(ch === '(' ? ')' : ']', depth + 1);
+            if (failure) break;
+            if (i >= part.length || part[i] !== (ch === '(' ? ')' : ']')) {
+              failure = cv('formula_syntax_error');
+              break;
+            }
+            i++;
+            const n = number();
+            if (failure) break;
+            for (const symbol of Object.keys(sub)) {
+              add(map, symbol, sub[symbol] * n);
+            }
+            entries++;
+          } else if (/[A-Z]/.test(ch)) {
+            let symbol = part[i++];
+            if (i < part.length && /[a-z]/.test(part[i])) {
+              symbol += part[i++];
+            }
+            if (!own(AR, symbol)) {
+              failure = ns('element_not_in_table');
+              break;
+            }
+            const n = number();
+            if (failure) break;
+            add(map, symbol, n);
+            entries++;
+          } else {
+            failure = cv('formula_syntax_error');
+            break;
+          }
+        }
+
+        if (entries === 0 && !failure) failure = cv('formula_syntax_error');
+        return map;
+      }
+
+      const sub = sequence(null, 0);
+      if (failure) return failure;
+      if (i !== part.length) return cv('formula_syntax_error');
+      for (const symbol of Object.keys(sub)) {
+        add(result, symbol, sub[symbol] * multiplier);
+      }
+      if (failure) return failure;
+    }
+
+    return result;
+  }
+
+  function massInternal(formula) {
+    const elements = parseInternal(formula);
+    if (isError(elements)) return elements;
+    let mass = 0;
+    for (const [symbol, count] of Object.entries(elements)) {
+      mass += AR[symbol] * count;
+    }
+    return Number.isFinite(mass) ? mass : cv('number_out_of_range');
+  }
+
+  function formulaText(counts) {
+    return Object.entries(counts)
+      .map(([s, n]) => s + (n === 1 ? '' : String(n))).join('');
+  }
+
+  /**
+   * Example: Ca(OH)2 -> {Ca:1,O:2,H:2}.
+   * Input: formula (ASCII chemical formula, 1–40 characters).
+   * Output: elements (symbol -> whole-number count).
+   * Nested brackets and hydrate parts are expanded.
+   * Errors: formula_syntax_error; element_not_in_table.
+   */
+  function parse_formula({ formula } = {}) {
+    const elements = parseInternal(formula);
+    return isError(elements) ? elements : { elements };
+  }
+
+  /**
+   * Example: CuSO4.5H2O -> 250 g/mol.
+   * Input: formula. Output: M_g_mol (g/mol).
+   * Assumption: fixed school relative atomic masses.
+   * Errors: formula_syntax_error; element_not_in_table.
+   */
+  function molar_mass({ formula } = {}) {
+    const M = massInternal(formula);
+    return isError(M) ? M : { M_g_mol: M };
+  }
+
+  /**
+   * Example: 9 g H2O -> 0.5 mol, 3.01e23 molecules.
+   * Inputs: formula, mass_g (g, >=0).
+   * Outputs: n_mol (mol), particles (formula units).
+   * Errors: negative_mass; invalid_number; formula errors.
+   */
+  function moles({ formula, mass_g } = {}) {
+    if (!finite(mass_g)) return cv('invalid_number');
+    if (mass_g < 0) return cv('negative_mass');
+    const M = massInternal(formula);
+    if (isError(M)) return M;
+    return ok({ n_mol: mass_g / M, particles: mass_g / M * NA });
+  }
+
+  /**
+   * Example: 0.25 mol CO2 -> 11 g.
+   * Inputs: formula, n_mol (mol). Output: mass_g (g).
+   * Errors: negative_amount; invalid_number; formula errors.
+   */
+  function mass_from_moles({ formula, n_mol } = {}) {
+    if (!finite(n_mol)) return cv('invalid_number');
+    if (n_mol < 0) return cv('negative_amount');
+    const M = massInternal(formula);
+    return isError(M) ? M : ok({ mass_g: n_mol * M });
+  }
+
+  /**
+   * Example: 0.5 mol -> 12 dm3 at r.t.p.
+   * Exactly one input: n_mol (mol) or volume_dm3 (dm3).
+   * Outputs: both fields. Assumes 24 dm3/mol.
+   * Errors: give_exactly_one_of_n_or_volume; negative_amount.
+   */
+  function gas_rtp(x = {}) {
+    const hasN = x.n_mol !== undefined;
+    const hasV = x.volume_dm3 !== undefined;
+    if (hasN === hasV) return cv('give_exactly_one_of_n_or_volume');
+    const v = hasN ? x.n_mol : x.volume_dm3;
+    if (!finite(v)) return cv('invalid_number');
+    if (v < 0) return cv('negative_amount');
+    return ok(hasN
+      ? { n_mol: v, volume_dm3: v * VM }
+      : { n_mol: v / VM, volume_dm3: v });
+  }
+
+  /**
+   * Example: 0.05 mol NaCl in 250 cm3 -> 0.2 mol/dm3,
+   * 11.7 g/dm3.
+   * Inputs: n_mol (mol), volume_cm3 (cm3), optional formula.
+   * Outputs: c_mol_dm3, c_g_dm3 (null without formula).
+   * Errors: volume_not_positive; negative_amount; formula errors.
+   */
+  function concentration({ n_mol, volume_cm3, formula } = {}) {
+    if (!numeric(n_mol, volume_cm3)) return cv('invalid_number');
+    if (volume_cm3 <= 0) return cv('volume_not_positive');
+    if (n_mol < 0) return cv('negative_amount');
+    const c = n_mol / (volume_cm3 / 1000);
+    if (formula === undefined) {
+      return ok({ c_mol_dm3: c, c_g_dm3: null });
+    }
+    const M = massInternal(formula);
+    return isError(M) ? M :
+      ok({ c_mol_dm3: c, c_g_dm3: c * M });
+  }
+
+  /**
+   * Example: H2O -> H 11.111...%, O 88.888...%.
+   * Input: formula. Output: percent (element -> mass %).
+   * Errors: formula_syntax_error; element_not_in_table.
+   */
+  function percent_composition({ formula } = {}) {
+    const elements = parseInternal(formula);
+    if (isError(elements)) return elements;
+    const M = massInternal(formula);
+    if (isError(M)) return M;
+    const percent = {};
+    for (const [s, n] of Object.entries(elements)) {
+      percent[s] = 100 * n * AR[s] / M;
+    }
+    return ok({ percent });
+  }
+
+  /**
+   * Example: elements [C,H,O], masses [2.4,0.6,1.6]
+   * -> C2H6O, ratio {C:2,H:6,O:1}.
+   * Inputs: elements (symbols), masses_g (g or mass percentages).
+   * Uses first multiplier 1..6 whose ratios are within 0.1
+   * of integers. Outputs: formula, ratio.
+   * Errors: elements_and_masses_mismatch; mass_not_positive;
+   * element_not_in_table; no_whole_number_ratio.
+   */
+  function empirical_formula({ elements, masses_g } = {}) {
+    if (!Array.isArray(elements) || !Array.isArray(masses_g) ||
+        elements.length < 2 || elements.length !== masses_g.length ||
+        new Set(elements).size !== elements.length ||
+        elements.length > Object.keys(AR).length) {
+      return cv('elements_and_masses_mismatch');
+    }
+    for (const s of elements) {
+      if (typeof s !== 'string' || !own(AR, s)) {
+        return ns('element_not_in_table');
+      }
+    }
+    if (!masses_g.every(finite)) return cv('invalid_number');
+    if (masses_g.some(x => x <= 0)) return cv('mass_not_positive');
+    const amounts = masses_g.map((m, i) => m / AR[elements[i]]);
+    const smallest = Math.min(...amounts);
+    const ratios = amounts.map(x => x / smallest);
+    if (!ratios.every(Number.isFinite)) return cv('number_out_of_range');
+    for (let k = 1; k <= 6; k++) {
+      const rounded = ratios.map(x => Math.round(x * k));
+      if (rounded.every((n, i) =>
+        positiveInteger(n) && Math.abs(ratios[i] * k - n) <= 0.1 + 1e-12)) {
+        const ratio = {};
+        elements.forEach((s, i) => { ratio[s] = rounded[i]; });
+        return { formula: formulaText(ratio), ratio };
+      }
+    }
+    return rt('no_whole_number_ratio');
+  }
+
+  /**
+   * Example: empirical CH2, Mr 28 -> multiplier 2, C2H4.
+   * Inputs: empirical (formula), M_g_mol (g/mol).
+   * Outputs: multiplier (integer), formula.
+   * Errors: not_a_whole_multiple; value_not_positive;
+   * formula errors.
+   */
+  function molecular_formula({ empirical, M_g_mol } = {}) {
+    if (!finite(M_g_mol)) return cv('invalid_number');
+    if (M_g_mol <= 0) return cv('value_not_positive');
+    const elements = parseInternal(empirical);
+    if (isError(elements)) return elements;
+    const M = massInternal(empirical);
+    const ratio = M_g_mol / M;
+    const k = Math.round(ratio);
+    if (!positiveInteger(k) || Math.abs(ratio - k) > 0.05) {
+      return me('not_a_whole_multiple');
+    }
+    const counts = {};
+    for (const [s, n] of Object.entries(elements)) {
+      if (!positiveInteger(n * k)) return cv('number_out_of_range');
+      counts[s] = n * k;
+    }
+    return { multiplier: k, formula: formulaText(counts) };
+  }
+
+  /**
+   * Example: 4 g H2 + 32 g O2 -> 36 g H2O; exact ratio.
+   * Inputs: reactants [{formula,coeff,mass_g}], products
+   * [{formula,coeff}]; coefficients are balanced integers.
+   * Outputs: limiting_index, extent_mol, exact_ratio,
+   * product_moles, product_masses_g, excess_left_g.
+   * Mass conservation checked when products are supplied.
+   * Errors: species_out_of_range; coefficient_not_positive_integer;
+   * mass_not_positive; reaction_not_balanced; formula errors.
+   */
+  function limiting({ reactants, products } = {}) {
+    if (!Array.isArray(reactants) || !Array.isArray(products) ||
+        reactants.length < 1 || reactants.length > 6 ||
+        products.length > 6) return cv('species_out_of_range');
+    const all = [...reactants, ...products];
+    if (all.some(x => !x || !positiveInteger(x.coeff))) {
+      return cv('coefficient_not_positive_integer');
+    }
+    if (reactants.some(x => !finite(x.mass_g))) return cv('invalid_number');
+    if (reactants.some(x => x.mass_g <= 0)) return cv('mass_not_positive');
+    const masses = [];
+    for (const x of all) {
+      const M = massInternal(x.formula);
+      if (isError(M)) return M;
+      masses.push(M);
+    }
+    if (products.length) {
+      const before = reactants.reduce((s, x, i) =>
+        s + x.coeff * masses[i], 0);
+      const after = products.reduce((s, x, j) =>
+        s + x.coeff * masses[reactants.length + j], 0);
+      if (Math.abs(before - after) >
+          1e-9 * Math.max(1, before, after)) {
+        return cv('reaction_not_balanced');
+      }
+    }
+    const extents = reactants.map((x, i) =>
+      (x.mass_g / masses[i]) / x.coeff);
+    const extent = Math.min(...extents);
+    const ties = extents.map((x, i) =>
+      Math.abs(x - extent) <=
+        1e-9 * Math.max(Math.abs(x), Math.abs(extent), 1e-30) ? i : -1)
+      .filter(i => i >= 0);
+    const limiting_index = ties[0];
+    const product_moles = products.map(x => x.coeff * extent);
+    const product_masses_g = products.map((x, j) =>
+      product_moles[j] * masses[reactants.length + j]);
+    const excess_left_g = reactants.map((x, i) => {
+      const remaining = x.mass_g - x.coeff * extent * masses[i];
+      return i === limiting_index ||
+        Math.abs(remaining) < 1e-9 ? 0 : Math.max(0, remaining);
+    });
+    return ok({
+      limiting_index, extent_mol: extent,
+      exact_ratio: ties.length > 1,
+      product_moles, product_masses_g, excess_left_g
+    });
+  }
+
+  /**
+   * Example: actual 8 g, theoretical 10 g -> 80%, false.
+   * Inputs: actual_g, theoretical_g (g).
+   * Outputs: percent, over_100. Above 100 is allowed.
+   * Errors: theoretical_not_positive; negative_mass.
+   */
+  function percent_yield({ actual_g, theoretical_g } = {}) {
+    if (!numeric(actual_g, theoretical_g)) return cv('invalid_number');
+    if (theoretical_g <= 0) return cv('theoretical_not_positive');
+    if (actual_g < 0) return cv('negative_mass');
+    const percent = 100 * actual_g / theoretical_g;
+    return ok({ percent, over_100: percent > 100 });
+  }
+
+  /**
+   * Example: 4 g pure in 5 g sample -> 80%.
+   * Inputs: pure_g, sample_g (g). Output: percent.
+   * Errors: mass_not_positive; negative_mass; pure_exceeds_sample.
+   */
+  function purity({ pure_g, sample_g } = {}) {
+    if (!numeric(pure_g, sample_g)) return cv('invalid_number');
+    if (sample_g <= 0) return cv('mass_not_positive');
+    if (pure_g < 0) return cv('negative_mass');
+    if (pure_g > sample_g) return cv('pure_exceeds_sample');
+    return ok({ percent: 100 * pure_g / sample_g });
+  }
+
+  /**
+   * Example: p=99720 Pa, V=0.003 m3, T=300 K
+   * -> n=0.12 mol.
+   * Exactly three inputs: p_Pa, V_m3, T_K, n_mol.
+   * Output: all four, including the solved field.
+   * Assumption: ideal gas, R=8.31 J/(K mol).
+   * Errors: give_exactly_three_values; below_absolute_zero;
+   * value_not_positive.
+   */
+  function ideal_gas(x = {}) {
+    const names = ['p_Pa', 'V_m3', 'T_K', 'n_mol'];
+    const present = names.filter(k => x[k] !== undefined);
+    if (present.length !== 3) return cv('give_exactly_three_values');
+    if (x.T_K !== undefined && finite(x.T_K) && x.T_K < 0) {
+      return cv('below_absolute_zero');
+    }
+    if (present.some(k => !finite(x[k]))) return cv('invalid_number');
+    if (present.some(k => x[k] <= 0)) return cv('value_not_positive');
+    const result = { ...x };
+    const missing = names.find(k => x[k] === undefined);
+    if (missing === 'n_mol') result.n_mol = x.p_Pa * x.V_m3 / (R * x.T_K);
+    if (missing === 'p_Pa') result.p_Pa = x.n_mol * R * x.T_K / x.V_m3;
+    if (missing === 'V_m3') result.V_m3 = x.n_mol * R * x.T_K / x.p_Pa;
+    if (missing === 'T_K') result.T_K = x.p_Pa * x.V_m3 / (x.n_mol * R);
+    return ok({
+      p_Pa: result.p_Pa, V_m3: result.V_m3,
+      T_K: result.T_K, n_mol: result.n_mol
+    });
+  }
+
+  /**
+   * Example: 4.6 g sample, 8.8 g CO2, 5.4 g H2O
+   * -> C 2.4 g, H 0.6 g, O 1.6 g, C2H6O.
+   * Inputs: mass_sample_g, mass_CO2_g, mass_H2O_g (g).
+   * Outputs: mass_C_g, mass_H_g, mass_O_g, formula.
+   * All combustion products are collected; sample contains C,H,O.
+   * Errors: negative_mass; mass_not_positive;
+   * masses_inconsistent; empirical ratio errors.
+   */
+  function combustion({ mass_sample_g, mass_CO2_g, mass_H2O_g } = {}) {
+    if (!numeric(mass_sample_g, mass_CO2_g, mass_H2O_g)) {
+      return cv('invalid_number');
+    }
+    if ([mass_sample_g, mass_CO2_g, mass_H2O_g].some(x => x < 0)) {
+      return cv('negative_mass');
+    }
+    if (mass_sample_g <= 0 || mass_CO2_g <= 0) {
+      return cv('mass_not_positive');
+    }
+    const C = mass_CO2_g * 12 / 44;
+    const H = mass_H2O_g * 2 / 18;
+    let O = mass_sample_g - C - H;
+    if (O < -1e-6) return cv('masses_inconsistent');
+    if (Math.abs(O) <= 1e-6) O = 0;
+    const elements = ['C'];
+    const masses_g = [C];
+    if (H > 0) { elements.push('H'); masses_g.push(H); }
+    if (O > 0) { elements.push('O'); masses_g.push(O); }
+    let formula;
+    if (elements.length === 1) {
+      formula = 'C';
+    } else {
+      const empirical = empirical_formula({ elements, masses_g });
+      if (isError(empirical)) return empirical;
+      formula = empirical.formula;
+    }
+    return ok({
+      mass_C_g: C, mass_H_g: H, mass_O_g: O, formula
+    });
+  }
+
+  /**
+   * Example: 0.1 mol/dm3, 20 cm3 titrant, 25 cm3 analyte,
+   * coefficients 1:1 -> 0.002 mol and 0.08 mol/dm3.
+   * Inputs: c_titrant_mol_dm3, v_titrant_cm3,
+   * v_analyte_cm3, analyte_coeff, titrant_coeff.
+   * Outputs: n_titrant_mol, n_analyte_mol,
+   * c_analyte_mol_dm3. Volumes in cm3.
+   * Errors: value_not_positive; coefficient_not_positive_integer.
+   */
+  function titration(x = {}) {
+    const { c_titrant_mol_dm3: c, v_titrant_cm3: v,
+      v_analyte_cm3: a, analyte_coeff: ac,
+      titrant_coeff: tc } = x;
+    if (!numeric(c, v, a, ac, tc)) return cv('invalid_number');
+    if (c <= 0 || v <= 0 || a <= 0) return cv('value_not_positive');
+    if (!positiveInteger(ac) || !positiveInteger(tc)) {
+      return cv('coefficient_not_positive_integer');
+    }
+    const nt = c * v / 1000;
+    const na = nt * ac / tc;
+    return ok({
+      n_titrant_mol: nt, n_analyte_mol: na,
+      c_analyte_mol_dm3: na / (a / 1000)
+    });
+  }
+
+  /**
+   * Example: 0.01 mol acid, 0.1 mol/dm3 alkali, 20 cm3,
+   * ratios 1 and 0.5, CaCO3 sample 0.5 g
+   * -> acid left .002, reacted .008, pure .4 g, purity 80%.
+   * Inputs: acid_total_mol, alkali_c_mol_dm_dm3,
+   * alkali_v_cm3, acid_per_alkali, sample_per_acid,
+   * sample_formula, sample_mass_g.
+   * Outputs: acid_left_mol, acid_reacted_mol, sample_mol,
+   * pure_mass_g, purity_percent. Acid is in excess.
+   * Errors: value_not_positive; titre_exceeds_acid_added;
+   * formula errors. Purity above 100 remains a result.
+   */
+  function back_titration(x = {}) {
+    const { acid_total_mol: total, alkali_c_mol_dm3: c,
+      alkali_v_cm3: v, acid_per_alkali: a,
+      sample_per_acid: s, sample_formula: formula,
+      sample_mass_g: sample } = x;
+    if (!numeric(total, c, v, a, s, sample)) {
+      return cv('invalid_number');
+    }
+    if ([total, c, v, a, s, sample].some(z => z <= 0)) {
+      return cv('value_not_positive');
+    }
+    const M = massInternal(formula);
+    if (isError(M)) return M;
+    const left = c * v / 1000 * a;
+    if (left > total + 1e-12) return cv('titre_exceeds_acid_added');
+    const reacted = Math.max(0, total - left);
+    const amount = reacted * s;
+    const pure = amount * M;
+    return ok({
+      acid_left_mol: left, acid_reacted_mol: reacted,
+      sample_mol: amount, pure_mass_g: pure,
+      purity_percent: 100 * pure / sample
+    });
+  }
+
+  /**
+   * Example: 0.1 mol/dm3 NaCl, 250 cm3, 100% purity
+   * -> 1.4625 g.
+   * Inputs: formula, c_mol_dm3, volume_cm3,
+   * optional purity_percent (default 100).
+   * Output: mass_g to weigh (g).
+   * Errors: purity_out_of_range; value_not_positive;
+   * formula errors.
+   */
+  function solution_prep(x = {}) {
+    const { formula, c_mol_dm3: c, volume_cm3: v } = x;
+    const p = x.purity_percent === undefined ? 100 : x.purity_percent;
+    if (!finite(p)) return cv('invalid_number');
+    if (p <= 0 || p > 100) return cv('purity_out_of_range');
+    if (!numeric(c, v)) return cv('invalid_number');
+    if (c <= 0 || v <= 0) return cv('value_not_positive');
+    const M = massInternal(formula);
+    return isError(M) ? M : ok({ mass_g: c * v / 1000 * M * 100 / p });
+  }
+
+  /**
+   * Example: c1=.2, v1=50 cm3, c2=.05
+   * -> v2=200 cm3, water=150 cm3.
+   * Inputs: c1, c2 (same concentration units), v1_cm3.
+   * Outputs: v2_cm3, water_cm3.
+   * Errors: cannot_concentrate_by_dilution; value_not_positive.
+   */
+  function dilution({ c1, v1_cm3, c2 } = {}) {
+    if (!numeric(c1, v1_cm3, c2)) return cv('invalid_number');
+    if (c2 > c1) return cv('cannot_concentrate_by_dilution');
+    if (c1 <= 0 || v1_cm3 <= 0 || c2 <= 0) {
+      return cv('value_not_positive');
+    }
+    const v2 = c1 * v1_cm3 / c2;
+    return ok({ v2_cm3: v2, water_cm3: v2 - v1_cm3 });
+  }
+
+  /**
+   * Example: c0=1, factor=10, steps=3
+   * -> [1,0.1,0.01,0.001].
+   * Inputs: c0 (concentration), factor (>1), steps (1..12).
+   * Output: concentrations, including starting value.
+   * Errors: factor_must_exceed_1; steps_out_of_range_1_12;
+   * value_not_positive.
+   */
+  function serial_dilution({ c0, factor, steps } = {}) {
+    if (!numeric(c0, factor, steps)) return cv('invalid_number');
+    if (factor <= 1) return cv('factor_must_exceed_1');
+    if (!whole(steps) || steps < 1 || steps > 12) {
+      return cv('steps_out_of_range_1_12');
+    }
+    if (c0 <= 0) return cv('value_not_positive');
+    const concentrations = [c0];
+    for (let i = 0; i < steps; i++) {
+      concentrations.push(concentrations[i] / factor);
+    }
+    return ok({ concentrations });
+  }
+
+  /**
+   * Example: NaCl, 58.5 mg/dm3 -> 0.001 mol/dm3.
+   * Inputs: value, from_unit, to_unit, optional formula.
+   * Units: mol_dm3, g_dm3, mg_dm3, ppm, percent_wv.
+   * Dilute aqueous solution: 1 ppm=1 mg/dm3;
+   * 1% w/v=10 g/dm3.
+   * Output: value in requested unit.
+   * Errors: unit_not_supported; formula_required;
+   * negative_amount; formula errors.
+   */
+  function convert_concentration({ value, from_unit, to_unit, formula } = {}) {
+    const units = ['mol_dm3', 'g_dm3', 'mg_dm3', 'ppm', 'percent_wv'];
+    if (!units.includes(from_unit) || !units.includes(to_unit)) {
+      return ns('unit_not_supported');
+    }
+    if (from_unit !== to_unit &&
+        (from_unit === 'mol_dm3' || to_unit === 'mol_dm3') &&
+        formula === undefined) return cv('formula_required');
+    if (!finite(value)) return cv('invalid_number');
+    if (value < 0) return cv('negative_amount');
+    if (from_unit === to_unit) return { value };
+    let M = 1;
+    if (from_unit === 'mol_dm3' || to_unit === 'mol_dm3') {
+      M = massInternal(formula);
+      if (isError(M)) return M;
+    }
+    const toGrams = {
+      mol_dm3: M, g_dm3: 1, mg_dm3: 0.001,
+      ppm: 0.001, percent_wv: 10
+    };
+    return ok({ value: value * toGrams[from_unit] / toGrams[to_unit] });
+  }
+
+  function gcdBig(a, b) {
+    a = a < 0n ? -a : a;
+    b = b < 0n ? -b : b;
+    while (b !== 0n) { const t = a % b; a = b; b = t; }
+    return a === 0n ? 1n : a;
+  }
+
+  function frac(n, d = 1n) {
+    if (d < 0n) { n = -n; d = -d; }
+    if (n === 0n) return [0n, 1n];
+    const g = gcdBig(n, d);
+    return [n / g, d / g];
+  }
+
+  const fadd = (a, b) =>
+    frac(a[0] * b[1] + b[0] * a[1], a[1] * b[1]);
+  const fneg = a => [-a[0], a[1]];
+  const fsub = (a, b) => fadd(a, fneg(b));
+  const fmul = (a, b) => frac(a[0] * b[0], a[1] * b[1]);
+  const fdiv = (a, b) => frac(a[0] * b[1], a[1] * b[0]);
+  const lcmBig = (a, b) => a / gcdBig(a, b) * b;
+
+  /**
+   * Example: FeS2 + O2 -> Fe2O3 + SO2
+   * -> [4,11,2,8].
+   * Inputs: reactants and products, arrays of formula strings,
+   * 1–6 on each side. Output: coefficients, smallest positive
+   * integers in input order. Exact rational null-space RREF.
+   * Errors: species_out_of_range; no_unique_balance;
+   * cannot_balance; coefficient_out_of_range; formula errors.
+   */
+  function balance({ reactants, products } = {}) {
+    if (!Array.isArray(reactants) || !Array.isArray(products) ||
+        reactants.length < 1 || reactants.length > 6 ||
+        products.length < 1 || products.length > 6) {
+      return cv('species_out_of_range');
+    }
+    const names = [...reactants, ...products];
+    const maps = [];
+    const symbols = [];
+    for (const formula of names) {
+      const map = parseInternal(formula);
+      if (isError(map)) return map;
+      maps.push(map);
+      for (const symbol of Object.keys(map)) {
+        if (!symbols.includes(symbol)) symbols.push(symbol);
+      }
+    }
+    const n = names.length;
+    const matrix = symbols.map(s => maps.map((map, j) =>
+      frac(BigInt((map[s] || 0) * (j < reactants.length ? 1 : -1)))));
+    const pivots = [];
+    let row = 0;
+    for (let col = 0; col < n && row < matrix.length; col++) {
+      let chosen = row;
+      while (chosen < matrix.length && matrix[chosen][col][0] === 0n) {
+        chosen++;
+      }
+      if (chosen === matrix.length) continue;
+      [matrix[row], matrix[chosen]] = [matrix[chosen], matrix[row]];
+      const divisor = matrix[row][col];
+      matrix[row] = matrix[row].map(x => fdiv(x, divisor));
+      for (let r = 0; r < matrix.length; r++) {
+        if (r === row || matrix[r][col][0] === 0n) continue;
+        const factor = matrix[r][col];
+        matrix[r] = matrix[r].map((x, k) =>
+          fsub(x, fmul(factor, matrix[row][k])));
+      }
+      pivots.push(col);
+      row++;
+    }
+    if (n - pivots.length !== 1) return me('no_unique_balance');
+    const free = Array.from({ length: n }, (_, i) => i)
+      .find(i => !pivots.includes(i));
+    const values = Array.from({ length: n }, () => frac(0n));
+    values[free] = frac(1n);
+    for (let r = pivots.length - 1; r >= 0; r--) {
+      let sum = frac(0n);
+      for (let c = pivots[r] + 1; c < n; c++) {
+        sum = fadd(sum, fmul(matrix[r][c], values[c]));
+      }
+      values[pivots[r]] = fneg(sum);
+    }
+    let denominator = 1n;
+    for (const x of values) {
+      denominator = lcmBig(denominator, x[1]);
+    }
+    let ints = values.map(x => x[0] * (denominator / x[1]));
+    if (ints.some(x => x === 0n)) return me('cannot_balance');
+    if (ints.every(x => x < 0n)) ints = ints.map(x => -x);
+    if (!ints.every(x => x > 0n)) return me('cannot_balance');
+    let divisor = ints[0];
+    for (const x of ints.slice(1)) divisor = gcdBig(divisor, x);
+    ints = ints.map(x => x / divisor);
+    if (ints.some(x => x > BigInt(Number.MAX_SAFE_INTEGER))) {
+      return cv('coefficient_out_of_range');
+    }
+    return { coefficients: ints.map(Number) };
+  }
+
+  /**
+   * Example: 2Mg + O2 -> 2MgO, desired 2MgO -> 100%.
+   * Inputs: reactants [{formula,coeff}], desired {formula,coeff}.
+   * Output: percent (mass of desired product / input mass).
+   * Assumes the supplied equation is balanced.
+   * Errors: coefficient_not_positive_integer; species_out_of_range;
+   * formula errors.
+   */
+  function atom_economy({ reactants, desired } = {}) {
+    if (!Array.isArray(reactants) || reactants.length < 1 ||
+        reactants.length > 6 || !desired) return cv('species_out_of_range');
+    if ([...reactants, desired].some(x =>
+      !x || !positiveInteger(x.coeff))) {
+      return cv('coefficient_not_positive_integer');
+    }
+    let inputMass = 0;
+    for (const x of reactants) {
+      const M = massInternal(x.formula);
+      if (isError(M)) return M;
+      inputMass += M * x.coeff;
+    }
+    const desiredM = massInternal(desired.formula);
+    if (isError(desiredM)) return desiredM;
+    return ok({ percent: 100 * desired.coeff * desiredM / inputMass });
+  }
+
+  /**
+   * Example: feed=10, left=4, product=4.5, both nu=1
+   * -> conversion=.6, yield=.45, selectivity=.75.
+   * Inputs: n_feed_mol, n_left_mol, n_product_mol (mol);
+   * optional nu_reactant, nu_product (default 1).
+   * Outputs: conversion, yield, selectivity as fractions.
+   * Zero conversion gives selectivity:null.
+   * Errors: left_exceeds_feed; value_not_positive;
+   * negative_amount; coefficient_not_positive_integer.
+   */
+  function conversion_yield(x = {}) {
+    const { n_feed_mol: feed, n_left_mol: left,
+      n_product_mol: product } = x;
+    const nr = x.nu_reactant === undefined ? 1 : x.nu_reactant;
+    const np = x.nu_product === undefined ? 1 : x.nu_product;
+    if (!numeric(feed, left, product, nr, np)) {
+      return cv('invalid_number');
+    }
+    if (left > feed) return cv('left_exceeds_feed');
+    if (feed <= 0) return cv('value_not_positive');
+    if (left < 0 || product < 0) return cv('negative_amount');
+    if (!positiveInteger(nr) || !positiveInteger(np)) {
+      return cv('coefficient_not_positive_integer');
+    }
+    const conversion = (feed - left) / feed;
+    const yieldValue = product * nr / np / feed;
+    return ok({
+      conversion, yield: yieldValue,
+      selectivity: conversion === 0 ? null : yieldValue / conversion
+    });
+  }
+
+  /**
+   * Example: recipe {white:2,red:1}, stock {white:7,red:2}
+   * -> made=2, leftover {white:3,red:0}, limiting ['red'].
+   * Inputs: recipe counts >=1, stock counts >=0, safe integers.
+   * Outputs: made (whole models), leftover, limiting.
+   * Errors: count_not_whole_number.
+   */
+  function build_count({ recipe, stock } = {}) {
+    if (!recipe || !stock || Array.isArray(recipe) ||
+        Array.isArray(stock) || typeof recipe !== 'object' ||
+        typeof stock !== 'object' || !Object.keys(recipe).length) {
+      return cv('count_not_whole_number');
+    }
+    if (Object.values(recipe).some(x => !positiveInteger(x)) ||
+        Object.values(stock).some(x => !whole(x) || x < 0)) {
+      return cv('count_not_whole_number');
+    }
+    const made = Math.min(...Object.keys(recipe).map(s =>
+      Math.floor((stock[s] || 0) / recipe[s])));
+    const leftover = {};
+    for (const s of [...new Set([
+      ...Object.keys(recipe), ...Object.keys(stock)
+    ])]) {
+      leftover[s] = (stock[s] || 0) - made * (recipe[s] || 0);
+    }
+    const limiting = Object.keys(recipe).filter(s =>
+      leftover[s] < recipe[s]);
+    return { made, leftover, limiting };
+  }
+
+  /**
+   * Example: 29 items in groups of 12 -> 2 groups, 5 left.
+   * Inputs: count (whole >=0), group_size (whole >=1).
+   * Outputs: groups, left (whole counts).
+   * Errors: group_size_not_positive_integer; count_not_whole_number.
+   */
+  function groups({ count, group_size } = {}) {
+    if (!positiveInteger(group_size)) {
+      return cv('group_size_not_positive_integer');
+    }
+    if (!whole(count) || count < 0) return cv('count_not_whole_number');
+    return {
+      groups: Math.floor(count / group_size),
+      left: count % group_size
+    };
+  }
+
+  /**
+   * Example: 2 white + 1 red per model, stock 7 white/2 red,
+   * plan 2 -> used 4 white/2 red, left 3 white/0 red.
+   * Inputs: recipe and stock as in build_count; models (whole >=0).
+   * Outputs: used, leftover, possible, total_before, total_after.
+   * Totals are bead mass units assuming equal-mass beads.
+   * Errors: count_not_whole_number.
+   */
+  function build_plan({ recipe, stock, models } = {}) {
+    const base = build_count({ recipe, stock });
+    if (isError(base)) return base;
+    if (!whole(models) || models < 0) return cv('count_not_whole_number');
+    const used = {};
+    const leftover = {};
+    let total_before = 0;
+    let total_after = 0;
+    let possible = true;
+    for (const s of [...new Set([
+      ...Object.keys(recipe), ...Object.keys(stock)
+    ])]) {
+      const n = models * (recipe[s] || 0);
+      used[s] = n;
+      leftover[s] = (stock[s] || 0) - n;
+      if (leftover[s] < 0) possible = false;
+      total_before += stock[s] || 0;
+      total_after += n + leftover[s];
+    }
+    return ok({ used, leftover, possible, total_before, total_after });
+  }
+
+  /**
+   * Example: 5.28 g vapour, 0.12 mol -> 44 g/mol.
+   * Inputs: mass_g (g, >=0), n_mol (mol, >0).
+   * Output: M_g_mol. Errors: negative_mass; value_not_positive.
+   */
+  function molar_mass_from_sample({ mass_g, n_mol } = {}) {
+    if (!numeric(mass_g, n_mol)) return cv('invalid_number');
+    if (mass_g < 0) return cv('negative_mass');
+    if (n_mol <= 0) return cv('value_not_positive');
+    return ok({ M_g_mol: mass_g / n_mol });
+  }
+
+  /**
+   * Example: acid .01 mol, 0.1 mol/dm3 alkali, 20 cm3,
+   * ratio 1 -> .008 mol acid remaining.
+   * Inputs: acid_initial_mol, alkali_c_mol_dm3,
+   * alkali_v_cm3, acid_per_alkali.
+   * Output: acid_remaining_mol, clamped at zero.
+   * Errors: value_not_positive; negative_amount.
+   */
+  function acid_remaining(x = {}) {
+    const { acid_initial_mol: acid, alkali_c_mol_dm3: c,
+      alkali_v_cm3: v, acid_per_alkali: ratio } = x;
+    if (!numeric(acid, c, v, ratio)) return cv('invalid_number');
+    if (acid <= 0 || c <= 0 || ratio <= 0) {
+      return cv('value_not_positive');
+    }
+    if (v < 0) return cv('negative_amount');
+    return ok({
+      acid_remaining_mol: Math.max(0, acid - c * v / 1000 * ratio)
+    });
+  }
+
+  /**
+   * Example: C2H4 feed 10 mol, O2 feed 20 mol,
+   * conversion .6 and desired selectivity .75:
+   * 4 mol C2H4 left, 4.5 mol C2H4O, 3 mol CO2,
+   * 3 mol H2O, 13.25 mol O2 left; both sides 920 g.
+   * Inputs: feed_C2H4_mol, feed_O2_mol, conversion,
+   * desired_selectivity (fractions 0..1).
+   * Outputs: inlet_mol, outlet_mol, inlet_masses_g,
+   * outlet_masses_g, mass_in_g, mass_out_g.
+   * Reactions: C2H4 + 0.5O2 -> C2H4O;
+   * C2H4 + 3O2 -> 2CO2 + 2H2O.
+   * Errors: value_not_positive; fraction_out_of_range;
+   * insufficient_oxygen.
+   */
+  function reactor_streams(x = {}) {
+    const { feed_C2H4_mol: feed, feed_O2_mol: oxygen,
+      conversion: conv, desired_selectivity: sel } = x;
+    if (!numeric(feed, oxygen, conv, sel)) return cv('invalid_number');
+    if (feed <= 0 || oxygen <= 0) return cv('value_not_positive');
+    if (conv < 0 || conv > 1 || sel < 0 || sel > 1) {
+      return cv('fraction_out_of_range');
+    }
+    const used = feed * conv;
+    const desired = used * sel;
+    const burned = used - desired;
+    const oxygenUsed = desired * 0.5 + burned * 3;
+    if (oxygenUsed > oxygen + 1e-10) {
+      return cv('insufficient_oxygen');
+    }
+    const inlet_mol = { C2H4: feed, O2: oxygen };
+    const outlet_mol = {
+      C2H4: feed - used, O2: Math.max(0, oxygen - oxygenUsed),
+      C2H4O: desired, CO2: burned * 2, H2O: burned * 2
+    };
+    const inlet_masses_g = {};
+    const outlet_masses_g = {};
+    for (const [s, n] of Object.entries(inlet_mol)) {
+      inlet_masses_g[s] = n * massInternal(s);
+    }
+    for (const [s, n] of Object.entries(outlet_mol)) {
+      outlet_masses_g[s] = n * massInternal(s);
+    }
+    const mass_in_g = Object.values(inlet_masses_g)
+      .reduce((a, b) => a + b, 0);
+    const mass_out_g = Object.values(outlet_masses_g)
+      .reduce((a, b) => a + b, 0);
+    return ok({
+      inlet_mol, outlet_mol, inlet_masses_g, outlet_masses_g,
+      mass_in_g, mass_out_g
+    });
+  }
+
+  return Object.freeze({
+    API_VERSION,
+    parse_formula, molar_mass, moles, mass_from_moles,
+    gas_rtp, concentration, percent_composition,
+    empirical_formula, molecular_formula, limiting,
+    percent_yield, purity, ideal_gas, combustion,
+    titration, back_titration, solution_prep, dilution,
+    serial_dilution, convert_concentration, balance,
+    atom_economy, conversion_yield, build_count, groups,
+    build_plan, molar_mass_from_sample, acid_remaining,
+    reactor_streams
+  });
+})();
+/* FIT-CALC-END moles */
+
+(function () {
+  'use strict';
+
+  const C = FITCalcMoles;
+  const $ = id => document.getElementById(id);
+
+  const COLOURS = Object.freeze({
+    orange:'#FF6B3D',
+    purple:'#6A45F5',
+    teal:'#2EC4A6',
+    blue:'#85C8FF',
+    yellow:'#FFC83D',
+    pink:'#FF8FB8',
+    green:'#3DBE6B',
+    grey:'#6B6B6B',
+    red:'#D92D20'
+  });
+
+  const ROUNDS = [
+    {
+      type:'prepare',
+      tag:'PREPARING A STANDARD SOLUTION',
+      title:'Weigh sodium chloride',
+      description:'Prepare 250.0 cm³ of a 0.100 mol dm⁻³ sodium chloride solution from pure, dry solid.',
+      equation:'n = cV     ·     m = nM',
+      given:[
+        ['Chemical','NaCl'],
+        ['Concentration','0.100 mol dm⁻³'],
+        ['Final volume','250.0 cm³'],
+        ['Reagent purity','100%']
+      ],
+      task:'Calculate the mass to weigh',
+      question:'Find the amount of NaCl required and the mass to weigh. Then select the correct volumetric preparation method.',
+      concept:'Use the final solution volume in dm³, not the volume of water initially added. Transfer the dissolved solute quantitatively and make up to the calibration mark.',
+      science:'V = 250.0/1000 = 0.2500 dm³. Amount = 0.100 × 0.2500 = 0.0250 mol. M(NaCl) = 23 + 35.5 = 58.5 g mol⁻¹. Mass = 0.0250 × 58.5 = 1.4625 g. Dissolve in less than the final volume, transfer quantitatively, rinse and make up to the mark with deionised water.',
+      hint:'Convert 250 cm³ to 0.250 dm³. Multiply by 0.100 to find moles, then by 58.5 to find grams.',
+      fields:[
+        {key:'amount',label:'Amount of NaCl (mol)',initial:'0'},
+        {key:'mass',label:'Mass of NaCl to weigh (g)',initial:'0'}
+      ],
+      choices:[
+        {value:'correct',label:'Dissolve, transfer, then make up to 250 cm³'},
+        {value:'water',label:'Add 250 cm³ of water to the solid'},
+        {value:'estimate',label:'Fill a beaker by eye to 250 cm³'}
+      ]
+    },
+    {
+      type:'hydrate',
+      tag:'PURITY-CORRECTED SOLUTION PREPARATION',
+      title:'Prepare a copper sulfate standard',
+      description:'Prepare 500.0 cm³ of 0.0500 mol dm⁻³ copper(II) sulfate using copper(II) sulfate pentahydrate. The supplied crystalline reagent is 95.0% pure by mass.',
+      equation:'m(weighed) = c × V × M(hydrate) / purity fraction',
+      given:[
+        ['Reagent','CuSO₄·5H₂O'],
+        ['Target concentration','0.0500 mol dm⁻³'],
+        ['Final volume','500.0 cm³'],
+        ['Assayed purity','95.0%']
+      ],
+      task:'Correct for reagent purity',
+      question:'Calculate the molar mass of the hydrated salt, the amount needed, and the actual mass of the 95.0%-pure crystals to weigh.',
+      concept:'Include all five waters of crystallisation in the molar mass. A sample that is only 95% active compound requires more weighed material than a 100%-pure sample.',
+      science:'M(CuSO₄·5H₂O) = 64 + 32 + 4(16) + 5(18) = 250 g mol⁻¹. The required amount is 0.0500 × 0.5000 = 0.0250 mol. Pure crystals needed: 6.250 g. At 95% purity, mass to weigh = 6.250/0.950 = 6.578947… g. The calculation assumes impurities do not contribute copper sulfate.',
+      hint:'The five waters add 90 g mol⁻¹. Find the mass at 100% purity, then divide by 0.95.',
+      fields:[
+        {key:'molarMass',label:'Molar mass of CuSO₄·5H₂O (g mol⁻¹)',initial:'0'},
+        {key:'amount',label:'Amount of hydrated salt (mol)',initial:'0'},
+        {key:'mass',label:'Mass of 95%-pure crystals to weigh (g)',initial:'0'}
+      ]
+    },
+    {
+      type:'dilute',
+      tag:'SINGLE-STEP DILUTION',
+      title:'Prepare a working standard',
+      description:'A concentrated stock solution must be diluted to produce a lower-concentration working standard. Assume ideal, additive volumes for this calculation.',
+      equation:'c₁V₁ = c₂V₂     ·     Water added = V₂ − V₁',
+      given:[
+        ['Stock concentration','0.500 mol dm⁻³'],
+        ['Stock aliquot','20.0 cm³'],
+        ['Target concentration','0.100 mol dm⁻³'],
+        ['Assumed volume model','Additive volumes']
+      ],
+      task:'Plan the dilution',
+      question:'Calculate the required final volume and the nominal volume of water to add. Then select the appropriate laboratory procedure.',
+      concept:'During ideal dilution, solute amount remains constant. The final volume must be measured; laboratory practice is to make up to the mark, not simply assume added volumes are exact.',
+      science:'Final volume = 0.500 × 20.0 / 0.100 = 100.0 cm³. Under the stated additive-volume assumption, the water increment is 100.0 − 20.0 = 80.0 cm³. For accuracy, pipette 20.0 cm³ of stock into a 100.0 cm³ volumetric flask, dilute with water, mix and make up to the calibration mark.',
+      hint:'The concentration falls by a factor of five, so the total volume must rise by a factor of five.',
+      fields:[
+        {key:'final',label:'Required final volume (cm³)',initial:'0'},
+        {key:'water',label:'Nominal water increment (cm³)',initial:'0'}
+      ],
+      choices:[
+        {value:'flask',label:'Pipette into a 100 cm³ volumetric flask and make up to the mark'},
+        {value:'beaker',label:'Estimate 100 cm³ in an uncalibrated beaker'},
+        {value:'discard',label:'Discard some of the stock and leave its concentration unchanged'}
+      ]
+    },
+    {
+      type:'impossible',
+      tag:'METHOD FEASIBILITY CHECK',
+      title:'Can dilution make a stronger solution?',
+      description:'A request asks you to turn a dilute stock solution into a more concentrated one by adding water. Evaluate whether the method can work.',
+      equation:'For dilution with water: c₂ ≤ c₁, provided solute is conserved',
+      given:[
+        ['Initial concentration','0.100 mol dm⁻³'],
+        ['Initial volume','20.0 cm³'],
+        ['Requested concentration','0.250 mol dm⁻³'],
+        ['Proposed operation','Add water only']
+      ],
+      task:'Reject an impossible method',
+      question:'Determine the final volume calculated from c₁V₁ = c₂V₂, then decide whether the requested concentration can be achieved by adding water only.',
+      concept:'Adding pure solvent cannot raise the solute concentration. An algebraically computed final volume smaller than the starting volume indicates that the proposed dilution method is impossible.',
+      science:'The equation gives V₂ = 0.100 × 20.0 / 0.250 = 8.00 cm³, which is smaller than the initial 20.0 cm³. Adding water increases volume and reduces concentration, so it cannot reach 0.250 mol dm⁻³. A different stock, addition of solute or another validated concentration procedure would be required.',
+      hint:'Compute 0.100 × 20.0 / 0.250. Compare your result with the original 20.0 cm³.',
+      fields:[
+        {key:'computed',label:'Algebraic final volume (cm³)',initial:'0'}
+      ],
+      choices:[
+        {value:'possible',label:'Possible by adding water'},
+        {value:'impossible',label:'Impossible by adding water only'}
+      ]
+    },
+    {
+      type:'serial',
+      tag:'SERIAL DILUTION SERIES',
+      title:'Build a calibration series',
+      description:'Prepare a three-step tenfold serial dilution starting with a 1.00 mol dm⁻³ solution. Each step transfers one part of the previous solution and makes up to ten parts total.',
+      equation:'cₖ = c₀ / fᵏ',
+      given:[
+        ['Starting concentration','1.00 mol dm⁻³'],
+        ['Dilution factor per step','10'],
+        ['Number of steps','3'],
+        ['Sequence','Stock → Standard 1 → 2 → 3']
+      ],
+      task:'Calculate the final standards',
+      question:'Determine the concentrations after steps 1, 2 and 3. Then identify the correct preparation sequence.',
+      concept:'Every new standard uses the preceding standard, not the original stock. A tenfold serial dilution changes concentration by a factor of ten at every step.',
+      science:'The series is 1.00, 0.100, 0.0100 and 0.00100 mol dm⁻³. Step 1 is tenfold below the stock; step 2 is a hundredfold below; step 3 is a thousandfold below. For example, transfer 10.0 cm³ into a 100.0 cm³ volumetric flask at each stage, using freshly mixed solution from the preceding stage.',
+      hint:'Divide 1.00 by 10 for step 1. Divide that result by 10 again for step 2, and once more for step 3.',
+      fields:[
+        {key:'step1',label:'Standard 1 concentration (mol dm⁻³)',initial:'0'},
+        {key:'step2',label:'Standard 2 concentration (mol dm⁻³)',initial:'0'},
+        {key:'step3',label:'Standard 3 concentration (mol dm⁻³)',initial:'0'}
+      ],
+      choices:[
+        {value:'previous',label:'Use the previous standard for every new dilution'},
+        {value:'stock',label:'Use the original stock for all three tenfold dilutions'},
+        {value:'reverse',label:'Use the most dilute standard to make the stock'}
+      ]
+    },
+    {
+      type:'qc',
+      tag:'CONCENTRATION UNITS & QUALITY CONTROL',
+      title:'Report a trace-level salt solution',
+      description:'A dilute aqueous sodium chloride solution contains 58.5 mg of NaCl per dm³. Express its concentration in several laboratory reporting units.',
+      equation:'mg dm⁻³ ↔ g dm⁻³ ↔ mol dm⁻³ ↔ ppm ↔ % w/v',
+      given:[
+        ['Solute','NaCl'],
+        ['Mass concentration','58.5 mg dm⁻³'],
+        ['Molar mass','58.5 g mol⁻¹'],
+        ['ppm convention','1 ppm ≈ 1 mg dm⁻³ in dilute water']
+      ],
+      task:'Prepare the quality-control report',
+      question:'Convert the stated NaCl concentration to g dm⁻³, mol dm⁻³, ppm and percentage mass per volume (% w/v).',
+      concept:'A unit conversion must preserve the quantity it represents. The approximation 1 ppm ≈ 1 mg dm⁻³ applies to dilute aqueous solutions with density near 1 kg dm⁻³.',
+      science:'58.5 mg dm⁻³ = 0.0585 g dm⁻³. Dividing by M(NaCl) = 58.5 g mol⁻¹ gives 0.00100 mol dm⁻³. Under the stated dilute-water convention, this is about 58.5 ppm. Since 1% w/v means 1 g per 100 mL, or 10 g dm⁻³, 0.0585 g dm⁻³ corresponds to 0.00585% w/v.',
+      hint:'Divide by 1000 to convert mg to g. Divide g dm⁻³ by 58.5 for mol dm⁻³. Divide g dm⁻³ by 10 for % w/v.',
+      fields:[
+        {key:'grams',label:'Mass concentration (g dm⁻³)',initial:'0'},
+        {key:'molar',label:'Molar concentration (mol dm⁻³)',initial:'0'},
+        {key:'ppm',label:'Concentration (ppm, dilute-water approximation)',initial:'0'},
+        {key:'percent',label:'Concentration (% w/v)',initial:'0'}
+      ]
+    }
+  ];
+
+  let round = 0;
+  let score = 0;
+  let tries = 0;
+  let hinted = false;
+  let solved = false;
+  let answers = {};
+  let selectedChoice = '';
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, c => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    })[c]);
+  }
+
+  function numberText(value, digits = 5) {
+    if (!Number.isFinite(value)) return '—';
+    if (value === 0) return '0';
+    if (Math.abs(value) >= 1e6 || Math.abs(value) < 0.0001) {
+      return value.toExponential(Math.max(1,digits-2));
+    }
+    return String(Number(value.toPrecision(digits)));
+  }
+
+  function inputNumber(key) {
+    if (answers[key] === undefined ||
+        String(answers[key]).trim() === '') return NaN;
+    const value = Number(answers[key]);
+    return Number.isFinite(value) ? value : NaN;
+  }
+
+  function displayNumber(key) {
+    return numberText(inputNumber(key));
+  }
+
+  function near(actual, expected, tolerance = 0.012) {
+    return Number.isFinite(actual) &&
+      Math.abs(actual - expected) <=
+        Math.max(1e-10,Math.abs(expected)*tolerance);
+  }
+
+  function isValid(result) {
+    return !!result &&
+      !Object.prototype.hasOwnProperty.call(result,'error');
+  }
+
+  function feedback(message, kind = '') {
+    $('feedback').textContent = message;
+    $('feedback').className = 'feedback' + (kind ? ' ' + kind : '');
+  }
+
+  function field(definition) {
+    const key = escapeHtml(definition.key);
+    return `<div class="answer">
+      <label for="answer-${key}">${escapeHtml(definition.label)}</label>
+      <input
+        id="answer-${key}"
+        type="number"
+        step="any"
+        inputmode="decimal"
+        data-answer="${key}"
+        value="${escapeHtml(answers[definition.key] ?? '')}"
+      >
+      ${definition.note
+        ? `<div class="note">${escapeHtml(definition.note)}</div>`
+        : ''}
+    </div>`;
+  }
+
+  function choicesHTML(options) {
+    return `<h3>Laboratory decision</h3>
+      <div class="choices" role="group" aria-label="Choose the laboratory procedure">
+        ${options.map(option => `
+          <button type="button" class="choice"
+            data-choice="${escapeHtml(option.value)}"
+            aria-pressed="${selectedChoice===option.value}">
+            ${escapeHtml(option.label)}
+          </button>
+        `).join('')}
+      </div>`;
+  }
+
+  function sceneBase() {
+    return `<rect x="9" y="9" width="442" height="282"
+      rx="20" fill="#FFFFFF" stroke="#111" stroke-width="3"/>`;
+  }
+
+  function flask(x, y, fill, label, value, scale = 1) {
+    return `<g transform="translate(${x} ${y}) scale(${scale})">
+      <path d="M-19 -92H19V-28L63 52Q75 77 48 83H-48Q-75 77-63 52L-19 -28Z"
+        fill="#E2ECFD" stroke="#111" stroke-width="3"/>
+      <path d="M-51 40H51L59 56Q66 71 46 72H-46Q-66 71-59 56Z"
+        fill="${fill}" stroke="#111" stroke-width="2" opacity=".85"/>
+      <path d="M-23 -74H23" stroke="#111" stroke-width="2"/>
+      <text x="0" y="2" font-size="12" font-weight="800" text-anchor="middle">
+        ${escapeHtml(label)}
+      </text>
+      <text x="0" y="20" font-size="12" font-weight="800" text-anchor="middle">
+        ${escapeHtml(value)}
+      </text>
+    </g>`;
+  }
+
+  function arrow(x1, y1, x2, y2) {
+    const angle = Math.atan2(y2-y1,x2-x1);
+    const l = 12;
+    const a1 = angle + Math.PI*0.8;
+    const a2 = angle - Math.PI*0.8;
+    return `<path d="M${x1} ${y1}L${x2} ${y2}M${x2+l*Math.cos(a1)} ${y2+l*Math.sin(a1)}
+      L${x2} ${y2}L${x2+l*Math.cos(a2)} ${y2+l*Math.sin(a2)}"
+      stroke="#111" stroke-width="3.5" fill="none"
+      stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+
+  function drawPreparationScene(hydrate) {
+    const mass = inputNumber('mass');
+    const amount = inputNumber('amount');
+    const finalVolume = hydrate ? 500 : 250;
+    const solute = hydrate ? 'CuSO₄' : 'NaCl';
+    const colour = hydrate ? '#85C8FF' : '#2EC4A6';
+    const displayMass = Number.isFinite(mass) ? `${numberText(mass)} g` : '— g';
+    const displayAmount = Number.isFinite(amount) ? `${numberText(amount)} mol` : '— mol';
+
+    let svg = sceneBase();
+    svg += `
+      <rect x="22" y="26" width="166" height="111" rx="13"
+        fill="#FFF4D6" stroke="#111" stroke-width="3"/>
+      <text x="105" y="48" text-anchor="middle"
+        font-size="11" font-weight="800">ANALYTICAL BALANCE</text>
+      <rect x="49" y="65" width="112" height="45" rx="9"
+        fill="#FFFFFF" stroke="#111" stroke-width="2"/>
+      <text x="105" y="93" text-anchor="middle"
+        font-size="18" font-weight="900">${displayMass}</text>
+      ${arrow(196,89,236,89)}
+      ${flask(326,158,colour,solute,`${finalVolume} cm³`,1)}
+      <rect x="24" y="161" width="169" height="106" rx="13"
+        fill="#FFE6DC" stroke="#111" stroke-width="3"/>
+      <text x="38" y="185" font-size="12" font-weight="800">YOUR CALCULATIONS</text>
+      <text x="38" y="215" font-size="17" font-weight="900">
+        ${displayAmount}
+      </text>
+      <text x="38" y="245" font-size="17" font-weight="900">
+        ${displayMass}
+      </text>
+      <text x="326" y="271" text-anchor="middle"
+        font-size="12" font-weight="800">Make up to mark</text>`;
+
+    $('scene').innerHTML = svg;
+    $('scene').setAttribute('aria-label',
+      `Analytical balance reading ${displayMass} and ${finalVolume} cubic centimetre volumetric flask for ${solute}. Entered amount ${displayAmount}.`);
+  }
+
+  function drawDilutionScene(impossible) {
+    const inputValue = impossible
+      ? inputNumber('computed')
+      : inputNumber('final');
+    const finalText = Number.isFinite(inputValue)
+      ? `${numberText(inputValue)} cm³`
+      : '— cm³';
+
+    let svg = sceneBase();
+    svg += `
+      ${flask(107,150,'#FF8FB8','STOCK',
+        impossible ? '0.100 M' : '0.500 M',0.82)}
+      ${arrow(174,150,264,150)}
+      ${flask(347,150,'#85C8FF','TARGET',
+        impossible ? '0.250 M' : '0.100 M',0.82)}
+      <rect x="22" y="249" width="416" height="28" rx="10"
+        fill="${impossible ? '#FFE7E5' : '#DDF7F1'}"
+        stroke="#111" stroke-width="2"/>
+      <text x="230" y="267" text-anchor="middle"
+        font-size="12" font-weight="800">
+        Your calculated final volume: ${finalText}
+      </text>`;
+
+    if (impossible) {
+      svg += `
+        <circle cx="230" cy="66" r="31"
+          fill="#FFC83D" stroke="#111" stroke-width="3"/>
+        <text x="230" y="76" text-anchor="middle"
+          font-size="30" font-weight="900">?</text>
+        <text x="230" y="116" text-anchor="middle"
+          font-size="12" font-weight="800">Can water increase concentration?</text>`;
+    } else {
+      const waterText = Number.isFinite(inputNumber('water'))
+        ? `${displayNumber('water')} cm³`
+        : '— cm³';
+      svg += `
+        <rect x="178" y="43" width="105" height="51" rx="11"
+          fill="#E2ECFD" stroke="#111" stroke-width="2"/>
+        <text x="230" y="63" text-anchor="middle"
+          font-size="10" font-weight="800">WATER</text>
+        <text x="230" y="82" text-anchor="middle"
+          font-size="12" font-weight="900">${waterText}</text>`;
+    }
+
+    $('scene').innerHTML = svg;
+    $('scene').setAttribute('aria-label',
+      `Dilution from ${impossible?'0.100':'0.500'} molar stock to ${impossible?'0.250':'0.100'} molar target. Entered final volume ${finalText}.`);
+  }
+
+  function drawSerialScene() {
+    const concentrations = [1,0.1,0.01,0.001];
+    const labels = ['STOCK','STEP 1','STEP 2','STEP 3'];
+    let svg = sceneBase();
+
+    concentrations.forEach((value,i) => {
+      const x = 19+i*110;
+      const y = 78;
+      const height = Math.max(8,105*(4-i)/4);
+      svg += `
+        <rect x="${x+12}" y="${y}" width="82" height="141"
+          rx="12" fill="#E2ECFD" stroke="#111" stroke-width="3"/>
+        <rect x="${x+20}" y="${y+133-height}" width="66"
+          height="${height}" rx="7"
+          fill="${[COLOURS.orange,COLOURS.yellow,COLOURS.teal,COLOURS.blue][i]}"
+          stroke="#111" stroke-width="1.5"/>
+        <text x="${x+53}" y="${y-14}" text-anchor="middle"
+          font-size="11" font-weight="800">${labels[i]}</text>
+        <text x="${x+53}" y="${y+164}" text-anchor="middle"
+          font-size="12" font-weight="800">${i===0?'1.00':displayNumber('step'+i)} M</text>`;
+      if (i<3) svg += arrow(x+98,149,x+113,149);
+    });
+
+    svg += `
+      <text x="230" y="278" text-anchor="middle"
+        font-size="12" font-weight="800">
+        A new tenfold dilution at each step
+      </text>`;
+
+    $('scene').innerHTML = svg;
+    $('scene').setAttribute('aria-label',
+      `Serial dilution with stock concentration 1 molar, then calculated standards ${concentrations.slice(1).map((_,i)=>displayNumber('step'+(i+1))).join(', ')} molar.`);
+  }
+
+  function drawQCScene() {
+    const ppm = inputNumber('ppm');
+    const molar = inputNumber('molar');
+    let svg = sceneBase();
+
+    svg += `
+      ${flask(116,151,'#85C8FF','NaCl','SAMPLE',0.92)}
+      ${arrow(198,147,254,147)}
+      <rect x="263" y="34" width="171" height="233" rx="15"
+        fill="#DDF7F1" stroke="#111" stroke-width="3"/>
+      <text x="348" y="61" text-anchor="middle"
+        font-size="12" font-weight="800">QC READOUT</text>
+      <line x1="278" y1="73" x2="420" y2="73"
+        stroke="#111" stroke-width="2"/>
+      <text x="278" y="102" font-size="11" font-weight="800">PPM</text>
+      <text x="278" y="127" font-size="19" font-weight="900">
+        ${Number.isFinite(ppm)?numberText(ppm):'—'}
+      </text>
+      <line x1="278" y1="143" x2="420" y2="143"
+        stroke="#111" stroke-width="2"/>
+      <text x="278" y="171" font-size="11" font-weight="800">MOL DM⁻³</text>
+      <text x="278" y="198" font-size="19" font-weight="900">
+        ${Number.isFinite(molar)?numberText(molar):'—'}
+      </text>
+      <line x1="278" y1="214" x2="420" y2="214"
+        stroke="#111" stroke-width="2"/>
+      <text x="278" y="245" font-size="11">
+        Trace concentration
+      </text>
+      <text x="115" y="278" text-anchor="middle"
+        font-size="12" font-weight="800">58.5 mg dm⁻³</text>`;
+
+    $('scene').innerHTML = svg;
+    $('scene').setAttribute('aria-label',
+      `Quality-control sample of sodium chloride at 58.5 milligrams per cubic decimetre; entered values ${Number.isFinite(ppm)?numberText(ppm):'blank'} parts per million and ${Number.isFinite(molar)?numberText(molar):'blank'} moles per cubic decimetre.`);
+  }
+
+  function drawScene() {
+    const type = ROUNDS[round].type;
+
+    if (type==='prepare') drawPreparationScene(false);
+    else if (type==='hydrate') drawPreparationScene(true);
+    else if (type==='dilute') drawDilutionScene(false);
+    else if (type==='impossible') drawDilutionScene(true);
+    else if (type==='serial') drawSerialScene();
+    else drawQCScene();
+  }
+
+  function graphBase(yLabel,xLabel,maxY,ticks=4) {
+    let svg = `
+      <rect x="0" y="0" width="460" height="265" rx="12" fill="white"/>
+      <path d="M64 27V213H437" fill="none"
+        stroke="#111" stroke-width="2"/>
+      <text x="14" y="17" class="plot-label">${escapeHtml(yLabel)}</text>
+      <text x="250" y="251" text-anchor="middle"
+        class="plot-label">${escapeHtml(xLabel)}</text>`;
+
+    for(let i=0;i<=ticks;i++){
+      const y=213-180*i/ticks;
+      svg+=`
+        <line x1="64" y1="${y}" x2="437" y2="${y}"
+          stroke="#E4E2DB" stroke-width="1"/>
+        <text x="55" y="${y+4}" text-anchor="end"
+          class="plot-label">${numberText(maxY*i/ticks,3)}</text>`;
+    }
+    return svg;
+  }
+
+  function linePath(points,colour,dashed=false){
+    if(!points.length)return '';
+    const d=points.map(([x,y],i)=>
+      `${i===0?'M':'L'}${x.toFixed(2)} ${y.toFixed(2)}`
+    ).join(' ');
+    return `<path d="${d}" fill="none" stroke="${colour}"
+      stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+      ${dashed?'stroke-dasharray="6 5"':''}/>`;
+  }
+
+  function marker(x,y,colour,label,anchor='start'){
+    const labelX=anchor==='end'?x-9:x+9;
+    return `<circle cx="${x}" cy="${y}" r="6" fill="${colour}"
+      stroke="#111" stroke-width="2"/>
+      <text x="${labelX}" y="${Math.max(18,y-11)}"
+      text-anchor="${anchor}" class="plot-label">${escapeHtml(label)}</text>`;
+  }
+
+  function graphLegend(items){
+    $('legend').innerHTML=items.map(([label,colour])=>
+      `<span><i class="swatch" style="--colour:${colour}"></i>${escapeHtml(label)}</span>`
+    ).join('');
+  }
+
+  function drawPreparationPlot(hydrate){
+    if(hydrate){
+      $('plot-title').textContent='Required mass versus reagent purity';
+
+      const maxY=11;
+      let svg=graphBase('Mass to weigh (g)','Reagent purity (%)',maxY,5);
+      const points=[];
+
+      for(let purity=60;purity<=100;purity+=1){
+        const result=C.solution_prep({
+          formula:'CuSO4.5H2O',
+          c_mol_dm3:0.05,
+          volume_cm3:500,
+          purity_percent:purity
+        });
+        points.push([
+          64+373*(purity-60)/40,
+          213-180*result.mass_g/maxY
+        ]);
+      }
+
+      svg+=linePath(points,COLOURS.orange);
+
+      const result=C.solution_prep({
+        formula:'CuSO4.5H2O',
+        c_mol_dm3:0.05,
+        volume_cm3:500,
+        purity_percent:95
+      });
+      const x=64+373*35/40;
+      const y=213-180*result.mass_g/maxY;
+
+      svg+=marker(x,y,COLOURS.yellow,'95% reagent','end');
+
+      const proposed=inputNumber('mass');
+      if(Number.isFinite(proposed)&&proposed>=0){
+        const py=213-180*Math.min(maxY,proposed)/maxY;
+        svg+=`<path d="M64 ${py}H437" fill="none"
+          stroke="${COLOURS.purple}" stroke-width="2"
+          stroke-dasharray="6 5"/>`;
+      }
+
+      for(let p=60;p<=100;p+=10){
+        svg+=`<text x="${64+373*(p-60)/40}" y="231"
+          text-anchor="middle" class="plot-label">${p}</text>`;
+      }
+
+      $('plot').innerHTML=svg;
+      $('plot').setAttribute('aria-label',
+        'Required copper sulfate pentahydrate mass versus purity from 60 to 100 per cent. At 95 per cent purity the required weighed mass is about 6.579 grams.');
+
+      graphLegend([
+        ['Required mass',COLOURS.orange],
+        ['95% purity point',COLOURS.yellow],
+        ['Your mass estimate',COLOURS.purple]
+      ]);
+      return;
+    }
+
+    $('plot-title').textContent='Required mass versus target concentration';
+
+    const maxY=3.5;
+    let svg=graphBase('NaCl mass (g)','Target c (mol dm⁻³)',maxY,5);
+    const points=[];
+
+    for(let concentration=0.01;concentration<=0.20+1e-9;concentration+=0.005){
+      const result=C.solution_prep({
+        formula:'NaCl',
+        c_mol_dm3:concentration,
+        volume_cm3:250
+      });
+      points.push([
+        64+373*concentration/0.20,
+        213-180*result.mass_g/maxY
+      ]);
+    }
+
+    svg+=linePath(points,COLOURS.orange);
+
+    const result=C.solution_prep({
+      formula:'NaCl',
+      c_mol_dm3:0.1,
+      volume_cm3:250
+    });
+
+    svg+=marker(
+      64+373*0.1/0.2,
+      213-180*result.mass_g/maxY,
+      COLOURS.yellow,
+      'Target: 0.100 M'
+    );
+
+    const proposed=inputNumber('mass');
+    if(Number.isFinite(proposed)&&proposed>=0){
+      const py=213-180*Math.min(maxY,proposed)/maxY;
+      svg+=`<path d="M64 ${py}H437"
+        stroke="${COLOURS.purple}" stroke-width="2"
+        stroke-dasharray="6 5" fill="none"/>`;
+    }
+
+    for(let i=0;i<=4;i++){
+      const c=i*0.05;
+      svg+=`<text x="${64+373*c/0.20}" y="231"
+        text-anchor="middle" class="plot-label">${c.toFixed(2)}</text>`;
+    }
+
+    $('plot').innerHTML=svg;
+    $('plot').setAttribute('aria-label',
+      'NaCl mass required in a 250 cubic centimetre volumetric flask as target molar concentration varies, with target 0.100 molar requiring 1.4625 grams.');
+
+    graphLegend([
+      ['Calculated mass',COLOURS.orange],
+      ['Target',COLOURS.yellow],
+      ['Your mass estimate',COLOURS.purple]
+    ]);
+  }
+
+  function drawDilutionPlot(impossible){
+    $('plot-title').textContent='Concentration versus final volume';
+
+    const stock=impossible?0.1:0.5;
+    const aliquot=20;
+    const maxVolume=impossible?100:180;
+    const maxConcentration=impossible?0.3:0.6;
+
+    let svg=graphBase(
+      'Concentration (mol dm⁻³)',
+      'Final volume (cm³)',
+      maxConcentration,
+      5
+    );
+
+    const points=[];
+    for(let volume=20;volume<=maxVolume;volume+=2){
+      const concentration=stock*aliquot/volume;
+      points.push([
+        64+373*volume/maxVolume,
+        213-180*concentration/maxConcentration
+      ]);
+    }
+
+    svg+=linePath(points,COLOURS.orange);
+
+    const target=impossible?0.25:0.1;
+    const targetY=213-180*target/maxConcentration;
+    svg+=`<path d="M64 ${targetY}H437"
+      fill="none" stroke="${COLOURS.purple}"
+      stroke-width="2" stroke-dasharray="5 5"/>`;
+
+    if(impossible){
+      const hypothetical=stock*aliquot/target;
+      const x=64+373*hypothetical/maxVolume;
+
+      svg+=marker(
+        x,targetY,
+        COLOURS.red,
+        'Would require a smaller volume'
+      );
+    }else{
+      const result=C.dilution({c1:stock,v1_cm3:20,c2:target});
+      const x=64+373*result.v2_cm3/maxVolume;
+
+      svg+=marker(x,targetY,COLOURS.yellow,'Target');
+    }
+
+    for(let v=0;v<=maxVolume;v+=impossible?20:30){
+      svg+=`<text x="${64+373*v/maxVolume}" y="231"
+        text-anchor="middle" class="plot-label">${v}</text>`;
+    }
+
+    $('plot').innerHTML=svg;
+    $('plot').setAttribute('aria-label',impossible
+      ? 'Dilution curve for an initial 20 cubic centimetres at 0.100 molar. As final volume increases, concentration decreases. The requested 0.250 molar target lies above the stock concentration and is unattainable by adding water.'
+      : 'Dilution curve showing concentration decreases as final volume increases. A 20 cubic centimetre aliquot of 0.500 molar stock reaches 0.100 molar at 100 cubic centimetres final volume.');
+
+    graphLegend(impossible?[
+      ['Attainable by dilution',COLOURS.orange],
+      ['Requested concentration',COLOURS.purple],
+      ['Infeasible volume',COLOURS.red]
+    ]:[
+      ['Calculated dilution',COLOURS.orange],
+      ['Target concentration',COLOURS.purple],
+      ['Required volume',COLOURS.yellow]
+    ]);
+  }
+
+  function drawSerialPlot(){
+    $('plot-title').textContent='Calibration standards: logarithmic concentration';
+
+    const result=C.serial_dilution({c0:1,factor:10,steps:3});
+    const values=result.concentrations;
+
+    let svg=`
+      <rect x="0" y="0" width="460" height="265" rx="12" fill="white"/>
+      <path d="M70 29V214H437" stroke="#111"
+        stroke-width="2" fill="none"/>
+      <text x="12" y="18" class="plot-label">
+        Concentration (mol dm⁻³, log scale)
+      </text>
+      <text x="251" y="250" text-anchor="middle"
+        class="plot-label">Serial dilution step</text>`;
+
+    for(let i=0;i<=3;i++){
+      const y=34+i*60;
+      svg+=`
+        <line x1="70" y1="${y}" x2="437" y2="${y}"
+          stroke="#E4E2DB" stroke-width="1"/>
+        <text x="61" y="${y+4}" text-anchor="end"
+          class="plot-label">${numberText(Math.pow(10,-i),2)}</text>`;
+    }
+
+    const points=values.map((value,i)=>[
+      82+i*112,
+      34-60*Math.log10(value)
+    ]);
+
+    svg+=linePath(points,COLOURS.orange);
+
+    points.forEach(([x,y],i)=>{
+      svg+=`
+        <circle cx="${x}" cy="${y}" r="6"
+          fill="${COLOURS.yellow}" stroke="#111" stroke-width="2"/>
+        <text x="${x}" y="233" text-anchor="middle"
+          class="plot-label">${i===0?'Stock':`Step ${i}`}</text>`;
+    });
+
+    for(let i=1;i<=3;i++){
+      const value=inputNumber('step'+i);
+      if(!Number.isFinite(value)||value<=0)continue;
+      const x=82+i*112;
+      const y=34-60*Math.log10(value);
+      if(y<30||y>214)continue;
+
+      svg+=`<rect x="${x-6}" y="${y-6}" width="12" height="12"
+        fill="${COLOURS.purple}" stroke="#111" stroke-width="2"/>`;
+    }
+
+    $('plot').innerHTML=svg;
+    $('plot').setAttribute('aria-label',
+      'Logarithmic concentration graph for serial dilution: stock 1 molar, step 1 0.1 molar, step 2 0.01 molar and step 3 0.001 molar. Purple squares represent entered values when within the graph range.');
+
+    graphLegend([
+      ['Calculated series',COLOURS.orange],
+      ['Target standards',COLOURS.yellow],
+      ['Your values',COLOURS.purple]
+    ]);
+  }
+
+  function drawQCPlot(){
+    $('plot-title').textContent='Solute mass versus solution volume';
+
+    const maxY=60;
+    let svg=graphBase(
+      'NaCl mass (mg)',
+      'Solution volume (cm³)',
+      maxY,
+      4
+    );
+
+    const points=[];
+    for(let volume=0;volume<=1000;volume+=25){
+      const mass=58.5*volume/1000;
+      points.push([
+        64+373*volume/1000,
+        213-180*mass/maxY
+      ]);
+    }
+
+    svg+=linePath(points,COLOURS.orange);
+
+    const x=64+373;
+    const y=213-180*58.5/maxY;
+    svg+=marker(x,y,COLOURS.yellow,'58.5 mg','end');
+
+    const proposed=inputNumber('grams');
+    if(Number.isFinite(proposed)&&proposed>=0){
+      const mg=proposed*1000;
+      const py=213-180*Math.min(maxY,mg)/maxY;
+      svg+=`<path d="M64 ${py}H437"
+        fill="none" stroke="${COLOURS.purple}"
+        stroke-width="2" stroke-dasharray="6 5"/>`;
+    }
+
+    for(let v=0;v<=1000;v+=250){
+      svg+=`<text x="${64+373*v/1000}" y="231"
+        text-anchor="middle" class="plot-label">${v}</text>`;
+    }
+
+    $('plot').innerHTML=svg;
+    $('plot').setAttribute('aria-label',
+      'NaCl mass in milligrams versus volume in cubic centimetres at a concentration of 58.5 milligrams per cubic decimetre, showing 58.5 milligrams in one cubic decimetre.');
+
+    graphLegend([
+      ['Calculated NaCl mass',COLOURS.orange],
+      ['One dm³ sample',COLOURS.yellow],
+      ['Your g dm⁻³ converted to mg',COLOURS.purple]
+    ]);
+  }
+
+  function drawPlot(){
+    const type=ROUNDS[round].type;
+
+    if(type==='prepare')drawPreparationPlot(false);
+    else if(type==='hydrate')drawPreparationPlot(true);
+    else if(type==='dilute')drawDilutionPlot(false);
+    else if(type==='impossible')drawDilutionPlot(true);
+    else if(type==='serial')drawSerialPlot();
+    else drawQCPlot();
+  }
+
+  function beginRound(){
+    const scenario=ROUNDS[round];
+
+    tries=0;
+    hinted=false;
+    solved=false;
+    selectedChoice='';
+    answers={};
+
+    for(const definition of scenario.fields){
+      answers[definition.key]=definition.initial??'';
+    }
+
+    $('round').textContent=`Round ${round+1}/${ROUNDS.length}`;
+    $('score').textContent=`Score ${score}`;
+    $('tag').textContent=scenario.tag;
+    $('title').textContent=scenario.title;
+    $('description').textContent=scenario.description;
+    $('equation').textContent=scenario.equation;
+    $('task').textContent=scenario.task;
+    $('question').textContent=scenario.question;
+    $('concept').textContent=scenario.concept;
+    $('science').textContent=scenario.science;
+
+    $('given').innerHTML=scenario.given.map(([label,value])=>`
+      <div class="data-item">
+        <small>${escapeHtml(label)}</small>
+        <strong>${escapeHtml(value)}</strong>
+      </div>
+    `).join('');
+
+    $('inputs').innerHTML=
+      scenario.fields.map(field).join('')+
+      (scenario.choices?choicesHTML(scenario.choices):'');
+
+    $('check').disabled=false;
+    $('hint').disabled=false;
+    $('next').classList.add('hidden');
+
+    feedback('Enter your calculations, then check your procedure.');
+    drawScene();
+    drawPlot();
+  }
+
+  function checkRound(){
+    if(solved)return;
+
+    const type=ROUNDS[round].type;
+    let correct=false;
+    let explanation='';
+
+    if(type==='prepare'){
+      const result=C.solution_prep({
+        formula:'NaCl',
+        c_mol_dm3:0.1,
+        volume_cm3:250
+      });
+      const amount=C.concentration({
+        n_mol:0.025,
+        volume_cm3:250,
+        formula:'NaCl'
+      });
+
+      correct=
+        isValid(result)&&
+        isValid(amount)&&
+        near(inputNumber('amount'),0.025)&&
+        near(inputNumber('mass'),result.mass_g)&&
+        selectedChoice==='correct';
+
+      explanation=
+        `Amount 0.0250 mol; mass ${numberText(result.mass_g)} g. `+
+        'Transfer quantitatively and make up to the volumetric flask mark.';
+
+    }else if(type==='hydrate'){
+      const molar=C.molar_mass({formula:'CuSO4.5H2O'});
+      const result=C.solution_prep({
+        formula:'CuSO4.5H2O',
+        c_mol_dm3:0.05,
+        volume_cm3:500,
+        purity_percent:95
+      });
+
+      correct=
+        isValid(molar)&&
+        isValid(result)&&
+        near(inputNumber('molarMass'),molar.M_g_mol)&&
+        near(inputNumber('amount'),0.025)&&
+        near(inputNumber('mass'),result.mass_g);
+
+      explanation=
+        `Molar mass ${numberText(molar.M_g_mol)} g mol⁻¹, `+
+        `amount 0.0250 mol, weighed mass ${numberText(result.mass_g,7)} g.`;
+
+    }else if(type==='dilute'){
+      const result=C.dilution({
+        c1:0.5,
+        v1_cm3:20,
+        c2:0.1
+      });
+
+      correct=
+        isValid(result)&&
+        near(inputNumber('final'),result.v2_cm3)&&
+        near(inputNumber('water'),result.water_cm3)&&
+        selectedChoice==='flask';
+
+      explanation=
+        `Final volume ${numberText(result.v2_cm3)} cm³; `+
+        `nominal water increment ${numberText(result.water_cm3)} cm³. `+
+        'For accurate preparation, make up to the calibration mark.';
+
+    }else if(type==='impossible'){
+      const result=C.dilution({
+        c1:0.1,
+        v1_cm3:20,
+        c2:0.25
+      });
+      const computed=0.1*20/0.25;
+
+      correct=
+        result.error==='ConstraintViolation'&&
+        result.reason==='cannot_concentrate_by_dilution'&&
+        near(inputNumber('computed'),computed)&&
+        selectedChoice==='impossible';
+
+      explanation=
+        `The equation suggests ${numberText(computed)} cm³, `+
+        'less than the original 20.0 cm³. Adding water cannot achieve the target.';
+
+    }else if(type==='serial'){
+      const result=C.serial_dilution({
+        c0:1,
+        factor:10,
+        steps:3
+      });
+
+      correct=
+        isValid(result)&&
+        near(inputNumber('step1'),result.concentrations[1])&&
+        near(inputNumber('step2'),result.concentrations[2])&&
+        near(inputNumber('step3'),result.concentrations[3])&&
+        selectedChoice==='previous';
+
+      explanation=
+        `Standard concentrations: `+
+        `${numberText(result.concentrations[1])}, `+
+        `${numberText(result.concentrations[2])} and `+
+        `${numberText(result.concentrations[3])} mol dm⁻³.`;
+
+    }else if(type==='qc'){
+      const common={
+        value:58.5,
+        from_unit:'mg_dm3',
+        formula:'NaCl'
+      };
+
+      const grams=C.convert_concentration({
+        ...common,to_unit:'g_dm3'
+      });
+      const molar=C.convert_concentration({
+        ...common,to_unit:'mol_dm3'
+      });
+      const ppm=C.convert_concentration({
+        ...common,to_unit:'ppm'
+      });
+      const percent=C.convert_concentration({
+        ...common,to_unit:'percent_wv'
+      });
+
+      correct=
+        isValid(grams)&&
+        isValid(molar)&&
+        isValid(ppm)&&
+        isValid(percent)&&
+        near(inputNumber('grams'),grams.value)&&
+        near(inputNumber('molar'),molar.value)&&
+        near(inputNumber('ppm'),ppm.value)&&
+        near(inputNumber('percent'),percent.value);
+
+      explanation=
+        `${numberText(grams.value)} g dm⁻³, `+
+        `${numberText(molar.value)} mol dm⁻³, `+
+        `${numberText(ppm.value)} ppm and `+
+        `${numberText(percent.value)}% w/v.`;
+    }
+
+    tries++;
+
+    if(!correct){
+      feedback(
+        'Not quite. Recheck your units, concentration equation and chosen laboratory procedure.',
+        'bad'
+      );
+      return;
+    }
+
+    solved=true;
+    const points=hinted?50:tries===1?100:tries===2?75:50;
+    score+=points;
+
+    $('score').textContent=`Score ${score}`;
+    $('check').disabled=true;
+    $('hint').disabled=true;
+    $('next').classList.remove('hidden');
+    $('next').textContent=round===ROUNDS.length-1
+      ? 'View assessment →'
+      : 'Next round →';
+
+    $('inputs').querySelectorAll('input,select,button').forEach(control=>{
+      control.disabled=true;
+    });
+
+    feedback(`Correct. +${points} points. ${explanation}`,'good');
+
+    drawScene();
+    drawPlot();
+  }
+
+  function finish(){
+    $('game').classList.add('hidden');
+    $('end').classList.remove('hidden');
+
+    const stars=score>=500?3:score>=375?2:1;
+    $('stars').textContent='★'.repeat(stars)+'☆'.repeat(3-stars);
+    $('stars').setAttribute('aria-label',`${stars} out of three stars`);
+    $('result').textContent=
+      `You earned ${score} out of ${ROUNDS.length*100} possible points.`;
+
+    $('end').scrollIntoView({
+      behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'auto'
+        : 'smooth',
+      block:'start'
+    });
+  }
+
+  $('inputs').addEventListener('input',event=>{
+    if(solved)return;
+
+    const control=event.target.closest('[data-answer]');
+    if(!control)return;
+
+    answers[control.dataset.answer]=control.value;
+    drawScene();
+    drawPlot();
+  });
+
+  $('inputs').addEventListener('click',event=>{
+    if(solved)return;
+
+    const button=event.target.closest('[data-choice]');
+    if(!button)return;
+
+    selectedChoice=button.dataset.choice;
+
+    $('inputs').querySelectorAll('[data-choice]').forEach(control=>{
+      control.setAttribute(
+        'aria-pressed',
+        String(control.dataset.choice===selectedChoice)
+      );
+    });
+  });
+
+  $('check').addEventListener('click',checkRound);
+
+  $('hint').addEventListener('click',()=>{
+    if(solved||hinted)return;
+    hinted=true;
+    $('hint').disabled=true;
+    feedback(ROUNDS[round].hint);
+  });
+
+  $('next').addEventListener('click',()=>{
+    if(!solved)return;
+    if(round===ROUNDS.length-1){
+      finish();
+      return;
+    }
+    round++;
+    beginRound();
+  });
+
+  $('replay').addEventListener('click',()=>{
+    round=0;
+    score=0;
+    $('end').classList.add('hidden');
+    $('game').classList.remove('hidden');
+    beginRound();
+
+    window.scrollTo({
+      top:0,
+      behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'auto'
+        : 'smooth'
+    });
+  });
+
+  beginRound();
+})();
+</script>
+</body>
+</html>
