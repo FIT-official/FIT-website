@@ -1,0 +1,2037 @@
+
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tally Town — Primary Statistics</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+html{background:var(--fit-paper)}
+body{
+ margin:0;padding:16px 12px 40px;
+ background:var(--fit-paper);color:var(--fit-ink);
+ font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+ font-size:16px;line-height:1.45
+}
+button,input,select{font:inherit}
+button,input[type=range],input[type=number],.tap,.drag{
+ touch-action:manipulation;
+ -webkit-tap-highlight-color:transparent;
+ user-select:none;-webkit-user-select:none
+}
+.drag{touch-action:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{
+ min-height:46px;border:2px solid #111;border-radius:999px;
+ background:#fff;color:#111;font-weight:800;
+ padding:9px 17px;cursor:pointer;
+ box-shadow:0 2px 0 #111;
+ transition:transform var(--dur-1),box-shadow var(--dur-1)
+}
+button:active{transform:translateY(2px);box-shadow:0 0 0 #111}
+button:disabled{opacity:.48;cursor:not-allowed}
+button.primary{
+ background:var(--fit-sun);border-width:3px;
+ box-shadow:0 4px 0 #111
+}
+button.primary:active{transform:translateY(3px);box-shadow:0 1px 0 #111}
+button.soft{background:var(--lvl-primary-tint)}
+button.small{padding:7px 12px;font-size:14px}
+button.chosen{background:var(--lvl-primary);border-width:3px}
+.wrap{max-width:1160px;margin:auto;min-width:0}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:18px}
+.badge{
+ display:inline-flex;align-items:center;min-height:33px;
+ border:2px solid #111;border-radius:999px;
+ background:var(--lvl-primary);color:var(--lvl-primary-on);
+ padding:6px 13px;font-size:12px;font-weight:800;
+ text-transform:uppercase;letter-spacing:.04em
+}
+h1{font-size:clamp(29px,5vw,43px);line-height:1.1;margin:7px 0;font-weight:800}
+h2{font-size:22px;margin:0 0 12px;font-weight:800}
+h3{font-size:17px;margin:0 0 10px;font-weight:800}
+p{margin:7px 0}
+.muted{color:var(--fit-ink-3)}
+.intro{max-width:680px;color:var(--fit-ink-2);font-weight:600}
+.hud{display:flex;gap:9px;flex-wrap:wrap;margin-left:auto}
+.pill{
+ display:inline-flex;align-items:center;justify-content:center;
+ min-height:40px;padding:7px 14px;border:2px solid #111;
+ border-radius:999px;background:#fff;font-weight:800
+}
+.pill.score{background:var(--lvl-primary-tint)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.card{
+ border:2px solid #111;border-radius:var(--r-lg);
+ background:#fff;box-shadow:var(--sh-2);
+ padding:17px;min-width:0
+}
+.stage{background:var(--lvl-primary-tint)}
+.question{
+ padding:14px;border:2px solid #111;border-radius:16px;
+ background:#fff;font-weight:700;font-size:18px;
+ margin:12px 0
+}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.scene{
+ border:2px solid #111;border-radius:20px;
+ background:#fff;padding:12px;overflow:hidden
+}
+.animals{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;min-height:85px;align-items:center}
+.animal{
+ display:grid;place-items:center;width:68px;height:68px;
+ border:3px solid #111;border-radius:20px;
+ font-size:38px;background:#fff
+}
+.animal.present{background:#ffdd00}
+.animal.enter{animation:pop .22s var(--ease-out) both}
+.tally-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.tally-card{
+ padding:10px 5px;text-align:center;
+ border:2px solid #111;border-radius:16px;background:#fff;min-width:0
+}
+.tally-card.current{background:#ffdd00}
+.tally-icon{font-size:30px;line-height:1.1}
+.tally-name{font-weight:800;font-size:13px;margin:5px 0}
+.tally-marks{font-family:monospace;font-size:19px;font-weight:800;word-break:break-all;min-height:26px}
+.tally-count{font-size:13px;color:#444}
+.tally-card button{width:100%;padding:8px 2px;font-size:13px}
+.chart{
+ display:block;width:100%;height:auto;max-width:100%;
+ background:#fff;border:2px solid #111;border-radius:18px;
+ margin-top:10px;overflow:visible
+}
+.chart text{font-family:Inter,system-ui,sans-serif;fill:#111}
+.bar-handle{
+ cursor:grab;touch-action:none;
+ stroke:#111;stroke-width:3px
+}
+.bar-handle:focus{outline:none;stroke-width:6px}
+.bar-handle:active{cursor:grabbing}
+.bar-hit{touch-action:none;cursor:ns-resize}
+.controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:12px}
+.control-box{
+ border:2px solid #111;border-radius:16px;padding:12px;
+ background:var(--fit-sunken);margin:12px 0
+}
+.stepper{display:flex;gap:8px;align-items:center;justify-content:center}
+.stepper button{min-width:49px;padding:8px}
+.step-value{
+ min-width:74px;text-align:center;font-weight:800;font-size:23px;
+ border:2px solid #111;border-radius:12px;background:#fff;padding:7px
+}
+.num{
+ width:100%;min-height:46px;padding:9px;
+ font-size:18px;border:2px solid #111;border-radius:12px
+}
+.choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.choice-grid button{border-radius:16px}
+.feedback{
+ min-height:65px;margin-top:12px;
+ padding:13px;border:2px solid #111;border-radius:16px;
+ background:#fff;font-weight:600
+}
+.feedback.good{background:#e3f9e9;border-color:var(--fit-success)}
+.feedback.bad{background:#fff0ee;border-color:var(--fit-danger)}
+.progress{height:13px;border:2px solid #111;background:#fff;border-radius:999px;overflow:hidden;margin:10px 0 18px}
+.progress-fill{height:100%;background:var(--fit-green);transition:width .2s}
+details{
+ border:2px solid #111;border-radius:18px;
+ padding:13px;margin-top:16px;background:#fff
+}
+summary{cursor:pointer;font-weight:800;min-height:28px}
+.math-line{padding:7px 0;border-bottom:1px solid var(--fit-line-soft)}
+.math-line:last-child{border-bottom:0}
+.concept{display:flex;align-items:center;gap:12px;margin-top:16px}
+.concept svg{flex:0 0 100px;max-width:100px}
+.concept p{font-size:13px;color:var(--fit-ink-2)}
+.legend{font-size:13px;display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.legend-item{display:inline-flex;align-items:center;gap:5px}
+.swatch{display:inline-block;width:16px;height:13px;border:2px solid #111;border-radius:3px}
+.finish{text-align:center;padding:28px 12px}
+.stars{font-size:52px;letter-spacing:3px;line-height:1.5}
+.hidden{display:none!important}
+footer{font-size:12px;color:var(--fit-ink-3);text-align:center;margin-top:30px}
+@media(min-width:900px){
+ body{padding:25px 28px 50px}
+ .layout{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);align-items:start}
+ .card{padding:22px}
+ .stage{position:relative}
+}
+@media(max-width:420px){
+ .card{padding:12px}
+ .hud{margin-left:0}
+ .tally-card{padding:8px 3px}
+ .tally-marks{font-size:16px}
+ .animal{width:58px;height:58px;font-size:32px}
+ .choice-grid button{padding:9px 5px}
+}
+@keyframes pop{from{opacity:.3;transform:scale(.75)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div>
+  <span class="badge">Primary · Maths</span>
+  <h1>Tally Town</h1>
+  <p class="intro">Count what you see, build a bar graph and solve data puzzles!</p>
+ </div>
+ <div class="hud">
+  <span class="pill" id="roundLabel">Round 1/6</span>
+  <span class="pill score" id="scoreLabel">Score: 0</span>
+ </div>
+</header>
+<div class="progress" aria-label="Game progress"><div class="progress-fill" id="progress"></div></div>
+
+<main id="game" class="layout">
+ <section class="card stage" aria-labelledby="stageTitle">
+  <div class="section-head">
+   <h2 id="stageTitle">Town square</h2>
+   <span class="pill" id="phaseLabel">Count</span>
+  </div>
+  <p id="story" class="muted"></p>
+  <div id="question" class="question"></div>
+  <div class="scene">
+   <h3 id="sceneTitle">Look carefully</h3>
+   <div id="animals" class="animals" aria-live="polite"></div>
+   <div id="tallyArea" class="tally-grid"></div>
+  </div>
+  <div class="concept" aria-label="Concept illustration">
+   <svg viewBox="0 0 110 83" role="img" aria-label="Five tally marks correspond to a bar of height five">
+    <rect x="2" y="2" width="106" height="79" rx="14" fill="#fff" stroke="#111" stroke-width="3"/>
+    <g stroke="#111" stroke-width="3" stroke-linecap="round">
+     <path d="M13 16V44 M22 16V44 M31 16V44 M40 16V44" />
+     <path d="M11 43L43 14" stroke="#ff8fb8" stroke-width="4"/>
+    </g>
+    <rect x="65" y="19" width="24" height="43" rx="3" fill="#ffc83d" stroke="#111" stroke-width="3"/>
+    <path d="M58 63H96" stroke="#111" stroke-width="3"/>
+    <text x="27" y="67" text-anchor="middle" font-size="10" font-weight="800">5</text>
+    <text x="77" y="74" text-anchor="middle" font-size="10" font-weight="800">5</text>
+   </svg>
+   <p><strong>Count and show:</strong> one tally mark stands for one item. A bar shows the same count using height.</p>
+  </div>
+ </section>
+
+ <section class="card" aria-labelledby="graphTitle">
+  <div class="section-head">
+   <h2 id="graphTitle">Your bar graph</h2>
+   <span class="pill" id="scaleLabel">1 per square</span>
+  </div>
+  <p class="muted" id="plotInstruction">Move the bar tops or use the buttons to show your counts.</p>
+  <svg id="plot" class="chart" viewBox="0 0 380 325" role="img" aria-label="Interactive bar graph"></svg>
+  <div class="legend">
+   <span class="legend-item"><i class="swatch" style="background:#ffc83d"></i>Your bars</span>
+   <span class="legend-item" id="legendOther"><i class="swatch" style="background:#fff"></i>Bar top: drag to change</span>
+  </div>
+
+  <div id="controlArea"></div>
+  <div class="controls">
+   <button id="hintBtn" class="soft">Hint −25</button>
+   <button id="checkBtn" class="primary">Check answer</button>
+   <button id="nextBtn" class="primary hidden">Next round →</button>
+  </div>
+  <div id="feedback" class="feedback" role="status" aria-live="polite">Ready! Start counting.</div>
+  <details>
+   <summary>The maths</summary>
+   <div class="math-line"><strong>Tally:</strong> make one mark for each item. Group every five marks together.</div>
+   <div class="math-line"><strong>Bar graph:</strong> height = number of items ÷ scale per square.</div>
+   <div class="math-line"><strong>Total:</strong> add the numbers in every group.</div>
+   <div class="math-line"><strong>How many more:</strong> larger number − smaller number.</div>
+   <div class="math-line"><strong>Average (mean):</strong> total ÷ number of groups. Unit: items per group.</div>
+  </details>
+ </section>
+</main>
+
+<section id="finish" class="card finish hidden" aria-live="polite">
+ <span class="badge">Primary · Maths</span>
+ <h2>Town data champion!</h2>
+ <div id="stars" class="stars" aria-label="Your stars"></div>
+ <p id="finalScore" style="font-size:23px;font-weight:800"></p>
+ <p id="finalMessage"></p>
+ <button id="againBtn" class="primary">Play again ↻</button>
+</section>
+<footer>Fix It Today</footer>
+</div>
+
+<script>
+/* FIT-CALC-BEGIN statistics */
+const FITCalcStats = (function () {
+  'use strict';
+
+  const MAX = 200;
+  const PI = Math.PI;
+
+  function err(error, reason) {
+    return { error, reason };
+  }
+
+  function finite(x) {
+    return typeof x === 'number' && Number.isFinite(x);
+  }
+
+  function finiteFields(o, names) {
+    if (!o || typeof o !== 'object') {
+      return err('ConstraintViolation', 'invalid_input');
+    }
+    for (const k of names) {
+      if (!finite(o[k])) {
+        return err('ConstraintViolation', 'non_finite_value');
+      }
+    }
+    return null;
+  }
+
+  function validData(data, minimum = 1) {
+    if (!Array.isArray(data)) {
+      return err('ConstraintViolation', 'invalid_data');
+    }
+    if (data.length === 0) {
+      return err('ConstraintViolation', 'empty_data');
+    }
+    if (data.length > MAX) {
+      return err('ConstraintViolation', 'too_many_points_max_200');
+    }
+    if (data.some(v => !finite(v))) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+    if (data.length < minimum) {
+      return err('ConstraintViolation', 'points_out_of_range_2_200');
+    }
+    return null;
+  }
+
+  function validConf(conf) {
+    if (!finite(conf) || conf <= 0 || conf >= 1) {
+      return err('ConstraintViolation', 'confidence_out_of_range');
+    }
+    return null;
+  }
+
+  function validN(n) {
+    if (!Number.isSafeInteger(n) || n < 1) {
+      return err('ConstraintViolation', 'sample_size_not_positive_integer');
+    }
+    return null;
+  }
+
+  function validEdges(edges) {
+    if (!Array.isArray(edges) ||
+        edges.length < 2 ||
+        edges.length > MAX + 1 ||
+        edges.some(v => !finite(v))) {
+      return err('ConstraintViolation', 'bad_class_edges');
+    }
+    for (let i = 1; i < edges.length; i++) {
+      if (edges[i] <= edges[i - 1]) {
+        return err('ConstraintViolation', 'bad_class_edges');
+      }
+    }
+    return null;
+  }
+
+  function sortNumbers(a) {
+    return a.slice().sort((x, y) => x - y);
+  }
+
+  function middle(a) {
+    const n = a.length;
+    const m = Math.floor(n / 2);
+    return n % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  }
+
+  function quartiles(sorted) {
+    const n = sorted.length;
+    if (n === 1) {
+      return {
+        q1: sorted[0],
+        median: sorted[0],
+        q3: sorted[0]
+      };
+    }
+    const m = Math.floor(n / 2);
+    return {
+      q1: middle(sorted.slice(0, m)),
+      median: middle(sorted),
+      q3: middle(sorted.slice(n % 2 ? m + 1 : m))
+    };
+  }
+
+  function moments(data) {
+    const n = data.length;
+    const origin = data[0];
+    let sum = 0;
+    for (const x of data) sum += x - origin;
+    const mean = origin + sum / n;
+    let ss = 0;
+    for (const x of data) {
+      const d = x - mean;
+      ss += d * d;
+    }
+    return { mean, ss };
+  }
+
+  /*
+   * Internal standard normal CDF.
+   * Simpson integration of the normal density on [0, |z|].
+   * Step width <= 0.025, with an even number of panels.
+   * Absolute integration error is well below 1e-7.
+   * Values beyond 12 standard deviations use limiting tails.
+   */
+  function Phi(z) {
+    if (z <= -12) return 0;
+    if (z >= 12) return 1;
+    if (z === 0) return 0.5;
+
+    const a = Math.abs(z);
+    const panels = Math.max(64, 2 * Math.ceil(a / 0.05));
+    const h = a / panels;
+    let sum = 1 + Math.exp(-a * a / 2);
+
+    for (let i = 1; i < panels; i++) {
+      const u = i * h;
+      sum += (i % 2 ? 4 : 2) * Math.exp(-u * u / 2);
+    }
+
+    const area = h * sum / (3 * Math.sqrt(2 * PI));
+    return Math.max(0, Math.min(1,
+      z > 0 ? 0.5 + area : 0.5 - area
+    ));
+  }
+
+  function invPhi(p) {
+    let lo = -12;
+    let hi = 12;
+
+    for (let i = 0; i < 65; i++) {
+      const mid = (lo + hi) / 2;
+      if (Phi(mid) < p) lo = mid;
+      else hi = mid;
+    }
+
+    return (lo + hi) / 2;
+  }
+
+  /*
+   * Lanczos log-gamma for positive real arguments.
+   * Internal numerical helper, dimensionless.
+   */
+  function logGamma(z) {
+    const c = [
+      0.99999999999980993,
+      676.5203681218851,
+      -1259.1392167224028,
+      771.32342877765313,
+      -176.61502916214059,
+      12.507343278686905,
+      -0.13857109526572012,
+      9.9843695780195716e-6,
+      1.5056327351493116e-7
+    ];
+
+    if (z < 0.5) {
+      return Math.log(PI) -
+        Math.log(Math.sin(PI * z)) -
+        logGamma(1 - z);
+    }
+
+    z -= 1;
+    let x = c[0];
+    for (let i = 1; i < c.length; i++) {
+      x += c[i] / (z + i);
+    }
+    const t = z + 7.5;
+    return 0.5 * Math.log(2 * PI) +
+      (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+
+  /*
+   * Continued fraction for regularised incomplete beta.
+   * Returns null on failure to converge within 500 iterations.
+   */
+  function betaFraction(a, b, x) {
+    const tiny = 1e-300;
+    let c = 1;
+    let d = 1 - (a + b) * x / (a + 1);
+    if (Math.abs(d) < tiny) d = tiny;
+    d = 1 / d;
+    let h = d;
+
+    for (let m = 1; m <= 500; m++) {
+      const m2 = 2 * m;
+      let aa = m * (b - m) * x /
+        ((a + m2 - 1) * (a + m2));
+
+      d = 1 + aa * d;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = 1 + aa / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      h *= d * c;
+
+      aa = -(a + m) * (a + b + m) * x /
+        ((a + m2) * (a + m2 + 1));
+
+      d = 1 + aa * d;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = 1 + aa / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      const delta = d * c;
+      h *= delta;
+
+      if (!Number.isFinite(h)) return null;
+      if (Math.abs(delta - 1) < 3e-14) return h;
+    }
+    return null;
+  }
+
+  function incompleteBeta(a, b, x) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+
+    const bt = Math.exp(
+      logGamma(a + b) - logGamma(a) -
+      logGamma(b) +
+      a * Math.log(x) + b * Math.log1p(-x)
+    );
+
+    if (x < (a + 1) / (a + b + 2)) {
+      const f = betaFraction(a, b, x);
+      return f === null ? null :
+        Math.max(0, Math.min(1, bt * f / a));
+    }
+
+    const f = betaFraction(b, a, 1 - x);
+    return f === null ? null :
+      Math.max(0, Math.min(1, 1 - bt * f / b));
+  }
+
+  function tCdf(t, df) {
+    if (t === 0) return 0.5;
+    const x = df / (df + t * t);
+    const beta = incompleteBeta(df / 2, 0.5, x);
+    if (beta === null) return null;
+    return t > 0 ? 1 - beta / 2 : beta / 2;
+  }
+
+  function tInverse(p, df) {
+    let lo = -1e12;
+    let hi = 1e12;
+
+    for (let i = 0; i < 120; i++) {
+      const mid = (lo + hi) / 2;
+      const value = tCdf(mid, df);
+      if (value === null) return null;
+      if (value < p) lo = mid;
+      else hi = mid;
+    }
+
+    return (lo + hi) / 2;
+  }
+
+  /**
+   * Tally categorical observations.
+   * Input: {data[]} with 1–200 finite numbers or strings.
+   * Output: {categories[],counts[]} in occurrences.
+   * Strings retain first-appearance order; numbers ascend.
+   * Errors: empty_data, too_many_points_max_200,
+   * non_finite_value, invalid_data.
+   * Worked example: ['cat','dog','cat'] ->
+   * categories=['cat','dog'], counts=[2,1].
+   */
+  function tally({ data } = {}) {
+    if (!Array.isArray(data)) {
+      return err('ConstraintViolation', 'invalid_data');
+    }
+    if (!data.length) {
+      return err('ConstraintViolation', 'empty_data');
+    }
+    if (data.length > MAX) {
+      return err('ConstraintViolation', 'too_many_points_max_200');
+    }
+    if (data.some(v =>
+      !(typeof v === 'string' || finite(v)))) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+
+    const isNumbers = data.every(finite);
+    const isStrings = data.every(v => typeof v === 'string');
+
+    if (!isNumbers && !isStrings) {
+      return err('ConstraintViolation', 'mixed_category_types');
+    }
+
+    const map = new Map();
+    data.forEach(v => map.set(v, (map.get(v) || 0) + 1));
+
+    const categories = Array.from(map.keys());
+    if (isNumbers) categories.sort((a, b) => a - b);
+
+    return {
+      categories,
+      counts: categories.map(v => map.get(v))
+    };
+  }
+
+  /**
+   * Describe ungrouped numerical observations.
+   * Input: {data[]} of 1–200 finite values, in common units.
+   * Output: n, mean, median, modes[], range, q1, q3, iqr,
+   * sd_pop, sd_sample, min, max.
+   * SDs have data units; n and modes frequencies are counts.
+   * Quartiles: median of the lower and upper halves;
+   * exclude the middle item for odd n (O-Level convention).
+   * Population SD divides by n; sample SD by n-1.
+   * n=1 has null sample SD. Equal frequencies with at
+   * least two distinct values mean no mode.
+   * Errors: shared data validation codes.
+   * Worked example: [1,2,2,5] -> mean=2.5,
+   * median=2, q1=1.5, q3=3.5, IQR=2,
+   * population variance=2.25, sample variance=3.
+   */
+  function summary({ data } = {}) {
+    const error = validData(data);
+    if (error) return error;
+
+    const sorted = sortNumbers(data);
+    const n = sorted.length;
+    const m = moments(data);
+    const q = quartiles(sorted);
+    const counts = new Map();
+
+    sorted.forEach(x =>
+      counts.set(x, (counts.get(x) || 0) + 1));
+
+    const top = Math.max(...counts.values());
+    const modes = counts.size > 1 &&
+      Array.from(counts.values()).every(v => v === top)
+      ? []
+      : Array.from(counts.keys()).filter(
+        v => counts.get(v) === top
+      );
+
+    return {
+      n,
+      mean: m.mean,
+      median: q.median,
+      modes,
+      range: sorted[n - 1] - sorted[0],
+      q1: q.q1,
+      q3: q.q3,
+      iqr: q.q3 - q.q1,
+      sd_pop: Math.sqrt(m.ss / n),
+      sd_sample: n === 1 ? null :
+        Math.sqrt(m.ss / (n - 1)),
+      min: sorted[0],
+      max: sorted[n - 1]
+    };
+  }
+
+  /**
+   * Estimate descriptive statistics from grouped classes.
+   * Input: {edges[],freqs[]} with increasing numerical edges,
+   * non-negative integer frequencies; edges.length=freqs.length+1.
+   * Units: edges and mean_est/sd_est in data units.
+   * SD is population midpoint estimate, divisor n.
+   * Modal class uses frequency density; ties choose first.
+   * Median class is first cumulative frequency >= n/2.
+   * Output: {n,mean_est,sd_est,modal_class_index,
+   * median_class_index}.
+   * Errors: bad_class_edges, zero_total_frequency,
+   * invalid_frequency, too_many_points_max_200.
+   * Worked example: edges=[0,10,30], freqs=[4,6].
+   * Midpoints 5,20; mean=14, variance=54,
+   * sd=sqrt(54), modal index=0 (densities .4,.3),
+   * median index=1.
+   */
+  function grouped_summary({ edges, freqs } = {}) {
+    const e = validEdges(edges);
+    if (e) return e;
+
+    if (!Array.isArray(freqs) ||
+        freqs.length !== edges.length - 1) {
+      return err('ConstraintViolation', 'bad_class_edges');
+    }
+    if (freqs.some(v =>
+      !Number.isSafeInteger(v) || v < 0)) {
+      return err('ConstraintViolation', 'invalid_frequency');
+    }
+
+    const n = freqs.reduce((a, b) => a + b, 0);
+    if (n === 0) {
+      return err('MathError', 'zero_total_frequency');
+    }
+
+    const mids = freqs.map((_, i) =>
+      (edges[i] + edges[i + 1]) / 2);
+
+    const mean_est = freqs.reduce((s, f, i) =>
+      s + f * mids[i], 0) / n;
+
+    const variance = freqs.reduce((s, f, i) =>
+      s + f * (mids[i] - mean_est) ** 2, 0) / n;
+
+    let modal_class_index = 0;
+    let bestDensity = -1;
+    let median_class_index = 0;
+    let cumulative = 0;
+    let foundMedian = false;
+
+    freqs.forEach((f, i) => {
+      const density = f / (edges[i + 1] - edges[i]);
+
+      if (density > bestDensity) {
+        bestDensity = density;
+        modal_class_index = i;
+      }
+
+      cumulative += f;
+      if (!foundMedian && cumulative >= n / 2) {
+        median_class_index = i;
+        foundMedian = true;
+      }
+    });
+
+    return {
+      n,
+      mean_est,
+      sd_est: Math.sqrt(variance),
+      modal_class_index,
+      median_class_index
+    };
+  }
+
+  /**
+   * Construct a histogram.
+   * Input: {data[],edges[]} with increasing class boundaries.
+   * Classes [a,b), except last class [a,b].
+   * Output: {freqs[],densities[]}; density unit is
+   * frequency per unit of the data axis.
+   * Errors: shared data validation, bad_class_edges,
+   * value_outside_edges.
+   * Worked example: data=[1,2,4,5], edges=[0,3,6]
+   * -> freqs=[2,2], densities=[2/3,2/3].
+   */
+  function histogram({ data, edges } = {}) {
+    const de = validData(data);
+    if (de) return de;
+    const ee = validEdges(edges);
+    if (ee) return ee;
+
+    const freqs = Array(edges.length - 1).fill(0);
+
+    for (const v of data) {
+      if (v < edges[0] || v > edges[edges.length - 1]) {
+        return err('ConstraintViolation', 'value_outside_edges');
+      }
+
+      let i = freqs.length - 1;
+      for (let j = 0; j < freqs.length - 1; j++) {
+        if (v < edges[j + 1]) {
+          i = j;
+          break;
+        }
+      }
+      freqs[i]++;
+    }
+
+    return {
+      freqs,
+      densities: freqs.map((f, i) =>
+        f / (edges[i + 1] - edges[i]))
+    };
+  }
+
+  /**
+   * Standardise one observation.
+   * Input: {x,mean,sd}, all in the same measurement units.
+   * Output: {z}, dimensionless.
+   * Errors: non_finite_value; zero_spread when sd<=0.
+   * Worked example: x=74, mean=70, sd=8 -> z=0.5.
+   */
+  function zscore(o = {}) {
+    const e = finiteFields(o, ['x', 'mean', 'sd']);
+    if (e) return e;
+    if (o.sd <= 0) return err('MathError', 'zero_spread');
+    return { z: (o.x - o.mean) / o.sd };
+  }
+
+  /**
+   * Normal cumulative distribution.
+   * Input: {x,mu,sigma}; measurement units shared.
+   * Output: {p}=P(X<=x), dimensionless.
+   * Simpson quadrature; absolute accuracy better than 1e-7.
+   * Errors: non_finite_value, zero_spread.
+   * Worked example: x=10,mu=10,sigma=2 -> p=0.5.
+   */
+  function normal_cdf(o = {}) {
+    const e = finiteFields(o, ['x', 'mu', 'sigma']);
+    if (e) return e;
+    if (o.sigma <= 0) return err('MathError', 'zero_spread');
+    return { p: Phi((o.x - o.mu) / o.sigma) };
+  }
+
+  /**
+   * Invert a normal cumulative probability.
+   * Input: {p,mu,sigma}; 0<p<1, sigma>0.
+   * Output: {x} in the units of mu and sigma.
+   * Bisection of numerical normal CDF, p error <1e-7.
+   * Errors: probability_out_of_range_0_1,
+   * non_finite_value, zero_spread.
+   * Worked example: p=0.5,mu=12,sigma=3 -> x=12.
+   */
+  function normal_inv(o = {}) {
+    if (!finite(o.p) || o.p <= 0 || o.p >= 1) {
+      return err('ConstraintViolation',
+        'probability_out_of_range_0_1');
+    }
+    const e = finiteFields(o, ['mu', 'sigma']);
+    if (e) return e;
+    if (o.sigma <= 0) return err('MathError', 'zero_spread');
+    return { x: o.mu + o.sigma * invPhi(o.p) };
+  }
+
+  /**
+   * Sampling distribution of the sample mean.
+   * Input: {mu,sigma,n}, n a positive integer;
+   * sigma a population SD (non-negative).
+   * Output: {mean,se}, in the original measurement units.
+   * SE=sigma/sqrt(n). Zero sigma gives zero SE.
+   * Errors: sample_size_not_positive_integer,
+   * non_finite_value, negative_spread.
+   * Worked example: mu=50,sigma=12,n=36 ->
+   * mean=50,se=2.
+   */
+  function sampling_mean(o = {}) {
+    const ne = validN(o.n);
+    if (ne) return ne;
+    const e = finiteFields(o, ['mu', 'sigma']);
+    if (e) return e;
+    if (o.sigma < 0) {
+      return err('ConstraintViolation', 'negative_spread');
+    }
+    return { mean: o.mu, se: o.sigma / Math.sqrt(o.n) };
+  }
+
+  /**
+   * Ordinary least-squares straight-line regression.
+   * Input: {points:[[x,y],...]}, 2–200 finite pairs.
+   * Output: intercept a (y units), slope b (y/x units),
+   * Pearson r, r2, rss (squared y units),
+   * se_b (slope units; null for n=2).
+   * r and r2 null when all y are equal.
+   * Errors: points_out_of_range_2_200,
+   * non_finite_value, invalid_points, all_x_equal.
+   * Worked example: points=[[1,2],[2,4],[3,6]]
+   * -> a=0,b=2,r=1,r2=1,rss=0,se_b=0.
+   */
+  function linreg({ points } = {}) {
+    if (!Array.isArray(points)) {
+      return err('ConstraintViolation', 'invalid_points');
+    }
+    if (points.length < 2 || points.length > MAX) {
+      return err('ConstraintViolation', 'points_out_of_range_2_200');
+    }
+    if (points.some(p =>
+      !Array.isArray(p) ||
+      p.length !== 2 ||
+      !finite(p[0]) ||
+      !finite(p[1]))) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+
+    const n = points.length;
+    const xs = points.map(p => p[0]);
+    const ys = points.map(p => p[1]);
+    const mx = moments(xs).mean;
+    const my = moments(ys).mean;
+    let sxx = 0, syy = 0, sxy = 0;
+
+    points.forEach(([x, y]) => {
+      const dx = x - mx;
+      const dy = y - my;
+      sxx += dx * dx;
+      syy += dy * dy;
+      sxy += dx * dy;
+    });
+
+    if (sxx === 0) return err('MathError', 'all_x_equal');
+
+    const b = sxy / sxx;
+    const a = my - b * mx;
+    const rss = points.reduce((s, [x, y]) =>
+      s + (y - (a + b * x)) ** 2, 0);
+
+    const r = syy === 0 ? null :
+      Math.max(-1, Math.min(1, sxy / Math.sqrt(sxx * syy)));
+
+    return {
+      a,
+      b,
+      r,
+      r2: r === null ? null : r * r,
+      rss,
+      se_b: n === 2 ? null :
+        Math.sqrt(Math.max(0, rss) / (n - 2) / sxx)
+    };
+  }
+
+  /**
+   * Predict using a fitted straight line.
+   * Input: {a,b,x,x_min,x_max}; x_min<=x_max.
+   * Output: {y,extrapolation}; y=a+b*x,
+   * extrapolation true outside observed x range.
+   * Units: y and a share units; b is y per x unit.
+   * Errors: non_finite_value, invalid_x_range.
+   * Worked example: a=2,b=3,x=5,x_min=1,x_max=4
+   * -> y=17,extrapolation=true.
+   */
+  function predict(o = {}) {
+    const e = finiteFields(o,
+      ['a', 'b', 'x', 'x_min', 'x_max']);
+    if (e) return e;
+
+    if (o.x_min > o.x_max) {
+      return err('ConstraintViolation', 'invalid_x_range');
+    }
+
+    return {
+      y: o.a + o.b * o.x,
+      extrapolation: o.x < o.x_min || o.x > o.x_max
+    };
+  }
+
+  /**
+   * Two-sided confidence interval for a population mean.
+   * Input: {data[],conf,sigma?}; observations share units.
+   * If known population sigma is supplied, use a z interval.
+   * Otherwise use Student's t with n-1 degrees of freedom,
+   * sample SD dividing by n-1.
+   * Output: {mean,half_width,lo,hi,method:'z'|'t'}.
+   * Numerical t quantile uses regularised incomplete beta.
+   * Errors: shared data codes, confidence_out_of_range,
+   * points_out_of_range_2_200, zero_variance,
+   * zero_spread, beta_iteration_limit.
+   * Worked example: data=[8,10,12],conf=0.95,
+   * sigma=2 -> mean=10,half_width=
+   * 1.95996398454*2/sqrt(3),method='z'.
+   */
+  function ci_mean(o = {}) {
+    const de = validData(o.data);
+    if (de) return de;
+    const ce = validConf(o.conf);
+    if (ce) return ce;
+
+    const known = o.sigma !== undefined;
+    if (!known && o.data.length < 2) {
+      return err('ConstraintViolation', 'points_out_of_range_2_200');
+    }
+
+    if (known) {
+      if (!finite(o.sigma)) {
+        return err('ConstraintViolation', 'non_finite_value');
+      }
+      if (o.sigma <= 0) {
+        return err('MathError', 'zero_spread');
+      }
+    }
+
+    const s = summary({ data: o.data });
+    const sigma = known ? o.sigma : s.sd_sample;
+
+    if (!known && sigma === 0) {
+      return err('MathError', 'zero_variance');
+    }
+
+    const q = known ?
+      invPhi((1 + o.conf) / 2) :
+      tInverse((1 + o.conf) / 2, s.n - 1);
+
+    if (q === null || !finite(q)) {
+      return err('RuntimeError', 'beta_iteration_limit');
+    }
+
+    const half_width = q * sigma / Math.sqrt(s.n);
+
+    return {
+      mean: s.mean,
+      half_width,
+      lo: s.mean - half_width,
+      hi: s.mean + half_width,
+      method: known ? 'z' : 't'
+    };
+  }
+
+  /**
+   * Wald confidence interval for a population proportion.
+   * Input: {successes,n,conf}; counts are non-negative integers.
+   * Output: {p_hat,half_width,lo,hi,clipped:false};
+   * all dimensionless proportions. Limits are NOT clipped.
+   * Normal approximation is not guaranteed reliable for
+   * small counts or extreme proportions.
+   * Errors: sample_size_not_positive_integer,
+   * successes_out_of_range, confidence_out_of_range.
+   * Worked example: successes=50,n=100,conf=0.95 ->
+   * p_hat=.5, half_width=.0979981992 approximately.
+   */
+  function ci_proportion(o = {}) {
+    const ne = validN(o.n);
+    if (ne) return ne;
+    if (!Number.isSafeInteger(o.successes) ||
+        o.successes < 0 || o.successes > o.n) {
+      return err('ConstraintViolation', 'successes_out_of_range');
+    }
+
+    const ce = validConf(o.conf);
+    if (ce) return ce;
+
+    const p_hat = o.successes / o.n;
+    const z = invPhi((1 + o.conf) / 2);
+    const half_width = z *
+      Math.sqrt(p_hat * (1 - p_hat) / o.n);
+
+    return {
+      p_hat,
+      half_width,
+      lo: p_hat - half_width,
+      hi: p_hat + half_width,
+      clipped: false
+    };
+  }
+
+  /**
+   * Minimum sample size for a specified mean margin.
+   * Input: {sigma,margin,conf}; sigma and margin share units.
+   * Output: {n}, smallest positive integer satisfying
+   * z*sigma/sqrt(n)<=margin; known-sigma z method.
+   * Errors: margin_not_positive, confidence_out_of_range,
+   * zero_spread, sample_size_too_large, non_finite_value.
+   * Worked example: sigma=10,margin=2,conf=.95 ->
+   * ceil((1.95996398454*10/2)^2)=97.
+   */
+  function sample_size_mean(o = {}) {
+    if (!finite(o.margin) || o.margin <= 0) {
+      return err('ConstraintViolation', 'margin_not_positive');
+    }
+    const ce = validConf(o.conf);
+    if (ce) return ce;
+    if (!finite(o.sigma)) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+    if (o.sigma <= 0) {
+      return err('MathError', 'zero_spread');
+    }
+
+    const z = invPhi((1 + o.conf) / 2);
+    const raw = (z * o.sigma / o.margin) ** 2;
+
+    if (!finite(raw) || raw > Number.MAX_SAFE_INTEGER) {
+      return err('ConstraintViolation', 'sample_size_too_large');
+    }
+
+    let n = Math.max(1, Math.ceil(raw));
+    while (n > 1 && z * o.sigma / Math.sqrt(n - 1) <= o.margin) {
+      n--;
+    }
+    while (z * o.sigma / Math.sqrt(n) > o.margin) {
+      n++;
+    }
+    return { n };
+  }
+
+  /**
+   * Three-sigma x-bar control-chart limits.
+   * Input: {mean,sd,n}; mean and sd share measurement units,
+   * sd is the known within-process individual-observation SD.
+   * Output: {ucl,lcl,cl}, in measurement units.
+   * No truncation or clamping of negative LCL.
+   * Errors: sample_size_not_positive_integer,
+   * non_finite_value, zero_spread.
+   * Worked example: mean=100,sd=6,n=9 ->
+   * ucl=106,lcl=94,cl=100.
+   */
+  function control_limits(o = {}) {
+    const ne = validN(o.n);
+    if (ne) return ne;
+    const e = finiteFields(o, ['mean', 'sd']);
+    if (e) return e;
+    if (o.sd <= 0) {
+      return err('MathError', 'zero_spread');
+    }
+
+    const h = 3 * o.sd / Math.sqrt(o.n);
+
+    return {
+      ucl: o.mean + h,
+      lcl: o.mean - h,
+      cl: o.mean
+    };
+  }
+
+  /**
+   * Tukey 1.5-IQR box-plot statistics.
+   * Input: {data[]} with 1–200 finite values, common units.
+   * Output: q1,median,q3,iqr,lower_fence,upper_fence,
+   * whisker_lo,whisker_hi,outliers[]; all data units.
+   * Quartiles exclude the median for odd-length lists.
+   * Fence equality counts as inside.
+   * Errors: shared data validation codes.
+   * Worked example: [1,2,3,4,5,20] ->
+   * q1=2,median=3.5,q3=5,iqr=3,
+   * fences=-2.5,9.5, whiskers=1,5,outliers=[20].
+   */
+  function boxplot({ data } = {}) {
+    const de = validData(data);
+    if (de) return de;
+    const s = summary({ data });
+    const sorted = sortNumbers(data);
+    const lower_fence = s.q1 - 1.5 * s.iqr;
+    const upper_fence = s.q3 + 1.5 * s.iqr;
+
+    const inside = sorted.filter(v =>
+      v >= lower_fence && v <= upper_fence);
+
+    return {
+      q1: s.q1,
+      median: s.median,
+      q3: s.q3,
+      iqr: s.iqr,
+      lower_fence,
+      upper_fence,
+      whisker_lo: inside.length ? inside[0] : null,
+      whisker_hi: inside.length ?
+        inside[inside.length - 1] : null,
+      outliers: sorted.filter(v =>
+        v < lower_fence || v > upper_fence)
+    };
+  }
+
+  /**
+   * Known-population-SD z test for a population mean.
+   * Input: {xbar,mu0,sigma,n,tail:'two'|'left'|'right'}.
+   * xbar,mu0,sigma share units; n is a positive integer.
+   * Output: {z,p}, both dimensionless.
+   * Validates tail, then n, then sigma.
+   * Errors: method_not_supported,
+   * sample_size_not_positive_integer,
+   * zero_spread, non_finite_value.
+   * Worked example: xbar=104,mu0=100,sigma=8,n=16,
+   * tail='right' -> z=2,p=0.02275013195.
+   */
+  function ztest(o = {}) {
+    if (!['two', 'left', 'right'].includes(o.tail)) {
+      return err('NotSupported', 'method_not_supported');
+    }
+    const ne = validN(o.n);
+    if (ne) return ne;
+
+    if (!finite(o.sigma)) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+    if (o.sigma <= 0) {
+      return err('MathError', 'zero_spread');
+    }
+
+    const e = finiteFields(o, ['xbar', 'mu0']);
+    if (e) return e;
+
+    const z = (o.xbar - o.mu0) /
+      (o.sigma / Math.sqrt(o.n));
+
+    const left = Phi(z);
+    const p = o.tail === 'left' ? left :
+      o.tail === 'right' ? 1 - left :
+      2 * Math.min(left, 1 - left);
+
+    return {
+      z,
+      p: Math.max(0, Math.min(1, p))
+    };
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    tally,
+    summary,
+    grouped_summary,
+    histogram,
+    zscore,
+    normal_cdf,
+    normal_inv,
+    sampling_mean,
+    linreg,
+    predict,
+    ci_mean,
+    ci_proportion,
+    sample_size_mean,
+    control_limits,
+    boxplot,
+    ztest
+  });
+})();
+/* FIT-CALC-END statistics */
+
+/* TALLY TOWN GAME */
+(function () {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const svgNS = 'http:' + String.fromCharCode(47, 47) +
+    'www.w3.org/2000/svg';
+
+  const PALETTES = [
+    { name: 'Animals', labels: ['Cats', 'Dogs', 'Birds'],
+      icons: ['🐱', '🐶', '🐦'], unit: 'animals' },
+    { name: 'Fruit stall', labels: ['Apples', 'Pears', 'Oranges'],
+      icons: ['🍎', '🍐', '🍊'], unit: 'fruits' },
+    { name: 'Bus stop', labels: ['Red', 'Blue', 'Green'],
+      icons: ['🚌', '🚎', '🚍'], unit: 'buses' },
+    { name: 'Garden', labels: ['Flowers', 'Bees', 'Butterflies'],
+      icons: ['🌷', '🐝', '🦋'], unit: 'things' },
+    { name: 'Snack shop', labels: ['Cakes', 'Biscuits', 'Buns'],
+      icons: ['🧁', '🍪', '🥯'], unit: 'snacks' },
+    { name: 'Playground', labels: ['Balls', 'Kites', 'Skates'],
+      icons: ['⚽', '🪁', '🛼'], unit: 'items' }
+  ];
+
+  const COLOURS = ['#FFC83D', '#FF8FB8', '#3DBE6B'];
+  const GAME_SEED = 624913;
+  let rng = () => 0.5;
+
+  function makeRng(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function randInt(min, max) {
+    return min + Math.floor(rng() * (max - min + 1));
+  }
+
+  function shuffle(a) {
+    const result = a.slice();
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = randInt(0, i);
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+  }
+
+  function fmt(v) {
+    if (!Number.isFinite(v)) return '—';
+    return Number(v.toPrecision(3)).toString();
+  }
+
+  function calcResult(v) {
+    if (!v || v.error) {
+      feedback(v && v.error ? friendly(v) :
+        'Could not calculate these numbers.', false);
+      return null;
+    }
+    return v;
+  }
+
+  function friendly(e) {
+    const messages = {
+      empty_data: 'There are no items to count yet.',
+      too_many_points_max_200: 'There are too many items.',
+      non_finite_value: 'Please use ordinary numbers.',
+      invalid_data: 'This set of data cannot be read.',
+      mixed_category_types: 'The categories must use one type.',
+      zero_spread: 'The values need some variation.'
+    };
+    return messages[e.reason] || 'Please check the data and try again.';
+  }
+
+  const state = {
+    round: 0,
+    score: 0,
+    tries: 0,
+    hinted: false,
+    solved: false,
+    mode: 'collect',
+    phase: 'tally',
+    counts: [0, 0, 0],
+    bars: [0, 0, 0],
+    tally: [0, 0, 0],
+    stream: [],
+    streamIndex: 0,
+    chosen: null,
+    answer: 0,
+    answerType: '',
+    scale: 1,
+    maxCount: 10,
+    stepValue: 0,
+    roundSeed: 0,
+    palette: PALETTES[0]
+  };
+
+  function svgEl(tag, attrs = {}, text) {
+    const el = document.createElementNS(svgNS, tag);
+    Object.entries(attrs).forEach(([key, value]) => {
+      el.setAttribute(key, String(value));
+    });
+    if (text !== undefined) el.textContent = String(text);
+    return el;
+  }
+
+  function text(svg, x, y, value, extra = {}) {
+    svg.appendChild(svgEl('text', {
+      x, y, 'font-size': 13, 'text-anchor': 'middle',
+      ...extra
+    }, value));
+  }
+
+  function feedback(message, good = null) {
+    const el = $('feedback');
+    el.textContent = message;
+    el.className = 'feedback' +
+      (good === true ? ' good' : good === false ? ' bad' : '');
+  }
+
+  function setButtons() {
+    $('checkBtn').classList.toggle('hidden', state.solved);
+    $('nextBtn').classList.toggle('hidden', !state.solved);
+    $('nextBtn').textContent =
+      state.round === 5 ? 'See your stars →' : 'Next round →';
+    $('hintBtn').disabled = state.solved || state.hinted;
+    $('checkBtn').disabled =
+      state.mode === 'collect' &&
+      state.phase === 'tally' &&
+      state.streamIndex < state.stream.length;
+  }
+
+  function createRound(index) {
+    rng = makeRng(GAME_SEED + index * 8189);
+    const p = PALETTES[index];
+    const mode = [ 'collect', 'read', 'collect',
+      'read', 'collect', 'read' ][index];
+
+    const scale = index < 2 ? 1 : index < 4 ? 2 : 5;
+    let squares = index < 2 ? 8 : index < 4 ? 7 : 6;
+    const maxCount = scale * squares;
+
+    let counts = Array.from({ length: 3 }, () =>
+      randInt(Math.max(1, scale), Math.max(scale + 1, maxCount - scale)));
+
+    if (index === 4) {
+      counts = counts.map(v =>
+        Math.min(maxCount, Math.max(scale, v)));
+    }
+
+    const stream = [];
+    counts.forEach((count, i) => {
+      for (let j = 0; j < count; j++) stream.push(i);
+    });
+
+    const answerType = index === 1 ? 'difference' :
+      index === 3 ? 'total' :
+      index === 5 ? 'average' : 'bars';
+
+    if (index === 5) {
+      const equal = randInt(1, 4) * scale;
+      const delta = scale;
+      counts = [equal - delta, equal, equal + delta];
+    }
+
+    const finalStream = mode === 'collect' ?
+      shuffle(counts.flatMap((count, i) =>
+        Array.from({ length: count }, () => i))) : [];
+
+    state.round = index;
+    state.roundSeed = GAME_SEED + index * 8189;
+    state.palette = p;
+    state.mode = mode;
+    state.phase = mode === 'collect' ? 'tally' : 'read';
+    state.counts = counts;
+    state.bars = mode === 'collect' ? [0, 0, 0] :
+      counts.slice();
+    state.tally = [0, 0, 0];
+    state.stream = finalStream;
+    state.streamIndex = 0;
+    state.answerType = answerType;
+    state.maxCount = maxCount;
+    state.scale = scale;
+    state.stepValue = 0;
+    state.chosen = null;
+    state.tries = 0;
+    state.hinted = false;
+    state.solved = false;
+
+    const result = FITCalcStats.tally({
+      data: counts.flatMap((c, i) =>
+        Array.from({ length: c }, () => p.labels[i]))
+    });
+
+    if (!calcResult(result)) return;
+
+    const fullCounts = p.labels.map(label => {
+      const at = result.categories.indexOf(label);
+      return at < 0 ? 0 : result.counts[at];
+    });
+
+    state.counts = fullCounts;
+
+    $('roundLabel').textContent = 'Round ' + (index + 1) + '/6';
+    $('scoreLabel').textContent = 'Score: ' + state.score;
+    $('progress').style.width = ((index / 6) * 100) + '%';
+    $('stageTitle').textContent = p.name;
+    $('sceneTitle').textContent =
+      mode === 'collect' ? 'Watch and count' : 'Read the graph';
+    $('phaseLabel').textContent =
+      mode === 'collect' ? 'Tally' : 'Read';
+    $('scaleLabel').textContent =
+      scale + (scale === 1 ? ' per square' : ' per square');
+
+    $('story').textContent = mode === 'collect' ?
+      'Items are arriving one by one. Record each one before the next arrives.' :
+      'The town has already counted its items. Use the graph to solve the puzzle.';
+
+    state.answer = calculateAnswer();
+
+    makeQuestion();
+    renderAll();
+    feedback('Ready! ' + (
+      mode === 'collect' ?
+      'Count each arrival using the matching tally button.' :
+      'Read the bar heights carefully.'
+    ));
+    setButtons();
+  }
+
+  function calculateAnswer() {
+    const c = state.counts;
+    const s = FITCalcStats.summary({ data: c });
+
+    if (s.error) return 0;
+
+    if (state.answerType === 'difference') {
+      return Math.abs(c[0] - c[1]);
+    }
+    if (state.answerType === 'total') {
+      return FITCalcStats.tally({
+        data: c.flatMap((count, i) =>
+          Array.from({ length: count }, () =>
+            state.palette.labels[i]))
+      }).counts.reduce((a, b) => a + b, 0);
+    }
+    if (state.answerType === 'average') return s.mean;
+    return 0;
+  }
+
+  function makeQuestion() {
+    const p = state.palette;
+    if (state.mode === 'collect') {
+      $('question').textContent =
+        'Step 1: tap the correct tally button for each item. ' +
+        'Step 2: drag each bar top to show its count.';
+      return;
+    }
+
+    if (state.answerType === 'difference') {
+      $('question').textContent =
+        'How many more ' + p.labels[0].toLowerCase() +
+        ' than ' + p.labels[1].toLowerCase() +
+        ' were counted? If there were fewer, give the difference.';
+    } else if (state.answerType === 'total') {
+      $('question').textContent =
+        'How many ' + p.unit + ' were counted altogether?';
+    } else {
+      $('question').textContent =
+        'What is the average number per group? ' +
+        'Add the three counts, then divide by 3.';
+    }
+  }
+
+  function tallyMarks(n) {
+    if (n <= 0) return '—';
+    const groups = [];
+    while (n >= 5) {
+      groups.push('||||╱');
+      n -= 5;
+    }
+    if (n) groups.push('|'.repeat(n));
+    return groups.join(' ');
+  }
+
+  function renderScene() {
+    const p = state.palette;
+    const arrivals = $('animals');
+    arrivals.replaceChildren();
+    const area = $('tallyArea');
+    area.replaceChildren();
+
+    if (state.mode === 'read') {
+      const note = document.createElement('p');
+      note.textContent = 'Read the bars on the right. Each square ' +
+        'represents ' + state.scale + ' ' +
+        (state.scale === 1 ? 'item.' : 'items.');
+      note.className = 'muted';
+      arrivals.appendChild(note);
+    } else if (state.phase === 'tally') {
+      if (state.streamIndex < state.stream.length) {
+        const kind = state.stream[state.streamIndex];
+        const animal = document.createElement('div');
+        animal.className = 'animal present enter';
+        animal.textContent = p.icons[kind];
+        animal.setAttribute('aria-label', p.labels[kind]);
+        arrivals.appendChild(animal);
+
+        const left = document.createElement('p');
+        left.className = 'muted';
+        left.textContent = 'Item ' +
+          (state.streamIndex + 1) + ' of ' + state.stream.length;
+        arrivals.appendChild(left);
+      } else {
+        const done = document.createElement('p');
+        done.textContent = 'All counted! Now build your graph.';
+        done.style.fontWeight = '800';
+        arrivals.appendChild(done);
+      }
+    } else {
+      const done = document.createElement('p');
+      done.textContent = 'Tallies complete. Set your three bar heights.';
+      arrivals.appendChild(done);
+    }
+
+    p.labels.forEach((label, i) => {
+      const card = document.createElement('div');
+      card.className = 'tally-card' +
+        (state.mode === 'collect' &&
+        state.phase === 'tally' &&
+        state.stream[state.streamIndex] === i ? ' current' : '');
+
+      const icon = document.createElement('div');
+      icon.className = 'tally-icon';
+      icon.textContent = p.icons[i];
+
+      const name = document.createElement('div');
+      name.className = 'tally-name';
+      name.textContent = label;
+
+      const marks = document.createElement('div');
+      marks.className = 'tally-marks';
+      marks.textContent = state.mode === 'read' ?
+        tallyMarks(state.counts[i]) : tallyMarks(state.tally[i]);
+
+      const count = document.createElement('div');
+      count.className = 'tally-count';
+      count.textContent = state.mode === 'read' ?
+        'Count: ' + state.counts[i] :
+        'Your tally: ' + state.tally[i];
+
+      const btn = document.createElement('button');
+      btn.className = 'small';
+      btn.textContent = 'Tally +1';
+      btn.setAttribute('aria-label', 'Tally one ' + label);
+      btn.disabled = state.mode !== 'collect' ||
+        state.phase !== 'tally' || state.solved ||
+        state.streamIndex >= state.stream.length;
+      btn.addEventListener('click', () => addTally(i));
+
+      card.append(icon, name, marks, count);
+      if (state.mode === 'collect') card.appendChild(btn);
+      area.appendChild(card);
+    });
+  }
+
+  function addTally(i) {
+    if (state.mode !== 'collect' ||
+        state.phase !== 'tally' ||
+        state.streamIndex >= state.stream.length) return;
+
+    state.tally[i]++;
+    state.streamIndex++;
+
+    if (state.streamIndex >= state.stream.length) {
+      state.phase = 'bars';
+      $('phaseLabel').textContent = 'Build bars';
+      feedback('All items are recorded. Build your bar graph now!');
+    } else {
+      feedback('Tally recorded. Look at the next item.');
+    }
+
+    renderAll();
+    setButtons();
+  }
+
+  function rangeValue(value, minimum, maximum) {
+    return Math.max(minimum, Math.min(maximum, value));
+  }
+
+  function changeBar(i, value) {
+    if (state.solved || state.mode !== 'collect' ||
+        state.phase !== 'bars') return;
+    if (!Number.isFinite(value)) return;
+
+    state.bars[i] = rangeValue(
+      Math.round(value), 0, state.maxCount);
+    renderPlot();
+    renderControls();
+  }
+
+  function renderPlot() {
+    const svg = $('plot');
+    svg.replaceChildren();
+
+    const width = 380;
+    const height = 325;
+    const left = 53;
+    const right = 17;
+    const top = 37;
+    const bottom = 70;
+    const plotW = width - left - right;
+    const plotH = height - top - bottom;
+    const maximum = state.maxCount;
+    const y = v => top + plotH * (1 - v / maximum);
+    const barWidth = 58;
+    const positions = [0, 1, 2].map(i =>
+      left + plotW * (i + 0.5) / 3);
+
+    svg.appendChild(svgEl('rect', {
+      x: left, y: top, width: plotW, height: plotH,
+      fill: '#fff'
+    }));
+
+    text(svg, 190, 22, state.palette.name + ' bar graph', {
+      'font-size': 16, 'font-weight': 800
+    });
+
+    for (let t = 0; t <= maximum; t += state.scale) {
+      const yy = y(t);
+      svg.appendChild(svgEl('line', {
+        x1: left, x2: width - right,
+        y1: yy, y2: yy, stroke: '#E4E2DB', 'stroke-width': 1.5
+      }));
+      text(svg, left - 11, yy + 4, t, {
+        'font-size': 12, 'text-anchor': 'end'
+      });
+    }
+
+    svg.appendChild(svgEl('line', {
+      x1: left, y1: top, x2: left, y2: top + plotH,
+      stroke: '#111', 'stroke-width': 3
+    }));
+    svg.appendChild(svgEl('line', {
+      x1: left, y1: top + plotH,
+      x2: width - right, y2: top + plotH,
+      stroke: '#111', 'stroke-width': 3
+    }));
+
+    const liveValues = state.mode === 'read' ?
+      state.counts : state.bars;
+
+    const readOnly = state.mode === 'read' || state.solved ||
+      state.phase !== 'bars';
+
+    liveValues.forEach((v, i) => {
+      const xx = positions[i];
+      const yy = y(v);
+      const bar = svgEl('rect', {
+        x: xx - barWidth / 2, y: yy,
+        width: barWidth,
+        height: Math.max(0, top + plotH - yy),
+        rx: 3, fill: COLOURS[i],
+        stroke: '#111', 'stroke-width': 2.5
+      });
+      svg.appendChild(bar);
+
+      if (!readOnly) {
+        const hit = svgEl('rect', {
+          x: xx - barWidth / 2 - 8,
+          y: top, width: barWidth + 16,
+          height: plotH, fill: 'transparent',
+          class: 'bar-hit'
+        });
+
+        hit.addEventListener('pointerdown', event => {
+          if (state.solved || state.phase !== 'bars') return;
+          event.preventDefault();
+          hit.setPointerCapture(event.pointerId);
+
+          const move = ev => {
+            const bounds = svg.getBoundingClientRect();
+            const sy = (ev.clientY - bounds.top) *
+              (height / bounds.height);
+            const value = (top + plotH - sy) / plotH * maximum;
+            changeBar(i, value);
+          };
+
+          move(event);
+
+          const moving = ev => move(ev);
+          const ending = () => {
+            hit.removeEventListener('pointermove', moving);
+            hit.removeEventListener('pointerup', ending);
+            hit.removeEventListener('pointercancel', ending);
+          };
+          hit.addEventListener('pointermove', moving);
+          hit.addEventListener('pointerup', ending);
+          hit.addEventListener('pointercancel', ending);
+        });
+
+        svg.appendChild(hit);
+
+        const handle = svgEl('rect', {
+          x: xx - 25, y: yy - 7,
+          width: 50, height: 14, rx: 6,
+          fill: '#fff', class: 'bar-handle',
+          role: 'slider', tabindex: 0,
+          'aria-label': 'Bar height for ' + state.palette.labels[i],
+          'aria-valuemin': 0, 'aria-valuemax': maximum,
+          'aria-valuenow': v
+        });
+
+        handle.addEventListener('keydown', e => {
+          if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
+            e.preventDefault();
+            changeBar(i, state.bars[i] + 1);
+          }
+          if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            changeBar(i, state.bars[i] - 1);
+          }
+        });
+
+        handle.addEventListener('pointerdown', event => {
+          event.preventDefault();
+          const bounds = svg.getBoundingClientRect();
+          const sy = (event.clientY - bounds.top) *
+            (height / bounds.height);
+          changeBar(i,
+            (top + plotH - sy) / plotH * maximum);
+        });
+
+        svg.appendChild(handle);
+      }
+
+      text(svg, xx, top + plotH + 20,
+        state.palette.labels[i], {
+          'font-size': 12, 'font-weight': 800
+        });
+    });
+
+    text(svg, width / 2, height - 8,
+      'Category (' + state.palette.unit + ')', {
+        'font-size': 12, 'font-weight': 700
+      });
+
+    const axis = svgEl('text', {
+      x: 16, y: top + plotH / 2,
+      'font-size': 12, 'font-weight': 700,
+      transform: 'rotate(-90 16 ' + (top + plotH / 2) + ')',
+      'text-anchor': 'middle'
+    }, 'Number of items (count)');
+    svg.appendChild(axis);
+
+    svg.setAttribute('aria-label',
+      'Bar graph for ' + state.palette.name +
+      '. Horizontal axis: categories. Vertical axis: item count.' +
+      (state.mode === 'collect' ?
+        ' Current bars: ' + state.bars.join(', ') + '.' :
+        ' Read the three bar heights.'));
+  }
+
+  function renderControls() {
+    const container = $('controlArea');
+    container.replaceChildren();
+
+    if (state.mode === 'collect') {
+      const box = document.createElement('div');
+      box.className = 'control-box';
+
+      const heading = document.createElement('h3');
+      heading.textContent = 'Set your bar heights';
+      box.appendChild(heading);
+
+      state.palette.labels.forEach((label, i) => {
+        const group = document.createElement('div');
+        group.style.marginBottom = '11px';
+
+        const name = document.createElement('div');
+        name.style.fontWeight = '800';
+        name.textContent = state.palette.icons[i] + ' ' + label;
+
+        const stepper = document.createElement('div');
+        stepper.className = 'stepper';
+
+        const minus = document.createElement('button');
+        minus.textContent = '−';
+        minus.setAttribute('aria-label', 'Decrease ' + label + ' bar');
+        minus.disabled = state.phase !== 'bars' || state.solved;
+        minus.addEventListener('click', () =>
+          changeBar(i, state.bars[i] - 1));
+
+        const value = document.createElement('output');
+        value.className = 'step-value';
+        value.textContent = state.bars[i];
+        value.setAttribute('aria-label',
+          label + ' bar height: ' + state.bars[i]);
+
+        const plus = document.createElement('button');
+        plus.textContent = '+';
+        plus.setAttribute('aria-label', 'Increase ' + label + ' bar');
+        plus.disabled = state.phase !== 'bars' || state.solved;
+        plus.addEventListener('click', () =>
+          changeBar(i, state.bars[i] + 1));
+
+        stepper.append(minus, value, plus);
+        group.append(name, stepper);
+        box.appendChild(group);
+      });
+
+      container.appendChild(box);
+      return;
+    }
+
+    const box = document.createElement('div');
+    box.className = 'control-box';
+
+    const heading = document.createElement('h3');
+    heading.textContent = 'Your answer (' +
+      (state.answerType === 'average' ?
+        'items per group' : state.palette.unit) + ')';
+    box.appendChild(heading);
+
+    const stepper = document.createElement('div');
+    stepper.className = 'stepper';
+
+    function updateAnswer(value) {
+      if (state.solved || !Number.isFinite(value)) return;
+      state.stepValue = Math.max(0,
+        Math.min(state.maxCount * 3, value));
+      renderControls();
+    }
+
+    const minusBig = document.createElement('button');
+    minusBig.textContent = '−−';
+    minusBig.setAttribute('aria-label', 'Subtract five');
+    minusBig.disabled = state.solved;
+    minusBig.addEventListener('click', () =>
+      updateAnswer(state.stepValue - 5));
+
+    const minus = document.createElement('button');
+    minus.textContent = '−';
+    minus.setAttribute('aria-label', 'Subtract one');
+    minus.disabled = state.solved;
+    minus.addEventListener('click', () =>
+      updateAnswer(state.stepValue - 1));
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.className = 'num';
+    input.style.width = '86px';
+    input.min = '0';
+    input.max = String(state.maxCount * 3);
+    input.step = 'any';
+    input.value = String(state.stepValue);
+    input.setAttribute('aria-label', 'Your numerical answer');
+    input.disabled = state.solved;
+    input.addEventListener('change', () => {
+      const v = Number(input.value);
+      if (Number.isFinite(v)) updateAnswer(v);
+      else input.value = String(state.stepValue);
+    });
+
+    const plus = document.createElement('button');
+    plus.textContent = '+';
+    plus.setAttribute('aria-label', 'Add one');
+    plus.disabled = state.solved;
+    plus.addEventListener('click', () =>
+      updateAnswer(state.stepValue + 1));
+
+    const plusBig = document.createElement('button');
+    plusBig.textContent = '++';
+    plusBig.setAttribute('aria-label', 'Add five');
+    plusBig.disabled = state.solved;
+    plusBig.addEventListener('click', () =>
+      updateAnswer(state.stepValue + 5));
+
+    stepper.append(minusBig, minus, input, plus, plusBig);
+    stepper.style.flexWrap = 'wrap';
+    box.appendChild(stepper);
+
+    if (state.answerType === 'average') {
+      const note = document.createElement('p');
+      note.className = 'muted';
+      note.textContent =
+        'Use the three bar heights. Give your average in items per group.';
+      box.appendChild(note);
+    }
+
+    container.appendChild(box);
+  }
+
+  function renderAll() {
+    renderScene();
+    renderPlot();
+    renderControls();
+  }
+
+  function errorMessageForDifference(diff) {
+    if (Math.abs(diff) < 1e-9) return '';
+    return 'Your answer is ' + fmt(Math.abs(diff)) +
+      (diff > 0 ? ' too high.' : ' too low.');
+  }
+
+  function check() {
+    if (state.solved) return;
+
+    if (state.mode === 'collect') {
+      if (state.phase !== 'bars') {
+        feedback('Count every arriving item before checking.', false);
+        return;
+      }
+
+      const tallyCheck = state.tally.every(
+        (v, i) => v === state.counts[i]);
+
+      if (!tallyCheck) {
+        state.tries++;
+        feedback('Some tallies do not match the arrivals. ' +
+          'Look at your counts and try again.', false);
+        return;
+      }
+
+      const different = state.bars.findIndex(
+        (v, i) => v !== state.counts[i]);
+
+      if (different !== -1) {
+        state.tries++;
+        const label = state.palette.labels[different];
+        const diff = state.bars[different] -
+          state.counts[different];
+        feedback(label + ': your bar is ' +
+          Math.abs(diff) + (diff > 0 ?
+          ' too tall.' : ' too short.') +
+          ' Check the tally marks.', false);
+        return;
+      }
+
+      win('Brilliant counting! Every bar matches your tally sheet.');
+      return;
+    }
+
+    const diff = state.stepValue - state.answer;
+    if (Math.abs(diff) > 1e-9) {
+      state.tries++;
+      feedback(errorMessageForDifference(diff) +
+        ' Read the graph scale carefully and try again.', false);
+      return;
+    }
+
+    let explanation = '';
+    const c = state.counts;
+
+    if (state.answerType === 'difference') {
+      explanation = 'The difference is ' +
+        Math.abs(c[0] - c[1]) + '. Subtract the smaller count.';
+    } else if (state.answerType === 'total') {
+      explanation = 'Add all three bars: ' +
+        c.join(' + ') + ' = ' + state.answer + '.';
+    } else {
+      const s = FITCalcStats.summary({ data: c });
+      explanation = 'The total is ' +
+        (c[0] + c[1] + c[2]) + '. ' +
+        'Divide by 3 to get the mean: ' + fmt(s.mean) + '.';
+    }
+
+    win('Excellent! ' + explanation);
+  }
+
+  function win(message) {
+    state.solved = true;
+    const earned = state.hinted ? 50 :
+      state.tries === 0 ? 100 :
+      state.tries === 1 ? 75 : 50;
+
+    state.score += earned;
+    $('scoreLabel').textContent = 'Score: ' + state.score;
+
+    feedback('★ ' + message + ' +' + earned + ' points!', true);
+    setButtons();
+    renderAll();
+  }
+
+  function hint() {
+    if (state.solved || state.hinted) return;
+    state.hinted = true;
+
+    if (state.mode === 'collect') {
+      feedback('Hint: compare each tally count with the ' +
+        'number marked on the vertical axis. If the scale is ' +
+        state.scale + ', one square represents ' +
+        state.scale + ' items.', null);
+    } else if (state.answerType === 'difference') {
+      feedback('Hint: read the first two bar heights, then ' +
+        'subtract the smaller from the larger.', null);
+    } else if (state.answerType === 'total') {
+      feedback('Hint: add the heights of all three bars.', null);
+    } else {
+      feedback('Hint: add the three bar heights, then divide by ' +
+        'the number of groups, which is 3.', null);
+    }
+
+    setButtons();
+  }
+
+  function finishGame() {
+    $('game').classList.add('hidden');
+    $('finish').classList.remove('hidden');
+    $('progress').style.width = '100%';
+    $('roundLabel').textContent = 'Round 6/6';
+
+    const stars = state.score >= 525 ? 3 :
+      state.score >= 400 ? 2 : 1;
+
+    $('stars').textContent = '★'.repeat(stars) +
+      '☆'.repeat(3 - stars);
+    $('stars').setAttribute('aria-label', stars + ' out of 3 stars');
+    $('finalScore').textContent =
+      state.score + ' out of 600 points';
+
+    $('finalMessage').textContent =
+      stars === 3 ? 'Amazing! You can count, draw and read data!' :
+      stars === 2 ? 'Great work! Keep practising your graphs.' :
+      'Good effort! Play again and aim for more stars.';
+  }
+
+  function next() {
+    if (!state.solved) return;
+    if (state.round === 5) {
+      finishGame();
+    } else {
+      createRound(state.round + 1);
+    }
+  }
+
+  function restart() {
+    state.score = 0;
+    $('game').classList.remove('hidden');
+    $('finish').classList.add('hidden');
+    createRound(0);
+  }
+
+  $('checkBtn').addEventListener('click', check);
+  $('hintBtn').addEventListener('click', hint);
+  $('nextBtn').addEventListener('click', next);
+  $('againBtn').addEventListener('click', restart);
+
+  restart();
+})();
+</script>
+</body>
+</html>

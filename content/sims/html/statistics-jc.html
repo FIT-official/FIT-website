@@ -1,0 +1,2336 @@
+
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sample Lab — JC Statistics</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+html{background:var(--fit-paper)}
+body{margin:0;padding:16px 12px 44px;background:var(--fit-paper);color:var(--fit-ink);font:400 16px/1.48 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit}
+button,input[type=range],input[type=number],.tap,.drag{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.drag{touch-action:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{min-height:46px;padding:9px 15px;border:2px solid #111;border-radius:999px;background:#fff;color:#111;font-weight:800;cursor:pointer;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.48;cursor:not-allowed}
+button.primary{border-width:3px;background:var(--fit-sun);box-shadow:var(--sh-2)}
+button.primary:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button.soft{background:var(--lvl-jc-tint)}
+button.selected{background:var(--lvl-jc);color:#fff;border-width:3px}
+.wrap{max-width:1200px;margin:auto;min-width:0}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:17px}
+.badge{display:inline-block;padding:7px 13px;border:2px solid #111;border-radius:999px;background:var(--lvl-jc);color:var(--lvl-jc-on);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+h1{font-size:clamp(30px,5vw,43px);line-height:1.1;margin:8px 0;font-weight:800}
+h2{font-size:22px;margin:0 0 12px;font-weight:800}
+h3{font-size:17px;margin:0 0 10px;font-weight:800}
+p{margin:7px 0}
+.intro{color:var(--fit-ink-2);font-weight:600}
+.muted{color:var(--fit-ink-3)}
+.hud{display:flex;flex-wrap:wrap;gap:9px}
+.pill{display:inline-flex;align-items:center;min-height:39px;padding:7px 12px;border:2px solid #111;border-radius:999px;background:#fff;font-size:14px;font-weight:800}
+.pill.accent{background:var(--lvl-jc-tint)}
+.progress{height:13px;margin:0 0 18px;border:2px solid #111;border-radius:999px;overflow:hidden;background:#fff}
+.progress-fill{height:100%;width:0;background:var(--lvl-jc);transition:width .2s}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:17px}
+.card{min-width:0;padding:16px;background:#fff;border:2px solid #111;border-radius:var(--r-lg);box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-jc-tint)}
+.question{padding:14px;margin:12px 0;border:2px solid #111;border-radius:16px;background:#fff;font-size:17px;font-weight:700}
+.scene{padding:12px;margin-top:12px;border:2px solid #111;border-radius:19px;background:#fff;min-width:0}
+.figure{display:block;width:100%;max-width:100%;height:auto;border:2px solid #111;border-radius:16px;background:#fff}
+.figure text{font-family:Inter,system-ui,sans-serif;fill:#111}
+.grid-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.stat{padding:11px;border:2px solid #111;border-radius:14px;background:var(--fit-sunken);min-width:0}
+.stat span{display:block;font-size:12px;font-weight:700;color:var(--fit-ink-3)}
+.stat strong{display:block;margin-top:4px;font-size:20px;overflow-wrap:anywhere}
+.control-box{padding:13px;margin:13px 0;border:2px solid #111;border-radius:17px;background:var(--fit-sunken)}
+.control-box label{display:block;font-weight:800;margin-bottom:6px}
+.stepper{display:flex;gap:7px;justify-content:center;align-items:center;flex-wrap:wrap}
+.stepper button{min-width:46px;padding:8px}
+.value{display:inline-block;min-width:83px;padding:8px;border:2px solid #111;border-radius:12px;background:#fff;text-align:center;font-size:20px;font-weight:800}
+input[type=number]{width:100%;min-width:0;min-height:46px;padding:9px;border:2px solid #111;border-radius:12px;background:#fff;font-size:18px}
+input[type=range]{width:100%;min-height:44px;accent-color:#6A45F5;cursor:pointer}
+.control-row{display:flex;gap:9px;flex-wrap:wrap;margin:10px 0}
+.control-row button{flex:1;min-width:68px}
+.choice-list{display:grid;gap:9px;margin:12px 0}
+.choice{display:flex;align-items:center;gap:12px;text-align:left;border-radius:15px;padding:12px;min-height:54px}
+.choice .mark{display:grid;place-items:center;flex:0 0 27px;height:27px;border:2px solid #111;border-radius:7px;background:#fff}
+.feedback{min-height:66px;margin-top:13px;padding:13px;border:2px solid #111;border-radius:16px;background:#fff;font-weight:600}
+.feedback.good{background:#e0f9e7;border-color:var(--fit-success)}
+.feedback.bad{background:#ffebe8;border-color:var(--fit-danger)}
+.controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:13px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:9px 0;font-size:12px;font-weight:700}
+.key{display:inline-block;width:17px;height:12px;border:2px solid #111;vertical-align:middle;margin-right:5px}
+.math-line{padding:7px 0;border-bottom:1px solid var(--fit-line-soft);font-size:14px}
+.math-line:last-child{border:0}
+details{margin-top:16px;padding:12px;border:2px solid #111;border-radius:17px;background:#fff}
+summary{font-weight:800;cursor:pointer}
+.concept{display:flex;align-items:center;gap:12px;margin-top:15px}
+.concept svg{flex:0 0 110px;width:110px}
+.concept p{font-size:13px;color:var(--fit-ink-2)}
+.finish{text-align:center;padding:30px}
+.stars{font-size:52px;letter-spacing:4px}
+.hidden{display:none!important}
+footer{text-align:center;margin-top:30px;color:var(--fit-ink-3);font-size:12px}
+@media(min-width:900px){body{padding:25px 28px 50px}.layout{grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);align-items:start}.card{padding:22px}}
+@media(max-width:420px){.card{padding:12px}.stepper button{min-width:44px;padding:7px}.value{min-width:70px}.control-row button{min-width:58px;padding:8px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div>
+  <span class="badge">JC · Maths</span>
+  <h1>Sample Lab</h1>
+  <p class="intro">Investigate sample means, unbiased estimates and statistical decisions.</p>
+ </div>
+ <div class="hud">
+  <span id="roundLabel" class="pill">Round 1/6</span>
+  <span id="scoreLabel" class="pill accent">Score: 0</span>
+ </div>
+</header>
+<div class="progress"><div id="progress" class="progress-fill"></div></div>
+
+<main id="game" class="layout">
+ <section class="card stage">
+  <div class="hud" style="margin-bottom:12px">
+   <span id="typeLabel" class="pill">Sampling</span>
+   <span id="difficultyLabel" class="pill">Warm-up</span>
+  </div>
+  <h2 id="stageTitle">Statistical investigation</h2>
+  <p id="story"></p>
+  <div id="question" class="question"></div>
+  <div class="scene">
+   <h3 id="sceneTitle">Evidence</h3>
+   <div id="sceneBody"></div>
+  </div>
+  <div class="concept">
+   <svg viewBox="0 0 110 84" role="img" aria-label="Population observations combine to make a sample mean">
+    <rect x="2" y="2" width="106" height="80" rx="14" fill="#fff" stroke="#111" stroke-width="3"/>
+    <g fill="#6A45F5" stroke="#111" stroke-width="2">
+     <circle cx="18" cy="18" r="6"/><circle cx="38" cy="18" r="6"/>
+     <circle cx="58" cy="18" r="6"/><circle cx="78" cy="18" r="6"/>
+    </g>
+    <path d="M25 36L55 49L85 36" fill="none" stroke="#111" stroke-width="3"/>
+    <path d="M55 48V57" stroke="#111" stroke-width="3"/>
+    <rect x="34" y="58" width="42" height="18" rx="6" fill="#FFC83D" stroke="#111" stroke-width="2"/>
+    <text x="55" y="71" text-anchor="middle" font-size="12" font-weight="800">x̄</text>
+   </svg>
+   <p><strong>Sampling:</strong> each sample produces a mean. Increasing sample size usually makes these means less variable.</p>
+  </div>
+ </section>
+
+ <section class="card">
+  <h2 id="plotTitle">Live sampling plot</h2>
+  <p id="plotNote" class="intro"></p>
+  <svg id="plot" class="figure" viewBox="0 0 420 325" role="img" aria-label="Live statistics visualisation"></svg>
+  <div id="legend" class="legend"></div>
+  <div id="controlArea"></div>
+  <div class="controls">
+   <button id="hintBtn" class="soft">Hint −25</button>
+   <button id="checkBtn" class="primary">Check answer</button>
+   <button id="nextBtn" class="primary hidden">Next round →</button>
+  </div>
+  <div id="feedback" class="feedback" aria-live="polite" role="status">Make your choice, then check your reasoning.</div>
+  <details>
+   <summary>The maths</summary>
+   <div class="math-line">Sampling mean: E(x̄) = μ. Standard error SE(x̄) = σ/√n.</div>
+   <div class="math-line">Central Limit Theorem: for independent identically distributed observations with finite variance, the standardised sample mean approaches a standard normal distribution as n increases.</div>
+   <div class="math-line">Unbiased sample variance: s² = [Σx² − (Σx)²/n] / (n − 1).</div>
+   <div class="math-line">Z-score: z = (x̄ − μ₀)/(σ/√n).</div>
+   <div class="math-line">Right-tail test: p = P(Z ≥ z). Left-tail test: p = P(Z ≤ z).</div>
+   <div class="math-line">Two-tailed test: p = 2 min[P(Z ≤ z), P(Z ≥ z)].</div>
+   <div class="math-line">Reject H₀ if p ≤ α; otherwise do not reject H₀.</div>
+   <div class="math-line">A sample variance uses n − 1 because estimating its mean removes one degree of freedom.</div>
+  </details>
+ </section>
+</main>
+
+<section id="finish" class="card finish hidden">
+ <span class="badge">JC · Maths</span>
+ <h2>Lab complete!</h2>
+ <div id="stars" class="stars" aria-label="Stars earned"></div>
+ <p id="finalScore" style="font-size:24px;font-weight:800"></p>
+ <p id="finalMessage"></p>
+ <button id="againBtn" class="primary">Play again ↻</button>
+</section>
+<footer>Fix It Today</footer>
+</div>
+
+<script>
+/* FIT-CALC-BEGIN statistics */
+const FITCalcStats = (function () {
+  'use strict';
+
+  const MAX = 200;
+  const PI = Math.PI;
+
+  function err(error, reason) {
+    return { error, reason };
+  }
+
+  function finite(x) {
+    return typeof x === 'number' && Number.isFinite(x);
+  }
+
+  function finiteFields(o, names) {
+    if (!o || typeof o !== 'object') {
+      return err('ConstraintViolation', 'invalid_input');
+    }
+    for (const k of names) {
+      if (!finite(o[k])) {
+        return err('ConstraintViolation', 'non_finite_value');
+      }
+    }
+    return null;
+  }
+
+  function validData(data, minimum = 1) {
+    if (!Array.isArray(data)) {
+      return err('ConstraintViolation', 'invalid_data');
+    }
+    if (data.length === 0) {
+      return err('ConstraintViolation', 'empty_data');
+    }
+    if (data.length > MAX) {
+      return err('ConstraintViolation', 'too_many_points_max_200');
+    }
+    if (data.some(v => !finite(v))) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+    if (data.length < minimum) {
+      return err('ConstraintViolation', 'points_out_of_range_2_200');
+    }
+    return null;
+  }
+
+  function validConf(conf) {
+    if (!finite(conf) || conf <= 0 || conf >= 1) {
+      return err('ConstraintViolation', 'confidence_out_of_range');
+    }
+    return null;
+  }
+
+  function validN(n) {
+    if (!Number.isSafeInteger(n) || n < 1) {
+      return err('ConstraintViolation', 'sample_size_not_positive_integer');
+    }
+    return null;
+  }
+
+  function validEdges(edges) {
+    if (!Array.isArray(edges) ||
+        edges.length < 2 ||
+        edges.length > MAX + 1 ||
+        edges.some(v => !finite(v))) {
+      return err('ConstraintViolation', 'bad_class_edges');
+    }
+    for (let i = 1; i < edges.length; i++) {
+      if (edges[i] <= edges[i - 1]) {
+        return err('ConstraintViolation', 'bad_class_edges');
+      }
+    }
+    return null;
+  }
+
+  function sortNumbers(a) {
+    return a.slice().sort((x, y) => x - y);
+  }
+
+  function middle(a) {
+    const n = a.length;
+    const m = Math.floor(n / 2);
+    return n % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  }
+
+  function quartiles(sorted) {
+    const n = sorted.length;
+    if (n === 1) {
+      return {
+        q1: sorted[0],
+        median: sorted[0],
+        q3: sorted[0]
+      };
+    }
+    const m = Math.floor(n / 2);
+    return {
+      q1: middle(sorted.slice(0, m)),
+      median: middle(sorted),
+      q3: middle(sorted.slice(n % 2 ? m + 1 : m))
+    };
+  }
+
+  function moments(data) {
+    const n = data.length;
+    const origin = data[0];
+    let sum = 0;
+    for (const x of data) sum += x - origin;
+    const mean = origin + sum / n;
+    let ss = 0;
+    for (const x of data) {
+      const d = x - mean;
+      ss += d * d;
+    }
+    return { mean, ss };
+  }
+
+  /*
+   * Internal standard normal CDF.
+   * Simpson integration of the normal density on [0, |z|].
+   * Step width <= 0.025, with an even number of panels.
+   * Absolute integration error is well below 1e-7.
+   * Values beyond 12 standard deviations use limiting tails.
+   */
+  function Phi(z) {
+    if (z <= -12) return 0;
+    if (z >= 12) return 1;
+    if (z === 0) return 0.5;
+
+    const a = Math.abs(z);
+    const panels = Math.max(64, 2 * Math.ceil(a / 0.05));
+    const h = a / panels;
+    let sum = 1 + Math.exp(-a * a / 2);
+
+    for (let i = 1; i < panels; i++) {
+      const u = i * h;
+      sum += (i % 2 ? 4 : 2) * Math.exp(-u * u / 2);
+    }
+
+    const area = h * sum / (3 * Math.sqrt(2 * PI));
+    return Math.max(0, Math.min(1,
+      z > 0 ? 0.5 + area : 0.5 - area
+    ));
+  }
+
+  function invPhi(p) {
+    let lo = -12;
+    let hi = 12;
+
+    for (let i = 0; i < 65; i++) {
+      const mid = (lo + hi) / 2;
+      if (Phi(mid) < p) lo = mid;
+      else hi = mid;
+    }
+
+    return (lo + hi) / 2;
+  }
+
+  /*
+   * Lanczos log-gamma for positive real arguments.
+   * Internal numerical helper, dimensionless.
+   */
+  function logGamma(z) {
+    const c = [
+      0.99999999999980993,
+      676.5203681218851,
+      -1259.1392167224028,
+      771.32342877765313,
+      -176.61502916214059,
+      12.507343278686905,
+      -0.13857109526572012,
+      9.9843695780195716e-6,
+      1.5056327351493116e-7
+    ];
+
+    if (z < 0.5) {
+      return Math.log(PI) -
+        Math.log(Math.sin(PI * z)) -
+        logGamma(1 - z);
+    }
+
+    z -= 1;
+    let x = c[0];
+    for (let i = 1; i < c.length; i++) {
+      x += c[i] / (z + i);
+    }
+    const t = z + 7.5;
+    return 0.5 * Math.log(2 * PI) +
+      (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+
+  /*
+   * Continued fraction for regularised incomplete beta.
+   * Returns null on failure to converge within 500 iterations.
+   */
+  function betaFraction(a, b, x) {
+    const tiny = 1e-300;
+    let c = 1;
+    let d = 1 - (a + b) * x / (a + 1);
+    if (Math.abs(d) < tiny) d = tiny;
+    d = 1 / d;
+    let h = d;
+
+    for (let m = 1; m <= 500; m++) {
+      const m2 = 2 * m;
+      let aa = m * (b - m) * x /
+        ((a + m2 - 1) * (a + m2));
+
+      d = 1 + aa * d;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = 1 + aa / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      h *= d * c;
+
+      aa = -(a + m) * (a + b + m) * x /
+        ((a + m2) * (a + m2 + 1));
+
+      d = 1 + aa * d;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = 1 + aa / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      const delta = d * c;
+      h *= delta;
+
+      if (!Number.isFinite(h)) return null;
+      if (Math.abs(delta - 1) < 3e-14) return h;
+    }
+    return null;
+  }
+
+  function incompleteBeta(a, b, x) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+
+    const bt = Math.exp(
+      logGamma(a + b) - logGamma(a) -
+      logGamma(b) +
+      a * Math.log(x) + b * Math.log1p(-x)
+    );
+
+    if (x < (a + 1) / (a + b + 2)) {
+      const f = betaFraction(a, b, x);
+      return f === null ? null :
+        Math.max(0, Math.min(1, bt * f / a));
+    }
+
+    const f = betaFraction(b, a, 1 - x);
+    return f === null ? null :
+      Math.max(0, Math.min(1, 1 - bt * f / b));
+  }
+
+  function tCdf(t, df) {
+    if (t === 0) return 0.5;
+    const x = df / (df + t * t);
+    const beta = incompleteBeta(df / 2, 0.5, x);
+    if (beta === null) return null;
+    return t > 0 ? 1 - beta / 2 : beta / 2;
+  }
+
+  function tInverse(p, df) {
+    let lo = -1e12;
+    let hi = 1e12;
+
+    for (let i = 0; i < 120; i++) {
+      const mid = (lo + hi) / 2;
+      const value = tCdf(mid, df);
+      if (value === null) return null;
+      if (value < p) lo = mid;
+      else hi = mid;
+    }
+
+    return (lo + hi) / 2;
+  }
+
+  /**
+   * Tally categorical observations.
+   * Input: {data[]} with 1–200 finite numbers or strings.
+   * Output: {categories[],counts[]} in occurrences.
+   * Strings retain first-appearance order; numbers ascend.
+   * Errors: empty_data, too_many_points_max_200,
+   * non_finite_value, invalid_data.
+   * Worked example: ['cat','dog','cat'] ->
+   * categories=['cat','dog'], counts=[2,1].
+   */
+  function tally({ data } = {}) {
+    if (!Array.isArray(data)) {
+      return err('ConstraintViolation', 'invalid_data');
+    }
+    if (!data.length) {
+      return err('ConstraintViolation', 'empty_data');
+    }
+    if (data.length > MAX) {
+      return err('ConstraintViolation', 'too_many_points_max_200');
+    }
+    if (data.some(v =>
+      !(typeof v === 'string' || finite(v)))) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+
+    const isNumbers = data.every(finite);
+    const isStrings = data.every(v => typeof v === 'string');
+
+    if (!isNumbers && !isStrings) {
+      return err('ConstraintViolation', 'mixed_category_types');
+    }
+
+    const map = new Map();
+    data.forEach(v => map.set(v, (map.get(v) || 0) + 1));
+
+    const categories = Array.from(map.keys());
+    if (isNumbers) categories.sort((a, b) => a - b);
+
+    return {
+      categories,
+      counts: categories.map(v => map.get(v))
+    };
+  }
+
+  /**
+   * Describe ungrouped numerical observations.
+   * Input: {data[]} of 1–200 finite values, in common units.
+   * Output: n, mean, median, modes[], range, q1, q3, iqr,
+   * sd_pop, sd_sample, min, max.
+   * SDs have data units; n and modes frequencies are counts.
+   * Quartiles: median of the lower and upper halves;
+   * exclude the middle item for odd n (O-Level convention).
+   * Population SD divides by n; sample SD by n-1.
+   * n=1 has null sample SD. Equal frequencies with at
+   * least two distinct values mean no mode.
+   * Errors: shared data validation codes.
+   * Worked example: [1,2,2,5] -> mean=2.5,
+   * median=2, q1=1.5, q3=3.5, IQR=2,
+   * population variance=2.25, sample variance=3.
+   */
+  function summary({ data } = {}) {
+    const error = validData(data);
+    if (error) return error;
+
+    const sorted = sortNumbers(data);
+    const n = sorted.length;
+    const m = moments(data);
+    const q = quartiles(sorted);
+    const counts = new Map();
+
+    sorted.forEach(x =>
+      counts.set(x, (counts.get(x) || 0) + 1));
+
+    const top = Math.max(...counts.values());
+    const modes = counts.size > 1 &&
+      Array.from(counts.values()).every(v => v === top)
+      ? []
+      : Array.from(counts.keys()).filter(
+        v => counts.get(v) === top
+      );
+
+    return {
+      n,
+      mean: m.mean,
+      median: q.median,
+      modes,
+      range: sorted[n - 1] - sorted[0],
+      q1: q.q1,
+      q3: q.q3,
+      iqr: q.q3 - q.q1,
+      sd_pop: Math.sqrt(m.ss / n),
+      sd_sample: n === 1 ? null :
+        Math.sqrt(m.ss / (n - 1)),
+      min: sorted[0],
+      max: sorted[n - 1]
+    };
+  }
+
+  /**
+   * Estimate descriptive statistics from grouped classes.
+   * Input: {edges[],freqs[]} with increasing numerical edges,
+   * non-negative integer frequencies; edges.length=freqs.length+1.
+   * Units: edges and mean_est/sd_est in data units.
+   * SD is population midpoint estimate, divisor n.
+   * Modal class uses frequency density; ties choose first.
+   * Median class is first cumulative frequency >= n/2.
+   * Output: {n,mean_est,sd_est,modal_class_index,
+   * median_class_index}.
+   * Errors: bad_class_edges, zero_total_frequency,
+   * invalid_frequency, too_many_points_max_200.
+   * Worked example: edges=[0,10,30], freqs=[4,6].
+   * Midpoints 5,20; mean=14, variance=54,
+   * sd=sqrt(54), modal index=0 (densities .4,.3),
+   * median index=1.
+   */
+  function grouped_summary({ edges, freqs } = {}) {
+    const e = validEdges(edges);
+    if (e) return e;
+
+    if (!Array.isArray(freqs) ||
+        freqs.length !== edges.length - 1) {
+      return err('ConstraintViolation', 'bad_class_edges');
+    }
+    if (freqs.some(v =>
+      !Number.isSafeInteger(v) || v < 0)) {
+      return err('ConstraintViolation', 'invalid_frequency');
+    }
+
+    const n = freqs.reduce((a, b) => a + b, 0);
+    if (n === 0) {
+      return err('MathError', 'zero_total_frequency');
+    }
+
+    const mids = freqs.map((_, i) =>
+      (edges[i] + edges[i + 1]) / 2);
+
+    const mean_est = freqs.reduce((s, f, i) =>
+      s + f * mids[i], 0) / n;
+
+    const variance = freqs.reduce((s, f, i) =>
+      s + f * (mids[i] - mean_est) ** 2, 0) / n;
+
+    let modal_class_index = 0;
+    let bestDensity = -1;
+    let median_class_index = 0;
+    let cumulative = 0;
+    let foundMedian = false;
+
+    freqs.forEach((f, i) => {
+      const density = f / (edges[i + 1] - edges[i]);
+
+      if (density > bestDensity) {
+        bestDensity = density;
+        modal_class_index = i;
+      }
+
+      cumulative += f;
+      if (!foundMedian && cumulative >= n / 2) {
+        median_class_index = i;
+        foundMedian = true;
+      }
+    });
+
+    return {
+      n,
+      mean_est,
+      sd_est: Math.sqrt(variance),
+      modal_class_index,
+      median_class_index
+    };
+  }
+
+  /**
+   * Construct a histogram.
+   * Input: {data[],edges[]} with increasing class boundaries.
+   * Classes [a,b), except last class [a,b].
+   * Output: {freqs[],densities[]}; density unit is
+   * frequency per unit of the data axis.
+   * Errors: shared data validation, bad_class_edges,
+   * value_outside_edges.
+   * Worked example: data=[1,2,4,5], edges=[0,3,6]
+   * -> freqs=[2,2], densities=[2/3,2/3].
+   */
+  function histogram({ data, edges } = {}) {
+    const de = validData(data);
+    if (de) return de;
+    const ee = validEdges(edges);
+    if (ee) return ee;
+
+    const freqs = Array(edges.length - 1).fill(0);
+
+    for (const v of data) {
+      if (v < edges[0] || v > edges[edges.length - 1]) {
+        return err('ConstraintViolation', 'value_outside_edges');
+      }
+
+      let i = freqs.length - 1;
+      for (let j = 0; j < freqs.length - 1; j++) {
+        if (v < edges[j + 1]) {
+          i = j;
+          break;
+        }
+      }
+      freqs[i]++;
+    }
+
+    return {
+      freqs,
+      densities: freqs.map((f, i) =>
+        f / (edges[i + 1] - edges[i]))
+    };
+  }
+
+  /**
+   * Standardise one observation.
+   * Input: {x,mean,sd}, all in the same measurement units.
+   * Output: {z}, dimensionless.
+   * Errors: non_finite_value; zero_spread when sd<=0.
+   * Worked example: x=74, mean=70, sd=8 -> z=0.5.
+   */
+  function zscore(o = {}) {
+    const e = finiteFields(o, ['x', 'mean', 'sd']);
+    if (e) return e;
+    if (o.sd <= 0) return err('MathError', 'zero_spread');
+    return { z: (o.x - o.mean) / o.sd };
+  }
+
+  /**
+   * Normal cumulative distribution.
+   * Input: {x,mu,sigma}; measurement units shared.
+   * Output: {p}=P(X<=x), dimensionless.
+   * Simpson quadrature; absolute accuracy better than 1e-7.
+   * Errors: non_finite_value, zero_spread.
+   * Worked example: x=10,mu=10,sigma=2 -> p=0.5.
+   */
+  function normal_cdf(o = {}) {
+    const e = finiteFields(o, ['x', 'mu', 'sigma']);
+    if (e) return e;
+    if (o.sigma <= 0) return err('MathError', 'zero_spread');
+    return { p: Phi((o.x - o.mu) / o.sigma) };
+  }
+
+  /**
+   * Invert a normal cumulative probability.
+   * Input: {p,mu,sigma}; 0<p<1, sigma>0.
+   * Output: {x} in the units of mu and sigma.
+   * Bisection of numerical normal CDF, p error <1e-7.
+   * Errors: probability_out_of_range_0_1,
+   * non_finite_value, zero_spread.
+   * Worked example: p=0.5,mu=12,sigma=3 -> x=12.
+   */
+  function normal_inv(o = {}) {
+    if (!finite(o.p) || o.p <= 0 || o.p >= 1) {
+      return err('ConstraintViolation',
+        'probability_out_of_range_0_1');
+    }
+    const e = finiteFields(o, ['mu', 'sigma']);
+    if (e) return e;
+    if (o.sigma <= 0) return err('MathError', 'zero_spread');
+    return { x: o.mu + o.sigma * invPhi(o.p) };
+  }
+
+  /**
+   * Sampling distribution of the sample mean.
+   * Input: {mu,sigma,n}, n a positive integer;
+   * sigma a population SD (non-negative).
+   * Output: {mean,se}, in the original measurement units.
+   * SE=sigma/sqrt(n). Zero sigma gives zero SE.
+   * Errors: sample_size_not_positive_integer,
+   * non_finite_value, negative_spread.
+   * Worked example: mu=50,sigma=12,n=36 ->
+   * mean=50,se=2.
+   */
+  function sampling_mean(o = {}) {
+    const ne = validN(o.n);
+    if (ne) return ne;
+    const e = finiteFields(o, ['mu', 'sigma']);
+    if (e) return e;
+    if (o.sigma < 0) {
+      return err('ConstraintViolation', 'negative_spread');
+    }
+    return { mean: o.mu, se: o.sigma / Math.sqrt(o.n) };
+  }
+
+  /**
+   * Ordinary least-squares straight-line regression.
+   * Input: {points:[[x,y],...]}, 2–200 finite pairs.
+   * Output: intercept a (y units), slope b (y/x units),
+   * Pearson r, r2, rss (squared y units),
+   * se_b (slope units; null for n=2).
+   * r and r2 null when all y are equal.
+   * Errors: points_out_of_range_2_200,
+   * non_finite_value, invalid_points, all_x_equal.
+   * Worked example: points=[[1,2],[2,4],[3,6]]
+   * -> a=0,b=2,r=1,r2=1,rss=0,se_b=0.
+   */
+  function linreg({ points } = {}) {
+    if (!Array.isArray(points)) {
+      return err('ConstraintViolation', 'invalid_points');
+    }
+    if (points.length < 2 || points.length > MAX) {
+      return err('ConstraintViolation', 'points_out_of_range_2_200');
+    }
+    if (points.some(p =>
+      !Array.isArray(p) ||
+      p.length !== 2 ||
+      !finite(p[0]) ||
+      !finite(p[1]))) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+
+    const n = points.length;
+    const xs = points.map(p => p[0]);
+    const ys = points.map(p => p[1]);
+    const mx = moments(xs).mean;
+    const my = moments(ys).mean;
+    let sxx = 0, syy = 0, sxy = 0;
+
+    points.forEach(([x, y]) => {
+      const dx = x - mx;
+      const dy = y - my;
+      sxx += dx * dx;
+      syy += dy * dy;
+      sxy += dx * dy;
+    });
+
+    if (sxx === 0) return err('MathError', 'all_x_equal');
+
+    const b = sxy / sxx;
+    const a = my - b * mx;
+    const rss = points.reduce((s, [x, y]) =>
+      s + (y - (a + b * x)) ** 2, 0);
+
+    const r = syy === 0 ? null :
+      Math.max(-1, Math.min(1, sxy / Math.sqrt(sxx * syy)));
+
+    return {
+      a,
+      b,
+      r,
+      r2: r === null ? null : r * r,
+      rss,
+      se_b: n === 2 ? null :
+        Math.sqrt(Math.max(0, rss) / (n - 2) / sxx)
+    };
+  }
+
+  /**
+   * Predict using a fitted straight line.
+   * Input: {a,b,x,x_min,x_max}; x_min<=x_max.
+   * Output: {y,extrapolation}; y=a+b*x,
+   * extrapolation true outside observed x range.
+   * Units: y and a share units; b is y per x unit.
+   * Errors: non_finite_value, invalid_x_range.
+   * Worked example: a=2,b=3,x=5,x_min=1,x_max=4
+   * -> y=17,extrapolation=true.
+   */
+  function predict(o = {}) {
+    const e = finiteFields(o,
+      ['a', 'b', 'x', 'x_min', 'x_max']);
+    if (e) return e;
+
+    if (o.x_min > o.x_max) {
+      return err('ConstraintViolation', 'invalid_x_range');
+    }
+
+    return {
+      y: o.a + o.b * o.x,
+      extrapolation: o.x < o.x_min || o.x > o.x_max
+    };
+  }
+
+  /**
+   * Two-sided confidence interval for a population mean.
+   * Input: {data[],conf,sigma?}; observations share units.
+   * If known population sigma is supplied, use a z interval.
+   * Otherwise use Student's t with n-1 degrees of freedom,
+   * sample SD dividing by n-1.
+   * Output: {mean,half_width,lo,hi,method:'z'|'t'}.
+   * Numerical t quantile uses regularised incomplete beta.
+   * Errors: shared data codes, confidence_out_of_range,
+   * points_out_of_range_2_200, zero_variance,
+   * zero_spread, beta_iteration_limit.
+   * Worked example: data=[8,10,12],conf=0.95,
+   * sigma=2 -> mean=10,half_width=
+   * 1.95996398454*2/sqrt(3),method='z'.
+   */
+  function ci_mean(o = {}) {
+    const de = validData(o.data);
+    if (de) return de;
+    const ce = validConf(o.conf);
+    if (ce) return ce;
+
+    const known = o.sigma !== undefined;
+    if (!known && o.data.length < 2) {
+      return err('ConstraintViolation', 'points_out_of_range_2_200');
+    }
+
+    if (known) {
+      if (!finite(o.sigma)) {
+        return err('ConstraintViolation', 'non_finite_value');
+      }
+      if (o.sigma <= 0) {
+        return err('MathError', 'zero_spread');
+      }
+    }
+
+    const s = summary({ data: o.data });
+    const sigma = known ? o.sigma : s.sd_sample;
+
+    if (!known && sigma === 0) {
+      return err('MathError', 'zero_variance');
+    }
+
+    const q = known ?
+      invPhi((1 + o.conf) / 2) :
+      tInverse((1 + o.conf) / 2, s.n - 1);
+
+    if (q === null || !finite(q)) {
+      return err('RuntimeError', 'beta_iteration_limit');
+    }
+
+    const half_width = q * sigma / Math.sqrt(s.n);
+
+    return {
+      mean: s.mean,
+      half_width,
+      lo: s.mean - half_width,
+      hi: s.mean + half_width,
+      method: known ? 'z' : 't'
+    };
+  }
+
+  /**
+   * Wald confidence interval for a population proportion.
+   * Input: {successes,n,conf}; counts are non-negative integers.
+   * Output: {p_hat,half_width,lo,hi,clipped:false};
+   * all dimensionless proportions. Limits are NOT clipped.
+   * Normal approximation is not guaranteed reliable for
+   * small counts or extreme proportions.
+   * Errors: sample_size_not_positive_integer,
+   * successes_out_of_range, confidence_out_of_range.
+   * Worked example: successes=50,n=100,conf=0.95 ->
+   * p_hat=.5, half_width=.0979981992 approximately.
+   */
+  function ci_proportion(o = {}) {
+    const ne = validN(o.n);
+    if (ne) return ne;
+    if (!Number.isSafeInteger(o.successes) ||
+        o.successes < 0 || o.successes > o.n) {
+      return err('ConstraintViolation', 'successes_out_of_range');
+    }
+
+    const ce = validConf(o.conf);
+    if (ce) return ce;
+
+    const p_hat = o.successes / o.n;
+    const z = invPhi((1 + o.conf) / 2);
+    const half_width = z *
+      Math.sqrt(p_hat * (1 - p_hat) / o.n);
+
+    return {
+      p_hat,
+      half_width,
+      lo: p_hat - half_width,
+      hi: p_hat + half_width,
+      clipped: false
+    };
+  }
+
+  /**
+   * Minimum sample size for a specified mean margin.
+   * Input: {sigma,margin,conf}; sigma and margin share units.
+   * Output: {n}, smallest positive integer satisfying
+   * z*sigma/sqrt(n)<=margin; known-sigma z method.
+   * Errors: margin_not_positive, confidence_out_of_range,
+   * zero_spread, sample_size_too_large, non_finite_value.
+   * Worked example: sigma=10,margin=2,conf=.95 ->
+   * ceil((1.95996398454*10/2)^2)=97.
+   */
+  function sample_size_mean(o = {}) {
+    if (!finite(o.margin) || o.margin <= 0) {
+      return err('ConstraintViolation', 'margin_not_positive');
+    }
+    const ce = validConf(o.conf);
+    if (ce) return ce;
+    if (!finite(o.sigma)) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+    if (o.sigma <= 0) {
+      return err('MathError', 'zero_spread');
+    }
+
+    const z = invPhi((1 + o.conf) / 2);
+    const raw = (z * o.sigma / o.margin) ** 2;
+
+    if (!finite(raw) || raw > Number.MAX_SAFE_INTEGER) {
+      return err('ConstraintViolation', 'sample_size_too_large');
+    }
+
+    let n = Math.max(1, Math.ceil(raw));
+    while (n > 1 && z * o.sigma / Math.sqrt(n - 1) <= o.margin) {
+      n--;
+    }
+    while (z * o.sigma / Math.sqrt(n) > o.margin) {
+      n++;
+    }
+    return { n };
+  }
+
+  /**
+   * Three-sigma x-bar control-chart limits.
+   * Input: {mean,sd,n}; mean and sd share measurement units,
+   * sd is the known within-process individual-observation SD.
+   * Output: {ucl,lcl,cl}, in measurement units.
+   * No truncation or clamping of negative LCL.
+   * Errors: sample_size_not_positive_integer,
+   * non_finite_value, zero_spread.
+   * Worked example: mean=100,sd=6,n=9 ->
+   * ucl=106,lcl=94,cl=100.
+   */
+  function control_limits(o = {}) {
+    const ne = validN(o.n);
+    if (ne) return ne;
+    const e = finiteFields(o, ['mean', 'sd']);
+    if (e) return e;
+    if (o.sd <= 0) {
+      return err('MathError', 'zero_spread');
+    }
+
+    const h = 3 * o.sd / Math.sqrt(o.n);
+
+    return {
+      ucl: o.mean + h,
+      lcl: o.mean - h,
+      cl: o.mean
+    };
+  }
+
+  /**
+   * Tukey 1.5-IQR box-plot statistics.
+   * Input: {data[]} with 1–200 finite values, common units.
+   * Output: q1,median,q3,iqr,lower_fence,upper_fence,
+   * whisker_lo,whisker_hi,outliers[]; all data units.
+   * Quartiles exclude the median for odd-length lists.
+   * Fence equality counts as inside.
+   * Errors: shared data validation codes.
+   * Worked example: [1,2,3,4,5,20] ->
+   * q1=2,median=3.5,q3=5,iqr=3,
+   * fences=-2.5,9.5, whiskers=1,5,outliers=[20].
+   */
+  function boxplot({ data } = {}) {
+    const de = validData(data);
+    if (de) return de;
+    const s = summary({ data });
+    const sorted = sortNumbers(data);
+    const lower_fence = s.q1 - 1.5 * s.iqr;
+    const upper_fence = s.q3 + 1.5 * s.iqr;
+
+    const inside = sorted.filter(v =>
+      v >= lower_fence && v <= upper_fence);
+
+    return {
+      q1: s.q1,
+      median: s.median,
+      q3: s.q3,
+      iqr: s.iqr,
+      lower_fence,
+      upper_fence,
+      whisker_lo: inside.length ? inside[0] : null,
+      whisker_hi: inside.length ?
+        inside[inside.length - 1] : null,
+      outliers: sorted.filter(v =>
+        v < lower_fence || v > upper_fence)
+    };
+  }
+
+  /**
+   * Known-population-SD z test for a population mean.
+   * Input: {xbar,mu0,sigma,n,tail:'two'|'left'|'right'}.
+   * xbar,mu0,sigma share units; n is a positive integer.
+   * Output: {z,p}, both dimensionless.
+   * Validates tail, then n, then sigma.
+   * Errors: method_not_supported,
+   * sample_size_not_positive_integer,
+   * zero_spread, non_finite_value.
+   * Worked example: xbar=104,mu0=100,sigma=8,n=16,
+   * tail='right' -> z=2,p=0.02275013195.
+   */
+  function ztest(o = {}) {
+    if (!['two', 'left', 'right'].includes(o.tail)) {
+      return err('NotSupported', 'method_not_supported');
+    }
+    const ne = validN(o.n);
+    if (ne) return ne;
+
+    if (!finite(o.sigma)) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+    if (o.sigma <= 0) {
+      return err('MathError', 'zero_spread');
+    }
+
+    const e = finiteFields(o, ['xbar', 'mu0']);
+    if (e) return e;
+
+    const z = (o.xbar - o.mu0) /
+      (o.sigma / Math.sqrt(o.n));
+
+    const left = Phi(z);
+    const p = o.tail === 'left' ? left :
+      o.tail === 'right' ? 1 - left :
+      2 * Math.min(left, 1 - left);
+
+    return {
+      z,
+      p: Math.max(0, Math.min(1, p))
+    };
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    tally,
+    summary,
+    grouped_summary,
+    histogram,
+    zscore,
+    normal_cdf,
+    normal_inv,
+    sampling_mean,
+    linreg,
+    predict,
+    ci_mean,
+    ci_proportion,
+    sample_size_mean,
+    control_limits,
+    boxplot,
+    ztest
+  });
+})();
+/* FIT-CALC-END statistics */
+
+/* SAMPLE LAB GAME */
+(function () {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const NS = 'http:' + String.fromCharCode(47, 47) +
+    'www.w3.org/2000/svg';
+  const BASE_SEED = 298173;
+  const PURPLE = '#6A45F5';
+  const YELLOW = '#FFC83D';
+  const GREEN = '#3DBE6B';
+  const RED = '#D92D20';
+
+  let rng = () => 0.5;
+  let animationFrame = null;
+  let animationToken = 0;
+
+  function makeRng(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  const randint = (a, b) =>
+    a + Math.floor(rng() * (b - a + 1));
+
+  const clamp = (v, lo, hi) =>
+    Math.max(lo, Math.min(hi, v));
+
+  function fmt(value, digits = 4) {
+    if (!Number.isFinite(value)) return '—';
+    return Number(value.toPrecision(digits)).toString();
+  }
+
+  function friendly(result) {
+    const reasons = {
+      zero_spread: 'The standard deviation must be positive.',
+      sample_size_not_positive_integer:
+        'The sample size must be a positive whole number.',
+      non_finite_value: 'Check that all values are finite numbers.',
+      empty_data: 'There are no observations to analyse.',
+      probability_out_of_range_0_1:
+        'The probability must lie strictly between zero and one.',
+      method_not_supported: 'That test direction is not supported.'
+    };
+    return reasons[result.reason] ||
+      'The calculation could not be completed. Check the inputs.';
+  }
+
+  function checked(result) {
+    if (!result || result.error) {
+      feedback(friendly(result || {}), false);
+      return null;
+    }
+    return result;
+  }
+
+  const game = {
+    round: 0,
+    score: 0,
+    attempts: 0,
+    hinted: false,
+    solved: false,
+    kind: 'sampling',
+    population: 'uniform',
+    mu: 0,
+    sigma: 1,
+    populationValues: [],
+    sampleN: 4,
+    targetSE: 1,
+    sampleMeans: [],
+    sampleDraws: 0,
+    selectedBatch: 10,
+    observed: [],
+    sum: 0,
+    sumSquares: 0,
+    estimateMean: 0,
+    estimateVariance: 0,
+    varianceAnswer: 0,
+    meanAnswer: 0,
+    test: {},
+    decision: '',
+    inputCritical: 0,
+    testVariant: 'decision',
+    criticalAnswer: 0,
+    leastN: 0,
+    chosenN: 1
+  };
+
+  function S(tag, attrs = {}, content) {
+    const e = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([key, value]) =>
+      e.setAttribute(key, String(value)));
+    if (content !== undefined) e.textContent = String(content);
+    return e;
+  }
+
+  function line(svg, x1, y1, x2, y2,
+    colour = '#111', width = 2, dash = '') {
+    svg.appendChild(S('line', {
+      x1, y1, x2, y2, stroke: colour,
+      'stroke-width': width,
+      ...(dash ? { 'stroke-dasharray': dash } : {})
+    }));
+  }
+
+  function label(svg, x, y, content, attrs = {}) {
+    svg.appendChild(S('text', {
+      x, y, 'font-size': 12, 'text-anchor': 'middle',
+      ...attrs
+    }, content));
+  }
+
+  function add(parent, tag, content, cls = '') {
+    const el = document.createElement(tag);
+    el.textContent = content;
+    if (cls) el.className = cls;
+    parent.appendChild(el);
+    return el;
+  }
+
+  function feedback(message, good = null) {
+    $('feedback').textContent = message;
+    $('feedback').className = 'feedback' +
+      (good === true ? ' good' :
+        good === false ? ' bad' : '');
+  }
+
+  function setUI() {
+    $('roundLabel').textContent =
+      'Round ' + (game.round + 1) + '/6';
+    $('scoreLabel').textContent = 'Score: ' + game.score;
+    $('progress').style.width =
+      (100 * game.round / 6) + '%';
+
+    $('checkBtn').classList.toggle('hidden', game.solved);
+    $('nextBtn').classList.toggle('hidden', !game.solved);
+    $('nextBtn').textContent =
+      game.round === 5 ? 'See your stars →' : 'Next round →';
+    $('hintBtn').disabled = game.solved || game.hinted;
+  }
+
+  function updateRound(index) {
+    animationToken++;
+    if (animationFrame !== null) {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = null;
+    }
+
+    rng = makeRng(BASE_SEED + index * 11777);
+    game.round = index;
+    game.attempts = 0;
+    game.hinted = false;
+    game.solved = false;
+    game.decision = '';
+
+    game.kind = [
+      'sampling', 'estimation', 'test',
+      'sampling', 'estimation', 'test'
+    ][index];
+
+    $('difficultyLabel').textContent =
+      index < 2 ? 'Warm-up' :
+      index < 4 ? 'Investigation' : 'Challenge';
+
+    if (game.kind === 'sampling') setupSampling(index);
+    if (game.kind === 'estimation') setupEstimation(index);
+    if (game.kind === 'test') setupTest(index);
+
+    render();
+    feedback('Investigate the data, then check your result.');
+  }
+
+  function populationStats(values) {
+    return FITCalcStats.summary({ data: values });
+  }
+
+  function setupSampling(index) {
+    $('typeLabel').textContent = 'Sampling distribution';
+    $('stageTitle').textContent = 'Build the sampling distribution';
+    $('sceneTitle').textContent = 'Population and experiment';
+    $('plotTitle').textContent = 'Histogram of sample means';
+    $('plotNote').textContent =
+      'The bars are simulated sample means; the smooth curve is the theoretical normal approximation.';
+
+    game.population = index === 0 ? 'uniform' : 'skewed';
+    game.populationValues = index === 0 ?
+      [20, 30, 40, 50, 60] :
+      [10, 10, 10, 10, 10, 10, 10, 10, 10, 90];
+
+    const ps = checked(populationStats(game.populationValues));
+    if (!ps) return;
+
+    game.mu = ps.mean;
+    game.sigma = ps.sd_pop;
+
+    const targetN = index === 0 ? 25 : 64;
+    game.targetSE = game.sigma / Math.sqrt(targetN);
+    game.sampleN = index === 0 ? 4 : 9;
+    game.sampleMeans = [];
+    game.sampleDraws = 0;
+    game.selectedBatch = 10;
+
+    $('story').textContent =
+      game.population === 'uniform' ?
+        'A population has five equally likely measurements. Repeated samples are drawn with replacement.' :
+        'A highly right-skewed population contains many small values and one large value. Watch the Central Limit Theorem emerge.';
+
+    $('question').textContent =
+      'Set the sample size n so that the theoretical standard error is ' +
+      fmt(game.targetSE, 6) +
+      ' units. Then draw at least 100 sample means and check. ' +
+      'Use the theoretical value, not the random histogram shape.';
+  }
+
+  function setupEstimation(index) {
+    $('typeLabel').textContent = 'Unbiased estimation';
+    $('stageTitle').textContent = 'Reconstruct the estimates';
+    $('sceneTitle').textContent = 'Recorded sufficient statistics';
+    $('plotTitle').textContent = 'Sample values and estimates';
+    $('plotNote').textContent =
+      'The sample observations are displayed as dots; adjust the estimated mean and variance.';
+
+    const n = index === 1 ? 6 : 9;
+    const centre = randint(12, 24);
+    const offsets = index === 1 ?
+      [-5, -3, -1, 1, 3, 5] :
+      [-8, -5, -3, -1, 0, 1, 3, 5, 8];
+
+    game.observed = offsets.map(v => centre + v);
+    game.sum = game.observed.reduce((s, x) => s + x, 0);
+    game.sumSquares =
+      game.observed.reduce((s, x) => s + x * x, 0);
+
+    const s = checked(FITCalcStats.summary({
+      data: game.observed
+    }));
+    if (!s) return;
+
+    game.meanAnswer = s.mean;
+    game.varianceAnswer = s.sd_sample ** 2;
+    game.estimateMean = Math.max(0, s.mean - 4);
+    game.estimateVariance = 0;
+
+    $('story').textContent =
+      index === 1 ?
+        'A field investigator kept only the observation count, sum and sum of squares.' :
+        'A larger batch has been recorded. Reconstruct both estimates without mistaking population variance for unbiased sample variance.';
+
+    $('question').textContent =
+      'Use n, Σx and Σx² to calculate the sample mean and unbiased sample variance. ' +
+      'Set both estimates. Give variance to 2 decimal places.';
+  }
+
+  function setupTest(index) {
+    $('typeLabel').textContent = 'Hypothesis test';
+    $('stageTitle').textContent = 'Decide whether to reject H₀';
+    $('sceneTitle').textContent = 'Test specification';
+    $('plotTitle').textContent = 'Standard normal test';
+    $('plotNote').textContent =
+      'The bell curve shows standard normal probability density. The critical region is shaded.';
+
+    if (index === 2) {
+      game.testVariant = 'decision';
+      game.test = {
+        mu0: 50,
+        sigma: 8,
+        n: 16,
+        xbar: 54.5,
+        alpha: 0.05,
+        tail: 'right'
+      };
+    } else {
+      game.testVariant = 'least_n';
+      game.test = {
+        mu0: 100,
+        sigma: 12,
+        n: 4,
+        xbar: 104,
+        alpha: 0.05,
+        tail: 'right'
+      };
+    }
+
+    if (index === 2) {
+      const result = FITCalcStats.ztest({
+        xbar: game.test.xbar,
+        mu0: game.test.mu0,
+        sigma: game.test.sigma,
+        n: game.test.n,
+        tail: game.test.tail
+      });
+      if (!checked(result)) return;
+
+      game.inputCritical = 0;
+      game.decision = '';
+      game.criticalAnswer =
+        FITCalcStats.normal_inv({
+          p: 1 - game.test.alpha,
+          mu: 0, sigma: 1
+        }).x;
+
+      $('story').textContent =
+        'A known population standard deviation allows a one-sided z-test.';
+      $('question').textContent =
+        'For H₀: μ = 50 against H₁: μ > 50, set the right-tail critical z-value ' +
+        'at the stated significance level, then decide whether to reject H₀.';
+    } else {
+      game.chosenN = 4;
+      game.leastN = 1;
+
+      while (game.leastN < 1000) {
+        const z = FITCalcStats.ztest({
+          xbar: game.test.xbar,
+          mu0: game.test.mu0,
+          sigma: game.test.sigma,
+          n: game.leastN,
+          tail: 'right'
+        });
+        if (!checked(z)) return;
+        if (z.p <= game.test.alpha) break;
+        game.leastN++;
+      }
+
+      $('story').textContent =
+        'The process mean may have shifted above its reference value. Increasing n changes the test statistic.';
+      $('question').textContent =
+        'Find the least positive integer sample size n for which the sample mean ' +
+        'would reject H₀ in the right-tailed test at α = 0.05. ' +
+        'The observed mean is treated as fixed while n changes.';
+    }
+  }
+
+  function render() {
+    $('sceneBody').replaceChildren();
+    $('controlArea').replaceChildren();
+    $('legend').replaceChildren();
+
+    if (game.kind === 'sampling') renderSampling();
+    if (game.kind === 'estimation') renderEstimation();
+    if (game.kind === 'test') renderTest();
+
+    renderPlot();
+    setUI();
+  }
+
+  function statCard(parent, title, value, unit = '') {
+    const card = document.createElement('div');
+    card.className = 'stat';
+    add(card, 'span', title);
+    add(card, 'strong', String(value) + (unit ? ' ' + unit : ''));
+    parent.appendChild(card);
+    return card;
+  }
+
+  function controlStepper(parent, options) {
+    const {
+      title, value, min, max, fine = 1, coarse = 5,
+      unit = '', onChange, decimals = 0
+    } = options;
+
+    const box = document.createElement('div');
+    box.className = 'control-box';
+    add(box, 'label', title);
+
+    const row = document.createElement('div');
+    row.className = 'stepper';
+
+    function set(v) {
+      if (game.solved || !Number.isFinite(v)) return;
+      const bounded = clamp(
+        Number(v.toFixed(Math.max(0, decimals))), min, max);
+      onChange(bounded);
+      render();
+    }
+
+    [
+      ['−−', -coarse],
+      ['−', -fine],
+      ['+', fine],
+      ['++', coarse]
+    ].forEach(([word, delta], i) => {
+      if (i === 2) {
+        const output = document.createElement('output');
+        output.className = 'value';
+        output.textContent = fmt(value) + (unit ? ' ' + unit : '');
+        row.appendChild(output);
+      }
+
+      const button = document.createElement('button');
+      button.textContent = word;
+      button.disabled = game.solved;
+      button.setAttribute('aria-label',
+        (delta < 0 ? 'Decrease ' : 'Increase ') +
+        title + ' by ' + Math.abs(delta));
+      button.addEventListener('click', () => set(value + delta));
+      row.appendChild(button);
+    });
+
+    box.appendChild(row);
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = String(min);
+    slider.max = String(max);
+    slider.step = String(fine);
+    slider.value = String(value);
+    slider.disabled = game.solved;
+    slider.setAttribute('aria-label', title);
+    slider.addEventListener('input', () => set(Number(slider.value)));
+    box.appendChild(slider);
+
+    parent.appendChild(box);
+  }
+
+  function renderSampling() {
+    const container = $('sceneBody');
+    const grid = document.createElement('div');
+    grid.className = 'grid-two';
+
+    statCard(grid, 'Population mean μ',
+      fmt(game.mu), 'units');
+    statCard(grid, 'Population SD σ',
+      fmt(game.sigma), 'units');
+    statCard(grid, 'Population type',
+      game.population);
+    statCard(grid, 'Sample means drawn',
+      game.sampleDraws);
+
+    container.appendChild(grid);
+
+    add(container, 'p',
+      'Equally likely population values: ' +
+      game.populationValues.join(', ') + ' units.',
+      'intro');
+
+    controlStepper($('controlArea'), {
+      title: 'Sample size n (observations)',
+      value: game.sampleN,
+      min: 1, max: 100,
+      fine: 1, coarse: 10,
+      onChange(v) {
+        if (v !== game.sampleN) {
+          game.sampleN = v;
+          game.sampleMeans = [];
+          game.sampleDraws = 0;
+        }
+      }
+    });
+
+    const box = document.createElement('div');
+    box.className = 'control-box';
+    add(box, 'h3', 'Run repeated samples');
+
+    add(box, 'p',
+      'Draws are seeded and use replacement. Pick a batch size.',
+      'intro');
+
+    const row = document.createElement('div');
+    row.className = 'control-row';
+
+    [1, 10, 100, 1000].forEach(batch => {
+      const btn = document.createElement('button');
+      btn.textContent = String(batch);
+      btn.className = game.selectedBatch === batch ? 'selected' : '';
+      btn.setAttribute('aria-pressed',
+        String(game.selectedBatch === batch));
+      btn.disabled = game.solved;
+      btn.addEventListener('click', () => {
+        game.selectedBatch = batch;
+        render();
+      });
+      row.appendChild(btn);
+    });
+    box.appendChild(row);
+
+    const drawButton = document.createElement('button');
+    drawButton.className = 'primary';
+    drawButton.textContent =
+      'Draw ' + game.selectedBatch + ' samples';
+    drawButton.disabled = game.solved ||
+      game.sampleDraws >= 5000;
+    drawButton.addEventListener('click', () =>
+      drawSamples(game.selectedBatch));
+    box.appendChild(drawButton);
+
+    $('controlArea').appendChild(box);
+  }
+
+  function sampleOne(random) {
+    const values = [];
+    for (let i = 0; i < game.sampleN; i++) {
+      const idx = Math.floor(
+        random() * game.populationValues.length);
+      values.push(game.populationValues[idx]);
+    }
+
+    const s = FITCalcStats.summary({ data: values });
+    return s.error ? null : s.mean;
+  }
+
+  function drawSamples(amount) {
+    if (game.solved) return;
+
+    const remaining = Math.max(0, 5000 - game.sampleDraws);
+    const count = Math.min(amount, remaining);
+    if (count < 1) return;
+
+    const random = makeRng(
+      BASE_SEED + game.round * 9001 +
+      game.sampleN * 719 + game.sampleDraws * 13
+    );
+
+    const results = [];
+    for (let i = 0; i < count; i++) {
+      const m = sampleOne(random);
+      if (m !== null && Number.isFinite(m)) results.push(m);
+    }
+
+    const token = ++animationToken;
+    const reduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)').matches;
+
+    if (reduced || results.length <= 10) {
+      game.sampleMeans.push(...results);
+      game.sampleDraws = game.sampleMeans.length;
+      render();
+      return;
+    }
+
+    let cursor = 0;
+    const stride = Math.max(1, Math.ceil(results.length / 12));
+
+    function frame() {
+      if (token !== animationToken) return;
+      const end = Math.min(results.length, cursor + stride);
+      for (; cursor < end; cursor++) {
+        game.sampleMeans.push(results[cursor]);
+      }
+      game.sampleDraws = game.sampleMeans.length;
+      renderPlot();
+      updateSamplingCount();
+
+      if (cursor < results.length) {
+        animationFrame = requestAnimationFrame(frame);
+      } else {
+        animationFrame = null;
+        render();
+      }
+    }
+
+    animationFrame = requestAnimationFrame(frame);
+  }
+
+  function updateSamplingCount() {
+    const cards = $('sceneBody').querySelectorAll('.stat strong');
+    if (cards.length >= 4) {
+      cards[3].textContent = String(game.sampleDraws);
+    }
+  }
+
+  function renderEstimation() {
+    const container = $('sceneBody');
+    const grid = document.createElement('div');
+    grid.className = 'grid-two';
+
+    statCard(grid, 'Sample size n',
+      game.observed.length, 'observations');
+    statCard(grid, 'Sum Σx',
+      game.sum, 'units');
+    statCard(grid, 'Sum of squares Σx²',
+      game.sumSquares, 'units²');
+    statCard(grid, 'Estimator',
+      'Unbiased s²');
+
+    container.appendChild(grid);
+
+    const sceneNote = document.createElement('p');
+    sceneNote.className = 'intro';
+    sceneNote.textContent =
+      'Only these sufficient statistics are needed for the calculations.';
+    container.appendChild(sceneNote);
+
+    const box = document.createElement('div');
+    box.className = 'control-box';
+    add(box, 'h3', 'Enter your estimates');
+
+    [
+      {
+        title: 'Sample mean x̄ (units)',
+        field: 'estimateMean',
+        step: '0.01'
+      },
+      {
+        title: 'Unbiased sample variance s² (units²)',
+        field: 'estimateVariance',
+        step: '0.01'
+      }
+    ].forEach(item => {
+      const labelEl = add(box, 'label', item.title);
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.step = item.step;
+      input.value = String(game[item.field]);
+      input.min = '0';
+      input.disabled = game.solved;
+      input.setAttribute('aria-label', item.title);
+      input.addEventListener('input', () => {
+        const v = input.valueAsNumber;
+        if (Number.isFinite(v) && v >= 0) {
+          game[item.field] = v;
+          renderPlot();
+        }
+      });
+      labelEl.appendChild(input);
+    });
+
+    $('controlArea').appendChild(box);
+  }
+
+  function renderTest() {
+    const container = $('sceneBody');
+    const t = game.test;
+    const grid = document.createElement('div');
+    grid.className = 'grid-two';
+
+    statCard(grid, 'Null mean μ₀',
+      t.mu0, 'units');
+    statCard(grid, 'Known population SD σ',
+      t.sigma, 'units');
+    statCard(grid, 'Observed mean x̄',
+      t.xbar, 'units');
+    statCard(grid, 'Significance level α',
+      fmt(t.alpha));
+
+    container.appendChild(grid);
+
+    if (game.testVariant === 'decision') {
+      statCard(container,
+        'Sample size', t.n + ' observations');
+
+      const box = document.createElement('div');
+      box.className = 'control-box';
+
+      add(box, 'h3', 'Critical z-value');
+
+      const number = document.createElement('input');
+      number.type = 'number';
+      number.step = '0.01';
+      number.min = '-4';
+      number.max = '4';
+      number.value = String(game.inputCritical);
+      number.disabled = game.solved;
+      number.setAttribute('aria-label',
+        'Right-tailed critical z-value');
+      number.addEventListener('input', () => {
+        if (Number.isFinite(number.valueAsNumber)) {
+          game.inputCritical = number.valueAsNumber;
+          renderPlot();
+        }
+      });
+      box.appendChild(number);
+
+      add(box, 'h3', 'Statistical decision');
+      const choices = document.createElement('div');
+      choices.className = 'choice-list';
+
+      [
+        ['reject', 'Reject H₀'],
+        ['retain', 'Do not reject H₀']
+      ].forEach(([key, title]) => {
+        const btn = document.createElement('button');
+        btn.textContent = title;
+        btn.className = 'choice' +
+          (game.decision === key ? ' selected' : '');
+        btn.disabled = game.solved;
+        btn.setAttribute('aria-pressed',
+          String(game.decision === key));
+        btn.addEventListener('click', () => {
+          game.decision = key;
+          render();
+        });
+        choices.appendChild(btn);
+      });
+
+      box.appendChild(choices);
+      $('controlArea').appendChild(box);
+    } else {
+      controlStepper($('controlArea'), {
+        title: 'Sample size n (observations)',
+        value: game.chosenN,
+        min: 1, max: 100,
+        fine: 1, coarse: 10,
+        onChange(v) { game.chosenN = v; }
+      });
+    }
+  }
+
+  function renderPlot() {
+    const svg = $('plot');
+    svg.replaceChildren();
+
+    if (game.kind === 'sampling') plotSampling(svg);
+    if (game.kind === 'estimation') plotEstimation(svg);
+    if (game.kind === 'test') plotTest(svg);
+  }
+
+  function plotSampling(svg) {
+    const theoretical = FITCalcStats.sampling_mean({
+      mu: game.mu,
+      sigma: game.sigma,
+      n: game.sampleN
+    });
+    if (theoretical.error || theoretical.se <= 0) return;
+
+    const left = 54, right = 406, top = 43, bottom = 266;
+    const plotW = right - left;
+    const plotH = bottom - top;
+
+    const domainLo = game.mu - Math.max(
+      4 * theoretical.se, game.sigma * 0.5);
+    const domainHi = game.mu + Math.max(
+      4 * theoretical.se, game.sigma * 0.5);
+
+    const binCount = 22;
+    const counts = Array(binCount).fill(0);
+
+    for (const m of game.sampleMeans) {
+      const index = clamp(Math.floor(
+        (m - domainLo) / (domainHi - domainLo) * binCount),
+        0, binCount - 1);
+      counts[index]++;
+    }
+
+    const binWidth = (domainHi - domainLo) / binCount;
+    const maxBar = Math.max(1, ...counts);
+    const peakExpected = Math.max(
+      1, game.sampleMeans.length * binWidth /
+      (theoretical.se * Math.sqrt(2 * Math.PI)));
+    const maxY = Math.max(maxBar, peakExpected) * 1.2;
+
+    const x = value => left +
+      (value - domainLo) / (domainHi - domainLo) * plotW;
+    const y = count => bottom - count / maxY * plotH;
+
+    label(svg, 210, 24, 'Distribution of sample means', {
+      'font-size': 16, 'font-weight': 800
+    });
+
+    for (let i = 0; i <= 4; i++) {
+      const tick = maxY * i / 4;
+      const yy = y(tick);
+      line(svg, left, yy, right, yy, '#E4E2DB', 1);
+      label(svg, left - 9, yy + 4,
+        fmt(tick, 3), { 'text-anchor': 'end', 'font-size': 10 });
+    }
+
+    counts.forEach((count, i) => {
+      const x1 = left + i / binCount * plotW;
+      const x2 = left + (i + 1) / binCount * plotW;
+
+      svg.appendChild(S('rect', {
+        x: x1, y: y(count),
+        width: Math.max(0, x2 - x1),
+        height: Math.max(0, bottom - y(count)),
+        fill: '#B8A5FF', stroke: '#111', 'stroke-width': .7
+      }));
+    });
+
+    let path = '';
+
+    for (let i = 0; i <= 150; i++) {
+      const value = domainLo +
+        i / 150 * (domainHi - domainLo);
+
+      const z = FITCalcStats.zscore({
+        x: value,
+        mean: theoretical.mean,
+        sd: theoretical.se
+      });
+
+      if (z.error) return;
+
+      const density = Math.exp(-0.5 * z.z * z.z) /
+        (theoretical.se * Math.sqrt(2 * Math.PI));
+
+      const expectedCount =
+        density * binWidth * game.sampleMeans.length;
+
+      const cmd = i === 0 ? 'M' : 'L';
+      path += cmd + x(value).toFixed(2) + ' ' +
+        y(expectedCount).toFixed(2) + ' ';
+    }
+
+    svg.appendChild(S('path', {
+      d: path, fill: 'none',
+      stroke: '#111', 'stroke-width': 3
+    }));
+
+    line(svg, x(theoretical.mean), top,
+      x(theoretical.mean), bottom,
+      PURPLE, 2.5, '6 4');
+
+    line(svg, left, top, left, bottom, '#111', 3);
+    line(svg, left, bottom, right, bottom, '#111', 3);
+
+    for (let i = 0; i <= 4; i++) {
+      const value = domainLo +
+        i / 4 * (domainHi - domainLo);
+      const xx = x(value);
+      line(svg, xx, bottom, xx, bottom + 6);
+      label(svg, xx, bottom + 21, fmt(value, 3), {
+        'font-size': 10
+      });
+    }
+
+    label(svg, 224, 310, 'Sample mean (units)', {
+      'font-size': 12, 'font-weight': 700
+    });
+
+    svg.appendChild(S('text', {
+      x: 14, y: 152,
+      transform: 'rotate(-90 14 152)',
+      'font-size': 11, 'font-weight': 700,
+      'text-anchor': 'middle'
+    }, 'Number of sample means (count)'));
+
+    svg.setAttribute('aria-label',
+      'Histogram containing ' + game.sampleMeans.length +
+      ' simulated sample means. Horizontal axis: sample mean in units. ' +
+      'Vertical axis: number of sample means. A black normal approximation ' +
+      'and a purple population-mean marker are overlaid.');
+
+    $('legend').innerHTML =
+      '<span><i class="key" style="background:#B8A5FF"></i>Simulated means</span>' +
+      '<span>━━ Normal approximation</span>' +
+      '<span>┄┄ Population mean</span>';
+  }
+
+  function plotEstimation(svg) {
+    const values = game.observed;
+    if (!values.length) return;
+
+    const left = 46, right = 405, baseline = 236;
+    const min = Math.min(...values) - 4;
+    const max = Math.max(...values) + 4;
+    const x = v => left +
+      (v - min) / (max - min) * (right - left);
+
+    label(svg, 210, 24, 'Sample observations', {
+      'font-size': 16, 'font-weight': 800
+    });
+
+    for (let t = Math.ceil(min / 2) * 2; t <= max; t += 2) {
+      line(svg, x(t), 54, x(t), baseline, '#E4E2DB', 1);
+      label(svg, x(t), baseline + 19, t, {
+        'font-size': 10
+      });
+    }
+
+    values.forEach((v, i) => {
+      svg.appendChild(S('circle', {
+        cx: x(v), cy: 95 + (i % 2) * 42,
+        r: 9, fill: '#B8A5FF',
+        stroke: '#111', 'stroke-width': 2
+      }));
+    });
+
+    if (game.estimateMean >= min &&
+        game.estimateMean <= max) {
+      line(svg, x(game.estimateMean), 45,
+        x(game.estimateMean), baseline,
+        PURPLE, 3, '6 4');
+    }
+
+    line(svg, left, baseline, right, baseline, '#111', 3);
+
+    label(svg, 210, 299, 'Observation value (units)', {
+      'font-size': 12, 'font-weight': 700
+    });
+
+    label(svg, 65, 59, 'Sample dots', {
+      'font-size': 11, 'text-anchor': 'start'
+    });
+
+    svg.setAttribute('aria-label',
+      'Dot plot of sample observations with horizontal axis in units. ' +
+      'The dashed marker shows the player-selected sample mean.');
+
+    $('legend').innerHTML =
+      '<span><i class="key" style="background:#B8A5FF"></i>Observations</span>' +
+      '<span>┄┄ Your mean estimate</span>';
+  }
+
+  function normalDensity(z) {
+    const result = FITCalcStats.zscore({
+      x: z, mean: 0, sd: 1
+    });
+    if (result.error) return 0;
+    return Math.exp(-0.5 * result.z * result.z) /
+      Math.sqrt(2 * Math.PI);
+  }
+
+  function plotTest(svg) {
+    const left = 47, right = 407, top = 40, bottom = 263;
+    const x = z => left + (z + 4) / 8 * (right - left);
+    const y = d => bottom - d / 0.43 * 170;
+
+    label(svg, 210, 24, 'Standard normal distribution', {
+      'font-size': 16, 'font-weight': 800
+    });
+
+    let actualN = game.testVariant === 'least_n' ?
+      game.chosenN : game.test.n;
+
+    const result = FITCalcStats.ztest({
+      xbar: game.test.xbar,
+      mu0: game.test.mu0,
+      sigma: game.test.sigma,
+      n: actualN,
+      tail: game.test.tail
+    });
+    if (result.error) return;
+
+    const critical = game.testVariant === 'decision' ?
+      game.inputCritical :
+      FITCalcStats.normal_inv({
+        p: 1 - game.test.alpha,
+        mu: 0, sigma: 1
+      }).x;
+
+    if (!Number.isFinite(critical)) return;
+
+    let area = 'M' + x(clamp(critical, -4, 4)) +
+      ' ' + bottom + ' ';
+
+    for (let i = 0; i <= 120; i++) {
+      const z = clamp(critical, -4, 4) +
+        i / 120 * (4 - clamp(critical, -4, 4));
+      area += 'L' + x(z).toFixed(2) + ' ' +
+        y(normalDensity(z)).toFixed(2) + ' ';
+    }
+
+    area += 'L' + x(4) + ' ' + bottom + ' Z';
+
+    svg.appendChild(S('path', {
+      d: area, fill: '#F7B5B1',
+      stroke: 'none'
+    }));
+
+    let curve = '';
+    for (let i = 0; i <= 200; i++) {
+      const z = -4 + 8 * i / 200;
+      curve += (i === 0 ? 'M' : 'L') +
+        x(z).toFixed(2) + ' ' +
+        y(normalDensity(z)).toFixed(2) + ' ';
+    }
+
+    svg.appendChild(S('path', {
+      d: curve, fill: 'none',
+      stroke: '#111', 'stroke-width': 3
+    }));
+
+    line(svg, x(0), top + 8, x(0), bottom,
+      '#777', 1.5, '5 4');
+
+    if (critical >= -4 && critical <= 4) {
+      line(svg, x(critical), top + 8,
+        x(critical), bottom, RED, 3, '6 4');
+    }
+
+    const observedZ = clamp(result.z, -4, 4);
+    line(svg, x(observedZ), top + 8,
+      x(observedZ), bottom, PURPLE, 3);
+
+    svg.appendChild(S('circle', {
+      cx: x(observedZ), cy: y(normalDensity(observedZ)),
+      r: 6, fill: YELLOW,
+      stroke: '#111', 'stroke-width': 2
+    }));
+
+    line(svg, left, bottom, right, bottom, '#111', 3);
+
+    for (let i = -4; i <= 4; i++) {
+      line(svg, x(i), bottom, x(i), bottom + 6);
+      label(svg, x(i), bottom + 22, i, {
+        'font-size': 11
+      });
+    }
+
+    label(svg, 220, 309, 'Standardised value z (no units)', {
+      'font-size': 12, 'font-weight': 700
+    });
+
+    svg.appendChild(S('text', {
+      x: 14, y: 146,
+      transform: 'rotate(-90 14 146)',
+      'font-size': 11, 'font-weight': 700,
+      'text-anchor': 'middle'
+    }, 'Probability density (per z unit)'));
+
+    svg.setAttribute('aria-label',
+      'Standard normal density curve with right-tail critical region shaded. ' +
+      'A purple line marks the observed test statistic, and a dashed red line ' +
+      'marks the selected critical boundary.');
+
+    $('legend').innerHTML =
+      '<span><i class="key" style="background:#F7B5B1"></i>Critical region</span>' +
+      '<span>━━ Observed z</span>' +
+      '<span>┄┄ Critical boundary</span>';
+  }
+
+  function checkSampling() {
+    const theory = FITCalcStats.sampling_mean({
+      mu: game.mu,
+      sigma: game.sigma,
+      n: game.sampleN
+    });
+    if (!checked(theory)) return;
+
+    const difference = theory.se - game.targetSE;
+
+    if (Math.abs(difference) > 1e-8) {
+      game.attempts++;
+      feedback('Your theoretical standard error is ' +
+        fmt(Math.abs(difference)) + ' units too ' +
+        (difference > 0 ? 'large.' : 'small.') +
+        ' Remember that SE decreases as √n increases.', false);
+      return;
+    }
+
+    if (game.sampleDraws < 100) {
+      game.attempts++;
+      feedback('Your sample size is suitable. ' +
+        'Now draw at least 100 samples to investigate the distribution.', false);
+      return;
+    }
+
+    win('Correct! With n = ' + game.sampleN +
+      ', the theoretical standard error is ' +
+      fmt(theory.se) + ' units. The simulated histogram need not match the curve exactly.');
+  }
+
+  function checkEstimation() {
+    const result = FITCalcStats.summary({
+      data: game.observed
+    });
+    if (!checked(result)) return;
+
+    const expectedMean = result.mean;
+    const expectedVariance = result.sd_sample ** 2;
+    const meanDiff = game.estimateMean - expectedMean;
+    const varianceDiff =
+      game.estimateVariance - expectedVariance;
+
+    if (Math.abs(meanDiff) > 0.015 ||
+        Math.abs(varianceDiff) > 0.015) {
+      game.attempts++;
+      let text = '';
+
+      if (Math.abs(meanDiff) > 0.015) {
+        text += 'Your mean estimate is ' +
+          fmt(Math.abs(meanDiff)) + ' units too ' +
+          (meanDiff > 0 ? 'high. ' : 'low. ');
+      }
+
+      if (Math.abs(varianceDiff) > 0.015) {
+        text += 'Your variance estimate is ' +
+          fmt(Math.abs(varianceDiff)) + ' units² too ' +
+          (varianceDiff > 0 ? 'high.' : 'low.');
+      }
+
+      feedback(text, false);
+      return;
+    }
+
+    win('Correct! The sample mean is ' +
+      fmt(expectedMean) + ' units, and the unbiased sample variance is ' +
+      fmt(expectedVariance) + ' units². The variance denominator is n − 1.');
+  }
+
+  function checkTest() {
+    if (game.testVariant === 'decision') {
+      const result = FITCalcStats.ztest({
+        xbar: game.test.xbar,
+        mu0: game.test.mu0,
+        sigma: game.test.sigma,
+        n: game.test.n,
+        tail: game.test.tail
+      });
+      if (!checked(result)) return;
+
+      const expected = FITCalcStats.normal_inv({
+        p: 1 - game.test.alpha,
+        mu: 0, sigma: 1
+      });
+      if (!checked(expected)) return;
+
+      const criticalDifference =
+        game.inputCritical - expected.x;
+
+      if (Math.abs(criticalDifference) > 0.011) {
+        game.attempts++;
+        feedback('Your critical z-value is ' +
+          fmt(Math.abs(criticalDifference)) +
+          ' too ' +
+          (criticalDifference > 0 ? 'high.' : 'low.') +
+          ' Use the upper-tail area α.', false);
+        return;
+      }
+
+      const reject = result.p <= game.test.alpha;
+      const correctDecision = reject ? 'reject' : 'retain';
+
+      if (game.decision !== correctDecision) {
+        game.attempts++;
+        feedback('Recheck the decision. Compare the observed z-statistic ' +
+          'with the right-tail critical value.', false);
+        return;
+      }
+
+      win('Correct! z = ' + fmt(result.z) +
+        ', p = ' + fmt(result.p) +
+        '. The conclusion follows from comparing p with α.');
+      return;
+    }
+
+    if (game.chosenN !== game.leastN) {
+      game.attempts++;
+      const direction = game.chosenN > game.leastN ?
+        'Your n is larger than the least sufficient value.' :
+        'Your n is too small to reach significance.';
+
+      feedback(direction +
+        ' Find the first integer n with right-tail p ≤ α.', false);
+      return;
+    }
+
+    const result = FITCalcStats.ztest({
+      xbar: game.test.xbar,
+      mu0: game.test.mu0,
+      sigma: game.test.sigma,
+      n: game.chosenN,
+      tail: 'right'
+    });
+
+    win('Correct! The least sample size is ' +
+      game.leastN + '. At that size, z = ' +
+      fmt(result.z) + ' and p = ' +
+      fmt(result.p) + '.');
+  }
+
+  function check() {
+    if (game.solved) return;
+    if (game.kind === 'sampling') checkSampling();
+    if (game.kind === 'estimation') checkEstimation();
+    if (game.kind === 'test') checkTest();
+  }
+
+  function win(message) {
+    game.solved = true;
+
+    const earned = game.hinted ? 50 :
+      game.attempts === 0 ? 100 :
+      game.attempts === 1 ? 75 : 50;
+
+    game.score += earned;
+    feedback('★ Investigation complete! ' +
+      message + ' +' + earned + ' points.', true);
+    render();
+  }
+
+  function hint() {
+    if (game.solved || game.hinted) return;
+    game.hinted = true;
+
+    let message = '';
+
+    if (game.kind === 'sampling') {
+      message =
+        'Hint: rearrange SE = σ/√n to get n = (σ/SE)². ' +
+        'Then examine at least 100 independent sample means.';
+    } else if (game.kind === 'estimation') {
+      message =
+        'Hint: x̄ = Σx/n. Then calculate ' +
+        's² = [Σx² − (Σx)²/n]/(n − 1). ' +
+        'Do not divide sample variance by n.';
+    } else if (game.testVariant === 'decision') {
+      message =
+        'Hint: the right-tail critical value leaves α probability to its right. ' +
+        'Compare the observed z-value with this boundary.';
+    } else {
+      message =
+        'Hint: for each candidate n, calculate z = (x̄ − μ₀)√n/σ. ' +
+        'Increase n until the right-tail p-value is no greater than α.';
+    }
+
+    feedback(message);
+    setUI();
+  }
+
+  function next() {
+    if (!game.solved) return;
+
+    if (game.round < 5) {
+      updateRound(game.round + 1);
+      return;
+    }
+
+    $('game').classList.add('hidden');
+    $('finish').classList.remove('hidden');
+    $('progress').style.width = '100%';
+
+    const stars = game.score >= 525 ? 3 :
+      game.score >= 400 ? 2 : 1;
+
+    $('stars').textContent =
+      '★'.repeat(stars) + '☆'.repeat(3 - stars);
+    $('stars').setAttribute('aria-label',
+      stars + ' out of 3 stars');
+    $('finalScore').textContent =
+      game.score + ' / 600 points';
+
+    $('finalMessage').textContent =
+      stars === 3 ?
+        'Excellent reasoning across sampling, estimation and inference.' :
+        stars === 2 ?
+          'Strong statistical thinking. Practise your most difficult investigation.' :
+          'Good effort. Replay to strengthen your statistical reasoning.';
+  }
+
+  function restart() {
+    game.score = 0;
+    $('game').classList.remove('hidden');
+    $('finish').classList.add('hidden');
+    updateRound(0);
+  }
+
+  $('hintBtn').addEventListener('click', hint);
+  $('checkBtn').addEventListener('click', check);
+  $('nextBtn').addEventListener('click', next);
+  $('againBtn').addEventListener('click', restart);
+
+  restart();
+})();
+</script>
+</body>
+</html>

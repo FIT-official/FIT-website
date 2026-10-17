@@ -1,0 +1,1982 @@
+
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Process Watch — Polytechnic Statistics</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+html{background:var(--fit-paper)}
+body{margin:0;padding:16px 12px 42px;background:var(--fit-paper);color:var(--fit-ink);font:400 16px/1.48 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit}
+button,input[type=range],input[type=number],.tap,.drag{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.drag{touch-action:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{min-height:46px;padding:9px 15px;border:2px solid #111;border-radius:999px;background:#fff;color:#111;font-weight:800;cursor:pointer;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.48;cursor:not-allowed}
+button.primary{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+button.primary:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button.soft{background:var(--lvl-poly-tint)}
+button.selected{background:var(--lvl-poly);border-width:3px}
+.wrap{max-width:1180px;margin:auto;min-width:0}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:17px}
+.badge{display:inline-block;padding:7px 13px;border:2px solid #111;border-radius:999px;background:var(--lvl-poly);color:var(--lvl-poly-on);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+h1{font-size:clamp(30px,5vw,43px);line-height:1.1;margin:8px 0;font-weight:800}
+h2{font-size:22px;margin:0 0 12px;font-weight:800}
+h3{font-size:17px;margin:0 0 10px;font-weight:800}
+p{margin:7px 0}
+.intro{color:var(--fit-ink-2);font-weight:600}
+.hud{display:flex;gap:9px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;min-height:39px;padding:7px 12px;border:2px solid #111;border-radius:999px;background:#fff;font-size:14px;font-weight:800}
+.pill.accent{background:var(--lvl-poly-tint)}
+.progress{height:13px;margin:0 0 18px;border:2px solid #111;border-radius:999px;background:#fff;overflow:hidden}
+.progress-fill{height:100%;width:0;background:var(--lvl-poly);transition:width .2s}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:17px}
+.card{min-width:0;padding:16px;border:2px solid #111;border-radius:var(--r-lg);background:#fff;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-poly-tint)}
+.question{padding:14px;margin:12px 0;border:2px solid #111;border-radius:16px;background:#fff;font-size:17px;font-weight:700}
+.scene{padding:12px;margin-top:12px;border:2px solid #111;border-radius:18px;background:#fff;min-width:0}
+.figure{display:block;width:100%;max-width:100%;height:auto;border:2px solid #111;border-radius:16px;background:#fff}
+.figure text{font-family:Inter,system-ui,sans-serif;fill:#111}
+.grid-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.stat{padding:11px;border:2px solid #111;border-radius:14px;background:var(--fit-sunken);min-width:0}
+.stat span{display:block;font-size:12px;font-weight:700;color:var(--fit-ink-3)}
+.stat strong{display:block;font-size:19px;margin-top:4px;overflow-wrap:anywhere}
+.control-box{padding:13px;margin:13px 0;border:2px solid #111;border-radius:17px;background:var(--fit-sunken)}
+.control-box label{display:block;margin:8px 0;font-weight:800}
+.stepper{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap}
+.stepper button{min-width:46px;padding:8px}
+.value{display:inline-block;min-width:85px;padding:8px;border:2px solid #111;border-radius:12px;background:#fff;text-align:center;font-size:19px;font-weight:800}
+input[type=number]{width:100%;min-width:0;min-height:46px;padding:9px;border:2px solid #111;border-radius:12px;background:#fff;font-size:18px}
+input[type=range]{width:100%;min-height:44px;accent-color:#FF6B3D;cursor:pointer}
+.choice-list{display:grid;gap:9px;margin:12px 0}
+.choice{display:flex;align-items:center;gap:12px;min-height:54px;padding:12px;border-radius:15px;text-align:left}
+.choice.selected{background:var(--lvl-poly-tint)}
+.choice .mark{display:grid;place-items:center;flex:0 0 27px;height:27px;border:2px solid #111;border-radius:7px;background:#fff}
+.feedback{min-height:66px;margin-top:13px;padding:13px;border:2px solid #111;border-radius:16px;background:#fff;font-weight:600}
+.feedback.good{background:#e1f8e8;border-color:var(--fit-success)}
+.feedback.bad{background:#ffebe8;border-color:var(--fit-danger)}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0;font-size:12px;font-weight:700}
+.key{display:inline-block;width:16px;height:12px;margin-right:5px;border:2px solid #111;vertical-align:middle}
+details{margin-top:16px;padding:12px;border:2px solid #111;border-radius:17px;background:#fff}
+summary{font-weight:800;cursor:pointer}
+.math-line{padding:7px 0;border-bottom:1px solid var(--fit-line-soft);font-size:14px}
+.math-line:last-child{border:0}
+.concept{display:flex;gap:12px;align-items:center;margin-top:15px}
+.concept svg{flex:0 0 110px;width:110px}
+.concept p{font-size:13px;color:var(--fit-ink-2)}
+.finish{text-align:center;padding:30px}
+.stars{font-size:52px;letter-spacing:4px}
+.hidden{display:none!important}
+footer{text-align:center;margin-top:30px;color:var(--fit-ink-3);font-size:12px}
+@media(min-width:900px){body{padding:25px 28px 50px}.layout{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);align-items:start}.card{padding:22px}}
+@media(max-width:420px){.card{padding:12px}.stepper button{min-width:44px;padding:7px}.value{min-width:72px}.figure{border-radius:12px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div>
+  <span class="badge">Poly · Maths</span>
+  <h1>Process Watch</h1>
+  <p class="intro">Monitor fill weights, calculate control limits and decide when to stop production.</p>
+ </div>
+ <div class="hud">
+  <span id="roundLabel" class="pill">Round 1/6</span>
+  <span id="scoreLabel" class="pill accent">Score: 0</span>
+ </div>
+</header>
+<div class="progress"><div id="progress" class="progress-fill"></div></div>
+
+<main id="game" class="layout">
+ <section class="card stage">
+  <div class="hud" style="margin-bottom:12px">
+   <span id="typeLabel" class="pill">Control chart</span>
+   <span id="difficultyLabel" class="pill">Warm-up</span>
+  </div>
+  <h2 id="stageTitle">Production monitoring</h2>
+  <p id="story"></p>
+  <div id="question" class="question"></div>
+  <div class="scene">
+   <h3 id="sceneTitle">Production records</h3>
+   <div id="sceneBody"></div>
+  </div>
+  <div class="concept">
+   <svg viewBox="0 0 110 85" role="img" aria-label="A simple control chart with a point outside the upper limit">
+    <rect x="2" y="2" width="106" height="81" rx="14" fill="#fff" stroke="#111" stroke-width="3"/>
+    <path d="M13 26H98" stroke="#D92D20" stroke-width="2" stroke-dasharray="5 3"/>
+    <path d="M13 45H98" stroke="#111" stroke-width="2"/>
+    <path d="M13 64H98" stroke="#D92D20" stroke-width="2" stroke-dasharray="5 3"/>
+    <path d="M16 48L32 41L48 46L64 19L80 43L96 44" fill="none" stroke="#FF6B3D" stroke-width="3"/>
+    <circle cx="64" cy="19" r="5" fill="#FFDD00" stroke="#111" stroke-width="2"/>
+   </svg>
+   <p><strong>Signal rule:</strong> a point outside the 3-sigma limits, or eight consecutive points on one side of the centre line, signals investigation.</p>
+  </div>
+ </section>
+
+ <section class="card">
+  <h2>Live x̄ control chart</h2>
+  <p id="plotNote" class="intro">Subgroup means and your selected limits update live.</p>
+  <svg id="plot" class="figure" viewBox="0 0 440 325" role="img" aria-label="Control chart of mean fill weight in grams"></svg>
+  <div id="legend" class="legend"></div>
+  <div id="controlArea"></div>
+  <div class="controls">
+   <button id="hintBtn" class="soft">Hint −25</button>
+   <button id="checkBtn" class="primary">Check answer</button>
+   <button id="nextBtn" class="primary hidden">Next round →</button>
+  </div>
+  <div id="feedback" class="feedback" aria-live="polite" role="status">Examine the process and check your decision.</div>
+  <details>
+   <summary>The maths</summary>
+   <div class="math-line">Each subgroup mean x̄ is the arithmetic average of n measured fill weights, in grams.</div>
+   <div class="math-line">Known process mean μ and individual standard deviation σ give SE = σ/√n.</div>
+   <div class="math-line">Centre line CL = μ.</div>
+   <div class="math-line">Upper control limit UCL = μ + 3σ/√n.</div>
+   <div class="math-line">Lower control limit LCL = μ − 3σ/√n.</div>
+   <div class="math-line">The total control-band width is UCL − LCL = 6σ/√n.</div>
+   <div class="math-line">Signal: one point strictly outside the control limits, or eight consecutive subgroup means strictly above or below the centre line.</div>
+   <div class="math-line">A point exactly on a limit is not beyond it. A point on the centre line interrupts a run.</div>
+   <div class="math-line">These are x̄ control limits, not product specification limits or confidence intervals.</div>
+  </details>
+ </section>
+</main>
+
+<section id="finish" class="card finish hidden">
+ <span class="badge">Poly · Maths</span>
+ <h2>Production audit complete!</h2>
+ <div id="stars" class="stars" aria-label="Stars earned"></div>
+ <p id="finalScore" style="font-size:24px;font-weight:800"></p>
+ <p id="finalMessage"></p>
+ <button id="againBtn" class="primary">Play again ↻</button>
+</section>
+<footer>Fix It Today</footer>
+</div>
+
+<script>
+/* FIT-CALC-BEGIN statistics */
+const FITCalcStats = (function () {
+  'use strict';
+
+  const MAX = 200;
+  const PI = Math.PI;
+
+  function err(error, reason) {
+    return { error, reason };
+  }
+
+  function finite(x) {
+    return typeof x === 'number' && Number.isFinite(x);
+  }
+
+  function finiteFields(o, names) {
+    if (!o || typeof o !== 'object') {
+      return err('ConstraintViolation', 'invalid_input');
+    }
+    for (const k of names) {
+      if (!finite(o[k])) {
+        return err('ConstraintViolation', 'non_finite_value');
+      }
+    }
+    return null;
+  }
+
+  function validData(data, minimum = 1) {
+    if (!Array.isArray(data)) {
+      return err('ConstraintViolation', 'invalid_data');
+    }
+    if (data.length === 0) {
+      return err('ConstraintViolation', 'empty_data');
+    }
+    if (data.length > MAX) {
+      return err('ConstraintViolation', 'too_many_points_max_200');
+    }
+    if (data.some(v => !finite(v))) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+    if (data.length < minimum) {
+      return err('ConstraintViolation', 'points_out_of_range_2_200');
+    }
+    return null;
+  }
+
+  function validConf(conf) {
+    if (!finite(conf) || conf <= 0 || conf >= 1) {
+      return err('ConstraintViolation', 'confidence_out_of_range');
+    }
+    return null;
+  }
+
+  function validN(n) {
+    if (!Number.isSafeInteger(n) || n < 1) {
+      return err('ConstraintViolation', 'sample_size_not_positive_integer');
+    }
+    return null;
+  }
+
+  function validEdges(edges) {
+    if (!Array.isArray(edges) ||
+        edges.length < 2 ||
+        edges.length > MAX + 1 ||
+        edges.some(v => !finite(v))) {
+      return err('ConstraintViolation', 'bad_class_edges');
+    }
+    for (let i = 1; i < edges.length; i++) {
+      if (edges[i] <= edges[i - 1]) {
+        return err('ConstraintViolation', 'bad_class_edges');
+      }
+    }
+    return null;
+  }
+
+  function sortNumbers(a) {
+    return a.slice().sort((x, y) => x - y);
+  }
+
+  function middle(a) {
+    const n = a.length;
+    const m = Math.floor(n / 2);
+    return n % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  }
+
+  function quartiles(sorted) {
+    const n = sorted.length;
+    if (n === 1) {
+      return {
+        q1: sorted[0],
+        median: sorted[0],
+        q3: sorted[0]
+      };
+    }
+    const m = Math.floor(n / 2);
+    return {
+      q1: middle(sorted.slice(0, m)),
+      median: middle(sorted),
+      q3: middle(sorted.slice(n % 2 ? m + 1 : m))
+    };
+  }
+
+  function moments(data) {
+    const n = data.length;
+    const origin = data[0];
+    let sum = 0;
+    for (const x of data) sum += x - origin;
+    const mean = origin + sum / n;
+    let ss = 0;
+    for (const x of data) {
+      const d = x - mean;
+      ss += d * d;
+    }
+    return { mean, ss };
+  }
+
+  /*
+   * Internal standard normal CDF.
+   * Simpson integration of the normal density on [0, |z|].
+   * Step width <= 0.025, with an even number of panels.
+   * Absolute integration error is well below 1e-7.
+   * Values beyond 12 standard deviations use limiting tails.
+   */
+  function Phi(z) {
+    if (z <= -12) return 0;
+    if (z >= 12) return 1;
+    if (z === 0) return 0.5;
+
+    const a = Math.abs(z);
+    const panels = Math.max(64, 2 * Math.ceil(a / 0.05));
+    const h = a / panels;
+    let sum = 1 + Math.exp(-a * a / 2);
+
+    for (let i = 1; i < panels; i++) {
+      const u = i * h;
+      sum += (i % 2 ? 4 : 2) * Math.exp(-u * u / 2);
+    }
+
+    const area = h * sum / (3 * Math.sqrt(2 * PI));
+    return Math.max(0, Math.min(1,
+      z > 0 ? 0.5 + area : 0.5 - area
+    ));
+  }
+
+  function invPhi(p) {
+    let lo = -12;
+    let hi = 12;
+
+    for (let i = 0; i < 65; i++) {
+      const mid = (lo + hi) / 2;
+      if (Phi(mid) < p) lo = mid;
+      else hi = mid;
+    }
+
+    return (lo + hi) / 2;
+  }
+
+  /*
+   * Lanczos log-gamma for positive real arguments.
+   * Internal numerical helper, dimensionless.
+   */
+  function logGamma(z) {
+    const c = [
+      0.99999999999980993,
+      676.5203681218851,
+      -1259.1392167224028,
+      771.32342877765313,
+      -176.61502916214059,
+      12.507343278686905,
+      -0.13857109526572012,
+      9.9843695780195716e-6,
+      1.5056327351493116e-7
+    ];
+
+    if (z < 0.5) {
+      return Math.log(PI) -
+        Math.log(Math.sin(PI * z)) -
+        logGamma(1 - z);
+    }
+
+    z -= 1;
+    let x = c[0];
+    for (let i = 1; i < c.length; i++) {
+      x += c[i] / (z + i);
+    }
+    const t = z + 7.5;
+    return 0.5 * Math.log(2 * PI) +
+      (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+
+  /*
+   * Continued fraction for regularised incomplete beta.
+   * Returns null on failure to converge within 500 iterations.
+   */
+  function betaFraction(a, b, x) {
+    const tiny = 1e-300;
+    let c = 1;
+    let d = 1 - (a + b) * x / (a + 1);
+    if (Math.abs(d) < tiny) d = tiny;
+    d = 1 / d;
+    let h = d;
+
+    for (let m = 1; m <= 500; m++) {
+      const m2 = 2 * m;
+      let aa = m * (b - m) * x /
+        ((a + m2 - 1) * (a + m2));
+
+      d = 1 + aa * d;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = 1 + aa / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      h *= d * c;
+
+      aa = -(a + m) * (a + b + m) * x /
+        ((a + m2) * (a + m2 + 1));
+
+      d = 1 + aa * d;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = 1 + aa / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      const delta = d * c;
+      h *= delta;
+
+      if (!Number.isFinite(h)) return null;
+      if (Math.abs(delta - 1) < 3e-14) return h;
+    }
+    return null;
+  }
+
+  function incompleteBeta(a, b, x) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+
+    const bt = Math.exp(
+      logGamma(a + b) - logGamma(a) -
+      logGamma(b) +
+      a * Math.log(x) + b * Math.log1p(-x)
+    );
+
+    if (x < (a + 1) / (a + b + 2)) {
+      const f = betaFraction(a, b, x);
+      return f === null ? null :
+        Math.max(0, Math.min(1, bt * f / a));
+    }
+
+    const f = betaFraction(b, a, 1 - x);
+    return f === null ? null :
+      Math.max(0, Math.min(1, 1 - bt * f / b));
+  }
+
+  function tCdf(t, df) {
+    if (t === 0) return 0.5;
+    const x = df / (df + t * t);
+    const beta = incompleteBeta(df / 2, 0.5, x);
+    if (beta === null) return null;
+    return t > 0 ? 1 - beta / 2 : beta / 2;
+  }
+
+  function tInverse(p, df) {
+    let lo = -1e12;
+    let hi = 1e12;
+
+    for (let i = 0; i < 120; i++) {
+      const mid = (lo + hi) / 2;
+      const value = tCdf(mid, df);
+      if (value === null) return null;
+      if (value < p) lo = mid;
+      else hi = mid;
+    }
+
+    return (lo + hi) / 2;
+  }
+
+  /**
+   * Tally categorical observations.
+   * Input: {data[]} with 1–200 finite numbers or strings.
+   * Output: {categories[],counts[]} in occurrences.
+   * Strings retain first-appearance order; numbers ascend.
+   * Errors: empty_data, too_many_points_max_200,
+   * non_finite_value, invalid_data.
+   * Worked example: ['cat','dog','cat'] ->
+   * categories=['cat','dog'], counts=[2,1].
+   */
+  function tally({ data } = {}) {
+    if (!Array.isArray(data)) {
+      return err('ConstraintViolation', 'invalid_data');
+    }
+    if (!data.length) {
+      return err('ConstraintViolation', 'empty_data');
+    }
+    if (data.length > MAX) {
+      return err('ConstraintViolation', 'too_many_points_max_200');
+    }
+    if (data.some(v =>
+      !(typeof v === 'string' || finite(v)))) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+
+    const isNumbers = data.every(finite);
+    const isStrings = data.every(v => typeof v === 'string');
+
+    if (!isNumbers && !isStrings) {
+      return err('ConstraintViolation', 'mixed_category_types');
+    }
+
+    const map = new Map();
+    data.forEach(v => map.set(v, (map.get(v) || 0) + 1));
+
+    const categories = Array.from(map.keys());
+    if (isNumbers) categories.sort((a, b) => a - b);
+
+    return {
+      categories,
+      counts: categories.map(v => map.get(v))
+    };
+  }
+
+  /**
+   * Describe ungrouped numerical observations.
+   * Input: {data[]} of 1–200 finite values, in common units.
+   * Output: n, mean, median, modes[], range, q1, q3, iqr,
+   * sd_pop, sd_sample, min, max.
+   * SDs have data units; n and modes frequencies are counts.
+   * Quartiles: median of the lower and upper halves;
+   * exclude the middle item for odd n (O-Level convention).
+   * Population SD divides by n; sample SD by n-1.
+   * n=1 has null sample SD. Equal frequencies with at
+   * least two distinct values mean no mode.
+   * Errors: shared data validation codes.
+   * Worked example: [1,2,2,5] -> mean=2.5,
+   * median=2, q1=1.5, q3=3.5, IQR=2,
+   * population variance=2.25, sample variance=3.
+   */
+  function summary({ data } = {}) {
+    const error = validData(data);
+    if (error) return error;
+
+    const sorted = sortNumbers(data);
+    const n = sorted.length;
+    const m = moments(data);
+    const q = quartiles(sorted);
+    const counts = new Map();
+
+    sorted.forEach(x =>
+      counts.set(x, (counts.get(x) || 0) + 1));
+
+    const top = Math.max(...counts.values());
+    const modes = counts.size > 1 &&
+      Array.from(counts.values()).every(v => v === top)
+      ? []
+      : Array.from(counts.keys()).filter(
+        v => counts.get(v) === top
+      );
+
+    return {
+      n,
+      mean: m.mean,
+      median: q.median,
+      modes,
+      range: sorted[n - 1] - sorted[0],
+      q1: q.q1,
+      q3: q.q3,
+      iqr: q.q3 - q.q1,
+      sd_pop: Math.sqrt(m.ss / n),
+      sd_sample: n === 1 ? null :
+        Math.sqrt(m.ss / (n - 1)),
+      min: sorted[0],
+      max: sorted[n - 1]
+    };
+  }
+
+  /**
+   * Estimate descriptive statistics from grouped classes.
+   * Input: {edges[],freqs[]} with increasing numerical edges,
+   * non-negative integer frequencies; edges.length=freqs.length+1.
+   * Units: edges and mean_est/sd_est in data units.
+   * SD is population midpoint estimate, divisor n.
+   * Modal class uses frequency density; ties choose first.
+   * Median class is first cumulative frequency >= n/2.
+   * Output: {n,mean_est,sd_est,modal_class_index,
+   * median_class_index}.
+   * Errors: bad_class_edges, zero_total_frequency,
+   * invalid_frequency, too_many_points_max_200.
+   * Worked example: edges=[0,10,30], freqs=[4,6].
+   * Midpoints 5,20; mean=14, variance=54,
+   * sd=sqrt(54), modal index=0 (densities .4,.3),
+   * median index=1.
+   */
+  function grouped_summary({ edges, freqs } = {}) {
+    const e = validEdges(edges);
+    if (e) return e;
+
+    if (!Array.isArray(freqs) ||
+        freqs.length !== edges.length - 1) {
+      return err('ConstraintViolation', 'bad_class_edges');
+    }
+    if (freqs.some(v =>
+      !Number.isSafeInteger(v) || v < 0)) {
+      return err('ConstraintViolation', 'invalid_frequency');
+    }
+
+    const n = freqs.reduce((a, b) => a + b, 0);
+    if (n === 0) {
+      return err('MathError', 'zero_total_frequency');
+    }
+
+    const mids = freqs.map((_, i) =>
+      (edges[i] + edges[i + 1]) / 2);
+
+    const mean_est = freqs.reduce((s, f, i) =>
+      s + f * mids[i], 0) / n;
+
+    const variance = freqs.reduce((s, f, i) =>
+      s + f * (mids[i] - mean_est) ** 2, 0) / n;
+
+    let modal_class_index = 0;
+    let bestDensity = -1;
+    let median_class_index = 0;
+    let cumulative = 0;
+    let foundMedian = false;
+
+    freqs.forEach((f, i) => {
+      const density = f / (edges[i + 1] - edges[i]);
+
+      if (density > bestDensity) {
+        bestDensity = density;
+        modal_class_index = i;
+      }
+
+      cumulative += f;
+      if (!foundMedian && cumulative >= n / 2) {
+        median_class_index = i;
+        foundMedian = true;
+      }
+    });
+
+    return {
+      n,
+      mean_est,
+      sd_est: Math.sqrt(variance),
+      modal_class_index,
+      median_class_index
+    };
+  }
+
+  /**
+   * Construct a histogram.
+   * Input: {data[],edges[]} with increasing class boundaries.
+   * Classes [a,b), except last class [a,b].
+   * Output: {freqs[],densities[]}; density unit is
+   * frequency per unit of the data axis.
+   * Errors: shared data validation, bad_class_edges,
+   * value_outside_edges.
+   * Worked example: data=[1,2,4,5], edges=[0,3,6]
+   * -> freqs=[2,2], densities=[2/3,2/3].
+   */
+  function histogram({ data, edges } = {}) {
+    const de = validData(data);
+    if (de) return de;
+    const ee = validEdges(edges);
+    if (ee) return ee;
+
+    const freqs = Array(edges.length - 1).fill(0);
+
+    for (const v of data) {
+      if (v < edges[0] || v > edges[edges.length - 1]) {
+        return err('ConstraintViolation', 'value_outside_edges');
+      }
+
+      let i = freqs.length - 1;
+      for (let j = 0; j < freqs.length - 1; j++) {
+        if (v < edges[j + 1]) {
+          i = j;
+          break;
+        }
+      }
+      freqs[i]++;
+    }
+
+    return {
+      freqs,
+      densities: freqs.map((f, i) =>
+        f / (edges[i + 1] - edges[i]))
+    };
+  }
+
+  /**
+   * Standardise one observation.
+   * Input: {x,mean,sd}, all in the same measurement units.
+   * Output: {z}, dimensionless.
+   * Errors: non_finite_value; zero_spread when sd<=0.
+   * Worked example: x=74, mean=70, sd=8 -> z=0.5.
+   */
+  function zscore(o = {}) {
+    const e = finiteFields(o, ['x', 'mean', 'sd']);
+    if (e) return e;
+    if (o.sd <= 0) return err('MathError', 'zero_spread');
+    return { z: (o.x - o.mean) / o.sd };
+  }
+
+  /**
+   * Normal cumulative distribution.
+   * Input: {x,mu,sigma}; measurement units shared.
+   * Output: {p}=P(X<=x), dimensionless.
+   * Simpson quadrature; absolute accuracy better than 1e-7.
+   * Errors: non_finite_value, zero_spread.
+   * Worked example: x=10,mu=10,sigma=2 -> p=0.5.
+   */
+  function normal_cdf(o = {}) {
+    const e = finiteFields(o, ['x', 'mu', 'sigma']);
+    if (e) return e;
+    if (o.sigma <= 0) return err('MathError', 'zero_spread');
+    return { p: Phi((o.x - o.mu) / o.sigma) };
+  }
+
+  /**
+   * Invert a normal cumulative probability.
+   * Input: {p,mu,sigma}; 0<p<1, sigma>0.
+   * Output: {x} in the units of mu and sigma.
+   * Bisection of numerical normal CDF, p error <1e-7.
+   * Errors: probability_out_of_range_0_1,
+   * non_finite_value, zero_spread.
+   * Worked example: p=0.5,mu=12,sigma=3 -> x=12.
+   */
+  function normal_inv(o = {}) {
+    if (!finite(o.p) || o.p <= 0 || o.p >= 1) {
+      return err('ConstraintViolation',
+        'probability_out_of_range_0_1');
+    }
+    const e = finiteFields(o, ['mu', 'sigma']);
+    if (e) return e;
+    if (o.sigma <= 0) return err('MathError', 'zero_spread');
+    return { x: o.mu + o.sigma * invPhi(o.p) };
+  }
+
+  /**
+   * Sampling distribution of the sample mean.
+   * Input: {mu,sigma,n}, n a positive integer;
+   * sigma a population SD (non-negative).
+   * Output: {mean,se}, in the original measurement units.
+   * SE=sigma/sqrt(n). Zero sigma gives zero SE.
+   * Errors: sample_size_not_positive_integer,
+   * non_finite_value, negative_spread.
+   * Worked example: mu=50,sigma=12,n=36 ->
+   * mean=50,se=2.
+   */
+  function sampling_mean(o = {}) {
+    const ne = validN(o.n);
+    if (ne) return ne;
+    const e = finiteFields(o, ['mu', 'sigma']);
+    if (e) return e;
+    if (o.sigma < 0) {
+      return err('ConstraintViolation', 'negative_spread');
+    }
+    return { mean: o.mu, se: o.sigma / Math.sqrt(o.n) };
+  }
+
+  /**
+   * Ordinary least-squares straight-line regression.
+   * Input: {points:[[x,y],...]}, 2–200 finite pairs.
+   * Output: intercept a (y units), slope b (y/x units),
+   * Pearson r, r2, rss (squared y units),
+   * se_b (slope units; null for n=2).
+   * r and r2 null when all y are equal.
+   * Errors: points_out_of_range_2_200,
+   * non_finite_value, invalid_points, all_x_equal.
+   * Worked example: points=[[1,2],[2,4],[3,6]]
+   * -> a=0,b=2,r=1,r2=1,rss=0,se_b=0.
+   */
+  function linreg({ points } = {}) {
+    if (!Array.isArray(points)) {
+      return err('ConstraintViolation', 'invalid_points');
+    }
+    if (points.length < 2 || points.length > MAX) {
+      return err('ConstraintViolation', 'points_out_of_range_2_200');
+    }
+    if (points.some(p =>
+      !Array.isArray(p) ||
+      p.length !== 2 ||
+      !finite(p[0]) ||
+      !finite(p[1]))) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+
+    const n = points.length;
+    const xs = points.map(p => p[0]);
+    const ys = points.map(p => p[1]);
+    const mx = moments(xs).mean;
+    const my = moments(ys).mean;
+    let sxx = 0, syy = 0, sxy = 0;
+
+    points.forEach(([x, y]) => {
+      const dx = x - mx;
+      const dy = y - my;
+      sxx += dx * dx;
+      syy += dy * dy;
+      sxy += dx * dy;
+    });
+
+    if (sxx === 0) return err('MathError', 'all_x_equal');
+
+    const b = sxy / sxx;
+    const a = my - b * mx;
+    const rss = points.reduce((s, [x, y]) =>
+      s + (y - (a + b * x)) ** 2, 0);
+
+    const r = syy === 0 ? null :
+      Math.max(-1, Math.min(1, sxy / Math.sqrt(sxx * syy)));
+
+    return {
+      a,
+      b,
+      r,
+      r2: r === null ? null : r * r,
+      rss,
+      se_b: n === 2 ? null :
+        Math.sqrt(Math.max(0, rss) / (n - 2) / sxx)
+    };
+  }
+
+  /**
+   * Predict using a fitted straight line.
+   * Input: {a,b,x,x_min,x_max}; x_min<=x_max.
+   * Output: {y,extrapolation}; y=a+b*x,
+   * extrapolation true outside observed x range.
+   * Units: y and a share units; b is y per x unit.
+   * Errors: non_finite_value, invalid_x_range.
+   * Worked example: a=2,b=3,x=5,x_min=1,x_max=4
+   * -> y=17,extrapolation=true.
+   */
+  function predict(o = {}) {
+    const e = finiteFields(o,
+      ['a', 'b', 'x', 'x_min', 'x_max']);
+    if (e) return e;
+
+    if (o.x_min > o.x_max) {
+      return err('ConstraintViolation', 'invalid_x_range');
+    }
+
+    return {
+      y: o.a + o.b * o.x,
+      extrapolation: o.x < o.x_min || o.x > o.x_max
+    };
+  }
+
+  /**
+   * Two-sided confidence interval for a population mean.
+   * Input: {data[],conf,sigma?}; observations share units.
+   * If known population sigma is supplied, use a z interval.
+   * Otherwise use Student's t with n-1 degrees of freedom,
+   * sample SD dividing by n-1.
+   * Output: {mean,half_width,lo,hi,method:'z'|'t'}.
+   * Numerical t quantile uses regularised incomplete beta.
+   * Errors: shared data codes, confidence_out_of_range,
+   * points_out_of_range_2_200, zero_variance,
+   * zero_spread, beta_iteration_limit.
+   * Worked example: data=[8,10,12],conf=0.95,
+   * sigma=2 -> mean=10,half_width=
+   * 1.95996398454*2/sqrt(3),method='z'.
+   */
+  function ci_mean(o = {}) {
+    const de = validData(o.data);
+    if (de) return de;
+    const ce = validConf(o.conf);
+    if (ce) return ce;
+
+    const known = o.sigma !== undefined;
+    if (!known && o.data.length < 2) {
+      return err('ConstraintViolation', 'points_out_of_range_2_200');
+    }
+
+    if (known) {
+      if (!finite(o.sigma)) {
+        return err('ConstraintViolation', 'non_finite_value');
+      }
+      if (o.sigma <= 0) {
+        return err('MathError', 'zero_spread');
+      }
+    }
+
+    const s = summary({ data: o.data });
+    const sigma = known ? o.sigma : s.sd_sample;
+
+    if (!known && sigma === 0) {
+      return err('MathError', 'zero_variance');
+    }
+
+    const q = known ?
+      invPhi((1 + o.conf) / 2) :
+      tInverse((1 + o.conf) / 2, s.n - 1);
+
+    if (q === null || !finite(q)) {
+      return err('RuntimeError', 'beta_iteration_limit');
+    }
+
+    const half_width = q * sigma / Math.sqrt(s.n);
+
+    return {
+      mean: s.mean,
+      half_width,
+      lo: s.mean - half_width,
+      hi: s.mean + half_width,
+      method: known ? 'z' : 't'
+    };
+  }
+
+  /**
+   * Wald confidence interval for a population proportion.
+   * Input: {successes,n,conf}; counts are non-negative integers.
+   * Output: {p_hat,half_width,lo,hi,clipped:false};
+   * all dimensionless proportions. Limits are NOT clipped.
+   * Normal approximation is not guaranteed reliable for
+   * small counts or extreme proportions.
+   * Errors: sample_size_not_positive_integer,
+   * successes_out_of_range, confidence_out_of_range.
+   * Worked example: successes=50,n=100,conf=0.95 ->
+   * p_hat=.5, half_width=.0979981992 approximately.
+   */
+  function ci_proportion(o = {}) {
+    const ne = validN(o.n);
+    if (ne) return ne;
+    if (!Number.isSafeInteger(o.successes) ||
+        o.successes < 0 || o.successes > o.n) {
+      return err('ConstraintViolation', 'successes_out_of_range');
+    }
+
+    const ce = validConf(o.conf);
+    if (ce) return ce;
+
+    const p_hat = o.successes / o.n;
+    const z = invPhi((1 + o.conf) / 2);
+    const half_width = z *
+      Math.sqrt(p_hat * (1 - p_hat) / o.n);
+
+    return {
+      p_hat,
+      half_width,
+      lo: p_hat - half_width,
+      hi: p_hat + half_width,
+      clipped: false
+    };
+  }
+
+  /**
+   * Minimum sample size for a specified mean margin.
+   * Input: {sigma,margin,conf}; sigma and margin share units.
+   * Output: {n}, smallest positive integer satisfying
+   * z*sigma/sqrt(n)<=margin; known-sigma z method.
+   * Errors: margin_not_positive, confidence_out_of_range,
+   * zero_spread, sample_size_too_large, non_finite_value.
+   * Worked example: sigma=10,margin=2,conf=.95 ->
+   * ceil((1.95996398454*10/2)^2)=97.
+   */
+  function sample_size_mean(o = {}) {
+    if (!finite(o.margin) || o.margin <= 0) {
+      return err('ConstraintViolation', 'margin_not_positive');
+    }
+    const ce = validConf(o.conf);
+    if (ce) return ce;
+    if (!finite(o.sigma)) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+    if (o.sigma <= 0) {
+      return err('MathError', 'zero_spread');
+    }
+
+    const z = invPhi((1 + o.conf) / 2);
+    const raw = (z * o.sigma / o.margin) ** 2;
+
+    if (!finite(raw) || raw > Number.MAX_SAFE_INTEGER) {
+      return err('ConstraintViolation', 'sample_size_too_large');
+    }
+
+    let n = Math.max(1, Math.ceil(raw));
+    while (n > 1 && z * o.sigma / Math.sqrt(n - 1) <= o.margin) {
+      n--;
+    }
+    while (z * o.sigma / Math.sqrt(n) > o.margin) {
+      n++;
+    }
+    return { n };
+  }
+
+  /**
+   * Three-sigma x-bar control-chart limits.
+   * Input: {mean,sd,n}; mean and sd share measurement units,
+   * sd is the known within-process individual-observation SD.
+   * Output: {ucl,lcl,cl}, in measurement units.
+   * No truncation or clamping of negative LCL.
+   * Errors: sample_size_not_positive_integer,
+   * non_finite_value, zero_spread.
+   * Worked example: mean=100,sd=6,n=9 ->
+   * ucl=106,lcl=94,cl=100.
+   */
+  function control_limits(o = {}) {
+    const ne = validN(o.n);
+    if (ne) return ne;
+    const e = finiteFields(o, ['mean', 'sd']);
+    if (e) return e;
+    if (o.sd <= 0) {
+      return err('MathError', 'zero_spread');
+    }
+
+    const h = 3 * o.sd / Math.sqrt(o.n);
+
+    return {
+      ucl: o.mean + h,
+      lcl: o.mean - h,
+      cl: o.mean
+    };
+  }
+
+  /**
+   * Tukey 1.5-IQR box-plot statistics.
+   * Input: {data[]} with 1–200 finite values, common units.
+   * Output: q1,median,q3,iqr,lower_fence,upper_fence,
+   * whisker_lo,whisker_hi,outliers[]; all data units.
+   * Quartiles exclude the median for odd-length lists.
+   * Fence equality counts as inside.
+   * Errors: shared data validation codes.
+   * Worked example: [1,2,3,4,5,20] ->
+   * q1=2,median=3.5,q3=5,iqr=3,
+   * fences=-2.5,9.5, whiskers=1,5,outliers=[20].
+   */
+  function boxplot({ data } = {}) {
+    const de = validData(data);
+    if (de) return de;
+    const s = summary({ data });
+    const sorted = sortNumbers(data);
+    const lower_fence = s.q1 - 1.5 * s.iqr;
+    const upper_fence = s.q3 + 1.5 * s.iqr;
+
+    const inside = sorted.filter(v =>
+      v >= lower_fence && v <= upper_fence);
+
+    return {
+      q1: s.q1,
+      median: s.median,
+      q3: s.q3,
+      iqr: s.iqr,
+      lower_fence,
+      upper_fence,
+      whisker_lo: inside.length ? inside[0] : null,
+      whisker_hi: inside.length ?
+        inside[inside.length - 1] : null,
+      outliers: sorted.filter(v =>
+        v < lower_fence || v > upper_fence)
+    };
+  }
+
+  /**
+   * Known-population-SD z test for a population mean.
+   * Input: {xbar,mu0,sigma,n,tail:'two'|'left'|'right'}.
+   * xbar,mu0,sigma share units; n is a positive integer.
+   * Output: {z,p}, both dimensionless.
+   * Validates tail, then n, then sigma.
+   * Errors: method_not_supported,
+   * sample_size_not_positive_integer,
+   * zero_spread, non_finite_value.
+   * Worked example: xbar=104,mu0=100,sigma=8,n=16,
+   * tail='right' -> z=2,p=0.02275013195.
+   */
+  function ztest(o = {}) {
+    if (!['two', 'left', 'right'].includes(o.tail)) {
+      return err('NotSupported', 'method_not_supported');
+    }
+    const ne = validN(o.n);
+    if (ne) return ne;
+
+    if (!finite(o.sigma)) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+    if (o.sigma <= 0) {
+      return err('MathError', 'zero_spread');
+    }
+
+    const e = finiteFields(o, ['xbar', 'mu0']);
+    if (e) return e;
+
+    const z = (o.xbar - o.mu0) /
+      (o.sigma / Math.sqrt(o.n));
+
+    const left = Phi(z);
+    const p = o.tail === 'left' ? left :
+      o.tail === 'right' ? 1 - left :
+      2 * Math.min(left, 1 - left);
+
+    return {
+      z,
+      p: Math.max(0, Math.min(1, p))
+    };
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    tally,
+    summary,
+    grouped_summary,
+    histogram,
+    zscore,
+    normal_cdf,
+    normal_inv,
+    sampling_mean,
+    linreg,
+    predict,
+    ci_mean,
+    ci_proportion,
+    sample_size_mean,
+    control_limits,
+    boxplot,
+    ztest
+  });
+})();
+/* FIT-CALC-END statistics */
+
+/* PROCESS WATCH GAME */
+(function () {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const NS = 'http:' + String.fromCharCode(47, 47) +
+    'www.w3.org/2000/svg';
+
+  const BASE_SEED = 481937;
+  const ORANGE = '#FF6B3D';
+  const RED = '#D92D20';
+  const GREEN = '#1E9E5A';
+  const YELLOW = '#FFC83D';
+
+  let random = () => 0.5;
+
+  function seeded(seed) {
+    let a = seed >>> 0;
+    return () => {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function randint(lo, hi) {
+    return lo + Math.floor(random() * (hi - lo + 1));
+  }
+
+  function fmt(v, digits = 4) {
+    return Number.isFinite(v) ?
+      Number(v.toPrecision(digits)).toString() : '—';
+  }
+
+  function clamp(v, lo, hi) {
+    return Math.max(lo, Math.min(hi, v));
+  }
+
+  function friendly(result) {
+    const messages = {
+      zero_spread: 'The process standard deviation must be positive.',
+      sample_size_not_positive_integer:
+        'The subgroup size must be a positive whole number.',
+      non_finite_value: 'All measurement values must be finite.',
+      empty_data: 'The subgroup has no measurements.',
+      too_many_points_max_200: 'The subgroup exceeds 200 measurements.'
+    };
+    return messages[result.reason] ||
+      'The calculation could not be completed. Check the inputs.';
+  }
+
+  function checked(result) {
+    if (!result || result.error) {
+      feedback(friendly(result || {}), false);
+      return null;
+    }
+    return result;
+  }
+
+  function S(tag, attrs = {}, content) {
+    const el = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([name, value]) =>
+      el.setAttribute(name, String(value)));
+    if (content !== undefined) el.textContent = String(content);
+    return el;
+  }
+
+  function line(svg, x1, y1, x2, y2,
+    colour = '#111', width = 2, dash = '') {
+    svg.appendChild(S('line', {
+      x1, y1, x2, y2, stroke: colour,
+      'stroke-width': width,
+      ...(dash ? { 'stroke-dasharray': dash } : {})
+    }));
+  }
+
+  function text(svg, x, y, value, attrs = {}) {
+    svg.appendChild(S('text', {
+      x, y, 'font-size': 12,
+      'text-anchor': 'middle', ...attrs
+    }, value));
+  }
+
+  function add(parent, tag, content, cls = '') {
+    const el = document.createElement(tag);
+    el.textContent = content;
+    if (cls) el.className = cls;
+    parent.appendChild(el);
+    return el;
+  }
+
+  function feedback(message, good = null) {
+    $('feedback').textContent = message;
+    $('feedback').className = 'feedback' +
+      (good === true ? ' good' : good === false ? ' bad' : '');
+  }
+
+  const state = {
+    round: 0,
+    score: 0,
+    attempts: 0,
+    hinted: false,
+    solved: false,
+    mode: 'monitor',
+    mu: 500,
+    sigma: 4,
+    n: 4,
+    values: [],
+    means: [],
+    selected: [],
+    playerUCL: 0,
+    playerLCL: 0,
+    playerCL: 0,
+    decision: '',
+    monitorVariant: 'single',
+    targetWidth: 0,
+    chosenN: 2,
+    targetN: 0,
+    flags: []
+  };
+
+  function limits(n = state.n) {
+    return FITCalcStats.control_limits({
+      mean: state.mu,
+      sd: state.sigma,
+      n
+    });
+  }
+
+  function analyseSignals(means, chartLimits) {
+    const flags = [];
+    let runSide = 0;
+    let runLength = 0;
+
+    means.forEach((value, i) => {
+      const beyond =
+        value > chartLimits.ucl || value < chartLimits.lcl;
+
+      const side = value > chartLimits.cl ? 1 :
+        value < chartLimits.cl ? -1 : 0;
+
+      if (side === 0) {
+        runSide = 0;
+        runLength = 0;
+      } else if (side === runSide) {
+        runLength++;
+      } else {
+        runSide = side;
+        runLength = 1;
+      }
+
+      const run = runLength >= 8;
+
+      if (beyond || run) {
+        flags.push({
+          index: i,
+          beyond,
+          run,
+          reason: beyond ? '3-sigma limit' : '8-point run'
+        });
+      }
+    });
+
+    return flags;
+  }
+
+  function newRound(index) {
+    random = seeded(BASE_SEED + 12791 * index);
+    state.round = index;
+    state.attempts = 0;
+    state.hinted = false;
+    state.solved = false;
+    state.selected = [];
+    state.decision = '';
+    state.flags = [];
+
+    state.mode =
+      index === 2 || index === 5 ? 'design' : 'monitor';
+
+    $('difficultyLabel').textContent =
+      index < 2 ? 'Warm-up' :
+      index < 4 ? 'Investigation' : 'Challenge';
+
+    if (state.mode === 'monitor') setupMonitor(index);
+    else setupDesign(index);
+
+    render();
+    feedback('Inspect the production data and check your answer.');
+  }
+
+  function makeMeasurements(mean, n, sigma, rng) {
+    const offsets = [];
+    const base = [
+      -1.4, -0.7, 0.2, 1.9,
+      -1.1, 0.5, 1.2, -0.6,
+      0.8, -1.6, 0.4, 0.3
+    ];
+
+    for (let i = 0; i < n; i++) {
+      offsets.push(base[i % base.length] +
+        (rng() - 0.5) * 0.2);
+    }
+
+    const m = FITCalcStats.summary({ data: offsets });
+    if (m.error) return [];
+
+    return offsets.map(v =>
+      mean + (v - m.mean) * sigma * 0.45);
+  }
+
+  function setupMonitor(index) {
+    $('typeLabel').textContent = 'Control chart audit';
+    $('stageTitle').textContent = 'Inspect the production line';
+    $('sceneTitle').textContent = 'Fill-weight records';
+
+    state.mu = index === 0 ? 500 :
+      index === 1 ? 250 : 750;
+    state.sigma = index === 0 ? 4 :
+      index === 1 ? 3 : 6;
+    state.n = index === 0 ? 4 :
+      index === 1 ? 9 : 4;
+
+    state.monitorVariant =
+      index === 0 ? 'single' :
+      index === 1 ? 'stable' : 'run';
+
+    const c = checked(limits());
+    if (!c) return;
+
+    const standardError = (c.ucl - c.cl) / 3;
+    const means = [];
+
+    for (let i = 0; i < 12; i++) {
+      const unit = (random() - 0.5) * 2;
+      means.push(state.mu + unit * standardError * 1.75);
+    }
+
+    if (state.monitorVariant === 'single') {
+      means[5] = c.ucl + standardError * 0.7;
+    }
+
+    if (state.monitorVariant === 'stable') {
+      for (let i = 0; i < means.length; i++) {
+        means[i] = state.mu +
+          (i % 2 ? -1 : 1) *
+          standardError * (0.3 + random() * 0.9);
+      }
+    }
+
+    if (state.monitorVariant === 'run') {
+      for (let i = 3; i < 12; i++) {
+        means[i] = state.mu +
+          standardError * (0.4 + random() * 0.8);
+      }
+    }
+
+    const measurementRng = seeded(
+      BASE_SEED + index * 23873 + 19);
+
+    state.values = means.map(m =>
+      makeMeasurements(m, state.n, state.sigma, measurementRng));
+
+    state.means = state.values.map(values => {
+      const result = FITCalcStats.summary({ data: values });
+      return result.error ? null : result.mean;
+    });
+
+    if (state.means.some(v => v === null)) {
+      feedback('The subgroup means could not be calculated.', false);
+      return;
+    }
+
+    state.flags = analyseSignals(state.means, c);
+
+    state.playerCL = state.mu;
+    state.playerUCL = state.mu;
+    state.playerLCL = state.mu;
+
+    $('story').textContent =
+      index === 0 ?
+        'A packaging line fills containers. Twelve subgroups have been measured in grams.' :
+        index === 1 ?
+          'A second production line has twelve recent subgroup means. Check whether the process is stable.' :
+          'A filling line may be drifting. A sequence of points on the same side of the centre can indicate a shift.';
+
+    $('question').textContent =
+      'Set the upper and lower 3-sigma control limits using the known process parameters. ' +
+      'Then decide whether the production line should stop for investigation. ' +
+      'Use both stated signal rules.';
+
+    $('plotNote').textContent =
+      'Orange dots are subgroup means. Dashed boundaries show your chosen limits; flagged signals are revealed after Check.';
+  }
+
+  function setupDesign(index) {
+    $('typeLabel').textContent = 'Subgroup design';
+    $('stageTitle').textContent = 'Design a monitoring plan';
+    $('sceneTitle').textContent = 'Process specification';
+
+    state.mu = index === 2 ? 400 : 600;
+    state.sigma = index === 2 ? 4 : 8;
+    state.targetN = index === 2 ? 16 : 64;
+
+    const target = checked(limits(state.targetN));
+    if (!target) return;
+
+    state.targetWidth = target.ucl - target.lcl;
+    state.chosenN = index === 2 ? 4 : 9;
+    state.n = state.chosenN;
+
+    const measurementRng = seeded(
+      BASE_SEED + 3917 * index);
+
+    state.values = [];
+    state.means = [];
+
+    for (let i = 0; i < 12; i++) {
+      const centre = state.mu +
+        (measurementRng() - 0.5) *
+        state.sigma * 0.5;
+      const observations = makeMeasurements(
+        centre, state.targetN,
+        state.sigma, measurementRng);
+
+      state.values.push(observations);
+      const s = FITCalcStats.summary({ data: observations });
+      state.means.push(s.error ? state.mu : s.mean);
+    }
+
+    $('story').textContent =
+      index === 2 ?
+        'A new filling operation needs narrow control limits without unnecessary measurements.' :
+        'A higher-variation process needs a tighter monitoring band. Choose the smallest valid subgroup size.';
+
+    $('question').textContent =
+      'Find the smallest integer subgroup size n that makes the full ' +
+      '3-sigma control-band width no greater than ' +
+      fmt(state.targetWidth, 8) +
+      ' g. Use the known individual-fill standard deviation.';
+
+    $('plotNote').textContent =
+      'The control boundaries change as you adjust subgroup size n. The displayed pilot means stay fixed for comparison.';
+  }
+
+  function render() {
+    $('sceneBody').replaceChildren();
+    $('controlArea').replaceChildren();
+
+    if (state.mode === 'monitor') renderMonitor();
+    else renderDesign();
+
+    renderPlot();
+    setUI();
+  }
+
+  function statCard(parent, heading, value, unit = '') {
+    const card = document.createElement('div');
+    card.className = 'stat';
+    add(card, 'span', heading);
+    add(card, 'strong', String(value) +
+      (unit ? ' ' + unit : ''));
+    parent.appendChild(card);
+  }
+
+  function renderParameters(parent, n) {
+    const grid = document.createElement('div');
+    grid.className = 'grid-two';
+
+    statCard(grid, 'Process mean μ',
+      fmt(state.mu), 'g');
+    statCard(grid, 'Individual SD σ',
+      fmt(state.sigma), 'g');
+    statCard(grid, 'Subgroup size',
+      n, 'fills');
+    statCard(grid, 'Subgroups shown',
+      state.means.length);
+
+    parent.appendChild(grid);
+  }
+
+  function makeStepper(parent, options) {
+    const { title, value, minimum, maximum,
+      fine, coarse, decimals, unit, update } = options;
+
+    const box = document.createElement('div');
+    box.className = 'control-box';
+    add(box, 'label', title);
+
+    const row = document.createElement('div');
+    row.className = 'stepper';
+
+    const set = valueNext => {
+      if (state.solved || !Number.isFinite(valueNext)) return;
+      const v = clamp(
+        Number(valueNext.toFixed(decimals)), minimum, maximum);
+      update(v);
+      render();
+    };
+
+    [
+      ['−−', -coarse],
+      ['−', -fine],
+      ['+', fine],
+      ['++', coarse]
+    ].forEach(([label, delta], index) => {
+      if (index === 2) {
+        const output = document.createElement('output');
+        output.className = 'value';
+        output.textContent = fmt(value, 7) +
+          (unit ? ' ' + unit : '');
+        row.appendChild(output);
+      }
+
+      const btn = document.createElement('button');
+      btn.textContent = label;
+      btn.disabled = state.solved;
+      btn.setAttribute('aria-label',
+        (delta > 0 ? 'Increase ' : 'Decrease ') +
+        title + ' by ' + Math.abs(delta));
+      btn.addEventListener('click', () => set(value + delta));
+      row.appendChild(btn);
+    });
+
+    box.appendChild(row);
+
+    const range = document.createElement('input');
+    range.type = 'range';
+    range.min = String(minimum);
+    range.max = String(maximum);
+    range.step = String(fine);
+    range.value = String(value);
+    range.disabled = state.solved;
+    range.setAttribute('aria-label', title);
+    range.addEventListener('input', () =>
+      set(Number(range.value)));
+
+    box.appendChild(range);
+    parent.appendChild(box);
+  }
+
+  function renderMonitor() {
+    const scene = $('sceneBody');
+    renderParameters(scene, state.n);
+
+    add(scene, 'p',
+      'Recent subgroup means (g), computed from the measured fills:',
+      'intro');
+
+    const recordGrid = document.createElement('div');
+    recordGrid.className = 'grid-two';
+
+    state.means.forEach((mean, i) => {
+      const card = document.createElement('div');
+      card.className = 'stat';
+      card.style.padding = '7px 9px';
+      add(card, 'span', 'Subgroup ' + (i + 1));
+      add(card, 'strong', fmt(mean, 6) + ' g');
+      recordGrid.appendChild(card);
+    });
+    scene.appendChild(recordGrid);
+
+    const control = $('controlArea');
+    const span = 3 * state.sigma / Math.sqrt(state.n);
+
+    makeStepper(control, {
+      title: 'Upper control limit UCL',
+      value: state.playerUCL,
+      minimum: state.mu - 4 * span,
+      maximum: state.mu + 4 * span,
+      fine: 0.05, coarse: 0.5,
+      decimals: 2, unit: 'g',
+      update(v) { state.playerUCL = v; }
+    });
+
+    makeStepper(control, {
+      title: 'Lower control limit LCL',
+      value: state.playerLCL,
+      minimum: state.mu - 4 * span,
+      maximum: state.mu + 4 * span,
+      fine: 0.05, coarse: 0.5,
+      decimals: 2, unit: 'g',
+      update(v) { state.playerLCL = v; }
+    });
+
+    const box = document.createElement('div');
+    box.className = 'control-box';
+    add(box, 'h3', 'Production decision');
+
+    const choices = document.createElement('div');
+    choices.className = 'choice-list';
+
+    [
+      ['continue', 'Continue production: no signal detected'],
+      ['stop', 'Stop the line and investigate the signal']
+    ].forEach(([key, title]) => {
+      const selected = state.decision === key;
+      const btn = document.createElement('button');
+      btn.className = 'choice' + (selected ? ' selected' : '');
+      btn.disabled = state.solved;
+      btn.setAttribute('aria-pressed', String(selected));
+
+      const mark = document.createElement('span');
+      mark.className = 'mark';
+      mark.textContent = selected ? '✓' : '';
+
+      add(btn, 'span', title);
+      btn.prepend(mark);
+
+      btn.addEventListener('click', () => {
+        state.decision = key;
+        render();
+      });
+
+      choices.appendChild(btn);
+    });
+
+    box.appendChild(choices);
+    control.appendChild(box);
+  }
+
+  function renderDesign() {
+    const scene = $('sceneBody');
+    renderParameters(scene, state.chosenN);
+
+    const note = document.createElement('div');
+    note.className = 'control-box';
+    add(note, 'h3', 'Required monitoring band');
+    add(note, 'p',
+      'Maximum full width: ' +
+      fmt(state.targetWidth, 8) + ' g.');
+    add(note, 'p',
+      'Choose the smallest whole-number subgroup size meeting the target.',
+      'intro');
+    scene.appendChild(note);
+
+    makeStepper($('controlArea'), {
+      title: 'Chosen subgroup size n',
+      value: state.chosenN,
+      minimum: 1,
+      maximum: 100,
+      fine: 1,
+      coarse: 10,
+      decimals: 0,
+      unit: 'fills',
+      update(v) {
+        state.chosenN = Math.round(v);
+        state.n = state.chosenN;
+      }
+    });
+  }
+
+  function setUI() {
+    $('roundLabel').textContent =
+      'Round ' + (state.round + 1) + '/6';
+    $('scoreLabel').textContent =
+      'Score: ' + state.score;
+    $('progress').style.width =
+      (100 * state.round / 6) + '%';
+
+    $('checkBtn').classList.toggle('hidden', state.solved);
+    $('nextBtn').classList.toggle('hidden', !state.solved);
+    $('nextBtn').textContent =
+      state.round === 5 ?
+        'See your stars →' : 'Next round →';
+    $('hintBtn').disabled = state.solved || state.hinted;
+  }
+
+  function renderPlot() {
+    const svg = $('plot');
+    svg.replaceChildren();
+
+    const left = 66, right = 424;
+    const top = 42, bottom = 266;
+    const width = right - left;
+    const height = bottom - top;
+
+    const correct = limits(state.mode === 'design' ?
+      state.chosenN : state.n);
+
+    if (correct.error) return;
+
+    const shownUCL = state.mode === 'design' ?
+      correct.ucl : state.playerUCL;
+    const shownLCL = state.mode === 'design' ?
+      correct.lcl : state.playerLCL;
+
+    const values = state.means;
+    if (!values.length) return;
+
+    const all = [
+      ...values,
+      correct.ucl,
+      correct.lcl,
+      shownUCL,
+      shownLCL,
+      state.mu
+    ];
+
+    const minValue = Math.min(...all);
+    const maxValue = Math.max(...all);
+    const padding = Math.max(1,
+      (maxValue - minValue) * 0.18);
+    const domainLo = minValue - padding;
+    const domainHi = maxValue + padding;
+
+    const x = index =>
+      left + index / (values.length - 1) * width;
+
+    const y = value =>
+      bottom - (value - domainLo) /
+      (domainHi - domainLo) * height;
+
+    text(svg, 220, 23, 'Subgroup mean fill weights', {
+      'font-size': 16, 'font-weight': 800
+    });
+
+    for (let i = 0; i <= 5; i++) {
+      const value = domainLo +
+        i / 5 * (domainHi - domainLo);
+      const yy = y(value);
+      line(svg, left, yy, right, yy, '#E4E2DB', 1);
+      text(svg, left - 10, yy + 4, fmt(value, 5), {
+        'font-size': 10,
+        'text-anchor': 'end'
+      });
+    }
+
+    for (let i = 0; i < values.length; i++) {
+      const xx = x(i);
+      line(svg, xx, bottom, xx, bottom + 5);
+      text(svg, xx, bottom + 19, i + 1, {
+        'font-size': 10
+      });
+    }
+
+    function horizontal(value, colour, dashed, thickness) {
+      if (!Number.isFinite(value)) return;
+      line(svg, left, y(value), right, y(value),
+        colour, thickness, dashed ? '7 5' : '');
+    }
+
+    horizontal(shownUCL, RED, true, 2.5);
+    horizontal(shownLCL, RED, true, 2.5);
+    horizontal(state.mu, '#111', false, 2.5);
+
+    const alertIndices = new Set(
+      state.solved ?
+        state.flags.map(flag => flag.index) : []
+    );
+
+    for (let i = 1; i < values.length; i++) {
+      line(svg,
+        x(i - 1), y(values[i - 1]),
+        x(i), y(values[i]),
+        ORANGE, 2.8);
+    }
+
+    values.forEach((value, i) => {
+      const flagged = alertIndices.has(i);
+
+      svg.appendChild(S('circle', {
+        cx: x(i), cy: y(value),
+        r: flagged ? 6.5 : 5.5,
+        fill: flagged ? RED : YELLOW,
+        stroke: '#111',
+        'stroke-width': flagged ? 3 : 2
+      }));
+
+      if (flagged) {
+        text(svg, x(i), y(value) - 12, '!', {
+          'font-size': 16,
+          'font-weight': 800
+        });
+      }
+    });
+
+    line(svg, left, top, left, bottom, '#111', 3);
+    line(svg, left, bottom, right, bottom, '#111', 3);
+
+    text(svg, 242, 309, 'Subgroup number (count)', {
+      'font-size': 12,
+      'font-weight': 700
+    });
+
+    svg.appendChild(S('text', {
+      x: 14, y: 154,
+      transform: 'rotate(-90 14 154)',
+      'font-size': 11,
+      'font-weight': 700,
+      'text-anchor': 'middle'
+    }, 'Mean fill weight (g)'));
+
+    svg.setAttribute('aria-label',
+      'Live x-bar control chart. Horizontal axis: subgroup number. ' +
+      'Vertical axis: mean fill weight in grams. ' +
+      'Orange points show 12 subgroup means, a solid horizontal line ' +
+      'shows the process centre, and dashed lines show the selected limits.' +
+      (state.solved ?
+        ' Exclamation markers indicate process signals.' : ''));
+
+    $('legend').replaceChildren();
+
+    [
+      ['#FF6B3D', 'Subgroup means'],
+      ['#111111', 'Centre line'],
+      ['#D92D20', 'Selected UCL and LCL']
+    ].forEach(([colour, title]) => {
+      const item = document.createElement('span');
+      const key = document.createElement('i');
+      key.className = 'key';
+      key.style.background = colour;
+      item.append(key, document.createTextNode(title));
+      $('legend').appendChild(item);
+    });
+
+    if (state.solved && state.flags.length) {
+      const item = document.createElement('span');
+      item.textContent = '! Signalled subgroup';
+      $('legend').appendChild(item);
+    }
+  }
+
+  function checkMonitor() {
+    const correct = limits();
+    if (!checked(correct)) return;
+
+    const du = state.playerUCL - correct.ucl;
+    const dl = state.playerLCL - correct.lcl;
+    const tolerance = 0.026;
+
+    if (Math.abs(du) > tolerance ||
+        Math.abs(dl) > tolerance) {
+      state.attempts++;
+      let message = '';
+
+      if (Math.abs(du) > tolerance) {
+        message += 'Your UCL is ' +
+          fmt(Math.abs(du)) + ' g too ' +
+          (du > 0 ? 'high. ' : 'low. ');
+      }
+      if (Math.abs(dl) > tolerance) {
+        message += 'Your LCL is ' +
+          fmt(Math.abs(dl)) + ' g too ' +
+          (dl > 0 ? 'high.' : 'low.');
+      }
+
+      feedback(message, false);
+      return;
+    }
+
+    const shouldStop = state.flags.length > 0;
+    const correctDecision = shouldStop ? 'stop' : 'continue';
+
+    if (state.decision !== correctDecision) {
+      state.attempts++;
+      feedback(
+        shouldStop ?
+          'Your limits are correct, but a signal appears in the chart. ' +
+          'Check points beyond limits and runs of eight.' :
+          'Your limits are correct. No rule has been triggered. ' +
+          'Look at the control signals rather than ordinary movement.',
+        false
+      );
+      return;
+    }
+
+    const reasons = Array.from(
+      new Set(state.flags.map(flag => flag.reason)));
+
+    win('Correct control limits: LCL = ' +
+      fmt(correct.lcl) + ' g, CL = ' +
+      fmt(correct.cl) + ' g and UCL = ' +
+      fmt(correct.ucl) + ' g. ' +
+      (shouldStop ?
+        'Stop and investigate: ' + reasons.join(' and ') +
+        ' detected.' :
+        'No control-rule signal was detected. Continue monitoring.'));
+  }
+
+  function checkDesign() {
+    const current = limits(state.chosenN);
+    if (!checked(current)) return;
+
+    const width = current.ucl - current.lcl;
+    const difference = width - state.targetWidth;
+
+    if (state.chosenN !== state.targetN) {
+      state.attempts++;
+
+      if (difference > 1e-8) {
+        feedback(
+          'Your control band is ' +
+          fmt(difference) +
+          ' g wider than the target. Increase subgroup size.',
+          false
+        );
+      } else {
+        feedback(
+          'The limits fit, but your subgroup size is not the smallest ' +
+          'that meets the target. Try a smaller integer n.',
+          false
+        );
+      }
+      return;
+    }
+
+    win('Correct! The minimum subgroup size is ' +
+      state.targetN + '. The control-band width is ' +
+      fmt(width) + ' g. Smaller groups would give a wider band.');
+  }
+
+  function check() {
+    if (state.solved) return;
+    if (state.mode === 'monitor') checkMonitor();
+    else checkDesign();
+  }
+
+  function win(message) {
+    state.solved = true;
+
+    const earned = state.hinted ? 50 :
+      state.attempts === 0 ? 100 :
+      state.attempts === 1 ? 75 : 50;
+
+    state.score += earned;
+    feedback('★ Production decision complete! ' +
+      message + ' +' + earned + ' points.', true);
+    render();
+  }
+
+  function hint() {
+    if (state.solved || state.hinted) return;
+    state.hinted = true;
+
+    if (state.mode === 'monitor') {
+      feedback(
+        'Hint: first find the standard error σ/√n. ' +
+        'Multiply it by 3 and add/subtract from the centre. ' +
+        'Then count consecutive points on the same side of the centre.',
+        null
+      );
+    } else {
+      feedback(
+        'Hint: full control-band width = 6σ/√n. ' +
+        'Rearrange the inequality, then round n upwards to the ' +
+        'smallest whole number that satisfies it.',
+        null
+      );
+    }
+
+    setUI();
+  }
+
+  function next() {
+    if (!state.solved) return;
+
+    if (state.round < 5) {
+      newRound(state.round + 1);
+      return;
+    }
+
+    $('game').classList.add('hidden');
+    $('finish').classList.remove('hidden');
+    $('progress').style.width = '100%';
+
+    const stars = state.score >= 525 ? 3 :
+      state.score >= 400 ? 2 : 1;
+
+    $('stars').textContent =
+      '★'.repeat(stars) + '☆'.repeat(3 - stars);
+    $('stars').setAttribute('aria-label',
+      stars + ' out of three stars');
+
+    $('finalScore').textContent =
+      state.score + ' / 600 points';
+
+    $('finalMessage').textContent =
+      stars === 3 ?
+        'Excellent process judgement and control-limit calculations.' :
+        stars === 2 ?
+          'Strong monitoring skills. Keep checking the signal rules.' :
+          'Good effort. Replay the audits to improve your decisions.';
+  }
+
+  function restart() {
+    state.score = 0;
+    $('game').classList.remove('hidden');
+    $('finish').classList.add('hidden');
+    newRound(0);
+  }
+
+  $('hintBtn').addEventListener('click', hint);
+  $('checkBtn').addEventListener('click', check);
+  $('nextBtn').addEventListener('click', next);
+  $('againBtn').addEventListener('click', restart);
+
+  restart();
+})();
+</script>
+</body>
+</html>

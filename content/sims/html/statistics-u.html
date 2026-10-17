@@ -1,0 +1,2644 @@
+
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fit and Interval — University Statistics</title>
+<style>
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+html{background:var(--fit-paper)}
+body{margin:0;padding:16px 12px 45px;background:var(--fit-paper);color:var(--fit-ink);font:400 16px/1.48 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit}
+button,input[type=range],input[type=number],.tap,.drag{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.drag{touch-action:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{min-height:46px;padding:9px 15px;border:2px solid #111;border-radius:999px;background:#fff;color:#111;font-weight:800;cursor:pointer;box-shadow:var(--sh-1)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.48;cursor:not-allowed}
+button.primary{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+button.primary:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+button.soft{background:var(--lvl-uni-tint)}
+button.selected{background:var(--lvl-uni);color:#fff;border-width:3px}
+.wrap{max-width:1220px;margin:auto;min-width:0}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:17px}
+.badge{display:inline-block;padding:7px 13px;border:2px solid #111;border-radius:999px;background:var(--lvl-uni);color:var(--lvl-uni-on);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+h1{font-size:clamp(30px,5vw,43px);line-height:1.1;margin:8px 0;font-weight:800}
+h2{font-size:22px;margin:0 0 12px;font-weight:800}
+h3{font-size:17px;margin:0 0 10px;font-weight:800}
+p{margin:7px 0}
+.intro{color:var(--fit-ink-2);font-weight:600}
+.muted{color:var(--fit-ink-3)}
+.hud{display:flex;gap:9px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;min-height:39px;padding:7px 12px;border:2px solid #111;border-radius:999px;background:#fff;font-size:14px;font-weight:800}
+.pill.accent{background:var(--lvl-uni-tint)}
+.progress{height:13px;margin:0 0 18px;border:2px solid #111;border-radius:999px;background:#fff;overflow:hidden}
+.progress-fill{height:100%;width:0;background:var(--lvl-uni);transition:width .2s}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:17px}
+.card{min-width:0;padding:16px;border:2px solid #111;border-radius:var(--r-lg);background:#fff;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-uni-tint)}
+.question{padding:14px;margin:12px 0;border:2px solid #111;border-radius:16px;background:#fff;font-size:17px;font-weight:700}
+.scene{padding:12px;margin-top:12px;border:2px solid #111;border-radius:18px;background:#fff;min-width:0}
+.figure{display:block;width:100%;max-width:100%;height:auto;border:2px solid #111;border-radius:16px;background:#fff}
+.figure text{font-family:Inter,system-ui,sans-serif;fill:#111}
+.figure .drag{cursor:grab}
+.figure .drag:focus{outline:none;stroke:#111;stroke-width:5}
+.grid-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.stat{padding:10px;border:2px solid #111;border-radius:14px;background:var(--fit-sunken);min-width:0}
+.stat span{display:block;font-size:12px;font-weight:700;color:var(--fit-ink-3)}
+.stat strong{display:block;margin-top:4px;font-size:19px;overflow-wrap:anywhere}
+.control-box{padding:13px;margin:13px 0;border:2px solid #111;border-radius:17px;background:var(--fit-sunken)}
+.control-box label{display:block;margin:8px 0;font-weight:800}
+.stepper{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap}
+.stepper button{min-width:46px;padding:8px}
+.value{display:inline-block;min-width:82px;padding:8px;border:2px solid #111;border-radius:12px;background:#fff;text-align:center;font-size:19px;font-weight:800}
+input[type=number]{width:100%;min-width:0;min-height:46px;padding:9px;border:2px solid #111;border-radius:12px;background:#fff;font-size:18px}
+input[type=range]{width:100%;min-height:44px;accent-color:#1F66E5;cursor:pointer}
+.choice-list{display:grid;gap:9px;margin:12px 0}
+.choice{display:flex;align-items:center;gap:12px;min-height:54px;padding:12px;border-radius:15px;text-align:left}
+.choice.selected{background:var(--lvl-uni-tint);color:#111}
+.choice .mark{display:grid;place-items:center;flex:0 0 27px;height:27px;border:2px solid #111;border-radius:7px;background:#fff}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
+.feedback{min-height:66px;margin-top:13px;padding:13px;border:2px solid #111;border-radius:16px;background:#fff;font-weight:600}
+.feedback.good{background:#e0f8e9;border-color:var(--fit-success)}
+.feedback.bad{background:#ffebe8;border-color:var(--fit-danger)}
+.legend{display:flex;gap:13px;flex-wrap:wrap;margin:10px 0;font-size:12px;font-weight:700}
+.key{display:inline-block;width:16px;height:12px;margin-right:5px;border:2px solid #111;vertical-align:middle}
+details{margin-top:16px;padding:12px;border:2px solid #111;border-radius:17px;background:#fff}
+summary{font-weight:800;cursor:pointer}
+.math-line{padding:7px 0;border-bottom:1px solid var(--fit-line-soft);font-size:14px}
+.math-line:last-child{border:0}
+.concept{display:flex;align-items:center;gap:12px;margin-top:15px}
+.concept svg{flex:0 0 110px;width:110px}
+.concept p{font-size:13px;color:var(--fit-ink-2)}
+.finish{text-align:center;padding:30px}
+.stars{font-size:52px;letter-spacing:4px}
+.hidden{display:none!important}
+footer{text-align:center;margin-top:30px;color:var(--fit-ink-3);font-size:12px}
+@media(min-width:900px){body{padding:25px 28px 50px}.layout{grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);align-items:start}.card{padding:22px}}
+@media(max-width:420px){.card{padding:12px}.stepper button{min-width:44px;padding:7px}.value{min-width:70px}.figure{border-radius:12px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div>
+  <span class="badge">University · Statistics</span>
+  <h1>Fit and Interval</h1>
+  <p class="intro">Fit a line, analyse residuals, construct confidence intervals and recognise extrapolation.</p>
+ </div>
+ <div class="hud">
+  <span id="roundLabel" class="pill">Round 1/6</span>
+  <span id="scoreLabel" class="pill accent">Score: 0</span>
+ </div>
+</header>
+<div class="progress"><div id="progress" class="progress-fill"></div></div>
+
+<main id="game" class="layout">
+ <section class="card stage">
+  <div class="hud" style="margin-bottom:12px">
+   <span id="typeLabel" class="pill">Regression</span>
+   <span id="difficultyLabel" class="pill">Warm-up</span>
+  </div>
+  <h2 id="stageTitle">Statistical investigation</h2>
+  <p id="story"></p>
+  <div id="question" class="question"></div>
+  <div class="scene">
+   <h3 id="sceneTitle">Evidence</h3>
+   <div id="sceneBody"></div>
+  </div>
+  <div class="concept">
+   <svg viewBox="0 0 110 85" role="img" aria-label="A scatter plot with a fitted line and residual">
+    <rect x="2" y="2" width="106" height="81" rx="14" fill="#fff" stroke="#111" stroke-width="3"/>
+    <path d="M13 67L97 18" stroke="#1F66E5" stroke-width="4" fill="none"/>
+    <circle cx="23" cy="59" r="5" fill="#FFC83D" stroke="#111" stroke-width="2"/>
+    <circle cx="49" cy="31" r="5" fill="#FFC83D" stroke="#111" stroke-width="2"/>
+    <circle cx="78" cy="37" r="5" fill="#FFC83D" stroke="#111" stroke-width="2"/>
+    <path d="M49 31V46M78 37V29" stroke="#D92D20" stroke-width="3" stroke-dasharray="4 2"/>
+   </svg>
+   <p><strong>Residuals:</strong> the vertical distance between an observation and a fitted prediction reveals what the line misses.</p>
+  </div>
+ </section>
+
+ <section class="card">
+  <h2 id="plotTitle">Live analysis</h2>
+  <p id="plotNote" class="intro"></p>
+  <svg id="plot" class="figure" viewBox="0 0 440 390" role="img" aria-label="Interactive statistical plot"></svg>
+  <div id="legend" class="legend"></div>
+  <div id="controlArea"></div>
+  <div class="controls">
+   <button id="hintBtn" class="soft">Hint −25</button>
+   <button id="checkBtn" class="primary">Check answer</button>
+   <button id="nextBtn" class="primary hidden">Next round →</button>
+  </div>
+  <div id="feedback" class="feedback" aria-live="polite" role="status">Investigate the evidence, then check your reasoning.</div>
+  <details>
+   <summary>The maths</summary>
+   <div class="math-line">Least-squares line: predicted y = a + bx, where b = Sxy/Sxx and a = ȳ − bx̄.</div>
+   <div class="math-line">Residual = observed y − predicted y. RSS is the sum of squared residuals, in squared response units.</div>
+   <div class="math-line">For a straight-line model with varying y, r² = 1 − RSS/TSS. A residual pattern may reveal model misspecification.</div>
+   <div class="math-line">Unknown population SD: two-sided mean interval x̄ ± t critical × s/√n, using n − 1 degrees of freedom.</div>
+   <div class="math-line">For proportions: Wald interval p̂ ± z critical × √[p̂(1 − p̂)/n]; endpoints are not clipped.</div>
+   <div class="math-line">Confidence is a long-run property of the interval procedure. An individual interval either covers the parameter or does not.</div>
+   <div class="math-line">Interpolation uses observed x-range values; extrapolation lies outside that range.</div>
+   <div class="math-line">Prediction uncertainty is not the same as confidence in the regression mean. Extrapolation adds model risk.</div>
+  </details>
+ </section>
+</main>
+
+<section id="finish" class="card finish hidden">
+ <span class="badge">University · Statistics</span>
+ <h2>Investigation complete!</h2>
+ <div id="stars" class="stars" aria-label="Stars earned"></div>
+ <p id="finalScore" style="font-size:24px;font-weight:800"></p>
+ <p id="finalMessage"></p>
+ <button id="againBtn" class="primary">Play again ↻</button>
+</section>
+<footer>Fix It Today</footer>
+</div>
+
+<script>
+/* FIT-CALC-BEGIN statistics */
+const FITCalcStats = (function () {
+  'use strict';
+
+  const MAX = 200;
+  const PI = Math.PI;
+
+  function err(error, reason) {
+    return { error, reason };
+  }
+
+  function finite(x) {
+    return typeof x === 'number' && Number.isFinite(x);
+  }
+
+  function finiteFields(o, names) {
+    if (!o || typeof o !== 'object') {
+      return err('ConstraintViolation', 'invalid_input');
+    }
+    for (const k of names) {
+      if (!finite(o[k])) {
+        return err('ConstraintViolation', 'non_finite_value');
+      }
+    }
+    return null;
+  }
+
+  function validData(data, minimum = 1) {
+    if (!Array.isArray(data)) {
+      return err('ConstraintViolation', 'invalid_data');
+    }
+    if (data.length === 0) {
+      return err('ConstraintViolation', 'empty_data');
+    }
+    if (data.length > MAX) {
+      return err('ConstraintViolation', 'too_many_points_max_200');
+    }
+    if (data.some(v => !finite(v))) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+    if (data.length < minimum) {
+      return err('ConstraintViolation', 'points_out_of_range_2_200');
+    }
+    return null;
+  }
+
+  function validConf(conf) {
+    if (!finite(conf) || conf <= 0 || conf >= 1) {
+      return err('ConstraintViolation', 'confidence_out_of_range');
+    }
+    return null;
+  }
+
+  function validN(n) {
+    if (!Number.isSafeInteger(n) || n < 1) {
+      return err('ConstraintViolation', 'sample_size_not_positive_integer');
+    }
+    return null;
+  }
+
+  function validEdges(edges) {
+    if (!Array.isArray(edges) ||
+        edges.length < 2 ||
+        edges.length > MAX + 1 ||
+        edges.some(v => !finite(v))) {
+      return err('ConstraintViolation', 'bad_class_edges');
+    }
+    for (let i = 1; i < edges.length; i++) {
+      if (edges[i] <= edges[i - 1]) {
+        return err('ConstraintViolation', 'bad_class_edges');
+      }
+    }
+    return null;
+  }
+
+  function sortNumbers(a) {
+    return a.slice().sort((x, y) => x - y);
+  }
+
+  function middle(a) {
+    const n = a.length;
+    const m = Math.floor(n / 2);
+    return n % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  }
+
+  function quartiles(sorted) {
+    const n = sorted.length;
+    if (n === 1) {
+      return {
+        q1: sorted[0],
+        median: sorted[0],
+        q3: sorted[0]
+      };
+    }
+    const m = Math.floor(n / 2);
+    return {
+      q1: middle(sorted.slice(0, m)),
+      median: middle(sorted),
+      q3: middle(sorted.slice(n % 2 ? m + 1 : m))
+    };
+  }
+
+  function moments(data) {
+    const n = data.length;
+    const origin = data[0];
+    let sum = 0;
+    for (const x of data) sum += x - origin;
+    const mean = origin + sum / n;
+    let ss = 0;
+    for (const x of data) {
+      const d = x - mean;
+      ss += d * d;
+    }
+    return { mean, ss };
+  }
+
+  /*
+   * Internal standard normal CDF.
+   * Simpson integration of the normal density on [0, |z|].
+   * Step width <= 0.025, with an even number of panels.
+   * Absolute integration error is well below 1e-7.
+   * Values beyond 12 standard deviations use limiting tails.
+   */
+  function Phi(z) {
+    if (z <= -12) return 0;
+    if (z >= 12) return 1;
+    if (z === 0) return 0.5;
+
+    const a = Math.abs(z);
+    const panels = Math.max(64, 2 * Math.ceil(a / 0.05));
+    const h = a / panels;
+    let sum = 1 + Math.exp(-a * a / 2);
+
+    for (let i = 1; i < panels; i++) {
+      const u = i * h;
+      sum += (i % 2 ? 4 : 2) * Math.exp(-u * u / 2);
+    }
+
+    const area = h * sum / (3 * Math.sqrt(2 * PI));
+    return Math.max(0, Math.min(1,
+      z > 0 ? 0.5 + area : 0.5 - area
+    ));
+  }
+
+  function invPhi(p) {
+    let lo = -12;
+    let hi = 12;
+
+    for (let i = 0; i < 65; i++) {
+      const mid = (lo + hi) / 2;
+      if (Phi(mid) < p) lo = mid;
+      else hi = mid;
+    }
+
+    return (lo + hi) / 2;
+  }
+
+  /*
+   * Lanczos log-gamma for positive real arguments.
+   * Internal numerical helper, dimensionless.
+   */
+  function logGamma(z) {
+    const c = [
+      0.99999999999980993,
+      676.5203681218851,
+      -1259.1392167224028,
+      771.32342877765313,
+      -176.61502916214059,
+      12.507343278686905,
+      -0.13857109526572012,
+      9.9843695780195716e-6,
+      1.5056327351493116e-7
+    ];
+
+    if (z < 0.5) {
+      return Math.log(PI) -
+        Math.log(Math.sin(PI * z)) -
+        logGamma(1 - z);
+    }
+
+    z -= 1;
+    let x = c[0];
+    for (let i = 1; i < c.length; i++) {
+      x += c[i] / (z + i);
+    }
+    const t = z + 7.5;
+    return 0.5 * Math.log(2 * PI) +
+      (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+
+  /*
+   * Continued fraction for regularised incomplete beta.
+   * Returns null on failure to converge within 500 iterations.
+   */
+  function betaFraction(a, b, x) {
+    const tiny = 1e-300;
+    let c = 1;
+    let d = 1 - (a + b) * x / (a + 1);
+    if (Math.abs(d) < tiny) d = tiny;
+    d = 1 / d;
+    let h = d;
+
+    for (let m = 1; m <= 500; m++) {
+      const m2 = 2 * m;
+      let aa = m * (b - m) * x /
+        ((a + m2 - 1) * (a + m2));
+
+      d = 1 + aa * d;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = 1 + aa / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      h *= d * c;
+
+      aa = -(a + m) * (a + b + m) * x /
+        ((a + m2) * (a + m2 + 1));
+
+      d = 1 + aa * d;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = 1 + aa / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      const delta = d * c;
+      h *= delta;
+
+      if (!Number.isFinite(h)) return null;
+      if (Math.abs(delta - 1) < 3e-14) return h;
+    }
+    return null;
+  }
+
+  function incompleteBeta(a, b, x) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+
+    const bt = Math.exp(
+      logGamma(a + b) - logGamma(a) -
+      logGamma(b) +
+      a * Math.log(x) + b * Math.log1p(-x)
+    );
+
+    if (x < (a + 1) / (a + b + 2)) {
+      const f = betaFraction(a, b, x);
+      return f === null ? null :
+        Math.max(0, Math.min(1, bt * f / a));
+    }
+
+    const f = betaFraction(b, a, 1 - x);
+    return f === null ? null :
+      Math.max(0, Math.min(1, 1 - bt * f / b));
+  }
+
+  function tCdf(t, df) {
+    if (t === 0) return 0.5;
+    const x = df / (df + t * t);
+    const beta = incompleteBeta(df / 2, 0.5, x);
+    if (beta === null) return null;
+    return t > 0 ? 1 - beta / 2 : beta / 2;
+  }
+
+  function tInverse(p, df) {
+    let lo = -1e12;
+    let hi = 1e12;
+
+    for (let i = 0; i < 120; i++) {
+      const mid = (lo + hi) / 2;
+      const value = tCdf(mid, df);
+      if (value === null) return null;
+      if (value < p) lo = mid;
+      else hi = mid;
+    }
+
+    return (lo + hi) / 2;
+  }
+
+  /**
+   * Tally categorical observations.
+   * Input: {data[]} with 1–200 finite numbers or strings.
+   * Output: {categories[],counts[]} in occurrences.
+   * Strings retain first-appearance order; numbers ascend.
+   * Errors: empty_data, too_many_points_max_200,
+   * non_finite_value, invalid_data.
+   * Worked example: ['cat','dog','cat'] ->
+   * categories=['cat','dog'], counts=[2,1].
+   */
+  function tally({ data } = {}) {
+    if (!Array.isArray(data)) {
+      return err('ConstraintViolation', 'invalid_data');
+    }
+    if (!data.length) {
+      return err('ConstraintViolation', 'empty_data');
+    }
+    if (data.length > MAX) {
+      return err('ConstraintViolation', 'too_many_points_max_200');
+    }
+    if (data.some(v =>
+      !(typeof v === 'string' || finite(v)))) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+
+    const isNumbers = data.every(finite);
+    const isStrings = data.every(v => typeof v === 'string');
+
+    if (!isNumbers && !isStrings) {
+      return err('ConstraintViolation', 'mixed_category_types');
+    }
+
+    const map = new Map();
+    data.forEach(v => map.set(v, (map.get(v) || 0) + 1));
+
+    const categories = Array.from(map.keys());
+    if (isNumbers) categories.sort((a, b) => a - b);
+
+    return {
+      categories,
+      counts: categories.map(v => map.get(v))
+    };
+  }
+
+  /**
+   * Describe ungrouped numerical observations.
+   * Input: {data[]} of 1–200 finite values, in common units.
+   * Output: n, mean, median, modes[], range, q1, q3, iqr,
+   * sd_pop, sd_sample, min, max.
+   * SDs have data units; n and modes frequencies are counts.
+   * Quartiles: median of the lower and upper halves;
+   * exclude the middle item for odd n (O-Level convention).
+   * Population SD divides by n; sample SD by n-1.
+   * n=1 has null sample SD. Equal frequencies with at
+   * least two distinct values mean no mode.
+   * Errors: shared data validation codes.
+   * Worked example: [1,2,2,5] -> mean=2.5,
+   * median=2, q1=1.5, q3=3.5, IQR=2,
+   * population variance=2.25, sample variance=3.
+   */
+  function summary({ data } = {}) {
+    const error = validData(data);
+    if (error) return error;
+
+    const sorted = sortNumbers(data);
+    const n = sorted.length;
+    const m = moments(data);
+    const q = quartiles(sorted);
+    const counts = new Map();
+
+    sorted.forEach(x =>
+      counts.set(x, (counts.get(x) || 0) + 1));
+
+    const top = Math.max(...counts.values());
+    const modes = counts.size > 1 &&
+      Array.from(counts.values()).every(v => v === top)
+      ? []
+      : Array.from(counts.keys()).filter(
+        v => counts.get(v) === top
+      );
+
+    return {
+      n,
+      mean: m.mean,
+      median: q.median,
+      modes,
+      range: sorted[n - 1] - sorted[0],
+      q1: q.q1,
+      q3: q.q3,
+      iqr: q.q3 - q.q1,
+      sd_pop: Math.sqrt(m.ss / n),
+      sd_sample: n === 1 ? null :
+        Math.sqrt(m.ss / (n - 1)),
+      min: sorted[0],
+      max: sorted[n - 1]
+    };
+  }
+
+  /**
+   * Estimate descriptive statistics from grouped classes.
+   * Input: {edges[],freqs[]} with increasing numerical edges,
+   * non-negative integer frequencies; edges.length=freqs.length+1.
+   * Units: edges and mean_est/sd_est in data units.
+   * SD is population midpoint estimate, divisor n.
+   * Modal class uses frequency density; ties choose first.
+   * Median class is first cumulative frequency >= n/2.
+   * Output: {n,mean_est,sd_est,modal_class_index,
+   * median_class_index}.
+   * Errors: bad_class_edges, zero_total_frequency,
+   * invalid_frequency, too_many_points_max_200.
+   * Worked example: edges=[0,10,30], freqs=[4,6].
+   * Midpoints 5,20; mean=14, variance=54,
+   * sd=sqrt(54), modal index=0 (densities .4,.3),
+   * median index=1.
+   */
+  function grouped_summary({ edges, freqs } = {}) {
+    const e = validEdges(edges);
+    if (e) return e;
+
+    if (!Array.isArray(freqs) ||
+        freqs.length !== edges.length - 1) {
+      return err('ConstraintViolation', 'bad_class_edges');
+    }
+    if (freqs.some(v =>
+      !Number.isSafeInteger(v) || v < 0)) {
+      return err('ConstraintViolation', 'invalid_frequency');
+    }
+
+    const n = freqs.reduce((a, b) => a + b, 0);
+    if (n === 0) {
+      return err('MathError', 'zero_total_frequency');
+    }
+
+    const mids = freqs.map((_, i) =>
+      (edges[i] + edges[i + 1]) / 2);
+
+    const mean_est = freqs.reduce((s, f, i) =>
+      s + f * mids[i], 0) / n;
+
+    const variance = freqs.reduce((s, f, i) =>
+      s + f * (mids[i] - mean_est) ** 2, 0) / n;
+
+    let modal_class_index = 0;
+    let bestDensity = -1;
+    let median_class_index = 0;
+    let cumulative = 0;
+    let foundMedian = false;
+
+    freqs.forEach((f, i) => {
+      const density = f / (edges[i + 1] - edges[i]);
+
+      if (density > bestDensity) {
+        bestDensity = density;
+        modal_class_index = i;
+      }
+
+      cumulative += f;
+      if (!foundMedian && cumulative >= n / 2) {
+        median_class_index = i;
+        foundMedian = true;
+      }
+    });
+
+    return {
+      n,
+      mean_est,
+      sd_est: Math.sqrt(variance),
+      modal_class_index,
+      median_class_index
+    };
+  }
+
+  /**
+   * Construct a histogram.
+   * Input: {data[],edges[]} with increasing class boundaries.
+   * Classes [a,b), except last class [a,b].
+   * Output: {freqs[],densities[]}; density unit is
+   * frequency per unit of the data axis.
+   * Errors: shared data validation, bad_class_edges,
+   * value_outside_edges.
+   * Worked example: data=[1,2,4,5], edges=[0,3,6]
+   * -> freqs=[2,2], densities=[2/3,2/3].
+   */
+  function histogram({ data, edges } = {}) {
+    const de = validData(data);
+    if (de) return de;
+    const ee = validEdges(edges);
+    if (ee) return ee;
+
+    const freqs = Array(edges.length - 1).fill(0);
+
+    for (const v of data) {
+      if (v < edges[0] || v > edges[edges.length - 1]) {
+        return err('ConstraintViolation', 'value_outside_edges');
+      }
+
+      let i = freqs.length - 1;
+      for (let j = 0; j < freqs.length - 1; j++) {
+        if (v < edges[j + 1]) {
+          i = j;
+          break;
+        }
+      }
+      freqs[i]++;
+    }
+
+    return {
+      freqs,
+      densities: freqs.map((f, i) =>
+        f / (edges[i + 1] - edges[i]))
+    };
+  }
+
+  /**
+   * Standardise one observation.
+   * Input: {x,mean,sd}, all in the same measurement units.
+   * Output: {z}, dimensionless.
+   * Errors: non_finite_value; zero_spread when sd<=0.
+   * Worked example: x=74, mean=70, sd=8 -> z=0.5.
+   */
+  function zscore(o = {}) {
+    const e = finiteFields(o, ['x', 'mean', 'sd']);
+    if (e) return e;
+    if (o.sd <= 0) return err('MathError', 'zero_spread');
+    return { z: (o.x - o.mean) / o.sd };
+  }
+
+  /**
+   * Normal cumulative distribution.
+   * Input: {x,mu,sigma}; measurement units shared.
+   * Output: {p}=P(X<=x), dimensionless.
+   * Simpson quadrature; absolute accuracy better than 1e-7.
+   * Errors: non_finite_value, zero_spread.
+   * Worked example: x=10,mu=10,sigma=2 -> p=0.5.
+   */
+  function normal_cdf(o = {}) {
+    const e = finiteFields(o, ['x', 'mu', 'sigma']);
+    if (e) return e;
+    if (o.sigma <= 0) return err('MathError', 'zero_spread');
+    return { p: Phi((o.x - o.mu) / o.sigma) };
+  }
+
+  /**
+   * Invert a normal cumulative probability.
+   * Input: {p,mu,sigma}; 0<p<1, sigma>0.
+   * Output: {x} in the units of mu and sigma.
+   * Bisection of numerical normal CDF, p error <1e-7.
+   * Errors: probability_out_of_range_0_1,
+   * non_finite_value, zero_spread.
+   * Worked example: p=0.5,mu=12,sigma=3 -> x=12.
+   */
+  function normal_inv(o = {}) {
+    if (!finite(o.p) || o.p <= 0 || o.p >= 1) {
+      return err('ConstraintViolation',
+        'probability_out_of_range_0_1');
+    }
+    const e = finiteFields(o, ['mu', 'sigma']);
+    if (e) return e;
+    if (o.sigma <= 0) return err('MathError', 'zero_spread');
+    return { x: o.mu + o.sigma * invPhi(o.p) };
+  }
+
+  /**
+   * Sampling distribution of the sample mean.
+   * Input: {mu,sigma,n}, n a positive integer;
+   * sigma a population SD (non-negative).
+   * Output: {mean,se}, in the original measurement units.
+   * SE=sigma/sqrt(n). Zero sigma gives zero SE.
+   * Errors: sample_size_not_positive_integer,
+   * non_finite_value, negative_spread.
+   * Worked example: mu=50,sigma=12,n=36 ->
+   * mean=50,se=2.
+   */
+  function sampling_mean(o = {}) {
+    const ne = validN(o.n);
+    if (ne) return ne;
+    const e = finiteFields(o, ['mu', 'sigma']);
+    if (e) return e;
+    if (o.sigma < 0) {
+      return err('ConstraintViolation', 'negative_spread');
+    }
+    return { mean: o.mu, se: o.sigma / Math.sqrt(o.n) };
+  }
+
+  /**
+   * Ordinary least-squares straight-line regression.
+   * Input: {points:[[x,y],...]}, 2–200 finite pairs.
+   * Output: intercept a (y units), slope b (y/x units),
+   * Pearson r, r2, rss (squared y units),
+   * se_b (slope units; null for n=2).
+   * r and r2 null when all y are equal.
+   * Errors: points_out_of_range_2_200,
+   * non_finite_value, invalid_points, all_x_equal.
+   * Worked example: points=[[1,2],[2,4],[3,6]]
+   * -> a=0,b=2,r=1,r2=1,rss=0,se_b=0.
+   */
+  function linreg({ points } = {}) {
+    if (!Array.isArray(points)) {
+      return err('ConstraintViolation', 'invalid_points');
+    }
+    if (points.length < 2 || points.length > MAX) {
+      return err('ConstraintViolation', 'points_out_of_range_2_200');
+    }
+    if (points.some(p =>
+      !Array.isArray(p) ||
+      p.length !== 2 ||
+      !finite(p[0]) ||
+      !finite(p[1]))) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+
+    const n = points.length;
+    const xs = points.map(p => p[0]);
+    const ys = points.map(p => p[1]);
+    const mx = moments(xs).mean;
+    const my = moments(ys).mean;
+    let sxx = 0, syy = 0, sxy = 0;
+
+    points.forEach(([x, y]) => {
+      const dx = x - mx;
+      const dy = y - my;
+      sxx += dx * dx;
+      syy += dy * dy;
+      sxy += dx * dy;
+    });
+
+    if (sxx === 0) return err('MathError', 'all_x_equal');
+
+    const b = sxy / sxx;
+    const a = my - b * mx;
+    const rss = points.reduce((s, [x, y]) =>
+      s + (y - (a + b * x)) ** 2, 0);
+
+    const r = syy === 0 ? null :
+      Math.max(-1, Math.min(1, sxy / Math.sqrt(sxx * syy)));
+
+    return {
+      a,
+      b,
+      r,
+      r2: r === null ? null : r * r,
+      rss,
+      se_b: n === 2 ? null :
+        Math.sqrt(Math.max(0, rss) / (n - 2) / sxx)
+    };
+  }
+
+  /**
+   * Predict using a fitted straight line.
+   * Input: {a,b,x,x_min,x_max}; x_min<=x_max.
+   * Output: {y,extrapolation}; y=a+b*x,
+   * extrapolation true outside observed x range.
+   * Units: y and a share units; b is y per x unit.
+   * Errors: non_finite_value, invalid_x_range.
+   * Worked example: a=2,b=3,x=5,x_min=1,x_max=4
+   * -> y=17,extrapolation=true.
+   */
+  function predict(o = {}) {
+    const e = finiteFields(o,
+      ['a', 'b', 'x', 'x_min', 'x_max']);
+    if (e) return e;
+
+    if (o.x_min > o.x_max) {
+      return err('ConstraintViolation', 'invalid_x_range');
+    }
+
+    return {
+      y: o.a + o.b * o.x,
+      extrapolation: o.x < o.x_min || o.x > o.x_max
+    };
+  }
+
+  /**
+   * Two-sided confidence interval for a population mean.
+   * Input: {data[],conf,sigma?}; observations share units.
+   * If known population sigma is supplied, use a z interval.
+   * Otherwise use Student's t with n-1 degrees of freedom,
+   * sample SD dividing by n-1.
+   * Output: {mean,half_width,lo,hi,method:'z'|'t'}.
+   * Numerical t quantile uses regularised incomplete beta.
+   * Errors: shared data codes, confidence_out_of_range,
+   * points_out_of_range_2_200, zero_variance,
+   * zero_spread, beta_iteration_limit.
+   * Worked example: data=[8,10,12],conf=0.95,
+   * sigma=2 -> mean=10,half_width=
+   * 1.95996398454*2/sqrt(3),method='z'.
+   */
+  function ci_mean(o = {}) {
+    const de = validData(o.data);
+    if (de) return de;
+    const ce = validConf(o.conf);
+    if (ce) return ce;
+
+    const known = o.sigma !== undefined;
+    if (!known && o.data.length < 2) {
+      return err('ConstraintViolation', 'points_out_of_range_2_200');
+    }
+
+    if (known) {
+      if (!finite(o.sigma)) {
+        return err('ConstraintViolation', 'non_finite_value');
+      }
+      if (o.sigma <= 0) {
+        return err('MathError', 'zero_spread');
+      }
+    }
+
+    const s = summary({ data: o.data });
+    const sigma = known ? o.sigma : s.sd_sample;
+
+    if (!known && sigma === 0) {
+      return err('MathError', 'zero_variance');
+    }
+
+    const q = known ?
+      invPhi((1 + o.conf) / 2) :
+      tInverse((1 + o.conf) / 2, s.n - 1);
+
+    if (q === null || !finite(q)) {
+      return err('RuntimeError', 'beta_iteration_limit');
+    }
+
+    const half_width = q * sigma / Math.sqrt(s.n);
+
+    return {
+      mean: s.mean,
+      half_width,
+      lo: s.mean - half_width,
+      hi: s.mean + half_width,
+      method: known ? 'z' : 't'
+    };
+  }
+
+  /**
+   * Wald confidence interval for a population proportion.
+   * Input: {successes,n,conf}; counts are non-negative integers.
+   * Output: {p_hat,half_width,lo,hi,clipped:false};
+   * all dimensionless proportions. Limits are NOT clipped.
+   * Normal approximation is not guaranteed reliable for
+   * small counts or extreme proportions.
+   * Errors: sample_size_not_positive_integer,
+   * successes_out_of_range, confidence_out_of_range.
+   * Worked example: successes=50,n=100,conf=0.95 ->
+   * p_hat=.5, half_width=.0979981992 approximately.
+   */
+  function ci_proportion(o = {}) {
+    const ne = validN(o.n);
+    if (ne) return ne;
+    if (!Number.isSafeInteger(o.successes) ||
+        o.successes < 0 || o.successes > o.n) {
+      return err('ConstraintViolation', 'successes_out_of_range');
+    }
+
+    const ce = validConf(o.conf);
+    if (ce) return ce;
+
+    const p_hat = o.successes / o.n;
+    const z = invPhi((1 + o.conf) / 2);
+    const half_width = z *
+      Math.sqrt(p_hat * (1 - p_hat) / o.n);
+
+    return {
+      p_hat,
+      half_width,
+      lo: p_hat - half_width,
+      hi: p_hat + half_width,
+      clipped: false
+    };
+  }
+
+  /**
+   * Minimum sample size for a specified mean margin.
+   * Input: {sigma,margin,conf}; sigma and margin share units.
+   * Output: {n}, smallest positive integer satisfying
+   * z*sigma/sqrt(n)<=margin; known-sigma z method.
+   * Errors: margin_not_positive, confidence_out_of_range,
+   * zero_spread, sample_size_too_large, non_finite_value.
+   * Worked example: sigma=10,margin=2,conf=.95 ->
+   * ceil((1.95996398454*10/2)^2)=97.
+   */
+  function sample_size_mean(o = {}) {
+    if (!finite(o.margin) || o.margin <= 0) {
+      return err('ConstraintViolation', 'margin_not_positive');
+    }
+    const ce = validConf(o.conf);
+    if (ce) return ce;
+    if (!finite(o.sigma)) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+    if (o.sigma <= 0) {
+      return err('MathError', 'zero_spread');
+    }
+
+    const z = invPhi((1 + o.conf) / 2);
+    const raw = (z * o.sigma / o.margin) ** 2;
+
+    if (!finite(raw) || raw > Number.MAX_SAFE_INTEGER) {
+      return err('ConstraintViolation', 'sample_size_too_large');
+    }
+
+    let n = Math.max(1, Math.ceil(raw));
+    while (n > 1 && z * o.sigma / Math.sqrt(n - 1) <= o.margin) {
+      n--;
+    }
+    while (z * o.sigma / Math.sqrt(n) > o.margin) {
+      n++;
+    }
+    return { n };
+  }
+
+  /**
+   * Three-sigma x-bar control-chart limits.
+   * Input: {mean,sd,n}; mean and sd share measurement units,
+   * sd is the known within-process individual-observation SD.
+   * Output: {ucl,lcl,cl}, in measurement units.
+   * No truncation or clamping of negative LCL.
+   * Errors: sample_size_not_positive_integer,
+   * non_finite_value, zero_spread.
+   * Worked example: mean=100,sd=6,n=9 ->
+   * ucl=106,lcl=94,cl=100.
+   */
+  function control_limits(o = {}) {
+    const ne = validN(o.n);
+    if (ne) return ne;
+    const e = finiteFields(o, ['mean', 'sd']);
+    if (e) return e;
+    if (o.sd <= 0) {
+      return err('MathError', 'zero_spread');
+    }
+
+    const h = 3 * o.sd / Math.sqrt(o.n);
+
+    return {
+      ucl: o.mean + h,
+      lcl: o.mean - h,
+      cl: o.mean
+    };
+  }
+
+  /**
+   * Tukey 1.5-IQR box-plot statistics.
+   * Input: {data[]} with 1–200 finite values, common units.
+   * Output: q1,median,q3,iqr,lower_fence,upper_fence,
+   * whisker_lo,whisker_hi,outliers[]; all data units.
+   * Quartiles exclude the median for odd-length lists.
+   * Fence equality counts as inside.
+   * Errors: shared data validation codes.
+   * Worked example: [1,2,3,4,5,20] ->
+   * q1=2,median=3.5,q3=5,iqr=3,
+   * fences=-2.5,9.5, whiskers=1,5,outliers=[20].
+   */
+  function boxplot({ data } = {}) {
+    const de = validData(data);
+    if (de) return de;
+    const s = summary({ data });
+    const sorted = sortNumbers(data);
+    const lower_fence = s.q1 - 1.5 * s.iqr;
+    const upper_fence = s.q3 + 1.5 * s.iqr;
+
+    const inside = sorted.filter(v =>
+      v >= lower_fence && v <= upper_fence);
+
+    return {
+      q1: s.q1,
+      median: s.median,
+      q3: s.q3,
+      iqr: s.iqr,
+      lower_fence,
+      upper_fence,
+      whisker_lo: inside.length ? inside[0] : null,
+      whisker_hi: inside.length ?
+        inside[inside.length - 1] : null,
+      outliers: sorted.filter(v =>
+        v < lower_fence || v > upper_fence)
+    };
+  }
+
+  /**
+   * Known-population-SD z test for a population mean.
+   * Input: {xbar,mu0,sigma,n,tail:'two'|'left'|'right'}.
+   * xbar,mu0,sigma share units; n is a positive integer.
+   * Output: {z,p}, both dimensionless.
+   * Validates tail, then n, then sigma.
+   * Errors: method_not_supported,
+   * sample_size_not_positive_integer,
+   * zero_spread, non_finite_value.
+   * Worked example: xbar=104,mu0=100,sigma=8,n=16,
+   * tail='right' -> z=2,p=0.02275013195.
+   */
+  function ztest(o = {}) {
+    if (!['two', 'left', 'right'].includes(o.tail)) {
+      return err('NotSupported', 'method_not_supported');
+    }
+    const ne = validN(o.n);
+    if (ne) return ne;
+
+    if (!finite(o.sigma)) {
+      return err('ConstraintViolation', 'non_finite_value');
+    }
+    if (o.sigma <= 0) {
+      return err('MathError', 'zero_spread');
+    }
+
+    const e = finiteFields(o, ['xbar', 'mu0']);
+    if (e) return e;
+
+    const z = (o.xbar - o.mu0) /
+      (o.sigma / Math.sqrt(o.n));
+
+    const left = Phi(z);
+    const p = o.tail === 'left' ? left :
+      o.tail === 'right' ? 1 - left :
+      2 * Math.min(left, 1 - left);
+
+    return {
+      z,
+      p: Math.max(0, Math.min(1, p))
+    };
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    tally,
+    summary,
+    grouped_summary,
+    histogram,
+    zscore,
+    normal_cdf,
+    normal_inv,
+    sampling_mean,
+    linreg,
+    predict,
+    ci_mean,
+    ci_proportion,
+    sample_size_mean,
+    control_limits,
+    boxplot,
+    ztest
+  });
+})();
+/* FIT-CALC-END statistics */
+
+/* FIT AND INTERVAL GAME */
+(function () {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const NS = 'http:' + String.fromCharCode(47, 47) +
+    'www.w3.org/2000/svg';
+  const BASE_SEED = 938271;
+  const BLUE = '#1F66E5';
+  const PURPLE = '#6A45F5';
+  const YELLOW = '#FFC83D';
+  const RED = '#D92D20';
+  const GREEN = '#1E9E5A';
+
+  let rng = () => 0.5;
+  let animationFrame = null;
+  let animationToken = 0;
+
+  function seeded(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function randint(a, b) {
+    return a + Math.floor(rng() * (b - a + 1));
+  }
+
+  function clamp(x, a, b) {
+    return Math.max(a, Math.min(b, x));
+  }
+
+  function fmt(v, precision = 4) {
+    return Number.isFinite(v) ?
+      Number(v.toPrecision(precision)).toString() : '—';
+  }
+
+  function friendly(result) {
+    const messages = {
+      empty_data: 'The data set cannot be empty.',
+      non_finite_value: 'All observations must be finite.',
+      all_x_equal: 'Regression needs variation in the x-values.',
+      points_out_of_range_2_200:
+        'At least two and no more than 200 observations are required.',
+      zero_variance: 'The observations have no sample variation.',
+      zero_spread: 'A positive standard deviation is required.',
+      confidence_out_of_range:
+        'Confidence must be strictly between zero and one.',
+      sample_size_not_positive_integer:
+        'Sample size must be a positive integer.',
+      successes_out_of_range:
+        'Successes must lie between zero and the sample size.',
+      beta_iteration_limit:
+        'The interval calculation did not converge.'
+    };
+    return messages[result.reason] ||
+      'The calculation could not be completed. Check the inputs.';
+  }
+
+  function checked(result) {
+    if (!result || result.error) {
+      feedback(friendly(result || {}), false);
+      return null;
+    }
+    return result;
+  }
+
+  function S(tag, attributes = {}, content) {
+    const e = document.createElementNS(NS, tag);
+    Object.entries(attributes).forEach(([name, value]) =>
+      e.setAttribute(name, String(value)));
+    if (content !== undefined) e.textContent = String(content);
+    return e;
+  }
+
+  function line(svg, x1, y1, x2, y2,
+    colour = '#111', thickness = 2, dash = '') {
+    svg.appendChild(S('line', {
+      x1, y1, x2, y2,
+      stroke: colour,
+      'stroke-width': thickness,
+      ...(dash ? { 'stroke-dasharray': dash } : {})
+    }));
+  }
+
+  function label(svg, x, y, content, extra = {}) {
+    svg.appendChild(S('text', {
+      x, y, 'font-size': 12,
+      'text-anchor': 'middle',
+      ...extra
+    }, content));
+  }
+
+  function add(parent, tag, content, cls = '') {
+    const el = document.createElement(tag);
+    el.textContent = content;
+    if (cls) el.className = cls;
+    parent.appendChild(el);
+    return el;
+  }
+
+  function feedback(message, good = null) {
+    $('feedback').textContent = message;
+    $('feedback').className = 'feedback' +
+      (good === true ? ' good' :
+        good === false ? ' bad' : '');
+  }
+
+  const game = {
+    round: 0,
+    score: 0,
+    attempts: 0,
+    hinted: false,
+    solved: false,
+    kind: 'regression',
+    points: [],
+    regression: null,
+    playerA: 0,
+    playerB: 0,
+    regressionVariant: 'outlier',
+    patternAnswer: '',
+    patternChoice: '',
+    confidenceVariant: 'mean',
+    confidence: 0.95,
+    targetHalf: 1,
+    currentN: 10,
+    requiredN: 10,
+    populationMean: 50,
+    populationSigma: 8,
+    populationProportion: 0.5,
+    coverageIntervals: [],
+    coverageCount: 0,
+    coverageDone: false,
+    coverageSeed: 0,
+    intervalInput: 0,
+    predictionX: 0,
+    predictionAnswer: '',
+    predictionChoice: '',
+    prediction: null,
+    dataUnit: 'units',
+    xUnit: 'units',
+    yUnit: 'units'
+  };
+
+  function setUI() {
+    $('roundLabel').textContent =
+      'Round ' + (game.round + 1) + '/6';
+    $('scoreLabel').textContent =
+      'Score: ' + game.score;
+    $('progress').style.width =
+      (game.round * 100 / 6) + '%';
+
+    $('checkBtn').classList.toggle('hidden', game.solved);
+    $('nextBtn').classList.toggle('hidden', !game.solved);
+    $('nextBtn').textContent =
+      game.round === 5 ?
+        'See your stars →' : 'Next round →';
+    $('hintBtn').disabled = game.hinted || game.solved;
+  }
+
+  function statCard(parent, title, value, units = '') {
+    const card = document.createElement('div');
+    card.className = 'stat';
+    add(card, 'span', title);
+    add(card, 'strong',
+      String(value) + (units ? ' ' + units : ''));
+    parent.appendChild(card);
+    return card;
+  }
+
+  function choiceButton(container, key, wording,
+    selected, callback) {
+    const button = document.createElement('button');
+    button.className = 'choice' +
+      (selected ? ' selected' : '');
+    button.disabled = game.solved;
+    button.setAttribute('aria-pressed', String(selected));
+
+    const mark = document.createElement('span');
+    mark.className = 'mark';
+    mark.textContent = selected ? '✓' : '';
+
+    const description = document.createElement('span');
+    description.textContent = wording;
+
+    button.append(mark, description);
+    button.addEventListener('click', callback);
+    container.appendChild(button);
+    return button;
+  }
+
+  function makeStepper(parent, config) {
+    const {
+      title, value, min, max, fine, coarse,
+      decimals = 0, unit = '', update
+    } = config;
+
+    const box = document.createElement('div');
+    box.className = 'control-box';
+    add(box, 'label', title);
+
+    function change(next) {
+      if (game.solved || !Number.isFinite(next)) return;
+      update(clamp(
+        Number(next.toFixed(decimals)), min, max));
+      render();
+    }
+
+    const row = document.createElement('div');
+    row.className = 'stepper';
+
+    [
+      ['−−', -coarse],
+      ['−', -fine],
+      ['+', fine],
+      ['++', coarse]
+    ].forEach(([word, delta], index) => {
+      if (index === 2) {
+        const output = document.createElement('output');
+        output.className = 'value';
+        output.textContent = fmt(value, 6) +
+          (unit ? ' ' + unit : '');
+        row.appendChild(output);
+      }
+
+      const button = document.createElement('button');
+      button.textContent = word;
+      button.disabled = game.solved;
+      button.setAttribute('aria-label',
+        (delta < 0 ? 'Decrease ' : 'Increase ') +
+        title + ' by ' + Math.abs(delta));
+      button.addEventListener('click', () =>
+        change(value + delta));
+      row.appendChild(button);
+    });
+
+    box.appendChild(row);
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = String(min);
+    slider.max = String(max);
+    slider.step = String(fine);
+    slider.value = String(value);
+    slider.disabled = game.solved;
+    slider.setAttribute('aria-label', title);
+    slider.addEventListener('input', () =>
+      change(Number(slider.value)));
+
+    box.appendChild(slider);
+    parent.appendChild(box);
+  }
+
+  function newRound(index) {
+    animationToken++;
+    if (animationFrame !== null) {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = null;
+    }
+
+    rng = seeded(BASE_SEED + index * 14449);
+    game.round = index;
+    game.attempts = 0;
+    game.hinted = false;
+    game.solved = false;
+    game.patternChoice = '';
+    game.predictionChoice = '';
+    game.coverageIntervals = [];
+    game.coverageCount = 0;
+    game.coverageDone = false;
+
+    game.kind = [
+      'regression',
+      'confidence',
+      'prediction',
+      'regression',
+      'confidence',
+      'prediction'
+    ][index];
+
+    $('difficultyLabel').textContent =
+      index < 2 ? 'Warm-up' :
+      index < 4 ? 'Investigation' : 'Challenge';
+
+    if (game.kind === 'regression') setupRegression(index);
+    if (game.kind === 'confidence') setupConfidence(index);
+    if (game.kind === 'prediction') setupPrediction(index);
+
+    render();
+    feedback('Investigate the evidence and check your answer.');
+  }
+
+  function setupRegression(index) {
+    $('typeLabel').textContent = 'Linear regression';
+    $('stageTitle').textContent = 'Fit the evidence';
+    $('sceneTitle').textContent = 'Observed data pairs';
+    $('plotTitle').textContent = 'Scatter and residual analysis';
+    $('plotNote').textContent =
+      'Adjust the line live. The lower panel shows residuals from your fitted line.';
+
+    game.regressionVariant =
+      index === 0 ? 'outlier' : 'curved';
+
+    game.xUnit = 'minutes';
+    game.yUnit = 'g';
+
+    if (index === 0) {
+      const offset = randint(1, 4);
+      game.points = [
+        [1, 8 + offset],
+        [2, 12 + offset],
+        [3, 14 + offset],
+        [4, 18 + offset],
+        [5, 21 + offset],
+        [6, 25 + offset],
+        [7, 27 + offset],
+        [8, 32 + offset],
+        [9, 44 + offset]
+      ];
+      game.patternAnswer = 'outlier';
+    } else {
+      const offset = randint(0, 3);
+      game.points = [
+        [1, 21 + offset],
+        [2, 15 + offset],
+        [3, 12 + offset],
+        [4, 10 + offset],
+        [5, 9 + offset],
+        [6, 10 + offset],
+        [7, 12 + offset],
+        [8, 15 + offset],
+        [9, 21 + offset]
+      ];
+      game.patternAnswer = 'curved';
+    }
+
+    game.regression = checked(FITCalcStats.linreg({
+      points: game.points
+    }));
+    if (!game.regression) return;
+
+    game.playerA =
+      Math.round(game.regression.a + 5);
+    game.playerB =
+      Number((game.regression.b - 0.5).toFixed(2));
+
+    $('story').textContent =
+      index === 0 ?
+        'A measurement process recorded response against elapsed time. One unusual observation may influence the fit.' :
+        'A response varies with elapsed time. A straight line may conceal a systematic pattern.';
+
+    $('question').textContent =
+      'Adjust intercept a and slope b to minimise the residual sum of squares. ' +
+      'Then identify whether the residual evidence suggests an outlier or a curved pattern. ' +
+      'Compare your fitted line with ordinary least squares after Check.';
+  }
+
+  function setupConfidence(index) {
+    $('typeLabel').textContent = 'Confidence intervals';
+    $('stageTitle').textContent = 'How precise is the estimate?';
+    $('sceneTitle').textContent = 'Sampling specification';
+    $('plotTitle').textContent = 'Interval coverage experiment';
+    $('plotNote').textContent =
+      'After choosing a suitable sample size, run 100 seeded intervals and see which contain the true parameter.';
+
+    game.confidenceVariant =
+      index === 1 ? 'mean' : 'proportion';
+
+    if (game.confidenceVariant === 'mean') {
+      game.populationMean = 50;
+      game.populationSigma = 8;
+      game.confidence = 0.95;
+      game.targetHalf = 3.1;
+      game.currentN = 12;
+      game.requiredN = 0;
+
+      for (let n = 2; n <= 200; n++) {
+        const exampleData = symmetricData(n, game.populationMean,
+          game.populationSigma);
+
+        const ci = FITCalcStats.ci_mean({
+          data: exampleData, conf: game.confidence
+        });
+
+        if (!ci.error && ci.half_width <= game.targetHalf) {
+          game.requiredN = n;
+          break;
+        }
+      }
+
+      $('story').textContent =
+        'A mean is estimated from independent measurements. The population standard deviation is unknown, so a Student t interval is required.';
+      $('question').textContent =
+        'Choose the smallest sample size from 2 to 200 whose two-sided ' +
+        '95% Student t interval has half-width at most ' +
+        fmt(game.targetHalf) + ' units, using the supplied planning sample SD. ' +
+        'Then run the coverage experiment.';
+    } else {
+      game.populationProportion = 0.4;
+      game.confidence = 0.90;
+      game.targetHalf = 0.08;
+      game.currentN = 35;
+      game.requiredN = 0;
+
+      for (let n = 2; n <= 200; n++) {
+        const successes = Math.round(
+          game.populationProportion * n);
+
+        const ci = FITCalcStats.ci_proportion({
+          successes, n, conf: game.confidence
+        });
+
+        if (!ci.error && ci.half_width <= game.targetHalf) {
+          game.requiredN = n;
+          break;
+        }
+      }
+
+      $('story').textContent =
+        'A binary quality indicator is recorded as success or failure. Use the Wald confidence interval without clipping its endpoints.';
+      $('question').textContent =
+        'Choose the smallest integer n from 2 to 200 for which the planning ' +
+        '90% Wald interval has half-width at most ' +
+        fmt(game.targetHalf) +
+        ', using successes rounded from a planning proportion of 0.4. ' +
+        'Then run 100 coverage intervals.';
+    }
+
+    game.coverageSeed = BASE_SEED + index * 92821 + 811;
+  }
+
+  /*
+   * Deterministic planning values have exactly the requested
+   * sample mean and sample standard deviation.
+   * The calculation of their statistics is delegated to FITCalcStats.
+   */
+  function symmetricData(n, centre, sampleSD) {
+    const values = [];
+    const pairs = Math.floor(n / 2);
+    const magnitude = sampleSD *
+      Math.sqrt((n - 1) / (2 * pairs));
+
+    for (let i = 0; i < pairs; i++) {
+      values.push(centre - magnitude);
+      values.push(centre + magnitude);
+    }
+
+    if (n % 2) values.push(centre);
+    return values;
+  }
+
+  function setupPrediction(index) {
+    $('typeLabel').textContent = 'Prediction and extrapolation';
+    $('stageTitle').textContent = 'Can the line be trusted?';
+    $('sceneTitle').textContent = 'Observed calibration data';
+    $('plotTitle').textContent = 'Prediction relative to the data';
+    $('plotNote').textContent =
+      'A fitted line is drawn through the observed domain. Your requested x-position is marked.';
+
+    game.xUnit = 'minutes';
+    game.yUnit = 'g';
+
+    const noise = [0, 1, -1, 1, 0, -1, 1, -1];
+    const offset = randint(0, 4);
+
+    game.points = Array.from({ length: 8 }, (_, i) => {
+      const x = i + 1;
+      return [x, 10 + offset + 3 * x + noise[i]];
+    });
+
+    const reg = checked(FITCalcStats.linreg({
+      points: game.points
+    }));
+    if (!reg) return;
+
+    game.regression = reg;
+    game.predictionX =
+      index === 2 ? 5 : 12;
+
+    game.prediction = checked(FITCalcStats.predict({
+      a: reg.a,
+      b: reg.b,
+      x: game.predictionX,
+      x_min: 1,
+      x_max: 8
+    }));
+    if (!game.prediction) return;
+
+    game.predictionAnswer =
+      game.prediction.extrapolation ?
+        'extrapolation' : 'interpolation';
+
+    game.intervalInput = 0;
+
+    $('story').textContent =
+      index === 2 ?
+        'A calibration relationship was fitted using eight measured times. You are asked for an estimate inside the observed range.' :
+        'A fitted calibration line is being used beyond the measured range. Investigate the reliability of the prediction.';
+
+    $('question').textContent =
+      'Calculate the predicted response at x = ' +
+      game.predictionX + ' minutes, then decide whether it is interpolation ' +
+      'or extrapolation. Consider how this affects trust in the result.';
+  }
+
+  function render() {
+    $('sceneBody').replaceChildren();
+    $('controlArea').replaceChildren();
+
+    if (game.kind === 'regression') renderRegression();
+    if (game.kind === 'confidence') renderConfidence();
+    if (game.kind === 'prediction') renderPrediction();
+
+    renderPlot();
+    setUI();
+  }
+
+  function renderRegression() {
+    const container = $('sceneBody');
+    const grid = document.createElement('div');
+    grid.className = 'grid-two';
+
+    statCard(grid, 'Observations',
+      game.points.length, 'pairs');
+    statCard(grid, 'Explanatory variable',
+      'Elapsed time', 'minutes');
+    statCard(grid, 'Response variable',
+      'Measured response', 'g');
+    statCard(grid, 'Method',
+      'Least squares');
+
+    container.appendChild(grid);
+
+    const box = document.createElement('div');
+    box.className = 'control-box';
+
+    add(box, 'h3', 'Observed pairs (minutes, g)');
+
+    const pairs = document.createElement('p');
+    pairs.style.fontSize = '14px';
+    pairs.style.overflowWrap = 'anywhere';
+    pairs.textContent = game.points.map(
+      p => '(' + p[0] + ', ' + p[1] + ')'
+    ).join(' · ');
+    box.appendChild(pairs);
+
+    container.appendChild(box);
+
+    const control = $('controlArea');
+
+    makeStepper(control, {
+      title: 'Intercept a (g)',
+      value: game.playerA,
+      min: -20, max: 60,
+      fine: 0.1, coarse: 1,
+      decimals: 2, unit: 'g',
+      update(v) { game.playerA = v; }
+    });
+
+    makeStepper(control, {
+      title: 'Slope b (g per minute)',
+      value: game.playerB,
+      min: -10, max: 10,
+      fine: 0.01, coarse: 0.1,
+      decimals: 2, unit: 'g/min',
+      update(v) { game.playerB = v; }
+    });
+
+    const choice = document.createElement('div');
+    choice.className = 'control-box';
+
+    add(choice, 'h3', 'Residual diagnosis');
+
+    const list = document.createElement('div');
+    list.className = 'choice-list';
+
+    [
+      ['outlier', 'An unusual outlying observation'],
+      ['curved', 'A curved residual pattern'],
+      ['random', 'No obvious residual pattern']
+    ].forEach(([key, wording]) => {
+      choiceButton(list, key, wording,
+        game.patternChoice === key,
+        () => {
+          game.patternChoice = key;
+          render();
+        });
+    });
+
+    choice.appendChild(list);
+    control.appendChild(choice);
+  }
+
+  function intervalForPlanning(n) {
+    if (game.confidenceVariant === 'mean') {
+      return FITCalcStats.ci_mean({
+        data: symmetricData(
+          n, game.populationMean, game.populationSigma),
+        conf: game.confidence
+      });
+    }
+
+    const successes = Math.round(
+      game.populationProportion * n);
+
+    return FITCalcStats.ci_proportion({
+      successes,
+      n,
+      conf: game.confidence
+    });
+  }
+
+  function renderConfidence() {
+    const container = $('sceneBody');
+    const grid = document.createElement('div');
+    grid.className = 'grid-two';
+
+    statCard(grid, 'Confidence level',
+      fmt(game.confidence * 100), '%');
+    statCard(grid, 'Target half-width',
+      fmt(game.targetHalf),
+      game.confidenceVariant === 'mean' ? 'units' : '');
+    statCard(grid, 'Method',
+      game.confidenceVariant === 'mean' ? 'Student t' : 'Wald');
+    statCard(grid, 'Maximum sample size',
+      200, 'observations');
+
+    container.appendChild(grid);
+
+    if (game.confidenceVariant === 'mean') {
+      add(container, 'p',
+        'Planning sample SD = ' +
+        game.populationSigma +
+        ' units. Values are centred symmetrically so their sample SD equals this value.',
+        'intro');
+    } else {
+      add(container, 'p',
+        'Planning proportion = ' +
+        fmt(game.populationProportion) +
+        '. Successes for each candidate n are rounded to the nearest whole number.',
+        'intro');
+    }
+
+    makeStepper($('controlArea'), {
+      title: 'Sample size n (observations)',
+      value: game.currentN,
+      min: 2, max: 200,
+      fine: 1, coarse: 10,
+      decimals: 0,
+      update(v) {
+        game.currentN = v;
+        game.coverageIntervals = [];
+        game.coverageCount = 0;
+        game.coverageDone = false;
+      }
+    });
+
+    const box = document.createElement('div');
+    box.className = 'control-box';
+
+    add(box, 'h3', 'Coverage experiment');
+
+    add(box, 'p',
+      'Draw 100 seeded samples. Each interval is calculated separately; the observed coverage count is not the target answer.',
+      'intro');
+
+    const button = document.createElement('button');
+    button.className = 'primary';
+    button.textContent = 'Run 100 intervals';
+    button.disabled = game.solved;
+    button.addEventListener('click', runCoverage);
+    box.appendChild(button);
+
+    const counts = document.createElement('div');
+    counts.className = 'grid-two';
+    statCard(counts, 'Intervals generated',
+      game.coverageIntervals.length);
+    statCard(counts, 'Intervals covering truth',
+      game.coverageCount);
+    box.appendChild(counts);
+
+    $('controlArea').appendChild(box);
+  }
+
+  function normalRandom(random) {
+    let u = random();
+    if (u <= 0) u = Number.MIN_VALUE;
+    const v = random();
+    return Math.sqrt(-2 * Math.log(u)) *
+      Math.cos(2 * Math.PI * v);
+  }
+
+  function coverageInterval(random) {
+    if (game.confidenceVariant === 'mean') {
+      const data = [];
+
+      for (let i = 0; i < game.currentN; i++) {
+        data.push(
+          game.populationMean +
+          game.populationSigma * normalRandom(random)
+        );
+      }
+
+      const ci = FITCalcStats.ci_mean({
+        data,
+        conf: game.confidence
+      });
+
+      if (ci.error) return null;
+
+      return {
+        lo: ci.lo,
+        hi: ci.hi,
+        centre: ci.mean,
+        covers: ci.lo <= game.populationMean &&
+          ci.hi >= game.populationMean
+      };
+    }
+
+    let successes = 0;
+
+    for (let i = 0; i < game.currentN; i++) {
+      if (random() < game.populationProportion) successes++;
+    }
+
+    const ci = FITCalcStats.ci_proportion({
+      successes,
+      n: game.currentN,
+      conf: game.confidence
+    });
+
+    if (ci.error) return null;
+
+    return {
+      lo: ci.lo,
+      hi: ci.hi,
+      centre: ci.p_hat,
+      covers: ci.lo <= game.populationProportion &&
+        ci.hi >= game.populationProportion
+    };
+  }
+
+  function runCoverage() {
+    if (game.solved) return;
+
+    animationToken++;
+    if (animationFrame !== null) {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = null;
+    }
+
+    const token = animationToken;
+    const random = seeded(
+      game.coverageSeed + game.currentN * 101
+    );
+
+    const results = [];
+
+    for (let i = 0; i < 100; i++) {
+      const interval = coverageInterval(random);
+      if (interval) results.push(interval);
+    }
+
+    if (results.length !== 100) {
+      feedback('The interval run could not produce 100 valid results.', false);
+      return;
+    }
+
+    game.coverageIntervals = [];
+    game.coverageCount = 0;
+    game.coverageDone = false;
+
+    const reduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)').matches;
+
+    if (reduced) {
+      game.coverageIntervals = results;
+      game.coverageCount =
+        results.filter(v => v.covers).length;
+      game.coverageDone = true;
+      render();
+      return;
+    }
+
+    let index = 0;
+
+    function step() {
+      if (token !== animationToken) return;
+
+      const end = Math.min(index + 10, results.length);
+
+      while (index < end) {
+        const item = results[index++];
+        game.coverageIntervals.push(item);
+        if (item.covers) game.coverageCount++;
+      }
+
+      renderCoveragePlot($('plot'));
+      updateCoverageCards();
+
+      if (index < results.length) {
+        animationFrame = requestAnimationFrame(step);
+      } else {
+        game.coverageDone = true;
+        animationFrame = null;
+        render();
+      }
+    }
+
+    animationFrame = requestAnimationFrame(step);
+  }
+
+  function updateCoverageCards() {
+    const cards = $('controlArea').querySelectorAll(
+      '.control-box .grid-two .stat strong'
+    );
+
+    if (cards.length >= 2) {
+      cards[0].textContent = String(
+        game.coverageIntervals.length);
+      cards[1].textContent = String(game.coverageCount);
+    }
+  }
+
+  function renderPrediction() {
+    const scene = $('sceneBody');
+    const grid = document.createElement('div');
+    grid.className = 'grid-two';
+
+    statCard(grid, 'Observed x minimum',
+      1, 'minute');
+    statCard(grid, 'Observed x maximum',
+      8, 'minutes');
+    statCard(grid, 'Prediction x',
+      game.predictionX, 'minutes');
+    statCard(grid, 'Observed pairs',
+      game.points.length);
+
+    scene.appendChild(grid);
+
+    const note = document.createElement('div');
+    note.className = 'control-box';
+    add(note, 'h3', 'Measured pairs');
+    add(note, 'p',
+      game.points.map(
+        p => '(' + p[0] + ', ' + p[1] + ')'
+      ).join(' · ') + ' (minutes, g)');
+    scene.appendChild(note);
+
+    const box = document.createElement('div');
+    box.className = 'control-box';
+
+    add(box, 'label', 'Predicted response y (g)');
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.step = '0.01';
+    input.value = String(game.intervalInput);
+    input.disabled = game.solved;
+    input.setAttribute('aria-label',
+      'Predicted response in grams');
+
+    input.addEventListener('input', () => {
+      if (Number.isFinite(input.valueAsNumber)) {
+        game.intervalInput = input.valueAsNumber;
+        renderPlot();
+      }
+    });
+
+    box.appendChild(input);
+    $('controlArea').appendChild(box);
+
+    const choice = document.createElement('div');
+    choice.className = 'control-box';
+
+    add(choice, 'h3', 'Prediction type');
+
+    const choices = document.createElement('div');
+    choices.className = 'choice-list';
+
+    [
+      ['interpolation', 'Interpolation: inside the observed x-range'],
+      ['extrapolation', 'Extrapolation: outside the observed x-range']
+    ].forEach(([key, wording]) => {
+      choiceButton(choices, key, wording,
+        game.predictionChoice === key,
+        () => {
+          game.predictionChoice = key;
+          render();
+        });
+    });
+
+    choice.appendChild(choices);
+    $('controlArea').appendChild(choice);
+  }
+
+  function renderPlot() {
+    const svg = $('plot');
+    svg.replaceChildren();
+
+    if (game.kind === 'regression') plotRegression(svg);
+    if (game.kind === 'confidence') renderCoveragePlot(svg);
+    if (game.kind === 'prediction') plotPrediction(svg);
+  }
+
+  function plotRegression(svg) {
+    const left = 52, right = 423;
+    const top = 38, bottom = 219;
+    const residualTop = 263, residualBottom = 346;
+
+    const xs = game.points.map(p => p[0]);
+    const ys = game.points.map(p => p[1]);
+
+    const xMin = Math.min(...xs) - 1;
+    const xMax = Math.max(...xs) + 1;
+
+    const predicted = game.points.map(([x]) => {
+      const p = FITCalcStats.predict({
+        a: game.playerA,
+        b: game.playerB,
+        x,
+        x_min: Math.min(...xs),
+        x_max: Math.max(...xs)
+      });
+      return p.error ? null : p.y;
+    });
+
+    if (predicted.some(v => v === null)) return;
+
+    const allY = [...ys, ...predicted];
+    const rawMin = Math.min(...allY);
+    const rawMax = Math.max(...allY);
+    const pad = Math.max(3, (rawMax - rawMin) * 0.15);
+    const yMin = rawMin - pad;
+    const yMax = rawMax + pad;
+
+    const x = v => left +
+      (v - xMin) / (xMax - xMin) *
+      (right - left);
+
+    const y = v => bottom -
+      (v - yMin) / (yMax - yMin) *
+      (bottom - top);
+
+    label(svg, 235, 21, 'Scatter plot and fitted line', {
+      'font-size': 16, 'font-weight': 800
+    });
+
+    for (let i = 0; i <= 4; i++) {
+      const tick = yMin + i / 4 * (yMax - yMin);
+      const yy = y(tick);
+      line(svg, left, yy, right, yy, '#E4E2DB', 1);
+      label(svg, left - 9, yy + 4, fmt(tick, 3), {
+        'font-size': 10, 'text-anchor': 'end'
+      });
+    }
+
+    game.points.forEach(([px, py], i) => {
+      const yp = predicted[i];
+      line(svg, x(px), y(py), x(px), y(yp),
+        RED, 2, '5 3');
+
+      svg.appendChild(S('circle', {
+        cx: x(px), cy: y(py), r: 5.5,
+        fill: YELLOW,
+        stroke: '#111', 'stroke-width': 2
+      }));
+    });
+
+    function regressionSegment(a, b, colour, dash) {
+      const p1 = FITCalcStats.predict({
+        a, b, x: xMin,
+        x_min: Math.min(...xs),
+        x_max: Math.max(...xs)
+      });
+      const p2 = FITCalcStats.predict({
+        a, b, x: xMax,
+        x_min: Math.min(...xs),
+        x_max: Math.max(...xs)
+      });
+
+      if (p1.error || p2.error) return;
+
+      line(svg,
+        x(xMin), y(p1.y),
+        x(xMax), y(p2.y),
+        colour, 3, dash);
+    }
+
+    regressionSegment(
+      game.playerA, game.playerB, BLUE, '');
+
+    if (game.solved) {
+      regressionSegment(
+        game.regression.a,
+        game.regression.b, GREEN, '7 4');
+    }
+
+    for (let t = 1; t <= 9; t += 2) {
+      label(svg, x(t), bottom + 18, t, {
+        'font-size': 11
+      });
+    }
+
+    line(svg, left, top, left, bottom, '#111', 2);
+    line(svg, left, bottom, right, bottom, '#111', 2);
+
+    label(svg, 240, 253, 'Elapsed time (minutes)', {
+      'font-size': 11, 'font-weight': 700
+    });
+
+    svg.appendChild(S('text', {
+      x: 13, y: 136,
+      transform: 'rotate(-90 13 136)',
+      'font-size': 11, 'font-weight': 700,
+      'text-anchor': 'middle'
+    }, 'Response (g)'));
+
+    label(svg, 240, 276, 'Residuals', {
+      'font-size': 13, 'font-weight': 800
+    });
+
+    const residuals = game.points.map(
+      ([, py], i) => py - predicted[i]
+    );
+
+    const maxAbs = Math.max(
+      1, ...residuals.map(Math.abs));
+    const zeroY = (residualTop + residualBottom) / 2;
+
+    line(svg, left, zeroY, right, zeroY, '#111', 2);
+
+    residuals.forEach((v, i) => {
+      const yy = zeroY -
+        v / maxAbs * (residualBottom - residualTop) * 0.4;
+      line(svg, x(game.points[i][0]), zeroY,
+        x(game.points[i][0]), yy, RED, 2);
+
+      svg.appendChild(S('circle', {
+        cx: x(game.points[i][0]),
+        cy: yy, r: 4.5,
+        fill: PURPLE,
+        stroke: '#111', 'stroke-width': 1.5
+      }));
+    });
+
+    label(svg, 240, 379, 'Elapsed time (minutes)', {
+      'font-size': 11, 'font-weight': 700
+    });
+
+    svg.setAttribute('aria-label',
+      'Scatter plot of response in grams against elapsed time in minutes, ' +
+      'with player line and vertical residual bars. ' +
+      'Lower plot shows residuals against elapsed time.' +
+      (game.solved ? ' The least-squares line is also shown.' : ''));
+
+    setLegend([
+      [YELLOW, 'Observed data'],
+      [BLUE, 'Your line'],
+      [RED, 'Residuals'],
+      ...(game.solved ? [[GREEN, 'Least-squares line']] : [])
+    ]);
+  }
+
+  function renderCoveragePlot(svg) {
+    svg.replaceChildren();
+
+    const left = 57, right = 421;
+    const top = 39, bottom = 348;
+
+    const truth = game.confidenceVariant === 'mean' ?
+      game.populationMean : game.populationProportion;
+
+    const span = game.confidenceVariant === 'mean' ?
+      Math.max(12, game.targetHalf * 5) : 0.32;
+
+    const xMin = truth - span;
+    const xMax = truth + span;
+
+    const x = value =>
+      left + (value - xMin) / (xMax - xMin) *
+      (right - left);
+
+    const y = index =>
+      top + index / 99 * (bottom - top);
+
+    label(svg, 235, 22, '100 confidence intervals', {
+      'font-size': 16, 'font-weight': 800
+    });
+
+    for (let i = 0; i <= 4; i++) {
+      const tick = xMin + i / 4 * (xMax - xMin);
+      const xx = x(tick);
+      line(svg, xx, top, xx, bottom,
+        '#E4E2DB', 1);
+      label(svg, xx, bottom + 19,
+        fmt(tick, 3), { 'font-size': 10 });
+    }
+
+    line(svg, x(truth), top, x(truth), bottom,
+      '#111', 3, '6 4');
+
+    game.coverageIntervals.forEach((ci, i) => {
+      const yy = y(i);
+      const colour = ci.covers ? BLUE : RED;
+      const lo = clamp(x(ci.lo), left, right);
+      const hi = clamp(x(ci.hi), left, right);
+
+      line(svg, lo, yy, hi, yy, colour, 2.2);
+
+      if (i % 10 === 0 || !ci.covers) {
+        svg.appendChild(S('circle', {
+          cx: clamp(x(ci.centre), left, right),
+          cy: yy,
+          r: 2.2,
+          fill: ci.covers ? GREEN : RED
+        }));
+      }
+    });
+
+    line(svg, left, top, left, bottom, '#111', 2);
+    line(svg, left, bottom, right, bottom, '#111', 2);
+
+    [1, 25, 50, 75, 100].forEach(n => {
+      const yy = y(n - 1);
+      label(svg, left - 11, yy + 4, n, {
+        'font-size': 10, 'text-anchor': 'end'
+      });
+    });
+
+    svg.appendChild(S('text', {
+      x: 15, y: 196,
+      transform: 'rotate(-90 15 196)',
+      'font-size': 11, 'font-weight': 700,
+      'text-anchor': 'middle'
+    }, 'Interval number (count)'));
+
+    label(svg, 240, 379,
+      game.confidenceVariant === 'mean' ?
+        'Population mean estimate (units)' :
+        'Population proportion (no units)', {
+          'font-size': 11, 'font-weight': 700
+        });
+
+    svg.setAttribute('aria-label',
+      'Coverage plot showing ' +
+      game.coverageIntervals.length +
+      ' confidence intervals. Blue intervals include the true parameter; ' +
+      'red intervals miss it. A dashed vertical line marks the true value.');
+
+    setLegend([
+      [BLUE, 'Covers truth'],
+      [RED, 'Misses truth'],
+      ['#111', 'True parameter']
+    ]);
+  }
+
+  function plotPrediction(svg) {
+    const left = 53, right = 421;
+    const top = 42, bottom = 331;
+
+    const allX = game.points.map(p => p[0]);
+    const allY = game.points.map(p => p[1]);
+
+    const xMin = 0;
+    const xMax = 14;
+
+    const prediction = FITCalcStats.predict({
+      a: game.regression.a,
+      b: game.regression.b,
+      x: game.predictionX,
+      x_min: Math.min(...allX),
+      x_max: Math.max(...allX)
+    });
+    if (prediction.error) return;
+
+    const yMin = Math.min(...allY, prediction.y) - 5;
+    const yMax = Math.max(...allY, prediction.y) + 5;
+
+    const x = v =>
+      left + (v - xMin) / (xMax - xMin) *
+      (right - left);
+
+    const y = v =>
+      bottom - (v - yMin) / (yMax - yMin) *
+      (bottom - top);
+
+    label(svg, 233, 23, 'Fitted relation and requested prediction', {
+      'font-size': 15, 'font-weight': 800
+    });
+
+    const observedMin = Math.min(...allX);
+    const observedMax = Math.max(...allX);
+
+    svg.appendChild(S('rect', {
+      x: x(observedMin), y: top,
+      width: x(observedMax) - x(observedMin),
+      height: bottom - top,
+      fill: '#E2ECFD'
+    }));
+
+    for (let i = 0; i <= 4; i++) {
+      const value = yMin + i / 4 * (yMax - yMin);
+      const yy = y(value);
+      line(svg, left, yy, right, yy, '#E4E2DB', 1);
+      label(svg, left - 9, yy + 4,
+        fmt(value, 3), {
+          'font-size': 10,
+          'text-anchor': 'end'
+        });
+    }
+
+    for (let t = 0; t <= 14; t += 2) {
+      line(svg, x(t), bottom, x(t), bottom + 6);
+      label(svg, x(t), bottom + 19, t, {
+        'font-size': 11
+      });
+    }
+
+    function yhat(v) {
+      const result = FITCalcStats.predict({
+        a: game.regression.a,
+        b: game.regression.b,
+        x: v,
+        x_min: observedMin,
+        x_max: observedMax
+      });
+      return result.error ? null : result.y;
+    }
+
+    const first = yhat(xMin);
+    const last = yhat(xMax);
+
+    if (first !== null && last !== null) {
+      line(svg, x(xMin), y(first),
+        x(xMax), y(last),
+        BLUE, 3);
+    }
+
+    game.points.forEach(([px, py]) => {
+      svg.appendChild(S('circle', {
+        cx: x(px), cy: y(py), r: 5,
+        fill: YELLOW,
+        stroke: '#111', 'stroke-width': 2
+      }));
+    });
+
+    line(svg, x(game.predictionX), top,
+      x(game.predictionX), bottom,
+      RED, 2.5, '6 4');
+
+    svg.appendChild(S('circle', {
+      cx: x(game.predictionX),
+      cy: y(prediction.y),
+      r: 7, fill: RED,
+      stroke: '#111', 'stroke-width': 2.5
+    }));
+
+    line(svg, left, top, left, bottom, '#111', 2.5);
+    line(svg, left, bottom, right, bottom, '#111', 2.5);
+
+    label(svg, 235, 379, 'Elapsed time (minutes)', {
+      'font-size': 12, 'font-weight': 700
+    });
+
+    svg.appendChild(S('text', {
+      x: 14, y: 185,
+      transform: 'rotate(-90 14 185)',
+      'font-size': 11,
+      'font-weight': 700,
+      'text-anchor': 'middle'
+    }, 'Predicted response (g)'));
+
+    svg.setAttribute('aria-label',
+      'Scatter plot of response against elapsed time, with a fitted line. ' +
+      'The shaded band marks the observed x-range, and a red marker ' +
+      'shows the requested prediction position.');
+
+    setLegend([
+      [YELLOW, 'Observed values'],
+      [BLUE, 'Fitted line'],
+      ['#E2ECFD', 'Observed x-range'],
+      [RED, 'Prediction position']
+    ]);
+  }
+
+  function setLegend(items) {
+    const container = $('legend');
+    container.replaceChildren();
+
+    items.forEach(([colour, wording]) => {
+      const item = document.createElement('span');
+      const key = document.createElement('i');
+      key.className = 'key';
+      key.style.background = colour;
+      item.append(key, document.createTextNode(wording));
+      container.appendChild(item);
+    });
+  }
+
+  function currentRSS() {
+    const residualSquares = game.points.map(([x, y]) => {
+      const prediction = FITCalcStats.predict({
+        a: game.playerA,
+        b: game.playerB,
+        x,
+        x_min: 1,
+        x_max: 9
+      });
+      if (prediction.error) return null;
+      return (y - prediction.y) ** 2;
+    });
+
+    if (residualSquares.some(v => v === null)) return null;
+    return residualSquares.reduce((sum, v) => sum + v, 0);
+  }
+
+  function checkRegression() {
+    const optimum = FITCalcStats.linreg({
+      points: game.points
+    });
+    if (!checked(optimum)) return;
+
+    const playerRSS = currentRSS();
+    if (playerRSS === null) {
+      feedback('The chosen line could not be evaluated.', false);
+      return;
+    }
+
+    const excess = playerRSS - optimum.rss;
+    const tolerance = Math.max(0.08, optimum.rss * 0.005);
+
+    if (excess > tolerance) {
+      game.attempts++;
+      feedback(
+        'Your residual sum of squares is ' +
+        fmt(excess) + ' g² above the least-squares minimum. ' +
+        'Adjust the intercept and slope together.',
+        false
+      );
+      return;
+    }
+
+    if (game.patternChoice !== game.patternAnswer) {
+      game.attempts++;
+      feedback(
+        'The line is close to least squares, but your residual diagnosis is incorrect. ' +
+        'Look for a single unusual point versus systematic curvature.',
+        false
+      );
+      return;
+    }
+
+    win('Correct! Least-squares intercept a = ' +
+      fmt(optimum.a) + ' g, slope b = ' +
+      fmt(optimum.b) + ' g/min, RSS = ' +
+      fmt(optimum.rss) + ' g² and r² = ' +
+      (optimum.r2 === null ? 'not defined' :
+        fmt(optimum.r2)) +
+      '. Inspecting residuals remains important even with a fitted line.');
+  }
+
+  function checkConfidence() {
+    const ci = intervalForPlanning(game.currentN);
+    if (!checked(ci)) return;
+
+    if (game.currentN !== game.requiredN) {
+      game.attempts++;
+
+      if (ci.half_width > game.targetHalf + 1e-10) {
+        feedback(
+          'The current half-width is ' +
+          fmt(ci.half_width) +
+          (game.confidenceVariant === 'mean' ? ' units' : '') +
+          ', above the required maximum. Increase n.',
+          false
+        );
+      } else {
+        feedback(
+          'Your interval meets the width target, but n is not the smallest ' +
+          'eligible sample size under the stated planning rule.',
+          false
+        );
+      }
+      return;
+    }
+
+    if (!game.coverageDone ||
+        game.coverageIntervals.length !== 100) {
+      game.attempts++;
+      feedback(
+        'The planned sample size meets the target. ' +
+        'Run all 100 intervals to complete the coverage investigation.',
+        false
+      );
+      return;
+    }
+
+    const expected = game.confidence * 100;
+
+    win('Correct! The smallest planning sample size is ' +
+      game.requiredN + ', with half-width ' +
+      fmt(ci.half_width) +
+      (game.confidenceVariant === 'mean' ? ' units.' : '.') +
+      ' In this seeded run, ' + game.coverageCount +
+      ' of 100 intervals covered the true value. ' +
+      'The theoretical long-run expectation is ' +
+      fmt(expected) + ' per 100, not a guaranteed count.');
+  }
+
+  function checkPrediction() {
+    const predicted = FITCalcStats.predict({
+      a: game.regression.a,
+      b: game.regression.b,
+      x: game.predictionX,
+      x_min: 1,
+      x_max: 8
+    });
+    if (!checked(predicted)) return;
+
+    const diff = game.intervalInput - predicted.y;
+
+    if (Math.abs(diff) > 0.015) {
+      game.attempts++;
+      feedback(
+        'Your predicted response is ' +
+        fmt(Math.abs(diff)) + ' g too ' +
+        (diff > 0 ? 'high.' : 'low.') +
+        ' Substitute x into the fitted equation.',
+        false
+      );
+      return;
+    }
+
+    const type = predicted.extrapolation ?
+      'extrapolation' : 'interpolation';
+
+    if (game.predictionChoice !== type) {
+      game.attempts++;
+      feedback(
+        'The predicted response is correct, but the classification is not. ' +
+        'Compare the requested x-value with the observed minimum and maximum.',
+        false
+      );
+      return;
+    }
+
+    win(
+      'Correct! The fitted response is ' +
+      fmt(predicted.y) + ' g. This is ' +
+      type + '. ' +
+      (predicted.extrapolation ?
+        'Outside the observed range, the linear relationship may no longer hold.' :
+        'Within the observed range, the prediction avoids extrapolation, although uncertainty remains.')
+    );
+  }
+
+  function check() {
+    if (game.solved) return;
+
+    if (game.kind === 'regression') checkRegression();
+    if (game.kind === 'confidence') checkConfidence();
+    if (game.kind === 'prediction') checkPrediction();
+  }
+
+  function win(message) {
+    game.solved = true;
+
+    const earned = game.hinted ? 50 :
+      game.attempts === 0 ? 100 :
+      game.attempts === 1 ? 75 : 50;
+
+    game.score += earned;
+
+    feedback(
+      '★ Investigation solved! ' + message +
+      ' +' + earned + ' points.',
+      true
+    );
+
+    render();
+  }
+
+  function hint() {
+    if (game.solved || game.hinted) return;
+    game.hinted = true;
+
+    let message = '';
+
+    if (game.kind === 'regression') {
+      message =
+        'Hint: the least-squares line passes through the sample means (x̄, ȳ). ' +
+        'Adjust its slope to reduce the squared vertical residuals, then inspect their shape.';
+    } else if (game.kind === 'confidence') {
+      message =
+        game.confidenceVariant === 'mean' ?
+          'Hint: use t rather than z because the population SD is unknown. ' +
+          'The critical t-value also changes with n − 1 degrees of freedom.' :
+          'Hint: for each n, set successes to round(0.4n), then apply the Wald half-width. ' +
+          'Check the smallest eligible n.';
+    } else {
+      message =
+        'Hint: calculate y = a + bx using least squares. ' +
+        'Then compare the requested x with the observed interval [1,8] minutes.';
+    }
+
+    feedback(message);
+    setUI();
+  }
+
+  function next() {
+    if (!game.solved) return;
+
+    if (game.round < 5) {
+      newRound(game.round + 1);
+      return;
+    }
+
+    $('game').classList.add('hidden');
+    $('finish').classList.remove('hidden');
+    $('progress').style.width = '100%';
+
+    const stars = game.score >= 525 ? 3 :
+      game.score >= 400 ? 2 : 1;
+
+    $('stars').textContent =
+      '★'.repeat(stars) + '☆'.repeat(3 - stars);
+    $('stars').setAttribute('aria-label',
+      stars + ' out of three stars');
+
+    $('finalScore').textContent =
+      game.score + ' / 600 points';
+
+    $('finalMessage').textContent =
+      stars === 3 ?
+        'Excellent analysis of regression, uncertainty and inference.' :
+        stars === 2 ?
+          'Strong reasoning. Review the residual and coverage investigations.' :
+          'Good effort. Replay to develop greater precision and confidence.';
+  }
+
+  function restart() {
+    game.score = 0;
+    $('game').classList.remove('hidden');
+    $('finish').classList.add('hidden');
+    newRound(0);
+  }
+
+  $('hintBtn').addEventListener('click', hint);
+  $('checkBtn').addEventListener('click', check);
+  $('nextBtn').addEventListener('click', next);
+  $('againBtn').addEventListener('click', restart);
+
+  restart();
+})();
+</script>
+</body>
+</html>

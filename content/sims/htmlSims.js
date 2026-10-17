@@ -24,6 +24,14 @@ const rasterGrid = { subject: 'Engineering', concept: 'raster-grids', accent: '#
 const optics = { subject: 'Physics', concept: 'optics', accent: '#FFC83D', minutes: '10–15', status: 'live' }
 // Tier-1 X2 seeded random simulation (calc: lib/sims/tier1/x2_random_sim.calc.js, inlined in each file). Live: fix2 passes all 30 Tier-1 KATs.
 const randomSim = { subject: 'Maths', concept: 'random-simulation', accent: '#8B5CF6', minutes: '10–15', status: 'live' }
+// Statistics family (calc: lib/sims/families/statistics.calc.js, inlined in each file); ChatGPT registry snippet, statuses set by FIT Social vetting.
+const statistics = {
+  subject: 'Maths',
+  concept: 'statistics',
+  accent: '#8B5CF6',
+  minutes: '10–15',
+  status: 'draft'
+}
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -265,4 +273,78 @@ export const htmlSims = [
     syllabusRef: 'University, Stochastic Modelling',
     approach: 'Explore genetic drift against selection, random walks and Brownian motion, Monte Carlo uncertainty in models, and how many parallel servers keep waiting times down.',
     activityPrompt: 'Play all rounds, then explain why mean-squared displacement grows in proportion to time for a random walk.', tags: ['University', 'Stochastic Modelling', 'genetic drift', 'random walk', 'Brownian motion', 'Monte Carlo uncertainty'] },
+  {
+    ...statistics,
+    id: 'statistics-p',
+    status: 'live',
+    title: 'Tally Town',
+    level: 'Primary',
+    topic: 'Tally charts, bar graphs and averages',
+    symbol: '📊',
+    height: 2700,
+    syllabusRef: 'MOE Primary Mathematics: Data Analysis (tally charts, bar graphs, tables and average)',
+    approach: 'Count arriving items, construct a bar graph using different scales, and solve questions about totals, differences and averages.',
+    activityPrompt: 'Play all rounds, then explain how a tally chart helps you draw and read a bar graph.',
+    tags: ['statistics', 'Primary', 'data analysis', 'tally charts', 'bar graphs', 'mean']
+  },
+
+  {
+    ...statistics,
+    id: 'statistics-s',
+    status: 'draft', // 7-check fail: drag dots 17 px (390) / 25 px (1440) < 44 px; see patches/statistics/FIX_REQUEST.md
+    title: 'Data Detective',
+    level: 'Secondary',
+    topic: 'Averages, spread, grouped data and histograms',
+    symbol: '🔎',
+    height: 3200,
+    syllabusRef: 'MOE Secondary Mathematics: Statistics (averages, quartiles, interquartile range, grouped data, histograms and box plots)',
+    approach: 'Reconstruct data sets from target statistics, estimate grouped means, build frequency-density histograms and compare distributions using box plots.',
+    activityPrompt: 'Play all rounds, then explain why frequency density, rather than frequency alone, determines histogram height when class widths differ.',
+    tags: ['statistics', 'Secondary', 'mean', 'median', 'mode', 'quartiles', 'histograms', 'frequency density', 'box plots']
+  },
+
+  {
+    ...statistics,
+    id: 'statistics-jc',
+    status: 'live',
+    title: 'Sample Lab',
+    level: 'JC',
+    topic: 'Sampling distributions, estimation and hypothesis testing',
+    symbol: '🧪',
+    height: 3100,
+    syllabusRef: 'MOE A-Level H2 Mathematics: Statistics (sampling distributions, Central Limit Theorem, unbiased estimates and hypothesis testing)',
+    approach: 'Generate seeded sampling distributions, calculate unbiased sample estimates and investigate statistical decisions using normal critical regions.',
+    activityPrompt: 'Play all rounds, then explain why increasing sample size reduces the standard error of the sample mean.',
+    tags: ['statistics', 'JC', 'sampling distribution', 'Central Limit Theorem', 'standard error', 'unbiased variance', 'z-test']
+  },
+
+  {
+    ...statistics,
+    id: 'statistics-poly',
+    status: 'live',
+    title: 'Process Watch',
+    level: 'Poly',
+    topic: 'Statistical process monitoring and control charts',
+    symbol: '🏭',
+    height: 2900,
+    syllabusRef: 'Polytechnic Applied Statistics: Process Monitoring (subgroup means, standard deviation and three-sigma control charts)',
+    approach: 'Calculate control limits for measured fill weights, identify process signals and choose subgroup sizes that meet monitoring-width targets.',
+    activityPrompt: 'Play all rounds, then explain why eight consecutive subgroup means on one side of the centre line may signal a process shift.',
+    tags: ['statistics', 'Poly', 'applied statistics', 'control charts', 'process monitoring', 'standard deviation', 'subgroup means']
+  },
+
+  {
+    ...statistics,
+    id: 'statistics-u',
+    status: 'live',
+    title: 'Fit and Interval',
+    level: 'University',
+    topic: 'Regression, residuals and confidence intervals',
+    symbol: '📈',
+    height: 3400,
+    syllabusRef: 'University, Statistics',
+    approach: 'Fit least-squares regression lines, diagnose residual patterns, investigate confidence interval coverage and distinguish interpolation from extrapolation.',
+    activityPrompt: 'Play all rounds, then explain why a confidence level describes long-run interval coverage rather than the probability that a fixed interval contains the parameter.',
+    tags: ['University', 'Statistics', 'regression', 'residuals', 'confidence intervals', 'coverage', 'extrapolation']
+  },
 ]
