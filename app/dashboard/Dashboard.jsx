@@ -28,6 +28,8 @@ import {
     formatMoney,
 } from '@/components/DashboardComponents/format'
 import CreatorTermsCard from '@/components/Legal/CreatorTermsCard'
+import CreatorWalkthrough from '@/components/DashboardComponents/CreatorWalkthrough'
+import CreatorFeesBox from '@/components/DashboardComponents/CreatorFeesBox'
 
 dayjs.extend(relativeTime)
 
@@ -41,7 +43,10 @@ const isRawUserId = value =>
     typeof value === 'string' &&
     /^user_[a-zA-Z0-9]+$/.test(value.trim())
 
-function Dashboard({ creatorTermsRequired = false }) {
+function Dashboard({
+    creatorTermsRequired = false,
+    creatorWalkthrough = false,
+}) {
     const { user, isLoaded } = useUser()
     const { displayName } = useShopIdentity()
 
@@ -394,6 +399,7 @@ function Dashboard({ creatorTermsRequired = false }) {
             </div>
 
             {/* Setup checklist — below needs-attention. */}
+            {creatorWalkthrough && <CreatorWalkthrough />}
             <SetupChecklist
                 user={user}
                 isLoaded={isLoaded}
@@ -513,6 +519,12 @@ function Dashboard({ creatorTermsRequired = false }) {
                     isLoaded={isLoaded}
                 />
             </div>
+
+            {creatorWalkthrough && (
+                <div id="fees">
+                    <CreatorFeesBox />
+                </div>
+            )}
         </div>
     )
 }

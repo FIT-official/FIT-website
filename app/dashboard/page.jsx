@@ -1,5 +1,8 @@
 import DashboardPage from './DashboardPage'
-import { isCreatorTermsAcceptanceEnabled } from '@/lib/legalFlags'
+import {
+    isCreatorTermsAcceptanceEnabled,
+    isCreatorWalkthroughEnabled,
+} from '@/lib/legalFlags'
 
 export const metadata = {
     title: 'Dashboard | Fix It Today®',
@@ -26,6 +29,7 @@ function DashboardHome() {
     return (
         <DashboardPage
             creatorTermsRequired={isCreatorTermsAcceptanceEnabled()}
+            creatorWalkthrough={isCreatorWalkthroughEnabled()}
         />
     )
 }
