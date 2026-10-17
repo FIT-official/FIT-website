@@ -1,0 +1,476 @@
+{
+  "tool": "x6_pendulum",
+  "owner": "FIT Printers",
+  "version": "2026-10-17",
+  "tolerance": {
+    "rel": 1e-08,
+    "abs": 1e-12,
+    "note": "pass if |got-expected| <= max(abs, rel*|expected|); per-case 'tol' overrides; strings, booleans, nulls, regimes and error classes exact"
+  },
+  "convention": "SI units; angles in radians, theta0 in [-pi, pi]. |theta0|>pi -> ConstraintViolation, reason theta0_out_of_range (no wrapping; |theta0|=pi is in range). Undamped point-mass pendulum: theta'=omega, omega'=-(g/L) sin(theta); g is a positive downward magnitude; default g=9.81. Energy is specific mechanical energy E=L^2 omega^2/2+gL(1-cos theta) in J/kg. T0=2 pi sqrt(L/g). Exact period for release from rest: T=4 sqrt(L/g) K(k) with MODULUS k=sin(|theta0|/2) (scipy.special.ellipk takes m=k^2). Regimes are results (ruling 16:44): 'oscillatory' for 0<|theta0|<pi; 'at_rest' for theta0=0 (period reported as the small-angle limit T0, ratio 1); 'unstable_equilibrium' for |theta0|=pi with period_s and period_ratio null (never Infinity). Schemes: explicit Euler (theta,omega)+=dt f(theta,omega); classical 4-stage RK4; both on the state (theta, omega), fixed dt, exactly 'steps' steps from the given state. Errors (ruling 17:46: schema classes only, cause in expected.reason): MathError for g=0 (gravity_zero) and dt=0 (dt_must_be_positive); ConstraintViolation for L<=0 (length_must_be_positive), g<0 (gravity_must_be_positive), dt<0, |theta0|>pi (theta0_out_of_range); validation order L, g, dt, theta0. Per-case 'tol' overrides the file tolerance for scheme runs.",
+  "oracle": "hand formulas re-checked independently in _build_fit_printers_tier1_kats.py: mpmath quadrature (30 digits) of the period integral cross-checked against scipy ellipk, solve_ivp of the linearised ODE for T0, own pure-Python Euler and RK4; multi-step expected values from a separate 40-digit mpmath implementation of the same schemes",
+  "cases": [
+    {
+      "id": "x6-001",
+      "desc": "Small-angle period, L=1 m",
+      "op": "small_angle_period",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81
+      },
+      "expected": {
+        "period_s": 2.006066680711
+      },
+      "edge": false,
+      "hand_check": "T0=2 pi sqrt(L/g)=2.0060667 s. Marion and Thornton, Classical Dynamics of Particles and Systems, small oscillations. Oracle: solve_ivp of the linearised ODE, half period from the first omega=0 event."
+    },
+    {
+      "id": "x6-002",
+      "desc": "Small-angle period, L=2 m",
+      "op": "small_angle_period",
+      "input": {
+        "L_m": 2.0,
+        "g_m_s2": 9.81
+      },
+      "expected": {
+        "period_s": 2.837006706886
+      },
+      "edge": false,
+      "hand_check": "T0=2 pi sqrt(2/9.81)=2.8370067 s. Marion and Thornton, Classical Dynamics of Particles and Systems. Oracle: solve_ivp of the linearised ODE."
+    },
+    {
+      "id": "x6-003",
+      "desc": "Exact period at 30 degrees",
+      "op": "exact_pendulum_period",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": 0.5235987755982988,
+        "omega0_rad_s": 0
+      },
+      "expected": {
+        "period_s": 2.040989889519,
+        "period_ratio": 1.017408797596,
+        "regime": "oscillatory"
+      },
+      "edge": false,
+      "hand_check": "T=4 sqrt(L/g) K(k), k=sin(theta0/2)=sin 15 deg (modulus; scipy ellipk takes m=k^2); T/T0=2K/pi=1.0174088. Marion and Thornton, Classical Dynamics of Particles and Systems; Abramowitz and Stegun, Handbook of Mathematical Functions, complete elliptic integral of the first kind. Oracle: mpmath quad of the period integral, cross-checked with scipy ellipk."
+    },
+    {
+      "id": "x6-004",
+      "desc": "Required exact period at 90 degrees: T/T0=1.18034",
+      "op": "exact_pendulum_period",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": 1.5707963267948966,
+        "omega0_rad_s": 0
+      },
+      "expected": {
+        "period_s": 2.367841947576,
+        "period_ratio": 1.180340599016,
+        "regime": "oscillatory"
+      },
+      "edge": false,
+      "hand_check": "k=sin 45 deg; T/T0=2K(k)/pi=1.1803406 (must-reproduce); T=2.3678419 s. Abramowitz and Stegun, Handbook of Mathematical Functions; Marion and Thornton, Classical Dynamics of Particles and Systems. Oracle: mpmath quad + ellipk."
+    },
+    {
+      "id": "x6-005",
+      "desc": "Exact period at 120 degrees",
+      "op": "exact_pendulum_period",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": 2.0943951023931953,
+        "omega0_rad_s": 0
+      },
+      "expected": {
+        "period_s": 2.754089828888,
+        "period_ratio": 1.372880500618,
+        "regime": "oscillatory"
+      },
+      "edge": false,
+      "hand_check": "k=sin 60 deg; T/T0=1.3728805; T=2.7540898 s. Abramowitz and Stegun, Handbook of Mathematical Functions. Oracle: mpmath quad + ellipk."
+    },
+    {
+      "id": "x6-006",
+      "desc": "Near-separatrix exact period at 179 degrees",
+      "op": "exact_pendulum_period",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": 3.12413936106985,
+        "omega0_rad_s": 0
+      },
+      "expected": {
+        "period_s": 7.825796837538,
+        "period_ratio": 3.901065160389,
+        "regime": "oscillatory"
+      },
+      "edge": true,
+      "hand_check": "k=sin 89.5 deg, K~ln(4/k')=6.128 with k'=cos 89.5 deg; T/T0=3.9010652; T=7.8257968 s. Abramowitz and Stegun, Handbook of Mathematical Functions; Strogatz, Nonlinear Dynamics and Chaos, separatrix. Oracle: mpmath quad (tanh-sinh handles the near-singular integrand) + ellipk."
+    },
+    {
+      "id": "x6-007",
+      "desc": "Euler step from rest at theta=0 stays at rest",
+      "op": "euler_step",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta_rad": 0,
+        "omega_rad_s": 0,
+        "dt_s": 0.1
+      },
+      "expected": {
+        "theta_next_rad": 0,
+        "omega_next_rad_s": 0,
+        "energy_next_J_kg": 0
+      },
+      "edge": true,
+      "hand_check": "f(0,0)=(0,-g sin 0)=(0,0): both increments vanish. Hairer, Norsett and Wanner, Solving Ordinary Differential Equations I, explicit Euler. Oracle: own float Euler."
+    },
+    {
+      "id": "x6-008",
+      "desc": "RK4 step from rest at theta=0 stays at rest",
+      "op": "rk4_step",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta_rad": 0,
+        "omega_rad_s": 0,
+        "dt_s": 0.1
+      },
+      "expected": {
+        "theta_next_rad": 0,
+        "omega_next_rad_s": 0,
+        "energy_next_J_kg": 0
+      },
+      "edge": true,
+      "hand_check": "All four RK4 stages are (0,0). Hairer, Norsett and Wanner, Solving Ordinary Differential Equations I, classical RK4. Oracle: own float RK4."
+    },
+    {
+      "id": "x6-009",
+      "desc": "Inverted equilibrium at 180 degrees: no finite period (result, not error)",
+      "op": "exact_pendulum_period",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": 3.141592653589793,
+        "omega0_rad_s": 0
+      },
+      "expected": {
+        "period_s": null,
+        "period_ratio": null,
+        "regime": "unstable_equilibrium"
+      },
+      "edge": true,
+      "hand_check": "k=sin(pi/2)=1, K(1) diverges: the inverted pendulum at rest is a physically valid (unstable) equilibrium, so per ruling 16:44 it is a regime result with period null (never Infinity in JSON). Strogatz, Nonlinear Dynamics and Chaos, pendulum phase portrait; Abramowitz and Stegun, Handbook of Mathematical Functions. Oracle: |theta0|=pi test; mpmath confirms K(m) grows without bound as m->1."
+    },
+    {
+      "id": "x6-010",
+      "desc": "Explicit Euler step increases energy",
+      "op": "euler_step",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta_rad": 0.1,
+        "omega_rad_s": 0,
+        "dt_s": 0.1
+      },
+      "expected": {
+        "theta_next_rad": 0.1,
+        "omega_next_rad_s": -0.09793658173054,
+        "energy_before_J_kg": 0.04900913862257,
+        "energy_next_J_kg": 0.0538049256431,
+        "energy_increased": true
+      },
+      "edge": false,
+      "hand_check": "theta1=0.1+0.1(0)=0.1; omega1=-0.1(9.81)sin 0.1=-0.0979366; E=L^2 omega^2/2+gL(1-cos theta): E0=0.0490091, E1=0.0538049>E0. Hairer, Norsett and Wanner, Solving Ordinary Differential Equations I. Oracle: own float Euler."
+    },
+    {
+      "id": "x6-011",
+      "desc": "RK4 step: energy error about 6.3e-7 J/kg",
+      "op": "rk4_step",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta_rad": 0.1,
+        "omega_rad_s": 0,
+        "dt_s": 0.1
+      },
+      "expected": {
+        "theta_next_rad": 0.09514300735284,
+        "omega_next_rad_s": -0.09634302869333,
+        "energy_before_J_kg": 0.04900913862257,
+        "energy_next_J_kg": 0.04900850684388,
+        "energy_change_J_kg": -6.317786822863e-07
+      },
+      "edge": false,
+      "hand_check": "Four RK4 stages give (0.0951430, -0.0963430); E1-E0=-6.318e-7 J/kg, about 7600 times smaller in magnitude than Euler's +4.8e-3 for the same step (RK4 is not exactly energy-conserving). Hairer, Norsett and Wanner, Solving Ordinary Differential Equations I. Oracle: own float RK4; energy_change checked with tol abs 1e-15.",
+      "tol": {
+        "rel": 1e-08,
+        "abs": 1e-15
+      }
+    },
+    {
+      "id": "x6-012",
+      "desc": "Euler step at a quarter-turn",
+      "op": "euler_step",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta_rad": 1.5707963267948966,
+        "omega_rad_s": 0,
+        "dt_s": 0.1
+      },
+      "expected": {
+        "theta_next_rad": 1.5707963267948966,
+        "omega_next_rad_s": -0.981
+      },
+      "edge": false,
+      "hand_check": "sin(pi/2)=1: omega1=-0.981 rad/s; theta1=pi/2. Hairer, Norsett and Wanner, Solving Ordinary Differential Equations I. Oracle: own float Euler."
+    },
+    {
+      "id": "x6-013",
+      "desc": "Zero pendulum length is physically invalid",
+      "op": "small_angle_period",
+      "input": {
+        "L_m": 0,
+        "g_m_s2": 9.81
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "length_must_be_positive"
+      },
+      "edge": true,
+      "hand_check": "L>0 required; T0=0 would be computable but the model g sin(theta)/L is singular -> ConstraintViolation, reason length_must_be_positive (L is validated before g). Marion and Thornton, Classical Dynamics of Particles and Systems. Oracle: validation."
+    },
+    {
+      "id": "x6-014",
+      "desc": "Negative pendulum length is physically invalid",
+      "op": "small_angle_period",
+      "input": {
+        "L_m": -1.0,
+        "g_m_s2": 9.81
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "length_must_be_positive"
+      },
+      "edge": true,
+      "hand_check": "L<0 is not a length (range is checked before the sqrt of a negative -> ConstraintViolation, reason length_must_be_positive). Marion and Thornton, Classical Dynamics of Particles and Systems. Oracle: validation."
+    },
+    {
+      "id": "x6-015",
+      "desc": "Zero gravity: period divides by zero",
+      "op": "exact_pendulum_period",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 0,
+        "theta0_rad": 0.5,
+        "omega0_rad_s": 0
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "gravity_zero"
+      },
+      "edge": true,
+      "hand_check": "T=4 sqrt(L/g)K(k) divides by g=0 -> MathError, reason gravity_zero (rulings 16:44, 17:46). CORRECTED from the draft's PhysicalParameterError. Marion and Thornton, Classical Dynamics of Particles and Systems. Oracle: zero-denominator test."
+    },
+    {
+      "id": "x6-016",
+      "desc": "Negative gravity is physically invalid",
+      "op": "small_angle_period",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": -9.81
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "gravity_must_be_positive"
+      },
+      "edge": true,
+      "hand_check": "g is a positive downward magnitude; g<0 is outside the model (ConstraintViolation, reason gravity_must_be_positive, same as mae_mechanics). Marion and Thornton, Classical Dynamics of Particles and Systems. Oracle: validation."
+    },
+    {
+      "id": "x6-017",
+      "desc": "Zero time step is rejected",
+      "op": "rk4_step",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta_rad": 0.5,
+        "omega_rad_s": 0,
+        "dt_s": 0
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "dt_must_be_positive"
+      },
+      "edge": true,
+      "hand_check": "dt=0 -> MathError, reason dt_must_be_positive (FIT Site ruling 17:46; CHANGED from the draft's PhysicalParameterError). Hairer, Norsett and Wanner, Solving Ordinary Differential Equations I. Oracle: validation."
+    },
+    {
+      "id": "x6-018",
+      "desc": "theta0=0: pendulum at rest, small-amplitude period limit",
+      "op": "exact_pendulum_period",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": 0,
+        "omega0_rad_s": 0
+      },
+      "expected": {
+        "period_s": 2.006066680711,
+        "period_ratio": 1.0,
+        "regime": "at_rest"
+      },
+      "edge": true,
+      "hand_check": "k=0, K(0)=pi/2 so T=4 sqrt(L/g)(pi/2)=T0 (limit of the exact formula); no motion occurs, regime 'at_rest' (ruling 17:46). Abramowitz and Stegun, Handbook of Mathematical Functions; Marion and Thornton, Classical Dynamics of Particles and Systems. Oracle: mpmath quad at k=0."
+    },
+    {
+      "id": "x6-019",
+      "desc": "Exact period is symmetric in the release angle (theta0=-90 degrees)",
+      "op": "exact_pendulum_period",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": -1.5707963267948966,
+        "omega0_rad_s": 0
+      },
+      "expected": {
+        "period_s": 2.367841947576,
+        "period_ratio": 1.180340599016,
+        "regime": "oscillatory"
+      },
+      "edge": false,
+      "hand_check": "k=sin(|theta0|/2): same as x6-004. Marion and Thornton, Classical Dynamics of Particles and Systems. Oracle: mpmath quad + ellipk."
+    },
+    {
+      "id": "x6-020",
+      "desc": "RK4 over one exact period at 90 degrees returns to the release state",
+      "op": "rk4_run",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": 1.5707963267948966,
+        "omega0_rad_s": 0,
+        "dt_s": 0.0011839209737881185,
+        "steps": 2000
+      },
+      "expected": {
+        "theta_final_rad": 1.5707963267948966,
+        "omega_final_rad_s": 0
+      },
+      "edge": false,
+      "hand_check": "dt=T_exact/2000 with T_exact=2.367841947576237 s (x6-004). Exact solution is periodic, so theta(T)=pi/2, omega(T)=0; RK4 global error O(dt^4) is ~4e-14 rad here (40-digit reference). Tolerance abs 1e-9. Hairer, Norsett and Wanner, Solving Ordinary Differential Equations I; Abramowitz and Stegun, Handbook of Mathematical Functions. Oracle: own float RK4 run.",
+      "tol": {
+        "rel": 1e-08,
+        "abs": 1e-09
+      }
+    },
+    {
+      "id": "x6-021",
+      "desc": "Euler over the same exact period drifts and gains about 1.84% energy",
+      "op": "euler_run",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": 1.5707963267948966,
+        "omega0_rad_s": 0,
+        "dt_s": 0.0011839209737881185,
+        "steps": 2000
+      },
+      "expected": {
+        "theta_final_rad": 1.589093259281461,
+        "omega_final_rad_s": 0.04924989543198478,
+        "energy_ratio": 1.018419538116471,
+        "energy_increased_every_step": true
+      },
+      "edge": false,
+      "hand_check": "Explicit Euler is not energy-stable for oscillators: energy rises every step, ending at E/E0=1.0184195 with theta=1.5890933 rad (0.0183 rad past the release angle) and omega=+0.0492 rad/s after one exact period, versus RK4's ~4e-14 in x6-020. Values from a 40-digit mpmath run of the same scheme with the same float dt; tol rel 1e-8. Hairer, Norsett and Wanner, Solving Ordinary Differential Equations I, stability of explicit Euler. Oracle: own float Euler run.",
+      "tol": {
+        "rel": 1e-08,
+        "abs": 1e-10
+      }
+    },
+    {
+      "id": "x6-022",
+      "desc": "Euler vs RK4 over 100 steps from 0.5 rad (dt=0.01 s)",
+      "op": "euler_rk4_compare_run",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": 0.5,
+        "omega0_rad_s": 0,
+        "dt_s": 0.01,
+        "steps": 100
+      },
+      "expected": {
+        "euler_theta_rad": -0.523664618105395,
+        "euler_omega_rad_s": -0.0985234631869757,
+        "euler_energy_ratio": 1.09871816625852,
+        "rk4_theta_rad": -0.49915718597226,
+        "rk4_omega_rad_s": -0.089003746683157,
+        "rk4_energy_ratio": 0.999999998797921,
+        "euler_energy_increased_every_step": true
+      },
+      "edge": false,
+      "hand_check": "Same initial state and step: Euler gains 9.87% energy in 1 s, RK4 changes energy by -1.2e-9 relative. Reference values from a 40-digit mpmath implementation of each scheme. Hairer, Norsett and Wanner, Solving Ordinary Differential Equations I. Oracle: own float Euler and RK4 (pure Python)."
+    },
+    {
+      "id": "x6-023",
+      "desc": "Release angle beyond 180 degrees is rejected (no wrapping)",
+      "op": "exact_pendulum_period",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": 3.3,
+        "omega0_rad_s": 0
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "theta0_out_of_range"
+      },
+      "edge": true,
+      "hand_check": "|theta0|=3.3 rad (189.08 deg) > pi: outside the allowed range [-pi, pi], checked before computing; no wrapping (FIT Site ruling 17:46). Marion and Thornton, Classical Dynamics of Particles and Systems. Oracle: range check."
+    },
+    {
+      "id": "x6-024",
+      "desc": "Release angle exactly -180 degrees is in range: unstable equilibrium",
+      "op": "exact_pendulum_period",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": -3.141592653589793,
+        "omega0_rad_s": 0
+      },
+      "expected": {
+        "period_s": null,
+        "period_ratio": null,
+        "regime": "unstable_equilibrium"
+      },
+      "edge": true,
+      "hand_check": "|theta0|=pi is the inclusive range boundary, so it is a regime result (period null), not theta0_out_of_range. Strogatz, Nonlinear Dynamics and Chaos. Oracle: range check + |theta0|=pi test."
+    },
+    {
+      "id": "x6-025",
+      "desc": "RK4 run with release angle beyond 180 degrees is rejected",
+      "op": "rk4_run",
+      "input": {
+        "L_m": 1.0,
+        "g_m_s2": 9.81,
+        "theta0_rad": -3.5,
+        "omega0_rad_s": 0,
+        "dt_s": 0.01,
+        "steps": 10
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "theta0_out_of_range"
+      },
+      "edge": true,
+      "hand_check": "|theta0|=3.5 rad > pi -> ConstraintViolation, reason theta0_out_of_range (no wrapping, ruling 17:46). Hairer, Norsett and Wanner, Solving Ordinary Differential Equations I. Oracle: range check."
+    }
+  ]
+}

@@ -1,0 +1,667 @@
+{
+  "tool": "numerics_stability",
+  "owner": "FIT Stock Strategy",
+  "version": "2026-10-17",
+  "tolerance": {
+    "rel": 1e-06,
+    "abs_when_expected_zero": 1e-09,
+    "note": "numbers relative 1e-6 (7 s.f.), zero compared abs 1e-9; booleans exact; the method's DISCRETE output is the expected value (not the exact solution, which is reported separately); errors compared exactly as {error: schema class, reason: lower_snake_case code} (KAT_SCHEMA 17:46)"
+  },
+  "convention": "ode_solve: explicit Euler or classical RK4, fixed step h, t starts at 0, fixed ODE list {decay: y'=lam y; logistic: y'=r y(1-y/K); t_minus_y: y'=t-y}; returns the numerical y, the exact solution at t=n h and abs_error=|y-exact|. convergence_order: errors[] for each h on y'=lam y, y(0)=1, and observed_order = the scalar p=log(e_k/e_(k+1))/log(h_k/h_(k+1)) for the LAST pair (FIT Site 20:29). stability: amplification |R(z)| for z=h lam on the real axis; Euler R=1+z, RK4 R=1+z+z^2/2+z^3/6+z^4/24; stable means |R|<=1 (boundary counts as stable). upwind_advect: first-order upwind for u_t+a u_x=0, a>0, periodic boundary, Courant C=a dt/dx, u_j^(n+1)=u_j-C(u_j-u_(j-1)); bounded = stays within the initial min/max. grid_convergence: observed order and Richardson extrapolation. At most one scalar ODE or one 2-state system, or 100 advection cells; Euler, RK4 and upwind only (scope cap). The nonlinear pendulum member belongs to FIT Printers and is not in this file.",
+  "oracle": "script-verified (textbook formulae); ChatGPT Chat cross-check pending. Expected values from explicit step loops following R. L. Burden & J. D. Faires, Numerical Analysis (textbook); E. Hairer & G. Wanner, Solving Ordinary Differential Equations II (textbook); R. J. LeVeque, Finite Difference Methods for Ordinary and Partial Differential Equations (textbook); W. E. Boyce & R. C. DiPrima, Elementary Differential Equations (textbook); P. J. Roache (1998), Verification of codes and calculations, AIAA J. 36:696 (Richardson extrapolation, observed order); recomputed independently from closed-form amplification factors R(z)^n, the closed-form Euler sum for y'=t-y, a numpy periodic upwind matrix power, numpy RK4 on arrays, and a base-10 / power-law fit for Richardson",
+  "cases": [
+    {
+      "id": "euler-stiff-h01-must",
+      "desc": "Euler on y'=-10y, h=0.1, one step",
+      "op": "ode_solve",
+      "input": {
+        "method": "euler",
+        "ode": "decay",
+        "params": {
+          "lam": -10
+        },
+        "y0": 1,
+        "h": 0.1,
+        "steps": 1
+      },
+      "expected": {
+        "y": 0.0,
+        "exact": 0.3678794,
+        "abs_error": 0.3678794
+      },
+      "edge": true,
+      "hand_check": "R. L. Burden & J. D. Faires, Numerical Analysis (textbook): y1=(1+h lam)y0=(1-1)=0 exactly (map must-reproduce); exact e^-1=0.3679"
+    },
+    {
+      "id": "euler-stiff-h03-must",
+      "desc": "Euler on y'=-10y, h=0.3, three steps: grows with alternating sign",
+      "op": "ode_solve",
+      "input": {
+        "method": "euler",
+        "ode": "decay",
+        "params": {
+          "lam": -10
+        },
+        "y0": 1,
+        "h": 0.3,
+        "steps": 3
+      },
+      "expected": {
+        "y": -8.0,
+        "exact": 0.0001234098,
+        "abs_error": 8.000123
+      },
+      "edge": false,
+      "hand_check": "R. L. Burden & J. D. Faires, Numerical Analysis (textbook): amplification 1+h lam=-2 -> y3=(-2)^3=-8 (map must-reproduce); |1+z|>1 unstable"
+    },
+    {
+      "id": "rk4-decay-must",
+      "desc": "RK4 dy/dt=-y, y(0)=1, h=0.1 to t=1",
+      "op": "ode_solve",
+      "input": {
+        "method": "rk4",
+        "ode": "decay",
+        "params": {
+          "lam": -1
+        },
+        "y0": 1,
+        "h": 0.1,
+        "steps": 10
+      },
+      "expected": {
+        "y": 0.3678798,
+        "exact": 0.3678794,
+        "abs_error": 3.332411e-07
+      },
+      "edge": false,
+      "hand_check": "R. L. Burden & J. D. Faires, Numerical Analysis (textbook): exact e^-1=0.367879 (map must-reproduce); RK4 error ~3e-7"
+    },
+    {
+      "id": "euler-decay",
+      "desc": "Euler dy/dt=-y, h=0.1 to t=1",
+      "op": "ode_solve",
+      "input": {
+        "method": "euler",
+        "ode": "decay",
+        "params": {
+          "lam": -1
+        },
+        "y0": 1,
+        "h": 0.1,
+        "steps": 10
+      },
+      "expected": {
+        "y": 0.3486784,
+        "exact": 0.3678794,
+        "abs_error": 0.019201
+      },
+      "edge": false,
+      "hand_check": "0.9^10=0.3487; error 0.0192"
+    },
+    {
+      "id": "rk4-logistic",
+      "desc": "RK4 logistic r=1, K=10, y0=1, h=0.5, 4 steps",
+      "op": "ode_solve",
+      "input": {
+        "method": "rk4",
+        "ode": "logistic",
+        "params": {
+          "r": 1,
+          "K": 10
+        },
+        "y0": 1,
+        "h": 0.5,
+        "steps": 4
+      },
+      "expected": {
+        "y": 4.50793,
+        "exact": 4.508531,
+        "abs_error": 0.000600497
+      },
+      "edge": false,
+      "hand_check": "W. E. Boyce & R. C. DiPrima, Elementary Differential Equations (textbook): exact K/(1+9e^-2)=4.509"
+    },
+    {
+      "id": "euler-tmy",
+      "desc": "Euler y'=t-y, y(0)=1, h=0.25, 4 steps",
+      "op": "ode_solve",
+      "input": {
+        "method": "euler",
+        "ode": "t_minus_y",
+        "params": {},
+        "y0": 1,
+        "h": 0.25,
+        "steps": 4
+      },
+      "expected": {
+        "y": 0.6328125,
+        "exact": 0.7357589,
+        "abs_error": 0.1029464
+      },
+      "edge": false,
+      "hand_check": "W. E. Boyce & R. C. DiPrima, Elementary Differential Equations (textbook): exact y=t-1+2e^-t -> 0.7358 at t=1"
+    },
+    {
+      "id": "ode-0steps",
+      "desc": "zero steps returns y0",
+      "op": "ode_solve",
+      "input": {
+        "method": "rk4",
+        "ode": "decay",
+        "params": {
+          "lam": -1
+        },
+        "y0": 2,
+        "h": 0.1,
+        "steps": 0
+      },
+      "expected": {
+        "y": 2,
+        "exact": 2.0,
+        "abs_error": 0.0
+      },
+      "edge": true,
+      "hand_check": "no step taken"
+    },
+    {
+      "id": "ode-h0",
+      "desc": "non-positive step refused",
+      "op": "ode_solve",
+      "input": {
+        "method": "euler",
+        "ode": "decay",
+        "params": {
+          "lam": -1
+        },
+        "y0": 1,
+        "h": 0,
+        "steps": 5
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "step_size_must_be_positive"
+      },
+      "edge": true,
+      "hand_check": "validation"
+    },
+    {
+      "id": "ode-unknown",
+      "desc": "ODE outside the fixed list",
+      "op": "ode_solve",
+      "input": {
+        "method": "euler",
+        "ode": "pendulum",
+        "params": {},
+        "y0": 1,
+        "h": 0.1,
+        "steps": 5
+      },
+      "expected": {
+        "error": "NotSupported",
+        "reason": "ode_or_method_not_in_fixed_list"
+      },
+      "edge": true,
+      "hand_check": "scope cap: fixed ODE list; pendulum member belongs to another owner"
+    },
+    {
+      "id": "order-euler",
+      "desc": "Euler error halves when h halves (order 1)",
+      "op": "convergence_order",
+      "input": {
+        "method": "euler",
+        "lam": -1,
+        "T": 1,
+        "h": [
+          0.1,
+          0.05,
+          0.025
+        ]
+      },
+      "expected": {
+        "errors": [
+          0.019201,
+          0.009393519,
+          0.004647001
+        ],
+        "observed_order": 1.015366
+      },
+      "edge": false,
+      "hand_check": "R. L. Burden & J. D. Faires, Numerical Analysis (textbook): global error O(h); observed p (last pair)=log(e2/e3)/log 2=1.015366 (first pair would give 1.031444)"
+    },
+    {
+      "id": "order-rk4",
+      "desc": "RK4 error falls 16x when h halves (order 4)",
+      "op": "convergence_order",
+      "input": {
+        "method": "rk4",
+        "lam": -1,
+        "T": 1,
+        "h": [
+          0.2,
+          0.1,
+          0.05
+        ]
+      },
+      "expected": {
+        "errors": [
+          5.796954e-06,
+          3.332411e-07,
+          1.99761e-08
+        ],
+        "observed_order": 4.060219
+      },
+      "edge": false,
+      "hand_check": "R. L. Burden & J. D. Faires, Numerical Analysis (textbook): global error O(h^4); observed p (last pair)=log(e2/e3)/log 2=4.060219 (map BME F1 must-reproduce: error falls at the method's order)"
+    },
+    {
+      "id": "stab-euler-edge",
+      "desc": "Euler at z=h lam=-2: on the stability boundary",
+      "op": "stability",
+      "input": {
+        "method": "euler",
+        "z": -2
+      },
+      "expected": {
+        "abs_R": 1,
+        "stable": true
+      },
+      "edge": true,
+      "hand_check": "E. Hairer & G. Wanner, Solving Ordinary Differential Equations II (textbook): |1+z|=1 -> marginally stable (counted stable, |R|<=1)"
+    },
+    {
+      "id": "stab-euler-out",
+      "desc": "Euler at z=-2.5",
+      "op": "stability",
+      "input": {
+        "method": "euler",
+        "z": -2.5
+      },
+      "expected": {
+        "abs_R": 1.5,
+        "stable": false
+      },
+      "edge": false,
+      "hand_check": "|1-2.5|=1.5>1 unstable"
+    },
+    {
+      "id": "stab-rk4-in",
+      "desc": "RK4 at z=-2.5 is still stable",
+      "op": "stability",
+      "input": {
+        "method": "rk4",
+        "z": -2.5
+      },
+      "expected": {
+        "abs_R": 0.6484375,
+        "stable": true
+      },
+      "edge": false,
+      "hand_check": "E. Hairer & G. Wanner, Solving Ordinary Differential Equations II (textbook): RK4 real-axis limit -2.785; |R(-2.5)|=0.6484"
+    },
+    {
+      "id": "stab-rk4-out",
+      "desc": "RK4 at z=-3",
+      "op": "stability",
+      "input": {
+        "method": "rk4",
+        "z": -3
+      },
+      "expected": {
+        "abs_R": 1.375,
+        "stable": false
+      },
+      "edge": true,
+      "hand_check": "|R(-3)|=1.375>1"
+    },
+    {
+      "id": "adv-c1-must",
+      "desc": "upwind, Courant 1.0: exact one-cell shift per step",
+      "op": "upwind_advect",
+      "input": {
+        "u0": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "courant": 1.0,
+        "steps": 3
+      },
+      "expected": {
+        "u": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mass": 1.0,
+        "max": 1.0,
+        "min": 0.0,
+        "bounded": true
+      },
+      "edge": false,
+      "hand_check": "R. J. LeVeque, Finite Difference Methods for Ordinary and Partial Differential Equations (textbook): u_j^(n+1)=u_j-C(u_j-u_(j-1)); C=1 -> u_j^(n+1)=u_(j-1)^n; pulse moves from cell 2 to 5 (map must-reproduce)"
+    },
+    {
+      "id": "adv-c05-must",
+      "desc": "upwind, Courant 0.5: bounded, diffusive, mass conserved",
+      "op": "upwind_advect",
+      "input": {
+        "u0": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "courant": 0.5,
+        "steps": 4
+      },
+      "expected": {
+        "u": [
+          0.0,
+          0.0,
+          0.0625,
+          0.25,
+          0.375,
+          0.25,
+          0.0625,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mass": 1.0,
+        "max": 0.375,
+        "min": 0.0,
+        "bounded": true
+      },
+      "edge": false,
+      "hand_check": "R. J. LeVeque, Finite Difference Methods for Ordinary and Partial Differential Equations (textbook): convex combination 0.5u_j+0.5u_(j-1) -> binomial spreading (1,4,6,4,1)/16; bounded (map must-reproduce)"
+    },
+    {
+      "id": "adv-c15-must",
+      "desc": "upwind, Courant 1.5: unstable",
+      "op": "upwind_advect",
+      "input": {
+        "u0": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "courant": 1.5,
+        "steps": 4
+      },
+      "expected": {
+        "u": [
+          0.0,
+          0.0,
+          0.0625,
+          -0.75,
+          3.375,
+          -6.75,
+          5.0625,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mass": 1.0,
+        "max": 5.0625,
+        "min": -6.75,
+        "bounded": false
+      },
+      "edge": true,
+      "hand_check": "R. J. LeVeque, Finite Difference Methods for Ordinary and Partial Differential Equations (textbook): CFL violated; coefficients (-0.5, 1.5) -> oscillating growth, bounded=false (map must-reproduce)"
+    },
+    {
+      "id": "adv-c0",
+      "desc": "Courant 0: nothing moves",
+      "op": "upwind_advect",
+      "input": {
+        "u0": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "courant": 0,
+        "steps": 5
+      },
+      "expected": {
+        "u": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "mass": 1,
+        "max": 1,
+        "min": 0,
+        "bounded": true
+      },
+      "edge": true,
+      "hand_check": "u unchanged"
+    },
+    {
+      "id": "adv-toolong",
+      "desc": "more than 100 cells refused",
+      "op": "upwind_advect",
+      "input": {
+        "u0": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "courant": 0.5,
+        "steps": 1
+      },
+      "expected": {
+        "error": "ConstraintViolation",
+        "reason": "cells_out_of_range_2_100"
+      },
+      "edge": true,
+      "hand_check": "scope cap"
+    },
+    {
+      "id": "rich",
+      "desc": "grid convergence: errors 0.04 at h, 0.01 at h/2; values 1.04, 1.01",
+      "op": "grid_convergence",
+      "input": {
+        "h1": 0.2,
+        "e1": 0.04,
+        "h2": 0.1,
+        "e2": 0.01,
+        "f1": 1.04,
+        "f2": 1.01
+      },
+      "expected": {
+        "observed_order": 2.0,
+        "extrapolated": 1.0
+      },
+      "edge": false,
+      "hand_check": "P. J. Roache (1998), Verification of codes and calculations, AIAA J. 36:696 (Richardson extrapolation, observed order): p=log(0.04/0.01)/log 2=2; Richardson f=f2+(f2-f1)/(2^p-1)=1.00"
+    },
+    {
+      "id": "rich-bad",
+      "desc": "zero error cannot give an order",
+      "op": "grid_convergence",
+      "input": {
+        "h1": 0.2,
+        "e1": 0.0,
+        "h2": 0.1,
+        "e2": 0.01
+      },
+      "expected": {
+        "error": "MathError",
+        "reason": "errors_must_be_positive_and_h1_gt_h2"
+      },
+      "edge": true,
+      "hand_check": "log 0 undefined"
+    },
+    {
+      "id": "slope-field",
+      "desc": "slope field of y'=t-y at three points",
+      "op": "slope_field",
+      "input": {
+        "ode": "t_minus_y",
+        "params": {},
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            3
+          ]
+        ]
+      },
+      "expected": {
+        "slopes": [
+          0,
+          1,
+          -1
+        ]
+      },
+      "edge": false,
+      "hand_check": "W. E. Boyce & R. C. DiPrima, Elementary Differential Equations (textbook): f(t,y)=t-y -> 0, 1, -1"
+    }
+  ]
+}

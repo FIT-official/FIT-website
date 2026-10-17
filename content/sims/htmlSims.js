@@ -34,6 +34,8 @@ const statistics = {
 }
 // Coding: loops family (p, jc fix3; s, u fix1/v2; poly v1). Status per game set by FIT Social vetting (all KATs + 7 checks).
 const codingLoops = { subject: 'Computing', concept: 'coding-loops', accent: '#1F66E5', minutes: '10–15', status: 'live' }
+// Tier-1 X6 numerical stability + pendulum (calc: lib/sims/tier1/x6_numerical_stability.calc.js, inlined in each file). Live: all 48 KATs pass (numerics_stability 23 + x6_pendulum 25).
+const numStability = { subject: 'Maths', concept: 'numerical-methods', accent: '#1F66E5', minutes: '10–15', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -369,4 +371,16 @@ export const htmlSims = [
     syllabusRef: 'University, Algorithms',
     approach: 'Choose the loop invariant and the variant that prove classic loops correct and terminating: summation, binary search and the insertion-sort inner loop.',
     activityPrompt: 'Play all rounds, then explain how an invariant and a variant together prove a loop is correct.', tags: ['University', 'Algorithms', 'loop invariant', 'termination', 'correctness'] },
+  { ...numStability, id: 'x6-numerical-stability-poly', title: 'Step Size Lab', level: 'Poly', topic: 'Step size, Euler and RK4', symbol: '📉', height: 1200,
+    syllabusRef: 'Poly engineering mathematics: numerical solution of first-order ODEs with Euler and RK4 (generic)',
+    approach: 'Choose a step size so Euler lands within a target error of the exact decay curve, compare Euler with RK4 at the same step, and find the step at which Euler starts to oscillate on a stiff decay.',
+    activityPrompt: 'Play all rounds, then explain why a smaller step makes Euler more accurate but slower.', tags: ['numerical methods', 'Euler method', 'RK4', 'step size', 'stiff equations'] },
+  { ...numStability, id: 'x6-numerical-stability-u1', title: 'Stability and Order', level: 'University', topic: 'Stability regions and convergence order', symbol: '🧮', height: 1350,
+    syllabusRef: 'University, Numerical Methods',
+    approach: 'Place z = hλ so a method is just stable using |R(z)| for Euler and RK4, measure the observed order from a log–log error plot, and step Euler along a slope field to hit a target.',
+    activityPrompt: 'Play all rounds, then explain why halving the step cuts RK4 error by about sixteen times but Euler error only by about half.', tags: ['University', 'Numerical Methods', 'absolute stability', 'convergence order', 'slope fields'] },
+  { ...numStability, id: 'x6-numerical-stability-u2', title: 'Advection and Pendulum', level: 'University', topic: 'CFL stability, Richardson extrapolation and energy drift', symbol: '🕰️', height: 1500,
+    syllabusRef: 'University, Computational Methods for Engineers',
+    approach: 'Set the Courant number so upwind advection stays bounded, extrapolate from two grid levels with Richardson, and compare Euler and RK4 energy drift for a nonlinear pendulum.',
+    activityPrompt: 'Play all rounds, then explain why explicit Euler makes a pendulum gain energy while RK4 nearly conserves it.', tags: ['University', 'Computational methods', 'CFL condition', 'Richardson extrapolation', 'nonlinear pendulum'] },
 ]

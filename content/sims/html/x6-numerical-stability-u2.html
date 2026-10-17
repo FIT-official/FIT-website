@@ -1,0 +1,1458 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Advection and Pendulum</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit}
+button,input[type=range],input[type=number]{-webkit-tap-highlight-color:transparent;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{min-width:44px;min-height:44px;border:2px solid #111;border-radius:999px;background:white;font-weight:800;padding:9px 15px;cursor:pointer}
+button:disabled{opacity:.5;cursor:default}
+button:active:not(:disabled){transform:translateY(2px);box-shadow:none}
+input[type=range]{width:100%;height:44px;accent-color:var(--lvl-uni);cursor:pointer}
+input[type=number]{min-height:48px;font-size:16px;border:2px solid #111;border-radius:12px;padding:9px;width:100%}
+main{max-width:1240px;margin:auto;padding:16px 14px 48px}
+h1,h2,h3,p{margin:0}
+h1{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-.04em}
+h2{font-size:21px;font-weight:800;margin-bottom:11px}
+h3{font-size:17px;font-weight:800}
+p{line-height:1.5}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:13px;margin-bottom:18px}
+.badge{display:inline-block;background:var(--lvl-uni);color:var(--lvl-uni-on);border:2px solid #111;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;text-transform:uppercase}
+.hud{display:flex;flex-wrap:wrap;gap:8px;font-weight:800}
+.pill{border:2px solid #111;border-radius:999px;background:white;padding:8px 13px}
+.layout{display:grid;gap:18px;align-items:start}
+.stack{display:grid;gap:18px;min-width:0}
+.card{min-width:0;border:2px solid #111;border-radius:24px;background:white;padding:18px;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-uni-tint)}
+.question{font-size:19px;font-weight:800;margin:11px 0;line-height:1.45}
+.small{color:var(--fit-ink-3);font-size:14px}
+.caption{margin-top:8px;font-size:13px;color:var(--fit-ink-2)}
+svg{display:block;width:100%;height:auto}
+.plot{min-height:205px}
+.legend{display:flex;flex-wrap:wrap;gap:13px;font-weight:600;font-size:13px;margin-top:9px}
+.swatch{display:inline-block;width:17px;height:5px;vertical-align:middle;margin-right:5px}
+.controls{display:grid;gap:13px}
+.controlBlock{border:2px solid var(--fit-line-soft);border-radius:16px;padding:12px;min-width:0}
+.controlHead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:800}
+.readout{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+.stepper{display:grid;grid-template-columns:repeat(4,minmax(44px,1fr));gap:7px;margin-top:8px}
+.stepper button{padding:8px 0;font-size:20px}
+.choices{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.choices button[aria-pressed=true]{background:var(--lvl-uni);color:#fff}
+.actionbar{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}
+.hint{flex:1}
+.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2);flex:2}
+.next{background:var(--lvl-uni);color:white;flex:1}
+.feedback{border:2px solid #111;border-radius:15px;padding:13px;font-weight:600;min-height:54px;margin-top:12px}
+.good{background:#def9e7}
+.bad{background:#fff0ed}
+details{margin-top:16px;padding-top:12px;border-top:2px solid #111}
+summary{display:flex;align-items:center;min-height:44px;cursor:pointer;font-weight:800}
+.equations{display:grid;gap:8px;margin-top:8px;font-size:14px}
+.end{text-align:center;padding:36px 16px}
+.stars{font-size:50px;letter-spacing:4px;margin:18px 0}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.card{padding:22px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div>
+    <span class="badge">University (later years)</span>
+    <h1>Advection and Pendulum</h1>
+    <p class="small">CFL transport, extrapolation and nonlinear energy</p>
+  </div>
+  <div class="hud">
+    <span class="pill" id="roundTag">Round 1/6</span>
+    <span class="pill" id="scoreTag">Score 0</span>
+  </div>
+</header>
+<div id="game" class="layout">
+  <div class="stack">
+    <section class="card stage">
+      <h2>Numerical challenge</h2>
+      <p id="assumption" class="small"></p>
+      <p id="question" class="question"></p>
+      <svg id="diagram" viewBox="0 0 470 185" role="img"
+        aria-label="Advection, grid refinement or pendulum system"></svg>
+      <p id="diagramCaption" class="caption"></p>
+    </section>
+    <section class="card">
+      <h2 id="mainTitle">Current numerical state</h2>
+      <svg id="mainPlot" class="plot" viewBox="0 0 500 290"
+        role="img" aria-label="Numerical solution graph"></svg>
+      <div id="mainLegend" class="legend"></div>
+      <p id="mainCaption" class="caption"></p>
+    </section>
+    <section class="card">
+      <h2>Concept: approximation error</h2>
+      <svg viewBox="0 0 470 114" role="img"
+        aria-label="Coarse and fine numerical grids">
+        <rect x="10" y="15" width="450" height="38" rx="7"
+          fill="#E2ECFD" stroke="#111" stroke-width="2"/>
+        <rect x="10" y="65" width="450" height="38" rx="7"
+          fill="#fff" stroke="#111" stroke-width="2"/>
+        <g stroke="#111" stroke-width="2">
+          <path d="M100 15 V53 M190 15 V53 M280 15 V53 M370 15 V53"/>
+          <path d="M55 65 V103 M100 65 V103 M145 65 V103 M190 65 V103 M235 65 V103 M280 65 V103 M325 65 V103 M370 65 V103 M415 65 V103"/>
+        </g>
+        <text x="18" y="40" font-size="14" font-weight="700">Coarse</text>
+        <text x="18" y="90" font-size="14" font-weight="700">Fine</text>
+      </svg>
+      <p class="caption">Refinement increases resolution but does not guarantee stability by itself.</p>
+    </section>
+  </div>
+  <div class="stack">
+    <section class="card">
+      <h2 id="secondaryTitle">Diagnostic plot</h2>
+      <svg id="secondaryPlot" class="plot" viewBox="0 0 500 290"
+        role="img" aria-label="Numerical accuracy or energy diagnostic"></svg>
+      <div id="secondaryLegend" class="legend"></div>
+      <p id="secondaryCaption" class="caption"></p>
+    </section>
+    <section class="card">
+      <h2>Experiment controls</h2>
+      <div id="controls" class="controls"></div>
+      <div class="actionbar">
+        <button id="hint" class="hint">Hint −50 max</button>
+        <button id="check" class="check">Check</button>
+        <button id="next" class="next" hidden>Next →</button>
+      </div>
+      <div id="feedback" class="feedback" aria-live="polite">
+        Configure the experiment and check.
+      </div>
+      <details>
+        <summary>The maths</summary>
+        <div id="maths" class="equations"></div>
+      </details>
+    </section>
+  </div>
+</div>
+<section id="end" class="card end" hidden>
+  <h2>Simulation complete!</h2>
+  <p>All six advanced experiments completed.</p>
+  <div id="stars" class="stars"></div>
+  <p id="finalScore" class="readout"></p>
+  <button id="again" class="check">Play again</button>
+</section>
+</main>
+<script>
+/* FIT-CALC-BEGIN x6_numerical_stability */
+const FITCalcX6 = (function () {
+  'use strict';
+
+  const PI = Math.PI;
+  const MAX_STEPS = 100000;
+  const MAX_CELLS = 100;
+
+  function error(type, reason) {
+    return { error: type, reason: reason };
+  }
+
+  function finite(x) {
+    return typeof x === 'number' && Number.isFinite(x);
+  }
+
+  function validNumber(x) {
+    return finite(x) ? null :
+      error('ConstraintViolation', 'invalid_numeric_input');
+  }
+
+  function validSteps(steps) {
+    if (!Number.isInteger(steps) || steps < 0 || steps > MAX_STEPS) {
+      return error('ConstraintViolation', 'steps_out_of_range');
+    }
+    return null;
+  }
+
+  function supportedODE(ode) {
+    return ode === 'decay' ||
+      ode === 'logistic' ||
+      ode === 't_minus_y';
+  }
+
+  function supportedMethod(method) {
+    return method === 'euler' || method === 'rk4';
+  }
+
+  function checkODE(ode, params) {
+    if (!supportedODE(ode)) {
+      return error('NotSupported', 'ode_or_method_not_in_fixed_list');
+    }
+    if (!params || typeof params !== 'object') {
+      return error('ConstraintViolation', 'invalid_parameters');
+    }
+    if (ode === 'decay' && !finite(params.lam)) {
+      return error('ConstraintViolation', 'invalid_parameters');
+    }
+    if (ode === 'logistic') {
+      if (!finite(params.r) || !finite(params.K) || params.K <= 0) {
+        return error('ConstraintViolation', 'invalid_parameters');
+      }
+    }
+    return null;
+  }
+
+  function rhs(ode, params, t, y) {
+    if (ode === 'decay') return params.lam * y;
+    if (ode === 'logistic') {
+      return params.r * y * (1 - y / params.K);
+    }
+    return t - y;
+  }
+
+  function exactODE(ode, params, y0, t) {
+    if (ode === 'decay') {
+      return y0 * Math.exp(params.lam * t);
+    }
+    if (ode === 't_minus_y') {
+      return t - 1 + (y0 + 1) * Math.exp(-t);
+    }
+    if (y0 === 0) return 0;
+    const e = Math.exp(-params.r * t);
+    return params.K / (1 + (params.K / y0 - 1) * e);
+  }
+
+  function advance(method, ode, params, t, y, h) {
+    if (method === 'euler') {
+      return y + h * rhs(ode, params, t, y);
+    }
+    const k1 = rhs(ode, params, t, y);
+    const k2 = rhs(ode, params, t + h / 2, y + h * k1 / 2);
+    const k3 = rhs(ode, params, t + h / 2, y + h * k2 / 2);
+    const k4 = rhs(ode, params, t + h, y + h * k3);
+    return y + h * (k1 + 2 * k2 + 2 * k3 + k4) / 6;
+  }
+
+  /**
+   * Fixed-step scalar initial-value solver.
+   * Inputs: method 'euler'|'rk4'; ode 'decay'|'logistic'|
+   * 't_minus_y'; params {lam} or {r,K} or {};
+   * y0 (state units), h (s), steps (integer).
+   * Output: y, exact, abs_error (state units).
+   * Assumptions: autonomous decay/logistic or specified forced ODE;
+   * fixed positive step and t0=0. Zero steps has zero error.
+   * Errors: unsupported method/ODE, non-positive step, invalid
+   * inputs or step cap, and non-finite intermediate results.
+   * Hand check: decay lam=-1, y0=1, Euler h=0.1,
+   * 2 steps: (1-0.1)^2=0.81;
+   * exact=exp(-0.2)=0.8187307530779818;
+   * absolute error=0.0087307530779818.
+   */
+  function ode_solve(input) {
+    const q = input || {};
+    const { method, ode, params, y0, h, steps } = q;
+    if (!supportedMethod(method) || !supportedODE(ode)) {
+      return error('NotSupported', 'ode_or_method_not_in_fixed_list');
+    }
+    const pError = checkODE(ode, params);
+    if (pError) return pError;
+    if (!finite(h) || h <= 0) {
+      return error('MathError', 'step_size_must_be_positive');
+    }
+    if (!finite(y0)) {
+      return error('ConstraintViolation', 'invalid_numeric_input');
+    }
+    const sError = validSteps(steps);
+    if (sError) return sError;
+    if (steps === 0) {
+      return { y: y0, exact: y0, abs_error: 0 };
+    }
+    const tEnd = h * steps;
+    if (!finite(tEnd)) {
+      return error('ConstraintViolation', 'time_out_of_range');
+    }
+    let y = y0;
+    for (let i = 0; i < steps; i++) {
+      y = advance(method, ode, params, i * h, y, h);
+      if (!finite(y)) {
+        return error('RuntimeError', 'non_finite_intermediate');
+      }
+    }
+    const exact = exactODE(ode, params, y0, tEnd);
+    if (!finite(exact)) {
+      return error('RuntimeError', 'non_finite_exact_solution');
+    }
+    const abs_error = Math.abs(y - exact);
+    if (!finite(abs_error)) {
+      return error('RuntimeError', 'non_finite_intermediate');
+    }
+    return { y, exact, abs_error };
+  }
+
+  /**
+   * Observed convergence order for exponential decay/growth.
+   * Inputs: method, lam (s^-1), T (s), h [h1,h2,h3] (s).
+   * T/h must be an integer to floating-point tolerance.
+   * Outputs: errors[] (state units), observed_order (dimensionless
+   * or null when the logarithmic ratio is undefined).
+   * Assumptions: y(0)=1, uniform fixed grids, final time T.
+   * Errors: invalid steps, time, parameters, unsupported method.
+   * Hand check: Euler, lam=-1, T=1, h=[1,0.5,0.25].
+   * Numerical y=[0,0.25,0.31640625].
+   * Exact=0.36787944117144233.
+   * Errors=[0.36787944117144233,0.11787944117144233,
+   * 0.05147319117144233].
+   * Last-pair order=log(e2/e3)/log(2), approximately 1.195.
+   */
+  function convergence_order(input) {
+    const q = input || {};
+    const { method, lam, T, h } = q;
+    if (!supportedMethod(method)) {
+      return error('NotSupported', 'ode_or_method_not_in_fixed_list');
+    }
+    if (!finite(lam) || !finite(T) || T <= 0 ||
+        !Array.isArray(h) || h.length !== 3) {
+      return error('ConstraintViolation', 'invalid_convergence_input');
+    }
+    const errors = [];
+    for (const hi of h) {
+      if (!finite(hi) || hi <= 0) {
+        return error('MathError', 'step_size_must_be_positive');
+      }
+      const n = Math.round(T / hi);
+      if (!Number.isSafeInteger(n) || n < 1 ||
+          Math.abs(n * hi - T) > 1e-9 * Math.max(1, T)) {
+        return error('ConstraintViolation', 'time_not_divisible_by_step');
+      }
+      const result = ode_solve({
+        method, ode: 'decay', params: { lam },
+        y0: 1, h: hi, steps: n
+      });
+      if (result.error) return result;
+      errors.push(result.abs_error);
+    }
+    if (!(h[0] > h[1] && h[1] > h[2])) {
+      return error('ConstraintViolation', 'step_sizes_not_descending');
+    }
+    let observed_order = null;
+    if (errors[1] > 0 && errors[2] > 0) {
+      const den = Math.log(h[1] / h[2]);
+      const value = Math.log(errors[1] / errors[2]) / den;
+      if (finite(value) && den !== 0) observed_order = value;
+    }
+    return { errors, observed_order };
+  }
+
+  /**
+   * Real-axis absolute stability of a one-step method.
+   * Inputs: method, z=h*lambda (dimensionless real number).
+   * Outputs: abs_R (dimensionless), stable (boolean).
+   * Assumptions: scalar linear test equation and real z.
+   * Errors: unsupported method, invalid z or overflow.
+   * Hand check: Euler z=-2 has R=-1, |R|=1, stable=true;
+   * RK4 z=-2 has R=1-2+2-8/6+16/24=1/3,
+   * |R|=0.3333333333333333, stable=true.
+   */
+  function stability(input) {
+    const q = input || {};
+    const { method, z } = q;
+    if (!supportedMethod(method)) {
+      return error('NotSupported', 'ode_or_method_not_in_fixed_list');
+    }
+    if (!finite(z)) {
+      return error('ConstraintViolation', 'invalid_numeric_input');
+    }
+    const R = method === 'euler'
+      ? 1 + z
+      : 1 + z + z * z / 2 +
+        z * z * z / 6 + z * z * z * z / 24;
+    if (!finite(R)) {
+      return error('ConstraintViolation', 'amplification_overflow');
+    }
+    const abs_R = Math.abs(R);
+    return { abs_R, stable: abs_R <= 1 };
+  }
+
+  /**
+   * Periodic first-order upwind advection.
+   * Inputs: u0[] (scalar cell values), courant=a*dt/dx
+   * (dimensionless), steps (integer).
+   * Outputs: u[], min, max, mass=sum(u), bounded (boolean).
+   * Assumptions: a>0, periodic cells, simultaneous explicit
+   * updates; initial minimum/maximum define the bounded range.
+   * Errors: 2..100 cell cap, invalid inputs/steps, overflow.
+   * Hand check: u0=[1,0,0,0], C=0.5, 2 steps.
+   * Step 1=[0.5,0.5,0,0].
+   * Step 2=[0.25,0.5,0.25,0].
+   * mass=1, min=0, max=0.5, bounded=true.
+   */
+  function upwind_advect(input) {
+    const q = input || {};
+    const { u0, courant, steps } = q;
+    if (!Array.isArray(u0) ||
+        u0.length < 2 || u0.length > MAX_CELLS) {
+      return error('ConstraintViolation', 'cells_out_of_range_2_100');
+    }
+    if (!u0.every(finite) || !finite(courant) || courant < 0) {
+      return error('ConstraintViolation', 'invalid_advection_input');
+    }
+    const sError = validSteps(steps);
+    if (sError) return sError;
+    const initialMin = Math.min(...u0);
+    const initialMax = Math.max(...u0);
+    let u = u0.slice();
+    let bounded = true;
+    for (let n = 0; n < steps; n++) {
+      const next = new Array(u.length);
+      for (let j = 0; j < u.length; j++) {
+        next[j] = u[j] -
+          courant * (u[j] - u[(j + u.length - 1) % u.length]);
+        if (!finite(next[j])) {
+          return error('RuntimeError', 'non_finite_intermediate');
+        }
+        if (next[j] < initialMin - 1e-12 ||
+            next[j] > initialMax + 1e-12) bounded = false;
+      }
+      u = next;
+    }
+    const min = Math.min(...u);
+    const max = Math.max(...u);
+    const mass = u.reduce((sum, value) => sum + value, 0);
+    if (!finite(mass)) {
+      return error('RuntimeError', 'non_finite_intermediate');
+    }
+    return {
+      u, min, max, mass,
+      bounded: bounded &&
+        min >= initialMin - 1e-12 &&
+        max <= initialMax + 1e-12
+    };
+  }
+
+  /**
+   * Two-level error order and Richardson extrapolation.
+   * Inputs: h1,h2 (positive grid/time spacing in a common SI
+   * unit), e1,e2 (positive errors in quantity units),
+   * optional f1,f2 (approximations in quantity units).
+   * Outputs: observed_order (dimensionless),
+   * extrapolated (quantity units, null without both f values).
+   * Assumptions: same asymptotic error law e=C*h^p.
+   * Errors: non-positive errors or h1<=h2, incomplete values,
+   * undefined extrapolation denominator or overflow.
+   * Hand check: h1=0.2, e1=0.04, h2=0.1, e2=0.01,
+   * f1=2.04, f2=2.01.
+   * p=log(4)/log(2)=2.
+   * f*=2.01+(2.01-2.04)/(4-1)=2.
+   */
+  function grid_convergence(input) {
+    const q = input || {};
+    const { h1, e1, h2, e2, f1, f2 } = q;
+    if (![h1, h2, e1, e2].every(finite) ||
+        h1 <= h2 || h2 <= 0 || e1 <= 0 || e2 <= 0) {
+      return error(
+        'MathError',
+        'errors_must_be_positive_and_h1_gt_h2'
+      );
+    }
+    const observed_order =
+      Math.log(e1 / e2) / Math.log(h1 / h2);
+    if (!finite(observed_order)) {
+      return error('MathError', 'undefined_convergence_order');
+    }
+    const hasF1 = f1 !== undefined;
+    const hasF2 = f2 !== undefined;
+    if (hasF1 !== hasF2) {
+      return error('ConstraintViolation', 'incomplete_extrapolation_data');
+    }
+    let extrapolated = null;
+    if (hasF1) {
+      if (!finite(f1) || !finite(f2)) {
+        return error('ConstraintViolation', 'invalid_numeric_input');
+      }
+      const ratio = Math.pow(h1 / h2, observed_order);
+      if (!finite(ratio)) {
+        return error('MathError', 'undefined_extrapolation');
+      }
+      if (Math.abs(ratio - 1) < 1e-14) {
+        return error('MathError', 'undefined_extrapolation');
+      }
+      extrapolated = f2 + (f2 - f1) / (ratio - 1);
+      if (!finite(extrapolated)) {
+        return error('MathError', 'undefined_extrapolation');
+      }
+    }
+    return { observed_order, extrapolated };
+  }
+
+  /**
+   * Vector of slopes at supplied time-state pairs.
+   * Inputs: ode, params as in ode_solve; points:[[t_s,y],...].
+   * Outputs: slopes[] in state units/s.
+   * Assumptions: pointwise evaluation, not numerical integration.
+   * Errors: unsupported ODE, invalid parameters or points,
+   * more than 10000 points, non-finite slopes.
+   * Hand check: t_minus_y at [[0,1],[1,2],[2,0]]
+   * gives [-1,-1,2].
+   */
+  function slope_field(input) {
+    const q = input || {};
+    const { ode, params, points } = q;
+    const pError = checkODE(ode, params);
+    if (pError) return pError;
+    if (!Array.isArray(points) || points.length > 10000) {
+      return error('ConstraintViolation', 'points_out_of_range');
+    }
+    const slopes = [];
+    for (const point of points) {
+      if (!Array.isArray(point) || point.length !== 2 ||
+          !point.every(finite)) {
+        return error('ConstraintViolation', 'invalid_slope_point');
+      }
+      const v = rhs(ode, params, point[0], point[1]);
+      if (!finite(v)) {
+        return error('RuntimeError', 'non_finite_intermediate');
+      }
+      slopes.push(v);
+    }
+    return { slopes };
+  }
+
+  function validatePendulum(q, needDt, thetaValue) {
+    if (!finite(q.L_m) || q.L_m <= 0) {
+      return error('ConstraintViolation', 'length_must_be_positive');
+    }
+    const g = q.g_m_s2 === undefined ? 9.81 : q.g_m_s2;
+    if (!finite(g)) {
+      return error('ConstraintViolation', 'invalid_numeric_input');
+    }
+    if (g === 0) return error('MathError', 'gravity_zero');
+    if (g < 0) {
+      return error('ConstraintViolation', 'gravity_must_be_positive');
+    }
+    if (needDt) {
+      if (!finite(q.dt_s) || q.dt_s === 0) {
+        return error('MathError', 'dt_must_be_positive');
+      }
+      if (q.dt_s < 0) {
+        return error('ConstraintViolation', 'dt_must_be_positive');
+      }
+    }
+    if (thetaValue !== undefined) {
+      if (!finite(thetaValue) || Math.abs(thetaValue) > PI) {
+        return error('ConstraintViolation', 'theta0_out_of_range');
+      }
+    }
+    return null;
+  }
+
+  function pendulumEnergy(L, g, theta, omega) {
+    return L * L * omega * omega / 2 +
+      g * L * (1 - Math.cos(theta));
+  }
+
+  /**
+   * Small-amplitude pendulum period.
+   * Inputs: L_m (m), optional g_m_s2 (m/s^2; default 9.81).
+   * Output: period_s (s).
+   * Assumptions: point mass, negligible damping, small angle.
+   * Errors: non-positive L or g, overflow.
+   * Hand check: L=1, g=9.81,
+   * T=2*pi*sqrt(1/9.81)=2.0060666807106475 s.
+   */
+  function small_angle_period(input) {
+    const q = input || {};
+    const ve = validatePendulum(q, false);
+    if (ve) return ve;
+    const g = q.g_m_s2 === undefined ? 9.81 : q.g_m_s2;
+    const period_s = 2 * PI * Math.sqrt(q.L_m / g);
+    if (!finite(period_s)) {
+      return error('RuntimeError', 'non_finite_intermediate');
+    }
+    return { period_s };
+  }
+
+  /**
+   * Exact finite-amplitude period, using AGM for K(k).
+   * Inputs: L_m (m), g_m_s2 (m/s^2, default 9.81),
+   * theta0_rad (rad), omega0_rad_s (rad/s; must be zero).
+   * Outputs: period_s (s|null), period_ratio (dimensionless|null),
+   * regime ('at_rest','oscillatory','unstable_equilibrium').
+   * Assumptions: undamped point mass released from rest;
+   * modulus k=sin(|theta0|/2).
+   * Errors: invalid physical inputs, unsupported non-rest release.
+   * Hand check: theta0=pi/2, L=1, g=9.81:
+   * k=sin(pi/4)=sqrt(1/2), AGM(1,sqrt(1/2))
+   * gives K=1.8540746773013719;
+   * T=4*K/sqrt(9.81), ratio=2*K/pi,
+   * approximately 1.180340599016096.
+   */
+  function exact_pendulum_period(input) {
+    const q = input || {};
+    const ve = validatePendulum(q, false, q.theta0_rad);
+    if (ve) return ve;
+    const omega = q.omega0_rad_s === undefined
+      ? 0 : q.omega0_rad_s;
+    if (!finite(omega)) {
+      return error('ConstraintViolation', 'invalid_numeric_input');
+    }
+    if (omega !== 0) {
+      return error('NotSupported', 'period_requires_release_from_rest');
+    }
+    const basic = small_angle_period(q);
+    if (basic.error) return basic;
+    const aTheta = Math.abs(q.theta0_rad);
+    if (aTheta === 0) {
+      return {
+        period_s: basic.period_s,
+        period_ratio: 1,
+        regime: 'at_rest'
+      };
+    }
+    if (aTheta === PI) {
+      return {
+        period_s: null,
+        period_ratio: null,
+        regime: 'unstable_equilibrium'
+      };
+    }
+    const k = Math.sin(aTheta / 2);
+    let a = 1;
+    let b = Math.sqrt((1 - k) * (1 + k));
+    let count = 0;
+    while (Math.abs(a - b) > 1e-15 * Math.max(a, b)) {
+      const an = (a + b) / 2;
+      b = Math.sqrt(a * b);
+      a = an;
+      count++;
+      if (count > 100) {
+        return error('RuntimeError', 'agm_iteration_cap');
+      }
+    }
+    const K = PI / (2 * a);
+    const period_ratio = 2 * K / PI;
+    const period_s = basic.period_s * period_ratio;
+    if (!finite(period_s) || !finite(period_ratio)) {
+      return error('RuntimeError', 'non_finite_intermediate');
+    }
+    return { period_s, period_ratio, regime: 'oscillatory' };
+  }
+
+  function pendulumAdvance(method, L, g, theta, omega, dt) {
+    if (method === 'euler') {
+      return [
+        theta + dt * omega,
+        omega - dt * (g / L) * Math.sin(theta)
+      ];
+    }
+    const f = (th, om) => [
+      om,
+      -(g / L) * Math.sin(th)
+    ];
+    const k1 = f(theta, omega);
+    const k2 = f(
+      theta + dt * k1[0] / 2,
+      omega + dt * k1[1] / 2
+    );
+    const k3 = f(
+      theta + dt * k2[0] / 2,
+      omega + dt * k2[1] / 2
+    );
+    const k4 = f(
+      theta + dt * k3[0],
+      omega + dt * k3[1]
+    );
+    return [
+      theta + dt *
+        (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0]) / 6,
+      omega + dt *
+        (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1]) / 6
+    ];
+  }
+
+  function pendulumStep(method, input) {
+    const q = input || {};
+    const ve = validatePendulum(q, true, q.theta_rad);
+    if (ve) return ve;
+    if (!finite(q.omega_rad_s)) {
+      return error('ConstraintViolation', 'invalid_numeric_input');
+    }
+    const g = q.g_m_s2 === undefined ? 9.81 : q.g_m_s2;
+    const before = pendulumEnergy(
+      q.L_m, g, q.theta_rad, q.omega_rad_s
+    );
+    const next = pendulumAdvance(
+      method, q.L_m, g, q.theta_rad, q.omega_rad_s, q.dt_s
+    );
+    const after = pendulumEnergy(q.L_m, g, next[0], next[1]);
+    const change = after - before;
+    if (![before, after, change, ...next].every(finite)) {
+      return error('RuntimeError', 'non_finite_intermediate');
+    }
+    return {
+      theta_next_rad: next[0],
+      omega_next_rad_s: next[1],
+      energy_next_J_kg: after,
+      energy_before_J_kg: before,
+      energy_change_J_kg: change,
+      energy_increased: change > 0
+    };
+  }
+
+  /**
+   * One explicit Euler pendulum step.
+   * Inputs: L_m, g_m_s2, theta_rad, omega_rad_s, dt_s.
+   * Outputs: next theta/omega, energies in J/kg, change, boolean.
+   * Assumptions: undamped nonlinear pendulum, explicit Euler.
+   * Errors: L, g, dt, angle, state or overflow.
+   * Hand check: L=1, g=10, theta=0, omega=1, dt=0.1.
+   * Euler yields theta=0.1, omega=1.
+   * E_before=0.5; E_after=0.5+10*(1-cos(0.1)).
+   */
+  function euler_step(input) {
+    return pendulumStep('euler', input);
+  }
+
+  /**
+   * One classical RK4 nonlinear pendulum step.
+   * Inputs and outputs: same as euler_step, SI units.
+   * Assumptions: same undamped two-state equations.
+   * Errors: as euler_step.
+   * Hand check: theta=0, omega=0, L=1, g=9.81,
+   * dt=0.1 produces theta_next=0, omega_next=0,
+   * both energies zero and energy_increased=false.
+   */
+  function rk4_step(input) {
+    return pendulumStep('rk4', input);
+  }
+
+  function pendulumRun(method, input) {
+    const q = input || {};
+    const ve = validatePendulum(q, true, q.theta0_rad);
+    if (ve) return ve;
+    if (!finite(q.omega0_rad_s)) {
+      return error('ConstraintViolation', 'invalid_numeric_input');
+    }
+    const se = validSteps(q.steps);
+    if (se) return se;
+    const g = q.g_m_s2 === undefined ? 9.81 : q.g_m_s2;
+    let theta = q.theta0_rad;
+    let omega = q.omega0_rad_s;
+    const initialEnergy = pendulumEnergy(q.L_m, g, theta, omega);
+    let previousEnergy = initialEnergy;
+    let increasedEvery = q.steps > 0;
+    for (let n = 0; n < q.steps; n++) {
+      const next = pendulumAdvance(
+        method, q.L_m, g, theta, omega, q.dt_s
+      );
+      theta = next[0];
+      omega = next[1];
+      const E = pendulumEnergy(q.L_m, g, theta, omega);
+      if (![theta, omega, E].every(finite)) {
+        return error('RuntimeError', 'non_finite_intermediate');
+      }
+      if (!(E > previousEnergy)) increasedEvery = false;
+      previousEnergy = E;
+    }
+    const energy_ratio = initialEnergy === 0
+      ? null : previousEnergy / initialEnergy;
+    if (energy_ratio !== null && !finite(energy_ratio)) {
+      return error('RuntimeError', 'non_finite_intermediate');
+    }
+    return {
+      theta_final_rad: theta,
+      omega_final_rad_s: omega,
+      energy_ratio,
+      energy_increased_every_step: increasedEvery
+    };
+  }
+
+  /**
+   * Fixed-step Euler pendulum trajectory.
+   * Inputs: L_m, g_m_s2, theta0_rad, omega0_rad_s, dt_s,
+   * steps. Output: final theta/omega, Efinal/Einitial,
+   * energy_increased_every_step; ratio null for zero initial E.
+   * Assumptions: point-mass, undamped, fixed positive time step.
+   * Errors: invalid physical parameters, steps cap or overflow.
+   * Hand check: L=1, g=10, theta0=0, omega0=1,
+   * dt=0.1, steps=1 gives theta=0.1, omega=1,
+   * energy_ratio=1+20*(1-cos(0.1)).
+   */
+  function euler_run(input) {
+    return pendulumRun('euler', input);
+  }
+
+  /**
+   * Fixed-step RK4 pendulum trajectory.
+   * Inputs, units and outputs: as euler_run.
+   * Assumptions: fourth-order classical RK for both state values.
+   * Errors: as euler_run.
+   * Hand check: L=1, g=9.81, theta0=0, omega0=0,
+   * dt=0.1, steps=10: theta=omega=0, energy_ratio=null,
+   * energy_increased_every_step=false.
+   */
+  function rk4_run(input) {
+    return pendulumRun('rk4', input);
+  }
+
+  /**
+   * Side-by-side Euler and RK4 fixed-step comparison.
+   * Inputs: same as euler_run, SI units.
+   * Outputs: Euler final theta, omega, energy ratio and
+   * monotonic-energy flag; RK4 final theta, omega, ratio.
+   * Assumptions: identical initial state and time grid.
+   * Errors: as euler_run.
+   * Hand check: L=1, g=9.81, theta0=0, omega0=0,
+   * dt=0.1, steps=5: both states remain zero,
+   * both energy ratios are null.
+   */
+  function euler_rk4_compare_run(input) {
+    const a = euler_run(input);
+    if (a.error) return a;
+    const b = rk4_run(input);
+    if (b.error) return b;
+    return {
+      euler_theta_rad: a.theta_final_rad,
+      euler_omega_rad_s: a.omega_final_rad_s,
+      euler_energy_ratio: a.energy_ratio,
+      euler_energy_increased_every_step:
+        a.energy_increased_every_step,
+      rk4_theta_rad: b.theta_final_rad,
+      rk4_omega_rad_s: b.omega_final_rad_s,
+      rk4_energy_ratio: b.energy_ratio
+    };
+  }
+
+  return Object.freeze({
+    API_VERSION: 1,
+    ode_solve,
+    convergence_order,
+    stability,
+    upwind_advect,
+    grid_convergence,
+    slope_field,
+    small_angle_period,
+    exact_pendulum_period,
+    euler_step,
+    rk4_step,
+    euler_run,
+    rk4_run,
+    euler_rk4_compare_run
+  });
+})();
+/* FIT-CALC-END x6_numerical_stability */
+
+(function () {
+  'use strict';
+  const C=FITCalcX6;
+  const $=id=>document.getElementById(id);
+  const NS='http:'+String.fromCharCode(47,47)+'www.w3.org/2000/svg';
+  let seed=92817,round=0,score=0,tries=0,hinted=false,locked=false;
+  let model,choice=0,secondChoice=0,method='euler',dtIndex=2;
+
+  function rnd(){
+    seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+    return seed/4294967296;
+  }
+  const pick=a=>a[Math.floor(rnd()*a.length)];
+  const fmt=(v,n=4)=>Number.isFinite(v)?
+    Number(v.toPrecision(n)).toString():'—';
+  const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
+  function svg(id,tag,attributes={},value){
+    const e=document.createElementNS(NS,tag);
+    Object.entries(attributes).forEach(([k,v])=>e.setAttribute(k,String(v)));
+    if(value!==undefined)e.textContent=String(value);
+    $(id).appendChild(e);return e;
+  }
+  function clear(id){$(id).replaceChildren();}
+  function line(id,x1,y1,x2,y2,col='#111',width=2,dash=''){
+    svg(id,'line',{x1,y1,x2,y2,stroke:col,
+      'stroke-width':width,'stroke-dasharray':dash});
+  }
+  function text(id,x,y,s,size=12){
+    svg(id,'text',{x,y,fill:'#111','font-size':size},s);
+  }
+  function plotBase(id,x0,x1,y0,y1,xlabel,ylabel){
+    clear(id);
+    const l=59,t=30,r=478,b=239;
+    const X=x=>l+(x-x0)/(x1-x0)*(r-l);
+    const Y=y=>b-(y-y0)/(y1-y0)*(b-t);
+    for(let i=0;i<=4;i++){
+      let x=x0+i*(x1-x0)/4,y=y0+i*(y1-y0)/4;
+      line(id,X(x),t,X(x),b,'#eee',1);
+      line(id,l,Y(y),r,Y(y),'#ddd',1);
+      text(id,X(x)-11,b+19,fmt(x,3),11);
+      text(id,4,Y(y)+4,fmt(y,3),11);
+    }
+    line(id,l,t,l,b,'#111',2);
+    line(id,l,b,r,b,'#111',2);
+    text(id,7,15,ylabel,13);
+    text(id,320,278,xlabel,13);
+    return {X,Y};
+  }
+  function series(id,pts,color,width=3,dash=''){
+    if(pts.length<2)return;
+    svg(id,'polyline',{
+      points:pts.map(p=>p[0]+','+p[1]).join(' '),
+      fill:'none',stroke:color,'stroke-width':width,
+      'stroke-dasharray':dash,'stroke-linejoin':'round',
+      'stroke-linecap':'round'
+    });
+  }
+  function dot(id,x,y,color,r=5){
+    svg(id,'circle',{cx:x,cy:y,r,fill:color,
+      stroke:'#111','stroke-width':1.5});
+  }
+  function makeRound(){
+    const type=round%3;
+    if(type===0){
+      const count=24;
+      const start=pick([2,4,6]);
+      const steps=pick([3,4,5]);
+      const u0=Array(count).fill(0);
+      for(let j=start;j<start+3;j++)u0[j]=1;
+      return {type,u0,steps,start,target:start+steps};
+    }
+    if(type===1){
+      const p=pick([1,2,3]);
+      const h1=0.4,h2=0.2;
+      const fstar=pick([1.5,2,2.5,3]);
+      const e2=pick([0.008,0.016,0.024]);
+      const e1=e2*Math.pow(h1/h2,p);
+      const sign=pick([-1,1]);
+      const f1=fstar+sign*e1;
+      const f2=fstar+sign*e2;
+      const ans=C.grid_convergence({h1,e1,h2,e2,f1,f2});
+      return {type,h1,h2,e1,e2,f1,f2,ans};
+    }
+    const angle=pick([0.5,0.7,0.9,1.1]);
+    const L=pick([0.8,1,1.2]);
+    const period=C.exact_pendulum_period({
+      L_m:L,g_m_s2:9.81,
+      theta0_rad:angle,omega0_rad_s:0
+    });
+    return {
+      type,L,angle,
+      percentage:100*(period.period_ratio-1),
+      dtValues:[0.025,0.05,0.1,0.2],
+      band:0.001,
+      T:4
+    };
+  }
+  function newRound(){
+    if(round>=6)return finish();
+    tries=0;hinted=false;locked=false;
+    model=makeRound();
+    choice=model.type===0?25:
+      model.type===1?100:20;
+    secondChoice=model.type===1?1500:0;
+    method='euler';dtIndex=2;
+    $('roundTag').textContent='Round '+(round+1)+'/6';
+    $('scoreTag').textContent='Score '+score;
+    $('feedback').className='feedback';
+    $('feedback').textContent='Configure the experiment and check.';
+    $('check').hidden=false;$('next').hidden=true;
+    $('hint').disabled=false;
+    staticUI();
+    controls();
+    live();
+  }
+  function staticUI(){
+    const m=model;
+    $('assumption').textContent=m.type===0?
+      'Assumption: constant positive velocity, periodic boundaries and explicit first-order upwind updates.':
+      m.type===1?
+      'Assumption: both grid errors follow one asymptotic power law, e = Chᵖ.':
+      'Assumption: undamped point-mass pendulum, released from rest; g = 9.81 m/s².';
+    $('question').textContent=m.type===0?
+      'Move the three-cell pulse to start at cell '+
+      m.target+' after '+m.steps+
+      ' time steps, preserving its height and remaining bounded. Set the Courant number.':
+      m.type===1?
+      'Determine both the observed order p and the Richardson zero-spacing estimate from the two reported grids.':
+      'Set the release angle to make the exact period exceed the small-angle period by '+
+      fmt(m.percentage,6)+'%. Then select a method and time step that keep final relative energy drift within '+
+      fmt(m.band*100,3)+'%.';
+    $('diagramCaption').textContent=m.type===0?
+      'The pulse travels to the right; the domain wraps periodically.':
+      m.type===1?
+      'Measured refinement levels: h₁ = '+fmt(m.h1)+' m, h₂ = '+
+        fmt(m.h2)+' m.':
+      'Pendulum length L = '+fmt(m.L)+' m; angular displacement in radians.';
+    $('maths').innerHTML=m.type===0?
+      '<p>C = aΔt/Δx, dimensionless.</p>'+
+      '<p>uⱼⁿ⁺¹ = uⱼⁿ − C(uⱼⁿ − uⱼ₋₁ⁿ).</p>'+
+      '<p>For a positive-speed upwind scheme, 0 ≤ C ≤ 1 preserves boundedness.</p>'+
+      '<p>At C = 1, an initial pulse shifts one cell per time step without numerical diffusion.</p>':
+      m.type===1?
+      '<p>Error model: e = Chᵖ.</p>'+
+      '<p>p = ln(e₁/e₂)/ln(h₁/h₂).</p>'+
+      '<p>f* = f₂ + (f₂−f₁)/((h₁/h₂)ᵖ−1).</p>'+
+      '<p>h is measured in m. Errors and f values are measured in the same quantity units.</p>':
+      '<p>θ′ = ω; ω′ = −(g/L)sin(θ).</p>'+
+      '<p>E = L²ω²/2 + gL(1−cos θ), J/kg.</p>'+
+      '<p>T₀ = 2π√(L/g), seconds.</p>'+
+      '<p>T/T₀ = (2/π)K(sin(|θ₀|/2)).</p>'+
+      '<p>Relative energy drift = |Efinal/Einitial−1|.</p>';
+    diagram();
+  }
+  function diagram(){
+    const m=model;
+    clear('diagram');
+    if(m.type===0){
+      line('diagram',15,95,454,95,'#111',3);
+      for(let i=0;i<12;i++){
+        const x=18+i*36;
+        svg('diagram','rect',{x,y:55,width:35,height:40,
+          fill:i>=2&&i<5?'#1F66E5':'#fff',
+          stroke:'#111','stroke-width':2});
+      }
+      line('diagram',145,31,300,31,'#111',4);
+      svg('diagram','path',{d:'M300 31 L284 21 L284 41 Z',fill:'#111'});
+      text('diagram',167,19,'a > 0 (m/s)',16);
+      text('diagram',17,121,'Periodic cells; Δx (m)',15);
+      text('diagram',17,148,'Left edge wraps to right edge',13);
+    }else if(m.type===1){
+      svg('diagram','rect',{x:25,y:29,width:175,height:95,rx:16,
+        fill:'#fff',stroke:'#111','stroke-width':3});
+      svg('diagram','rect',{x:265,y:29,width:175,height:95,rx:16,
+        fill:'#fff',stroke:'#111','stroke-width':3});
+      text('diagram',43,60,'Coarse grid',19);
+      text('diagram',43,90,'h₁ = '+m.h1+' m',17);
+      text('diagram',284,60,'Fine grid',19);
+      text('diagram',284,90,'h₂ = '+m.h2+' m',17);
+      line('diagram',202,77,260,77,'#111',4);
+      svg('diagram','path',{d:'M260 77 L245 67 L245 87 Z',fill:'#111'});
+      text('diagram',157,151,'Richardson limit h → 0',16);
+    }else{
+      const pivotX=234,pivotY=29,Ldraw=115;
+      line('diagram',90,pivotY,380,pivotY,'#111',4);
+      const theta=0.65;
+      const endX=pivotX+Ldraw*Math.sin(theta);
+      const endY=pivotY+Ldraw*Math.cos(theta);
+      line('diagram',pivotX,pivotY,pivotX,pivotY+115,'#aaa',2,'5 5');
+      line('diagram',pivotX,pivotY,endX,endY,'#111',5);
+      dot('diagram',endX,endY,'#FF6B3D',19);
+      dot('diagram',pivotX,pivotY,'#111',7);
+      svg('diagram','path',{
+        d:'M234 68 A39 39 0 0 0 258 60',
+        fill:'none',stroke:'#1F66E5','stroke-width':4
+      });
+      text('diagram',267,73,'θ₀ (rad)',16);
+      text('diagram',285,123,'L = '+fmt(m.L)+' m',15);
+      line('diagram',405,75,405,145,'#111',3);
+      svg('diagram','path',{d:'M405 145 L396 130 L414 130 Z',fill:'#111'});
+      text('diagram',350,165,'g (m/s²)',14);
+    }
+    $('diagram').setAttribute('aria-label',
+      m.type===0?'Periodic 24-cell positive-velocity advection channel.':
+      m.type===1?'Coarse and fine grid refinement diagram.':
+      'Pendulum with release angle, length and downward gravity.');
+  }
+  function control(name,min,max,step,value,format,onchange){
+    const box=document.createElement('div');
+    box.className='controlBlock';
+    const head=document.createElement('div');
+    head.className='controlHead';
+    const caption=document.createElement('strong');
+    caption.textContent=name;
+    const output=document.createElement('output');
+    output.className='readout';
+    output.textContent=format(value);
+    head.append(caption,output);
+    box.appendChild(head);
+    const input=document.createElement('input');
+    input.type='range';
+    input.min=String(min);input.max=String(max);
+    input.step=String(step);input.value=String(value);
+    input.setAttribute('aria-label',name);
+    const set=v=>{
+      if(locked)return;
+      const next=clamp(Math.round(Number(v)/step)*step,min,max);
+      input.value=String(next);
+      output.textContent=format(next);
+      onchange(next);
+      live();
+    };
+    input.addEventListener('input',()=>set(input.value));
+    box.appendChild(input);
+    const st=document.createElement('div');
+    st.className='stepper';
+    [-10,-1,1,10].forEach((d,i)=>{
+      const b=document.createElement('button');
+      b.textContent=['−−','−','+','++'][i];
+      b.setAttribute('aria-label',
+        (d<0?'Decrease ':'Increase ')+name+
+        ' by '+Math.abs(d*step));
+      b.addEventListener('click',()=>set(Number(input.value)+d*step));
+      st.appendChild(b);
+    });
+    box.appendChild(st);
+    $('controls').appendChild(box);
+    return {input,output};
+  }
+  function controls(){
+    $('controls').replaceChildren();
+    const m=model;
+    if(m.type===0){
+      control('Courant number C (1)',0,150,1,choice,
+        v=>(v/100).toFixed(2),v=>choice=v);
+    }else if(m.type===1){
+      const card=document.createElement('div');
+      card.className='controlBlock';
+      card.innerHTML='<strong>Grid measurements</strong>'+
+        '<p class="small">e₁ = '+fmt(m.e1,7)+
+        ', e₂ = '+fmt(m.e2,7)+
+        ' quantity units</p>'+
+        '<p class="small">f₁ = '+fmt(m.f1,7)+
+        ', f₂ = '+fmt(m.f2,7)+
+        ' quantity units</p>';
+      $('controls').appendChild(card);
+      control('Observed order p (1)',0,400,1,choice,
+        v=>(v/100).toFixed(2),v=>choice=v);
+      control('Extrapolated f* (quantity units)',1000,3500,1,
+        secondChoice,v=>(v/1000).toFixed(3),v=>secondChoice=v);
+    }else{
+      control('Release angle θ₀ (rad)',0,140,1,choice,
+        v=>(v/100).toFixed(2),v=>choice=v);
+      const box=document.createElement('div');
+      box.className='controlBlock';
+      const head=document.createElement('strong');
+      head.textContent='Time-stepping method';
+      box.appendChild(head);
+      const choices=document.createElement('div');
+      choices.className='choices';
+      ['euler','rk4'].forEach(name=>{
+        const b=document.createElement('button');
+        b.textContent=name==='euler'?'Euler':'RK4';
+        b.setAttribute('aria-pressed',String(method===name));
+        b.addEventListener('click',()=>{
+          if(locked)return;
+          method=name;
+          choices.querySelectorAll('button').forEach(btn=>
+            btn.setAttribute('aria-pressed',
+              String(btn===b)));
+          live();
+        });
+        choices.appendChild(b);
+      });
+      box.appendChild(choices);
+      $('controls').appendChild(box);
+      const dtBox=document.createElement('div');
+      dtBox.className='controlBlock';
+      const dtTitle=document.createElement('strong');
+      dtTitle.textContent='Time step Δt (s)';
+      dtBox.appendChild(dtTitle);
+      const dtChoices=document.createElement('div');
+      dtChoices.className='choices';
+      m.dtValues.forEach((dt,i)=>{
+        const b=document.createElement('button');
+        b.textContent=fmt(dt,4)+' s';
+        b.setAttribute('aria-pressed',String(dtIndex===i));
+        b.addEventListener('click',()=>{
+          if(locked)return;
+          dtIndex=i;
+          dtChoices.querySelectorAll('button').forEach(btn=>
+            btn.setAttribute('aria-pressed',String(btn===b)));
+          live();
+        });
+        dtChoices.appendChild(b);
+      });
+      dtBox.appendChild(dtChoices);
+      $('controls').appendChild(dtBox);
+    }
+  }
+  function advectionPlot(){
+    const m=model,Courant=choice/100;
+    const result=C.upwind_advect({
+      u0:m.u0,courant:Courant,steps:m.steps
+    });
+    const map=plotBase('mainPlot',0,m.u0.length-1,0,1.35,
+      'Cell index j (1)','Cell value u (1)');
+    const initial=m.u0.map((v,i)=>[map.X(i),map.Y(v)]);
+    const current=result.u.map((v,i)=>[map.X(i),map.Y(v)]);
+    series('mainPlot',initial,'#6B6B6B',2,'6 4');
+    series('mainPlot',current,'#1F66E5',3);
+    current.forEach(p=>dot('mainPlot',p[0],p[1],'#1F66E5',3));
+    const target=[m.target,m.target+1,m.target+2];
+    target.forEach(j=>{
+      svg('mainPlot','rect',{
+        x:map.X(j)-5,y:map.Y(1)-6,width:10,height:12,
+        fill:'none',stroke:'#111','stroke-width':2
+      });
+    });
+    $('mainTitle').textContent='Transported pulse';
+    $('mainLegend').innerHTML=
+      '<span><i class="swatch" style="background:#6B6B6B"></i>Initial</span>'+
+      '<span><i class="swatch" style="background:#1F66E5"></i>Current</span>'+
+      '<span>□ Target cells</span>';
+    $('mainCaption').textContent='Mass sum: '+fmt(result.mass,6)+
+      '; bounded: '+(result.bounded?'yes':'no')+
+      '; peak height: '+fmt(result.max,5)+'.';
+    $('mainPlot').setAttribute('aria-label',
+      'The initial pulse and current upwind cell values, with target-cell outlines.');
+
+    const map2=plotBase('secondaryPlot',0,1.5,0,1.5,
+      'Courant number C (1)','Peak cell value (1)');
+    const curve=[];
+    for(let i=0;i<=75;i++){
+      const c=i*0.02;
+      const r=C.upwind_advect({
+        u0:m.u0,courant:c,steps:m.steps
+      });
+      if(!r.error&&Number.isFinite(r.max))
+        curve.push([map2.X(c),map2.Y(r.max)]);
+    }
+    series('secondaryPlot',curve,'#FF6B3D',3);
+    dot('secondaryPlot',map2.X(Courant),
+      map2.Y(result.max),'#FFDD00',7);
+    $('secondaryTitle').textContent='Peak height versus C';
+    $('secondaryLegend').innerHTML=
+      '<span><i class="swatch" style="background:#FF6B3D"></i>Peak</span>'+
+      '<span>● Your C</span>';
+    $('secondaryCaption').textContent=
+      'Changing C changes transport, numerical diffusion and, outside the stability interval, overshoot.';
+    $('secondaryPlot').setAttribute('aria-label',
+      'Peak transported pulse height plotted against Courant number with a current marker.');
+  }
+  function richardsonPlot(){
+    const m=model;
+    const p=choice/100,f=secondChoice/1000;
+    const map=plotBase('mainPlot',0,0.45,0,
+      Math.max(0.1,m.e1*1.2),
+      'Grid spacing h (m)','Absolute error (quantity units)');
+    const empirical=[];
+    for(let i=1;i<=40;i++){
+      const h=0.01+i*0.01;
+      const y=m.e2*Math.pow(h/m.h2,p);
+      empirical.push([map.X(h),map.Y(y)]);
+    }
+    series('mainPlot',empirical,'#1F66E5',3);
+    dot('mainPlot',map.X(m.h1),map.Y(m.e1),'#FF6B3D',7);
+    dot('mainPlot',map.X(m.h2),map.Y(m.e2),'#FF6B3D',7);
+    $('mainTitle').textContent='Error scaling across grids';
+    $('mainLegend').innerHTML=
+      '<span><i class="swatch" style="background:#1F66E5"></i>Candidate hᵖ</span>'+
+      '<span>● Measured errors</span>';
+    $('mainCaption').textContent=
+      'Your candidate order p = '+p.toFixed(2)+'.';
+    $('mainPlot').setAttribute('aria-label',
+      'Measured refinement errors and a candidate power-law error curve.');
+
+    const ymin=Math.min(m.f1,m.f2,f)-0.2;
+    const ymax=Math.max(m.f1,m.f2,f)+0.2;
+    const map2=plotBase('secondaryPlot',0,0.45,ymin,ymax,
+      'Grid spacing h (m)','Approximation f (quantity units)');
+    const interpolation=[
+      [map2.X(0),map2.Y(f)],
+      [map2.X(m.h2),map2.Y(m.f2)],
+      [map2.X(m.h1),map2.Y(m.f1)]
+    ];
+    series('secondaryPlot',interpolation,'#1F66E5',3);
+    dot('secondaryPlot',map2.X(0),map2.Y(f),'#FFDD00',8);
+    dot('secondaryPlot',map2.X(m.h1),map2.Y(m.f1),'#FF6B3D',6);
+    dot('secondaryPlot',map2.X(m.h2),map2.Y(m.f2),'#FF6B3D',6);
+    $('secondaryTitle').textContent='Extrapolation to h = 0';
+    $('secondaryLegend').innerHTML=
+      '<span><i class="swatch" style="background:#1F66E5"></i>Candidate extrapolation</span>'+
+      '<span>● Your f*</span>';
+    $('secondaryCaption').textContent=
+      'Your extrapolated limit: '+fmt(f,5)+' quantity units.';
+    $('secondaryPlot').setAttribute('aria-label',
+      'Coarse and fine approximations plotted against grid size with the proposed zero-spacing estimate.');
+  }
+  function pendulumPeriod(){
+    return C.exact_pendulum_period({
+      L_m:model.L,g_m_s2:9.81,
+      theta0_rad:choice/100,omega0_rad_s:0
+    });
+  }
+  function pendulumData(){
+    const m=model;
+    const dt=m.dtValues[dtIndex];
+    const steps=Math.round(m.T/dt);
+    const angle=choice/100;
+    const e=[],r=[],ee=[],rr=[];
+    for(let i=0;i<=steps;i++){
+      const v=C.euler_rk4_compare_run({
+        L_m:m.L,g_m_s2:9.81,
+        theta0_rad:angle,omega0_rad_s:0,
+        dt_s:dt,steps:i
+      });
+      const t=i*dt;
+      e.push([t,v.euler_theta_rad]);
+      r.push([t,v.rk4_theta_rad]);
+      ee.push([t,v.euler_energy_ratio]);
+      rr.push([t,v.rk4_energy_ratio]);
+    }
+    return {e,r,ee,rr,dt,steps};
+  }
+  function pendulumPlot(){
+    const m=model;
+    const period=pendulumPeriod();
+    const data=pendulumData();
+    const raw=[...data.e,...data.r].map(v=>v[1]);
+    const ybound=Math.max(0.2,...raw.map(Math.abs))*1.15;
+    const map=plotBase('mainPlot',0,m.T,-ybound,ybound,
+      'Time t (s)','Angle θ (rad)');
+    series('mainPlot',
+      data.e.map(v=>[map.X(v[0]),map.Y(v[1])]),
+      '#FF6B3D',3);
+    series('mainPlot',
+      data.r.map(v=>[map.X(v[0]),map.Y(v[1])]),
+      '#1F66E5',3);
+    const selected=method==='euler'?data.e:data.r;
+    const last=selected[selected.length-1];
+    dot('mainPlot',map.X(last[0]),map.Y(last[1]),'#FFDD00',7);
+    $('mainTitle').textContent='Nonlinear angular displacement';
+    $('mainLegend').innerHTML=
+      '<span><i class="swatch" style="background:#FF6B3D"></i>Euler</span>'+
+      '<span><i class="swatch" style="background:#1F66E5"></i>RK4</span>'+
+      '<span>● Selected final state</span>';
+    $('mainCaption').textContent=
+      'Exact period increase at chosen release angle: '+
+      (period.period_ratio===null?'undefined':
+        fmt(100*(period.period_ratio-1),6)+'%')+'.';
+    $('mainPlot').setAttribute('aria-label',
+      'Time series of nonlinear pendulum angle for Euler and RK4 at the selected step size.');
+
+    const numbers=[...data.ee,...data.rr].map(v=>v[1])
+      .filter(Number.isFinite);
+    const lo=Math.min(0.95,...numbers),hi=Math.max(1.05,...numbers);
+    const map2=plotBase('secondaryPlot',0,m.T,lo,hi,
+      'Time t (s)','Energy ratio E/E₀ (1)');
+    line('secondaryPlot',map2.X(0),map2.Y(1),
+      map2.X(m.T),map2.Y(1),'#111',2,'6 4');
+    for(const [values,color] of [
+      [data.ee,'#FF6B3D'],[data.rr,'#1F66E5']
+    ]){
+      series('secondaryPlot',
+        values.filter(v=>Number.isFinite(v[1]))
+          .map(v=>[map2.X(v[0]),map2.Y(v[1])]),color,3);
+    }
+    const chosenData=method==='euler'?data.ee:data.rr;
+    const final=chosenData[chosenData.length-1][1];
+    if(Number.isFinite(final))
+      dot('secondaryPlot',map2.X(m.T),map2.Y(final),'#FFDD00',7);
+    $('secondaryTitle').textContent='Mechanical energy drift';
+    $('secondaryLegend').innerHTML=
+      '<span><i class="swatch" style="background:#FF6B3D"></i>Euler</span>'+
+      '<span><i class="swatch" style="background:#1F66E5"></i>RK4</span>'+
+      '<span>┄ Conserved energy</span>';
+    $('secondaryCaption').textContent=
+      'Chosen method: '+method.toUpperCase()+
+      '; final relative drift: '+
+      (Number.isFinite(final)?fmt(Math.abs(final-1)*100,5)+'%':'undefined')+'.';
+    $('secondaryPlot').setAttribute('aria-label',
+      'Energy ratio versus time for both numerical schemes, with unit energy reference and selected final marker.');
+  }
+  function live(){
+    if(model.type===0)advectionPlot();
+    else if(model.type===1)richardsonPlot();
+    else pendulumPlot();
+  }
+  function check(){
+    if(locked)return;
+    tries++;
+    const m=model;
+    let valid=false,explanation='';
+    if(m.type===0){
+      const Cval=choice/100;
+      const result=C.upwind_advect({
+        u0:m.u0,courant:Cval,steps:m.steps
+      });
+      valid=result.bounded&&result.u.every((v,i)=>{
+        const expected=i>=m.target&&i<m.target+3?1:0;
+        return Math.abs(v-expected)<1e-10;
+      });
+      explanation=valid?
+        'The pulse advances one cell per step with no numerical smearing.':
+        !result.bounded?
+          'The selected Courant number allows overshoot beyond the initial bounds.':
+          'The pulse does not yet match the requested target cells and height.';
+    }else if(m.type===1){
+      const p=choice/100, f=secondChoice/1000;
+      const dp=Math.abs(p-m.ans.observed_order);
+      const df=Math.abs(f-m.ans.extrapolated);
+      valid=dp<=0.00500001&&df<=0.00050001;
+      explanation=valid?
+        'Both the error exponent and zero-spacing limit are consistent.':
+        'Order difference: '+fmt(dp,5)+
+        '; extrapolated-value difference: '+fmt(df,5)+' quantity units.';
+    }else{
+      const angle=choice/100;
+      const period=C.exact_pendulum_period({
+        L_m:m.L,g_m_s2:9.81,
+        theta0_rad:angle,omega0_rad_s:0
+      });
+      const percentage=period.period_ratio===null?
+        null:100*(period.period_ratio-1);
+      const match=percentage!==null&&
+        Math.abs(percentage-m.percentage)<=0.00001;
+      const dt=m.dtValues[dtIndex];
+      const r=(method==='euler'?C.euler_run:C.rk4_run)({
+        L_m:m.L,g_m_s2:9.81,
+        theta0_rad:angle,omega0_rad_s:0,
+        dt_s:dt,steps:Math.round(m.T/dt)
+      });
+      const drift=r.energy_ratio===null?
+        null:Math.abs(r.energy_ratio-1);
+      valid=match&&drift!==null&&drift<=m.band+1e-12;
+      explanation=valid?
+        'The exact finite-amplitude period matches, and the numerical energy stays within the required final-drift band.':
+        !match?
+          'The period percentage differs by '+
+          fmt(Math.abs(percentage-m.percentage),5)+
+          ' percentage points.':
+          'Final relative energy drift exceeds the permitted band. Try changing method or step size.';
+    }
+    if(valid){
+      locked=true;
+      const points=hinted?50:tries===1?100:75;
+      score+=points;
+      $('scoreTag').textContent='Score '+score;
+      $('feedback').className='feedback good';
+      $('feedback').textContent='✓ Correct! +'+points+
+        ' points. '+explanation;
+      $('check').hidden=true;
+      $('next').hidden=false;
+      $('next').textContent=round===5?'See stars ★':'Next →';
+      $('hint').disabled=true;
+    }else{
+      $('feedback').className='feedback bad';
+      $('feedback').textContent=explanation;
+    }
+  }
+  function hint(){
+    if(locked)return;
+    hinted=true;$('hint').disabled=true;
+    $('feedback').className='feedback';
+    $('feedback').textContent=model.type===0?
+      'The update at C = 1 copies the upstream cell into the next cell. Check boundedness too.':
+      model.type===1?
+      'Use the error ratio to obtain p, then substitute p into the Richardson expression.':
+      'Match the finite-angle period first; then compare the methods using the energy-ratio plot.';
+  }
+  function finish(){
+    $('game').hidden=true;$('game').style.display='none';
+    $('end').hidden=false;
+    const n=score>=525?3:score>=375?2:1;
+    $('stars').textContent='★'.repeat(n)+'☆'.repeat(3-n);
+    $('finalScore').textContent=score+' / 600 points';
+  }
+  function restart(){
+    round=0;score=0;seed=(seed+2293)>>>0;
+    $('end').hidden=true;
+    $('game').hidden=false;$('game').style.display='';
+    newRound();
+  }
+  $('check').addEventListener('click',check);
+  $('hint').addEventListener('click',hint);
+  $('next').addEventListener('click',()=>{round++;newRound();});
+  $('again').addEventListener('click',restart);
+  restart();
+})();
+</script>
+</body>
+</html>
