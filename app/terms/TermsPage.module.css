@@ -1,0 +1,5 @@
+/* Scoped copy of the <style> block in CUSTOMER_TERMS_v1.0.html (body rules applied to .legal). */
+.legal{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem;line-height:1.6;color:#222}
+.legal h1{font-size:1.8rem;font-weight:700} .legal h2{font-size:1.25rem;font-weight:600;margin-top:2rem;border-top:1px solid #ddd;padding-top:1rem} .legal h3{font-size:1.05rem}
+.legal p{margin:.75rem 0} .legal ul{list-style:disc;margin:.75rem 0 .75rem 1.5rem}
+.legal table{border-collapse:collapse;margin:1rem 0;width:100%} .legal th,.legal td{border:1px solid #ccc;padding:.4rem .6rem;text-align:left;vertical-align:top} .legal th{background:#f4f4f4}

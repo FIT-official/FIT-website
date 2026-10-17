@@ -110,7 +110,7 @@ function PrivacyPage() {
                     <h3 className="text-textColor text-sm">Contact Information</h3>
                     <p>If you have questions or wish to exercise your rights, contact us at:</p>
                     <div className='w-full flex items-center'>
-                        <p><b>Fix It Today Pte. Ltd.</b><br />Email: <a href="mailto:fixittoday.contact@gmail.com" className=" underline">fixittoday.contact@gmail.com</a></p>
+                        <p><b>Fix It Today Pte. Ltd., UEN 53370270D</b><br />Email: <a href="mailto:fixittoday.contact@gmail.com" className=" underline">fixittoday.contact@gmail.com</a></p>
                     </div>
                 </div>
             </div>
