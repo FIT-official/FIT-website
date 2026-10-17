@@ -1,0 +1,1504 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chance and Queues | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+button,input,summary{font:inherit}
+button,input,summary,[role="button"]{-webkit-tap-highlight-color:transparent;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid var(--fit-focus);outline-offset:3px}
+.shell{max-width:1320px;margin:auto;padding:20px 16px 42px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.badge{border:2px solid #111;background:var(--lvl-poly);color:var(--lvl-poly-on);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800;text-transform:uppercase}
+.pill{border:2px solid #111;border-radius:999px;background:white;padding:8px 14px;font-weight:800}
+.score{margin-left:auto}
+h1{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-.045em;line-height:1.12;margin:8px 0}
+h2{font-size:23px;font-weight:800;margin:0 0 10px}
+p{margin:8px 0}
+.subtitle{font-weight:600;color:var(--fit-ink-2);max-width:780px}
+.layout{display:grid;gap:18px;margin-top:20px}
+.card{background:white;border:2px solid #111;border-radius:28px;box-shadow:var(--sh-2);padding:18px;min-width:0}
+.stage{background:var(--lvl-poly-tint)}
+.chartBox{border:2px solid #111;border-radius:16px;background:white;overflow:hidden}
+svg{display:block;width:100%;height:auto}
+.diagram{max-height:270px}
+.plot{min-height:220px}
+.controls{display:grid;gap:12px;margin-top:14px}
+.control{border:2px solid #111;background:var(--fit-sunken);border-radius:18px;padding:12px}
+.control label{font-size:15px;font-weight:800;display:block}
+.control output{display:block;font-weight:800;font-size:27px;font-variant-numeric:tabular-nums;margin:8px 0}
+.steps{display:flex;flex-wrap:wrap;gap:8px}
+button{min-width:44px;min-height:44px;border:2px solid #111;border-radius:999px;background:white;font-weight:800;cursor:pointer;padding:8px 16px;transition:transform .12s}
+button:active{transform:translateY(2px)}
+button:disabled{opacity:.4;cursor:default}
+button.primary{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2);min-height:54px}
+button.primary:active{box-shadow:var(--sh-1);transform:translateY(2px)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+input[type=range]{width:100%;height:44px;accent-color:var(--lvl-poly);cursor:pointer}
+.feedback{border:2px solid #111;border-radius:16px;background:white;padding:12px;font-weight:700;min-height:48px;margin-top:14px}
+.feedback.good{background:#E7F8EC}
+.feedback.bad{background:#FFF0EF}
+details{margin-top:16px;border:2px solid #111;border-radius:16px;background:white;padding:12px}
+summary{cursor:pointer;font-weight:800;min-height:44px;display:flex;align-items:center}
+.maths{font-size:14px;line-height:1.7}
+.concept{display:flex;gap:14px;align-items:center;margin-top:18px;background:var(--fit-sunken);border:2px solid #111;border-radius:18px;padding:12px}
+.concept svg{width:120px;flex:none}
+.small{color:var(--fit-ink-3);font-size:13px}
+.end{text-align:center;padding:30px 12px}
+.stars{font-size:55px;letter-spacing:8px;color:#E3A300}
+.metric{font-weight:800;font-variant-numeric:tabular-nums}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.card{padding:24px}}
+@media(max-width:440px){.score{margin-left:0}.steps button{flex:1;padding:8px 5px}.shell{padding-left:12px;padding-right:12px}.card{padding:14px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="top">
+    <span class="badge">Polytechnic</span>
+    <span class="pill" id="round">Round 1/6</span>
+    <span class="pill score" id="score">Score 0</span>
+  </div>
+  <h1>Chance and Queues</h1>
+  <p class="subtitle">See how random proportions settle with more trials, and how a busy cashier creates a waiting line.</p>
+  <div id="game" class="layout">
+    <section class="card stage">
+      <h2 id="heading">Loading challenge</h2>
+      <p id="question"></p>
+      <svg id="diagram" class="diagram" viewBox="0 0 480 240" role="img" aria-label="Simulation scene"></svg>
+      <div class="concept">
+        <svg viewBox="0 0 120 85" role="img" aria-label="A sample growing towards a stable average">
+          <rect x="4" y="4" width="112" height="77" rx="12" fill="#fff" stroke="#111" stroke-width="3"/>
+          <path d="M12 45H108" stroke="#111" stroke-width="2" stroke-dasharray="5 5"/>
+          <path d="M12 70L29 18L45 62L60 36L78 50L97 43L108 45" fill="none" stroke="#FF6B3D" stroke-width="4"/>
+        </svg>
+        <p><strong>Big samples, calmer averages.</strong><br><span class="small">Random results still fluctuate; larger samples generally reduce their uncertainty.</span></p>
+      </div>
+      <details>
+        <summary>The maths</summary>
+        <div class="maths" id="maths"></div>
+      </details>
+    </section>
+    <section class="card">
+      <h2>Live experiment</h2>
+      <div class="chartBox">
+        <svg id="plot" class="plot" viewBox="0 0 540 320" role="img" aria-label="Live quantitative simulation plot"></svg>
+      </div>
+      <div id="readout" class="small" style="margin-top:10px" aria-live="polite"></div>
+      <div id="controls" class="controls"></div>
+      <div class="actions">
+        <button id="hint">Hint −25</button>
+        <button id="check" class="primary">Check answer</button>
+        <button id="next" hidden>Next round →</button>
+      </div>
+      <div id="feedback" class="feedback" aria-live="polite">Adjust the controls, then check your solution.</div>
+    </section>
+  </div>
+  <div id="end" class="card end" hidden>
+    <h2>Challenge complete!</h2>
+    <div class="stars" id="stars" aria-label="Stars earned"></div>
+    <p id="result"></p>
+    <button class="primary" id="again">Play again</button>
+  </div>
+</main>
+<script>
+/* FIT-CALC-BEGIN x2_random_sim */
+const FITCalcX2 = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+  const G = 6.674e-11;
+  const TAU = 2 * Math.PI;
+  const MAX_DRAWS = 10000;
+  const MAX_STATES = 5;
+  const MAX_CUSTOMERS = 10000;
+
+  // FIT integration (17:46 error-style ruling): UPPER codes -> schema class + lower_snake reason.
+  const ERROR_MAP = {
+    ROWS_MUST_SUM_TO_1: { error: 'ConstraintViolation', reason: 'rows_must_sum_to_1' },
+    INVALID_SERVERS: { error: 'ConstraintViolation', reason: 'servers_out_of_range_1_3' },
+    INVALID_PROBABILITY: { error: 'ConstraintViolation', reason: 'p_out_of_range_0_1' },
+    TOO_MANY_DRAWS: { error: 'ConstraintViolation', reason: 'draws_out_of_range_1_10000' },
+    STATIONARY_NOT_UNIQUE: { error: 'MathError', reason: 'stationary_distribution_not_unique' },
+    MathError: { error: 'MathError', reason: 'non_finite_result' },
+    DRAW_CAP_REACHED: { error: 'RuntimeError', reason: 'draw_cap_reached' }
+  };
+  const error = code => ERROR_MAP[code] ? { ...ERROR_MAP[code] }
+    : { error: 'ConstraintViolation', reason: code.toLowerCase() };
+  const finite = x => typeof x === 'number' && Number.isFinite(x);
+  const integer = x => Number.isSafeInteger(x);
+  const probability = x => finite(x) && x >= 0 && x <= 1;
+  const validSeed = x => integer(x) && x >= 0 && x <= 4294967295;
+  const seedError = x => validSeed(x) ? null : error('INVALID_SEED');
+  const numericError = (...xs) =>
+    xs.every(finite) ? null : error('INVALID_NUMBER');
+
+  function createRng(seed) {
+    let a = seed >>> 0;
+    return function next() {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function normalDraw(rng, mean, sd) {
+    const u1 = rng();
+    const u2 = rng();
+    return mean + sd *
+      Math.sqrt(-2 * Math.log(1 - u1)) * Math.cos(TAU * u2);
+  }
+
+  function sampleDist(rng, dist, params) {
+    const p = params || {};
+    if (dist === 'uniform')
+      return p.a + (p.b - p.a) * rng();
+    if (dist === 'exponential')
+      return -Math.log(1 - rng()) / p.rate;
+    if (dist === 'normal')
+      return normalDraw(rng, p.mean, p.sd);
+    if (dist === 'bernoulli')
+      return rng() < p.p ? 1 : 0;
+    if (dist === 'binomial') {
+      let count = 0;
+      for (let i = 0; i < p.n; i++)
+        if (rng() < p.p) count++;
+      return count;
+    }
+    if (dist === 'triangular') {
+      const u = rng();
+      const split = (p.c - p.a) / (p.b - p.a);
+      return u < split
+        ? p.a + Math.sqrt(u * (p.b - p.a) * (p.c - p.a))
+        : p.b - Math.sqrt((1 - u) * (p.b - p.a) * (p.b - p.c));
+    }
+    return null;
+  }
+
+  function distributionError(dist, params) {
+    const p = params;
+    if (!p || typeof p !== 'object') return 'INVALID_PARAMETERS';
+    switch (dist) {
+      case 'uniform':
+        if (!finite(p.a) || !finite(p.b)) return 'INVALID_NUMBER';
+        return p.b > p.a ? null : 'INVALID_BOUNDS';
+      case 'exponential':
+        return finite(p.rate) && p.rate > 0
+          ? null : 'RATE_MUST_BE_POSITIVE';
+      case 'normal':
+        return finite(p.mean) && finite(p.sd) && p.sd >= 0
+          ? null : 'INVALID_NORMAL_PARAMETERS';
+      case 'bernoulli':
+        return probability(p.p) ? null : 'INVALID_PROBABILITY';
+      case 'binomial':
+        if (!integer(p.n) || p.n < 0) return 'INVALID_TRIAL_COUNT';
+        return probability(p.p) ? null : 'INVALID_PROBABILITY';
+      case 'triangular':
+        if (![p.a, p.c, p.b].every(finite)) return 'INVALID_NUMBER';
+        return p.a < p.b && p.c >= p.a && p.c <= p.b
+          ? null : 'INVALID_BOUNDS';
+      default:
+        return 'UNKNOWN_DISTRIBUTION';
+    }
+  }
+
+  function drawCost(dist, params) {
+    if (dist === 'normal') return 2;
+    if (dist === 'binomial') return params.n;
+    return 1;
+  }
+
+  function checkCount(n, minimum = 1) {
+    if (!integer(n) || n < minimum) return error('INVALID_COUNT');
+    if (n > MAX_DRAWS) return error('TOO_MANY_DRAWS');
+    return null;
+  }
+
+  function moments(values) {
+    const n = values.length;
+    if (!n) return { mean: 0, variance: 0, sd: 0 };
+    let mean = 0;
+    let m2 = 0;
+    values.forEach((x, i) => {
+      const delta = x - mean;
+      mean += delta / (i + 1);
+      m2 += delta * (x - mean);
+    });
+    const variance = m2 / n;
+    return { mean, variance, sd: Math.sqrt(Math.max(0, variance)) };
+  }
+
+  function histogramOf(values) {
+    if (!values.length) return [];
+    const lo = Math.min(...values);
+    const hi = Math.max(...values);
+    const bins = 12;
+    const width = hi > lo ? (hi - lo) / bins : 1;
+    const counts = Array(bins).fill(0);
+    values.forEach(v => {
+      const i = Math.min(bins - 1, Math.floor((v - lo) / width));
+      counts[Math.max(0, i)]++;
+    });
+    return counts.map((count, i) => ({
+      low: lo + i * width,
+      high: lo + (i + 1) * width,
+      count,
+      proportion: count / values.length
+    }));
+  }
+
+  /**
+   * Known answer: createRng(1) gives, in order:
+   * 0.6270739405881613, 0.002735721180215478,
+   * 0.5274470399599522.
+   * Input: unsigned 32-bit seed. Output: generator yielding [0,1).
+   * Algorithm: exact mulberry32; one state update per draw.
+   * Assumption: deterministic 32-bit integer arithmetic.
+   * Errors: none; simulation entry points validate their seeds.
+   */
+
+  /**
+   * Known answer: E[inside/n] = pi/4; E[estimate] = pi.
+   * Inputs: seed (uint32), n (number of point pairs, 1..10000).
+   * Outputs: estimate (dimensionless), inside (count), n (count).
+   * Draw order: x then y, each uniform(-1,1), per point.
+   * Assumption: independent uniform points in a square.
+   * Errors: INVALID_SEED, INVALID_COUNT, TOO_MANY_DRAWS.
+   */
+  function monteCarloPi({ seed, n }) {
+    const bad = seedError(seed) || checkCount(n);
+    if (bad) return bad;
+    const rng = createRng(seed);
+    let inside = 0;
+    for (let i = 0; i < n; i++) {
+      const x = 2 * rng() - 1;
+      const y = 2 * rng() - 1;
+      if (x * x + y * y <= 1) inside++;
+    }
+    return { estimate: 4 * inside / n, inside, n };
+  }
+
+  /**
+   * Known answer: fair six-sided die, target 3, E[proportion]=1/6.
+   * Inputs: seed (uint32), n (throws), faces (count, default 6),
+   * target (face, integer in 1..faces).
+   * Outputs: proportion, expected (dimensionless).
+   * Draw order: one uniform draw per throw, face=floor(u*faces)+1.
+   * Assumption: fair independent faces.
+   * Errors: INVALID_SEED, INVALID_COUNT, INVALID_FACES,
+   * INVALID_TARGET, TOO_MANY_DRAWS.
+   */
+  function diceProportion({ seed, n, faces = 6, target }) {
+    const bad = seedError(seed) || checkCount(n);
+    if (bad) return bad;
+    if (!integer(faces) || faces < 2 || faces > 100)
+      return error('INVALID_FACES');
+    if (!integer(target) || target < 1 || target > faces)
+      return error('INVALID_TARGET');
+    const rng = createRng(seed);
+    let hits = 0;
+    for (let i = 0; i < n; i++)
+      if (Math.floor(rng() * faces) + 1 === target) hits++;
+    return { proportion: hits / n, expected: 1 / faces };
+  }
+
+  /**
+   * Known answer: uniform(0,2) has population mean 1;
+   * Bernoulli(0.5) has population mean 0.5.
+   * Inputs: seed (uint32), n (sample count), dist (name), params
+   * (uniform {a,b}, exponential {rate}, normal {mean,sd},
+   * bernoulli {p}, binomial {n,p}, triangular {a,c,b}).
+   * Outputs: means[] (running arithmetic means, sample units).
+   * Draw order: successive samples; normal uses two consecutive
+   * uniforms with Box-Muller cosine and discards the sine sample;
+   * binomial uses n consecutive Bernoulli comparisons; triangular
+   * uses one inverse-CDF draw; exponential uses -ln(1-u)/rate.
+   * Errors: INVALID_SEED, INVALID_COUNT, TOO_MANY_DRAWS,
+   * and distribution-specific validation errors.
+   */
+  function runningMean({ seed, n, dist, params }) {
+    const bad = seedError(seed) || checkCount(n);
+    if (bad) return bad;
+    const de = distributionError(dist, params);
+    if (de) return error(de);
+    if (n * drawCost(dist, params) > MAX_DRAWS)
+      return error('TOO_MANY_DRAWS');
+    const rng = createRng(seed);
+    const means = [];
+    let mean = 0;
+    for (let i = 0; i < n; i++) {
+      const v = sampleDist(rng, dist, params);
+      if (!finite(v)) return error('MathError');
+      mean += (v - mean) / (i + 1);
+      means.push(mean);
+    }
+    return { means };
+  }
+
+  function validateP(P) {
+    if (!Array.isArray(P) || P.length < 1)
+      return error('INVALID_MATRIX');
+    if (P.length > MAX_STATES) return error('TOO_MANY_STATES');
+    if (P.some(row => !Array.isArray(row) || row.length !== P.length))
+      return error('INVALID_MATRIX');
+    for (const row of P) {
+      if (row.some(x => !probability(x)))
+        return error('INVALID_PROBABILITY');
+      if (Math.abs(row.reduce((a, b) => a + b, 0) - 1) > 1e-9)
+        return error('ROWS_MUST_SUM_TO_1');
+    }
+    return null;
+  }
+
+  function validateDist(d, n) {
+    if (!Array.isArray(d) || d.length !== n)
+      return error('INVALID_DISTRIBUTION');
+    if (d.some(x => !probability(x)))
+      return error('INVALID_DISTRIBUTION');
+    if (Math.abs(d.reduce((a, b) => a + b, 0) - 1) > 1e-9)
+      return error('INVALID_DISTRIBUTION');
+    return null;
+  }
+
+  function multiplyDist(P, dist) {
+    return P.map((_, j) =>
+      dist.reduce((sum, x, i) => sum + x * P[i][j], 0));
+  }
+
+  /**
+   * Known answer: [1,0] times [[0.9,0.1],[0.2,0.8]]
+   * becomes [0.9,0.1].
+   * Inputs: P (dimensionless row-stochastic matrix), dist
+   * (dimensionless initial probability row vector).
+   * Output: dist (next-step probability vector).
+   * Assumption: finite time-homogeneous Markov chain.
+   * Errors: INVALID_MATRIX, TOO_MANY_STATES, INVALID_PROBABILITY,
+   * ROWS_MUST_SUM_TO_1, INVALID_DISTRIBUTION.
+   */
+  function markovStep({ P, dist }) {
+    const bad = validateP(P) || validateDist(dist, P.length);
+    if (bad) return bad;
+    return { dist: multiplyDist(P, dist) };
+  }
+
+  /**
+   * Known answer: for P=[[0.9,0.1],[0.2,0.8]],
+   * dist0=[1,0], dists[1]=[0.9,0.1].
+   * Inputs: P (transition probabilities), dist0 (probabilities),
+   * steps (non-negative integer, <=10000).
+   * Output: dists[] including the initial distribution at index 0.
+   * Assumption: fixed transition matrix each discrete step.
+   * Errors: matrix/distribution errors, INVALID_COUNT,
+   * TOO_MANY_DRAWS (work cap).
+   */
+  function markovDistribution({ P, dist0, steps }) {
+    const bad = validateP(P) || validateDist(dist0, P.length);
+    if (bad) return bad;
+    if (!integer(steps) || steps < 0) return error('INVALID_COUNT');
+    if (steps > MAX_DRAWS) return error('TOO_MANY_DRAWS');
+    const dists = [dist0.slice()];
+    for (let i = 0; i < steps; i++)
+      dists.push(multiplyDist(P, dists[i]));
+    return { dists };
+  }
+
+  /**
+   * Known answer: P=[[0.9,0.1],[0.2,0.8]]
+   * gives pi=[2/3,1/3], within floating-point precision.
+   * Input: P (row-stochastic matrix of at most 5 states).
+   * Output: pi (unique stationary probability vector).
+   * Method: solve (P^T-I)pi=0 with sum(pi)=1 by elimination.
+   * Assumption: a unique stationary distribution exists;
+   * periodicity does not itself invalidate stationarity.
+   * Errors: matrix validation errors, MathError for a singular
+   * stationary system or numerically invalid solution.
+   */
+  function markovStationary({ P }) {
+    const bad = validateP(P);
+    if (bad) return bad;
+    const n = P.length;
+    const A = Array.from({ length: n }, (_, i) =>
+      Array.from({ length: n + 1 }, (_, j) =>
+        i === n - 1 ? (j === n ? 1 : 1) :
+        j === n ? 0 : P[j][i] - (i === j ? 1 : 0)));
+    for (let col = 0; col < n; col++) {
+      let pivot = col;
+      for (let r = col + 1; r < n; r++)
+        if (Math.abs(A[r][col]) > Math.abs(A[pivot][col]))
+          pivot = r;
+      if (Math.abs(A[pivot][col]) < 1e-12)
+        return error('STATIONARY_NOT_UNIQUE');
+      [A[col], A[pivot]] = [A[pivot], A[col]];
+      const div = A[col][col];
+      for (let j = col; j <= n; j++) A[col][j] /= div;
+      for (let r = 0; r < n; r++) {
+        if (r === col) continue;
+        const factor = A[r][col];
+        for (let j = col; j <= n; j++)
+          A[r][j] -= factor * A[col][j];
+      }
+    }
+    const pi = A.map(row => row[n]);
+    if (pi.some(x => !finite(x) || x < -1e-9))
+      return error('MathError');
+    const cleaned = pi.map(x => Math.max(0, x));
+    const total = cleaned.reduce((a, b) => a + b, 0);
+    if (!(total > 0)) return error('MathError');
+    return { pi: cleaned.map(x => x / total) };
+  }
+
+  /**
+   * Known answer: P=[[1,0],[0,1]], start=0 gives only state 0.
+   * Inputs: seed (uint32), P (transition matrix), start (zero-based
+   * state index), steps (number of transitions, <=10000).
+   * Output: states[] of length steps+1, including start.
+   * Draw order: one uniform per transition; select the first state
+   * whose cumulative row probability exceeds the draw.
+   * Errors: matrix validation errors, INVALID_SEED, INVALID_START,
+   * INVALID_COUNT, TOO_MANY_DRAWS.
+   */
+  function markovSimulate({ seed, P, start, steps }) {
+    const bad = seedError(seed) || validateP(P);
+    if (bad) return bad;
+    if (!integer(start) || start < 0 || start >= P.length)
+      return error('INVALID_START');
+    const countError = checkCount(steps, 0);
+    if (countError) return countError;
+    const rng = createRng(seed);
+    let state = start;
+    const states = [state];
+    for (let i = 0; i < steps; i++) {
+      const u = rng();
+      let cumulative = 0;
+      let next = P.length - 1;
+      for (let j = 0; j < P.length; j++) {
+        cumulative += P[state][j];
+        if (u < cumulative) { next = j; break; }
+      }
+      state = next;
+      states.push(state);
+    }
+    return { states };
+  }
+
+  /**
+   * Known answer: Poisson(k=2, mean=2) = 2e^-2
+   * = 0.2706705664732254.
+   * Inputs: k (non-negative integer, event count), mean
+   * (dimensionless expected number of arrivals).
+   * Outputs: p (probability), mean and var (event counts),
+   * P_at_least_1 (probability).
+   * Assumption: independent Poisson events in a fixed interval.
+   * Errors: INVALID_COUNT, INVALID_MEAN, MathError.
+   */
+  function poissonPmf({ k, mean }) {
+    if (!integer(k) || k < 0 || k > 10000)
+      return error('INVALID_COUNT');
+    if (!finite(mean) || mean < 0) return error('INVALID_MEAN');
+    if (mean === 0)
+      return { p: k === 0 ? 1 : 0, mean, var: mean, P_at_least_1: 0 };
+    let logFactorial = 0;
+    for (let i = 2; i <= k; i++) logFactorial += Math.log(i);
+    const p = Math.exp(k * Math.log(mean) - mean - logFactorial);
+    return finite(p)
+      ? { p, mean, var: mean, P_at_least_1: -Math.expm1(-mean) }
+      : error('MathError');
+  }
+
+  /**
+   * Known answer: the mean inter-arrival gap at 2 min^-1
+   * is 0.5 min; expected count in 3 min is 6.
+   * Inputs: seed (uint32), rate_per_min (min^-1),
+   * window_min (min).
+   * Outputs: times[] (arrival times in min), count.
+   * Draw order: exponential gaps -ln(1-u)/rate until first
+   * arrival beyond the window; each attempted gap uses one draw.
+   * Assumption: homogeneous Poisson process.
+   * Errors: INVALID_SEED, RATE_MUST_BE_POSITIVE,
+   * INVALID_WINDOW, TOO_MANY_DRAWS, MathError.
+   */
+  function poissonArrivals({ seed, rate_per_min, window_min }) {
+    const bad = seedError(seed);
+    if (bad) return bad;
+    if (!finite(rate_per_min) || rate_per_min <= 0)
+      return error('RATE_MUST_BE_POSITIVE');
+    if (!finite(window_min) || window_min < 0)
+      return error('INVALID_WINDOW');
+    const rng = createRng(seed);
+    const times = [];
+    let t = 0;
+    for (let i = 0; i < MAX_DRAWS; i++) {
+      t += -Math.log(1 - rng()) / rate_per_min;
+      if (!finite(t)) return error('MathError');
+      if (t > window_min) return { times, count: times.length };
+      times.push(t);
+    }
+    return error('DRAW_CAP_REACHED');
+  }
+
+  function ratesError(lambda, mu) {
+    if (!finite(lambda) || lambda < 0)
+      return error('INVALID_ARRIVAL_RATE');
+    if (!finite(mu) || mu <= 0)
+      return error('RATE_MUST_BE_POSITIVE');
+    return null;
+  }
+
+  /**
+   * Known answer: lambda=2 h^-1, mu=3 h^-1:
+   * rho=2/3, W_h=1 h, Lq=4/3, L=2,
+   * Wq_h=2/3 h, P0=1/3.
+   * Inputs: lambda_per_h, mu_per_h (h^-1).
+   * Outputs: stable, rho, L, Lq (customers), W_h,
+   * Wq_h (h), P0 (probability system is empty).
+   * Unstable gives null queue statistics and P0.
+   * Assumption: infinite-capacity FIFO M/M/1 steady state.
+   * Errors: INVALID_ARRIVAL_RATE, RATE_MUST_BE_POSITIVE,
+   * MathError on non-finite computed results.
+   */
+  function mm1({ lambda_per_h, mu_per_h }) {
+    const bad = ratesError(lambda_per_h, mu_per_h);
+    if (bad) return bad;
+    const rho = lambda_per_h / mu_per_h;
+    if (!finite(rho)) return error('MathError');
+    if (rho >= 1)
+      return { stable: false, rho, L: null, Lq: null,
+        W_h: null, Wq_h: null, P0: null };
+    const W_h = 1 / (mu_per_h - lambda_per_h);
+    const Wq_h = rho * W_h;
+    const L = lambda_per_h * W_h;
+    const Lq = lambda_per_h * Wq_h;
+    if (![W_h, Wq_h, L, Lq].every(finite))
+      return error('MathError');
+    return { stable: true, rho, L, Lq, W_h, Wq_h, P0: 1 - rho };
+  }
+
+  /** M/D/1 with deterministic service, Pollaczek-Khinchine. */
+  function md1({ lambda_per_h, mu_per_h, lambda, mu }) {
+    const arrival = lambda_per_h === undefined ? lambda : lambda_per_h;
+    const service = mu_per_h === undefined ? mu : mu_per_h;
+    const bad = ratesError(arrival, service);
+    if (bad) return bad;
+    const rho = arrival / service;
+    if (!finite(rho)) return error('MathError');
+    if (rho >= 1) return { stable: false, rho, L: null, Lq: null,
+      W_h: null, Wq_h: null, W: null, Wq: null };
+    const Lq = rho * rho / (2 * (1 - rho));
+    const Wq_h = rho / (2 * service * (1 - rho));
+    const W_h = Wq_h + 1 / service;
+    const L = Lq + rho;
+    if (![L, Lq, W_h, Wq_h].every(finite)) return error('MathError');
+    return { stable: true, rho, L, Lq, W_h, Wq_h, W: W_h, Wq: Wq_h };
+  }
+
+  /**
+   * Known answer: lambda=2 h^-1, mu=3 h^-1, servers=1:
+   * P0=1/3, Pwait=2/3, Wq_h=2/3, Lq=4/3,
+   * L=2, W_h=1 h.
+   * Inputs: lambda_per_h, mu_per_h (h^-1 per server),
+   * servers (integer 1, 2 or 3).
+   * Outputs: stable, rho, P0, Pwait, Lq, L (customers),
+   * Wq_h, W_h (h); null metrics when rho>=1.
+   * Method: Erlang C with identical parallel exponential servers.
+   * Assumption: FIFO, unlimited buffer, Poisson arrivals,
+   * steady state, exponentially distributed service.
+   * Errors: INVALID_SERVERS, INVALID_ARRIVAL_RATE,
+   * RATE_MUST_BE_POSITIVE, MathError.
+   */
+  function mmc({ lambda_per_h, mu_per_h, servers }) {
+    const bad = ratesError(lambda_per_h, mu_per_h);
+    if (bad) return bad;
+    if (!integer(servers) || servers < 1 || servers > 3)
+      return error('INVALID_SERVERS');
+    const rho = lambda_per_h / (servers * mu_per_h);
+    if (!finite(rho)) return error('MathError');
+    if (rho >= 1)
+      return { stable: false, rho, P0: null, Pwait: null,
+        Lq: null, Wq_h: null, L: null, W_h: null };
+    if (lambda_per_h === 0)
+      return { stable: true, rho: 0, P0: 1, Pwait: 0,
+        Lq: 0, Wq_h: 0, L: 0, W_h: 1 / mu_per_h };
+    const a = lambda_per_h / mu_per_h;
+    let sum = 0;
+    let term = 1;
+    for (let k = 0; k < servers; k++) {
+      if (k > 0) term *= a / k;
+      sum += term;
+    }
+    const last = term * a / servers;
+    const P0 = 1 / (sum + last / (1 - rho));
+    const Pwait = last * P0 / (1 - rho);
+    const Lq = Pwait * rho / (1 - rho);
+    const Wq_h = Lq / lambda_per_h;
+    const W_h = Wq_h + 1 / mu_per_h;
+    const L = lambda_per_h * W_h;
+    if (![P0, Pwait, Lq, Wq_h, W_h, L].every(finite))
+      return error('MathError');
+    return { stable: true, rho, P0, Pwait, Lq, Wq_h, L, W_h };
+  }
+
+  /**
+   * Known answer: one fixed server with zero wait on isolated
+   * arrivals has departure=arrival+1/mu, utilisation defined as
+   * busy-server time / (servers * final departure time).
+   * Inputs: seed (uint32), lambda_per_h, mu_per_h (h^-1),
+   * servers (1..3), service ('exponential' or 'fixed'),
+   * customers (integer 1..10000).
+   * Outputs: arrivals[], starts[], departures[] (h);
+   * meanWait_h, meanInSystem_h (h), utilisation (fraction),
+   * maxQueue (maximum number waiting, excluding service).
+   * Draw order: ALL exponential inter-arrival gaps first, then
+   * ALL service times (one exponential draw each, or zero draws
+   * for fixed service). FIFO, initially empty, time starts at 0.
+   * Errors: INVALID_SEED, rate/server errors, INVALID_SERVICE,
+   * INVALID_COUNT, TOO_MANY_DRAWS, MathError.
+   */
+  function simulateQueue({
+    seed, lambda_per_h, mu_per_h, servers, service, customers
+  }) {
+    const bad = seedError(seed) || ratesError(lambda_per_h, mu_per_h);
+    if (bad) return bad;
+    if (lambda_per_h === 0) return error('RATE_MUST_BE_POSITIVE');
+    if (!integer(servers) || servers < 1 || servers > 3)
+      return error('INVALID_SERVERS');
+    if (service !== 'exponential' && service !== 'fixed')
+      return error('INVALID_SERVICE');
+    const cb = checkCount(customers);
+    if (cb) return cb;
+    if (customers * (service === 'exponential' ? 2 : 1) > MAX_DRAWS)
+      return error('TOO_MANY_DRAWS');
+    const rng = createRng(seed);
+    const arrivals = [];
+    const durations = [];
+    let t = 0;
+    for (let i = 0; i < customers; i++) {
+      t += -Math.log(1 - rng()) / lambda_per_h;
+      if (!finite(t)) return error('MathError');
+      arrivals.push(t);
+    }
+    for (let i = 0; i < customers; i++)
+      durations.push(service === 'fixed'
+        ? 1 / mu_per_h : -Math.log(1 - rng()) / mu_per_h);
+    const available = Array(servers).fill(0);
+    const starts = [];
+    const departures = [];
+    let totalWait = 0;
+    let totalSystem = 0;
+    let busy = 0;
+    for (let i = 0; i < customers; i++) {
+      let server = 0;
+      for (let j = 1; j < servers; j++)
+        if (available[j] < available[server]) server = j;
+      const start = Math.max(arrivals[i], available[server]);
+      const departure = start + durations[i];
+      if (!finite(departure)) return error('MathError');
+      starts.push(start);
+      departures.push(departure);
+      available[server] = departure;
+      totalWait += start - arrivals[i];
+      totalSystem += departure - arrivals[i];
+      busy += durations[i];
+    }
+    const events = [];
+    for (let i = 0; i < customers; i++) {
+      events.push([arrivals[i], 1]);
+      events.push([starts[i], -1]);
+    }
+    events.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    let waiting = 0;
+    let maxQueue = 0;
+    for (const event of events) {
+      waiting += event[1];
+      if (waiting > maxQueue) maxQueue = waiting;
+    }
+    const horizon = Math.max(...departures);
+    const utilisation = busy / (servers * horizon);
+    if (![totalWait, totalSystem, utilisation].every(finite))
+      return error('MathError');
+    return {
+      arrivals, starts, departures,
+      meanWait_h: totalWait / customers,
+      meanInSystem_h: totalSystem / customers,
+      utilisation, maxQueue
+    };
+  }
+
+  /**
+   * Known answer: pRight=0.5 gives theoryMean=0,
+   * theoryVariance=steps; at pRight=1, mean=steps, variance=0.
+   * Inputs: seed (uint32), steps (non-negative integer),
+   * pRight (probability), walkers (positive integer).
+   * Outputs: finals[] (integer displacement in unit steps), mean,
+   * variance (population variance), theoryMean, theoryVariance,
+   * sample[][] (positions including zero for every walker).
+   * Draw order: each walker completes all steps before the next;
+   * one Bernoulli draw per step, right when u<pRight.
+   * Assumption: independent +/-1 steps in one dimension.
+   * Errors: INVALID_SEED, INVALID_COUNT, INVALID_PROBABILITY,
+   * TOO_MANY_DRAWS.
+   */
+  function randomWalk1D({ seed = 1, steps, pRight, walkers = 1, stepLength = 1, n, p, step }) {
+    steps = steps === undefined ? n : steps;
+    pRight = pRight === undefined ? p : pRight;
+    stepLength = step === undefined ? stepLength : step;
+    const bad = seedError(seed);
+    if (bad) return bad;
+    if (!integer(steps) || steps < 0 ||
+        !integer(walkers) || walkers < 1)
+      return error('INVALID_COUNT');
+    if (!probability(pRight)) return error('INVALID_PROBABILITY');
+    if (!finite(stepLength) || stepLength <= 0) return error('INVALID_STEP_LENGTH');
+    if (steps * walkers > MAX_DRAWS)
+      return error('TOO_MANY_DRAWS');
+    const rng = createRng(seed);
+    const finals = [];
+    const sample = [];
+    for (let j = 0; j < walkers; j++) {
+      let x = 0;
+      const path = [0];
+      for (let i = 0; i < steps; i++) {
+        x += rng() < pRight ? stepLength : -stepLength;
+        path.push(x);
+      }
+      finals.push(x);
+      sample.push(path);
+    }
+    const m = moments(finals);
+    const theoryMean = steps * (2 * pRight - 1) * stepLength;
+    const theoryVariance = 4 * steps * pRight * (1 - pRight) * stepLength ** 2;
+    let P_at_origin = steps === 0 ? 1 : 0;
+    if (steps > 0 && steps % 2 === 0) {
+      const k = steps / 2;
+      if (pRight === 0 || pRight === 1) P_at_origin = 0;
+      else {
+        let logChoose = 0;
+        for (let i = 1; i <= k; i++) logChoose += Math.log(k + i) - Math.log(i);
+        P_at_origin = Math.exp(logChoose + k * Math.log(pRight) + k * Math.log1p(-pRight));
+      }
+    }
+    const rms = Math.sqrt(theoryMean ** 2 + theoryVariance);
+    return {
+      finals, mean: m.mean, variance: m.variance,
+      theoryMean, theoryVariance, rms, P_at_origin,
+      sample
+    };
+  }
+
+  /**
+   * Known answer: D=1 m^2/s and t=2 s gives theoretical
+   * MSD=8 m^2; each axis step variance is 2D*dt (m^2).
+   * Inputs: seed (uint32), D_m2_s (m^2/s), dt_s (s),
+   * steps (non-negative integer), particles (positive integer).
+   * Outputs: msd[] and theoryMsd[] (m^2), theoryRms[] (m),
+   * all including t=0.
+   * Draw order: for each particle, all successive steps; each
+   * step draws x-normal (two uniforms), then y-normal (two).
+   * Box-Muller sine partner discarded.
+   * Assumption: unbounded isotropic 2D Brownian motion.
+   * Errors: INVALID_SEED, INVALID_DIFFUSIVITY, INVALID_TIME,
+   * INVALID_COUNT, TOO_MANY_DRAWS, MathError.
+   */
+  function brownian2D({ seed, D_m2_s, dt_s, steps, particles }) {
+    const bad = seedError(seed);
+    if (bad) return bad;
+    if (!finite(D_m2_s) || D_m2_s < 0)
+      return error('INVALID_DIFFUSIVITY');
+    if (!finite(dt_s) || dt_s <= 0)
+      return error('INVALID_TIME');
+    if (!integer(steps) || steps < 0 ||
+        !integer(particles) || particles < 1)
+      return error('INVALID_COUNT');
+    if (4 * steps * particles > MAX_DRAWS)
+      return error('TOO_MANY_DRAWS');
+    const rng = createRng(seed);
+    const msd = Array(steps + 1).fill(0);
+    const sigma = Math.sqrt(2 * D_m2_s * dt_s);
+    for (let j = 0; j < particles; j++) {
+      let x = 0;
+      let y = 0;
+      for (let i = 1; i <= steps; i++) {
+        x += normalDraw(rng, 0, sigma);
+        y += normalDraw(rng, 0, sigma);
+        msd[i] += (x * x + y * y) / particles;
+      }
+    }
+    const theoryMsd = msd.map((_, i) => 4 * D_m2_s * dt_s * i);
+    const theoryRms = theoryMsd.map(x => Math.sqrt(x));
+    if (msd.some(x => !finite(x)) ||
+        theoryMsd.some(x => !finite(x)) ||
+        theoryRms.some(x => !finite(x)))
+      return error('MathError');
+    return { msd, theoryMsd, theoryRms };
+  }
+
+  /** Kimura genic-selection diffusion approximation for diploids. */
+  function fixationProbability({ N, s, p0, p }) {
+    p0 = p0 === undefined ? p : p0;
+    if (!integer(N) || N < 1) return error('INVALID_POPULATION');
+    if (!probability(p0)) return error('INVALID_PROBABILITY');
+    if (!finite(s)) return error('INVALID_SELECTION');
+    if (s === 0) return { u: p0 };
+    const exponent = -4 * N * s;
+    let u;
+    if (exponent > 700) {
+      u = Math.exp(exponent * (1 - p0));
+    } else {
+      u = -Math.expm1(exponent * p0) / -Math.expm1(exponent);
+    }
+    return finite(u) ? { u: Math.min(1, Math.max(0, u)) } : error('MathError');
+  }
+
+  /**
+   * Known answer: N=50, p0=0.3, s=0 produces next-generation
+   * count distributed Binomial(100,0.3), E[count]=30,
+   * Var[count]=21.
+   * Inputs: seed (uint32), N (diploid population size),
+   * p0 (initial allele frequency), generations (integer >=0),
+   * s (dimensionless relative fitness advantage, default 0).
+   * Output: p[] allele frequencies including generation 0.
+   * Draw order: for each generation, 2N independent Bernoulli
+   * comparisons, with probability p(1+s)/(1+p*s).
+   * Assumption: diploid Wright-Fisher sampling, genic selection,
+   * no mutation/migration, independent generations.
+   * Errors: INVALID_SEED, INVALID_POPULATION,
+   * INVALID_PROBABILITY, INVALID_SELECTION, INVALID_COUNT,
+   * TOO_MANY_DRAWS, MathError.
+   */
+  function wrightFisher({
+    seed, N, p0, generations, s = 0
+  }) {
+    const bad = seedError(seed);
+    if (bad) return bad;
+    if (!integer(N) || N < 1) return error('INVALID_POPULATION');
+    if (!probability(p0)) return error('INVALID_PROBABILITY');
+    if (!finite(s) || s < -1) return error('INVALID_SELECTION');
+    if (!integer(generations) || generations < 0)
+      return error('INVALID_COUNT');
+    if (2 * N * generations > MAX_DRAWS)
+      return error('TOO_MANY_DRAWS');
+    const rng = createRng(seed);
+    const p = [p0];
+    for (let g = 0; g < generations; g++) {
+      const current = p[g];
+      const denominator = 1 + current * s;
+      const selected = denominator === 0 ? 0 :
+        current * (1 + s) / denominator;
+      if (!probability(selected)) return error('MathError');
+      let count = 0;
+      for (let i = 0; i < 2 * N; i++)
+        if (rng() < selected) count++;
+      p.push(count / (2 * N));
+    }
+    return { p };
+  }
+
+  /**
+   * Known answer: N=50, p=0.3 -> mean=30, variance=21
+   * allele copies.
+   * Inputs: N (diploid individuals), p (allele probability).
+   * Outputs: mean (allele copies), variance (copies squared).
+   * Assumption: next-generation Binomial(2N,p), without
+   * selection, mutation or migration.
+   * Errors: INVALID_POPULATION, INVALID_PROBABILITY, MathError.
+   */
+  function wrightFisherMoments({ N, p, t = 0, generations }) {
+    t = generations === undefined ? t : generations;
+    if (!integer(N) || N < 1)
+      return error('INVALID_POPULATION');
+    if (!probability(p)) return error('INVALID_PROBABILITY');
+    if (!integer(t) || t < 0) return error('INVALID_COUNT');
+    const mean = 2 * N * p;
+    const variance = 2 * N * p * (1 - p);
+    const H_t = 2 * p * (1 - p) * (1 - 1 / (2 * N)) ** t;
+    return finite(mean) && finite(variance) && finite(H_t)
+      ? { mean, variance, H_t } : error('MathError');
+  }
+
+  const models = {
+    buriedSphereGravity: ['a_m', 'drho_kg_m3', 'z_m'],
+    riverMixing: ['Qr_m3_s', 'Cr_mg_L', 'Qe_m3_s', 'Ce_mg_L']
+  };
+
+  function calculateModel(model, values) {
+    if (model === 'buriedSphereGravity') {
+      const { a_m, drho_kg_m3, z_m } = values;
+      if (a_m <= 0 || z_m <= 0) return error('INVALID_GEOMETRY');
+      if (z_m < a_m) return error('INVALID_GEOMETRY');
+      return { value: 4 * Math.PI * G / 3 *
+        drho_kg_m3 * a_m ** 3 / z_m ** 2 };
+    }
+    const { Qr_m3_s, Cr_mg_L, Qe_m3_s, Ce_mg_L } = values;
+    if (Qr_m3_s < 0 || Qe_m3_s < 0 ||
+        Qr_m3_s + Qe_m3_s <= 0)
+      return error('INVALID_FLOW');
+    if (Cr_mg_L < 0 || Ce_mg_L < 0)
+      return error('INVALID_CONCENTRATION');
+    return { value: (Qr_m3_s * Cr_mg_L +
+      Qe_m3_s * Ce_mg_L) / (Qr_m3_s + Qe_m3_s) };
+  }
+
+  /**
+   * Known answers:
+   * buriedSphereGravity(a=10 m, drho=1000 kg/m^3, z=20 m)
+   * = 6.989291442...e-7 m/s^2 (approximately 6.99e-7).
+   * riverMixing(Qr=10 m^3/s, Cr=2 mg/L, Qe=1 m^3/s,
+   * Ce=20 mg/L) = 40/11 = 3.636363636... mg/L.
+   * Inputs: model (one of two names), values (named SI fields,
+   * except concentrations explicitly expressed in mg/L).
+   * Output: value (m/s^2 or mg/L respectively).
+   * Assumptions: uniform buried sphere, observation directly
+   * above its centre; or instantaneous complete river mixing.
+   * Errors: UNKNOWN_MODEL, INVALID_NUMBER, INVALID_GEOMETRY,
+   * INVALID_FLOW, INVALID_CONCENTRATION, MathError.
+   */
+  function deterministicModel({ model, values }) {
+    const keys = models[model];
+    if (!keys) return error('UNKNOWN_MODEL');
+    if (!values || keys.some(k => !finite(values[k])))
+      return error('INVALID_NUMBER');
+    const result = calculateModel(model, values);
+    return result.error || finite(result.value)
+      ? result : error('MathError');
+  }
+
+  /**
+   * Known answers: deterministic central gravity 6.99e-7
+   * m/s^2 and central river concentration 3.6363636 mg/L
+   * (see deterministicModel).
+   * Inputs: seed (uint32), n (number of realisations), inputs
+   * {field:{dist,params}}, model (buriedSphereGravity or
+   * riverMixing). Every required model field needs a distribution.
+   * Outputs: outputs[] in model units, mean, population sd,
+   * histogram[] of {low,high,count,proportion}.
+   * Draw order: each realisation samples model fields IN THE
+   * FIXED ORDER listed in models, not object insertion order.
+   * Within a field: uniform a+(b-a)u; exponential -ln(1-u)/rate;
+   * normal uses Box-Muller cosine and discards sine; Bernoulli
+   * compares u<p; binomial sums n Bernoulli draws; triangular
+   * uses the inverse CDF and one draw.
+   * Invalid realisations, including negative physical values,
+   * return a named error rather than being silently discarded.
+   * Errors: INVALID_SEED, INVALID_COUNT, TOO_MANY_DRAWS,
+   * UNKNOWN_MODEL, INVALID_INPUTS, distribution errors,
+   * model physical validation errors, MathError.
+   */
+  function monteCarloUncertainty({ seed, n, inputs, model }) {
+    const bad = seedError(seed) || checkCount(n);
+    if (bad) return bad;
+    const keys = models[model];
+    if (!keys) return error('UNKNOWN_MODEL');
+    if (!inputs || typeof inputs !== 'object' ||
+        keys.some(k => !inputs[k]))
+      return error('INVALID_INPUTS');
+    let cost = 0;
+    for (const k of keys) {
+      const spec = inputs[k];
+      if (!spec || typeof spec !== 'object')
+        return error('INVALID_INPUTS');
+      const de = distributionError(spec.dist, spec.params);
+      if (de) return error(de);
+      cost += drawCost(spec.dist, spec.params);
+    }
+    if (n * cost > MAX_DRAWS) return error('TOO_MANY_DRAWS');
+    const rng = createRng(seed);
+    const outputs = [];
+    for (let i = 0; i < n; i++) {
+      const values = {};
+      for (const k of keys) {
+        const spec = inputs[k];
+        values[k] = sampleDist(rng, spec.dist, spec.params);
+      }
+      const result = deterministicModel({ model, values });
+      if (result.error) return result;
+      outputs.push(result.value);
+    }
+    const m = moments(outputs);
+    if (!finite(m.mean) || !finite(m.sd))
+      return error('MathError');
+    return {
+      outputs, mean: m.mean, sd: m.sd,
+      histogram: histogramOf(outputs)
+    };
+  }
+
+  return Object.freeze({
+    API_VERSION,
+    createRng,
+    monteCarloPi,
+    diceProportion,
+    runningMean,
+    markovStep,
+    markovDistribution,
+    markovStationary,
+    markovSimulate,
+    poissonPmf,
+    poissonArrivals,
+    mm1,
+    md1,
+    mmc,
+    simulateQueue,
+    randomWalk1D,
+    fixationProbability,
+    brownian2D,
+    wrightFisher,
+    wrightFisherMoments,
+    monteCarloUncertainty,
+    deterministicModel
+  });
+})();
+/* FIT-CALC-END x2_random_sim */
+
+(function () {
+  'use strict';
+  const calc = FITCalcX2;
+  const $ = id => document.getElementById(id);
+  const NS = 'http:' + String.fromCharCode(47,47) +
+    'www.w3.org/2000/svg';
+  const palette = ['#FF6B3D','#1F66E5','#1E9E5A'];
+  let round = 0, score = 0, attempts = 0, hinted = false;
+  let locked = false, values = {}, current = null, seedBase = 47021;
+  const number = (x, dp = 3) => Number.isFinite(x)
+    ? Number(x.toPrecision(dp)).toString() : '—';
+  const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
+  const roundTo = (v, step) => Math.round(v / step) * step;
+
+  function el(name, attrs, parent, text) {
+    const node = document.createElementNS(NS, name);
+    Object.entries(attrs || {}).forEach(([k, v]) =>
+      node.setAttribute(k, String(v)));
+    if (text !== undefined) node.textContent = String(text);
+    parent.appendChild(node);
+    return node;
+  }
+  function wipe(node) {
+    while (node.firstChild) node.removeChild(node.firstChild);
+  }
+  function label(svg, x, y, text, attrs = {}) {
+    return el('text', {
+      x, y, fill: '#111', 'font-size': 13,
+      'font-weight': 700, ...attrs
+    }, svg, text);
+  }
+  function plot(title, xLabel, yLabel, series, marker = null) {
+    const svg = $('plot');
+    wipe(svg);
+    el('rect',{x:0,y:0,width:540,height:320,fill:'white'},svg);
+    label(svg,20,24,title,{'font-size':18,'font-weight':800});
+    const all = series.flatMap(s => s.data);
+    const xs = all.map(p => p[0]).filter(Number.isFinite);
+    const ys = all.map(p => p[1]).filter(Number.isFinite);
+    if (!xs.length || !ys.length) return;
+    const xmin = Math.min(0,...xs), xmax = Math.max(1,...xs);
+    const ymin = Math.min(0,...ys);
+    const ymax = Math.max(ymin + 1e-9,...ys);
+    const lx=65, rx=518, ty=51, by=260;
+    const X = x => lx+(x-xmin)/(xmax-xmin)*(rx-lx);
+    const Y = y => by-(y-ymin)/(ymax-ymin)*(by-ty);
+    for(let i=0;i<=4;i++){
+      const y=ty+(by-ty)*i/4;
+      el('line',{x1:lx,y1:y,x2:rx,y2:y,stroke:'#ddd'},svg);
+      label(svg,56,y+4,number(ymax-(ymax-ymin)*i/4),{
+        'text-anchor':'end','font-size':11
+      });
+    }
+    for(let i=0;i<=4;i++){
+      const x=lx+(rx-lx)*i/4;
+      label(svg,x,278,number(xmin+(xmax-xmin)*i/4),{
+        'text-anchor':'middle','font-size':11
+      });
+    }
+    el('path',{d:`M${lx} ${ty}V${by}H${rx}`,fill:'none',
+      stroke:'#111','stroke-width':2},svg);
+    label(svg,291,310,xLabel,{'text-anchor':'middle'});
+    label(svg,16,158,yLabel,{
+      transform:'rotate(-90 16 158)','text-anchor':'middle'
+    });
+    series.forEach((s,i)=>{
+      const points=s.data.filter(p=>p.every(Number.isFinite));
+      const d=points.map((p,j)=>
+        `${j?'L':'M'}${X(p[0]).toFixed(2)} ${Y(p[1]).toFixed(2)}`
+      ).join(' ');
+      el('path',{d,fill:'none',stroke:s.color||palette[i%3],
+        'stroke-width':3,'stroke-dasharray':s.dash?'7 6':'none'},svg);
+    });
+    if(marker && marker.every(Number.isFinite)){
+      el('circle',{cx:X(marker[0]),cy:Y(marker[1]),r:7,
+        fill:'#FFDD00',stroke:'#111','stroke-width':3},svg);
+    }
+    series.forEach((s,i)=>{
+      const x=75+i*145;
+      el('line',{x1:x,y1:40,x2:x+23,y2:40,
+        stroke:s.color||palette[i%3],'stroke-width':4,
+        'stroke-dasharray':s.dash?'6 5':'none'},svg);
+      label(svg,x+28,44,s.name,{'font-size':11});
+    });
+    svg.setAttribute('aria-label',
+      `${title}. Horizontal axis ${xLabel}; vertical axis ${yLabel}. `+
+      series.map(s=>s.name).join(', '));
+  }
+  function makeButton(text, change, description) {
+    const b=document.createElement('button');
+    b.type='button';
+    b.textContent=text;
+    b.setAttribute('aria-label',description);
+    b.addEventListener('click',change);
+    return b;
+  }
+  function control(key,title,min,max,step,unit) {
+    const outer=document.createElement('div');
+    outer.className='control';
+    const l=document.createElement('label');
+    l.textContent=title;
+    outer.appendChild(l);
+    const out=document.createElement('output');
+    out.id='value-'+key;
+    outer.appendChild(out);
+    const buttons=document.createElement('div');
+    buttons.className='steps';
+    const change=delta=>{
+      if(locked)return;
+      values[key]=clamp(
+        roundTo(values[key]+delta,step),min,max);
+      render();
+    };
+    [
+      ['−−',-step*10,'Decrease '+title+' by ten steps'],
+      ['−',-step,'Decrease '+title+' by one step'],
+      ['+',step,'Increase '+title+' by one step'],
+      ['++',step*10,'Increase '+title+' by ten steps']
+    ].forEach(([txt,d,aria])=>
+      buttons.appendChild(makeButton(txt,()=>change(d),aria)));
+    outer.appendChild(buttons);
+    const range=document.createElement('input');
+    range.type='range'; range.min=min;range.max=max;range.step=step;
+    range.id='range-'+key;
+    range.setAttribute('aria-label',title);
+    range.addEventListener('input',()=>{
+      if(locked)return;
+      values[key]=Number(range.value);
+      render();
+    });
+    outer.appendChild(range);
+    $('controls').appendChild(outer);
+    return ()=> {
+      out.textContent=number(values[key],5)+' '+unit;
+      range.value=String(values[key]);
+      Array.from(buttons.children).forEach((b,i)=>{
+        b.disabled=locked || (i<2?values[key]<=min:values[key]>=max);
+      });
+    };
+  }
+  let updaters=[];
+  function drawDice(faces,target,throws) {
+    const svg=$('diagram');
+    wipe(svg);
+    const count=Math.min(10,Math.max(1,Math.round(throws/100)));
+    for(let i=0;i<count;i++){
+      const x=12+(i%5)*92,y=15+Math.floor(i/5)*105;
+      el('rect',{x,y,width:78,height:78,rx:15,fill:'#fff',
+        stroke:'#111','stroke-width':4},svg);
+      label(svg,x+39,y+48,String((i%faces)+1),{
+        'text-anchor':'middle','font-size':30});
+    }
+    label(svg,15,235,`${faces} faces · target face ${target} · ${throws} trials`);
+    svg.setAttribute('aria-label',
+      `Fair ${faces}-sided die; target face ${target}; ${throws} throws`);
+  }
+  function drawPi(n) {
+    const svg=$('diagram');wipe(svg);
+    el('rect',{x:100,y:5,width:215,height:215,fill:'#fff',
+      stroke:'#111','stroke-width':3},svg);
+    el('circle',{cx:207.5,cy:112.5,r:107.5,fill:'#FFE6DC',
+      stroke:'#FF6B3D','stroke-width':3},svg);
+    const rng=calc.createRng(current.seed);
+    for(let i=0;i<Math.min(n,500);i++){
+      const x=2*rng()-1,y=2*rng()-1;
+      el('circle',{cx:207.5+107*x,cy:112.5+107*y,r:2,
+        fill:x*x+y*y<=1?'#1F66E5':'#111'},svg);
+    }
+    label(svg,336,60,'Square: 2 × 2');
+    label(svg,336,82,'Circle: r = 1');
+    label(svg,100,237,`${n} seeded points`);
+    svg.setAttribute('aria-label',
+      `Square and inscribed unit circle with ${n} random points`);
+  }
+  function drawQueue(lambda,mu) {
+    const svg=$('diagram');wipe(svg);
+    label(svg,12,32,`Arrivals: ${lambda} customers/h`);
+    el('path',{d:'M15 105H182',stroke:'#111',
+      'stroke-width':5,fill:'none'},svg);
+    el('path',{d:'M164 91L184 105L164 119',stroke:'#111',
+      'stroke-width':5,fill:'none'},svg);
+    for(let i=0;i<4;i++){
+      el('circle',{cx:35+i*35,cy:105,r:12,fill:'#FFDD00',
+        stroke:'#111','stroke-width':3},svg);
+    }
+    el('rect',{x:201,y:67,width:124,height:80,rx:17,
+      fill:'#fff',stroke:'#111','stroke-width':4},svg);
+    label(svg,263,100,'CASHIER',{'text-anchor':'middle'});
+    label(svg,263,127,`${number(mu)} /h`,{'text-anchor':'middle'});
+    el('path',{d:'M327 105H454M435 92L454 105L435 118',
+      fill:'none',stroke:'#111','stroke-width':5},svg);
+    label(svg,20,197,'FIFO waiting line');
+    label(svg,20,221,'One server · exponential service');
+    svg.setAttribute('aria-label',
+      `Customers arrive at ${lambda} per hour; cashier serves at `+
+      `${mu} per hour; first in, first out`);
+  }
+  function queueTrace(data) {
+    const events=[];
+    data.arrivals.forEach(t=>events.push([t,1]));
+    data.starts.forEach(t=>events.push([t,-1]));
+    events.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+    let q=0;
+    const points=[[0,0]];
+    events.forEach(([t,d])=>{
+      points.push([t,q]);
+      q+=d;
+      points.push([t,q]);
+    });
+    return points;
+  }
+  const patterns=['dice','pi','queue','dice','pi','queue'];
+  function setup() {
+    locked=false;attempts=0;hinted=false;
+    $('next').hidden=true;$('check').hidden=false;
+    $('hint').disabled=false;
+    $('feedback').textContent='Adjust the controls, then check your solution.';
+    $('feedback').className='feedback';
+    $('round').textContent=`Round ${round+1}/6`;
+    $('score').textContent=`Score ${score}`;
+    $('controls').replaceChildren();
+    const kind=patterns[round];
+    const seed=(seedBase+round*421)>>>0;
+    const rng=calc.createRng(seed);
+    const setupSeed=(seed+12345)>>>0;
+    let target, tolerance, params;
+    if(kind==='dice'){
+      const faces=round===0?2:6;
+      const face=round===0?1:3;
+      const candidates=[100,200,300,400,500,600,700,800,900,1000];
+      const results=candidates.map(n=>calc.diceProportion({
+        seed:setupSeed,n,faces,target:face
+      }));
+      const errors=results.map(r=>Math.abs(r.proportion-r.expected));
+      const index=round===0?5:7;
+      target=errors[index];
+      tolerance=target+1e-10;
+      params={faces,face,candidates,index};
+      current={kind,seed:setupSeed,target,tolerance,params};
+      values={n:100};
+      $('heading').textContent=faces===2?'Coin lab':'Dice lab';
+      $('question').textContent=
+        `Choose a trial count whose observed target-face proportion `+
+        `is within ±${number(tolerance,3)} of the fair probability. `+
+        `Each run uses the same random seed.`;
+      $('maths').textContent=
+        'Sample proportion = target-face hits / trials. '+
+        'True probability = 1 / number of faces. '+
+        'The standard error decreases with sample size. '+
+        'Assumption: independent fair throws.';
+      updaters=[control('n','Number of throws',100,1000,100,'throws')];
+    } else if(kind==='pi'){
+      const candidates=[100,200,300,400,500,600,700,800,900,1000,
+        1200,1400,1600,1800,2000,2400,2800,3200,3600,4000];
+      const index=round===1?10:14;
+      target=Math.abs(calc.monteCarloPi({
+        seed:setupSeed,n:candidates[index]
+      }).estimate-Math.PI);
+      tolerance=target+1e-10;
+      params={candidates,index};
+      current={kind,seed:setupSeed,tolerance,params};
+      values={n:100};
+      $('heading').textContent='The circle challenge';
+      $('question').textContent=
+        `Choose enough seeded random points that the calculated `+
+        `estimate of π differs from π by at most `+
+        `${number(tolerance,3)}.`;
+      $('maths').textContent=
+        'π estimate = 4 × points inside circle / total points. '+
+        'Circle radius 1; enclosing square side 2. '+
+        'Assumption: independent uniform points.';
+      updaters=[control('n','Number of points',100,4000,100,'points')];
+    } else {
+      const lambda=round===2?3:5;
+      const muTarget=round===2?7:10;
+      const analytic=calc.mm1({lambda_per_h:lambda,mu_per_h:muTarget});
+      target=analytic.Wq_h;
+      params={lambda};
+      current={kind,seed:setupSeed,target,params};
+      values={mu:lambda};
+      $('heading').textContent='One busy cashier';
+      $('question').textContent=
+        `Arrivals average ${lambda} customers/h. Set the cashier's `+
+        `service rate so the steady-state mean waiting time is `+
+        `at most ${number(target,3)} h.`;
+      $('maths').textContent=
+        'ρ = λ/μ; Wq = λ/[μ(μ − λ)] h for μ > λ. '+
+        'At μ ≤ λ the steady-state queue is unstable. '+
+        'Assumption: Poisson arrivals, exponential service, FIFO.';
+      updaters=[control('mu','Service rate',lambda,15,1,
+        'customers/h')];
+    }
+    render();
+  }
+  function render() {
+    if(!current)return;
+    updaters.forEach(fn=>fn());
+    if(current.kind==='dice'){
+      const {faces,face}=current.params;
+      const result=calc.diceProportion({
+        seed:current.seed,n:values.n,faces,target:face
+      });
+      if(result.error)return fail(result.error);
+      const means=calc.runningMean({
+        seed:current.seed,n:values.n,
+        dist:'bernoulli',params:{p:1/faces}
+      });
+      const series=[
+        {name:'Observed (seeded)',data:means.means.map((m,i)=>[i+1,m])},
+        {name:'True probability',data:[[1,result.expected],
+          [values.n,result.expected]],dash:true,color:'#111'}
+      ];
+      plot('Running proportion','Throws','Proportion',series,
+        [values.n,result.proportion]);
+      drawDice(faces,face,values.n);
+      $('readout').textContent=
+        `Observed: ${number(result.proportion)} · `+
+        `Fair probability: ${number(result.expected)} · `+
+        `Absolute difference: ${number(Math.abs(result.proportion-result.expected))}`;
+    } else if(current.kind==='pi'){
+      const result=calc.monteCarloPi({seed:current.seed,n:values.n});
+      if(result.error)return fail(result.error);
+      const checkpoints=[];
+      for(let n=100;n<=values.n;n+=100){
+        const r=calc.monteCarloPi({seed:current.seed,n});
+        checkpoints.push([n,r.estimate]);
+      }
+      plot('π estimate versus samples','Points','π estimate',[
+        {name:'Estimate',data:checkpoints},
+        {name:'π reference',data:[[100,Math.PI],[values.n,Math.PI]],
+          dash:true,color:'#111'}
+      ],[values.n,result.estimate]);
+      drawPi(values.n);
+      $('readout').textContent=
+        `Inside: ${result.inside}/${result.n} · `+
+        `Estimate: ${number(result.estimate,5)} · `+
+        `Absolute error: ${number(Math.abs(result.estimate-Math.PI))}`;
+    } else {
+      const {lambda}=current.params;
+      const result=calc.mm1({lambda_per_h:lambda,mu_per_h:values.mu});
+      const simulated=calc.simulateQueue({
+        seed:current.seed,lambda_per_h:lambda,mu_per_h:values.mu,
+        servers:1,service:'exponential',customers:160
+      });
+      if(result.error||simulated.error)
+        return fail(result.error||simulated.error);
+      const points=queueTrace(simulated);
+      plot('Waiting line through time','Time (h)','Waiting customers',
+        [{name:'Queue length',data:points}],
+        points.length?points[points.length-1]:[0,0]);
+      drawQueue(lambda,values.mu);
+      $('readout').textContent=result.stable === false
+        ? 'Unstable: the queue grows without limit. '+
+          'The finite simulation shows only a sample of its build-up.'
+        : `ρ = ${number(result.rho)} · Steady-state Wq = `+
+          `${number(result.Wq_h)} h · Simulated mean = `+
+          `${number(simulated.meanWait_h)} h`;
+    }
+  }
+  function fail(code){
+    $('readout').textContent='Calculation unavailable: '+(typeof code === 'object' ? code.error+' / '+code.reason : code);
+  }
+  function success() {
+    const gained=hinted?50:attempts===1?100:75;
+    score+=gained;
+    locked=true;updaters.forEach(fn=>fn());
+    $('score').textContent=`Score ${score}`;
+    $('feedback').className='feedback good';
+    $('feedback').textContent=
+      `✓ Correct! +${gained} points. `+
+      (current.kind==='queue'
+        ? 'Service capacity must exceed arrivals by enough to control waiting.'
+        : 'This seeded experiment meets the requested precision.');
+    $('hint').disabled=true;$('check').hidden=true;
+    $('next').hidden=false;
+    $('next').textContent=round===5?'See results →':'Next round →';
+  }
+  function check(){
+    if(locked)return;
+    attempts++;
+    if(current.kind==='dice'){
+      const {faces,face}=current.params;
+      const r=calc.diceProportion({
+        seed:current.seed,n:values.n,faces,target:face
+      });
+      const miss=Math.abs(r.proportion-r.expected);
+      if(miss<=current.tolerance+1e-12)return success();
+      wrong(`Your proportion misses by ${number(miss)}; `+
+        `the permitted difference is ${number(current.tolerance)}.`);
+    } else if(current.kind==='pi'){
+      const r=calc.monteCarloPi({seed:current.seed,n:values.n});
+      const miss=Math.abs(r.estimate-Math.PI);
+      if(miss<=current.tolerance+1e-12)return success();
+      wrong(`The π estimate is off by ${number(miss)}; `+
+        `try a different point count.`);
+    } else {
+      const r=calc.mm1({
+        lambda_per_h:current.params.lambda,mu_per_h:values.mu
+      });
+      if(r.stable !== false && r.Wq_h<=current.target+1e-12)
+        return success();
+      wrong(r.stable === false
+        ? 'The arrival rate is at least the service rate: unstable.'
+        : `The mean wait is ${number(r.Wq_h-current.target)} h `+
+          `above the target.`);
+    }
+  }
+  function wrong(message){
+    $('feedback').className='feedback bad';
+    $('feedback').textContent='✕ Not yet. '+message;
+  }
+  function hint(){
+    if(locked)return;
+    hinted=true;
+    $('hint').disabled=true;
+    const message=current.kind==='queue'
+      ? 'Increase μ above λ and use the live waiting-time readout.'
+      : 'Try a larger sample, but remember each seeded result can fluctuate.';
+    $('feedback').className='feedback';
+    $('feedback').textContent='Hint: '+message+
+      ' This round now awards at most 50 points.';
+  }
+  function next(){
+    if(round===5){
+      $('game').hidden=true;$('end').hidden=false;
+      $('round').textContent='Complete';
+      const stars=score>=500?3:score>=350?2:1;
+      $('stars').textContent='★'.repeat(stars)+'☆'.repeat(3-stars);
+      $('result').textContent=`${score} / 600 points · ${stars} stars`;
+    }else{round++;setup();}
+  }
+  $('check').addEventListener('click',check);
+  $('hint').addEventListener('click',hint);
+  $('next').addEventListener('click',next);
+  $('again').addEventListener('click',()=>{
+    round=0;score=0;seedBase=(seedBase+8191)>>>0;
+    $('end').hidden=true;$('game').hidden=false;setup();
+  });
+  setup();
+})();
+</script>
+</body>
+</html>

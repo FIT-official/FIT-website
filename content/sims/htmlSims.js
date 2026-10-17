@@ -22,6 +22,8 @@ const rasterGrid = { subject: 'Engineering', concept: 'raster-grids', accent: '#
 // Optics family: FITCalcOptics (module + each game's embedded copy) passes all 44 cases of kat_cases/families/optics.json (tests/families).
 // optics-s, optics-jc and optics-u stay draft: their 390 px CSS shrinks the stepper buttons to 43 px wide (FIX_REQUEST.md).
 const optics = { subject: 'Physics', concept: 'optics', accent: '#FFC83D', minutes: '10–15', status: 'live' }
+// Tier-1 X2 seeded random simulation (calc: lib/sims/tier1/x2_random_sim.calc.js, inlined in each file). Live: fix2 passes all 30 Tier-1 KATs.
+const randomSim = { subject: 'Maths', concept: 'random-simulation', accent: '#8B5CF6', minutes: '10–15', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -251,4 +253,16 @@ export const htmlSims = [
     syllabusRef: 'University, Optics',
     approach: 'Design thin lenses with Cartesian surface radii, compare optical power in air and water, analyse two-lens systems with virtual intermediate objects, and calculate longitudinal chromatic aberration.',
     activityPrompt: 'Play all rounds, then explain how surface curvature, surrounding refractive index and dispersion influence focal length.', tags: ['University', 'Optics', 'lensmaker', 'two-lens systems', 'Cartesian radii', 'refractive index', 'dispersion', 'chromatic aberration'] },
+  { ...randomSim, id: 'x2-random-sim-poly', title: 'Chance and Queues', level: 'Poly', topic: 'Monte Carlo simulation and queues', symbol: '🎲', height: 1150,
+    syllabusRef: 'Poly engineering mathematics: probability, Monte Carlo simulation and single-server queues (generic)',
+    approach: 'Run seeded dice, coin and Monte Carlo π simulations to see proportions settle as samples grow, then tune a single cashier so the waiting line stays short.',
+    activityPrompt: 'Play all rounds, then explain why a queue keeps growing when customers arrive faster than they are served.', tags: ['random simulation', 'Monte Carlo', 'probability', 'queues'] },
+  { ...randomSim, id: 'x2-random-sim-u1', title: 'Markov and Poisson Lab', level: 'University', topic: 'Markov chains, Poisson arrivals and M/M/1 queues', symbol: '🔁', height: 1200,
+    syllabusRef: 'University, Probability and Stochastic Processes',
+    approach: 'Set transition probabilities so a Markov chain settles on a target stationary distribution, compare simulated arrivals with Poisson probabilities, and tune an M/M/1 queue.',
+    activityPrompt: 'Play all rounds, then explain what the stationary distribution of a Markov chain tells you about the long run.', tags: ['University', 'Probability and Stochastic Processes', 'Markov chains', 'Poisson process', 'M/M/1 queue'] },
+  { ...randomSim, id: 'x2-random-sim-u2', title: 'Drift, Walks and Uncertainty', level: 'University', topic: 'Stochastic processes in science', symbol: '🧬', height: 1400,
+    syllabusRef: 'University, Stochastic Modelling',
+    approach: 'Explore genetic drift against selection, random walks and Brownian motion, Monte Carlo uncertainty in models, and how many parallel servers keep waiting times down.',
+    activityPrompt: 'Play all rounds, then explain why mean-squared displacement grows in proportion to time for a random walk.', tags: ['University', 'Stochastic Modelling', 'genetic drift', 'random walk', 'Brownian motion', 'Monte Carlo uncertainty'] },
 ]
