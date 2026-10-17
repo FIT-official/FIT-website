@@ -3,436 +3,392 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Compressor Work | Fix It Today</title>
+<title>Compressor Work | FIT</title>
 <style>
 :where(html,body,*){touch-action:manipulation}
-:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
---lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
---r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
 *{box-sizing:border-box}
-body{margin:0;color:var(--fit-ink);background:var(--fit-paper);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
-button,input{font:inherit}
-button,input[type=range],input[type=number],summary{min-height:44px;-webkit-tap-highlight-color:transparent;user-select:none}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,summary{font:inherit;-webkit-tap-highlight-color:transparent;user-select:none}
+button{min-height:48px;padding:9px 15px;border:2px solid #111;border-radius:999px;background:white;box-shadow:var(--sh-1);font-weight:800;cursor:pointer}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45}
 :focus:not(:focus-visible){outline:none}
 :focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
-button{border:2px solid #111;border-radius:999px;background:white;box-shadow:var(--sh-1);font-weight:800;padding:10px 15px;cursor:pointer;transition:transform .12s,box-shadow .12s}
-button:active{transform:translateY(2px);box-shadow:none}
-button:disabled{opacity:.45;cursor:not-allowed}
-button.selected{background:var(--lvl-poly-tint);border-width:3px}
-button.check{background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
-button.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
-.page{max-width:1280px;margin:auto;padding:18px}
-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:22px}
-.brand{font-weight:800;font-size:1.1rem}
-.hud{display:flex;gap:8px;flex-wrap:wrap;font-weight:800}
-.badge,.pill{border:2px solid #111;border-radius:999px;font-size:12px;padding:6px 12px}
-.badge{background:var(--lvl-poly);color:var(--lvl-poly-on);text-transform:uppercase;font-weight:800}
-.pill{background:#fff}
-h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;line-height:1.15;margin:0 0 18px}
-h2{font-size:1.2rem;font-weight:800;margin:0 0 12px}
-h3{font-size:1rem;font-weight:800;margin:0 0 10px}
-p{margin:0 0 12px}
-.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
-.panel{display:grid;gap:18px;align-content:start;min-width:0}
-.card{border:2px solid #111;border-radius:24px;box-shadow:var(--sh-2);padding:18px;background:#fff;min-width:0}
-.stage{background:var(--lvl-poly-tint);border-radius:32px;box-shadow:var(--sh-3)}
-.scene{width:100%;display:block;max-height:370px}
-.graph{width:100%;display:block}
-.question{font-weight:800;font-size:1.13rem}
-.caption,.assumption{font-size:.87rem;color:var(--fit-ink-2)}
-.controls{display:grid;gap:12px}
-.control{background:var(--fit-sunken);border:2px solid #111;border-radius:16px;padding:12px}
-.control label{display:block;font-weight:800;margin-bottom:7px}
-.stepper{display:flex;gap:7px;flex-wrap:wrap;align-items:center;justify-content:center}
-.stepper button{min-height:48px;min-width:46px;padding:6px}
-.stepper output{min-width:110px;text-align:center;font-size:1.2rem;font-weight:800;font-variant-numeric:tabular-nums}
-input[type=range]{accent-color:var(--lvl-poly);width:100%}
-.choices,.actions{display:flex;gap:10px;flex-wrap:wrap}
-.choice{flex:1;min-width:110px}
-.readout{background:#fff;border:2px solid #111;border-radius:16px;padding:12px;margin-top:12px;font-weight:700;font-variant-numeric:tabular-nums}
-.readout strong{font-size:1.25rem}
-.feedback{border:2px dashed #999;border-radius:16px;padding:12px;min-height:58px;font-weight:600}
-.feedback.good{background:#E4F9ED;border-color:var(--fit-success)}
-.feedback.bad{background:#FFF0EE;border-color:var(--fit-danger)}
+svg [tabindex]:focus-visible{outline:none;stroke:#111;stroke-width:6}
+input[type=number]{min-height:48px;width:95px;max-width:100%;font-size:18px;border:2px solid #111;border-radius:12px;text-align:center;font-weight:800}
+input[type=range]{min-height:44px;width:100%;accent-color:var(--lvl-poly)}
+main{max-width:1320px;margin:auto;padding:16px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-weight:900;font-size:14px;letter-spacing:.07em}
+.hud{display:flex;gap:8px;flex-wrap:wrap;font-size:14px;font-weight:800}
+.hud span{border:2px solid #111;border-radius:999px;padding:7px 12px}
+.hud .badge{background:var(--lvl-poly);color:var(--lvl-poly-on);text-transform:uppercase;font-size:12px}
+h1{font-size:clamp(32px,5vw,54px);font-weight:800;line-height:1.12;margin:13px 0 6px}
+h2{font-size:21px;font-weight:800;margin:0 0 12px}
+p{margin:9px 0}
+.lead{margin-bottom:19px;color:var(--fit-ink-2)}
+.layout{display:grid;gap:20px}
+.card{background:white;border:2px solid #111;border-radius:28px;padding:18px;box-shadow:var(--sh-2);min-width:0}
+.stage{background:var(--lvl-poly-tint)}
+.scene,.plot{display:block;width:100%;height:auto}
+.plot{background:var(--fit-sunken);border:2px solid #111;border-radius:16px;margin-top:11px}
+.question{font-size:19px;line-height:1.45;font-weight:800}
+.control{border:2px solid #111;border-radius:17px;padding:12px;background:var(--lvl-poly-tint);margin:13px 0}
+.control label{display:block;font-weight:800;margin-bottom:9px}
+.stepper{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.stepper button{min-width:44px;padding:8px}
+.coarse{background:var(--fit-sunken)}
+.unit{font-weight:800}
+.choices{display:flex;gap:9px;flex-wrap:wrap}
+.choices button{flex:1;min-width:115px}
+.choices button[aria-pressed=true]{background:var(--lvl-poly)}
+.readout{border:2px solid #111;background:white;border-radius:14px;padding:12px;font-weight:700;margin:12px 0}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.check{flex:1;background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2)}
+.check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
+.feedback{min-height:53px;margin-top:13px;padding:12px;border-radius:14px;font-weight:700}
+.feedback:empty{padding:0}
+.good{border:2px solid var(--fit-success);background:#DDF7E5}
+.bad{border:2px solid var(--fit-danger);background:#FFE7E2}
+.info{border:2px solid var(--fit-focus);background:#E2ECFD}
+.concept{border:2px dashed #111;border-radius:16px;padding:12px;background:white;margin-top:18px}
+.concept svg{display:block;width:100%;height:108px}
+.caption{font-size:13px;color:var(--fit-ink-2)}
+.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:13px;font-weight:700;margin-top:10px}
+.swatch{width:13px;height:11px;border:2px solid #111;display:inline-block;vertical-align:middle;margin-right:5px}
+details{border:2px solid #111;border-radius:17px;padding:14px;margin-top:20px}
+summary{font-weight:800;cursor:pointer;min-height:44px}
 .hidden{display:none!important}
-details{margin-top:18px;padding:8px 15px;border:2px solid #111;border-radius:16px}
-summary{font-weight:800;cursor:pointer}
-details p{margin:8px 0}
-.end{text-align:center;padding:30px}
-.stars{font-size:3rem;letter-spacing:8px;color:#d49b00}
-@media(min-width:900px){.layout{grid-template-columns:minmax(0,1.03fr) minmax(0,1fr)}}
-@media(max-width:480px){.page{padding:12px}.card{padding:14px}.stepper output{order:-1;width:100%}.stepper button{flex:1}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+.end{text-align:center;max-width:680px;margin:30px auto}
+.stars{font-size:58px;letter-spacing:8px;color:#C79B00}
+.end button{background:var(--fit-sun)}
+@media(min-width:900px){.layout{grid-template-columns:1.05fr .95fr;align-items:start}.stage{grid-row:span 2}}
+@media(max-width:480px){main{padding:11px}.card{padding:13px}.stepper{gap:4px}.stepper button{padding:7px 8px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<main class="page">
-<header>
-<div class="brand">FIT / LEARNING LAB</div>
-<div class="hud">
-<span class="badge">Polytechnic</span>
-<span class="pill" id="roundHud">Round 1/6</span>
-<span class="pill" id="scoreHud">0 points</span>
-</div>
-</header>
-
+<main>
+<header><div class="brand">FIT / ENGINEERING LAB</div><div class="hud"><span class="badge">Polytechnic</span><span id="round">Round 1/6</span><span id="score">Score 0</span></div></header>
 <section id="game">
 <h1>Compressor Work</h1>
+<p class="lead">Shape gas processes and calculate boundary work.</p>
 <div class="layout">
-<div class="card stage">
+<section class="card stage">
 <h2>Air cylinder</h2>
-<svg id="scene" class="scene" viewBox="0 0 500 355" role="img" aria-label="Air cylinder with movable piston, heat arrow, and work arrow"></svg>
-<p class="caption">Positive boundary work means work done BY the gas.</p>
-<div class="card" style="margin-top:16px">
-<h3>Concept figure · Boundary work</h3>
-<svg viewBox="0 0 440 150" width="100%" role="img" aria-label="Area below a pressure volume curve representing boundary work">
-<path d="M48 12 V122 H419" fill="none" stroke="#111" stroke-width="3"/>
-<path d="M92 47 L116 61 L140 72 L164 82 L188 90 L212 96 L236 101 L260 105 L284 109 L308 112 L332 115" fill="none" stroke="#FF6B3D" stroke-width="4"/>
-<path d="M92 47 L116 61 L140 72 L164 82 L188 90 L212 96 L236 101 L260 105 L284 109 L308 112 L332 115 V122 H92 Z" fill="#FF6B3D" fill-opacity=".25" stroke="none"/>
-<path d="M92 47 V122 M140 72 V122 M188 90 V122 M236 101 V122 M284 109 V122 M332 115 V122" stroke="#111" stroke-width="1.5" stroke-dasharray="4 4"/>
-<text x="52" y="145" font-size="12" font-weight="800">V →</text>
-<text x="54" y="16" font-size="12" font-weight="800">p ↑</text>
-<text x="216" y="46" font-size="14" font-weight="800">∫p dV</text>
-<text x="216" y="65" font-size="11">Area under curve</text>
+<svg id="scene" class="scene" viewBox="0 0 560 355" role="img" aria-label="Moving piston and air cylinder with pressure and volume labels"></svg>
+<div class="concept">
+<svg viewBox="0 0 420 108" role="img" aria-label="The area below the pressure volume path is boundary work done by a gas">
+<path d="M33 12V87H396" stroke="#111" stroke-width="3" fill="none"/>
+<path d="M77 22Q163 42 342 69L342 87H77Z" fill="#FFC83D" opacity=".6" stroke="#111" stroke-width="2.5"/>
+<path d="M77 22Q163 42 342 69" stroke="#FF6B3D" stroke-width="4" fill="none"/>
+<g font-size="13" font-weight="800">
+<text x="135" y="71">∫ p dV</text><text x="227" y="105">Boundary work</text>
+<text x="15" y="19">p</text><text x="388" y="102">V</text>
+</g>
 </svg>
-<p class="caption">Area under the p–V path represents boundary work. Expansion is positive; compression is negative.</p>
+<p class="caption">Closed-system boundary work: expansion work by the gas is positive; compression work by the gas is negative.</p>
 </div>
-</div>
-
-<div class="panel">
-<div class="card">
-<h2 id="roundType">Engineering task</h2>
+</section>
+<section class="card">
+<h2 id="mission">Process challenge</h2>
 <p id="question" class="question"></p>
-<p id="assumption" class="assumption"></p>
-<div id="controls" class="controls"></div>
-<div class="readout" id="readout"></div>
-</div>
-<div class="card">
-<h2>Live p–V process</h2>
-<svg id="plot" class="graph" viewBox="0 0 500 320" role="img" aria-label="Pressure in kilopascals against volume in litres with boundary-work area"></svg>
-<p class="caption">Shaded strips show the signed boundary-work area for the current process.</p>
-</div>
-<div class="card">
-<div class="actions">
-<button id="hint">Hint</button>
-<button id="check" class="check">Check ✓</button>
-<button id="next" disabled>Next round →</button>
-</div>
-<p id="feedback" class="feedback" aria-live="polite">Select your process settings and press Check.</p>
+<div id="controls"></div>
+<div id="choiceBox" class="control hidden">
+<label>Choose the least positive steady-flow compressor (shaft) work input</label>
+<div class="choices">
+<button data-choice="isothermal" aria-pressed="false">Isothermal</button>
+<button data-choice="adiabatic" aria-pressed="false">Adiabatic</button>
+<button data-choice="polytropic" aria-pressed="false">Polytropic n = 1.2</button>
 </div>
 </div>
+<div id="readout" class="readout"></div>
+<div class="actions"><button id="hint">Hint (−25)</button><button id="check" class="check">Check</button><button id="next" class="hidden">Next round →</button></div>
+<div id="feedback" class="feedback" aria-live="polite"></div>
+</section>
+<section class="card">
+<h2>Pressure–volume process</h2>
+<svg id="plot" class="plot" viewBox="0 0 570 340" role="img" aria-label="Pressure versus volume curve with work area shaded"></svg>
+<div class="legend"><span><i class="swatch" style="background:#FF6B3D"></i>Process curve</span><span><i class="swatch" style="background:#FFC83D"></i>Work area</span><span><i class="swatch" style="background:#3DBE6B"></i>Final state</span></div>
+<p class="caption">The shaded strips represent closed-system boundary work, ∫p dV. Steady-flow compressor (shaft) work is calculated separately as −∫V dp.</p>
+</section>
 </div>
 <details>
 <summary>The physics</summary>
-<p><strong>Perfect gas:</strong> pV = mRT, with R = 0.287 kJ kg⁻¹ K⁻¹ for air. The heat-capacity ratio is γ = 1.4.</p>
-<p><strong>Isothermal:</strong> pV = constant, n = 1 and T₂ = T₁.</p>
-<p><strong>Reversible adiabatic:</strong> pVᵞ = constant, n = γ = 1.4, and no heat crosses the boundary.</p>
-<p><strong>Polytropic:</strong> pVⁿ = constant.</p>
-<p><strong>Boundary work:</strong> W_by = ∫p dV = (p₂V₂ − p₁V₁)/(1 − n) for n different from 1. For n = 1, W_by = p₁V₁ ln(V₂/V₁).</p>
-<p><strong>Final temperature:</strong> T₂/T₁ = (p₂/p₁)^((n−1)/n).</p>
-<p><strong>Sign convention:</strong> W_by is positive for expansion and negative for compression. Compressor work input = −W_by when compressed reversibly.</p>
-<p><strong>Units:</strong> p in kPa, V in m³ gives work in kJ. For plotted volumes in L, divide kPa·L by 1,000 to obtain kJ.</p>
-<p><strong>Assumptions:</strong> fixed mass of perfect gas, constant specific heats, quasi-static reversible processes, negligible changes in kinetic and potential energy.</p>
+<p>For air, R = 0.287 kJ kg⁻¹ K⁻¹ and γ = 1.4. Perfect-gas equation: pV = mRT. With p in kPa and V in m³, pV is in kJ.</p>
+<p>Isothermal process: n = 1, pV = constant, T₂ = T₁ and closed-system boundary work W<sub>by</sub> = p₁V₁ ln(V₂/V₁).</p>
+<p>Adiabatic reversible process: n = γ = 1.4, pV<sup>γ</sup> = constant, and Q = 0.</p>
+<p>Polytropic process: pV<sup>n</sup> = constant. For n ≠ 1, closed-system boundary work W<sub>by</sub> = (p₂V₂ − p₁V₁)/(1 − n).</p>
+<p>Closed-system boundary work W<sub>by</sub> is done <strong>by</strong> the gas: positive for expansion and negative for compression. Closed-system compression input work is −W<sub>by</sub>.</p>
+<p>For a reversible steady-flow compressor, the shaft work done by the fluid is W<sub>shaft,by</sub> = −∫V dp. The positive compressor shaft input is W<sub>shaft,in</sub> = ∫V dp. For p₂/p₁ &gt; 1, isothermal compression requires the least shaft input and reversible adiabatic compression the most, for the same initial state and pressure ratio.</p>
+<p>Steady-flow compressor input, n = 1: W<sub>shaft,in</sub> = p₁V₁ ln(p₂/p₁). For n ≠ 1: W<sub>shaft,in</sub> = [n/(n − 1)]p₁V₁[(p₂/p₁)<sup>(n−1)/n</sup> − 1].</p>
+<p>Temperature ratio: T₂/T₁ = (p₂/p₁)<sup>(n−1)/n</sup>. Equivalently, T₂/T₁ = (V₁/V₂)<sup>n−1</sup>.</p>
+<p>Assumptions: reversible, quasi-static perfect-gas processes, constant process index and negligible kinetic and potential energy changes. No mechanical losses are included. The steady-flow compressor comparison additionally assumes steady operation and an internally reversible flow process.</p>
 </details>
 </section>
-
-<section id="finish" class="card end hidden">
-<h1>Compressor challenge complete!</h1>
-<div id="stars" class="stars"></div>
-<h2 id="result"></h2>
-<p id="resultText"></p>
-<button class="check" id="again">Play again ↻</button>
-</section>
+<section id="end" class="card end hidden"><h1>Compressor approved!</h1><div id="stars" class="stars"></div><h2 id="final"></h2><p id="comment"></p><button id="again">Engineer again ↻</button></section>
 </main>
-
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const NS="http:"+"//www.w3.org/2000/svg";
 const R=.287,GAMMA=1.4;
-const s={round:0,score:0,tries:0,hinted:false,done:false,seed:1,d:null,value:0,choice:null,sync:null};
-function randomSeed(){s.seed=(Math.floor(Math.random()*4294967295)+s.round*12911)>>>0;}
-function rnd(){s.seed=(Math.imul(1664525,s.seed)+1013904223)>>>0;return s.seed/4294967296;}
-function pick(a){return a[Math.floor(rnd()*a.length)];}
-function e(tag,a={},t){
- const x=document.createElementNS(NS,tag);
- for(const [k,v] of Object.entries(a))x.setAttribute(k,String(v));
- if(t!==undefined)x.textContent=String(t);
- return x;
+let seed=72341,round=0,score=0,tries=0,hinted=false,solved=false;
+let rounds=[],q=null,inputs={},choice="";
+function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function pick(a){return a[Math.floor(rand()*a.length)]}
+function fmt(n){return Number(n.toPrecision(5)).toString()}
+
+/*
+ Pure calculation functions, exposed below for external tests.
+ Pressure: kPa. Volumes: L. Both functions return kJ.
+ boundaryWork is signed work BY a closed-system gas.
+ flowWork is signed steady-flow shaft work BY the fluid:
+ flowWork = -integral(V dp), negative for compression.
+ Its positive compressor shaft input is -flowWork.
+*/
+function boundaryWork(p1,V1,V2,n){
+ if(![p1,V1,V2,n].every(Number.isFinite)||V1<=0||V2<=0||p1<=0||n<=0)return NaN;
+ const ratio=V2/V1;
+ if(Math.abs(n-1)<1e-8)return p1*V1*Math.log(ratio)/1000;
+ const p2=p1*Math.pow(V1/V2,n);
+ return (p2*V2-p1*V1)/(1-n)/1000;
 }
-function add(g,tag,a={},t){const x=e(tag,a,t);g.appendChild(x);return x;}
-function line(g,x1,y1,x2,y2,c="#111",w=2,d=""){add(g,"line",{x1,y1,x2,y2,stroke:c,"stroke-width":w,"stroke-dasharray":d});}
-function text(g,x,y,t,size=13,anchor="start",c="#111"){add(g,"text",{x,y,"font-size":size,"font-weight":700,"text-anchor":anchor,fill:c},t);}
-function pAt(d,v,n){return d.p1*Math.pow(d.v1/v,n);}
-function work(d,v,n){
- if(v<=0||d.v1<=0||!Number.isFinite(v)||!Number.isFinite(n))return 0;
- if(Math.abs(n-1)<1e-9)return d.p1*d.v1*Math.log(v/d.v1)/1000;
- const p=pAt(d,v,n);
- return (p*v-d.p1*d.v1)/(1-n)/1000;
+function flowWork(n,p1,V1,p2,gamma){
+ if(![n,p1,V1,p2,gamma].every(Number.isFinite)||n<=0||p1<=0||V1<=0||p2<=0||gamma<=0)return NaN;
+ const ratio=p2/p1;
+ if(Math.abs(n-1)<1e-8)return -p1*V1*Math.log(ratio)/1000;
+ return -(n/(n-1))*p1*V1*(Math.pow(ratio,(n-1)/n)-1)/1000;
 }
-function finalTemperature(d,n){
- if(n<=0||d.ratio<=0)return NaN;
- return d.T1*Math.pow(d.ratio,(n-1)/n);
-}
-function current(){
- const d=s.d;if(!d)return{};
- if(d.type==="workV"){
-  const v=s.value,n=d.n,p2=pAt(d,v,n);
-  return{v,n,p2,T2:d.T1*(p2/d.p1)*(v/d.v1),W:work(d,v,n)};
- }
- if(d.type==="workN"){
-  const n=s.value,v=d.v2,p2=pAt(d,v,n);
-  return{v,n,p2,T2:d.T1*(p2/d.p1)*(v/d.v1),W:work(d,v,n)};
- }
- if(d.type==="temp"){
-  const n=s.value,v=d.v1*Math.pow(d.ratio,-1/n),p2=d.p1*d.ratio;
-  return{v,n,p2,T2:finalTemperature(d,n),W:work(d,v,n)};
- }
- const n=s.choice==="isothermal"?1:s.choice==="polytropic"?1.2:1.4;
- const v=d.v1*Math.pow(d.ratio,-1/n);
- return{v,n,p2:d.p1*d.ratio,T2:finalTemperature(d,n),W:work(d,v,n)};
-}
-function stepper(label,unit,min,max,step,coarse){
- const box=document.createElement("div");box.className="control";
- const lab=document.createElement("label");lab.textContent=label;box.appendChild(lab);
- const row=document.createElement("div");row.className="stepper";
- const out=document.createElement("output");
- const change=delta=>{
-  s.value=Number(Math.max(min,Math.min(max,s.value+delta)).toFixed(5));
-  update();
- };
- for(const [symbol,delta,description] of [
-  ["−−",-coarse,"Decrease coarse"],["−",-step,"Decrease fine"],
-  ["+",step,"Increase fine"],["++",coarse,"Increase coarse"]
- ]){
-  const b=document.createElement("button");b.textContent=symbol;
-  b.setAttribute("aria-label",`${description} by ${Math.abs(delta)} ${unit}`);
-  b.onclick=()=>change(delta);row.appendChild(b);
- }
- row.insertBefore(out,row.children[2]);
- box.appendChild(row);
- const range=document.createElement("input");range.type="range";
- range.min=min;range.max=max;range.step=step;
- range.setAttribute("aria-label",label);
- range.oninput=()=>{s.value=Number(range.value);update();};
- box.appendChild(range);$("controls").appendChild(box);
- s.sync=()=>{out.textContent=`${Number(s.value.toFixed(3))} ${unit}`;range.value=String(s.value);};
-}
-function choices(options){
- const row=document.createElement("div");row.className="choices";
- for(const [label,value] of options){
-  const b=document.createElement("button");b.className="choice";b.textContent=label;
-  b.onclick=()=>{
-   s.choice=value;
-   row.querySelectorAll("button").forEach(x=>x.classList.toggle("selected",x===b));
-   update();
-  };
-  row.appendChild(b);
- }
- $("controls").appendChild(row);
-}
-function start(){
- randomSeed();
- s.tries=0;s.hinted=false;s.done=false;s.choice=null;s.sync=null;
- $("controls").replaceChildren();
- $("roundHud").textContent=`Round ${s.round+1}/6`;
- $("scoreHud").textContent=s.score+" points";
- $("check").disabled=false;$("hint").disabled=false;$("next").disabled=true;
- $("feedback").className="feedback";
- $("feedback").textContent="Select your process settings and press Check.";
- const types=["workV","workN","compare","temp","workV","temp"];
- const d={type:types[s.round],p1:pick([100,150,200]),v1:pick([2,3,4]),T1:pick([290,300,320])};
- d.mass=d.p1*(d.v1/1000)/(R*d.T1);
- if(d.type==="workV"){
-  d.n=pick([1,1.2,1.4]);
-  d.answer=pick([1,1.5,2,2.5,3,3.5,4.5,5]);
-  if(Math.abs(d.answer-d.v1)<.1)d.answer=d.v1===2?4:2;
-  d.target=work(d,d.answer,d.n);
-  s.value=d.answer===3?4:3;
-  if(s.value===d.answer)s.value=2;
-  s.d=d;
-  $("roundType").textContent="A · Boundary work";
-  $("question").textContent=`Air begins at ${d.p1} kPa and ${d.v1.toFixed(1)} L. For a ${d.n===1?"reversible isothermal":d.n===1.4?"reversible adiabatic":"polytropic"} process with n = ${d.n.toFixed(1)}, set V₂ so the boundary work BY the gas is ${d.target.toFixed(5)} kJ.`;
-  $("assumption").textContent="Use the reversible pVⁿ process relation and the correct n = 1 limit.";
-  stepper("Final volume, V₂","L",.5,6,.1,.5);
- }else if(d.type==="workN"){
-  d.v2=d.v1*pick([.5,.75,1.25,1.5]);
-  d.answer=pick([1,1.1,1.2,1.3,1.4,1.5,1.6]);
-  d.target=work(d,d.v2,d.answer);
-  s.value=d.answer===1.2?1.5:1.2;
-  s.d=d;
-  $("roundType").textContent="B · Find the process index";
-  $("question").textContent=`Air changes from V₁ = ${d.v1.toFixed(2)} L to V₂ = ${d.v2.toFixed(2)} L at initial pressure ${d.p1} kPa. Set the polytropic index n so W_by = ${d.target.toFixed(6)} kJ.`;
-  $("assumption").textContent="Reversible pVⁿ process. An index near 1 requires the logarithmic limit.";
-  stepper("Polytropic index, n","",.8,1.8,.01,.1);
- }else if(d.type==="compare"){
-  d.ratio=pick([1.5,2,2.5,3]);
-  s.choice=null;s.d=d;
-  $("roundType").textContent="C · Compare compressor processes";
-  $("question").textContent=`Starting at p₁ = ${d.p1} kPa and T₁ = ${d.T1} K, three reversible compressor paths reach p₂/p₁ = ${d.ratio.toFixed(1)}. Which path requires the least positive boundary-work input?`;
-  $("assumption").textContent="Same initial state, pressure ratio and gas mass. Compare isothermal, polytropic n = 1.2 and adiabatic γ = 1.4.";
-  choices([
-   ["Isothermal n = 1","isothermal"],
-   ["Polytropic n = 1.2","polytropic"],
-   ["Adiabatic n = 1.4","adiabatic"]
-  ]);
+window.boundaryWork=boundaryWork;
+window.flowWork=flowWork;
+const boundary=boundaryWork;
+
+function makeRounds(){
+ const out=[];
+ for(let i=0;i<6;i++){
+ const p1=pick([100,150,200]),V1=pick([8,10,12]),T1=pick([280,300,320]);
+ if(i===0||i===3){
+ const v2=i===0?V1/2:V1*1.5;
+ const n=i===0?1.2:1;
+ out.push({type:"volume",p1,V1,T1,n,answer:v2,target:boundary(p1,V1,v2,n)});
+ }else if(i===1){
+ const V2=V1*.6,answer=1.3;
+ out.push({type:"index",p1,V1,V2,T1,answer,target:boundary(p1,V1,V2,answer)});
+ }else if(i===2){
+ out.push({type:"compare",p1,V1,T1,ratio:2});
+ }else if(i===4){
+ const ratio=2,n=1.4;
+ out.push({type:"temperature",p1,V1,T1,ratio,n,answer:T1*Math.pow(ratio,(n-1)/n)});
  }else{
-  d.ratio=pick([1.5,2,2.5,3]);
-  d.answer=pick([1,1.1,1.2,1.3,1.4,1.5,1.6]);
-  d.target=finalTemperature(d,d.answer);
-  s.value=d.answer===1.2?1.5:1.2;
-  s.d=d;
-  $("roundType").textContent="D · Final temperature";
-  $("question").textContent=`Air begins at T₁ = ${d.T1} K. The pressure rises by a factor of ${d.ratio.toFixed(1)}. Select the polytropic index n that produces T₂ = ${d.target.toFixed(3)} K.`;
-  $("assumption").textContent="Perfect gas, reversible pVⁿ process, constant specific heats.";
-  stepper("Polytropic index, n","",.8,1.8,.01,.1);
+ const V2=V1*.75,answer=1.2;
+ out.push({type:"index",p1,V1,V2,T1,answer,target:boundary(p1,V1,V2,answer)});
  }
- update();
+ }
+ return out;
 }
-function plot(){
- const g=$("plot");g.replaceChildren();
- const d=s.d,c=current();
- const xmin=.35,xmax=7.0;
- const X=v=>67+(v-xmin)/(xmax-xmin)*410;
- const pmax=Math.max(800,d.p1*3.5,c.p2*1.2);
- const Y=p=>258-Math.max(0,p)/pmax*198;
- text(g,250,20,"Pressure and boundary work",17,"middle");
- for(let i=0;i<=4;i++){
-  const p=pmax*i/4,y=Y(p);
-  line(g,67,y,477,y,"#ddd",1);
-  text(g,58,y+4,p.toFixed(0),11,"end");
+function field(name,label,value,min,max,step,unit){
+ inputs[name]=value;
+ return `<div class="control"><label for="f-${name}">${label}</label>
+ <div class="stepper">
+ <button type="button" class="coarse" data-adjust="${name}" data-delta="${-step*10}" aria-label="Decrease ${label} by ten steps">−−</button>
+ <button type="button" data-adjust="${name}" data-delta="${-step}" aria-label="Decrease ${label} by one step">−</button>
+ <input id="f-${name}" type="number" min="${min}" max="${max}" step="${step}" value="${value}" data-field="${name}">
+ <span class="unit">${unit}</span>
+ <button type="button" data-adjust="${name}" data-delta="${step}" aria-label="Increase ${label} by one step">+</button>
+ <button type="button" class="coarse" data-adjust="${name}" data-delta="${step*10}" aria-label="Increase ${label} by ten steps">++</button>
+ </div></div>`;
+}
+function bind(){
+ document.querySelectorAll("[data-field]").forEach(e=>{
+ e.addEventListener("input",()=>{if(e.value!=="")update(e.dataset.field,e.value)});
+ e.addEventListener("blur",()=>update(e.dataset.field,inputs[e.dataset.field]));
+ });
+ document.querySelectorAll("[data-adjust]").forEach(b=>b.addEventListener("click",()=>update(b.dataset.adjust,inputs[b.dataset.adjust]+Number(b.dataset.delta))));
+}
+function update(name,x){
+ if(!Number.isFinite(Number(x)))return;
+ let el=$("f-"+name);if(!el)return;
+ let v=Math.max(Number(el.min),Math.min(Number(el.max),Number(x)));
+ v=Number(v.toFixed(5));inputs[name]=v;el.value=fmt(v);draw();
+}
+document.querySelectorAll("[data-choice]").forEach(b=>b.addEventListener("click",()=>{
+ choice=b.dataset.choice;
+ document.querySelectorAll("[data-choice]").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.choice===choice)));
+ draw();
+}));
+function startRound(){
+ q=rounds[round];tries=0;hinted=false;solved=false;inputs={};choice="";
+ $("round").textContent=`Round ${round+1}/6`;$("score").textContent="Score "+score;
+ $("feedback").textContent="";$("feedback").className="feedback";
+ $("check").classList.remove("hidden");$("next").classList.add("hidden");$("hint").disabled=false;
+ $("next").textContent=round===5?"See results →":"Next round →";
+ $("choiceBox").classList.toggle("hidden",q.type!=="compare");
+ document.querySelectorAll("[data-choice]").forEach(b=>b.setAttribute("aria-pressed","false"));
+ let html="";
+ if(q.type==="volume"){
+ $("mission").textContent=q.n===1?"Isothermal work":"Compression boundary work";
+ $("question").textContent=`Air starts at ${q.p1} kPa and ${q.V1} L, then follows a reversible ${q.n===1?"isothermal":"polytropic"} process with n = ${q.n}. Set the final volume to obtain closed-system boundary work done by the gas of ${fmt(q.target)} kJ.`;
+ html=field("V2","Final volume V₂",q.answer+2,2,30,.1,"L");
+ }else if(q.type==="index"){
+ $("mission").textContent="Find the process index";
+ $("question").textContent=`Air starts at ${q.p1} kPa and ${q.V1} L and ends at ${fmt(q.V2)} L. Choose the polytropic index n so that the signed closed-system boundary work done by the gas is ${fmt(q.target)} kJ.`;
+ html=field("n","Polytropic index n",q.answer+.3,.5,2,.1,"");
+ }else if(q.type==="compare"){
+ $("mission").textContent="Least steady-flow compressor work";
+ $("question").textContent=`A steady-flow compressor receives air at ${q.p1} kPa, with inlet volume ${q.V1} L for a fixed quantity of air, and delivers it at pressure ratio p₂/p₁ = ${q.ratio}. Compare internally reversible isothermal n = 1, polytropic n = 1.2 and adiabatic n = 1.4 processes. Which needs the least positive compressor (steady-flow) shaft-work input, evaluated from ∫V dp?`;
+ }else{
+ $("mission").textContent="Final temperature";
+ $("question").textContent=`Air initially has T₁ = ${q.T1} K and p₁ = ${q.p1} kPa. For a reversible adiabatic compression (n = γ = 1.4) to pressure ratio p₂/p₁ = ${q.ratio}, determine T₂.`;
+ html=field("T2","Final temperature T₂",Math.round(q.answer)+40,200,800,.01,"K");
  }
- line(g,67,60,67,258);line(g,67,258,477,258);
- for(let v=1;v<=7;v++){
-  line(g,X(v),258,X(v),263);
-  text(g,X(v),279,v,11,"middle");
- }
- text(g,270,306,"Volume V (L)",13,"middle");
- add(g,"text",{x:16,y:158,transform:"rotate(-90 16 158)","text-anchor":"middle","font-size":13,"font-weight":700},"Pressure p (kPa)");
- let path="";
- const N=100;
- const vlow=Math.min(d.v1,c.v),vhigh=Math.max(d.v1,c.v);
- const stripWidth=(vhigh-vlow)/N;
- for(let i=0;i<N;i++){
-  const v=vlow+(i+.5)*stripWidth;
-  if(v<=0)continue;
-  const p=pAt(d,v,c.n);
-  const x1=X(vlow+i*stripWidth),x2=X(vlow+(i+1)*stripWidth);
-  const y=Y(p);
-  if(Number.isFinite(y)&&y>-10000){
-   add(g,"rect",{
-    x:x1,y:Math.max(60,y),width:Math.max(.2,x2-x1),height:Math.max(0,258-Math.max(60,y)),
-    fill:c.v<d.v1?"#FF8FB8":"#FF6B3D","fill-opacity":.42
-   });
-  }
- }
- for(let v=xmin;v<=xmax+.0001;v+=.035){
-  const p=pAt(d,v,c.n),y=Math.max(-1000,Y(p));
-  if(!Number.isFinite(y))continue;
-  path+=(path?"L":"M")+X(v).toFixed(2)+" "+y.toFixed(2)+" ";
- }
- add(g,"path",{d:path,fill:"none",stroke:"#FF6B3D","stroke-width":3.5});
- add(g,"circle",{cx:X(d.v1),cy:Y(d.p1),r:6,fill:"#fff",stroke:"#111","stroke-width":2});
- add(g,"circle",{cx:X(c.v),cy:Y(c.p2),r:8,fill:"#FFC83D",stroke:"#111","stroke-width":3});
- text(g,300,40,"● Current end state",12);
- text(g,300,57,"○ Initial state",12);
- text(g,300,74,"■ Work area",12);
- g.setAttribute("aria-label",`Pressure-volume graph with process index ${c.n.toFixed(2)}. Current final volume ${c.v.toFixed(3)} litres and final pressure ${c.p2.toFixed(3)} kilopascals. Signed boundary work ${c.W.toFixed(5)} kilojoules.`);
+ $("controls").innerHTML=html;bind();draw();
+}
+function state(){
+ let n=q.type==="volume"?q.n:q.type==="index"?inputs.n:q.type==="compare"?choice==="isothermal"?1:choice==="adiabatic"?GAMMA:1.2:q.n;
+ let V2=q.type==="volume"?inputs.V2:q.type==="index"?q.V2:q.type==="compare"?q.V1*Math.pow(1/q.ratio,1/n):q.V1*Math.pow(1/q.ratio,1/n);
+ const p2=q.p1*Math.pow(q.V1/Math.max(.001,V2),n);
+ let T2=q.T1*(p2/q.p1)*(V2/q.V1);
+ let work=boundary(q.p1,q.V1,V2,n);
+ return {n,V2,p2,T2,work,V1:q.V1,p1:q.p1,mass:q.p1*q.V1/(1000*R*q.T1)};
 }
 function scene(){
- const g=$("scene");g.replaceChildren();
- const d=s.d,c=current();
- const h=70+Math.max(.1,Math.min(1,c.v/6))*195,top=290-h;
- text(g,250,23,"Reversible cylinder process",20,"middle");
- add(g,"rect",{x:112,y:55,width:265,height:242,rx:10,fill:"#fff",stroke:"#111","stroke-width":4});
- add(g,"rect",{x:117,y:top+10,width:255,height:280-top,fill:"#FFE1D7"});
- add(g,"rect",{x:105,y:top,width:279,height:13,rx:5,fill:"#FFC83D",stroke:"#111","stroke-width":4});
- add(g,"rect",{x:237,y:34,width:15,height:Math.max(0,top-34),fill:"#aaa",stroke:"#111","stroke-width":2});
- for(let i=0;i<23;i++){
-  const x=130+(i*83)%231,y=top+24+(i*47)%Math.max(30,260-top);
-  if(y<285)add(g,"circle",{cx:x,cy:y,r:5,fill:"#FF8FB8",stroke:"#111","stroke-width":1.5});
+ const s=state();
+ const ratio=s.V2/q.V1,level=260-130*Math.min(1.6,Math.max(.2,ratio));
+ let html='<rect width="560" height="355" rx="24" fill="#FFE6DC" stroke="#111" stroke-width="3"/>';
+ html+='<path d="M130 39V297Q130 308 142 308H418Q430 308 430 297V39" fill="white" stroke="#111" stroke-width="5"/>';
+ html+=`<rect x="136" y="${level+17}" width="288" height="${291-level-17}" fill="#FFD1BF"/>`;
+ html+=`<rect x="123" y="${level}" width="314" height="20" rx="5" fill="#FF6B3D" stroke="#111" stroke-width="4"/>`;
+ html+=`<path d="M280 ${level}V${Math.max(20,level-46)}" stroke="#111" stroke-width="8"/>`;
+ html+='<path d="M478 58V112M467 97L478 114L489 97" stroke="#111" stroke-width="4" fill="none"/>';
+ html+='<text x="495" y="82" font-size="15" font-weight="800">W on</text>';
+ html+='<path d="M479 267V208M468 225L479 207L490 225" stroke="#D92D20" stroke-width="4" fill="none"/>';
+ html+='<text x="494" y="242" font-size="16" font-weight="800">Q</text>';
+ for(let i=0;i<20;i++){
+ let x=148+(i*83)%255,y=level+31+(i*49)%Math.max(29,260-level);
+ html+=`<circle cx="${x}" cy="${y}" r="6" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
  }
- text(g,25,135,"Q →",19);
- text(g,250,332,c.W<0?"W_by < 0 · input":"W_by ≥ 0 · output",16,"middle");
- text(g,395,113,`p₂ ${c.p2.toFixed(1)}`,14);
- text(g,395,134,"kPa",12);
- text(g,395,180,`T₂ ${c.T2.toFixed(1)}`,14);
- text(g,395,201,"K",12);
- text(g,395,245,`n ${c.n.toFixed(2)}`,14);
- text(g,250,353,`V₂ ${c.v.toFixed(2)} L`,15,"middle");
- g.setAttribute("aria-label",`Air in a cylinder: final pressure ${c.p2.toFixed(2)} kilopascals, volume ${c.v.toFixed(2)} litres, temperature ${c.T2.toFixed(2)} kelvin and polytropic index ${c.n.toFixed(2)}.`);
+ html+=`<text x="20" y="25" font-size="14" font-weight="800">p₁ = ${q.p1} kPa</text>`;
+ html+=`<text x="20" y="44" font-size="14" font-weight="800">V₁ = ${q.V1} L</text>`;
+ html+=`<text x="20" y="63" font-size="14" font-weight="800">T₁ = ${q.T1} K</text>`;
+ html+=`<text x="20" y="83" font-size="14" font-weight="800">n = ${fmt(s.n)}</text>`;
+ html+='<text x="280" y="338" text-anchor="middle" font-size="14" font-weight="800">Moving piston • perfect gas</text>';
+ $("scene").innerHTML=html;
+ $("scene").setAttribute("aria-label",`Perfect-gas cylinder. Initial pressure ${q.p1} kilopascals, initial volume ${q.V1} litres, final volume ${fmt(s.V2)} litres.`);
 }
-function update(){
- if(!s.d)return;
- if(s.sync)s.sync();
- const c=current(),d=s.d;
- $("readout").innerHTML=`Boundary work W_by: <strong>${c.W.toFixed(6)} kJ</strong><br>p₂ = ${c.p2.toFixed(3)} kPa · V₂ = ${c.v.toFixed(3)} L<br>T₂ = ${c.T2.toFixed(3)} K · n = ${c.n.toFixed(2)}<br>Compressor work input = ${Math.max(0,-c.W).toFixed(6)} kJ`;
- plot();scene();
+function plot(){
+ const s=state(),W=570,H=340,L=79,Rt=18,Top=61,B=46;
+ let minV=Math.max(.2,Math.min(q.V1,s.V2)*.78),maxV=Math.max(q.V1,s.V2)*1.22;
+ if(maxV-minV<2){minV=Math.max(.2,minV-1);maxV+=1}
+ const pOf=V=>q.p1*Math.pow(q.V1/V,s.n);
+ let maxP=Math.max(q.p1,pOf(minV),s.p2)*1.12;
+ const X=v=>L+(W-L-Rt)*(v-minV)/(maxV-minV);
+ const Y=p=>H-B-(H-B-Top)*p/maxP;
+ let html='<rect width="570" height="340" rx="15" fill="#F4F3EF"/>';
+ for(let i=0;i<=5;i++){
+ const v=minV+(maxV-minV)*i/5,x=X(v);
+ html+=`<line x1="${x}" y1="${Top}" x2="${x}" y2="${H-B}" stroke="#DDD9CD"/><text x="${x}" y="${H-B+18}" font-size="12" text-anchor="middle">${fmt(v)}</text>`;
+ }
+ for(let i=0;i<=4;i++){
+ const p=maxP*i/4,y=Y(p);
+ html+=`<line x1="${L}" y1="${y}" x2="${W-Rt}" y2="${y}" stroke="#DDD9CD"/><text x="${L-8}" y="${y+4}" font-size="12" text-anchor="end">${fmt(p)}</text>`;
+ }
+ html+=`<path d="M${L} ${Top}V${H-B}H${W-Rt}" stroke="#111" stroke-width="2.5" fill="none"/>`;
+ html+=`<text x="${L}" y="19" font-size="15" font-weight="800">Reversible process p–V</text>`;
+ html+=`<text x="${L}" y="${Top-9}" font-size="12" font-weight="800">Pressure p (kPa)</text>`;
+ html+=`<text x="${W/2}" y="${H-8}" text-anchor="middle" font-size="13" font-weight="800">Volume V (L)</text>`;
+ let pts=[];
+ for(let i=0;i<=150;i++){
+ const v=minV+(maxV-minV)*i/150;
+ pts.push(`${X(v)},${Y(pOf(v))}`);
+ }
+ html+=`<polyline points="${pts.join(" ")}" fill="none" stroke="#111" stroke-width="5"/>`;
+ html+=`<polyline points="${pts.join(" ")}" fill="none" stroke="#FF6B3D" stroke-width="3.5"/>`;
+ let strips=80;
+ for(let i=0;i<strips;i++){
+ const v1=q.V1+(s.V2-q.V1)*i/strips;
+ const v2=q.V1+(s.V2-q.V1)*(i+1)/strips;
+ const middle=(v1+v2)/2,p=pOf(middle);
+ html+=`<rect x="${Math.min(X(v1),X(v2))}" y="${Y(p)}" width="${Math.abs(X(v2)-X(v1))+.4}" height="${Y(0)-Y(p)}" fill="#FFC83D" opacity=".34"/>`;
+ }
+ html+=`<circle cx="${X(q.V1)}" cy="${Y(q.p1)}" r="7" fill="white" stroke="#111" stroke-width="3"/>`;
+ html+=`<circle cx="${X(s.V2)}" cy="${Y(s.p2)}" r="9" fill="#3DBE6B" stroke="#111" stroke-width="3"/>`;
+ html+=`<text x="${W-Rt-7}" y="38" text-anchor="end" font-size="14" font-weight="800">Boundary W_by = ${fmt(s.work)} kJ</text>`;
+ $("plot").innerHTML=html;
+ $("plot").setAttribute("aria-label",`Pressure volume curve with closed-system boundary-work area. Current final state ${fmt(s.p2)} kilopascals, ${fmt(s.V2)} litres. Signed boundary work by gas ${fmt(s.work)} kilojoules.`);
 }
-function hint(){
- if(s.hinted||s.done)return;
- s.hinted=true;$("hint").disabled=true;
- const d=s.d;
- const message=d.type==="workV"?"Use p₂ = p₁(V₁/V₂)ⁿ before calculating work.":
- d.type==="workN"?"Changing n changes the shape of the p–V curve. Near n = 1 use the logarithmic work equation.":
- d.type==="compare"?"At a fixed pressure ratio, the larger n requires a smaller fractional volume reduction. Compare the areas under the paths.":
- "Rearrange T₂/T₁ = (p₂/p₁)^((n−1)/n).";
- $("feedback").textContent="Hint: "+message;
+function draw(){
+ if(!q)return;
+ const s=state();scene();plot();
+ $("readout").textContent=`Process index n = ${fmt(s.n)} · p₂ = ${fmt(s.p2)} kPa · V₂ = ${fmt(s.V2)} L · calculated T₂ = ${fmt(s.T2)} K · closed-system boundary work by gas = ${fmt(s.work)} kJ.`;
+ if(q.type==="compare"){
+ const signedFlow=flowWork(s.n,q.p1,q.V1,q.p1*q.ratio,GAMMA);
+ $("readout").textContent=`Process index n = ${fmt(s.n)} · steady-flow compressor shaft input = ${fmt(-signedFlow)} kJ · signed steady-flow shaft work by fluid = ${fmt(signedFlow)} kJ · separate closed-system boundary work by gas = ${fmt(s.work)} kJ.`;
+ }
+ if(q.type==="temperature")$("readout").textContent=`Pressure ratio ${q.ratio}; adiabatic index γ = ${q.n}. Your submitted temperature: ${fmt(inputs.T2)} K.`;
 }
+function message(t,k){$("feedback").textContent=t;$("feedback").className="feedback "+k}
 function check(){
- if(s.done)return;
- if(s.d.type==="compare"&&!s.choice){
-  $("feedback").textContent="Choose a process first.";return;
+ if(solved)return;tries++;
+ const s=state();
+ if(q.type==="compare"){
+ const cases=[
+ ["isothermal",1],
+ ["polytropic",1.2],
+ ["adiabatic",GAMMA]
+ ];
+ const inputsForComparison=cases.map(([name,n])=>({
+ name,
+ input:-flowWork(n,q.p1,q.V1,q.p1*q.ratio,GAMMA)
+ }));
+ const least=inputsForComparison.reduce((best,item)=>item.input<best.input?item:best);
+ if(choice===least.name){
+ win(`Steady-flow compressor shaft inputs are ${inputsForComparison.map(x=>fmt(x.input)).join(", ")} kJ for isothermal, n = 1.2 and adiabatic respectively. These use positive compressor input ∫V dp, not closed-system boundary work ∫p dV.`);
+ }else message(choice?"Compare positive steady-flow compressor shaft inputs from ∫V dp, not the separate closed-system boundary-work integrals.":"Select one process before checking.","bad");
+ return;
  }
- s.tries++;
- const d=s.d,c=current();
- let correct=false,diff=0,unit="";
- if(d.type==="compare"){
-  correct=s.choice==="adiabatic";
- }else if(d.type==="temp"){
-  diff=c.T2-d.target;unit="K";
-  correct=Math.abs(diff)<.025;
- }else{
-  diff=c.W-d.target;unit="kJ";
-  correct=Math.abs(diff)<.00015;
+ if(q.type==="temperature"){
+ let e=inputs.T2-q.answer;
+ if(Math.abs(e)<=.02)win(`T₂ = T₁(p₂/p₁)^((n−1)/n) = ${fmt(q.answer)} K.`);
+ else message(`Your final temperature is ${fmt(Math.abs(e))} K ${e>0?"too high":"too low"}.`,"bad");
+ return;
  }
- if(correct){
-  const gain=s.hinted?50:s.tries===1?100:75;
-  s.score+=gain;s.done=true;
-  $("feedback").className="feedback good";
-  $("scoreHud").textContent=s.score+" points";
-  $("check").disabled=true;$("next").disabled=false;$("hint").disabled=true;
-  let why="";
-  if(d.type==="compare"){
-   const w1=work(d,d.v1/Math.pow(d.ratio,1),1);
-   const wa=work(d,d.v1/Math.pow(d.ratio,1/1.4),1.4);
-   why=`For this pressure ratio, the adiabatic input ${(-wa).toFixed(4)} kJ is less than the isothermal input ${(-w1).toFixed(4)} kJ.`;
-  }else if(d.type==="temp"){
-   why=`T₂ = ${c.T2.toFixed(3)} K using the pressure ratio and process index.`;
-  }else{
-   why=`W_by = ${c.W.toFixed(6)} kJ, with the correct sign for ${c.W<0?"compression":"expansion"}.`;
-  }
-  $("feedback").textContent=`★ Correct! +${gain} points. ${why}`;
+ let e=s.work-q.target;
+ if(Math.abs(e)<=.003){
+ win(`Closed-system boundary work W_by = ${fmt(s.work)} kJ. The pressure-volume area is signed: ${s.work<0?"compression, so work by the gas is negative.":"expansion, so work by the gas is positive."}`);
  }else{
-  $("feedback").className="feedback bad";
-  $("feedback").textContent=d.type==="compare"?
-   "Not the least work input. Compare the area magnitudes at the same pressure ratio.":
-   `Your ${d.type==="temp"?"final temperature":"work"} is ${Math.abs(diff).toFixed(d.type==="temp"?3:6)} ${unit} too ${diff>0?"high":"low"}.`;
+ message(`Your closed-system boundary work is ${fmt(Math.abs(e))} kJ ${e>0?"too high":"too low"}. Adjust ${q.type==="index"?"n":"V₂"} while keeping the sign convention.`,"bad");
  }
 }
+function win(t){
+ solved=true;let pts=hinted?50:tries===1?100:75;score+=pts;
+ $("score").textContent="Score "+score;
+ message(`★ Correct! +${pts} points. ${t}`,"good");
+ $("hint").disabled=true;$("check").classList.add("hidden");$("next").classList.remove("hidden");
+}
+$("check").addEventListener("click",check);
+$("hint").addEventListener("click",()=>{
+ hinted=true;$("hint").disabled=true;
+ let t=q.type==="volume"?"Use the appropriate closed-system boundary-work formula for the stated n. Compression produces negative W_by.":
+ q.type==="index"?"Find p₂ from p₁(V₁/V₂)^n, then calculate closed-system boundary work (p₂V₂−p₁V₁)/(1−n).":
+ q.type==="compare"?"Use positive steady-flow compressor shaft input ∫V dp, equivalently negative signed shaft work −∫V dp. For the same inlet and pressure ratio, compare the n = 1, 1.2 and 1.4 paths. Do not compare closed-system boundary work.":
+ "Use the absolute-temperature ratio T₂/T₁ = (p₂/p₁)^((n−1)/n).";
+ message("Hint: "+t+" This round is now worth 50 points.","info");
+});
+$("next").addEventListener("click",()=>{if(!solved)return;if(round===5){finish();return}round++;startRound()});
+$("again").addEventListener("click",newGame);
 function finish(){
- $("game").classList.add("hidden");$("finish").classList.remove("hidden");
- const stars=s.score>=500?3:s.score>=350?2:s.score>=200?1:0;
- $("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
- $("result").textContent=`${s.score} / 600 points`;
- $("resultText").textContent="You have analysed boundary work, pressure ratios and perfect-gas process temperatures.";
- $("roundHud").textContent="Complete";
+ $("game").classList.add("hidden");$("end").classList.remove("hidden");
+ let n=score>=525?3:score>=375?2:1;
+ $("stars").textContent="★".repeat(n)+"☆".repeat(3-n);
+ $("final").textContent=`${score}/600 points`;
+ $("comment").textContent=n===3?"Excellent compressor design!":n===2?"Solid thermofluids work.":"Review the pressure-volume area and retry.";
 }
-$("hint").onclick=hint;
-$("check").onclick=check;
-$("next").onclick=()=>{s.round++;s.round>=6?finish():start();};
-$("again").onclick=()=>{s.round=0;s.score=0;$("finish").classList.add("hidden");$("game").classList.remove("hidden");start();};
-start();
+function newGame(){
+ seed=(seed+83749)>>>0;rounds=makeRounds();round=0;score=0;
+ $("end").classList.add("hidden");$("game").classList.remove("hidden");startRound();
+}
+newGame();
 </script>
 </body>
 </html>

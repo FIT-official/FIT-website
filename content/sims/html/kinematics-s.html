@@ -6,274 +6,469 @@
 <title>Graph Racer | FIT</title>
 <style>
 :where(html,body,*){touch-action:manipulation}
-:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
---lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
---r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
 *{box-sizing:border-box}
-body{margin:0;background:var(--fit-paper);color:#111;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-button,input{font:inherit;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+body{margin:0;color:var(--fit-ink);background:var(--fit-paper);font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit;-webkit-tap-highlight-color:transparent;user-select:none}
+button{min-height:48px;border-radius:999px;border:2px solid #111;padding:9px 17px;background:white;font-weight:800;box-shadow:var(--sh-1);cursor:pointer}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.45;cursor:default}
 :focus:not(:focus-visible){outline:none}
 :focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
-button{cursor:pointer;min-height:48px;padding:9px 17px;border:2px solid #111;border-radius:999px;background:#fff;font-weight:800;box-shadow:var(--sh-1)}
-button:active{transform:translateY(2px);box-shadow:none}
-button:disabled{opacity:.5;cursor:default}
-main{max-width:1300px;margin:auto;padding:17px 16px 48px}
-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px}
-h1{font-size:clamp(30px,5vw,45px);font-weight:800;margin:8px 0}
-h2{font-size:20px;font-weight:800;margin:0 0 14px}
-.badge{border:2px solid #111;background:var(--lvl-secondary);color:var(--lvl-secondary-on);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;text-transform:uppercase}
-.hud{display:flex;gap:15px;flex-wrap:wrap;font-weight:800}
-.layout{display:grid;gap:18px}
-.panel{background:#fff;border:2px solid #111;border-radius:26px;box-shadow:var(--sh-2);padding:17px;min-width:0}
+svg [tabindex]:focus-visible{outline:none;stroke:#111;stroke-width:7}
+input[type=number]{width:102px;max-width:100%;min-height:48px;border:2px solid #111;border-radius:12px;font-size:18px;font-weight:800;text-align:center}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-secondary)}
+main{max-width:1320px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:17px}
+.brand{font-weight:900;font-size:14px;letter-spacing:.06em}
+.badge{border:2px solid #111;border-radius:999px;background:var(--lvl-secondary);color:var(--lvl-secondary-on);padding:7px 14px;text-transform:uppercase;font-weight:800;font-size:12px}
+.hud{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-weight:800;font-size:14px}
+.hud span{border:2px solid #111;border-radius:999px;padding:7px 12px}
+h1{font-size:clamp(30px,5vw,52px);font-weight:800;line-height:1.14;margin:8px 0}
+h2{font-size:21px;font-weight:800;margin:0 0 12px;line-height:1.3}
+p{margin:9px 0}
+.lead{color:var(--fit-ink-2);margin-bottom:18px}
+.layout{display:grid;gap:20px}
+.card{border:2px solid #111;border-radius:28px;background:white;box-shadow:var(--sh-2);padding:18px;min-width:0}
 .stage{background:var(--lvl-secondary-tint)}
-.question{font-size:18px;font-weight:700;line-height:1.5}
-svg{width:100%;height:auto;display:block}
-svg text{font-family:inherit;fill:#111}
-.plot{background:white;border:2px solid #111;border-radius:15px;padding:7px;margin:10px 0}
-.plot svg{overflow:hidden}
-#velocityGraph{touch-action:none}
-.graph-dot{cursor:grab;outline:none;touch-action:none}
-.graph-dot:focus-visible{stroke:#111;stroke-width:6}
-.graph-dot:active{cursor:grabbing}
-.controls{background:var(--fit-sunken);border:2px solid #111;border-radius:18px;padding:14px;margin:12px 0}
-.control-row{margin-bottom:14px}
-.control-row:last-child{margin-bottom:0}
-label{display:block;font-weight:800;margin-bottom:8px}
-input[type=range]{width:100%;height:44px;accent-color:#138B75;cursor:pointer}
-input[type=number]{font-size:17px;min-width:0;width:100%;border:2px solid #111;border-radius:12px;padding:12px;background:#fff;min-height:48px}
-input:disabled{opacity:.55}
-.actions{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
-.check{flex:1;background:var(--fit-sun);border:3px solid #111;box-shadow:var(--sh-2)}
+.scene{width:100%;height:auto;display:block}
+.plot{display:block;width:100%;height:auto;background:var(--fit-sunken);border:2px solid #111;border-radius:16px;margin-top:11px}
+.graphbox{position:relative}
+.graphbox .plot{touch-action:none}
+.graphbox .plot,.graphbox .plot *{-webkit-tap-highlight-color:transparent;user-select:none}
+.graphbox .handle-hit{fill:transparent;stroke:none;pointer-events:all;cursor:ns-resize;touch-action:none}
+.graphbox .handle-dot{pointer-events:none}
+.graphbox .handle-hit:focus-visible{outline:none;stroke:#111;stroke-width:5;stroke-opacity:1}
+.corner-buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.corner-buttons .corner-group{display:flex;gap:7px;align-items:center;justify-content:space-between;flex:1 1 195px;padding:8px 10px;border:2px solid #111;border-radius:16px;background:var(--lvl-secondary-tint);font-size:13px;font-weight:800}
+.corner-buttons button{min-width:44px;min-height:44px;padding:7px 10px}
+.question{font-size:19px;font-weight:800}
+.small{font-size:13px;color:var(--fit-ink-3)}
+.controls{display:grid;gap:15px;margin:16px 0}
+.control{border:2px solid #111;border-radius:17px;padding:12px;background:var(--lvl-secondary-tint)}
+.control label{display:block;font-weight:800;margin-bottom:9px}
+.value-row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.steppers{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.steppers button{padding:7px 11px;min-width:44px}
+.steppers button.coarse{background:var(--fit-sunken)}
+.output{font-weight:800;font-size:17px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.check{background:var(--fit-sun);border-width:3px;flex:1;box-shadow:var(--sh-2)}
 .check:active{transform:translateY(3px);box-shadow:var(--sh-1)}
-#feedback{min-height:54px;font-weight:700;line-height:1.5}
-.good{color:var(--fit-success)}.bad{color:var(--fit-danger)}
-.concept{border-top:2px dashed #999;margin-top:17px;padding-top:12px}
-.concept p{font-size:13px;line-height:1.4}
-details{border:2px solid #111;border-radius:15px;padding:12px;background:#fff;margin-top:15px}
-summary{font-weight:800;cursor:pointer}
-details p{font-size:14px}
-#finish{display:none;text-align:center}
-.stars{font-size:46px;color:#c58b00}
-@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+.feedback{min-height:50px;padding:11px;border-radius:14px;margin-top:13px;font-weight:700}
+.feedback:empty{padding:0}
+.good{background:#DDF7E5;border:2px solid var(--fit-success)}
+.bad{background:#FFE7E2;border:2px solid var(--fit-danger)}
+.info{background:#E2ECFD;border:2px solid var(--fit-focus)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;font-weight:700}
+.swatch{width:14px;height:10px;display:inline-block;border:2px solid #111;vertical-align:middle;margin-right:4px}
+.concept{border:2px dashed #111;border-radius:16px;padding:13px;background:white;margin-top:17px}
+.concept svg{width:100%;height:100px}
+.caption{font-size:13px;color:var(--fit-ink-2)}
+details{border:2px solid #111;border-radius:17px;padding:14px;margin-top:19px;background:white}
+summary{cursor:pointer;font-weight:800;min-height:44px;-webkit-tap-highlight-color:transparent;user-select:none}
+.hidden{display:none!important}
+.end{text-align:center;max-width:700px;margin:32px auto}
+.stars{font-size:58px;letter-spacing:8px;color:#CE9E00}
+.end button{background:var(--fit-sun)}
+@media(min-width:900px){.layout{grid-template-columns:1.05fr .95fr;align-items:start}.stage{grid-row:span 2}}
+@media(max-width:480px){main{padding:11px}.card{padding:13px}.steppers{gap:4px}.steppers button{padding:7px 9px}input[type=number]{width:88px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <main>
 <header>
-<div><span class="badge">Secondary · Physics</span><h1>Graph Racer</h1><p>Build a speed–time graph and read how a runner moves.</p></div>
-<div class="hud"><span id="round">Round 1/6</span><span id="score">Score: 0</span></div>
-</header>
-<div id="game" class="layout">
-<section class="panel stage">
-<h2>Running track</h2>
-<svg id="track" viewBox="0 0 520 125" role="img" aria-label="Runner on a straight track">
-<rect x="18" y="20" width="484" height="83" rx="18" fill="#fff" stroke="#111" stroke-width="3"/>
-<path d="M45 85H480" stroke="#111" stroke-width="3" stroke-dasharray="9 8"/>
-<path d="M45 51H480" stroke="#999" stroke-width="2"/>
-<g id="runner"></g>
-<text x="34" y="17" font-size="12">Start</text><text x="457" y="17" font-size="12">Finish →</text>
-</svg>
-<p id="question" class="question"></p>
-<div class="plot">
-<svg id="velocityGraph" viewBox="0 0 520 295" role="img" aria-label="Speed versus time graph with shaded area"></svg>
+<div class="brand">FIT / MOTION GAMES</div>
+<div class="hud">
+<span class="badge">Secondary · Physics</span>
+<span id="roundLabel">Round 1/6</span>
+<span id="scoreLabel">Score 0</span>
 </div>
-<div class="concept">
-<svg viewBox="0 0 480 110" role="img" aria-label="A triangle and rectangle forming the area under a speed time graph">
-<path d="M55 15V89H447" stroke="#111" stroke-width="3" fill="none"/>
-<path d="M55 89L180 35H310V89Z" fill="#2EC4A6" fill-opacity=".65" stroke="#111" stroke-width="2"/>
-<text x="155" y="102" font-size="13">Time (s)</text><text x="11" y="20" font-size="12">v (m/s)</text>
-<text x="253" y="65" font-size="16" font-weight="800" text-anchor="middle">Area = distance</text>
+</header>
+<section id="game">
+<h1>Graph Racer</h1>
+<p class="lead">Shape a runner's motion. Read gradients and areas.</p>
+<div class="layout">
+<section class="card stage">
+<h2>Race track</h2>
+<svg id="scene" class="scene" viewBox="0 0 560 190" role="img" aria-label="Runner on a straight race track">
+<rect x="12" y="12" width="536" height="164" rx="23" fill="#DDF7F1" stroke="#111" stroke-width="3"/>
+<path d="M28 125H532" stroke="#111" stroke-width="35" stroke-linecap="round"/>
+<path d="M28 125H532" stroke="#FFF" stroke-width="27" stroke-linecap="round"/>
+<path d="M28 125H532" stroke="#111" stroke-width="2" stroke-dasharray="13 15"/>
+<path d="M45 95V155M516 95V155" stroke="#111" stroke-width="3" stroke-dasharray="5 5"/>
+<g id="runner" transform="translate(60 0)">
+<circle cx="0" cy="64" r="12" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+<path d="M0 76L-6 99L18 110M-6 99L-27 112M-5 87L-23 78M-5 87L15 82" stroke="#111" stroke-width="6" stroke-linecap="round" fill="none"/>
+</g>
+<g font-size="14" font-weight="800"><text x="28" y="28">START</text><text x="483" y="28">FINISH</text><text id="sceneReadout" x="280" y="166" text-anchor="middle">Motion</text></g>
 </svg>
-<p>The area under a speed–time graph gives the distance travelled.</p>
+<div class="concept">
+<svg viewBox="0 0 400 100" role="img" aria-label="Triangle below a speed time graph indicates distance; a rising segment has positive acceleration">
+<path d="M40 13V79H365" fill="none" stroke="#111" stroke-width="3"/>
+<path d="M40 79L190 20L330 20L330 79Z" fill="#FFC83D" opacity=".65" stroke="#111" stroke-width="3"/>
+<path d="M40 79L190 20" stroke="#2EC4A6" stroke-width="5"/>
+<path d="M85 66L120 66L120 49" fill="none" stroke="#111" stroke-width="2" stroke-dasharray="4 3"/>
+<g font-size="12" font-weight="800">
+<text x="132" y="60">Gradient = a</text>
+<text x="204" y="65">Area = distance</text>
+<text x="355" y="95">t</text>
+<text x="20" y="20">v</text>
+</g>
+</svg>
+<p class="caption">The area under a speed–time graph is distance. Its gradient is acceleration.</p>
 </div>
 </section>
-<section class="panel">
-<h2>Distance–time graph</h2>
-<div class="plot"><svg id="distanceGraph" viewBox="0 0 520 265" role="img" aria-label="Distance in metres versus time in seconds"></svg></div>
+<section class="card">
+<h2 id="missionTitle">Your mission</h2>
+<p id="question" class="question"></p>
 <div id="controls" class="controls"></div>
-<div class="actions"><button id="hint">Hint (−25)</button><button id="check" class="check">Check ✓</button><button id="next" hidden>Next →</button></div>
-<div id="feedback" role="status" aria-live="polite"></div>
+<div class="actions">
+<button id="hint" type="button">Hint (−25)</button>
+<button id="check" class="check" type="button">Check</button>
+<button id="next" type="button" class="hidden">Next round →</button>
+</div>
+<div id="feedback" class="feedback" aria-live="polite"></div>
+</section>
+<section class="card">
+<h2>Speed–time graph</h2>
+<p class="small" id="dragHelp">Drag the circular handles, or use the controls, to change the speed.</p>
+<div class="graphbox">
+<svg id="speedPlot" class="plot" viewBox="0 0 540 312" role="img" aria-label="Speed versus time graph"></svg>
+</div>
+<div id="cornerButtons" class="corner-buttons hidden">
+<div class="corner-group">
+<span id="corner1Label">Corner speed at 5 seconds</span>
+<button type="button" data-corner="1" data-direction="-1" aria-label="Decrease first corner speed">−</button>
+<button type="button" data-corner="1" data-direction="1" aria-label="Increase first corner speed">+</button>
+</div>
+<div class="corner-group">
+<span id="corner2Label">Corner speed at 10 seconds</span>
+<button type="button" data-corner="2" data-direction="-1" aria-label="Decrease second corner speed">−</button>
+<button type="button" data-corner="2" data-direction="1" aria-label="Increase second corner speed">+</button>
+</div>
+</div>
+<div class="legend">
+<span><i class="swatch" style="background:#2EC4A6"></i>Speed</span>
+<span><i class="swatch" style="background:#FFC83D"></i>Area = distance</span>
+<span><i class="swatch" style="background:#FF8FB8"></i>Selected gradient</span>
+</div>
+<h2 style="margin-top:21px">Distance–time graph</h2>
+<svg id="distancePlot" class="plot" viewBox="0 0 540 260" role="img" aria-label="Distance versus time graph"></svg>
+<p class="caption">The distance curve is built by adding the area under the speed graph.</p>
+</section>
+</div>
 <details>
 <summary>The physics</summary>
-<p><b>Speed:</b> distance travelled per second (m/s).</p>
-<p><b>Acceleration:</b> (final velocity − initial velocity) ÷ time taken, measured in m/s².</p>
-<p><b>Distance:</b> area under a non-negative speed–time graph, including triangles and trapeziums.</p>
-<p><b>Displacement:</b> signed change in position. For this runner travelling forwards, displacement equals distance.</p>
-<p><b>Distance–time gradient:</b> instantaneous speed. Curves have changing gradients.</p>
-<p>Each graph stage assumes constant acceleration. At stage joins, speed is continuous.</p>
+<p>Acceleration a = (v − u) ÷ t. Its unit is m/s². A decrease in velocity gives negative acceleration.</p>
+<p>Distance = area under a speed–time graph: trapezium area = ½(u + v) × time.</p>
+<p>Distance increases while speed is non-negative, even during deceleration.</p>
+<p>For straight-line motion in one direction, speed and the magnitude of velocity are equal. The gradient of a distance–time graph is speed.</p>
+<p>Each graph segment assumes constant acceleration. Changes in acceleration may be abrupt at the joins.</p>
 </details>
 </section>
-</div>
-<section id="finish" class="panel">
-<div id="stars" class="stars"></div><h2 id="finalScore"></h2><p id="endText"></p>
-<button id="again" class="check">Play again ↻</button>
+<section class="card end hidden" id="end">
+<h1>Finish line!</h1>
+<div id="stars" class="stars"></div>
+<h2 id="finalScore"></h2>
+<p id="comment"></p>
+<button id="again" type="button">Race again ↻</button>
 </section>
 </main>
 <script>
-(function(){
 "use strict";
 const $=id=>document.getElementById(id);
-let round=0,score=0,attempts=0,hinted=false,solved=false,model={},v1=0,v2=0,ansA=0,ansD=0,drag=-1;
-let seed=81029;
-function random(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}
-function pick(a){return a[Math.floor(random()*a.length)]}
-function fmt(n){return Number(n.toFixed(3)).toString()}
-function path(points){return points.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2)).join(" ")}
-function makeModel(i){
-const build=i%2===0;
-const T=pick([8,10,12]),t1=T/2;
-const values=build?{a:pick([2,4,6]),b:pick([2,4,6])}:
-{a:pick([2,4,6,8]),b:pick([0,2,4,6])};
-const m={build,T,t1,va:values.a,vb:values.b};
-m.distance=t1*(m.va/2+(m.va+m.vb)/2);
-m.accel=(m.vb-m.va)/t1;
-m.decidingStage=i%4===1?2:1;
-if(!build){
-m.accel=m.decidingStage===1?m.va/t1:(m.vb-m.va)/t1;
+let seed=18273,round=0,score=0,tries=0,hinted=false,solved=false;
+let rounds=[],q=null,knots=[0,0,0],inputs={},dragIndex=-1;
+function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function pick(a){return a[Math.floor(rand()*a.length)]}
+function fmt(x){return Number(x.toFixed(3)).toString()}
+function makeRounds(){
+ let a=[];
+ for(let i=0;i<6;i++){
+ const T=pick([8,10,12]),m=T/2;
+ if(i%2===0){
+ let v1=pick([4,6,8]),v2=pick([4,6,10]);
+ let start=pick([0,2]);
+ let target=m*(start+2*v1+v2)/2;
+ a.push({type:"build",T,m,solution:[start,v1,v2],target});
+ }else{
+ let speeds=i===3?[pick([6,8]),pick([4,6]),0]:[pick([0,2]),pick([6,8,10]),pick([2,4])];
+ if(i===5)speeds=[pick([4,6]),pick([8,10]),pick([0,2])];
+ let stage=i===3?2:pick([1,2]);
+ let acc=(speeds[stage]-speeds[stage-1])/m;
+ let distance=m*(speeds[0]+2*speeds[1]+speeds[2])/2;
+ a.push({type:"read",T,m,speeds,stage,acc,distance});
+ }
+ }
+ return a;
 }
-return m;
+function distanceAt(t,k=knots){
+ const m=q.m,T=q.T;
+ if(t<=0)return 0;
+ if(t<=m){
+ let z=Math.min(t,m);
+ return k[0]*z+.5*(k[1]-k[0])/m*z*z;
+ }
+ let first=m*(k[0]+k[1])/2,z=Math.min(T,t)-m;
+ return first+k[1]*z+.5*(k[2]-k[1])/m*z*z;
 }
-function distanceAt(t,a,b){
-const T=model.T,h=T/2;
-if(t<=h)return .5*a*t*t/h;
-const q=t-h;return a*h/2+a*q+(b-a)*q*q/(2*h);
+function totalDistance(k=knots){return distanceAt(q.T,k)}
+function speedAt(t,k=knots){
+ let idx=Math.min(1,Math.max(0,Math.floor(t/q.m)));
+ let z=(t-idx*q.m)/q.m;
+ return k[idx]+(k[idx+1]-k[idx])*Math.min(1,Math.max(0,z));
 }
-function speedAt(t,a,b){const h=model.T/2;return t<=h?a*t/h:a+(b-a)*(t-h)/h}
-function total(a,b){return model.T*(a+.5*b)/2}
-function initialise(){
-if(round===6){finish();return}
-model=makeModel(round);attempts=0;hinted=false;solved=false;
-v1=model.build?Math.max(0,model.va+2):model.va;
-v2=model.build?Math.max(0,model.vb-2):model.vb;
-if(model.build&&Math.abs(total(v1,v2)-model.distance)<.001)v2+=2;
-ansA=0;ansD=0;
-$("round").textContent=`Round ${round+1}/6`;
-$("score").textContent=`Score: ${score}`;
-$("feedback").textContent="";$("feedback").className="";
-$("check").hidden=false;$("next").hidden=true;$("hint").disabled=false;
-if(model.build){
-$("question").textContent=`Move the two round graph points to make the runner travel ${fmt(model.distance)} m in ${model.T} s. Start and finish speeds must be 0 m/s. Only the total distance is marked for checking.`;
-$("controls").innerHTML=`<div class="control-row"><label for="v1">Speed at ${model.t1} s: <span id="v1text"></span> m/s</label><input id="v1" type="range" min="0" max="12" step="0.5"></div><div class="control-row"><label for="v2">Speed at ${model.T} s: <span id="v2text"></span> m/s</label><input id="v2" type="range" min="0" max="12" step="0.5"></div><p style="font-size:13px">Drag the graph points or use the sliders. The final speed is not fixed.</p>`;
-$("question").textContent=`The runner starts from rest. Adjust the corner speeds so the total distance in ${model.T} s is ${fmt(model.distance)} m. The graph joins are at ${model.t1} s and ${model.T} s.`;
-$("v1").value=v1;$("v2").value=v2;
-$("v1").addEventListener("input",e=>{v1=+e.target.value;draw()});
-$("v2").addEventListener("input",e=>{v2=+e.target.value;draw()});
-}else{
-$("question").textContent=`From the given speed–time graph, calculate the acceleration during stage ${model.decidingStage} (${model.decidingStage===1?`0–${model.t1}`:`${model.t1}–${model.T}`} s) and the total distance travelled.`;
-$("controls").innerHTML=`<div class="control-row"><label for="accAnswer">Stage ${model.decidingStage} acceleration (m/s²)</label><input id="accAnswer" type="number" step="0.1" inputmode="decimal" value="0"></div><div class="control-row"><label for="distAnswer">Total distance (m)</label><input id="distAnswer" type="number" min="0" step="0.5" inputmode="decimal" value="0"></div>`;
-$("accAnswer").addEventListener("input",e=>{ansA=Number(e.target.value);});
-$("distAnswer").addEventListener("input",e=>{ansD=Number(e.target.value);});
+function bindControls(){
+ document.querySelectorAll("[data-field]").forEach(el=>{
+ const name=el.dataset.field;
+ el.addEventListener("input",()=>setField(name,el.value,false));
+ });
+ document.querySelectorAll("[data-adjust]").forEach(b=>{
+ b.addEventListener("click",()=>{
+ let field=b.dataset.adjust;
+ let step=Number(b.dataset.steps);
+ setField(field,(Number(inputs[field])||0)+step,true);
+ });
+ });
 }
-draw();
+function control(name,label,value,unit,min,max,step=1){
+ inputs[name]=value;
+ return `<div class="control"><label for="input-${name}">${label}</label>
+ <div class="value-row"><div class="steppers">
+ <button type="button" class="coarse" data-adjust="${name}" data-steps="-${10*step}" aria-label="Decrease ${label} by ${10*step}">−−</button>
+ <button type="button" data-adjust="${name}" data-steps="-${step}" aria-label="Decrease ${label} by ${step}">−</button>
+ <input type="number" id="input-${name}" data-field="${name}" min="${min}" max="${max}" step="${step}" value="${value}" aria-label="${label}">
+ <button type="button" data-adjust="${name}" data-steps="${step}" aria-label="Increase ${label} by ${step}">+</button>
+ <button type="button" class="coarse" data-adjust="${name}" data-steps="${10*step}" aria-label="Increase ${label} by ${10*step}">++</button>
+ </div><span class="output">${unit}</span></div></div>`;
 }
-function graphBase(W,H,title,ylabel,xmax,ymax){
-const L=66,R=W-22,B=H-45,Top=39,ww=R-L,hh=B-Top;
-const xx=t=>L+t/xmax*ww, yy=y=>B-y/ymax*hh;
-let s=`<text x="${W/2}" y="19" font-size="17" text-anchor="middle" font-weight="800">${title}</text>`;
-for(let k=0;k<=4;k++){
-const x=xx(xmax*k/4),y=yy(ymax*k/4);
-s+=`<path d="M${x} ${Top}V${B} M${L} ${y}H${R}" stroke="#ddd" fill="none"/><text x="${x}" y="${B+18}" font-size="12" text-anchor="middle">${fmt(xmax*k/4)}</text><text x="${L-8}" y="${y+4}" font-size="12" text-anchor="end">${fmt(ymax*k/4)}</text>`;
+function setField(name,val,fromButton){
+ let el=$("input-"+name);
+ if(!el)return;
+ let min=Number(el.min),max=Number(el.max),n=Number(val);
+ if(!Number.isFinite(n))return;
+ n=Math.min(max,Math.max(min,n));
+ n=Math.round(n*1000)/1000;
+ inputs[name]=n;el.value=fmt(n);
+ if(q.type==="build"){
+ knots=[inputs.v0,inputs.v1,inputs.v2];
+ }
+ draw();
 }
-s+=`<path d="M${L} ${Top}V${B}H${R}" stroke="#111" stroke-width="2" fill="none"/><text x="${(L+R)/2}" y="${H-5}" text-anchor="middle" font-size="13">Time t (s)</text><text x="15" y="${H/2}" transform="rotate(-90 15 ${H/2})" text-anchor="middle" font-size="13">${ylabel}</text>`;
-return {s,xx,yy,B,Top,L,R};
+function startRound(){
+ q=rounds[round];tries=0;hinted=false;solved=false;inputs={};
+ $("roundLabel").textContent=`Round ${round+1}/6`;
+ $("scoreLabel").textContent="Score "+score;
+ $("hint").disabled=false;$("check").classList.remove("hidden");$("next").classList.add("hidden");
+ $("feedback").textContent="";$("feedback").className="feedback";
+ $("next").textContent=round===5?"See results →":"Next round →";
+ $("cornerButtons").classList.toggle("hidden",q.type!=="build");
+ $("corner1Label").textContent=`Corner speed at ${fmt(q.m)} seconds`;
+ $("corner2Label").textContent=`Corner speed at ${fmt(q.T)} seconds`;
+ if(q.type==="build"){
+ $("missionTitle").textContent="Build the graph";
+ $("question").textContent=`The runner has ${q.T} s to cover ${fmt(q.target)} m. Set the three speeds to make the area under the graph match the journey distance.`;
+ let initial=[q.solution[0]+2,q.solution[1]+2,q.solution[2]+2];
+ knots=initial;
+ $("controls").innerHTML=
+ control("v0","Speed at start",initial[0],"m/s",0,20)+
+ control("v1","Speed halfway",initial[1],"m/s",0,20)+
+ control("v2","Speed at finish",initial[2],"m/s",0,20);
+ $("dragHelp").textContent="Drag the three handles up or down, or use the steppers. The graph updates live.";
+ }else{
+ knots=q.speeds.slice();
+ $("missionTitle").textContent="Read the graph";
+ $("question").textContent=`A runner changes speed over ${q.T} s. Find the acceleration during stage ${q.stage} and the total distance travelled.`;
+ $("controls").innerHTML=
+ control("acc","Stage "+q.stage+" acceleration",q.acc>=0?-2:2,"m/s²",-15,15,.5)+
+ control("distance","Total distance",Math.max(0,q.distance-8),"m",0,500,1);
+ $("dragHelp").textContent="Read the fixed graph. The highlighted triangle shows the gradient of the selected stage.";
+ }
+ bindControls();draw();
 }
-function draw(){
-const a=v1,b=v2,T=model.T,h=T/2;
-if(model.build){
-$("v1text").textContent=fmt(a);$("v2text").textContent=fmt(b);
+function graphBase(w,h,left,bottom,top,right,title,xName,yName,xMax,yMax){
+ const sx=t=>left+(w-left-right)*t/xMax;
+ const sy=v=>h-bottom-(h-bottom-top)*v/yMax;
+ let s=`<rect width="${w}" height="${h}" rx="15" fill="#F4F3EF"/>`;
+ for(let i=0;i<=5;i++){
+ let t=xMax*i/5,x=sx(t);
+ s+=`<line x1="${x}" y1="${top}" x2="${x}" y2="${h-bottom}" stroke="#DDD9CD"/>`;
+ s+=`<text x="${x}" y="${h-bottom+19}" font-size="12" text-anchor="middle">${fmt(t)}</text>`;
+ }
+ for(let i=0;i<=4;i++){
+ let v=yMax*i/4,y=sy(v);
+ s+=`<line x1="${left}" y1="${y}" x2="${w-right}" y2="${y}" stroke="#DDD9CD"/>`;
+ s+=`<text x="${left-8}" y="${y+4}" font-size="12" text-anchor="end">${fmt(v)}</text>`;
+ }
+ s+=`<path d="M${left} ${top}V${h-bottom}H${w-right}" stroke="#111" stroke-width="2.5" fill="none"/>`;
+ s+=`<text x="${left}" y="18" font-size="15" font-weight="800">${title}</text>`;
+ s+=`<text x="${w/2}" y="${h-7}" font-size="13" text-anchor="middle" font-weight="700">${xName}</text>`;
+ s+=`<text x="${left}" y="${top-8}" font-size="12" font-weight="700">${yName}</text>`;
+ return {s,sx,sy};
 }
-let scale=Math.max(12,Math.ceil(Math.max(a,b,model.va,model.vb)/4)*4);
-let G=graphBase(520,295,"Speed–time graph","Speed v (m/s)",T,scale);
-let poly=[[G.xx(0),G.yy(0)],[G.xx(h),G.yy(a)],[G.xx(T),G.yy(b)],[G.xx(T),G.B]];
-let s=G.s+`<polygon points="${poly.map(p=>p.join(",")).join(" ")}" fill="#2EC4A6" opacity=".23"/>`;
-s+=`<path d="${path(poly.slice(0,3))}" stroke="#087D71" stroke-width="4" fill="none" stroke-linejoin="round"/>`;
-const points=[[0,0],[h,a],[T,b]];
-points.forEach((p,i)=>{
-let x=G.xx(p[0]),y=G.yy(p[1]);
-s+=`<circle class="graph-dot" data-i="${i}" cx="${x}" cy="${y}" r="${i===0?6:11}" fill="${i===0?"#111":"#FFC83D"}" stroke="#111" stroke-width="3" ${model.build&&i>0?'tabindex="0" role="slider" aria-label="Corner speed at '+p[0]+' seconds" aria-valuemin="0" aria-valuemax="12" aria-valuenow="'+p[1]+'"':""}/>`;
+function drawSpeed(){
+ const w=540,h=312,left=71,bottom=43,top=62,right=19;
+ let ymax=Math.max(12,...knots, q.type==="read"?0:0)*1.25;
+ let o=graphBase(w,h,left,bottom,top,right,"Speed–time","Time t (s)","Speed v (m/s)",q.T,ymax);
+ let {sx,sy}=o,s=o.s;
+ let points=knots.map((v,i)=>[sx(i*q.m),sy(v)]);
+ s+=`<path d="M${sx(0)} ${sy(0)}L${points.map(p=>p.join(" ")).join(" L")}L${sx(q.T)} ${sy(0)}Z" fill="#FFC83D" opacity=".56"/>`;
+ s+=`<polyline points="${points.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#111" stroke-width="5" stroke-linejoin="round"/>`;
+ s+=`<polyline points="${points.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#2EC4A6" stroke-width="3" stroke-linejoin="round"/>`;
+ if(q.type==="read"){
+ let i=q.stage,[ax,ay]=points[i-1],[bx,by]=points[i];
+ s+=`<path d="M${ax} ${ay}H${bx}V${by}" stroke="#D92D20" stroke-width="2.5" stroke-dasharray="6 4" fill="none"/>`;
+ s+=`<circle cx="${(ax+bx)/2}" cy="${(ay+by)/2}" r="6" fill="#FF8FB8" stroke="#111" stroke-width="2"/>`;
+ s+=`<text x="${(ax+bx)/2}" y="${Math.min(255,Math.max(77,(ay+by)/2-15))}" font-size="13" text-anchor="middle" font-weight="800">Stage ${i}</text>`;
+ }
+ points.forEach(([x,y],i)=>{
+ if(q.type==="build"){
+ const label=i===0?"Starting speed":`Corner speed at ${fmt(i*q.m)} seconds`;
+ const currentWidth=Math.max(1,$("speedPlot").getBoundingClientRect().width);
+ const cssScale=currentWidth/w;
+ const hitRadius=Math.max(12,23/cssScale);
+ s+=`<circle class="handle-hit" data-handle="${i}" tabindex="0" role="slider" aria-label="${label}" aria-valuemin="0" aria-valuemax="20" aria-valuenow="${knots[i]}" cx="${x}" cy="${y}" r="${hitRadius}" fill="transparent" stroke="none"/>`;
+ s+=`<circle class="handle-dot" cx="${x}" cy="${y}" r="12" fill="#FF8FB8" stroke="#111" stroke-width="3"/>`;
+ }else s+=`<circle cx="${x}" cy="${y}" r="6" fill="#FFF" stroke="#111" stroke-width="3"/>`;
+ if(q.type==="read")s+=`<text x="${x}" y="${Math.max(top+15,y-15)}" text-anchor="middle" font-size="12" font-weight="800">${fmt(knots[i])}</text>`;
+ });
+ if(q.type==="build"){
+ let dist=totalDistance();
+ s+=`<text x="${w-right-8}" y="38" text-anchor="end" font-size="14" font-weight="800">Current distance: ${fmt(dist)} m</text>`;
+ }else{
+ s+=`<text x="${w-right-8}" y="38" text-anchor="end" font-size="13" font-weight="800">Read the shaded area</text>`;
+ }
+ $("speedPlot").innerHTML=s;
+ $("speedPlot").setAttribute("aria-label",`Speed versus time, ${q.T} seconds. Speeds at start, middle and end are ${knots.map(fmt).join(", ")} metres per second. ${q.type==="build"?"Handles adjustable.":"Stage "+q.stage+" highlighted."}`);
+ if(q.type==="build")attachHandles();
+}
+function drawDistance(){
+ const w=540,h=260,left=72,right=19,top=51,bottom=43;
+ let total=totalDistance(),max=Math.max(10,total*1.18);
+ let o=graphBase(w,h,left,bottom,top,right,"Distance–time","Time t (s)","Distance s (m)",q.T,max);
+ let s=o.s,pts=[];
+ for(let i=0;i<=100;i++){
+ const t=q.T*i/100;pts.push([o.sx(t),o.sy(distanceAt(t))]);
+ }
+ s+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#111" stroke-width="5"/>`;
+ s+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#2EC4A6" stroke-width="3"/>`;
+ s+=`<circle cx="${o.sx(q.T)}" cy="${o.sy(total)}" r="7" fill="#FFC83D" stroke="#111" stroke-width="2"/>`;
+ if(q.type==="build")s+=`<text x="${w-right-8}" y="37" text-anchor="end" font-size="14" font-weight="800">Current: ${fmt(total)} m</text>`;
+ $("distancePlot").innerHTML=s;
+ $("distancePlot").setAttribute("aria-label",`Distance versus time. Current endpoint: ${fmt(total)} metres after ${q.T} seconds.`);
+}
+function drawScene(){
+ let d=totalDistance();
+ let ratio=q.type==="build"?Math.min(1,d/Math.max(q.target,1)):Math.min(1,d/Math.max(d,1));
+ $("runner").setAttribute("transform",`translate(${fmt(60+ratio*395)} 0)`);
+ $("sceneReadout").textContent=q.type==="build"?"Adjust your motion profile":"Motion represented by the graph";
+ $("scene").setAttribute("aria-label",`Runner on a straight track, shown at the journey end position. Graph time interval ${q.T} seconds.`);
+}
+function draw(){if(!q)return;drawSpeed();drawDistance();drawScene()}
+function attachHandles(){
+ const svg=$("speedPlot");
+ svg.querySelectorAll(".handle-hit").forEach(el=>{
+ const idx=Number(el.dataset.handle);
+ el.addEventListener("pointerdown",e=>{
+ if(e.button!==0&&e.pointerType==="mouse")return;
+ dragIndex=idx;
+ e.preventDefault();
+ svg.setPointerCapture(e.pointerId);
+ });
+ el.addEventListener("keydown",e=>{
+ if(e.key==="ArrowUp"||e.key==="ArrowRight"){
+ e.preventDefault();setField("v"+idx,knots[idx]+1,true);
+ const replacement=svg.querySelector(`.handle-hit[data-handle="${idx}"]`);
+ if(replacement)replacement.focus();
+ }
+ if(e.key==="ArrowDown"||e.key==="ArrowLeft"){
+ e.preventDefault();setField("v"+idx,knots[idx]-1,true);
+ const replacement=svg.querySelector(`.handle-hit[data-handle="${idx}"]`);
+ if(replacement)replacement.focus();
+ }
+ });
+ });
+}
+const speedGraph=$("speedPlot");
+speedGraph.addEventListener("pointermove",e=>{
+ if(dragIndex<0||!speedGraph.hasPointerCapture(e.pointerId)||q.type!=="build")return;
+ const box=speedGraph.getBoundingClientRect();
+ const y=(e.clientY-box.top)/Math.max(1,box.height)*312;
+ const ymax=Math.max(12,...knots)*1.25;
+ const newV=Math.min(20,Math.max(0,Math.round((269-y)/(269-62)*ymax)));
+ setField("v"+dragIndex,newV,false);
 });
-s+=`<path d="M${G.xx(h)} ${G.yy(a)}V${G.B}H${G.xx(0)}" stroke="#D92D20" stroke-dasharray="6 4" fill="none" stroke-width="2"/><text x="${G.xx(h)+8}" y="${G.B-9}" font-size="12">Δt</text><text x="${G.L+7}" y="${G.yy(a)-8}" font-size="12">Δv</text>`;
-s+=`<circle cx="415" cy="25" r="5" fill="#087D71"/><text x="427" y="29" font-size="12">Speed</text>`;
-$("velocityGraph").innerHTML=s;
-$("velocityGraph").setAttribute("aria-label",`Speed time plot: initial speed 0 m/s, midpoint speed ${fmt(a)} m/s at ${h} s, final speed ${fmt(b)} m/s at ${T} s. Shaded area represents distance.`);
-const d=total(a,b),dmax=Math.max(10,Math.ceil(Math.max(d,model.distance)/10)*10);
-G=graphBase(520,265,"Distance–time graph","Distance s (m)",T,dmax);
-const coords=[];
-for(let k=0;k<=100;k++){let t=T*k/100;coords.push([G.xx(t),G.yy(distanceAt(t,a,b))])}
-let dsvg=G.s+`<path d="${path(coords)}" fill="none" stroke="#6A45F5" stroke-width="4"/><circle cx="${G.xx(T)}" cy="${G.yy(d)}" r="7" fill="#FFC83D" stroke="#111" stroke-width="2"/><text x="370" y="27" font-size="12">● Distance</text>`;
-$("distanceGraph").innerHTML=dsvg;
-$("distanceGraph").setAttribute("aria-label",`Distance increases from zero to ${fmt(d)} metres over ${T} seconds. The line curves where acceleration is nonzero.`);
-const fraction=dmax>0?Math.min(1,d/dmax):0;
-let pos=46+410*fraction;
-$("runner").innerHTML=`<circle cx="${pos}" cy="45" r="10" fill="#FF8FB8" stroke="#111" stroke-width="3"/><path d="M${pos} 55l-8 19m8-19l10 18m-10-14l-14 1m14-1l15-9" stroke="#111" stroke-width="4" fill="none" stroke-linecap="round"/><text x="${pos}" y="113" font-size="12" text-anchor="middle">● position</text>`;
-$("track").setAttribute("aria-label",`Runner position marker represents ${fmt(d)} metres on a route scaled to ${fmt(dmax)} metres.`);
-}
-const svg=$("velocityGraph");
-function eventSpeed(ev){
-const r=svg.getBoundingClientRect();
-const cy=(ev.clientY-r.top)/Math.max(1,r.height)*295;
-return Math.max(0,Math.min(12,Math.round((232-cy)/193*12*2)/2));
-}
-function setCorner(index,x){if(!model.build||solved||index<1)return; if(index===1)v1=x;else v2=x;$("v1").value=v1;$("v2").value=v2;draw()}
-svg.addEventListener("pointerdown",e=>{
-const c=e.target.closest(".graph-dot");
-if(!c||!model.build||solved)return;
-let i=Number(c.dataset.i);if(i<1)return;
-drag=i;svg.setPointerCapture(e.pointerId);setCorner(i,eventSpeed(e));
+speedGraph.addEventListener("pointerup",e=>{
+ dragIndex=-1;
+ if(speedGraph.hasPointerCapture(e.pointerId))speedGraph.releasePointerCapture(e.pointerId);
 });
-svg.addEventListener("pointermove",e=>{if(drag>0)setCorner(drag,eventSpeed(e))});
-svg.addEventListener("pointerup",()=>{drag=-1});
-svg.addEventListener("pointercancel",()=>{drag=-1});
-svg.addEventListener("keydown",e=>{
-const c=e.target.closest(".graph-dot");
-if(!c||!model.build||solved)return;
-const i=Number(c.dataset.i);
-if(i<1||!["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key))return;
-e.preventDefault();
-setCorner(i,Math.max(0,Math.min(12,(i===1?v1:v2)+(e.key==="ArrowUp"||e.key==="ArrowRight"?.5:-.5))));
+speedGraph.addEventListener("pointercancel",()=>{dragIndex=-1});
+speedGraph.addEventListener("lostpointercapture",()=>{dragIndex=-1});
+document.querySelectorAll("[data-corner]").forEach(button=>{
+ button.addEventListener("click",()=>{
+ if(q.type!=="build")return;
+ const idx=Number(button.dataset.corner);
+ const direction=Number(button.dataset.direction);
+ setField("v"+idx,knots[idx]+direction,true);
+ });
 });
+function message(text,kind){$("feedback").textContent=text;$("feedback").className="feedback "+kind}
+function check(){
+ if(solved)return;
+ tries++;
+ if(q.type==="build"){
+ let err=totalDistance()-q.target;
+ if(Math.abs(err)<=.51){
+ win(`The trapezium areas add to ${fmt(totalDistance())} m. Well done!`);
+ }else message(`Your covered distance is ${fmt(Math.abs(err))} m ${err>0?"too long":"too short"}. Change the graph's area.`,"bad");
+ }else{
+ const a=Number(inputs.acc),d=Number(inputs.distance);
+ let ea=a-q.acc,ed=d-q.distance;
+ if(Math.abs(ea)<=.01&&Math.abs(ed)<=.51){
+ win(`Gradient = (${fmt(knots[q.stage])} − ${fmt(knots[q.stage-1])}) ÷ ${fmt(q.m)} = ${fmt(q.acc)} m/s²; trapezium areas total ${fmt(q.distance)} m.`);
+ }else{
+ let parts=[];
+ if(Math.abs(ea)>.01)parts.push(`acceleration ${fmt(Math.abs(ea))} m/s² ${ea>0?"too high":"too low"}`);
+ if(Math.abs(ed)>.51)parts.push(`distance ${fmt(Math.abs(ed))} m ${ed>0?"too high":"too low"}`);
+ message("Check again: "+parts.join("; ")+".","bad");
+ }
+ }
+}
+function win(why){
+ solved=true;
+ const earned=hinted?50:tries===1?100:75;score+=earned;
+ $("scoreLabel").textContent="Score "+score;
+ message(`★ Correct! +${earned} points. ${why}`,"good");
+ $("check").classList.add("hidden");$("next").classList.remove("hidden");$("hint").disabled=true;
+}
+$("check").addEventListener("click",check);
 $("hint").addEventListener("click",()=>{
-if(solved||hinted)return;hinted=true;$("hint").disabled=true;
-$("feedback").className="";
-$("feedback").textContent=model.build?"Hint: the shaded region is a triangle plus a trapezium. Add their areas.":"Hint: gradient = change in speed ÷ change in time. Total distance = sum of areas under the two stages.";
+ hinted=true;$("hint").disabled=true;
+ message(q.type==="build"?
+ "Hint: add the two trapezium areas. You can raise one handle and lower another to keep the same total.":
+ `Hint: acceleration is the change in speed divided by ${fmt(q.m)} s. Add the two trapezium areas for distance. This round is now worth 50 points.`,"info");
 });
-$("check").addEventListener("click",()=>{
-if(solved)return;attempts++;
-let ok=false,why="",error="";
-if(model.build){
-const got=total(v1,v2),dif=got-model.distance;
-ok=Math.abs(dif)<=.001;
-why=`Distance = ½ × ${fmt(model.t1)} × ${fmt(v1)} + ½ × ${fmt(model.t1)} × (${fmt(v1)} + ${fmt(v2)}) = ${fmt(got)} m.`;
-error=`Your graph travels ${fmt(Math.abs(dif))} m ${dif>0?"too far":"too little"}.`;
-}else{
-const valid=Number.isFinite(ansA)&&Number.isFinite(ansD)&&ansD>=0;
-const ea=ansA-model.accel,ed=ansD-model.distance;
-ok=valid&&Math.abs(ea)<.051&&Math.abs(ed)<.051;
-why=`Stage acceleration = ${fmt(model.accel)} m/s². The two stage areas add to ${fmt(model.distance)} m.`;
-error=!valid?"Enter valid finite acceleration and non-negative distance values.":`Acceleration is ${fmt(Math.abs(ea))} m/s² ${ea>0?"too high":"too low"}; distance is ${fmt(Math.abs(ed))} m ${ed>0?"too high":"too low"}.`;
-}
-if(ok){
-solved=true;const pts=hinted?50:attempts===1?100:75;score+=pts;
-$("score").textContent=`Score: ${score}`;$("feedback").className="good";
-$("feedback").textContent=`★ Correct! +${pts}. ${why}`;
-$("check").hidden=true;$("next").hidden=false;$("hint").disabled=true;
-if(model.build){$("v1").disabled=true;$("v2").disabled=true}
-else{$("accAnswer").disabled=true;$("distAnswer").disabled=true}
-}else{$("feedback").className="bad";$("feedback").textContent=error}
+$("next").addEventListener("click",()=>{
+ if(!solved)return;
+ if(round===5){finish();return}
+ round++;startRound();
 });
-$("next").addEventListener("click",()=>{round++;initialise()});
-$("again").addEventListener("click",()=>{round=0;score=0;seed=(seed+2027)>>>0;$("game").style.display="grid";$("finish").style.display="none";initialise()});
+$("again").addEventListener("click",newGame);
 function finish(){
-$("game").style.display="none";$("finish").style.display="block";
-let stars=score>=500?3:score>=350?2:1;
-$("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
-$("finalScore").textContent=`${score} / 600 points`;
-$("endText").textContent="You have completed six graph challenges.";
-$("round").textContent="6/6 complete";
+ $("game").classList.add("hidden");$("end").classList.remove("hidden");
+ let n=score>=525?3:score>=375?2:1;
+ $("stars").textContent="★".repeat(n)+"☆".repeat(3-n);
+ $("stars").setAttribute("aria-label",n+" of three stars");
+ $("finalScore").textContent=`${score}/600 points`;
+ $("comment").textContent=n===3?"Graph champion!":n===2?"Strong racing!":"Keep practising areas and gradients.";
 }
-initialise();
-})();
+function newGame(){
+ seed=(seed+13579)>>>0;rounds=makeRounds();round=0;score=0;
+ $("end").classList.add("hidden");$("game").classList.remove("hidden");startRound();
+}
+newGame();
 </script>
 </body>
 </html>
