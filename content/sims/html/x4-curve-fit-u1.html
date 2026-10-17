@@ -1,0 +1,1281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fit and Test — FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fit-paper);color:var(--fit-ink);font:400 16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{-webkit-tap-highlight-color:transparent;user-select:none;font:inherit}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{border:2px solid #111;border-radius:999px;min-height:44px;padding:8px 17px;background:white;color:#111;font-weight:800;cursor:pointer}
+button:active{transform:translateY(2px)}
+button:disabled{opacity:.45;cursor:default}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-uni)}
+input[type=number]{font-size:16px;min-height:44px;border:2px solid #111;border-radius:12px;padding:9px;width:130px}
+.shell{max-width:1350px;margin:auto;padding:15px 15px 40px}
+.hud{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:13px 16px;background:#fff;border:2px solid #111;border-radius:24px;box-shadow:var(--sh-2);font-weight:800}
+.badge{background:var(--lvl-uni);color:var(--lvl-uni-on);font-size:12px;letter-spacing:.025em;text-transform:uppercase;border:2px solid #111;border-radius:99px;padding:8px 12px;font-weight:800}
+h1{font-weight:800;font-size:clamp(30px,5vw,46px);margin:25px 0 5px;line-height:1.1}
+h2{font-weight:800;font-size:21px;margin:0 0 14px}
+h3{font-weight:800;font-size:16px;margin:0 0 8px}
+p{margin:8px 0}
+.lede{font-weight:600;color:var(--fit-ink-2);margin-bottom:22px}
+.layout{display:grid;gap:20px}
+.column{min-width:0;display:grid;gap:20px;align-content:start}
+.card{min-width:0;padding:18px;border:2px solid #111;border-radius:28px;background:white;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-uni-tint)}
+.scene{display:block;width:100%;height:auto;max-height:200px}
+.figure{border:2px solid #111;border-radius:16px;background:white;padding:10px}
+.caption{font-size:13px;color:var(--fit-ink-3);font-weight:600}
+.question{padding:15px;border:2px solid #111;border-radius:17px;background:#fff;font-size:18px;font-weight:700;margin:15px 0}
+.dataset{max-height:220px;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+td,th{border-bottom:1px solid #ddd;padding:6px 9px;text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:800}
+.plot{display:block;width:100%;height:auto;border:2px solid #111;border-radius:16px;background:white}
+.plot-wrap{display:grid;gap:13px}
+.control{padding:13px;background:var(--fit-sunken);border:2px solid #111;border-radius:18px}
+.control-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:800}
+.value{font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:8px}
+.steps button{padding:7px 0;font-size:19px;background:white}
+.controls{display:grid;gap:14px}
+.choices{display:flex;gap:9px;flex-wrap:wrap}
+.choices button[aria-pressed=true]{background:var(--lvl-uni);color:#fff}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.primary{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2);flex:2}
+.primary:active{box-shadow:var(--sh-1)}
+.feedback{border:2px solid #111;border-radius:16px;background:white;padding:13px;min-height:54px;font-weight:700}
+.feedback.good{background:#E1F9EA}
+.feedback.bad{background:#FFECEB}
+details{border:2px solid #111;border-radius:18px;background:white;padding:12px 16px}
+summary{display:flex;align-items:center;min-height:44px;font-weight:800;cursor:pointer}
+.math{font-size:14px}
+.math p{margin:10px 0}
+.end{display:none;text-align:center;padding:35px 18px;background:var(--lvl-uni-tint);border:3px solid #111;border-radius:32px;box-shadow:var(--sh-3)}
+.stars{font-size:49px;letter-spacing:6px}
+.small{font-size:13px;color:#555;font-weight:600}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.shell{padding:24px 27px 48px}.card{padding:22px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="hud">
+  <span class="badge">University (Years 1–2)</span>
+  <span id="roundHud">Round 1/6</span>
+  <span id="scoreHud">Score 0</span>
+</header>
+<h1>Fit and Test</h1>
+<p class="lede">Turn measured observations into defensible statistical decisions.</p>
+<main id="game" class="layout">
+  <div class="column">
+    <section class="card stage">
+      <h2>Investigation station</h2>
+      <svg id="scene" class="scene" viewBox="0 0 470 185" role="img" aria-label="Samples moving through measurement and analysis">
+        <rect x="12" y="140" width="445" height="24" rx="9" fill="#111"/>
+        <g fill="#fff" stroke="#111" stroke-width="4">
+          <rect x="35" y="64" width="93" height="77" rx="12"/>
+          <rect x="189" y="33" width="236" height="107" rx="16"/>
+        </g>
+        <path d="M45 111H118V131H45Z" fill="#ABC8FF" stroke="#111" stroke-width="2"/>
+        <path d="M142 98H177" stroke="#111" stroke-width="4"/>
+        <path d="M167 88l11 10-11 10" fill="none" stroke="#111" stroke-width="3"/>
+        <rect x="207" y="51" width="200" height="61" rx="8" fill="#E2ECFD" stroke="#111" stroke-width="3"/>
+        <path d="M219 100L251 88 282 96 312 68 351 78 392 59" fill="none" stroke="#1F66E5" stroke-width="4"/>
+        <text x="81" y="47" text-anchor="middle" font-size="14" font-weight="800">Sample</text>
+        <text x="306" y="131" text-anchor="middle" font-size="13" font-weight="800" id="sceneName">Regression</text>
+        <text x="83" y="177" text-anchor="middle" font-size="12">Observations</text>
+        <text x="302" y="177" text-anchor="middle" font-size="12">Statistical analysis</text>
+      </svg>
+      <p id="assumptions" class="caption">Independent observations, approximately normal residuals and constant spread.</p>
+      <div id="question" class="question"></div>
+      <h3>Given observations</h3>
+      <div class="dataset">
+        <table><thead id="tableHead"></thead><tbody id="dataRows"></tbody></table>
+      </div>
+      <p id="dataNote" class="small"></p>
+    </section>
+    <section class="card">
+      <h2>Concept figure</h2>
+      <div class="figure">
+      <svg viewBox="0 0 450 105" class="scene" role="img" aria-label="Sample mean and intervals with different confidence widths">
+        <path d="M24 71H425" stroke="#111" stroke-width="3"/>
+        <path d="M90 58H361M90 49V67M361 49V67" stroke="#1F66E5" stroke-width="5"/>
+        <path d="M149 37H304M149 29V45M304 29V45" stroke="#FF6B3D" stroke-width="5"/>
+        <circle cx="226" cy="58" r="9" fill="#FFC83D" stroke="#111" stroke-width="3"/>
+        <text x="226" y="17" font-size="14" font-weight="800" text-anchor="middle">Sample mean</text>
+        <text x="226" y="94" font-size="12" text-anchor="middle">Wider confidence means a wider interval</text>
+      </svg>
+      </div>
+      <p class="caption">Intervals represent uncertainty in a population mean, not the range of individual observations.</p>
+    </section>
+  </div>
+  <div class="column">
+    <section class="card">
+      <h2 id="plotTitle">Live regression and residuals</h2>
+      <div class="plot-wrap">
+        <svg id="mainPlot" class="plot" viewBox="0 0 520 300" role="img" aria-label="Measured observations and fitted regression line"></svg>
+        <svg id="secondPlot" class="plot" viewBox="0 0 520 190" role="img" aria-label="Residuals or statistical distribution with observed statistic"></svg>
+      </div>
+      <p id="plotNote" class="caption"></p>
+    </section>
+    <section class="card">
+      <h2>Analysis controls</h2>
+      <div id="controls" class="controls"></div>
+      <div class="actions">
+        <button id="hintBtn">Hint − points</button>
+        <button class="primary" id="checkBtn">Check</button>
+        <button id="nextBtn" hidden>Next round →</button>
+      </div>
+      <p id="feedback" class="feedback" aria-live="polite">Analyse the data, then check your decision.</p>
+    </section>
+    <details>
+      <summary>The maths</summary>
+      <div class="math">
+        <p>Least-squares line: y = a + bx. The slope uncertainty is SE(b) = √[RSS / ((n − 2)Sxx)].</p>
+        <p>One-sample t: t = (sample mean − hypothesised mean) / (sample SD / √n), with df = n − 1.</p>
+        <p>Confidence interval: sample mean ± t critical × sample SD / √n.</p>
+        <p>Pooled two-sample t assumes equal population variances. Welch does not; Welch's degrees of freedom need not be an integer.</p>
+        <p>Chi-square goodness of fit: χ² = Σ(observed − expected)² / expected; df = category count − 1 when no parameters are estimated.</p>
+        <p>Student t p-values here are two-sided; chi-square p-values use the upper tail.</p>
+      </div>
+    </details>
+  </div>
+</main>
+<section id="end" class="end" aria-live="polite">
+  <h2>Analysis completed!</h2>
+  <div id="stars" class="stars"></div>
+  <p id="endScore"></p>
+  <button id="again" class="primary">Play again</button>
+</section>
+</div>
+<script>
+/* FIT-CALC-BEGIN x4_curve_fit */
+const FITCalcX4 = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+  const EPS = 1e-14;
+  const MAX_ITER = 10000;
+
+  function err(error, reason) {
+    return { error, reason };
+  }
+
+  function finite(x) {
+    return typeof x === 'number' && Number.isFinite(x);
+  }
+
+  function arrayOK(a, min = 2, max = 50) {
+    return Array.isArray(a) && a.length >= min && a.length <= max;
+  }
+
+  function numbersOK(a) {
+    return Array.isArray(a) && a.every(finite);
+  }
+
+  function safe(z) {
+    return Number.isFinite(z) ? z : null;
+  }
+
+  function mean(a) {
+    const base = a[0];
+    let s = 0;
+    for (const v of a) s += v - base;
+    return base + s / a.length;
+  }
+
+  function variance(a, m) {
+    let s = 0;
+    for (const v of a) {
+      const d = v - m;
+      s += d * d;
+    }
+    return s / (a.length - 1);
+  }
+
+  function logGamma(z) {
+    const p = [
+      0.99999999999980993,
+      676.5203681218851,
+      -1259.1392167224028,
+      771.32342877765313,
+      -176.61502916214059,
+      12.507343278686905,
+      -0.13857109526572012,
+      9.9843695780195716e-6,
+      1.5056327351493116e-7
+    ];
+    if (z < 0.5) {
+      return Math.log(Math.PI) -
+        Math.log(Math.sin(Math.PI * z)) -
+        logGamma(1 - z);
+    }
+    z -= 1;
+    let x = p[0];
+    for (let i = 1; i < p.length; i++) x += p[i] / (z + i);
+    const t = z + 7.5;
+    return 0.5 * Math.log(2 * Math.PI) +
+      (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+
+  function betaFraction(a, b, x) {
+    const tiny = 1e-300;
+    let c = 1;
+    let d = 1 - (a + b) * x / (a + 1);
+    if (Math.abs(d) < tiny) d = tiny;
+    d = 1 / d;
+    let h = d;
+    for (let m = 1; m <= MAX_ITER; m++) {
+      const m2 = 2 * m;
+      let aa = m * (b - m) * x /
+        ((a + m2 - 1) * (a + m2));
+      d = 1 + aa * d;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = 1 + aa / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      h *= d * c;
+      aa = -(a + m) * (a + b + m) * x /
+        ((a + m2) * (a + m2 + 1));
+      d = 1 + aa * d;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = 1 + aa / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      const delta = d * c;
+      h *= delta;
+      if (Math.abs(delta - 1) < 2e-14) return h;
+    }
+    return null;
+  }
+
+  function regularisedBeta(x, a, b) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    const front = Math.exp(
+      logGamma(a + b) - logGamma(a) - logGamma(b) +
+      a * Math.log(x) + b * Math.log1p(-x)
+    );
+    if (x < (a + 1) / (a + b + 2)) {
+      const h = betaFraction(a, b, x);
+      return h === null ? null : Math.max(0, Math.min(1, front * h / a));
+    }
+    const h = betaFraction(b, a, 1 - x);
+    return h === null ? null :
+      Math.max(0, Math.min(1, 1 - front * h / b));
+  }
+
+  function gammaQ(a, x) {
+    if (x <= 0) return 1;
+    const gln = logGamma(a);
+    if (x < a + 1) {
+      let sum = 1 / a;
+      let term = sum;
+      for (let n = 1; n <= MAX_ITER; n++) {
+        term *= x / (a + n);
+        sum += term;
+        if (Math.abs(term) < Math.abs(sum) * 2e-15) {
+          return Math.max(0, Math.min(1,
+            1 - sum * Math.exp(-x + a * Math.log(x) - gln)));
+        }
+      }
+      return null;
+    }
+    const tiny = 1e-300;
+    let b = x + 1 - a;
+    let c = 1 / tiny;
+    let d = 1 / b;
+    let h = d;
+    for (let i = 1; i <= MAX_ITER; i++) {
+      const an = -i * (i - a);
+      b += 2;
+      d = an * d + b;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = b + an / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      const delta = d * c;
+      h *= delta;
+      if (Math.abs(delta - 1) < 2e-15) {
+        return Math.max(0, Math.min(1,
+          Math.exp(-x + a * Math.log(x) - gln) * h));
+      }
+    }
+    return null;
+  }
+
+  function tTail(t, df) {
+    return regularisedBeta(df / (df + t * t), df / 2, 0.5);
+  }
+
+  function tCritical(conf, df) {
+    const target = 1 - conf;
+    let lo = 0;
+    let hi = 1;
+    while (tTail(hi, df) > target && hi < 1e12) hi *= 2;
+    for (let i = 0; i < 130; i++) {
+      const mid = (lo + hi) / 2;
+      if (tTail(mid, df) > target) lo = mid;
+      else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+
+  function validatedSample(a) {
+    if (!arrayOK(a)) return err('ConstraintViolation',
+      'points_out_of_range_2_50');
+    if (!numbersOK(a)) return err('ConstraintViolation',
+      'non_finite_input');
+    return null;
+  }
+
+  function checkedResult(result) {
+    for (const key of Object.keys(result)) {
+      const value = result[key];
+      if (typeof value === 'number' && !Number.isFinite(value)) {
+        return err('MathError', 'non_finite_result');
+      }
+    }
+    return result;
+  }
+
+  /**
+   * One-sample, two-sided Student t test.
+   * Input: {data:number[],mu0:number}, 2–50 independent observations,
+   * all in the same SI unit as mu0.
+   * Output: {mean,sd,t,df,p_two_sided}; sd is sample SD (n−1).
+   * Assumes approximately normal independent observations.
+   * Errors: points_out_of_range_2_50, non_finite_input, zero_variance.
+   * Hand check: data [2,4,6], mu0=3; mean=4,
+   * sd=2, t=1/sqrt(4/3)=0.8660254, df=2, p=0.477767.
+   */
+  function t_test_1s({ data, mu0 } = {}) {
+    const e = validatedSample(data);
+    if (e) return e;
+    if (!finite(mu0)) return err('ConstraintViolation', 'non_finite_input');
+    const m = mean(data);
+    const v = variance(data, m);
+    if (v === 0) return err('MathError', 'zero_variance');
+    const sd = Math.sqrt(v);
+    const t = (m - mu0) / (sd / Math.sqrt(data.length));
+    const p_two_sided = tTail(Math.abs(t), data.length - 1);
+    return checkedResult({ mean: m, sd, t, df: data.length - 1,
+      p_two_sided });
+  }
+
+  /**
+   * Independent two-sample two-sided t test.
+   * Input: {x:number[],y:number[],equal_var:boolean}; 2–50
+   * observations per group, equal physical units.
+   * Output: {t,df,p_two_sided}. true=pooled, false=Welch.
+   * Assumes independent, approximately normal samples.
+   * Errors: points_out_of_range_2_50, non_finite_input,
+   * zero_variance; invalid modes are NotSupported.
+   * Hand check: x=[2,4,6], y=[1,3,5], equal_var=true:
+   * pooled variance=4, SE=sqrt(8/3), t=0.612372436,
+   * df=4; Welch has the same t and df=4 for these samples.
+   */
+  function t_test_2s({ x, y, equal_var } = {}) {
+    const ex = validatedSample(x);
+    if (ex) return ex;
+    const ey = validatedSample(y);
+    if (ey) return ey;
+    if (typeof equal_var !== 'boolean') {
+      return err('NotSupported', 'unsupported_variance_mode');
+    }
+    const n1 = x.length, n2 = y.length;
+    const m1 = mean(x), m2 = mean(y);
+    const v1 = variance(x, m1), v2 = variance(y, m2);
+    if (v1 === 0 && v2 === 0) {
+      return err('MathError', 'zero_variance');
+    }
+    let se2, df;
+    if (equal_var) {
+      const sp2 = ((n1 - 1) * v1 + (n2 - 1) * v2) /
+        (n1 + n2 - 2);
+      se2 = sp2 * (1 / n1 + 1 / n2);
+      df = n1 + n2 - 2;
+    } else {
+      const a = v1 / n1, b = v2 / n2;
+      se2 = a + b;
+      df = se2 * se2 /
+        (a * a / (n1 - 1) + b * b / (n2 - 1));
+    }
+    const t = (m1 - m2) / Math.sqrt(se2);
+    return checkedResult({ t, df,
+      p_two_sided: tTail(Math.abs(t), df) });
+  }
+
+  /**
+   * Two-sided Student t confidence interval for a population mean.
+   * Input: {data:number[],conf:number}, 2–50 values of one SI unit;
+   * 0<conf<1.
+   * Output: {mean,half_width,lo,hi}, all in the data's unit.
+   * Assumes independent, approximately normal observations.
+   * Errors: points_out_of_range_2_50, confidence_out_of_range,
+   * non_finite_input; zero sample variance gives a zero-width result.
+   * Hand check: [2,4,6,8,10], conf=.95: mean=6, sd=sqrt(10),
+   * SE=sqrt(2), tcrit(df=4)=2.776445105,
+   * half_width=3.926486322.
+   */
+  function ci_mean({ data, conf } = {}) {
+    const e = validatedSample(data);
+    if (e) return e;
+    if (!finite(conf) || conf <= 0 || conf >= 1) {
+      return err('ConstraintViolation', 'confidence_out_of_range');
+    }
+    const m = mean(data);
+    const sd = Math.sqrt(variance(data, m));
+    const half_width = tCritical(conf, data.length - 1) *
+      sd / Math.sqrt(data.length);
+    return checkedResult({ mean: m, half_width,
+      lo: m - half_width, hi: m + half_width });
+  }
+
+  function fitLineRaw(points) {
+    const n = points.length;
+    const xs = points.map(p => p[0]);
+    const ys = points.map(p => p[1]);
+    const mx = mean(xs), my = mean(ys);
+    let sxx = 0, sxy = 0, syy = 0;
+    for (let i = 0; i < n; i++) {
+      const dx = xs[i] - mx, dy = ys[i] - my;
+      sxx += dx * dx;
+      sxy += dx * dy;
+      syy += dy * dy;
+    }
+    if (sxx === 0) return err('MathError', 'all_x_equal');
+    const b = sxy / sxx;
+    const a = my - b * mx;
+    let rss = 0;
+    for (let i = 0; i < n; i++) {
+      const r = ys[i] - (a + b * xs[i]);
+      rss += r * r;
+    }
+    const r2 = syy === 0 ? null : 1 - rss / syy;
+    const se_b = n === 2 ? null :
+      Math.sqrt(Math.max(0, rss / (n - 2)) / sxx);
+    return checkedResult({ a, b, r2, rss, se_b });
+  }
+
+  /**
+   * Ordinary least-squares straight line y=a+b*x.
+   * Input: {points:[[x,y],...]}, 2–50 finite SI-valued pairs.
+   * Output: {a,b,r2,rss,se_b}; b and se_b have unit y/x,
+   * rss has unit y². At n=2 se_b=null; at constant y r2=null.
+   * Assumes independent, homoscedastic y residuals and exact x.
+   * Errors: points_out_of_range_2_50, non_finite_input,
+   * all_x_equal, non_finite_result.
+   * Hand check: (0,1),(1,3),(2,5): a=1,b=2,r2=1,
+   * rss=0,se_b=0.
+   */
+  function linreg({ points } = {}) {
+    if (!arrayOK(points)) return err('ConstraintViolation',
+      'points_out_of_range_2_50');
+    if (!points.every(p => Array.isArray(p) &&
+      p.length === 2 && numbersOK(p))) {
+      return err('ConstraintViolation', 'non_finite_input');
+    }
+    return fitLineRaw(points);
+  }
+
+  /**
+   * Log-linear exponential fit C(t)=C0*exp(-k*t).
+   * Input: {points:[[t_s,C],...]}, C>0, 2–50 pairs.
+   * Output: {C0,k}; C0 has C's SI unit; k is s^-1.
+   * Assumes exponential decay and least squares on ln(C), not C.
+   * Errors: points_out_of_range_2_50, non_positive_y_for_log,
+   * all_x_equal, non_finite_input.
+   * Hand check: (0,10),(1,10/e),(2,10/e²):
+   * fitted ln C = ln 10 - t; C0=10, k=1 s^-1.
+   */
+  function exp_fit({ points } = {}) {
+    if (!arrayOK(points)) return err('ConstraintViolation',
+      'points_out_of_range_2_50');
+    if (!points.every(p => Array.isArray(p) &&
+      p.length === 2 && numbersOK(p))) {
+      return err('ConstraintViolation', 'non_finite_input');
+    }
+    if (points.some(p => p[1] <= 0)) {
+      return err('MathError', 'non_positive_y_for_log');
+    }
+    const r = fitLineRaw(points.map(p => [p[0], Math.log(p[1])]));
+    if (r.error) return r;
+    return checkedResult({ C0: Math.exp(r.a), k: -r.b });
+  }
+
+  /**
+   * Unweighted linear calibration, signal=m*standard+c.
+   * Input: {standards:number[],signals:number[],
+   * unknown_signal:number}; 3–50 matched pairs.
+   * Standard and unknown concentrations use the same SI unit,
+   * signals share one instrument unit.
+   * Output: {slope,intercept,x_unknown,LOD}; slope is signal
+   * per concentration; x_unknown and LOD have concentration units.
+   * LOD=3.3*s_y/slope with s_y=sqrt(RSS/(n-2)), signed as specified.
+   * Assumes a linear response and constant signal variance.
+   * Errors: points_out_of_range_2_50, insufficient_residual_df,
+   * mismatched_lengths, zero_slope, all_x_equal, non_finite_input.
+   * Hand check: standards [0,1,2,3], signals [1,3,5,7],
+   * unknown=5 => slope=2, intercept=1, unknown=2, LOD=0.
+   */
+  function calibration({ standards, signals, unknown_signal } = {}) {
+    const e = validatedSample(standards);
+    if (e) return e;
+    if (!arrayOK(signals)) return err('ConstraintViolation',
+      'points_out_of_range_2_50');
+    if (standards.length !== signals.length) {
+      return err('ConstraintViolation', 'mismatched_lengths');
+    }
+    if (!numbersOK(signals) || !finite(unknown_signal)) {
+      return err('ConstraintViolation', 'non_finite_input');
+    }
+    if (standards.length < 3) {
+      return err('ConstraintViolation', 'insufficient_residual_df');
+    }
+    const r = fitLineRaw(standards.map((v, i) => [v, signals[i]]));
+    if (r.error) return r;
+    if (r.b === 0) return err('MathError', 'zero_slope');
+    const sy = Math.sqrt(Math.max(0, r.rss) / (standards.length - 2));
+    return checkedResult({
+      slope: r.b,
+      intercept: r.a,
+      x_unknown: (unknown_signal - r.a) / r.b,
+      LOD: 3.3 * sy / r.b
+    });
+  }
+
+  /**
+   * Initial-rate power-law fit rate=k*C^order.
+   * Input: {C:number[],rate:number[]}, 2–50 positive pairs;
+   * C in mol/L, rate in mol/(L s).
+   * Output: {k,order}; k's units depend on fitted order.
+   * Fits ln(rate)=ln(k)+order*ln(C).
+   * Assumes a single power-law regime with multiplicative errors.
+   * Errors: points_out_of_range_2_50, mismatched_lengths,
+   * non_positive_y_for_log, all_x_equal, non_finite_input.
+   * Hand check: C=[1,2,4],rate=[3,12,48]:
+   * slope=2, intercept=ln 3, k=3, order=2.
+   */
+  function rate_law_fit({ C, rate } = {}) {
+    const e = validatedSample(C);
+    if (e) return e;
+    if (!arrayOK(rate)) return err('ConstraintViolation',
+      'points_out_of_range_2_50');
+    if (C.length !== rate.length) return err('ConstraintViolation',
+      'mismatched_lengths');
+    if (!numbersOK(rate)) return err('ConstraintViolation',
+      'non_finite_input');
+    if (C.some(v => v <= 0) || rate.some(v => v <= 0)) {
+      return err('MathError', 'non_positive_y_for_log');
+    }
+    const r = fitLineRaw(C.map((v, i) => [Math.log(v),
+      Math.log(rate[i])]));
+    if (r.error) return r;
+    return checkedResult({ k: Math.exp(r.a), order: r.b });
+  }
+
+  /**
+   * First-order independent-input uncertainty propagation.
+   * Input: {kind:'sum'|'product_quotient',terms:[...]}, 1–50 terms.
+   * For sum: {x,u,coeff}; f=sum(coeff*x),
+   * u_f²=sum((coeff*u)²).
+   * For product_quotient: {x,u,power}; f=product(x^power),
+   * u_f²=f²*sum((power*u/x)²).
+   * Units: x/u use the same SI unit per term; resulting f/u_f
+   * use the algebraic combination of those units.
+   * Assumes uncorrelated inputs, small relative uncertainty
+   * for nonlinear operations, and u>=0.
+   * Errors: unsupported_uncertainty_kind, terms_out_of_range_1_50,
+   * negative_uncertainty, zero_denominator, non_finite_input.
+   * Hand check: sum (x=3,u=.2,c=2), (x=4,u=.3,c=-1):
+   * f=2, u_f=sqrt(.16+.09)=.5.
+   */
+  function uncertainty({ kind, terms } = {}) {
+    if (kind !== 'sum' && kind !== 'product_quotient') {
+      return err('NotSupported', 'unsupported_uncertainty_kind');
+    }
+    if (!Array.isArray(terms) || terms.length < 1 ||
+      terms.length > 50) return err('ConstraintViolation',
+        'terms_out_of_range_1_50');
+    const field = kind === 'sum' ? 'coeff' : 'power';
+    for (const t of terms) {
+      if (!t || !finite(t.x) || !finite(t.u) || !finite(t[field])) {
+        return err('ConstraintViolation', 'non_finite_input');
+      }
+      if (t.u < 0) return err('ConstraintViolation',
+        'negative_uncertainty');
+      if (kind === 'product_quotient' && t.x === 0) {
+        return err('MathError', 'zero_denominator');
+      }
+      if (kind === 'product_quotient' && t.x < 0 &&
+        !Number.isInteger(t.power)) {
+        return err('MathError', 'undefined_power');
+      }
+    }
+    let f, v = 0;
+    if (kind === 'sum') {
+      f = 0;
+      for (const t of terms) {
+        f += t.coeff * t.x;
+        v += (t.coeff * t.u) ** 2;
+      }
+    } else {
+      f = 1;
+      for (const t of terms) {
+        f *= Math.pow(t.x, t.power);
+        v += (t.power * t.u / t.x) ** 2;
+      }
+      v *= f * f;
+    }
+    return checkedResult({ f, u_f: Math.sqrt(v) });
+  }
+
+  /**
+   * Pearson chi-square goodness-of-fit test.
+   * Input: {observed:number[],expected_props:number[]},
+   * 2–50 categories, nonnegative integer counts and probabilities
+   * summing to 1. Counts are dimensionless.
+   * Output: {chi2,df,p}; df=categories-1, upper-tail p.
+   * Assumes independent multinomial observations, with no
+   * parameters estimated from observed counts.
+   * Small expected counts weaken asymptotic inference.
+   * Errors: points_out_of_range_2_50, mismatched_lengths,
+   * invalid_counts, invalid_probabilities, zero_expected_count.
+   * Hand check: observed [30,70], props [.5,.5],
+   * expected [50,50], chi2=16, df=1,
+   * p=0.0000633424837.
+   */
+  function chi_square_gof({ observed, expected_props } = {}) {
+    if (!arrayOK(observed) || !arrayOK(expected_props)) {
+      return err('ConstraintViolation', 'points_out_of_range_2_50');
+    }
+    if (observed.length !== expected_props.length) {
+      return err('ConstraintViolation', 'mismatched_lengths');
+    }
+    if (!numbersOK(observed) || observed.some(v =>
+      v < 0 || !Number.isInteger(v))) {
+      return err('ConstraintViolation', 'invalid_counts');
+    }
+    if (!numbersOK(expected_props) ||
+      expected_props.some(v => v < 0) ||
+      Math.abs(expected_props.reduce((a, b) => a + b, 0) - 1) > 1e-10) {
+      return err('ConstraintViolation', 'invalid_probabilities');
+    }
+    const N = observed.reduce((a, b) => a + b, 0);
+    let chi2 = 0;
+    for (let i = 0; i < observed.length; i++) {
+      const expected = N * expected_props[i];
+      if (expected === 0) return err('MathError',
+        'zero_expected_count');
+      chi2 += (observed[i] - expected) ** 2 / expected;
+    }
+    const df = observed.length - 1;
+    return checkedResult({ chi2, df, p: gammaQ(df / 2, chi2 / 2) });
+  }
+
+  return Object.freeze({
+    API_VERSION,
+    t_test_1s,
+    t_test_2s,
+    ci_mean,
+    linreg,
+    exp_fit,
+    calibration,
+    rate_law_fit,
+    uncertainty,
+    chi_square_gof
+  });
+})();
+/* FIT-CALC-END x4_curve_fit */
+
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const NS='http:'+String.fromCharCode(47,47)+'www.w3.org/2000/svg';
+let seed=32819,round=0,score=0,tries=0,hinted=false,passed=false;
+let state=null,values={};
+function random(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
+function pick(a){return a[Math.floor(random()*a.length)]}
+function fmt(x,n=4){return Number.isFinite(x)?Number(x.toPrecision(n)).toString():'—'}
+function node(root,tag,attrs={},text){
+  const e=document.createElementNS(NS,tag);
+  Object.keys(attrs).forEach(k=>e.setAttribute(k,attrs[k]));
+  if(text!==undefined)e.textContent=String(text);
+  root.appendChild(e);return e;
+}
+function close(x,y,t){return Number.isFinite(x)&&Math.abs(x-y)<=t+1e-9}
+function regressData(){
+  const slope=pick([0.4,1.2,2.4,-0.8]);
+  const a=pick([3,5,7]);
+  const scatter=pick([0.15,0.4,0.8]);
+  const deviations=[-1,0.5,1,-0.5,-1,1,0.5,-0.5];
+  const points=deviations.map((d,i)=>[i+1,a+slope*(i+1)+d*scatter]);
+  return {points,fit:FITCalcX4.linreg({points})};
+}
+function oneData(){
+  const centre=pick([9.5,10,10.5,11.5]);
+  const step=pick([0.4,0.7,1.0]);
+  const arr=[-1.8,-1.1,-0.6,0.1,0.4,0.8,1.0,1.2]
+    .map(d=>centre+step*d);
+  const mu0=pick([centre-1,centre-0.4,centre+0.1,centre+0.9]);
+  return {data:arr,mu0,conf:0.95};
+}
+function twoData(){
+  const unequal=round===3;
+  const x=unequal?[10.1,10.3,10.5,10.7,10.9,11.1]:
+    [9.1,9.6,10.0,10.4,10.6,11.1];
+  const shift=pick([0.3,0.8,1.3,2.1]);
+  const y=(unequal?[6.8,8.6,9.1,11.8,12.7,14.0]:
+    [9.3,9.8,10.2,10.6,10.8,11.3]).map(v=>v+shift);
+  return {x,y,unequal,fit:FITCalcX4.t_test_2s({
+    x,y,equal_var:!unequal
+  })};
+}
+function chiData(){
+  const observed=pick([[16,28,36],[35,20,25],[20,20,40]]);
+  const expected_props=[0.25,0.35,0.4];
+  return {observed,expected_props,
+    fit:FITCalcX4.chi_square_gof({observed,expected_props})};
+}
+function roundStart(){
+  tries=0;hinted=false;passed=false;
+  const type=['reg','one','two','two','chi','reg'][round];
+  if(type==='reg'){
+    state={type,...regressData()};
+    values={mode:'se',numeric:0,decision:false};
+  }else if(type==='one'){
+    state={type,...oneData()};
+    state.fit=FITCalcX4.ci_mean({data:state.data,conf:state.conf});
+    state.test=FITCalcX4.t_test_1s({data:state.data,mu0:state.mu0});
+    values={conf:.90,half:0,inside:false};
+  }else if(type==='two'){
+    state={type,...twoData()};
+    values={method:state.unequal?'pooled':'welch',decision:false};
+  }else{
+    state={type,...chiData()};
+    values={chi:0,decision:false};
+  }
+  $('roundHud').textContent=`Round ${round+1}/6`;
+  $('feedback').className='feedback';
+  $('feedback').textContent='Analyse the data, then check your decision.';
+  $('checkBtn').hidden=false;$('nextBtn').hidden=true;
+  $('hintBtn').disabled=false;
+  showQuestion();showTable();buildControls();draw();
+}
+function showQuestion(){
+  const s=state;
+  $('sceneName').textContent=({reg:'Regression',one:'One-sample t',
+    two:'Two-sample t',chi:'Goodness of fit'})[s.type];
+  if(s.type==='reg'){
+    $('question').textContent=
+      'Determine the slope standard error (signal unit per metre), then decide at α = 0.05 whether the slope differs from zero. Change the analysis view if useful.';
+    $('assumptions').textContent='Ordinary least squares: independent residuals, fixed x values and constant variance.';
+  }else if(s.type==='one'){
+    $('question').textContent=
+      `Set the confidence interval half-width. Does the reference mean ${fmt(s.mu0,5)} m lie inside that interval? You may change the confidence level.`;
+    $('assumptions').textContent='Independent, approximately normal observations; unknown population standard deviation.';
+  }else if(s.type==='two'){
+    $('question').textContent=
+      'Choose the justified variance method and decide whether the two means differ at α = 0.05 (two-sided).';
+    $('assumptions').textContent=s.unequal?
+      'Independent normal samples; the observed spreads differ substantially.' :
+      'Independent normal samples with comparable observed spreads and a shared-variance assumption.';
+  }else{
+    $('question').textContent=
+      'Calculate the chi-square statistic, then decide whether the observed category pattern differs from the specified proportions at α = 0.05.';
+    $('assumptions').textContent='Independent category counts, fully specified expected probabilities and no fitted parameters.';
+  }
+}
+function showTable(){
+  const s=state,head=$('tableHead'),body=$('dataRows');
+  head.replaceChildren();body.replaceChildren();
+  let names,rows;
+  if(s.type==='reg'){
+    names=['Distance / m','Signal / a.u.'];rows=s.points;
+  }else if(s.type==='one'){
+    names=['Reading','Length / m'];rows=s.data.map((x,i)=>[i+1,x]);
+  }else if(s.type==='two'){
+    names=['A / m','B / m'];rows=s.x.map((x,i)=>[x,s.y[i]]);
+  }else{
+    names=['Category','Observed','Expected proportion'];
+    rows=s.observed.map((x,i)=>[
+      ['A','B','C'][i],x,s.expected_props[i]
+    ]);
+  }
+  const tr=document.createElement('tr');
+  names.forEach(name=>{
+    const th=document.createElement('th');th.textContent=name;tr.appendChild(th);
+  });head.appendChild(tr);
+  rows.forEach(row=>{
+    const tr=document.createElement('tr');
+    row.forEach(v=>{
+      const td=document.createElement('td');
+      td.textContent=typeof v==='number'?fmt(v,6):v;tr.appendChild(td);
+    });body.appendChild(tr);
+  });
+  $('dataNote').textContent=s.type==='reg'?
+    'Test H₀: slope = 0 using t = b / SE(b), df = n − 2.' :
+    s.type==='one'?`Hypothesised mean: ${fmt(s.mu0,5)} m.` :
+    s.type==='two'?'Two independent measurement groups.' :
+    'Total counts determine each expected category count.';
+}
+function stepper(key,label,min,max,step,unit){
+  const box=document.createElement('div');box.className='control';
+  const head=document.createElement('div');head.className='control-head';
+  const name=document.createElement('strong');name.textContent=label;
+  const out=document.createElement('span');out.className='value';
+  head.append(name,out);box.appendChild(head);
+  const input=document.createElement('input');input.type='range';
+  input.min=min;input.max=max;input.step=step;
+  input.value=Math.max(min,Math.min(max,values[key]));
+  input.setAttribute('aria-label',label);box.appendChild(input);
+  const buttons=document.createElement('div');buttons.className='steps';
+  function set(v){
+    const ticks=Math.round((Math.max(min,Math.min(max,v))-min)/step);
+    values[key]=Number((min+ticks*step).toFixed(8));
+    input.value=values[key];sync();
+  }
+  function sync(){out.textContent=`${fmt(values[key],5)} ${unit}`;draw();}
+  [[-10,'−−','Coarse decrease'],[-1,'−','Fine decrease'],
+    [1,'+','Fine increase'],[10,'++','Coarse increase']].forEach(([d,text,aria])=>{
+    const b=document.createElement('button');b.textContent=text;
+    b.setAttribute('aria-label',`${aria} ${label}`);
+    b.addEventListener('click',()=>set(+input.value+d*step));
+    buttons.appendChild(b);
+  });
+  input.addEventListener('input',()=>{values[key]=+input.value;sync()});
+  box.appendChild(buttons);$('controls').appendChild(box);sync();
+}
+function options(key,label,opts,onChange){
+  const box=document.createElement('div');box.className='control';
+  const h=document.createElement('h3');h.textContent=label;box.appendChild(h);
+  const row=document.createElement('div');row.className='choices';
+  opts.forEach(([v,t])=>{
+    const b=document.createElement('button');b.textContent=t;
+    b.setAttribute('aria-pressed',String(values[key]===v));
+    b.addEventListener('click',()=>{
+      values[key]=v;
+      row.querySelectorAll('button').forEach(q=>
+        q.setAttribute('aria-pressed',String(q===b)));
+      if(onChange)onChange(v);
+      draw();
+    });
+    row.appendChild(b);
+  });box.appendChild(row);$('controls').appendChild(box);
+}
+function buildControls(){
+  $('controls').replaceChildren();
+  if(state.type==='reg'){
+    options('mode','Plot perspective',[
+      ['se','Standard error'],['r2','Goodness of fit']
+    ]);
+    stepper('numeric','Slope SE',0,2,0.0001,'a.u. m⁻¹');
+    options('decision','Reject zero slope?',[
+      [true,'Yes'],[false,'No']
+    ]);
+  }else if(state.type==='one'){
+    options('conf','Confidence level',[
+      [.90,'90 %'],[.95,'95 %'],[.99,'99 %']
+    ],v=>{
+      state.fit=FITCalcX4.ci_mean({data:state.data,conf:v});
+    });
+    stepper('half','CI half-width',0,6,0.0001,'m');
+    options('inside','Reference mean lies inside CI?',[
+      [true,'Inside'],[false,'Outside']
+    ]);
+  }else if(state.type==='two'){
+    options('method','Variance model',[
+      ['pooled','Pooled'],['welch','Welch']
+    ]);
+    options('decision','Reject equal means?',[
+      [true,'Reject H₀'],[false,'Do not reject H₀']
+    ]);
+  }else{
+    stepper('chi','Chi-square statistic',0,50,0.0001,'1');
+    options('decision','Reject specified proportions?',[
+      [true,'Reject H₀'],[false,'Do not reject H₀']
+    ]);
+  }
+}
+function axes(root,x0,x1,y0,y1,xlab,ylab,title){
+  const L=68,T=35,W=520,H=300,R=23,B=47;
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-R);
+  const Y=y=>T+(y1-y)/(y1-y0)*(H-T-B);
+  node(root,'text',{x:260,y:19,'text-anchor':'middle',
+    'font-size':15,'font-weight':800},title);
+  for(let i=0;i<=5;i++){
+    const x=x0+(x1-x0)*i/5;
+    node(root,'line',{x1:X(x),x2:X(x),y1:T,y2:H-B,
+      stroke:'#E4E2DB'});
+    node(root,'text',{x:X(x),y:H-B+17,'text-anchor':'middle',
+      'font-size':11},fmt(x,3));
+    const y=y0+(y1-y0)*i/5;
+    node(root,'line',{x1:L,x2:W-R,y1:Y(y),y2:Y(y),
+      stroke:'#E4E2DB'});
+    node(root,'text',{x:L-8,y:Y(y)+4,'text-anchor':'end',
+      'font-size':11},fmt(y,3));
+  }
+  node(root,'rect',{x:L,y:T,width:W-L-R,height:H-T-B,
+    fill:'none',stroke:'#111','stroke-width':2});
+  node(root,'text',{x:260,y:H-8,'text-anchor':'middle',
+    'font-size':13},xlab);
+  node(root,'text',{x:16,y:150,transform:'rotate(-90 16 150)',
+    'text-anchor':'middle','font-size':13},ylab);
+  return {X,Y};
+}
+function plotLine(root,points,fit,showSE){
+  root.replaceChildren();
+  const x0=0,x1=9;
+  const ys=points.map(p=>p[1]);
+  const y0=Math.min(...ys,fit.a,fit.a+fit.b*9)-2;
+  const y1=Math.max(...ys,fit.a,fit.a+fit.b*9)+2;
+  const {X,Y}=axes(root,x0,x1,y0,y1,'Distance / m',
+    'Signal / a.u.','Fitted line and measured observations');
+  node(root,'line',{x1:X(0),y1:Y(fit.a),x2:X(9),
+    y2:Y(fit.a+9*fit.b),stroke:'#111','stroke-width':3});
+  points.forEach(([x,y])=>{
+    node(root,'line',{x1:X(x),x2:X(x),y1:Y(y),
+      y2:Y(fit.a+fit.b*x),stroke:'#1F66E5','stroke-width':3});
+    node(root,'circle',{cx:X(x),cy:Y(y),r:5,fill:'#FFC83D',
+      stroke:'#111','stroke-width':2});
+  });
+  if(showSE){
+    const candidate=FITCalcX4.linreg({points:points.map((p,i)=>
+      [p[0],fit.a+fit.b*p[0]+(i%2?-1:1)*values.numeric])});
+    const width=candidate.error?0:candidate.se_b||0;
+    node(root,'text',{x:95,y:54,'font-size':12,
+      'font-weight':700,fill:'#D92D20'},
+      `Your uncertainty marker: ${fmt(values.numeric,3)}`);
+    node(root,'line',{x1:X(8.5),x2:X(8.5),
+      y1:Y(fit.a+fit.b*8.5-width*2),
+      y2:Y(fit.a+fit.b*8.5+width*2),
+      stroke:'#D92D20','stroke-width':5});
+  }else{
+    node(root,'text',{x:100,y:54,'font-size':12,'font-weight':700},
+      'Gold: readings · Blue: residuals');
+  }
+}
+function residualPlot(root,points,fit){
+  root.replaceChildren();
+  const W=520,H=190,L=68,R=23,T=25,B=40;
+  const residuals=points.map(([x,y])=>[x,y-fit.a-fit.b*x]);
+  const lim=Math.max(.3,...residuals.map(p=>Math.abs(p[1])))*1.3;
+  const X=x=>L+(x/9)*(W-L-R);
+  const Y=y=>T+(lim-y)/(2*lim)*(H-T-B);
+  node(root,'text',{x:260,y:17,'font-size':14,
+    'font-weight':800,'text-anchor':'middle'},'Residual plot');
+  node(root,'line',{x1:L,y1:Y(0),x2:W-R,y2:Y(0),
+    stroke:'#111','stroke-width':2});
+  residuals.forEach(([x,y])=>{
+    node(root,'line',{x1:X(x),y1:Y(0),x2:X(x),y2:Y(y),
+      stroke:'#1F66E5','stroke-width':4});
+    node(root,'circle',{cx:X(x),cy:Y(y),r:4,fill:'#FF6B3D',
+      stroke:'#111','stroke-width':1.5});
+  });
+  node(root,'text',{x:260,y:H-6,'font-size':12,
+    'text-anchor':'middle'},'Distance / m');
+  node(root,'text',{x:14,y:100,'font-size':12,
+    transform:'rotate(-90 14 100)','text-anchor':'middle'},
+    'Residual / a.u.');
+  node(root,'text',{x:L-7,y:Y(0)+4,'font-size':11,
+    'text-anchor':'end'},'0');
+}
+function gaussianShape(x,df){
+  const points=[[-2,0],[-1,1],[0,2],[1,1],[2,0]];
+  const test=FITCalcX4.linreg({points});
+  const scale=test.error?1:Math.max(1,Math.abs(test.b)+1);
+  return Math.pow(1+(x*x)/df,-(df+1)/2)/scale;
+}
+function drawDistribution(root,kind,stat,df,p,secondary){
+  root.replaceChildren();
+  const W=520,H=secondary?190:300,L=68,R=23,T=30,B=43;
+  const lo=kind==='chi'?0:-6,hi=kind==='chi'?Math.max(18,stat*1.3):6;
+  const X=x=>L+(x-lo)/(hi-lo)*(W-L-R);
+  const yvals=[];
+  for(let i=0;i<=120;i++){
+    const x=lo+(hi-lo)*i/120;
+    const v=kind==='chi'?
+      (x<=0?0:Math.pow(x,Math.max(0,df/2-1))*Math.exp(-x/2)):
+      gaussianShape(x,df);
+    yvals.push([x,v]);
+  }
+  const ymax=Math.max(...yvals.map(p=>p[1]),1e-9)*1.1;
+  const Y=y=>H-B-y/ymax*(H-T-B);
+  node(root,'text',{x:260,y:18,'font-size':14,
+    'font-weight':800,'text-anchor':'middle'},
+    kind==='chi'?'Chi-square distribution':'Student t distribution');
+  let line='',area='',start=false;
+  yvals.forEach(([x,y])=>{
+    const px=X(x),py=Y(y);
+    line+=(line?' ':'')+`${px},${py}`;
+    const shaded=kind==='chi'?x>=stat:Math.abs(x)>=Math.abs(stat);
+    if(shaded){
+      if(!start){area=`${px},${Y(0)} `;start=true}
+      area+=`${px},${py} `;
+    }else if(start){
+      area+=`${px},${Y(0)}`;
+      node(root,'polygon',{points:area,fill:'#FFB5CD',
+        opacity:.75});area='';start=false;
+    }
+  });
+  if(start){
+    area+=`${X(hi)},${Y(0)}`;
+    node(root,'polygon',{points:area,fill:'#FFB5CD',opacity:.75});
+  }
+  node(root,'polyline',{points:line,fill:'none',stroke:'#111',
+    'stroke-width':3});
+  node(root,'line',{x1:L,y1:Y(0),x2:W-R,y2:Y(0),
+    stroke:'#111','stroke-width':2});
+  const markers=kind==='chi'?[stat]:[-Math.abs(stat),Math.abs(stat)];
+  markers.forEach(x=>{
+    if(x>=lo&&x<=hi)node(root,'line',{x1:X(x),x2:X(x),
+      y1:T,y2:H-B,stroke:'#D92D20','stroke-width':2,
+      'stroke-dasharray':'6 4'});
+  });
+  node(root,'text',{x:260,y:H-10,'font-size':12,
+    'text-anchor':'middle'},kind==='chi'?'χ² / 1':'t / 1');
+  if(passed)node(root,'text',{x:85,y:51,
+    'font-size':13,'font-weight':800},`Tail area p = ${fmt(p,5)}`);
+  else node(root,'text',{x:85,y:51,'font-size':12,
+    'font-weight':700},'Pink: tail region · Red: observed statistic');
+}
+function drawInterval(root){
+  root.replaceChildren();
+  const s=state,fit=s.fit,observedMean=fit.mean;
+  const lo=observedMean-5,hi=observedMean+5;
+  const L=68,R=23,T=35,H=300,W=520,B=50;
+  const X=x=>L+(x-lo)/(hi-lo)*(W-L-R);
+  node(root,'text',{x:260,y:20,'font-size':15,
+    'font-weight':800,'text-anchor':'middle'},'Confidence interval');
+  node(root,'line',{x1:L,y1:153,x2:W-R,y2:153,stroke:'#111',
+    'stroke-width':3});
+  const left=observedMean-values.half,right=observedMean+values.half;
+  node(root,'line',{x1:X(left),y1:115,x2:X(right),y2:115,
+    stroke:'#1F66E5','stroke-width':8});
+  [left,right].forEach(x=>node(root,'line',{x1:X(x),y1:100,
+    x2:X(x),y2:130,stroke:'#111','stroke-width':3}));
+  node(root,'circle',{cx:X(observedMean),cy:115,r:8,
+    fill:'#FFC83D',stroke:'#111','stroke-width':3});
+  node(root,'line',{x1:X(s.mu0),x2:X(s.mu0),y1:73,
+    y2:180,stroke:'#D92D20','stroke-width':3,
+    'stroke-dasharray':'6 4'});
+  for(let i=0;i<=5;i++){
+    const x=lo+(hi-lo)*i/5;
+    node(root,'text',{x:X(x),y:183,'font-size':11,
+      'text-anchor':'middle'},fmt(x,3));
+  }
+  node(root,'text',{x:260,y:230,'text-anchor':'middle',
+    'font-size':13},'Length / m');
+  node(root,'text',{x:260,y:265,'text-anchor':'middle',
+    'font-size':12},'Blue: your interval · Red: reference mean');
+}
+function drawCategory(root){
+  root.replaceChildren();
+  const s=state;const L=65,T=32,H=300,W=520,B=50,R=20;
+  const total=s.observed.reduce((a,b)=>a+b,0);
+  const expected=s.expected_props.map(p=>total*p);
+  const ymax=Math.ceil(Math.max(...s.observed,...expected)/10)*10+5;
+  const X=i=>L+75+i*125,Y=y=>H-B-y/ymax*(H-B-T);
+  node(root,'text',{x:260,y:20,'font-size':15,
+    'font-weight':800,'text-anchor':'middle'},'Observed and expected counts');
+  s.observed.forEach((v,i)=>{
+    node(root,'rect',{x:X(i)-20,y:Y(v),width:34,height:Y(0)-Y(v),
+      fill:'#1F66E5',stroke:'#111','stroke-width':2});
+    node(root,'rect',{x:X(i)+15,y:Y(expected[i]),width:34,
+      height:Y(0)-Y(expected[i]),fill:'#FFC83D',
+      stroke:'#111','stroke-width':2});
+    node(root,'text',{x:X(i)+14,y:270,'text-anchor':'middle',
+      'font-size':13},['A','B','C'][i]);
+  });
+  node(root,'text',{x:260,y:293,'text-anchor':'middle',
+    'font-size':12},'Category / 1');
+  node(root,'text',{x:17,y:150,transform:'rotate(-90 17 150)',
+    'text-anchor':'middle','font-size':12},'Count / 1');
+  node(root,'text',{x:75,y:44,'font-size':12},'Blue: observed · Yellow: expected');
+}
+function drawSamples(root){
+  root.replaceChildren();
+  const s=state;const L=64,T=32,W=520,H=300,B=47;
+  const all=s.type==='two'?[...s.x,...s.y]:s.data;
+  const lo=Math.min(...all)-1,hi=Math.max(...all)+1;
+  const X=x=>L+(x-lo)/(hi-lo)*(W-L-30);
+  node(root,'text',{x:260,y:19,'font-size':15,
+    'font-weight':800,'text-anchor':'middle'},'Measurement distributions');
+  node(root,'line',{x1:L,y1:210,x2:W-30,y2:210,
+    stroke:'#111','stroke-width':3});
+  if(s.type==='two'){
+    s.x.forEach((x,i)=>node(root,'circle',{cx:X(x),cy:105+(i%3)*16,
+      r:7,fill:'#1F66E5',stroke:'#111','stroke-width':2}));
+    s.y.forEach((x,i)=>node(root,'rect',{x:X(x)-6,y:155+(i%3)*16,
+      width:12,height:12,fill:'#FF8FB8',stroke:'#111',
+      'stroke-width':2}));
+    node(root,'text',{x:100,y:67,'font-size':13},'Blue: A · Pink: B');
+  }else{
+    s.data.forEach((x,i)=>node(root,'circle',{cx:X(x),
+      cy:120+(i%3)*17,r:7,fill:'#1F66E5',stroke:'#111',
+      'stroke-width':2}));
+    node(root,'line',{x1:X(s.mu0),x2:X(s.mu0),y1:62,y2:215,
+      stroke:'#D92D20','stroke-width':3,'stroke-dasharray':'6 5'});
+    node(root,'text',{x:100,y:67,'font-size':13},
+      'Blue: readings · Red: hypothesised mean');
+  }
+  for(let i=0;i<=5;i++){
+    const x=lo+(hi-lo)*i/5;
+    node(root,'text',{x:X(x),y:231,'font-size':11,
+      'text-anchor':'middle'},fmt(x,3));
+  }
+  node(root,'text',{x:260,y:270,'text-anchor':'middle',
+    'font-size':13},'Length / m');
+}
+function draw(){
+  if(!state)return;
+  const a=$('mainPlot'),b=$('secondPlot');
+  if(state.type==='reg'){
+    $('plotTitle').textContent='Regression and residuals';
+    plotLine(a,state.points,state.fit,values.mode==='se');
+    residualPlot(b,state.points,state.fit);
+    $('plotNote').textContent=
+      'Gold circles are measurements; vertical blue segments are regression residuals.';
+  }else if(state.type==='one'){
+    $('plotTitle').textContent='Interval and t-test evidence';
+    drawInterval(a);
+    drawDistribution(b,'t',state.test.t,state.test.df,
+      state.test.p_two_sided,true);
+    $('plotNote').textContent='The red reference mean is fixed; the blue interval follows your half-width.';
+  }else if(state.type==='two'){
+    $('plotTitle').textContent='Two-sample comparison';
+    drawSamples(a);
+    const fit=FITCalcX4.t_test_2s({x:state.x,y:state.y,
+      equal_var:values.method==='pooled'});
+    drawDistribution(b,'t',fit.t,fit.df,fit.p_two_sided,true);
+    $('plotNote').textContent='Changing method recalculates the t statistic, degrees of freedom and tail region.';
+  }else{
+    $('plotTitle').textContent='Category counts and chi-square';
+    drawCategory(a);
+    drawDistribution(b,'chi',values.chi,state.fit.df,
+      state.fit.p,true);
+    $('plotNote').textContent='The red marker follows your chosen chi-square statistic.';
+  }
+  a.setAttribute('aria-label',`${$('plotTitle').textContent}; current player choices are plotted.`);
+  b.setAttribute('aria-label','Statistical residuals or distribution with labelled reference markers.');
+}
+function evaluation(){
+  const s=state;
+  if(s.type==='reg'){
+    const se=s.fit.se_b,stat=s.fit.b/se;
+    const xs=s.points.map(p=>p[0]);
+    const t=FITCalcX4.t_test_1s({
+      data:xs.map((x,i)=>s.points[i][1]-s.fit.a),
+      mu0:0
+    });
+    const significant=Math.abs(stat)>0 && (
+      Math.abs(stat)>4 || (Math.abs(stat)>2.5 && s.fit.r2>.6));
+    const exactSignificant=significant;
+    return {
+      ok:close(values.numeric,se,.00011)&&
+        values.decision===exactSignificant,
+      wrong:`Slope SE differs by ${fmt(Math.abs(values.numeric-se),4)} a.u. m⁻¹, or revisit the slope decision.`,
+      answer:`SE(b) = ${fmt(se,7)} a.u. m⁻¹; t = ${fmt(stat,5)}; ${exactSignificant?'reject':'do not reject'} H₀`,
+      note:t.error?'':`Slope evidence comes from the residual variance.`
+    };
+  }
+  if(s.type==='one'){
+    const fit=FITCalcX4.ci_mean({data:s.data,conf:values.conf});
+    const inside=s.mu0>=fit.lo&&s.mu0<=fit.hi;
+    return {
+      ok:close(values.half,fit.half_width,.00012)&&
+        values.inside===inside,
+      wrong:`Half-width differs by ${fmt(Math.abs(values.half-fit.half_width),5)} m; review whether the reference mean falls inside your interval.`,
+      answer:`half-width ${fmt(fit.half_width,7)} m; interval ${fmt(fit.lo,6)} to ${fmt(fit.hi,6)} m; reference mean ${inside?'inside':'outside'}`,
+      note:'The t critical value changes with confidence level.'
+    };
+  }
+  if(s.type==='two'){
+    const rightMethod=s.unequal?'welch':'pooled';
+    const fit=FITCalcX4.t_test_2s({x:s.x,y:s.y,
+      equal_var:values.method==='pooled'});
+    const decision=fit.p_two_sided<.05;
+    return {
+      ok:values.method===rightMethod&&values.decision===decision,
+      wrong:'Check the relative group spreads, then compare the appropriate two-sided p-value with 0.05.',
+      answer:`${rightMethod}; t = ${fmt(fit.t,6)}, df = ${fmt(fit.df,6)}, p = ${fmt(fit.p_two_sided,6)}; ${decision?'reject':'do not reject'} H₀`,
+      note:'Welch permits different group variances and fractional degrees of freedom.'
+    };
+  }
+  const decision=s.fit.p<.05;
+  return {
+    ok:close(values.chi,s.fit.chi2,.00012)&&
+      values.decision===decision,
+    wrong:`χ² differs by ${fmt(Math.abs(values.chi-s.fit.chi2),5)}; check each observed-versus-expected contribution.`,
+    answer:`χ² = ${fmt(s.fit.chi2,7)}, df = ${s.fit.df}, p = ${fmt(s.fit.p,6)}; ${decision?'reject':'do not reject'} H₀`,
+    note:'Each category contributes (observed − expected)² / expected.'
+  };
+}
+function check(){
+  if(passed)return;
+  tries++;
+  const e=evaluation();
+  if(e.ok){
+    passed=true;
+    const points=hinted?50:tries===1?100:75;
+    score+=points;$('scoreHud').textContent=`Score ${score}`;
+    $('feedback').className='feedback good';
+    $('feedback').textContent=`✓ Correct! +${points}. ${e.answer}. ${e.note}`;
+    $('checkBtn').hidden=true;$('hintBtn').disabled=true;
+    $('nextBtn').hidden=false;
+    $('nextBtn').textContent=round===5?'See results →':'Next round →';
+    draw();
+  }else{
+    $('feedback').className='feedback bad';
+    $('feedback').textContent=`✗ ${e.wrong}`;
+  }
+}
+function hint(){
+  if(passed)return;
+  hinted=true;$('hintBtn').disabled=true;
+  const s=state;
+  const hint=s.type==='reg'?
+    'Estimate residual variance using n − 2 degrees of freedom, then divide by Sxx before taking the square root. Test slope against zero with a t statistic.' :
+    s.type==='one'?
+    'Compute sample SD using n − 1. Multiply its standard error by the appropriate two-sided t critical value.' :
+    s.type==='two'?
+    'Use Welch if the variances differ substantially; otherwise the pooled model is appropriate under the stated assumptions.' :
+    'Multiply total count by each expected proportion, then sum squared differences divided by expected counts.';
+  $('feedback').className='feedback';
+  $('feedback').textContent=`Hint (maximum 50 points): ${hint}`;
+}
+function next(){
+  if(!passed)return;
+  round++;
+  if(round===6){
+    $('game').style.display='none';$('end').style.display='block';
+    const n=score>=510?3:score>=360?2:score>=180?1:0;
+    $('stars').textContent='★'.repeat(n)+'☆'.repeat(3-n);
+    $('endScore').textContent=`Total score: ${score} / 600`;
+  }else roundStart();
+}
+function restart(){
+  seed=(seed+1093)>>>0;round=0;score=0;
+  $('game').style.display='grid';$('end').style.display='none';
+  $('scoreHud').textContent='Score 0';roundStart();
+}
+$('hintBtn').addEventListener('click',hint);
+$('checkBtn').addEventListener('click',check);
+$('nextBtn').addEventListener('click',next);
+$('again').addEventListener('click',restart);
+restart();
+})();
+</script>
+</body>
+</html>

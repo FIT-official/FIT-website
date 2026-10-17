@@ -1,0 +1,1044 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calibration Lab — FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--fit-ink:#111111;--fit-ink-2:#3D3D3D;--fit-ink-3:#6B6B6B;--fit-paper:#FEFEFE;--fit-white:#FFFFFF;--fit-sunken:#F4F3EF;--fit-line-soft:#E4E2DB;--fit-sun:#FFC83D;--fit-pink:#FF8FB8;--fit-green:#3DBE6B;--fit-focus:#1F66E5;--fit-success:#1E9E5A;--fit-danger:#D92D20;
+--lvl-primary:#FFC83D;--lvl-primary-tint:#FFF4D6;--lvl-primary-on:#111111;--lvl-secondary:#2EC4A6;--lvl-secondary-tint:#DDF7F1;--lvl-secondary-on:#111111;--lvl-jc:#6A45F5;--lvl-jc-tint:#ECE7FF;--lvl-jc-on:#FFFFFF;--lvl-poly:#FF6B3D;--lvl-poly-tint:#FFE6DC;--lvl-poly-on:#111111;--lvl-uni:#1F66E5;--lvl-uni-tint:#E2ECFD;--lvl-uni-on:#FFFFFF;
+--r-sm:12px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;--bw:2px;--bw-strong:3px;--sh-1:0 2px 0 #111;--sh-2:0 4px 0 #111;--sh-3:0 6px 0 #111;--ease-out:cubic-bezier(.2,.8,.2,1);--dur-1:120ms;--dur-2:180ms}
+*{box-sizing:border-box}
+html,body{margin:0;min-width:0}
+body{background:var(--fit-paper);color:var(--fit-ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45}
+button,input,select{font:inherit}
+button,input,[role="button"]{-webkit-tap-highlight-color:transparent;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid #1F66E5;outline-offset:3px}
+button{min-height:44px;border:2px solid #111;border-radius:999px;background:white;color:#111;font-weight:800;cursor:pointer;padding:10px 18px;transition:transform var(--dur-1) var(--ease-out)}
+button:active{transform:translateY(2px)}
+button:disabled{opacity:.45;cursor:default}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--lvl-poly);cursor:pointer}
+input[type=number]{width:110px;max-width:100%;min-height:44px;border:2px solid #111;border-radius:12px;padding:8px;font-size:16px}
+.shell{max-width:1300px;margin:auto;padding:16px 16px 36px}
+.hud{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;border:2px solid #111;border-radius:24px;padding:12px 16px;background:white;box-shadow:var(--sh-2)}
+.badge{display:inline-flex;align-items:center;border:2px solid #111;border-radius:999px;background:var(--lvl-poly);color:var(--lvl-poly-on);font-size:12px;font-weight:800;text-transform:uppercase;padding:8px 12px;letter-spacing:.04em}
+.stat{font-weight:800;font-variant-numeric:tabular-nums}
+h1{font-size:clamp(30px,5vw,48px);line-height:1.04;margin:25px 0 8px;font-weight:800}
+h2{font-size:22px;line-height:1.15;margin:0 0 14px;font-weight:800}
+h3{font-size:17px;margin:0 0 8px;font-weight:800}
+p{margin:8px 0}
+.lede{color:var(--fit-ink-2);font-weight:600;margin-bottom:22px}
+.layout{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+.column{min-width:0;display:grid;gap:20px;align-content:start}
+.card{min-width:0;background:white;border:2px solid #111;border-radius:28px;padding:18px;box-shadow:var(--sh-2)}
+.stage{background:var(--lvl-poly-tint)}
+.plot-card{background:var(--fit-white)}
+.plot{display:block;width:100%;height:auto;border:2px solid #111;border-radius:16px;background:white;overflow:visible}
+.scene{width:100%;height:auto;display:block;max-height:220px}
+.caption{font-size:13px;font-weight:600;color:var(--fit-ink-3)}
+.question{font-size:18px;font-weight:700;line-height:1.4;padding:14px;border:2px solid #111;border-radius:16px;background:var(--lvl-poly-tint)}
+.controls{display:grid;gap:16px}
+.control{padding:12px;background:var(--fit-sunken);border:2px solid #111;border-radius:16px}
+.control-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.control-head strong{font-weight:800}
+.value{font-weight:800;font-size:19px;font-variant-numeric:tabular-nums}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:10px}
+.steps button{padding:6px 0;font-size:19px;background:white}
+.option-grid{display:flex;gap:9px;flex-wrap:wrap}
+.option-grid button{background:white}
+.option-grid button[aria-pressed=true]{background:var(--lvl-poly);box-shadow:var(--sh-1)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.primary{background:var(--fit-sun);border-width:3px;box-shadow:var(--sh-2);flex:2}
+.primary:active{box-shadow:var(--sh-1)}
+.hint{background:var(--lvl-poly-tint)}
+.feedback{padding:12px 14px;border:2px solid #111;border-radius:14px;font-weight:700;min-height:54px;background:white}
+.feedback.good{background:#DDF7E5}
+.feedback.bad{background:#FFF0EF}
+details{border:2px solid #111;border-radius:18px;padding:14px;background:white}
+summary{font-weight:800;cursor:pointer;min-height:44px;display:flex;align-items:center}
+.math-lines{display:grid;gap:8px;font-size:14px}
+.data-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+.data-table th,.data-table td{padding:7px;border-bottom:1px solid #ddd;text-align:right}
+.data-table th:first-child,.data-table td:first-child{text-align:left}
+.data-table th{font-weight:800}
+.end{display:none;text-align:center;background:var(--lvl-poly-tint);border:3px solid #111;border-radius:32px;padding:36px 18px;box-shadow:var(--sh-3)}
+.stars{font-size:48px;letter-spacing:8px}
+.pill-note{display:inline-block;padding:5px 12px;border:2px solid #111;border-radius:99px;background:white;font-size:13px;font-weight:800}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;font-weight:700;margin-top:10px}
+.swatch{display:inline-block;width:18px;height:5px;vertical-align:middle;margin-right:5px;background:#111}
+.swatch.player{background:#D92D20}
+.swatch.resid{background:#1F66E5}
+.swatch.lod{background:#168751}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.shell{padding:24px 28px 46px}.card{padding:22px}.stage{position:relative}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="hud">
+    <span class="badge">Polytechnic</span>
+    <span class="stat" id="roundHud">Round 1/6</span>
+    <span class="stat" id="scoreHud">Score 0</span>
+  </header>
+  <h1>Calibration Lab</h1>
+  <p class="lede">Build a reliable instrument calibration, identify a sample and report measured uncertainty.</p>
+  <main id="game" class="layout">
+    <div class="column">
+      <section class="card stage" aria-labelledby="sceneTitle">
+        <h2 id="sceneTitle">Measurement bench</h2>
+        <svg id="scene" class="scene" role="img" aria-label="Calibration equipment and measured quantities" viewBox="0 0 470 200">
+          <rect x="12" y="152" width="445" height="25" rx="9" fill="#111"/>
+          <rect x="46" y="67" width="110" height="86" rx="12" fill="#FFF" stroke="#111" stroke-width="4"/>
+          <rect x="57" y="94" width="88" height="47" rx="6" fill="#FFCA92" stroke="#111" stroke-width="3"/>
+          <path d="M65 82h73" stroke="#111" stroke-width="4"/>
+          <rect x="198" y="35" width="205" height="116" rx="17" fill="#fff" stroke="#111" stroke-width="4"/>
+          <rect x="214" y="53" width="170" height="56" rx="8" fill="#DDF7F1" stroke="#111" stroke-width="3"/>
+          <path d="M170 110H195" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+          <path d="M183 101l12 9-12 9" fill="none" stroke="#111" stroke-width="3"/>
+          <text x="100" y="29" text-anchor="middle" font-size="14" font-weight="800">Standard</text>
+          <text x="300" y="76" text-anchor="middle" font-size="14" font-weight="800">Signal / a.u.</text>
+          <text x="300" y="97" id="sceneValue" text-anchor="middle" font-size="17" font-weight="800">Measuring</text>
+          <text x="300" y="135" text-anchor="middle" font-size="13" font-weight="700">Detector</text>
+          <text x="105" y="193" text-anchor="middle" font-size="12">Concentration / mol L⁻¹</text>
+        </svg>
+        <p id="sceneCaption" class="caption">Standards produce detector signals that define a straight calibration line.</p>
+        <div id="question" class="question"></div>
+        <h3 style="margin-top:17px">Measurement sheet</h3>
+        <table class="data-table">
+          <thead><tr><th id="col1">Standard / mol L⁻¹</th><th id="col2">Signal / a.u.</th></tr></thead>
+          <tbody id="measurements"></tbody>
+        </table>
+      </section>
+      <section class="card">
+        <h2>Concept figure</h2>
+        <svg viewBox="0 0 400 105" class="scene" role="img" aria-label="Three standard samples with increasing detector responses">
+          <path d="M30 82H370" stroke="#111" stroke-width="4"/>
+          <rect x="60" y="46" width="55" height="36" rx="5" fill="#FFE6DC" stroke="#111" stroke-width="4"/>
+          <rect x="172" y="29" width="55" height="53" rx="5" fill="#FFB391" stroke="#111" stroke-width="4"/>
+          <rect x="284" y="10" width="55" height="72" rx="5" fill="#FF6B3D" stroke="#111" stroke-width="4"/>
+          <text x="88" y="99" text-anchor="middle" font-size="12">Low</text>
+          <text x="200" y="99" text-anchor="middle" font-size="12">Medium</text>
+          <text x="311" y="99" text-anchor="middle" font-size="12">High</text>
+        </svg>
+        <p class="caption">Greater concentration normally gives a greater signal for a positive-slope detector.</p>
+      </section>
+    </div>
+    <div class="column">
+      <section class="card plot-card">
+        <h2>Live calibration plot</h2>
+        <svg id="plot" class="plot" role="img" aria-label="Signal versus concentration with fitted line and residuals" viewBox="0 0 520 340"></svg>
+        <div class="legend">
+          <span><i class="swatch"></i>Standards and reference fit</span>
+          <span><i class="swatch player"></i>Your line</span>
+          <span><i class="swatch resid"></i>Residuals</span>
+          <span><i class="swatch lod"></i>LOD</span>
+        </div>
+      </section>
+      <section class="card">
+        <h2>Instrument controls</h2>
+        <div id="controls" class="controls"></div>
+        <div class="actions">
+          <button id="hintBtn" class="hint">Hint − points</button>
+          <button id="checkBtn" class="primary">Check</button>
+          <button id="nextBtn" hidden>Next round →</button>
+        </div>
+        <p id="feedback" class="feedback" aria-live="polite">Adjust the controls, then check your answer.</p>
+      </section>
+      <details>
+        <summary>The maths</summary>
+        <div class="math-lines">
+          <p>Linear calibration: signal = intercept + slope × concentration.</p>
+          <p>Least squares minimises Σ[signal − predicted signal]².</p>
+          <p>Unknown concentration = (unknown signal − intercept) / slope.</p>
+          <p>Limit of detection: LOD = 3.3 × residual standard deviation / slope. Residual SD uses n − 2 degrees of freedom.</p>
+          <p>For a sum, square weighted absolute uncertainties before adding. For a product or quotient, combine weighted relative uncertainties in quadrature. Inputs are treated as uncorrelated.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+  <section id="end" class="end" aria-live="polite">
+    <h2>Calibration complete!</h2>
+    <div id="stars" class="stars"></div>
+    <p id="finalScore" class="stat"></p>
+    <p>Six measurements, one sharper laboratory eye.</p>
+    <button id="againBtn" class="primary">Play again</button>
+  </section>
+</div>
+<script>
+/* FIT-CALC-BEGIN x4_curve_fit */
+const FITCalcX4 = (function () {
+  'use strict';
+
+  const API_VERSION = 1;
+  const EPS = 1e-14;
+  const MAX_ITER = 10000;
+
+  function err(error, reason) {
+    return { error, reason };
+  }
+
+  function finite(x) {
+    return typeof x === 'number' && Number.isFinite(x);
+  }
+
+  function arrayOK(a, min = 2, max = 50) {
+    return Array.isArray(a) && a.length >= min && a.length <= max;
+  }
+
+  function numbersOK(a) {
+    return Array.isArray(a) && a.every(finite);
+  }
+
+  function safe(z) {
+    return Number.isFinite(z) ? z : null;
+  }
+
+  function mean(a) {
+    const base = a[0];
+    let s = 0;
+    for (const v of a) s += v - base;
+    return base + s / a.length;
+  }
+
+  function variance(a, m) {
+    let s = 0;
+    for (const v of a) {
+      const d = v - m;
+      s += d * d;
+    }
+    return s / (a.length - 1);
+  }
+
+  function logGamma(z) {
+    const p = [
+      0.99999999999980993,
+      676.5203681218851,
+      -1259.1392167224028,
+      771.32342877765313,
+      -176.61502916214059,
+      12.507343278686905,
+      -0.13857109526572012,
+      9.9843695780195716e-6,
+      1.5056327351493116e-7
+    ];
+    if (z < 0.5) {
+      return Math.log(Math.PI) -
+        Math.log(Math.sin(Math.PI * z)) -
+        logGamma(1 - z);
+    }
+    z -= 1;
+    let x = p[0];
+    for (let i = 1; i < p.length; i++) x += p[i] / (z + i);
+    const t = z + 7.5;
+    return 0.5 * Math.log(2 * Math.PI) +
+      (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+
+  function betaFraction(a, b, x) {
+    const tiny = 1e-300;
+    let c = 1;
+    let d = 1 - (a + b) * x / (a + 1);
+    if (Math.abs(d) < tiny) d = tiny;
+    d = 1 / d;
+    let h = d;
+    for (let m = 1; m <= MAX_ITER; m++) {
+      const m2 = 2 * m;
+      let aa = m * (b - m) * x /
+        ((a + m2 - 1) * (a + m2));
+      d = 1 + aa * d;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = 1 + aa / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      h *= d * c;
+      aa = -(a + m) * (a + b + m) * x /
+        ((a + m2) * (a + m2 + 1));
+      d = 1 + aa * d;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = 1 + aa / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      const delta = d * c;
+      h *= delta;
+      if (Math.abs(delta - 1) < 2e-14) return h;
+    }
+    return null;
+  }
+
+  function regularisedBeta(x, a, b) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    const front = Math.exp(
+      logGamma(a + b) - logGamma(a) - logGamma(b) +
+      a * Math.log(x) + b * Math.log1p(-x)
+    );
+    if (x < (a + 1) / (a + b + 2)) {
+      const h = betaFraction(a, b, x);
+      return h === null ? null : Math.max(0, Math.min(1, front * h / a));
+    }
+    const h = betaFraction(b, a, 1 - x);
+    return h === null ? null :
+      Math.max(0, Math.min(1, 1 - front * h / b));
+  }
+
+  function gammaQ(a, x) {
+    if (x <= 0) return 1;
+    const gln = logGamma(a);
+    if (x < a + 1) {
+      let sum = 1 / a;
+      let term = sum;
+      for (let n = 1; n <= MAX_ITER; n++) {
+        term *= x / (a + n);
+        sum += term;
+        if (Math.abs(term) < Math.abs(sum) * 2e-15) {
+          return Math.max(0, Math.min(1,
+            1 - sum * Math.exp(-x + a * Math.log(x) - gln)));
+        }
+      }
+      return null;
+    }
+    const tiny = 1e-300;
+    let b = x + 1 - a;
+    let c = 1 / tiny;
+    let d = 1 / b;
+    let h = d;
+    for (let i = 1; i <= MAX_ITER; i++) {
+      const an = -i * (i - a);
+      b += 2;
+      d = an * d + b;
+      if (Math.abs(d) < tiny) d = tiny;
+      c = b + an / c;
+      if (Math.abs(c) < tiny) c = tiny;
+      d = 1 / d;
+      const delta = d * c;
+      h *= delta;
+      if (Math.abs(delta - 1) < 2e-15) {
+        return Math.max(0, Math.min(1,
+          Math.exp(-x + a * Math.log(x) - gln) * h));
+      }
+    }
+    return null;
+  }
+
+  function tTail(t, df) {
+    return regularisedBeta(df / (df + t * t), df / 2, 0.5);
+  }
+
+  function tCritical(conf, df) {
+    const target = 1 - conf;
+    let lo = 0;
+    let hi = 1;
+    while (tTail(hi, df) > target && hi < 1e12) hi *= 2;
+    for (let i = 0; i < 130; i++) {
+      const mid = (lo + hi) / 2;
+      if (tTail(mid, df) > target) lo = mid;
+      else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+
+  function validatedSample(a) {
+    if (!arrayOK(a)) return err('ConstraintViolation',
+      'points_out_of_range_2_50');
+    if (!numbersOK(a)) return err('ConstraintViolation',
+      'non_finite_input');
+    return null;
+  }
+
+  function checkedResult(result) {
+    for (const key of Object.keys(result)) {
+      const value = result[key];
+      if (typeof value === 'number' && !Number.isFinite(value)) {
+        return err('MathError', 'non_finite_result');
+      }
+    }
+    return result;
+  }
+
+  /**
+   * One-sample, two-sided Student t test.
+   * Input: {data:number[],mu0:number}, 2–50 independent observations,
+   * all in the same SI unit as mu0.
+   * Output: {mean,sd,t,df,p_two_sided}; sd is sample SD (n−1).
+   * Assumes approximately normal independent observations.
+   * Errors: points_out_of_range_2_50, non_finite_input, zero_variance.
+   * Hand check: data [2,4,6], mu0=3; mean=4,
+   * sd=2, t=1/sqrt(4/3)=0.8660254, df=2, p=0.477767.
+   */
+  function t_test_1s({ data, mu0 } = {}) {
+    const e = validatedSample(data);
+    if (e) return e;
+    if (!finite(mu0)) return err('ConstraintViolation', 'non_finite_input');
+    const m = mean(data);
+    const v = variance(data, m);
+    if (v === 0) return err('MathError', 'zero_variance');
+    const sd = Math.sqrt(v);
+    const t = (m - mu0) / (sd / Math.sqrt(data.length));
+    const p_two_sided = tTail(Math.abs(t), data.length - 1);
+    return checkedResult({ mean: m, sd, t, df: data.length - 1,
+      p_two_sided });
+  }
+
+  /**
+   * Independent two-sample two-sided t test.
+   * Input: {x:number[],y:number[],equal_var:boolean}; 2–50
+   * observations per group, equal physical units.
+   * Output: {t,df,p_two_sided}. true=pooled, false=Welch.
+   * Assumes independent, approximately normal samples.
+   * Errors: points_out_of_range_2_50, non_finite_input,
+   * zero_variance; invalid modes are NotSupported.
+   * Hand check: x=[2,4,6], y=[1,3,5], equal_var=true:
+   * pooled variance=4, SE=sqrt(8/3), t=0.612372436,
+   * df=4; Welch has the same t and df=4 for these samples.
+   */
+  function t_test_2s({ x, y, equal_var } = {}) {
+    const ex = validatedSample(x);
+    if (ex) return ex;
+    const ey = validatedSample(y);
+    if (ey) return ey;
+    if (typeof equal_var !== 'boolean') {
+      return err('NotSupported', 'unsupported_variance_mode');
+    }
+    const n1 = x.length, n2 = y.length;
+    const m1 = mean(x), m2 = mean(y);
+    const v1 = variance(x, m1), v2 = variance(y, m2);
+    if (v1 === 0 && v2 === 0) {
+      return err('MathError', 'zero_variance');
+    }
+    let se2, df;
+    if (equal_var) {
+      const sp2 = ((n1 - 1) * v1 + (n2 - 1) * v2) /
+        (n1 + n2 - 2);
+      se2 = sp2 * (1 / n1 + 1 / n2);
+      df = n1 + n2 - 2;
+    } else {
+      const a = v1 / n1, b = v2 / n2;
+      se2 = a + b;
+      df = se2 * se2 /
+        (a * a / (n1 - 1) + b * b / (n2 - 1));
+    }
+    const t = (m1 - m2) / Math.sqrt(se2);
+    return checkedResult({ t, df,
+      p_two_sided: tTail(Math.abs(t), df) });
+  }
+
+  /**
+   * Two-sided Student t confidence interval for a population mean.
+   * Input: {data:number[],conf:number}, 2–50 values of one SI unit;
+   * 0<conf<1.
+   * Output: {mean,half_width,lo,hi}, all in the data's unit.
+   * Assumes independent, approximately normal observations.
+   * Errors: points_out_of_range_2_50, confidence_out_of_range,
+   * non_finite_input; zero sample variance gives a zero-width result.
+   * Hand check: [2,4,6,8,10], conf=.95: mean=6, sd=sqrt(10),
+   * SE=sqrt(2), tcrit(df=4)=2.776445105,
+   * half_width=3.926486322.
+   */
+  function ci_mean({ data, conf } = {}) {
+    const e = validatedSample(data);
+    if (e) return e;
+    if (!finite(conf) || conf <= 0 || conf >= 1) {
+      return err('ConstraintViolation', 'confidence_out_of_range');
+    }
+    const m = mean(data);
+    const sd = Math.sqrt(variance(data, m));
+    const half_width = tCritical(conf, data.length - 1) *
+      sd / Math.sqrt(data.length);
+    return checkedResult({ mean: m, half_width,
+      lo: m - half_width, hi: m + half_width });
+  }
+
+  function fitLineRaw(points) {
+    const n = points.length;
+    const xs = points.map(p => p[0]);
+    const ys = points.map(p => p[1]);
+    const mx = mean(xs), my = mean(ys);
+    let sxx = 0, sxy = 0, syy = 0;
+    for (let i = 0; i < n; i++) {
+      const dx = xs[i] - mx, dy = ys[i] - my;
+      sxx += dx * dx;
+      sxy += dx * dy;
+      syy += dy * dy;
+    }
+    if (sxx === 0) return err('MathError', 'all_x_equal');
+    const b = sxy / sxx;
+    const a = my - b * mx;
+    let rss = 0;
+    for (let i = 0; i < n; i++) {
+      const r = ys[i] - (a + b * xs[i]);
+      rss += r * r;
+    }
+    const r2 = syy === 0 ? null : 1 - rss / syy;
+    const se_b = n === 2 ? null :
+      Math.sqrt(Math.max(0, rss / (n - 2)) / sxx);
+    return checkedResult({ a, b, r2, rss, se_b });
+  }
+
+  /**
+   * Ordinary least-squares straight line y=a+b*x.
+   * Input: {points:[[x,y],...]}, 2–50 finite SI-valued pairs.
+   * Output: {a,b,r2,rss,se_b}; b and se_b have unit y/x,
+   * rss has unit y². At n=2 se_b=null; at constant y r2=null.
+   * Assumes independent, homoscedastic y residuals and exact x.
+   * Errors: points_out_of_range_2_50, non_finite_input,
+   * all_x_equal, non_finite_result.
+   * Hand check: (0,1),(1,3),(2,5): a=1,b=2,r2=1,
+   * rss=0,se_b=0.
+   */
+  function linreg({ points } = {}) {
+    if (!arrayOK(points)) return err('ConstraintViolation',
+      'points_out_of_range_2_50');
+    if (!points.every(p => Array.isArray(p) &&
+      p.length === 2 && numbersOK(p))) {
+      return err('ConstraintViolation', 'non_finite_input');
+    }
+    return fitLineRaw(points);
+  }
+
+  /**
+   * Log-linear exponential fit C(t)=C0*exp(-k*t).
+   * Input: {points:[[t_s,C],...]}, C>0, 2–50 pairs.
+   * Output: {C0,k}; C0 has C's SI unit; k is s^-1.
+   * Assumes exponential decay and least squares on ln(C), not C.
+   * Errors: points_out_of_range_2_50, non_positive_y_for_log,
+   * all_x_equal, non_finite_input.
+   * Hand check: (0,10),(1,10/e),(2,10/e²):
+   * fitted ln C = ln 10 - t; C0=10, k=1 s^-1.
+   */
+  function exp_fit({ points } = {}) {
+    if (!arrayOK(points)) return err('ConstraintViolation',
+      'points_out_of_range_2_50');
+    if (!points.every(p => Array.isArray(p) &&
+      p.length === 2 && numbersOK(p))) {
+      return err('ConstraintViolation', 'non_finite_input');
+    }
+    if (points.some(p => p[1] <= 0)) {
+      return err('MathError', 'non_positive_y_for_log');
+    }
+    const r = fitLineRaw(points.map(p => [p[0], Math.log(p[1])]));
+    if (r.error) return r;
+    return checkedResult({ C0: Math.exp(r.a), k: -r.b });
+  }
+
+  /**
+   * Unweighted linear calibration, signal=m*standard+c.
+   * Input: {standards:number[],signals:number[],
+   * unknown_signal:number}; 3–50 matched pairs.
+   * Standard and unknown concentrations use the same SI unit,
+   * signals share one instrument unit.
+   * Output: {slope,intercept,x_unknown,LOD}; slope is signal
+   * per concentration; x_unknown and LOD have concentration units.
+   * LOD=3.3*s_y/slope with s_y=sqrt(RSS/(n-2)), signed as specified.
+   * Assumes a linear response and constant signal variance.
+   * Errors: points_out_of_range_2_50, insufficient_residual_df,
+   * mismatched_lengths, zero_slope, all_x_equal, non_finite_input.
+   * Hand check: standards [0,1,2,3], signals [1,3,5,7],
+   * unknown=5 => slope=2, intercept=1, unknown=2, LOD=0.
+   */
+  function calibration({ standards, signals, unknown_signal } = {}) {
+    const e = validatedSample(standards);
+    if (e) return e;
+    if (!arrayOK(signals)) return err('ConstraintViolation',
+      'points_out_of_range_2_50');
+    if (standards.length !== signals.length) {
+      return err('ConstraintViolation', 'mismatched_lengths');
+    }
+    if (!numbersOK(signals) || !finite(unknown_signal)) {
+      return err('ConstraintViolation', 'non_finite_input');
+    }
+    if (standards.length < 3) {
+      return err('ConstraintViolation', 'insufficient_residual_df');
+    }
+    const r = fitLineRaw(standards.map((v, i) => [v, signals[i]]));
+    if (r.error) return r;
+    if (r.b === 0) return err('MathError', 'zero_slope');
+    const sy = Math.sqrt(Math.max(0, r.rss) / (standards.length - 2));
+    return checkedResult({
+      slope: r.b,
+      intercept: r.a,
+      x_unknown: (unknown_signal - r.a) / r.b,
+      LOD: 3.3 * sy / r.b
+    });
+  }
+
+  /**
+   * Initial-rate power-law fit rate=k*C^order.
+   * Input: {C:number[],rate:number[]}, 2–50 positive pairs;
+   * C in mol/L, rate in mol/(L s).
+   * Output: {k,order}; k's units depend on fitted order.
+   * Fits ln(rate)=ln(k)+order*ln(C).
+   * Assumes a single power-law regime with multiplicative errors.
+   * Errors: points_out_of_range_2_50, mismatched_lengths,
+   * non_positive_y_for_log, all_x_equal, non_finite_input.
+   * Hand check: C=[1,2,4],rate=[3,12,48]:
+   * slope=2, intercept=ln 3, k=3, order=2.
+   */
+  function rate_law_fit({ C, rate } = {}) {
+    const e = validatedSample(C);
+    if (e) return e;
+    if (!arrayOK(rate)) return err('ConstraintViolation',
+      'points_out_of_range_2_50');
+    if (C.length !== rate.length) return err('ConstraintViolation',
+      'mismatched_lengths');
+    if (!numbersOK(rate)) return err('ConstraintViolation',
+      'non_finite_input');
+    if (C.some(v => v <= 0) || rate.some(v => v <= 0)) {
+      return err('MathError', 'non_positive_y_for_log');
+    }
+    const r = fitLineRaw(C.map((v, i) => [Math.log(v),
+      Math.log(rate[i])]));
+    if (r.error) return r;
+    return checkedResult({ k: Math.exp(r.a), order: r.b });
+  }
+
+  /**
+   * First-order independent-input uncertainty propagation.
+   * Input: {kind:'sum'|'product_quotient',terms:[...]}, 1–50 terms.
+   * For sum: {x,u,coeff}; f=sum(coeff*x),
+   * u_f²=sum((coeff*u)²).
+   * For product_quotient: {x,u,power}; f=product(x^power),
+   * u_f²=f²*sum((power*u/x)²).
+   * Units: x/u use the same SI unit per term; resulting f/u_f
+   * use the algebraic combination of those units.
+   * Assumes uncorrelated inputs, small relative uncertainty
+   * for nonlinear operations, and u>=0.
+   * Errors: unsupported_uncertainty_kind, terms_out_of_range_1_50,
+   * negative_uncertainty, zero_denominator, non_finite_input.
+   * Hand check: sum (x=3,u=.2,c=2), (x=4,u=.3,c=-1):
+   * f=2, u_f=sqrt(.16+.09)=.5.
+   */
+  function uncertainty({ kind, terms } = {}) {
+    if (kind !== 'sum' && kind !== 'product_quotient') {
+      return err('NotSupported', 'unsupported_uncertainty_kind');
+    }
+    if (!Array.isArray(terms) || terms.length < 1 ||
+      terms.length > 50) return err('ConstraintViolation',
+        'terms_out_of_range_1_50');
+    const field = kind === 'sum' ? 'coeff' : 'power';
+    for (const t of terms) {
+      if (!t || !finite(t.x) || !finite(t.u) || !finite(t[field])) {
+        return err('ConstraintViolation', 'non_finite_input');
+      }
+      if (t.u < 0) return err('ConstraintViolation',
+        'negative_uncertainty');
+      if (kind === 'product_quotient' && t.x === 0) {
+        return err('MathError', 'zero_denominator');
+      }
+      if (kind === 'product_quotient' && t.x < 0 &&
+        !Number.isInteger(t.power)) {
+        return err('MathError', 'undefined_power');
+      }
+    }
+    let f, v = 0;
+    if (kind === 'sum') {
+      f = 0;
+      for (const t of terms) {
+        f += t.coeff * t.x;
+        v += (t.coeff * t.u) ** 2;
+      }
+    } else {
+      f = 1;
+      for (const t of terms) {
+        f *= Math.pow(t.x, t.power);
+        v += (t.power * t.u / t.x) ** 2;
+      }
+      v *= f * f;
+    }
+    return checkedResult({ f, u_f: Math.sqrt(v) });
+  }
+
+  /**
+   * Pearson chi-square goodness-of-fit test.
+   * Input: {observed:number[],expected_props:number[]},
+   * 2–50 categories, nonnegative integer counts and probabilities
+   * summing to 1. Counts are dimensionless.
+   * Output: {chi2,df,p}; df=categories-1, upper-tail p.
+   * Assumes independent multinomial observations, with no
+   * parameters estimated from observed counts.
+   * Small expected counts weaken asymptotic inference.
+   * Errors: points_out_of_range_2_50, mismatched_lengths,
+   * invalid_counts, invalid_probabilities, zero_expected_count.
+   * Hand check: observed [30,70], props [.5,.5],
+   * expected [50,50], chi2=16, df=1,
+   * p=0.0000633424837.
+   */
+  function chi_square_gof({ observed, expected_props } = {}) {
+    if (!arrayOK(observed) || !arrayOK(expected_props)) {
+      return err('ConstraintViolation', 'points_out_of_range_2_50');
+    }
+    if (observed.length !== expected_props.length) {
+      return err('ConstraintViolation', 'mismatched_lengths');
+    }
+    if (!numbersOK(observed) || observed.some(v =>
+      v < 0 || !Number.isInteger(v))) {
+      return err('ConstraintViolation', 'invalid_counts');
+    }
+    if (!numbersOK(expected_props) ||
+      expected_props.some(v => v < 0) ||
+      Math.abs(expected_props.reduce((a, b) => a + b, 0) - 1) > 1e-10) {
+      return err('ConstraintViolation', 'invalid_probabilities');
+    }
+    const N = observed.reduce((a, b) => a + b, 0);
+    let chi2 = 0;
+    for (let i = 0; i < observed.length; i++) {
+      const expected = N * expected_props[i];
+      if (expected === 0) return err('MathError',
+        'zero_expected_count');
+      chi2 += (observed[i] - expected) ** 2 / expected;
+    }
+    const df = observed.length - 1;
+    return checkedResult({ chi2, df, p: gammaQ(df / 2, chi2 / 2) });
+  }
+
+  return Object.freeze({
+    API_VERSION,
+    t_test_1s,
+    t_test_2s,
+    ci_mean,
+    linreg,
+    exp_fit,
+    calibration,
+    rate_law_fit,
+    uncertainty,
+    chi_square_gof
+  });
+})();
+/* FIT-CALC-END x4_curve_fit */
+
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const svgNS = 'http:' + String.fromCharCode(47,47) +
+    'www.w3.org/2000/svg';
+  let seed = 123456789, round = 0, score = 0, tries = 0;
+  let hinted = false, passed = false, state = null, values = {};
+
+  function rnd() {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 4294967296;
+  }
+  function pick(a) { return a[Math.floor(rnd() * a.length)]; }
+  function fmt(n, d = 3) {
+    return Number.isFinite(n) ? Number(n.toPrecision(d)).toString() : '—';
+  }
+  function svg(tag, at, parent, text) {
+    const el = document.createElementNS(svgNS, tag);
+    for (const k in at) el.setAttribute(k, String(at[k]));
+    if (text !== undefined) el.textContent = String(text);
+    parent.appendChild(el);
+    return el;
+  }
+  function near(a,b,t) {
+    return Number.isFinite(a) && Math.abs(a-b) <= t + 1e-10;
+  }
+  function calibrationData() {
+    const a = pick([1.6,2.1,2.8,3.2]);
+    const b = pick([3.4,4.2,5.1,6.2]);
+    const standards = [0,1,2,3,4,5];
+    const noise = [0.2,-0.3,0.15,-0.2,0.3,-0.15];
+    const signals = standards.map((x,i) => a+b*x+noise[i]);
+    const unknownX = pick([1.5,2.5,3.5,4.5]);
+    const base = FITCalcX4.calibration({
+      standards, signals, unknown_signal: a+b*unknownX
+    });
+    const actualSignal = base.intercept + base.slope*unknownX;
+    const calc = FITCalcX4.calibration({
+      standards, signals, unknown_signal: actualSignal
+    });
+    return { standards,signals,unknownSignal:actualSignal,calc,
+      line:FITCalcX4.linreg({points:standards.map((x,i)=>[x,signals[i]])}) };
+  }
+  function newRound() {
+    tries = 0; hinted = false; passed = false;
+    const type = ['line','unknown','uncertainty','line','unknown','uncertainty'][round];
+    const data = calibrationData();
+    if(type === 'line') {
+      state = {type,...data};
+      values = {a:0,b:1};
+    } else if(type === 'unknown') {
+      const beyond = round === 4;
+      const u = beyond ? data.calc.LOD*0.6 : 2.5;
+      const unknownSignal = data.calc.intercept + data.calc.slope*u;
+      const calc = FITCalcX4.calibration({standards:data.standards,
+        signals:data.signals,unknown_signal:unknownSignal});
+      state = {type,...data,calc,unknownSignal};
+      values = {x:0,above:false};
+    } else {
+      const kind = round === 2 ? 'sum' : 'product_quotient';
+      const terms = kind === 'sum' ?
+        [{x:4.2,u:0.2,coeff:1},{x:2.8,u:0.1,coeff:1}] :
+        [{x:4.0,u:0.2,power:1},{x:2.0,u:0.1,power:-1}];
+      state = {type,kind,terms,
+        calc:FITCalcX4.uncertainty({kind,terms}),...data};
+      values = {f:0,u:0};
+    }
+    $('nextBtn').hidden = true;
+    $('checkBtn').hidden = false;
+    $('hintBtn').disabled = false;
+    $('feedback').className = 'feedback';
+    $('feedback').textContent = 'Adjust the controls, then check your answer.';
+    $('roundHud').textContent = `Round ${round+1}/6`;
+    updateScene();
+    buildControls();
+    draw();
+  }
+  function updateScene() {
+    const s = state;
+    $('sceneValue').textContent = s.type === 'unknown' ?
+      `${fmt(s.unknownSignal,4)} a.u.` :
+      s.type === 'uncertainty' ? '± measurement' : 'Standard series';
+    if(s.type === 'line') {
+      $('question').textContent = 'Match the least-squares slope and intercept. Move your orange-red line through the standards.';
+    } else if(s.type === 'unknown') {
+      $('question').textContent = `An unknown produced ${fmt(s.unknownSignal,6)} a.u. Set its concentration, then decide whether that concentration exceeds the LOD.`;
+    } else {
+      $('question').textContent = s.kind === 'sum' ?
+        'Two lengths are added. Report the combined length and standard uncertainty.' :
+        'Calculate a length ratio and its standard uncertainty from the two measurements.';
+    }
+    $('col1').textContent = s.type === 'uncertainty' ? 'Measurement' :
+      'Standard / mol L⁻¹';
+    $('col2').textContent = s.type === 'uncertainty' ? 'Value ± u' :
+      'Signal / a.u.';
+    $('measurements').replaceChildren();
+    if(s.type === 'uncertainty') {
+      s.terms.forEach((t,i)=>{
+        const tr=document.createElement('tr');
+        const name=i?'B':'A';
+        tr.innerHTML=`<td>${name}</td><td>${fmt(t.x,5)} ± ${fmt(t.u,5)} m</td>`;
+        $('measurements').appendChild(tr);
+      });
+    } else {
+      s.standards.forEach((x,i)=>{
+        const tr=document.createElement('tr');
+        const a=document.createElement('td'),b=document.createElement('td');
+        a.textContent=fmt(x);b.textContent=fmt(s.signals[i],6);
+        tr.append(a,b);$('measurements').appendChild(tr);
+      });
+    }
+  }
+  function control(key,label,min,max,step,unit) {
+    const wrap=document.createElement('div');
+    wrap.className='control';
+    const head=document.createElement('div');
+    head.className='control-head';
+    const strong=document.createElement('strong');
+    strong.textContent=label;
+    const output=document.createElement('span');
+    output.className='value';
+    head.append(strong,output);
+    const range=document.createElement('input');
+    range.type='range';range.min=min;range.max=max;range.step=step;
+    range.value=Math.min(max,Math.max(min,values[key]));
+    range.setAttribute('aria-label',label);
+    const row=document.createElement('div');
+    row.className='steps';
+    const moves=[[-10,'−−'],[-1,'−'],[1,'+'],[10,'++']];
+    moves.forEach(([n,txt])=>{
+      const b=document.createElement('button');
+      b.type='button';b.textContent=txt;
+      b.setAttribute('aria-label',`${txt==='−−'?'Coarse decrease':txt==='++'?'Coarse increase':n<0?'Fine decrease':'Fine increase'} ${label}`);
+      b.addEventListener('click',()=>set(+range.value+n*step));
+      row.appendChild(b);
+    });
+    function set(v) {
+      const ticks=Math.round((Math.min(max,Math.max(min,v))-min)/step);
+      values[key]=Number((min+ticks*step).toFixed(8));
+      range.value=values[key];sync();
+    }
+    function sync(){output.textContent=`${fmt(values[key],5)} ${unit}`;draw();}
+    range.addEventListener('input',()=>{values[key]=+range.value;sync();});
+    wrap.append(head,range,row);
+    $('controls').appendChild(wrap);
+    sync();
+  }
+  function choices(key,label,options) {
+    const wrap=document.createElement('div');wrap.className='control';
+    const h=document.createElement('h3');h.textContent=label;wrap.appendChild(h);
+    const row=document.createElement('div');row.className='option-grid';
+    options.forEach(([v,name])=>{
+      const b=document.createElement('button');
+      b.textContent=name;b.setAttribute('aria-pressed',String(values[key]===v));
+      b.addEventListener('click',()=>{
+        values[key]=v;
+        row.querySelectorAll('button').forEach(q=>
+          q.setAttribute('aria-pressed',String(q===b)));
+        draw();
+      });
+      row.appendChild(b);
+    });
+    wrap.appendChild(row);$('controls').appendChild(wrap);
+  }
+  function buildControls() {
+    $('controls').replaceChildren();
+    if(state.type==='line'){
+      control('a','Intercept',-2,8,0.01,'a.u.');
+      control('b','Slope',0,9,0.01,'a.u. L mol⁻¹');
+    } else if(state.type==='unknown'){
+      control('x','Unknown concentration',0,6,0.001,'mol L⁻¹');
+      choices('above','Above the LOD?',[[true,'Yes'],[false,'No']]);
+    } else {
+      control('f','Reported result',0,12,0.001,
+        state.kind==='sum'?'m':'1');
+      control('u','Standard uncertainty',0,2,0.001,
+        state.kind==='sum'?'m':'1');
+    }
+  }
+  function linePoints(x0,x1,a,b,xs,ys) {
+    return `${xs(x0)},${ys(a+b*x0)} ${xs(x1)},${ys(a+b*x1)}`;
+  }
+  function draw() {
+    if(!state)return;
+    const root=$('plot');root.replaceChildren();
+    const s=state, W=520,H=340,L=73,R=24,T=36,B=60;
+    const plotW=W-L-R,plotH=H-T-B;
+    const xMin=0,xMax=6,yMin=0;
+    const maxSignal=Math.max(...s.signals,38);
+    const yMax=Math.ceil((maxSignal+3)/5)*5;
+    const X=x=>L+(x-xMin)/(xMax-xMin)*plotW;
+    const Y=y=>T+plotH-(y-yMin)/(yMax-yMin)*plotH;
+    function tickText(x,y,txt,anchor='middle') {
+      svg('text',{x,y,'text-anchor':anchor,'font-size':12,
+        fill:'#3D3D3D'},root,txt);
+    }
+    svg('text',{x:W/2,y:19,'text-anchor':'middle','font-size':16,
+      'font-weight':800},root,'Instrument response');
+    for(let i=0;i<=6;i++){
+      const x=X(i);
+      svg('line',{x1:x,y1:T,x2:x,y2:T+plotH,
+        stroke:'#E4E2DB'},root);
+      tickText(x,T+plotH+18,i);
+    }
+    for(let i=0;i<=5;i++){
+      const y=yMax*i/5;
+      svg('line',{x1:L,y1:Y(y),x2:W-R,y2:Y(y),
+        stroke:'#E4E2DB'},root);
+      tickText(L-9,Y(y)+4,fmt(y),'end');
+    }
+    svg('rect',{x:L,y:T,width:plotW,height:plotH,fill:'none',
+      stroke:'#111','stroke-width':2},root);
+    tickText(W/2,H-13,'Concentration / mol L⁻¹');
+    svg('text',{x:17,y:H/2,transform:`rotate(-90 17 ${H/2})`,
+      'font-size':13,'text-anchor':'middle'},root,'Signal / a.u.');
+    const a=s.line.a,b=s.line.b;
+    svg('polyline',{points:linePoints(0,6,a,b,X,Y),fill:'none',
+      stroke:'#111','stroke-width':3},root);
+    s.standards.forEach((x,i)=>{
+      const y=s.signals[i];
+      svg('line',{x1:X(x),y1:Y(y),x2:X(x),y2:Y(a+b*x),
+        stroke:'#1F66E5','stroke-width':3},root);
+      svg('circle',{cx:X(x),cy:Y(y),r:5,fill:'#FFC83D',
+        stroke:'#111','stroke-width':2},root);
+    });
+    if(s.type==='line'){
+      svg('polyline',{points:linePoints(0,6,values.a,values.b,X,Y),
+        stroke:'#D92D20','stroke-width':3,fill:'none'},root);
+    } else if(s.type==='unknown'){
+      svg('line',{x1:X(values.x),x2:X(values.x),y1:T,
+        y2:T+plotH,stroke:'#D92D20','stroke-width':3,
+        'stroke-dasharray':'7 5'},root);
+      svg('circle',{cx:X(values.x),cy:Y(s.unknownSignal),
+        r:8,fill:'#D92D20',stroke:'#111','stroke-width':2},root);
+      if(Number.isFinite(s.calc.LOD) &&
+        s.calc.LOD>=0 && s.calc.LOD<=6){
+        svg('line',{x1:X(s.calc.LOD),x2:X(s.calc.LOD),
+          y1:T,y2:T+plotH,stroke:'#168751','stroke-width':2,
+          'stroke-dasharray':'4 4'},root);
+        tickText(X(s.calc.LOD),T+12,'LOD');
+      }
+    } else {
+      const t=s.terms;
+      const proxy=FITCalcX4.uncertainty({
+        kind:s.kind,terms:t
+      });
+      const y=proxy.error?0:proxy.f;
+      svg('line',{x1:X(0.5),y1:Y(Math.max(0,y)),
+        x2:X(5.4),y2:Y(Math.max(0,y)),stroke:'#D92D20',
+        'stroke-width':3,'stroke-dasharray':'8 5'},root);
+      tickText(X(3),T+15,'Measurement combination');
+    }
+    root.setAttribute('aria-label',
+      'Signal versus concentration; gold circles are standards, black is the fitted line, red indicates the player, blue segments are residuals.');
+  }
+  function targetAndGap() {
+    const s=state;
+    if(s.type==='line'){
+      const da=values.a-s.line.a, db=values.b-s.line.b;
+      return {ok:near(values.a,s.line.a,.006)&&
+        near(values.b,s.line.b,.006),
+        message:`Intercept ${fmt(Math.abs(da),3)} ${da<0?'too low':'too high'}; slope ${fmt(Math.abs(db),3)} ${db<0?'too low':'too high'}.`,
+        answer:`intercept ${fmt(s.line.a,6)} a.u.; slope ${fmt(s.line.b,6)} a.u. L mol⁻¹`};
+    }
+    if(s.type==='unknown'){
+      const above=s.calc.x_unknown>s.calc.LOD;
+      const dx=values.x-s.calc.x_unknown;
+      return {ok:near(values.x,s.calc.x_unknown,.0011)&&
+        values.above===above,
+        message:`Concentration ${fmt(Math.abs(dx),4)} mol L⁻¹ ${dx<0?'too low':'too high'}. Recheck the LOD decision.`,
+        answer:`concentration ${fmt(s.calc.x_unknown,6)} mol L⁻¹; LOD ${fmt(s.calc.LOD,5)} mol L⁻¹; ${above?'above':'not above'} LOD`};
+    }
+    const df=values.f-s.calc.f,du=values.u-s.calc.u_f;
+    return {ok:near(values.f,s.calc.f,.0011)&&
+      near(values.u,s.calc.u_f,.0011),
+      message:`Result ${fmt(Math.abs(df),4)} ${df<0?'too low':'too high'}; uncertainty ${fmt(Math.abs(du),4)} ${du<0?'too low':'too high'}.`,
+      answer:`${fmt(s.calc.f,6)} ± ${fmt(s.calc.u_f,6)} ${s.kind==='sum'?'m':'(dimensionless)'}`};
+  }
+  function check() {
+    if(passed)return;
+    tries++;
+    const result=targetAndGap();
+    if(result.ok){
+      passed=true;
+      const gained=hinted?50:tries===1?100:75;
+      score+=gained;
+      $('scoreHud').textContent=`Score ${score}`;
+      $('feedback').className='feedback good';
+      $('feedback').textContent=`✓ Excellent! +${gained} points. ${result.answer}. The result follows the measured data and uncertainty model.`;
+      $('nextBtn').hidden=false;
+      $('nextBtn').textContent=round===5?'See results →':'Next round →';
+      $('checkBtn').hidden=true;$('hintBtn').disabled=true;
+    } else {
+      $('feedback').className='feedback bad';
+      $('feedback').textContent=`✗ Not yet. ${result.message}`;
+    }
+  }
+  function hint() {
+    if(passed)return;
+    hinted=true;
+    const s=state;
+    const help=s.type==='line'?
+      'Use the trend across all six standards, not just the first and last pair. The vertical intercept is the signal at zero concentration.' :
+      s.type==='unknown'?
+      'First subtract the calibration intercept from the unknown signal, then divide by slope. Compare the concentration with the LOD.' :
+      'For sums, combine absolute uncertainty contributions in quadrature. For ratios, combine relative contributions and multiply by the reported result.';
+    $('feedback').className='feedback';
+    $('feedback').textContent=`Hint (maximum 50 points): ${help}`;
+    $('hintBtn').disabled=true;
+  }
+  function next() {
+    if(!passed)return;
+    round++;
+    if(round>=6){
+      $('game').style.display='none';
+      $('end').style.display='block';
+      $('finalScore').textContent=`${score} / 600 points`;
+      const n=score>=510?3:score>=360?2:score>=180?1:0;
+      $('stars').textContent='★'.repeat(n)+'☆'.repeat(3-n);
+    }else newRound();
+  }
+  function begin(){
+    seed=(seed+7919)>>>0;round=0;score=0;
+    $('game').style.display='grid';$('end').style.display='none';
+    $('scoreHud').textContent='Score 0';newRound();
+  }
+  $('hintBtn').addEventListener('click',hint);
+  $('checkBtn').addEventListener('click',check);
+  $('nextBtn').addEventListener('click',next);
+  $('againBtn').addEventListener('click',begin);
+  begin();
+})();
+</script>
+</body>
+</html>

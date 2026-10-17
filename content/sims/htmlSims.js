@@ -15,6 +15,8 @@ const kinematics = { subject: 'Physics', concept: 'kinematics', accent: '#FF6B3D
 const compartment = { subject: 'Engineering', concept: 'compartment-models', accent: '#2EC4A6', minutes: '15–20', status: 'live' }
 // Tier-1 X3: FITCalcX3 (module + each game's embedded copy) passes all 22 cases of kat_cases/tier1/balance_accounting.json (tests/tier1).
 const massBalance = { subject: 'Chemistry', concept: 'mass-balance', accent: '#2EC4A6', minutes: '15–20', status: 'live' }
+// Tier-1 X4 estimation and curve fitting (calc: lib/sims/tier1/x4_curve_fit.calc.js, inlined in each file). Live: all 19 Tier-1 KATs pass.
+const curveFit = { subject: 'Maths', concept: 'curve-fitting', accent: '#2EC4A6', minutes: '10–15', status: 'live' }
 export const htmlSims = [
   { ...circuits, id: 'circuits-p', title: 'Bulb Builder', level: 'Primary', topic: 'Electric circuits', symbol: '💡', height: 1000,
     syllabusRef: 'MOE Primary Science: Energy (electrical systems: closed circuits, conductors and insulators)',
@@ -200,4 +202,16 @@ export const htmlSims = [
     syllabusRef: 'University, Process Engineering',
     approach: 'Improve process yield, atom economy and E-factor, recover a biomolecule through staged steps and build a carbon inventory from user-supplied factors.',
     activityPrompt: 'Play all rounds, then explain why a high-yield step can still have a poor E-factor.', tags: ['University', 'Process Engineering', 'atom economy', 'E-factor', 'carbon accounting'] },
+  { ...curveFit, id: 'x4-curve-fit-poly', title: 'Calibration Lab', level: 'Poly', topic: 'Calibration curves and measurement uncertainty', symbol: '📏', height: 1550,
+    syllabusRef: 'Poly laboratory data analysis: least-squares calibration lines, limit of detection and propagation of uncertainty (generic)',
+    approach: 'Fit a calibration line to standards, read an unknown sample from it, judge the limit of detection and report the result with its uncertainty.',
+    activityPrompt: 'Play all rounds, then explain why a sample signal below the limit of detection cannot be reported as a concentration.', tags: ['curve fitting', 'calibration', 'limit of detection', 'uncertainty'] },
+  { ...curveFit, id: 'x4-curve-fit-u1', title: 'Fit and Test', level: 'University', topic: 'Regression, confidence intervals and hypothesis tests', symbol: '📊', height: 1820,
+    syllabusRef: 'University, Statistics',
+    approach: 'Fit least-squares lines and read their residuals, build confidence intervals for a mean, and decide with t tests and a chi-square goodness-of-fit test.',
+    activityPrompt: 'Play all rounds, then explain what a p-value below 0.05 does and does not tell you.', tags: ['University', 'Statistics', 'linear regression', 'confidence interval', 't test', 'chi-square'] },
+  { ...curveFit, id: 'x4-curve-fit-u2', title: 'Kinetics from Data', level: 'University', topic: 'Fitting rate laws to experimental data', symbol: '⚗️', height: 1820,
+    syllabusRef: 'University, Chemical Kinetics',
+    approach: 'Fit exponential decays on a log scale, find a reaction order and rate constant from a log–log plot, and build an uncertainty budget for a derived result.',
+    activityPrompt: 'Play all rounds, then explain why plotting ln(rate) against ln(C) gives the reaction order as the gradient.', tags: ['University', 'Chemical Kinetics', 'rate law', 'exponential fit', 'uncertainty budget'] },
 ]
