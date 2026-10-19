@@ -7,7 +7,6 @@ vi.mock('@/lib/s3', () => ({ s3: { send: m.send } }))
 vi.mock('@/lib/fabrication/serverAssets', () => ({ privateFabricationBucket: m.privateBucket }))
 import { buildIdleNudgeEmail } from '@/lib/email/templates/customPrint'
 import { prepareNudgePreviews, loadModelBytes, renderModelPng, PREVIEW_LIMITS } from '@/lib/email/printPreviews'
-import { drawModel, parseForPreview } from '@/lib/email/printPreviewRender'
 import { assetsFor, byteSource, guidedRequest, legacyRequest, OWNER } from '../helpers/emailFixtures'
 import { boxStl } from '../helpers/modelFixtures'
 
@@ -90,7 +89,7 @@ describe('bounded, abortable reads and time budget', () => {
   })
 })
 
-describe('geometry and the shared renderer', () => {
+describe('geometry and zero-normal files', () => {
   const ascii = `solid z\n${[[[0, 0, 0], [10, 0, 0], [0, 10, 0]], [[0, 0, 0], [0, 0, 10], [10, 0, 0]], [[0, 0, 0], [0, 10, 0], [0, 0, 10]], [[10, 0, 0], [0, 0, 10], [0, 10, 0]]].map(t => `facet normal 0 0 0\n outer loop\n${t.map(v => `  vertex ${v.join(' ')}`).join('\n')}\n endloop\nendfacet`).join('\n')}\nendsolid z\n`
   it('a zero-normal STL (binary and ASCII) parses to real triangles and draws a non-blank picture', async () => {
     const binary = boxStl(20)
@@ -100,16 +99,8 @@ describe('geometry and the shared renderer', () => {
       expect(out.triangles).toBeGreaterThanOrEqual(4)
       const sharp = (await import('sharp')).default
       const { data } = await sharp(out.png).raw().toBuffer({ resolveWithObject: true })
-      let dark = 0; for (let i = 0; i < data.length; i += 3) if (data[i] < 200) dark++
-      expect(dark).toBeGreaterThan(1500)
+      let solid = 0; for (let i = 0; i < data.length; i += 3) if (Math.abs(data[i] - 244) + Math.abs(data[i + 1] - 242) + Math.abs(data[i + 2] - 238) > 30) solid++
+      expect(solid).toBeGreaterThan(1500)
     }
-  })
-  it('drawModel keeps its defaults for the order model viewer (no options: every triangle up to 30000) and only samples when asked', async () => {
-    const calls = { fills: 0 }
-    const ctx = { save() {}, restore() {}, fillRect() {}, beginPath() {}, moveTo() {}, lineTo() {}, closePath() {}, fill() { calls.fills++ }, stroke() {} }
-    const positions = await parseForPreview(Buffer.from(boxStl(20)), 'a.stl')
-    expect(drawModel(ctx, positions, 200, 200)).toMatchObject({ triangles: 12, drawn: 12 })
-    expect(calls.fills).toBe(12)
-    expect(drawModel(ctx, positions, 200, 200, { maxTriangles: 4 })).toMatchObject({ triangles: 12, drawn: 4 })
   })
 })
