@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hamming Code Rescue | FIT</title>
+<style>
+:where(html,body,*){touch-action:manipulation}
+:root{--ink:#111;--paper:#FEFEFE;--sunken:#F4F3EF;--focus:#1F66E5;--ok:#1E9E5A;--bad:#D92D20;--jc:#6A45F5;--jc-tint:#ECE7FF;--sun:#FFC83D}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+main{max-width:720px;margin:0 auto;padding:16px}
+h1{font-size:1.5rem;margin:0 0 4px}h2{font-size:1.05rem;margin:18px 0 6px}
+button{font:inherit;cursor:pointer;min-width:44px;min-height:44px;border:2px solid #111;border-radius:99px;background:#fff;font-weight:800;padding:9px 15px;box-shadow:0 2px 0 #111;-webkit-tap-highlight-color:transparent;user-select:none}
+button:active{transform:translateY(2px);box-shadow:none}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.bit{border-radius:12px;min-width:48px;min-height:56px;padding:6px;display:flex;flex-direction:column;align-items:center;font-size:1.2rem}
+.bit small{font-size:.7rem;font-weight:600}
+.bit.parity{background:var(--jc-tint)}.bit.data{background:#fff}
+.bit.flipped{background:var(--sun)}.bit.fixed{border-color:var(--ok)}
+.panel{background:var(--sunken);border:2px solid #111;border-radius:16px;padding:12px;margin:10px 0}
+#status{font-weight:800}.good{color:var(--ok)}.warn{color:var(--bad)}
+@media (max-width:420px){.bit{min-width:44px}main{padding:10px}}
+</style>
+</head>
+<body>
+<main>
+<h1>Hamming Code Rescue</h1>
+<p>Hamming(7,4) adds 3 parity bits to 4 data bits so that <strong>one</strong> flipped bit can be found and repaired.</p>
+<h2>1. Choose 4 data bits</h2>
+<div class="row" id="data" role="group" aria-label="Data bits"></div>
+<h2>2. Encoded 7-bit codeword (tap a bit to flip it in transit)</h2>
+<div class="row" id="word" role="group" aria-label="Received codeword; press a bit to flip it"></div>
+<div class="row"><button type="button" id="reset">Clear errors</button></div>
+<h2>3. Parity checks</h2>
+<div class="panel" id="checks" aria-live="polite"></div>
+<h2>4. Result</h2>
+<div class="panel"><p id="status" aria-live="polite"></p><p id="detail"></p></div>
+<div class="panel"><strong>Limit:</strong> Hamming(7,4) always corrects one flipped bit. With two flipped bits the syndrome points to a wrong position, so the decoder "corrects" the wrong bit and returns wrong data without warning. Detecting two errors needs an extra overall parity bit (SECDED).</div>
+</main>
+<script>
+(function(){
+var P=[1,2,4],D=[3,5,6,7];
+function encode(d){var w=[0,0,0,0,0,0,0,0];for(var i=0;i<4;i++)w[D[i]]=d[i]&1;
+ for(var k=0;k<3;k++){var p=P[k],s=0;for(var j=1;j<=7;j++)if(j!==p&&(j&p))s^=w[j];w[p]=s}
+ return w.slice(1)}
+function syndrome(c){var s=0;for(var j=1;j<=7;j++)if(c[j-1])s^=j;return s}
+function checks(c){var r=[];for(var k=0;k<3;k++){var p=P[k],s=0;for(var j=1;j<=7;j++)if(j&p)s^=c[j-1];r.push(s)}return r}
+function correct(c){var s=syndrome(c),o=c.slice();if(s)o[s-1]^=1;return{word:o,syndrome:s}}
+function extract(c){return D.map(function(j){return c[j-1]})}
+var api={encode:encode,syndrome:syndrome,checks:checks,correct:correct,extract:extract};
+if(typeof window!=='undefined')window.Hamming74=api;
+if(typeof document==='undefined')return;
+var data=[1,0,1,1],flips={};
+var $=function(id){return document.getElementById(id)};
+function clean(){return encode(data)}
+function received(){var c=clean();for(var k in flips)c[k]^=1;return c}
+function render(){
+ var dEl=$('data');dEl.innerHTML='';
+ data.forEach(function(v,i){var b=document.createElement('button');b.type='button';b.className='bit data';b.textContent=v;
+  b.setAttribute('aria-label','Data bit '+(i+1)+' is '+v+'. Press to toggle.');b.onclick=function(){data[i]^=1;flips={};render()};dEl.appendChild(b)});
+ var c=received(),cl=clean(),wEl=$('word');wEl.innerHTML='';
+ c.forEach(function(v,i){var pos=i+1,isP=P.indexOf(pos)>=0,b=document.createElement('button');b.type='button';
+  b.className='bit '+(isP?'parity':'data')+(flips[i]?' flipped':'');
+  b.innerHTML=v+'<small>'+(isP?'p':'d')+pos+'</small>';
+  b.setAttribute('aria-label',(isP?'Parity':'Data')+' position '+pos+' is '+v+(flips[i]?', flipped':'')+'. Press to flip.');
+  b.onclick=function(){if(flips[i])delete flips[i];else flips[i]=1;render();var n=$('word').children[i];if(n)n.focus()};
+  wEl.appendChild(b)});
+ var ch=checks(c),s=syndrome(c);
+ $('checks').innerHTML=ch.map(function(x,k){return 'Check p'+P[k]+': '+(x?'<span class="warn">fails</span>':'<span class="good">passes</span>')}).join('<br>')+'<br>Syndrome = '+ch.slice().reverse().join('')+'₂ = '+s;
+ var n=Object.keys(flips).length,fixed=correct(c),ok=extract(fixed.word).join('')===data.join('');
+ var st=$('status'),dt=$('detail');
+ if(n===0){st.className='good';st.textContent='No error: syndrome 0, data '+data.join('')+' accepted.';dt.textContent='All three parity checks pass.'}
+ else if(n===1){st.className='good';st.textContent='Single error at position '+s+' corrected. Data '+extract(fixed.word).join('')+' recovered.';dt.textContent='The syndrome number is the position of the flipped bit.'}
+ else{st.className='warn';st.textContent=ok?'Lucky: decoded data happens to match.':'Decoded data '+extract(fixed.word).join('')+' is WRONG (sent '+data.join('')+').';
+  dt.textContent=n+' bits flipped: the syndrome '+s+' points to position '+(s||'none')+', so Hamming(7,4) cannot reliably correct this.'}
+}
+document.addEventListener('keydown',function(e){if(e.repeat&&(e.key==='Enter'||e.key===' ')&&e.target.tagName==='BUTTON')e.preventDefault()},true);
+$('reset').onclick=function(){flips={};render()};
+render();
+})();
+</script>
+</body>
+</html>
