@@ -4,6 +4,16 @@ name: Blog scheduled publishing
 # token-guarded endpoint every 15 minutes; the app flips due drafts to
 # published. Uses the same repository secrets as custom-print-nudges:
 #   CRON_SECRET, CRON_BASE_URL
+#
+# Run #1481 (18 Oct 2026 16:38 UTC) got one HTTP 500 between successful ticks
+# on an unchanged deploy. The production function log shows the route failing
+# with a MongoDB connection-pool checkout timeout (MongoWaitQueueTimeoutError)
+# at that minute; why the pool was exhausted is not known. 5xx/connection
+# errors are now retried in-run before the job is failed: curl retries three
+# times, 20 s apart. A sustained outage still fails the run after ~1 minute, so
+# it stays visible. The endpoint's per-post write is guarded (see
+# app/api/cron/blog-scheduled/route.js), so a retry does not re-publish a post
+# that the first attempt already flipped.
 
 on:
   schedule:
@@ -12,7 +22,9 @@ on:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    # Pinned: the ubuntu-latest label migrates to Ubuntu 26 from 19 Oct 2026
+    # (actions/runner-images#14748); pin so the scheduler does not change under us.
+    runs-on: ubuntu-24.04
     steps:
       - name: Trigger scheduled-publish endpoint
         env:
@@ -24,12 +36,17 @@ jobs:
             exit 1
           fi
           code=$(curl -sS -o /tmp/blog.json -w '%{http_code}' \
+            --retry 3 --retry-delay 20 --retry-all-errors --max-time 60 \
             -H "Authorization: Bearer $CRON_SECRET" \
             "${CRON_BASE_URL%/}/api/cron/blog-scheduled")
           echo "HTTP $code"
           cat /tmp/blog.json 2>/dev/null || true
           echo
           if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
-            echo "::error::Blog cron endpoint returned HTTP $code" >&2
+            echo "::error::Blog cron endpoint returned HTTP $code after retries" >&2
+            exit 1
+          fi
+          if ! grep -q '"ok":true' /tmp/blog.json; then
+            echo "::error::Blog cron endpoint reported partial failure (see body above)" >&2
             exit 1
           fi

@@ -4,7 +4,7 @@ import { render, screen, cleanup } from '@testing-library/react'
 import { matchesBlogFilter, visibilityPosts } from '../helpers/blogFilter'
 import { statusQuery } from '@/lib/blog/status'
 
-const state = vi.hoisted(() => ({ finds: [], docs: [], content: null, saved: [] }))
+const state = vi.hoisted(() => ({ finds: [], docs: [], content: null, saved: [], updates: [] }))
 vi.mock('@/lib/db', () => ({ connectToDatabase: vi.fn(async () => {}) }))
 vi.mock('@/lib/blog/sortIndex', () => ({ BLOG_SORT_INDEX: {}, ensureBlogSortIndex: vi.fn(async () => {}) }))
 vi.mock('@/models/BlogPost', () => ({ default: {
@@ -15,6 +15,12 @@ vi.mock('@/models/BlogPost', () => ({ default: {
             then: (resolve, reject) => Promise.resolve(state.docs.filter(doc => matchesBlogFilter(doc, filter))).then(resolve, reject),
         }
         return chain
+    },
+    // Scheduler write path (compare-and-set): record the id and the filter it was guarded with.
+    updateOne: async (filter, update) => {
+        state.updates.push({ filter, update })
+        const matched = state.docs.filter(doc => doc._id === filter._id && matchesBlogFilter(doc, filter))
+        return { matchedCount: matched.length, modifiedCount: matched.length }
     },
 } }))
 vi.mock('@/models/ContentBlock', () => ({ default: { findOne: () => ({ lean: async () => state.content }) } }))
@@ -71,12 +77,18 @@ describe('blog visibility consumers', () => {
     })
     it('the scheduler publishes only due drafts and never touches unlisted or hidden posts', async () => {
         const now = new Date(Date.now() - 60000)
-        state.docs = visibilityPosts.map(post => ({ ...post, scheduledFor: now, save: async function () { state.saved.push(this._id) } }))
+        state.docs = visibilityPosts.map(post => ({ ...post, scheduledFor: now }))
+        state.updates = []
         vi.stubEnv('CRON_SECRET', 'test-only-secret')
         const { GET } = await import('@/app/api/cron/blog-scheduled/route')
         const response = await GET(new Request('http://t/api/cron/blog-scheduled', { headers: { authorization: 'Bearer test-only-secret' } }))
         expect(response.status).toBe(200)
-        expect(state.saved).toEqual(['draft-false', 'draft-true'])
+        expect(await response.json()).toMatchObject({ ok: true, published: 2, failed: [] })
+        expect(state.updates.map(u => u.filter._id)).toEqual(['draft-false', 'draft-true'])
+        for (const u of state.updates) {
+            expect(u.filter.$or).toEqual(statusQuery('draft').$or)          // the write itself is guarded on draft state
+            expect(u.update.$set).toMatchObject({ status: 'published', published: true, scheduledFor: null })
+        }
         expect(state.finds[0].$or).toEqual(statusQuery('draft').$or)
     })
 })
