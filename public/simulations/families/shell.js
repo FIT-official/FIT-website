@@ -53,14 +53,66 @@ export function plotSVG(spec, w = 420, h = 270) {
 export function dial(key, label, value, unit = '', step = 1) {
   return `<div class="dial" data-dial="${key}" data-step="${step}"><span class="dl">${esc(label)}</span><button type="button" class="db" data-d="-1" aria-label="Decrease ${esc(label)}">−</button><output class="dv" aria-live="polite">${esc(value)}<small>${esc(unit)}</small></output><button type="button" class="db" data-d="1" aria-label="Increase ${esc(label)}">+</button></div>`;
 }
+// Press-and-hold stepper wiring. LIFECYCLE (this is what fixes the "keeps clicking after one tap" bug):
+//  * Listeners live on `root` (the stage), not on the buttons, and are added ONCE per root. A round re-render replaces every button
+//    (stage.innerHTML = ...), so listeners on the buttons were lost while the repeat timer kept running with nothing left to stop it.
+//  * One tap = one step. Only if the press is still held after HOLD_DELAY does it repeat every HOLD_REPEAT ms.
+//  * Releasing ANYWHERE (pointerup/pointercancel on the window, matched to the pressing pointer), losing focus, hiding the page,
+//    a context menu, or removing the stage from the document all stop it. Window listeners exist only while a press is active.
+//  * Only the primary pointer starts a hold (left mouse button, first touch). Keyboard Enter/Space is one step per key press.
+// Calling bindDials again on the same root (every paint does) just swaps in the newest onStep: nothing is added or leaked.
+export const HOLD_DELAY = 350;
+export const HOLD_REPEAT = 160;
+const dialBindings = new WeakMap();
 export function bindDials(root, onStep) {
-  root.querySelectorAll('[data-dial]').forEach(el => el.querySelectorAll('.db').forEach(b => {
-    let timer;
-    const go = () => onStep(el.dataset.dial, Number(b.dataset.d) * Number(el.dataset.step));
-    b.addEventListener('pointerdown', e => { e.preventDefault(); go(); timer = setInterval(go, 160); });
-    ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => b.addEventListener(t, () => clearInterval(timer)));
-    b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
-  }));
+  const existing = dialBindings.get(root);
+  if (existing) { existing.onStep = onStep; return existing.unbind; }
+  const c = { onStep, hold: null, unbind: null };
+  const stepOf = btn => { const el = btn.closest('[data-dial]'); return el ? [el.dataset.dial, Number(btn.dataset.d) * Number(el.dataset.step)] : null; };
+  const buttonOf = e => { const t = e.target; const btn = t && t.closest ? t.closest('.db') : null; return btn && root.contains(btn) ? btn : null; };
+  // pointerup/cancel use capture so nothing can swallow the release; blur must NOT be captured (it would fire for element blurs caused by a re-render).
+  const WINDOW_END = [['pointerup', true], ['pointercancel', true], ['blur', false], ['pagehide', false], ['contextmenu', false]];
+  const onEnd = e => { if (!c.hold) return; if ((e.type === 'pointerup' || e.type === 'pointercancel' || e.type === 'lostpointercapture') && e.pointerId !== c.hold.id) return; stopHold(); };
+  // Pointer capture on the STABLE root: a touch/pen gesture is routed to the pressed button, and when the first step re-renders the stage that button is
+  // detached, so the release/cancel is delivered to a node that is no longer in the document and never reaches window listeners (seen with touch inside an
+  // iframe). Capturing to the root sends pointerup / pointercancel / lostpointercapture to it for as long as the gesture lasts, wherever the pointer goes.
+  const ROOT_END = ['pointerup', 'pointercancel', 'lostpointercapture'];
+  const onHidden = () => { if (document.hidden) stopHold(); };
+  function stopHold() {
+    const h = c.hold; if (!h) return;
+    c.hold = null; clearTimeout(h.delay); clearInterval(h.timer);
+    ROOT_END.forEach(t => root.removeEventListener(t, onEnd));
+    try { if (h.captured && root.hasPointerCapture && root.hasPointerCapture(h.id)) root.releasePointerCapture(h.id); } catch { /* capture already gone */ }
+    WINDOW_END.forEach(([t, cap]) => window.removeEventListener(t, onEnd, cap)); document.removeEventListener('visibilitychange', onHidden);
+  }
+  const down = e => {
+    const btn = buttonOf(e); if (!btn) return;
+    if (e.isPrimary === false || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    const step = stepOf(btn); if (!step) return;
+    e.preventDefault(); stopHold();
+    const hold = { id: e.pointerId, delay: 0, timer: 0 }; c.hold = hold;
+    WINDOW_END.forEach(([t, cap]) => window.addEventListener(t, onEnd, cap)); document.addEventListener('visibilitychange', onHidden);
+    ROOT_END.forEach(t => root.addEventListener(t, onEnd));
+    try { if (e.pointerId !== undefined && root.setPointerCapture) { root.setPointerCapture(e.pointerId); hold.captured = true; } } catch { /* not capturable: window listeners still end the press */ }
+    c.onStep(...step);                       // may re-render and destroy `btn`: nothing below depends on it
+    if (c.hold !== hold) return;
+    hold.delay = setTimeout(() => {
+      if (c.hold !== hold) return;
+      hold.timer = setInterval(() => { if (c.hold !== hold || !root.isConnected) { if (c.hold === hold) stopHold(); return; } c.onStep(...step); }, HOLD_REPEAT);
+    }, HOLD_DELAY);
+  };
+  const key = e => {
+    const btn = buttonOf(e); if (!btn || (e.key !== 'Enter' && e.key !== ' ')) return;
+    const step = stepOf(btn); if (!step) return;
+    const dialKey = btn.closest('[data-dial]').dataset.dial, dir = btn.dataset.d;
+    e.preventDefault(); c.onStep(...step);
+    // A step re-renders the stage and destroys the focused button, which would drop keyboard focus to <body> and make the next Enter/Space do nothing.
+    if (!btn.isConnected) { const again = [...root.querySelectorAll('[data-dial]')].find(el => el.dataset.dial === dialKey); const next = again && [...again.querySelectorAll('.db')].find(b => b.dataset.d === dir); if (next) next.focus(); }
+  };
+  root.addEventListener('pointerdown', down); root.addEventListener('keydown', key);
+  c.unbind = () => { stopHold(); root.removeEventListener('pointerdown', down); root.removeEventListener('keydown', key); dialBindings.delete(root); };
+  dialBindings.set(root, c);
+  return c.unbind;
 }
 // Drag helper for SVG handles: maps pointer to viewBox coords.
 export function dragSVG(svg, handleSel, onMove) {
