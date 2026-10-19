@@ -8,6 +8,7 @@ import {
   NUDGE_ELIGIBLE_STATUSES,
 } from '@/lib/notifications/idleRequests'
 import { verifyCronSecret } from '@/lib/verifyCronSecret'
+import { prepareNudgePreviews, PREVIEW_LIMITS } from '@/lib/email/printPreviews'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -17,6 +18,8 @@ export const dynamic = 'force-dynamic'
 const IDLE_DAYS = Number(process.env.CUSTOM_PRINT_NUDGE_IDLE_DAYS) || 3
 const COOLDOWN_DAYS = Number(process.env.CUSTOM_PRINT_NUDGE_COOLDOWN_DAYS) || 7
 const MAX_PER_RUN = 200
+// Model previews are a bonus: once a run has spent this long preparing them, the remaining emails go out without pictures. Deliberately small: the deployment runtime limit for this route has not been verified.
+const PREVIEW_RUN_BUDGET_MS = 30000
 
 /**
  * GET /api/cron/custom-print-nudges — scheduled job (GitHub Actions,
@@ -61,10 +64,19 @@ export async function GET(req) {
 
   let sent = 0
   let failed = 0
+  let previewSpentMs = 0
   for (const request of due) {
     try {
-      const { subject, html } = buildIdleNudgeEmail({ request })
-      await sendEmail({ to: request.userEmail, subject, html })
+      // Best-effort: any failure here means the original email without a model preview, never a failed or skipped send.
+      let prepared = { models: null, previews: {}, attachments: [] }
+      if (previewSpentMs < PREVIEW_RUN_BUDGET_MS) {
+        const started = Date.now()
+        // Never more than what is left of the run's preview budget (and never more than one email's own limit), so the last email cannot overshoot.
+        try { prepared = await prepareNudgePreviews(request, { limits: { ...PREVIEW_LIMITS, budgetMs: Math.min(PREVIEW_LIMITS.budgetMs, PREVIEW_RUN_BUDGET_MS - previewSpentMs) } }) } catch (err) { console.error(`[cron:nudges] preview skipped for ${request.requestId}:`, err?.name || 'error') }
+        previewSpentMs += Date.now() - started
+      }
+      const { subject, html } = buildIdleNudgeEmail({ request, models: prepared.models, previews: prepared.previews })
+      await sendEmail({ to: request.userEmail, subject, html, ...(prepared.attachments.length ? { attachments: prepared.attachments } : {}) })
       await CustomPrintRequest.updateOne(
         { requestId: request.requestId },
         { $set: { idleNudgeSentAt: new Date() } },
