@@ -18,6 +18,8 @@ const navigation = vi.hoisted(() => ({
   }),
 }))
 
+// /class now includes a client component that reads the signed-in state (anonymous here).
+vi.mock('@clerk/nextjs', () => ({ useUser: () => ({ isLoaded: true, isSignedIn: false, user: null }) }))
 vi.mock('next/navigation', () => ({
   notFound: navigation.notFound,
 }))
@@ -319,7 +321,7 @@ describe('/class Computing card', () => {
     expect(html).toContain('href="/class/simulations"')
     expect(html).not.toContain('href="/computing"')
     expect(html).not.toContain('id="computing-heading"')
-    expect(html).toContain('More coming soon.')
+    expect(html).toContain('More classes are planned.')
   })
 
   it('does not show Computing when only a subordinate flag is on', () => {
@@ -367,7 +369,7 @@ describe('/class Computing card', () => {
     expect(html).toContain('aria-label="Breadcrumb"')
     expect(html).toContain('FIT LEARNING STUDIO')
     expect(html).toContain('<h1>Class</h1>')
-    expect(html).toContain('More coming soon.')
+    expect(html).toContain('More classes are planned.')
 
     expect(classMetadata.title).toBe(
       'Class | FIT Learning Studio',

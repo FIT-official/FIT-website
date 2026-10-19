@@ -6,6 +6,7 @@ import { getLiveSims } from '@/lib/sims/registry'
 import { GALLERY_LEVELS, GALLERY_TOPICS, GALLERY_DIFFICULTIES, GALLERY_ART, EMPTY_FILTERS, filterGallery, parseGalleryQuery, galleryQuery, simLevels, topicKey, difficultyKey } from '@/lib/sims/gallery'
 import AddToClass from '@/components/sims/AddToClass'
 import ActivityArt from '@/components/sims/ActivityArt'
+import ClassTabs from '@/components/class/ClassTabs'
 import styles from './gallery.module.css'
 
 const activities = getLiveSims()
@@ -69,6 +70,7 @@ export default function Library({ addToClassEnabled = false }) {
   const chip = (row, key, label, glyph, extra = {}) => <button type="button" key={key} className={styles.chip} data-row={row} aria-pressed={filters[row].includes(key)} onClick={() => toggle(row, key)} onFocus={event => event.currentTarget.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })} {...extra}>{glyph}<span>{label}</span></button>
   return <main className={styles.gallery}>
     <nav className={styles.breadcrumb} aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden="true">/</span><Link href="/class">Class</Link><span aria-hidden="true">/</span><span aria-current="page">Simulations</span></nav>
+    <ClassTabs current="simulations" />
     <header className={styles.hero}>
       <h1>Simulations</h1>
       <svg className={styles.shapes} viewBox="0 0 280 140" aria-hidden="true"><path d="M8 34c14-16 28-16 42 0s28 16 42 0" fill="none" stroke="#6A45F5" strokeWidth="7" strokeLinecap="round"/><circle cx="52" cy="92" r="36" fill="#FFC83D" stroke="#111" strokeWidth="5"/><path d="M128 124 160 58l32 66Z" fill="#FF6B3D" stroke="#111" strokeWidth="5" strokeLinejoin="round"/><rect x="204" y="62" width="58" height="58" rx="14" transform="rotate(12 233 91)" fill="#2EC4A6" stroke="#111" strokeWidth="5"/><circle cx="150" cy="24" r="9" fill="#FF9EC0" stroke="#111" strokeWidth="4"/><circle cx="248" cy="18" r="11" fill="#1F66E5" stroke="#111" strokeWidth="4"/></svg>

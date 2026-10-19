@@ -49,3 +49,4 @@
   .art { border-bottom: 0; border-right: 1px solid var(--borderColor, #e6e6e6); }
   .cardBody { padding: 36px; }
 }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
