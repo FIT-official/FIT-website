@@ -4,11 +4,13 @@ import { SignInButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import FilamentColourPreview from '@/components/Shop/FilamentColourPreview'
 import { COLOURS, COLOUR_SOURCE, normalizeHex, rankColours } from '@/lib/makerTools/colours'
+import { CHANNELS, PALETTE, findSwatch, formatRgb, hexToRgb, parseHexInput, parseRgbInput } from '@/lib/makerTools/colourInputs'
 import { estimateMaterial, MATERIALS, number, planProject, validateInventory } from '@/lib/makerTools/calculations'
 import styles from './MakerTools.module.css'
 
 const grams = value => new Intl.NumberFormat('en-SG', { maximumFractionDigits: 2 }).format(value) + ' g'
-const tabs = [['match', '01', 'Colour matcher'], ['estimate', '02', 'Material estimator'], ['inventory', '03', 'My filament'], ['plan', '04', 'Project planner']]
+const tabs = [['match', 'Colour matcher'], ['estimate', 'Material estimator'], ['inventory', 'My filament'], ['plan', 'Project planner']]
+const stockSourceLabels = { sheet: 'FIT stock sheet', shop: 'FIT shop', snapshot: 'recorded snapshot' }
 function download(name, data) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }))
   const a = document.createElement('a'); a.href = url; a.download = name; a.click()
@@ -25,47 +27,96 @@ function NumberInput({ value, onChange, ...props }) {
 }
 function SourceNote() {
   return <details className={styles.details}><summary>How colour matching works</summary>
-    <p>30 Bambu Lab PLA Basic colours, from the <a href={COLOUR_SOURCE.url} target="_blank" rel="noreferrer">official HEX table</a>, checked {COLOUR_SOURCE.checkedAt}. We convert sRGB HEX to CIELAB using D65 white and rank by Delta E 1976 (ΔE76). Lower means closer in this screen-colour model; zero means the same reference HEX.</p>
-    <p>This is approximate, with no physical-match confidence percentage. Screens, lighting, texture, translucency, printer settings and batches change appearance. Compare a printed sample before a colour-critical purchase. Metallic and other finishes are not captured by one HEX. Photos are existing, source-verified catalogue samples; their packaging is not a stock promise.</p>
+    <p>30 Bambu Lab PLA Basic colours, from the <a href={COLOUR_SOURCE.url} target="_blank" rel="noreferrer">official HEX table</a>, checked {COLOUR_SOURCE.checkedAt}. Matches are ranked by a standard colour-difference formula (CIE76 ΔE, computed from the screen colours). A lower difference is closer; 0 means the same reference HEX.</p>
+    <p>This is an approximation, not a percentage chance of a physical match. Screens, lighting, texture, translucency, printer settings and batches change appearance. Compare a printed sample before a colour-critical purchase. Metallic and other finishes are not captured by one HEX. Photos are existing, source-verified catalogue samples; their packaging is not a stock promise.</p>
   </details>
 }
 function Offers({ offers, needed }) {
   if (!offers.length) return <p className={styles.muted}>No confirmed catalogue variant available. Browse <Link href="/shop?productCategory=Filament">FIT filament</Link>.</p>
   return <div className={styles.offers}>{offers.map(o => <div key={o.optionId + o.format}>
     <strong>{o.format === 'refill' ? 'Refill · no spool' : 'With spool'} · 1 kg net</strong>
-    <span>{o.availableRolls === null ? 'Combination stock unconfirmed' : `${o.availableRolls} roll${o.availableRolls === 1 ? '' : 's'} available`}
+    <span>{o.availableRolls === null ? 'Stock not confirmed for this option' : `${o.availableRolls} roll${o.availableRolls === 1 ? '' : 's'} available`}
       {needed > 0 && o.availableRolls !== null && <>{o.availableRolls >= needed ? ' · enough for this colour' : ` · short by ${needed - o.availableRolls} roll(s)`}</>}</span>
-    {o.checkedAt && <small>{o.stockSource === 'snapshot' ? 'Recorded snapshot' : 'Stock checked'}: {new Date(o.checkedAt).toLocaleString('en-SG', { timeZone: 'Asia/Singapore' })} SGT · {o.stockSource}</small>}
+    {o.checkedAt && <small>{o.stockSource === 'snapshot' ? 'Recorded snapshot' : 'Stock checked'}: {new Date(o.checkedAt).toLocaleString('en-SG', { timeZone: 'Asia/Singapore' })} SGT · {stockSourceLabels[o.stockSource] || 'FIT catalogue'}</small>}
     {o.identityNote && <small>{o.identityNote}</small>}
     <Link href={o.href}>View product &amp; select {o.optionName} →</Link>
   </div>)}</div>
 }
 
+function ColourInputs({ onPick, target, hexText, rgbText, onHex, onRgb, hexInfo, rgbInfo, pickerValue }) {
+  const swatch = findSwatch(target)
+  const rgb = hexToRgb(target)
+  const problem = hexInfo.message ? { id: 'hex-error', text: hexInfo.message } : rgbInfo.status === 'invalid' ? { id: 'rgb-error', text: Object.values(rgbInfo.errors).join(' ') } : rgbInfo.status === 'incomplete' ? { id: 'rgb-error', text: 'Enter all three RGB values (0–255) to see matches.' } : null
+  return <div className={styles.colourInputs}>
+    <div className={styles.inputGroup}>
+      <p className={styles.groupLabel} id="swatch-label">Named colours</p>
+      <div className={styles.swatchGrid} role="group" aria-labelledby="swatch-label">{PALETTE.map(s => {
+        const selected = target === s.hex
+        return <button type="button" key={s.id} className={styles.swatchButton} aria-pressed={selected} aria-label={`${s.name} ${s.hex}`} onClick={() => onPick(s.hex)}>
+          <span className={styles.swatchChip} style={{ backgroundColor: s.hex }} aria-hidden="true">{selected && <span className={styles.swatchCheck}>✓</span>}</span>
+          <span className={styles.swatchName} aria-hidden="true">{s.name}</span>
+        </button>
+      })}</div>
+    </div>
+    <div className={styles.inputGroup}>
+      <p className={styles.groupLabel}>Exact colour</p>
+      <div className={styles.exactRow}>
+        <label className={styles.pickerField}><span>Colour picker</span><input className={styles.picker} type="color" aria-label="Pick a target colour" value={pickerValue} onChange={e => onPick(e.target.value.toUpperCase())} /></label>
+        <Field label="Target HEX"><input value={hexText} spellCheck={false} autoComplete="off" placeholder="#00AE42" onChange={e => onHex(e.target.value)} onBlur={() => hexInfo.status === 'valid' && onHex(hexInfo.hex)} aria-invalid={Boolean(hexInfo.message)} aria-describedby={hexInfo.message ? 'hex-error' : undefined} /></Field>
+        <fieldset className={styles.rgbSet} aria-describedby={problem?.id === 'rgb-error' ? 'rgb-error' : undefined}><legend>RGB, 0–255 each</legend>
+          {CHANNELS.map(([key, label]) => <Field key={key} label={`${label} channel`}><input inputMode="numeric" autoComplete="off" placeholder="0–255" value={rgbText[key]} onChange={e => onRgb(key, e.target.value)} aria-invalid={Boolean(rgbInfo.errors[key])} /></Field>)}
+        </fieldset>
+      </div>
+      {problem && <p id={problem.id} role="alert" className={styles.error}>{problem.text}</p>}
+    </div>
+    <div className={styles.selected} role="status" aria-label="Selected colour">
+      <span className={styles.selectedChip} style={target ? { background: target } : undefined} aria-hidden="true" />
+      {target ? <dl><div><dt>Selected</dt><dd>{swatch ? `${swatch.name} swatch` : 'Custom colour'}</dd></div><div><dt>HEX</dt><dd>{target}</dd></div><div><dt>RGB</dt><dd>{formatRgb(rgb)}</dd></div></dl>
+        : <p>No colour selected. Fix the entry above or choose a swatch.</p>}
+    </div>
+  </div>
+}
+
 function Matcher({ offers, catalogueState, onUseColour }) {
-  const [hex, setHex] = useState('#00AE42')
+  const [hexText, setHexText] = useState('#00AE42')
+  const [rgbText, setRgbText] = useState(() => { const { r, g, b } = hexToRgb('#00AE42'); return { r: String(r), g: String(g), b: String(b) } })
+  const [target, setTarget] = useState('#00AE42')
+  const [lastValid, setLastValid] = useState('#00AE42')
   const [stockOnly, setStockOnly] = useState(false)
   const [format, setFormat] = useState('any')
   const [all, setAll] = useState(false)
-  const valid = normalizeHex(hex)
+  const hexInfo = parseHexInput(hexText)
+  const rgbInfo = parseRgbInput(rgbText)
+  const rgbFields = hex => { const { r, g, b } = hexToRgb(hex); return { r: String(r), g: String(g), b: String(b) } }
+  const choose = hex => { setTarget(hex); setLastValid(hex); setHexText(hex); setRgbText(rgbFields(hex)) }
+  const typeHex = text => {
+    setHexText(text)
+    const info = parseHexInput(text)
+    if (info.status === 'valid') { setTarget(info.hex); setLastValid(info.hex); setRgbText(rgbFields(info.hex)) } else setTarget(null)
+  }
+  const typeRgb = (key, text) => {
+    const next = { ...rgbText, [key]: text }
+    setRgbText(next)
+    const info = parseRgbInput(next)
+    if (info.status === 'valid') { setTarget(info.hex); setLastValid(info.hex); setHexText(info.hex) } else setTarget(null)
+  }
   const matchingOffers = id => offers.filter(o => o.referenceId === id && (format === 'any' || o.format === format))
-  const ranked = rankColours(hex).filter(c => !stockOnly || matchingOffers(c.id).some(o => o.availableRolls > 0))
+  const ranked = rankColours(target).filter(c => !stockOnly || matchingOffers(c.id).some(o => o.availableRolls > 0))
   return <section aria-labelledby="match-heading">
-    <div className={styles.heading}><div><p className={styles.eyebrow}>FIND YOUR PALETTE</p><h2 id="match-heading">From HEX to filament.</h2></div><span className={styles.tag}>Bambu Lab · PLA Basic</span></div>
-    <p className={styles.intro}>Choose a colour. Compare the closest manufacturer references, then check the exact filament and packaging.</p>
-    <div className={styles.matcherControls}>
-      <input className={styles.picker} type="color" aria-label="Pick a target colour" value={valid || '#000000'} onChange={e => setHex(e.target.value.toUpperCase())} />
-      <Field label="Target HEX"><input value={hex} maxLength={7} spellCheck={false} placeholder="#00AE42" onChange={e => setHex(e.target.value)} aria-invalid={!valid} aria-describedby={!valid ? 'hex-error' : undefined} /></Field>
+    <div className={styles.heading}><h2 id="match-heading">Colour matcher</h2><span className={styles.tag}>Bambu Lab · PLA Basic</span></div>
+    <p className={styles.intro}>Choose a swatch, use the picker, or type a HEX or RGB value. The closest Bambu Lab PLA Basic reference colours appear below.</p>
+    <ColourInputs {...{ target, hexText, rgbText, hexInfo, rgbInfo, onHex: typeHex, onRgb: typeRgb, onPick: choose, pickerValue: lastValid }} />
+    <div className={styles.filterRow}>
       <Field label="Packaging"><select value={format} onChange={e => setFormat(e.target.value)}><option value="any">Spool &amp; refill</option><option value="spool">With spool</option><option value="refill">Refill only</option></select></Field>
       <label className={styles.check}><input type="checkbox" checked={stockOnly} onChange={e => setStockOnly(e.target.checked)} /> Confirmed in stock only</label>
     </div>
-    {!valid && <p id="hex-error" role="alert" className={styles.error}>Use a 3- or 6-digit HEX, such as #00AE42.</p>}
-    <p className={styles.muted} aria-live="polite">{valid ? `${ranked.length} reference matches · ordered by screen-colour distance` : 'Enter a valid colour to see matches.'}{stockOnly && catalogueState !== 'ready' ? ' · refresh stock to confirm availability' : ''}</p>
+    <p className={styles.muted} aria-live="polite">{target ? `${ranked.length} reference matches for ${target} · closest first` : 'Enter a complete, valid colour to see matches.'}{target && stockOnly && catalogueState !== 'ready' ? ' · refresh stock to confirm availability' : ''}</p>
     <div className={styles.cards}>{ranked.slice(0, all ? 30 : 6).map((c, index) => {
       const variants = matchingOffers(c.id), preview = variants[0]?.preview
       return <article className={styles.card} key={c.id}>
         <div className={styles.colourBar} style={{ backgroundColor: c.hex }}><span>#{String(index + 1).padStart(2, '0')}</span></div>
         <div className={styles.cardBody}><div className={styles.cardTitle}><div><h3>{c.name}</h3><p className={styles.hex}>{c.hex}</p></div>{preview && <FilamentColourPreview preview={preview} name={c.name} compact />}</div>
-          <p className={styles.score}>ΔE76 {c.distance.toFixed(1)} <span>{c.confidence}</span></p>
+          <p className={styles.score}>Difference {c.distance.toFixed(1)} <span>{c.confidence}</span></p>
           {preview?.sourceUrl && <a className={styles.sourceLink} href={preview.sourceUrl} target="_blank" rel="noreferrer">Sample source ↗</a>}
           <Offers offers={variants} />
           <button className={styles.secondary} onClick={() => onUseColour(c.id)}>Use {c.name} in planner</button>
@@ -73,7 +124,7 @@ function Matcher({ offers, catalogueState, onUseColour }) {
       </article>
     })}</div>
     {ranked.length > 6 && <button className={styles.secondary} onClick={() => setAll(!all)}>{all ? 'Show closest six' : 'Compare all 30 colours'}</button>}
-    {valid && !ranked.length && <p className={styles.notice}>No confirmed stock matches this filter. Clear the stock filter to explore the reference colours.</p>}
+    {target && !ranked.length && <p className={styles.notice}>No confirmed stock matches this filter. Clear the stock filter to explore the reference colours.</p>}
     <SourceNote />
   </section>
 }
@@ -84,8 +135,8 @@ function Estimator() {
   let result, error
   try { result = estimateMaterial(input) } catch (e) { error = e.message }
   return <section aria-labelledby="estimate-heading">
-    <div className={styles.heading}><div><p className={styles.eyebrow}>PLAN YOUR MATERIAL</p><h2 id="estimate-heading">A useful estimate. Clear assumptions.</h2></div></div>
-    <p className={styles.intro}>Start with known consumption or plastic volume. Your slicer is the source for a model&apos;s walls, infill, supports, purge and print time.</p>
+    <div className={styles.heading}><h2 id="estimate-heading">Material estimator</h2></div>
+    <p className={styles.intro}>Enter your known filament use or plastic volume. Take walls, infill, supports, purge and print time from your slicer.</p>
     <div className={styles.split}><div className={styles.panel}><div className={styles.formGrid}>
       <Field label="Known input"><select value={input.mode} onChange={e => set('mode')(e.target.value)}><option value="mass">Material mass (g)</option><option value="length">Filament length (m)</option><option value="volume">Deposited plastic volume (cm³)</option></select></Field>
       <Field label={`Amount per copy (${input.mode === 'mass' ? 'g' : input.mode === 'length' ? 'm' : 'cm³'})`}><NumberInput value={input.amount} onChange={set('amount')} /></Field>
@@ -97,10 +148,10 @@ function Estimator() {
       <Field label="Your material cost (SGD/kg)" hint="Optional. Excludes labour, delivery, energy and tax."><NumberInput value={input.pricePerKg} onChange={set('pricePerKg')} placeholder="Optional" /></Field>
       <Field label="Slicer time per copy (minutes)" hint="Optional. Enter a known slicer estimate."><NumberInput value={input.minutes} onChange={set('minutes')} placeholder="Optional" /></Field>
     </div></div><aside className={styles.result} aria-live="polite">
-      <p className={styles.eyebrow}>MATERIAL TO HAVE ON HAND</p>
+      <h3 className={styles.resultTitle}>Material to have on hand</h3>
       {error ? <p role="alert">{error}</p> : <><p className={styles.bigNumber}>{grams(result.totalGrams)}</p><p>{(result.totalGrams / 1000).toFixed(3)} kg including reserve</p>
         <dl><div><dt>Consumption from your inputs</dt><dd>{grams(result.consumptionGrams)}</dd></div><div><dt>Extra reserve</dt><dd>{grams(result.reserveGrams)}</dd></div><div><dt>Material budget</dt><dd>{result.costSgd === null ? 'Enter cost / kg' : new Intl.NumberFormat('en-SG', { style: 'currency', currency: 'SGD' }).format(result.costSgd)}</dd></div><div><dt>Entered slicer time × copies</dt><dd>{result.minutes === null ? 'No time estimate' : `${Math.round(result.minutes * 10) / 10} min`}</dd></div></dl>
-        <button className={styles.lightButton} onClick={() => download('fit-material-estimate.json', { schemaVersion: 1, inputs: input, result, note: 'User-input estimate; not a slicer calculation or quotation.' })}>Export estimate</button></>}
+        <button className={styles.lightButton} onClick={() => download('fit-material-estimate.json', { schemaVersion: 1, inputs: input, result, note: 'Estimate from your inputs; not a slicer calculation or quotation.' })}>Export estimate</button></>}
     </aside></div>
     <details className={styles.details} open><summary>Units, formula &amp; limits</summary><p>{result?.formula || 'Check the input values.'}. Add any extra support/purge per copy, multiply by copies, then add the selected reserve percentage.</p>
       <p>Volume means deposited plastic volume, not the model&apos;s bounding box. We do not infer infill, purge towers or support from geometry. This tool does not slice a model or predict print duration. Multiplying entered slicer time assumes sequential identical copies; a multi-object plate may differ.</p>
@@ -128,9 +179,9 @@ function Inventory({ userId, inventory, setInventory, loaded, dirty, setDirty, s
     } catch (e) { setError(e.message) }
   }
   return <section aria-labelledby="inventory-heading" className="ph-no-capture ph-mask" data-private>
-    <div className={styles.heading}><div><p className={styles.eyebrow}>YOUR MATERIAL SHELF</p><h2 id="inventory-heading">Know what you already own.</h2></div><span className={styles.tag}>Private to your account</span></div>
+    <div className={styles.heading}><h2 id="inventory-heading">My filament</h2><span className={styles.tag}>Private to your account</span></div>
     <p className={styles.intro}>Keep a manual record of remaining net filament. Weigh filament without the spool, or subtract your measured empty spool weight. Update it after printing.</p>
-    {!userId ? <div className={styles.empty}><h3>Your next print starts with your shelf.</h3><p>Sign in to save, edit and export your own filament inventory.</p><SignIn /></div> : <>
+    {!userId ? <div className={styles.empty}><h3>Sign in to use My filament</h3><p>Sign in to save, edit and export your own filament inventory.</p><SignIn /></div> : <>
       {message && <p role="status" className={styles.notice}>{message}</p>}
       {!loaded ? <button className={styles.secondary} onClick={reload}>Reload inventory</button> : <>
         <div className={styles.toolbar}><span>{inventory.spools.length}/100 entries · {grams(inventory.spools.reduce((sum, s) => sum + (Number(s.remainingGrams) || 0), 0))} recorded {dirty && '· unsaved edits'}</span><div>
@@ -153,7 +204,7 @@ function Inventory({ userId, inventory, setInventory, loaded, dirty, setDirty, s
           <Field label={`Remaining grams for ${s.label}`}><NumberInput value={s.remainingGrams} max="100000" disabled={saving} onChange={value => replace(inventory.spools.map(item => item.id === s.id ? { ...item, remainingGrams: value === '' ? '' : Number(value) } : item))} /></Field>
           <button className={styles.remove} disabled={saving} onClick={() => replace(inventory.spools.filter(item => item.id !== s.id))} aria-label={`Remove ${s.label}`}>Remove</button>
         </div>)}</div>
-        <p className={styles.muted}>Edits are saved only when you choose Save inventory. Export downloads your current edits as JSON. <button className={styles.textButton} disabled={saving} onClick={reload}>Reload saved inventory and discard these edits</button></p>
+        <p className={styles.muted}>Edits are saved only when you choose Save inventory. Export downloads your current edits as a file. <button className={styles.textButton} disabled={saving} onClick={reload}>Reload saved inventory and discard these edits</button></p>
       </>}
     </>}
     <p className={styles.notice}>Manual inventory only. There is no printer connection, automatic consumption tracking or Bambu account integration. Removing all entries and saving clears your saved filament list.</p>
@@ -166,8 +217,8 @@ function Planner({ lines, setLines, spools, offers, userId, loaded, dirty }) {
   try { result = planProject(lines, spools, reserve) } catch (e) { error = e.message }
   const change = (index, key, value) => setLines(old => old.map((l, i) => i === index ? { ...l, [key]: value } : l))
   return <section aria-labelledby="plan-heading" className="ph-no-capture ph-mask" data-private>
-    <div className={styles.heading}><div><p className={styles.eyebrow}>READY FOR YOUR NEXT PRINT</p><h2 id="plan-heading">Build a colour shopping list.</h2></div><span className={styles.tag}>PLA Basic · 1.75 mm</span></div>
-    <p className={styles.intro}>Enter total grams for each colour from your slicer, including supports and purge. We compare exact colour references with your on-hand filament and show what is missing.</p>
+    <div className={styles.heading}><h2 id="plan-heading">Project planner</h2><span className={styles.tag}>PLA Basic · 1.75 mm</span></div>
+    <p className={styles.intro}>Enter total grams for each colour from your slicer, including supports and purge. Each colour is compared with your on-hand filament to show what is missing.</p>
     <p className={styles.notice}>{!userId ? 'Sign in to include your private inventory. This plan currently starts with no on-hand filament.' : !loaded ? 'Inventory has not loaded. On-hand totals are not yet available.' : dirty ? 'This plan uses your current unsaved inventory edits.' : 'This plan uses your saved manual inventory.'} Custom colours, other materials and 2.85 mm filament are not silently substituted.</p>
     <div className={styles.panel}>{lines.map((line, index) => <div key={line.id} className={styles.projectRow}><span className={styles.rowNumber}>{String(index + 1).padStart(2, '0')}</span>
       <Field label={`Project colour ${index + 1}`}><select value={line.referenceId} onChange={e => change(index, 'referenceId', e.target.value)}>{COLOURS.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
@@ -233,7 +284,7 @@ function Workspace({ userId }) {
     document.getElementById('maker-workbench')?.scrollIntoView({ behavior: 'auto', block: 'start' })
   }
   return <>
-    <nav className={styles.tabs} aria-label="Maker tools">{tabs.map(([id, n, label]) => <button key={id} aria-pressed={tab === id} onClick={() => setTab(id)}><span>{n}</span>{label}</button>)}</nav>
+    <nav className={styles.tabs} aria-label="Maker tools">{tabs.map(([id, label]) => <button key={id} aria-pressed={tab === id} onClick={() => setTab(id)}>{label}</button>)}</nav>
     <div id="maker-workbench" className={styles.workbench}>
       <div className={styles.stockStatus} role="status"><span>{catalogueState === 'loading' ? 'Checking FIT catalogue stock…' : catalogueState === 'error' ? 'Live stock unavailable. Colour references still work.' : 'Catalogue loaded. Check the source and time on each packaging option.'}</span><button className={styles.textButton} disabled={catalogueState === 'loading'} onClick={() => setStockVersion(v => v + 1)}>Refresh stock</button></div>
       <div hidden={tab !== 'match'}><Matcher offers={offers} catalogueState={catalogueState} onUseColour={useColourInPlan} /></div>
@@ -247,9 +298,9 @@ export default function MakerTools() {
   const { user, isLoaded } = useUser()
   return <main className={styles.root}>
     <nav className={styles.breadcrumb} aria-label="Breadcrumb"><Link href="/shop">Shop</Link><span>/</span><span aria-current="page">Maker Tools</span></nav>
-    <header className={styles.hero}><div><p className={styles.eyebrow}>FIT / THE MAKER WORKBENCH</p><h1>Make more.<br /><span>Guess less.</span></h1><p>Find your colour. Know your material.<br className={styles.desktopBreak} /> Plan the next print with what you already own.</p></div><div className={styles.heroArt} aria-hidden="true"><div className={styles.swatches}>{['#00AE42', '#FEC600', '#FF6A13', '#0086D6', '#EC008C'].map((c, i) => <span key={c} style={{ backgroundColor: c, transform: `rotate(${(i - 2) * 10}deg)` }} />)}</div><span>30 COLOURS. YOUR NEXT IDEA.</span></div></header>
+    <header className={styles.hero}><h1>Maker Tools</h1><p>Match filament colours, estimate material, track your filament and plan multicolour projects.</p></header>
     {isLoaded ? <Workspace key={user?.id || 'guest'} userId={user?.id || null} /> : <p className={styles.empty}>Loading Maker Tools…</p>}
-    <section className={styles.community} aria-label="Learn and troubleshoot"><div><p className={styles.eyebrow}>TRY. OBSERVE. LEARN.</p><h2>Keep your next idea moving.</h2><p>Explore beginner coding lessons or find a useful first step when a print fails.</p></div><div className={styles.learningLinks}><Link className={styles.secondary} href="/maker-tools/playground">Open coding playground</Link><Link className={styles.secondary} href="/guides/3d-printing-problems">Common printing problems</Link></div></section>
-    <section className={styles.community}><div><p className={styles.eyebrow}>MAKE SOMETHING TOGETHER</p><h2>A place for your next question or project.</h2><p>Share what you are making and learn with the FIT maker community.</p></div><Link className={styles.primary} href="/community">Explore Community →</Link></section>
+    <section className={styles.community} aria-labelledby="learn-heading"><div><h2 id="learn-heading">Learning and help</h2><p>Try beginner coding lessons, or find a first step when a print fails.</p></div><div className={styles.learningLinks}><Link className={styles.secondary} href="/maker-tools/playground">Open coding playground</Link><Link className={styles.secondary} href="/guides/3d-printing-problems">Common printing problems</Link></div></section>
+    <section className={styles.community} aria-labelledby="community-heading"><div><h2 id="community-heading">Community</h2><p>Share what you are making and ask questions.</p></div><Link className={styles.primary} href="/community">Explore Community →</Link></section>
   </main>
 }

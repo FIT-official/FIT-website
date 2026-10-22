@@ -20,7 +20,7 @@ it('offers working guest matching and validation without requesting private inve
   render(<MakerTools />)
   await screen.findByText(/Catalogue loaded/)
   expect(state.fetch.mock.calls.some(([url]) => url.includes('inventory'))).toBe(false)
-  expect(screen.getByRole('heading', { name: 'From HEX to filament.' })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'Colour matcher' })).toBeInTheDocument()
   fireEvent.change(screen.getByLabelText('Target HEX'), { target: { value: '#12345' } })
   expect(screen.getByRole('alert')).toHaveTextContent('3- or 6-digit')
   fireEvent.click(screen.getByRole('button', { name: /My filament/ }))
