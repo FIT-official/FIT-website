@@ -15,6 +15,11 @@ export const metadata = programmeMetadata({
 function About() {
     return (
         <div className='flex w-full flex-col pt-12 border-b border-borderColor'>
+            <nav aria-label="About Us" className="flex flex-wrap gap-x-8 gap-y-2 border-b border-borderColor px-8 pb-6 text-sm md:px-20">
+                <Link href="/about/makeraccess" className="inline-flex min-h-11 items-center underline underline-offset-4">MakerAccess</Link>
+                <Link href="/class" className="inline-flex min-h-11 items-center underline underline-offset-4">FIT Class</Link>
+                <a href="https://leewenwei.com" className="inline-flex min-h-11 items-center underline underline-offset-4">About the Founder</a>
+            </nav>
             <IntroductionSection />
             <BenefitsSection />
             <Header title="OUR SERVICES" />

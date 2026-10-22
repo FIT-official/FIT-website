@@ -1,6 +1,7 @@
 // RTL smokes for the storefront navbar.
 //
-// Desktop: primary links (Creators/About) render with hrefs; Shop and Prints
+// Desktop: primary links render with hrefs; About Us groups the public pages.
+// Shop and Prints
 // are mega-panel triggers (aria-expanded) whose panels carry the category ->
 // subcategory links with exact query-param hrefs plus the Browse-all and
 // Print-your-model icon rows; the right rail shows CMS featured articles
@@ -20,6 +21,7 @@
 // and closes on Escape returning focus to the hamburger trigger.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent, within, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import Navbar from '@/components/General/Navbar'
 
 let mockPathname = '/'
@@ -91,6 +93,7 @@ let mockNavContent = null
 const okJson = (body) => Promise.resolve({ ok: true, json: async () => body })
 
 beforeEach(() => {
+    mockPathname = '/'
     mockIsAdmin = false
     mockNavContent = null
     mockEntitlements = {
@@ -139,9 +142,8 @@ describe('Navbar desktop bar', () => {
     it('renders the primary links, cart, messages and the account dropdown', async () => {
         render(<Navbar />)
         expect(screen.getByRole('link', { name: 'Creators' })).toHaveAttribute('href', '/creators')
-        expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute('href', '/about')
-        // Shop and Prints are mega panel triggers, closed by default.
-        ;['Shop', 'Prints'].forEach((name) => {
+        // Public page and catalogue disclosures are closed by default.
+        ;['Shop', 'Prints', 'About Us'].forEach((name) => {
             expect(screen.getByRole('button', { name })).toHaveAttribute('aria-expanded', 'false')
         })
         // Cart keeps its redirect-back href; messages keeps its destination.
@@ -290,7 +292,10 @@ describe('Navbar mobile menu', () => {
         ;[
             ['Home', '/'],
             ['Creators', '/creators'],
-            ['About', '/about'],
+            ['About FIT', '/about'],
+            ['MakerAccess', '/about/makeraccess'],
+            ['FIT Class', '/class'],
+            ['About the Founder', 'https://leewenwei.com'],
         ].forEach(([name, href]) => {
             expect(within(sheet).getByRole('link', { name })).toHaveAttribute('href', href)
         })
@@ -416,6 +421,48 @@ describe('Navbar mobile menu', () => {
         expect(document.activeElement).toBe(trigger)
     })
 
+    it.each([true, false])('wraps Tab and Shift+Tab inside the mobile sheet when signed in = %s', async signedIn => {
+        if (!signedIn) mockUser = null
+        const user = userEvent.setup()
+        const sheet = await openMobileMenu()
+        const first = within(sheet).getByRole('button', { name: 'Close menu' })
+        const last = signedIn
+            ? within(sheet).getByRole('button', { name: 'Sign out' })
+            : within(sheet).getByRole('link', { name: 'Sign up' })
+
+        expect(document.activeElement).toBe(first)
+        await user.tab({ shift: true })
+        expect(document.activeElement).toBe(last)
+        await user.tab()
+        expect(document.activeElement).toBe(first)
+        await user.tab()
+        expect(document.activeElement).toBe(within(sheet).getByRole('link', { name: 'Home' }))
+
+        await user.keyboard('{Escape}')
+        await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Menu' })).toBeNull())
+        expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Open menu' }))
+    })
+
+    it('updates the focus boundary when account destinations change in an open sheet', async () => {
+        const signedInUser = mockUser
+        mockUser = null
+        const user = userEvent.setup()
+        const { rerender } = render(<Navbar />)
+        fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
+        const sheet = await screen.findByRole('dialog', { name: 'Menu' })
+        const first = within(sheet).getByRole('button', { name: 'Close menu' })
+        expect(within(sheet).getByRole('link', { name: 'Sign up' })).toBeInTheDocument()
+
+        mockUser = signedInUser
+        rerender(<Navbar />)
+        const last = within(sheet).getByRole('button', { name: 'Sign out' })
+        last.focus()
+        await user.tab()
+        expect(document.activeElement).toBe(first)
+        await user.tab({ shift: true })
+        expect(document.activeElement).toBe(last)
+    })
+
     it('locks body scroll while open and closes from the backdrop close button', async () => {
         const sheet = await openMobileMenu()
         expect(document.body.style.overflow).toBe('hidden')
@@ -455,32 +502,86 @@ describe('Blog navigation', () => {
     })
 })
 
-describe('Public Class navigation', () => {
+describe('About Us navigation', () => {
     afterEach(() => { mockPathname = '/' })
-    it.each([true, false])('keeps Class visible on desktop and mobile when signed in = %s', async signedIn => {
+    it.each([true, false])('keeps the public About Us destinations available when signed in = %s', async signedIn => {
         if (!signedIn) mockUser = null
         render(<Navbar />)
         const primary = screen.getByRole('navigation', { name: 'Primary' })
-        expect(within(primary).getByRole('link', { name: 'Class' })).toHaveAttribute('href', '/class')
-        expect(within(primary).queryByRole('link', { name: 'Classes' })).toBeNull()
+        fireEvent.click(within(primary).getByRole('button', { name: 'About Us' }))
+        const panel = await screen.findByRole('region', { name: 'About Us menu' })
+        ;[
+            ['MakerAccess', '/about/makeraccess'],
+            ['FIT Class', '/class'],
+            ['About the Founder', 'https://leewenwei.com'],
+            ['About FIT', '/about'],
+        ].forEach(([name, href]) => {
+            expect(within(panel).getByRole('link', { name })).toHaveAttribute('href', href)
+        })
+        expect(within(primary).queryByRole('link', { name: 'Class' })).toBeNull()
         fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
         const sheet = await screen.findByRole('dialog', { name: 'Menu' })
-        const link = within(sheet).getByRole('link', { name: 'Class' })
+        expect(within(sheet).getByText('About Us')).toBeInTheDocument()
+        expect(within(sheet).getByRole('link', { name: 'MakerAccess' })).toHaveAttribute('href', '/about/makeraccess')
+        expect(within(sheet).getByRole('link', { name: 'About the Founder' })).toHaveAttribute('href', 'https://leewenwei.com')
+        const link = within(sheet).getByRole('link', { name: 'FIT Class' })
         expect(link).toHaveAttribute('href', '/class')
-        expect(within(sheet).queryByRole('link', { name: 'Classes' })).toBeNull()
         fireEvent.click(link)
         await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Menu' })).toBeNull())
     })
-    it.each(['/class', '/class/simulations', '/class/simulations/sampling'])('marks Class active for %s', async pathname => {
+    it.each([
+        ['/class', 'FIT Class'],
+        ['/class/simulations', 'FIT Class'],
+        ['/class/simulations/sampling', 'FIT Class'],
+        ['/about/makeraccess', 'MakerAccess'],
+        ['/about', 'About FIT'],
+    ])('marks the matching About Us destination active for %s', async (pathname, name) => {
         mockPathname = pathname; render(<Navbar />)
-        expect(within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { name: 'Class' })).toHaveAttribute('aria-current', 'page')
+        const trigger = within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('button', { name: 'About Us' })
+        expect(trigger.className).toContain('text-textColor')
+        fireEvent.click(trigger)
+        const panel = await screen.findByRole('region', { name: 'About Us menu' })
+        expect(within(panel).getByRole('link', { name })).toHaveAttribute('aria-current', 'page')
+        expect(within(panel).getAllByRole('link').filter(link => link.getAttribute('aria-current') === 'page')).toHaveLength(1)
         fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
-        expect(within(await screen.findByRole('dialog', { name: 'Menu' })).getByRole('link', { name: 'Class' })).toHaveAttribute('aria-current', 'page')
+        expect(within(await screen.findByRole('dialog', { name: 'Menu' })).getByRole('link', { name })).toHaveAttribute('aria-current', 'page')
     })
-    it.each(['/class-extra', '/classes'])('does not confuse %s with the Class namespace', async pathname => {
+    it.each(['/class-extra', '/classes', '/about/makeraccess-extra'])('does not confuse %s with an About Us destination', async pathname => {
         mockPathname = pathname; render(<Navbar />)
-        expect(within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { name: 'Class' })).not.toHaveAttribute('aria-current')
+        fireEvent.click(screen.getByRole('button', { name: 'About Us' }))
+        const panel = await screen.findByRole('region', { name: 'About Us menu' })
+        expect(within(panel).getAllByRole('link').every(link => !link.hasAttribute('aria-current'))).toBe(true)
         fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
-        expect(within(await screen.findByRole('dialog', { name: 'Menu' })).getByRole('link', { name: 'Class' })).not.toHaveAttribute('aria-current')
+        const sheet = await screen.findByRole('dialog', { name: 'Menu' })
+        expect(within(sheet).getByRole('link', { name: 'FIT Class' })).not.toHaveAttribute('aria-current')
+        expect(within(sheet).getByRole('link', { name: 'MakerAccess' })).not.toHaveAttribute('aria-current')
+    })
+
+    it('supports ArrowDown to the first link and Escape back to the About Us trigger', async () => {
+        render(<Navbar />)
+        const trigger = screen.getByRole('button', { name: 'About Us' })
+        fireEvent.keyDown(trigger, { key: 'ArrowDown' })
+        const panel = await screen.findByRole('region', { name: 'About Us menu' })
+        await waitFor(() => expect(document.activeElement).toBe(within(panel).getByRole('link', { name: 'MakerAccess' })))
+        expect(trigger).toHaveAttribute('aria-expanded', 'true')
+        expect(trigger).toHaveAttribute('aria-controls', panel.id)
+        fireEvent.keyDown(document, { key: 'Escape' })
+        await waitFor(() => expect(screen.queryByRole('region', { name: 'About Us menu' })).toBeNull())
+        expect(document.activeElement).toBe(trigger)
+        expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('closes the About Us panel after a link or outside click', async () => {
+        render(<Navbar />)
+        const trigger = screen.getByRole('button', { name: 'About Us' })
+        fireEvent.click(trigger)
+        let panel = await screen.findByRole('region', { name: 'About Us menu' })
+        fireEvent.click(within(panel).getByRole('link', { name: 'MakerAccess' }))
+        await waitFor(() => expect(screen.queryByRole('region', { name: 'About Us menu' })).toBeNull())
+        fireEvent.click(trigger)
+        panel = await screen.findByRole('region', { name: 'About Us menu' })
+        expect(panel).toBeInTheDocument()
+        fireEvent.mouseDown(document.body)
+        await waitFor(() => expect(screen.queryByRole('region', { name: 'About Us menu' })).toBeNull())
     })
 })

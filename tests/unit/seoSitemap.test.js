@@ -64,6 +64,7 @@ describe('public sitemap URLs', () => {
         const entries = buildPublicSitemap()
         expect(entries.map(entry => entry.url)).toEqual([
             'https://www.fixitoday.com/', 'https://www.fixitoday.com/about',
+            'https://www.fixitoday.com/about/makeraccess',
             'https://www.fixitoday.com/shop', 'https://www.fixitoday.com/prints',
             'https://www.fixitoday.com/creators', 'https://www.fixitoday.com/creators/join',
             'https://www.fixitoday.com/blog',

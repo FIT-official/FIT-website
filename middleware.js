@@ -18,6 +18,8 @@ async function handleRequest(auth, req) {
     if (isApiRoute(req)) return NextResponse.next()
     const maintenance = await maintenanceResponse(auth, req)
     if (maintenance) return maintenance
+    // MakerAccess is public information, including for accounts awaiting onboarding.
+    if (['/about/makeraccess', '/about/makeraccess/'].includes(new URL(req.url).pathname)) return NextResponse.next()
     // Public learning pages still respect the shared maintenance gate.
     if (isMakerPlayground(req)) return NextResponse.next()
     // Clerk must finish OAuth account linking/session activation before any

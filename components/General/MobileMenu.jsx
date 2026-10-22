@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { ABOUT_LINKS, isAboutLinkActive } from './AboutLinks'
 import {
     IoHomeOutline,
     IoStorefrontOutline,
@@ -149,6 +150,7 @@ function MobileMenu({ open, onClose, triggerRef, shopCategories = [], printCateg
     const [expanded, setExpanded] = useState(null)
     const [planBadge, setPlanBadge] = useState('')
     const closeButtonRef = useRef(null)
+    const dialogRef = useRef(null)
 
     const signedIn = isLoaded && !!user
 
@@ -173,13 +175,36 @@ function MobileMenu({ open, onClose, triggerRef, shopCategories = [], printCateg
         }
     }, [subscription?.priceId])
 
-    // Esc closes and returns focus to the hamburger trigger.
+    // Keep keyboard focus in the open sheet. Query on each Tab so expanded
+    // categories and changes to account rows are included immediately.
     useEffect(() => {
         if (!open) return undefined
         function handleKeyDown(event) {
             if (event.key === 'Escape') {
                 onClose()
                 triggerRef?.current?.focus()
+                return
+            }
+            if (event.key !== 'Tab') return
+            const dialog = dialogRef.current
+            if (!dialog) return
+            const focusable = Array.from(dialog.querySelectorAll('a[href], button, input, select, textarea, [tabindex]'))
+                .filter(element => element.tabIndex >= 0 && !element.matches(':disabled') && !element.closest('[hidden], [inert], [aria-hidden="true"]'))
+            const first = focusable[0]
+            const last = focusable[focusable.length - 1]
+            if (!first) {
+                event.preventDefault()
+                dialog.focus()
+                return
+            }
+            const active = document.activeElement
+            const outside = !dialog.contains(active) || active === dialog
+            if (event.shiftKey && (active === first || outside)) {
+                event.preventDefault()
+                last.focus()
+            } else if (!event.shiftKey && (active === last || outside)) {
+                event.preventDefault()
+                first.focus()
             }
         }
         document.addEventListener('keydown', handleKeyDown)
@@ -264,7 +289,9 @@ function MobileMenu({ open, onClose, triggerRef, shopCategories = [], printCateg
                     />
                     <motion.div
                         key="mobile-menu-sheet"
+                        ref={dialogRef}
                         role="dialog"
+                        tabIndex={-1}
                         aria-modal="true"
                         aria-label="Menu"
                         initial={reduceMotion ? { opacity: 0 } : { x: '100%' }}
@@ -340,12 +367,22 @@ function MobileMenu({ open, onClose, triggerRef, shopCategories = [], printCateg
                             <SheetRow href="/research-fabrication" icon={IoConstructOutline} label="Services" active={['/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair'].some(path => pathname === path || pathname?.startsWith(`${path}/`))} onNavigate={onClose} />
                             <SheetRow href="/school-programmes" icon={IoPeopleOutline} label="School programmes" active={pathname?.startsWith('/school-programmes')} onNavigate={onClose} />
                             <SheetRow href="/company-workshops" icon={IoPeopleOutline} label="Company workshops" active={pathname?.startsWith('/company-workshops')} onNavigate={onClose} />
-                            <SheetRow href="/class" icon={IoGridOutline} label="Class" active={pathname === '/class' || pathname?.startsWith('/class/')} onNavigate={onClose} />
                             <SheetRow href="/maker-tools" icon={IoConstructOutline} label="Maker Tools" active={pathname === "/maker-tools"} onNavigate={onClose} />
                             <SheetRow href="/community" icon={IoPeopleOutline} label="Community" active={pathname === "/community" || pathname?.startsWith("/community/")} onNavigate={onClose} />
                             <SheetRow href="/creators" icon={IoPeopleOutline} label="Creators" active={pathname?.startsWith('/creators')} onNavigate={onClose} />
                             <SheetRow href="/blog" icon={IoInformationCircleOutline} label="Blog" active={pathname === "/blog" || pathname?.startsWith("/blog/")} onNavigate={onClose} />
-                            <SheetRow href="/about" icon={IoInformationCircleOutline} label="About" active={pathname?.startsWith('/about')} onNavigate={onClose} />
+                            <GroupLabel>About Us</GroupLabel>
+                            {ABOUT_LINKS.map((item) => (
+                                <SheetRow
+                                    key={item.href}
+                                    href={item.href}
+                                    icon={item.href === '/class' ? IoGridOutline : item.external ? IoPersonOutline : IoStorefrontOutline}
+                                    label={item.label}
+                                    active={isAboutLinkActive(item.href, pathname)}
+                                    onNavigate={onClose}
+                                />
+                            ))}
+                            <SheetRow href="/about" icon={IoInformationCircleOutline} label="About FIT" active={pathname === '/about'} onNavigate={onClose} />
 
                             {signedIn ? (
                                 <>

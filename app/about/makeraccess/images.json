@@ -1,0 +1,47 @@
+[
+  {
+    "name": "bambu-build-plate.webp",
+    "source_url": "https://www.fixitoday.com/api/proxy?key=admin%2Fuploads%2Fblog%2F1789105908013-gz8gigh1o6u.jpg",
+    "source_page": "https://www.fixitoday.com/blog/makeraccess-bambu-p1s-printing-guide",
+    "alt": "Bambu P1S with its build plate fitted",
+    "width": 1000,
+    "height": 1000,
+    "sha256": "212f08291d07036379b6b249ce9b9e9bb4f361ee1856ce8889c593fb7c713d4d"
+  },
+  {
+    "name": "3d-pen-form.webp",
+    "source_url": "https://www.fixitoday.com/api/proxy?key=admin%2Fuploads%2Fblog%2F1789106395501-vxomevd3cq.jpg",
+    "source_page": "https://www.fixitoday.com/blog/makeraccess-3d-pen-starter-guide",
+    "alt": "A blue 3D pen form being joined by hand",
+    "width": 1000,
+    "height": 666,
+    "sha256": "6171bcbfa9392a2cfa3345aa34b669731cc9d129791fc6f5f6e5da3394edc8f3"
+  },
+  {
+    "name": "maker-bag-tags.webp",
+    "source_url": "https://www.fixitoday.com/api/proxy?key=admin%2Fuploads%2Fblog%2F1789106287352-uu77e0mg3ui.jpg",
+    "source_page": "https://www.fixitoday.com/blog/makeraccess-maker-ideas-library",
+    "alt": "Colourful name tags from the Maker Ideas Library",
+    "width": 240,
+    "height": 240,
+    "sha256": "b537dd17b4ab4f44a4f7112b215f406afffdb30d592dda9caf6c3599a545320e"
+  },
+  {
+    "name": "sensor-servo-circuit.webp",
+    "source_url": "https://www.fixitoday.com/api/proxy?key=admin%2Fuploads%2Fblog%2F1789106332124-kfr5xs2sd9g.jpg",
+    "source_page": "https://www.fixitoday.com/blog/makeraccess-sensor-projects",
+    "alt": "Arduino and breadboard connected to a small servo",
+    "width": 240,
+    "height": 182,
+    "sha256": "5312e41f83756579f552181c4155395157b8e3b438c7d3499fc595b22ac8b4bd"
+  },
+  {
+    "name": "toast-clicker.webp",
+    "source_url": "https://www.fixitoday.com/api/proxy?key=admin%2Fuploads%2Fblog%2F1789105735079-rp4xdw9diwi.jpg",
+    "source_page": "https://www.fixitoday.com/blog/maker-access-projects",
+    "alt": "Orange toast-shaped clicker with a smiling face",
+    "width": 164,
+    "height": 164,
+    "sha256": "ac532b427af841c310b452883374ad5a720d9c9897dc8a5cee8422829750a4f6"
+  }
+]

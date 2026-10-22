@@ -17,27 +17,27 @@ import Logo from '../Logo'
 import { useUser } from '@clerk/nextjs'
 import AccountDropdown from './AccountDropdown'
 import MobileMenu from './MobileMenu'
+import AboutLinks from './AboutLinks'
 import NavPanel, { navItemCls, NavUnderline, DEFAULT_MENU_PAGES } from './NavPanel'
 import { useEffect, useRef, useState } from 'react'
-import { AnimatePresence, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { IoCartOutline, IoChatbubblesOutline, IoMenuOutline } from 'react-icons/io5'
 import useEntitlements from '@/utils/useEntitlements'
 import { useContent } from '@/utils/useContent'
 
-// Shop and Prints open a mega panel; the rest are plain routes. `key` doubles
-// as the productType segment in panel subcategory hrefs.
+// Shop and Prints open catalogue panels; About Us groups the public pages.
+// Catalogue keys double as productType segments in subcategory hrefs.
 const PRIMARY = [
     { key: 'shop', label: 'Shop' },
     { key: 'prints', label: 'Prints' },
     { key: 'services', label: 'Services', href: '/research-fabrication', paths: ['/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair'] },
     { key: 'school-programmes', label: 'Programmes', href: '/school-programmes' },
-    { key: 'class', label: 'Class', href: '/class' },
     { key: 'maker-tools', label: 'Maker Tools', href: '/maker-tools' },
     { key: 'community', label: 'Community', href: '/community' },
     { key: 'creators', label: 'Creators', href: '/creators' },
     { key: 'blog', label: 'Blog', href: '/blog' },
-    { key: 'about', label: 'About', href: '/about' },
+    { key: 'about', label: 'About Us', paths: ['/class'] },
 ]
 
 // Fixed bar mirrors the centered layout column's width classes exactly.
@@ -49,7 +49,7 @@ function Navbar() {
     const { loading: entitlementsLoading, canUseMessaging } = useEntitlements()
     const [unreadMessages, setUnreadMessages] = useState(0)
     const [isOpen, setIsOpen] = useState(false) // mobile sheet
-    const [openPanel, setOpenPanel] = useState(null) // 'shop' | 'prints' | null
+    const [openPanel, setOpenPanel] = useState(null) // 'shop' | 'prints' | 'about' | null
     const [shopCategories, setShopCategories] = useState([])
     const [printCategories, setPrintCategories] = useState([])
     const [fallbackPosts, setFallbackPosts] = useState([])
@@ -230,7 +230,7 @@ function Navbar() {
                                             triggerRefs.current[item.key] = el
                                         }}
                                         type="button"
-                                        aria-haspopup="true"
+                                        aria-haspopup={item.key === 'about' ? undefined : 'true'}
                                         aria-expanded={openPanel === item.key}
                                         aria-controls={`nav-panel-${item.key}`}
                                         onClick={() => {
@@ -314,7 +314,23 @@ function Navbar() {
                 </nav>
 
                 <AnimatePresence>
-                    {openItem && (
+                    {openItem?.key === 'about' ? (
+                        <motion.div
+                            key="about"
+                            id="nav-panel-about"
+                            role="region"
+                            aria-label="About Us menu"
+                            initial={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
+                            transition={{ type: 'tween', duration: 0.18, ease: 'easeOut' }}
+                            onMouseEnter={cancelTimer}
+                            onMouseLeave={scheduleClose}
+                            className="absolute right-4 top-full z-50 mt-2 w-72 overflow-hidden rounded-xl border border-borderColor bg-background shadow-[0_2px_6px_rgba(17,17,17,0.05),0_16px_40px_rgba(17,17,17,0.10)] max-lg:hidden"
+                        >
+                            <AboutLinks pathname={pathname} onNavigate={() => setOpenPanel(null)} />
+                        </motion.div>
+                    ) : openItem && (
                         <NavPanel
                             key={openItem.key}
                             id={`nav-panel-${openItem.key}`}
