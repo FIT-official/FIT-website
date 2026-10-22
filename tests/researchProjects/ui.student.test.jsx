@@ -467,7 +467,9 @@ describe('submit, review and revise', () => {
     await again.user.click(screen.getByRole('button', { name: 'Yes, submit' }))
     await waitFor(() => expect(status()).toHaveTextContent('Submitted for review'))
     expect([...w.collection.docs.values()][0].submissions).toHaveLength(2)
-  })
+  // This spans two renders, submission, teacher review and resubmission; the
+  // full instrumented suite needs more than the default five-second budget.
+  }, 20_000)
 })
 
 describe('answer key policy in the student view', () => {

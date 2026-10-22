@@ -1,5 +1,6 @@
 import SignInPage from "./SignInPage";
 import { subscriptionPriceId } from '@/lib/subscriptionIntent';
+import { advancedClassesReturn } from '@/lib/advancedClasses/signInReturn';
 
 export const metadata = {
     title: "Sign In | Fix It Today®",
@@ -23,9 +24,10 @@ export const metadata = {
 };
 
 async function SignInLayout({ searchParams }) {
-    const priceId = subscriptionPriceId((await searchParams)?.priceId);
+    const params = await searchParams;
+    const priceId = subscriptionPriceId(params?.priceId);
     return (
-        <SignInPage priceId={priceId} />
+        <SignInPage priceId={priceId} returnTo={advancedClassesReturn(params?.redirect_url)} />
     )
 }
 

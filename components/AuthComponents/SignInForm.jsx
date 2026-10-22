@@ -11,8 +11,9 @@ import PasswordField from './PasswordField';
 import EmailField from './EmailField';
 import posthog from 'posthog-js';
 import { subscriptionIntentTarget, withSubscriptionIntent } from '@/lib/subscriptionIntent';
+import { advancedClassesReturn, withAdvancedClassesReturn } from '@/lib/advancedClasses/signInReturn';
 
-function SignInForm({ priceId }) {
+function SignInForm({ priceId, returnTo }) {
     const { isLoaded, signIn, setActive } = useSignIn();
     const router = useRouter();
 
@@ -33,8 +34,8 @@ function SignInForm({ priceId }) {
             if (method === 'google') {
                 await signIn.authenticateWithRedirect({
                     strategy: 'oauth_google',
-                    redirectUrl: withSubscriptionIntent('/sign-in/sso-callback', priceId),
-                    redirectUrlComplete: subscriptionIntentTarget(priceId, '/'),
+                    redirectUrl: withAdvancedClassesReturn(withSubscriptionIntent('/sign-in/sso-callback', priceId), returnTo),
+                    redirectUrlComplete: subscriptionIntentTarget(priceId, advancedClassesReturn(returnTo) || '/'),
                 });
             } else if (method === 'email') {
                 if (!email || !password) {
@@ -49,7 +50,7 @@ function SignInForm({ priceId }) {
                 if (result.status === 'complete') {
                     await setActive({ session: result.createdSessionId });
                     try { posthog.capture('sign_in_completed', { method: 'email' }); } catch { /* Analytics is optional. */ }
-                    router.push(subscriptionIntentTarget(priceId, '/'));
+                    router.push(subscriptionIntentTarget(priceId, advancedClassesReturn(returnTo) || '/'));
                 }
             }
         } catch (error) {

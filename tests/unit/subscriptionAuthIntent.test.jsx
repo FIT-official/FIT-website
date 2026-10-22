@@ -17,6 +17,9 @@ import SignInForm from '@/components/AuthComponents/SignInForm'
 import SignInPage from '@/app/sign-in/[[...sign-in]]/SignInPage'
 import SsoCallback from '@/components/AuthComponents/SsoCallback'
 import { subscriptionIntentTarget, subscriptionPriceId } from '@/lib/subscriptionIntent'
+import { advancedClassesReturn } from '@/lib/advancedClasses/signInReturn'
+import SignInRoute from '@/app/sign-in/[[...sign-in]]/page'
+import SignInCallbackRoute from '@/app/sign-in/sso-callback/page'
 
 const priceId = 'price_standard_year'
 const destination = `/account/subscription?priceId=${priceId}`
@@ -34,6 +37,35 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('subscription selection through authentication', () => {
+    it.each([SignInRoute, SignInCallbackRoute])('validates the feature return on the server route before forwarding it', async Page => {
+        expect((await Page({ searchParams: Promise.resolve({ redirect_url: '/class/projects' }) })).props.returnTo).toBe('/class/projects')
+        expect((await Page({ searchParams: Promise.resolve({ redirect_url: 'https://evil.example' }) })).props.returnTo).toBeNull()
+        expect((await Page({ searchParams: Promise.resolve({ redirect_url: ['/class/projects'] }) })).props.returnTo).toBeNull()
+    })
+    it.each(['/class/projects', '/admin/advanced-classes'])('returns an existing owner to the approved feature entry %s after email sign-in', async returnTo => {
+        render(<SignInForm returnTo={returnTo} />)
+        credentials(); fireEvent.click(screen.getByRole('button', { name: 'Sign In' }))
+        await waitFor(() => expect(mocks.push).toHaveBeenCalledWith(returnTo))
+        expect(mocks.setActive).toHaveBeenCalledWith({ session: 'session_signin' })
+    })
+    it('keeps the approved feature return through Google and the existing callback', async () => {
+        const returnTo = '/class/projects'
+        const view = render(<SignInForm returnTo={returnTo} />)
+        fireEvent.click(screen.getByRole('button', { name: 'Sign in with Google' }))
+        await waitFor(() => expect(mocks.oauth).toHaveBeenCalledWith({ strategy: 'oauth_google', redirectUrl: '/sign-in/sso-callback?redirect_url=%2Fclass%2Fprojects', redirectUrlComplete: returnTo }))
+        view.unmount(); render(<SsoCallback returnTo={returnTo} />)
+        expect(mocks.callback).toHaveBeenLastCalledWith({ signInForceRedirectUrl: returnTo, signUpForceRedirectUrl: returnTo, signInFallbackRedirectUrl: returnTo, signUpFallbackRedirectUrl: returnTo })
+    })
+    it('returns an already signed-in owner to the feature and preserves subscription priority', async () => {
+        mocks.signedIn = true
+        const view = render(<SignInPage returnTo="/class/projects" />)
+        await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith('/class/projects'))
+        view.rerender(<SignInPage returnTo="/class/projects" priceId={priceId} />)
+        await waitFor(() => expect(mocks.replace).toHaveBeenLastCalledWith(destination))
+    })
+    it.each([undefined, '', '//evil.example', 'https://evil.example', '/class/projects-private', '/class/projects?redirect_url=https://evil.example', '/admin', ['/class/projects'], '/class/projects\n', '/%2fexample.com'])('rejects every unapproved feature return %j', value => {
+        expect(advancedClassesReturn(value)).toBeNull()
+    })
     it('keeps a paid choice through email signup and verification without storing payment metadata', async () => {
         render(<SignUpPage priceId={priceId} />)
         credentials(); fireEvent.click(screen.getByRole('button', { name: 'Create free account' }))
