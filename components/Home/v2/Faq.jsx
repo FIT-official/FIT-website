@@ -18,7 +18,7 @@ export default function Faq({ facts = siteFacts }) {
     const schema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: questions.map(item => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) }
     return <section className={styles.section} aria-labelledby="home-faq">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(schema) }} />
-        <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>A little help getting started</p><h2 id="home-faq">Good to know</h2></div></div>
+        <div className={styles.sectionHeading}><div><h2 id="home-faq">Good to know</h2></div></div>
         <div className={styles.faq}>{questions.map(item => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</div>
     </section>
 }

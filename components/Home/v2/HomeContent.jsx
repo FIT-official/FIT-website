@@ -40,7 +40,7 @@ export default function HomeContent({ sections = {}, heroContent, products = [],
         </section>}
         {on('clientLogos') && <ClientLogos facts={facts} />}
         {on('services') && <section className={styles.section} aria-labelledby="home-services">
-            <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>From an idea to a working part</p><h2 id="home-services">What do you need?</h2></div></div>
+            <div className={styles.sectionHeading}><div><h2 id="home-services">What do you need?</h2></div></div>
             <div className={styles.serviceGrid}>{services.map(service => <Link key={service.href} href={service.href} className={styles.serviceCard}>
                 <div className={styles.serviceImage}><Image src={service.image} alt={service.alt} fill loading="lazy" sizes="(max-width: 639px) 85vw, (max-width: 1023px) 40vw, 22vw" /></div>
                 <div className={styles.cardBody}><h3>{service.title} <span aria-hidden="true">↗</span></h3><p>{service.caption}</p></div>
@@ -48,7 +48,7 @@ export default function HomeContent({ sections = {}, heroContent, products = [],
         </section>}
         {on('visit') && <><VisitPickup facts={facts} /><LocalBusinessSchema facts={facts} /></>}
         {on('bulk') && <section className={styles.bulk} aria-labelledby="home-bulk">
-            <div className={styles.bulkCopy}><p className={styles.eyebrow}>Stock up for your next project</p><h2 id="home-bulk">Schools & makerspaces: bulk filament</h2>
+            <div className={styles.bulkCopy}><h2 id="home-bulk">Schools & makerspaces: bulk filament</h2>
                 <p>Plan an order of Lanbo PLA, Lanbo PETG or Marble & Wood PLA. See quantity pricing, then choose your colours in the bulk form.</p>
                 <Link href="/shop/bulk-filament" className={styles.button}>Get a bulk quote <span aria-hidden="true">↗</span></Link>
             </div><BulkCalculator />
