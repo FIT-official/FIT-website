@@ -1,0 +1,85 @@
+/* Contrast: #111 on #fff is about 18:1; #fff on #111 is about 18:1; #0b4a8f on #fff is about 8.9:1. */
+.preview {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: min(34rem, calc(100svh - 6rem));
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: #f4f4f4;
+}
+
+/* Everything inside is decoration. Blur applies here only, never to the notice. */
+.backdrop {
+  position: absolute;
+  inset: -1rem;
+  z-index: 0;
+  padding: 2rem 1.5rem;
+  filter: blur(9px);
+  opacity: 0.85;
+  pointer-events: none;
+  user-select: none;
+}
+
+.skeletonHeader { display: grid; gap: 0.6rem; max-width: 28rem; margin-bottom: 1.5rem; }
+.skeletonGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 1rem; }
+.skeletonCard { display: grid; gap: 0.6rem; padding: 0.9rem; border-radius: 0.75rem; background: #fff; border: 1px solid #d4d4d4; }
+.thumb { display: block; height: 5rem; border-radius: 0.5rem; background: #c9d3e0; }
+.barWide, .barShort { display: block; height: 0.8rem; border-radius: 999px; background: #bdbdbd; }
+.barWide { width: 85%; }
+.barShort { width: 50%; }
+
+.notice {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 32rem);
+  box-sizing: border-box;
+  padding: 1.5rem;
+  border: 1px solid #111;
+  border-radius: 0.9rem;
+  background: #fff;
+  color: #111;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.title { margin: 0 0 0.6rem; font-size: clamp(1.4rem, 5vw, 1.9rem); line-height: 1.2; color: #111; }
+.message { margin: 0 0 1.2rem; font-size: 1.05rem; line-height: 1.5; color: #111; }
+
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+
+.primary, .secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.primary { background: #111; color: #fff; border: 2px solid #111; }
+.secondary { background: #fff; color: #0b4a8f; border: 2px solid #0b4a8f; }
+
+.primary:hover { background: #333; }
+.secondary:hover { background: #eef4fb; }
+
+.primary:focus-visible, .secondary:focus-visible {
+  outline: 3px solid #0b4a8f;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px #fff;
+}
+
+@media (max-width: 30rem) {
+  .preview { padding: 0.75rem; }
+  .notice { padding: 1.1rem; }
+  .actions { flex-direction: column; }
+  .primary, .secondary { width: 100%; }
+}
+
+@media (forced-colors: active) {
+  .backdrop { forced-color-adjust: none; }
+  .notice { border: 2px solid CanvasText; }
+}
