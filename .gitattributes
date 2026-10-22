@@ -1,0 +1,2 @@
+# Hashed teaching assets must keep identical bytes on Windows and Linux.
+content/researchProjects/assets/** -text

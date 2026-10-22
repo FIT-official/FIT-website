@@ -203,6 +203,8 @@ async function main() {
   }
   process.on('SIGINT', stop)
   process.on('SIGTERM', stop)
+  // The owned headless harness asks this fixture to close its own Mongo process.
+  process.on('message', message => { if (message === 'stop-fixture') stop() })
   if (process.argv.includes('--self-test')) {
     // Fetch the pages the way a browser would, then stop. Used by the harness author to prove the wiring.
     const base = `http://127.0.0.1:${PORT}`
