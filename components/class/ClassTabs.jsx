@@ -4,6 +4,7 @@ import styles from './ClassHub.module.css'
 // Real links, not an ARIA tablist: each tab is its own page, so Tab/Enter and the browser Back button behave normally.
 export const CLASS_TABS = [
   { key: 'classes', label: 'Classes', href: '/class' },
+  { key: 'projects', label: 'Advanced Classes', href: '/class/projects' },
   { key: 'simulations', label: 'Simulations', href: '/class/simulations' },
   { key: 'programming', label: 'Programming', href: '/class/programming' },
 ]

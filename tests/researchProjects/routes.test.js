@@ -1,12 +1,11 @@
 // @vitest-environment node
-// The REAL route modules with the SHIPPED default wiring (empty reviewed membership, no attached
-// class). Only the Clerk session and the database handle are replaced. This shows what production
-// does today: students are denied by default, and teachers keep to the existing admin boundary.
+// Real routes with owner-only production wiring; provider and database are synthetic.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createFakeCollection, request, read, SLUG, ORIGIN } from './helpers'
 
 const clerk = vi.hoisted(() => ({ userId: null, admins: new Set(), authCalls: 0, users: [] }))
 const db = vi.hoisted(() => ({ collection: null, connects: 0 }))
+vi.mock('server-only', () => ({}))
 
 vi.mock('@clerk/nextjs/server', () => ({
   auth: async () => { clerk.authCalls++; return { userId: clerk.userId } },
@@ -92,7 +91,7 @@ describe('shipped routes, signed in without a reviewed class membership', () => 
     for (const res of results) expect(res.body).toMatchObject({ code: 'not_member' })
     expect(results.map(x => x.status)).toEqual([403, 403, 403, 403])
     expect(db.connects).toBe(0)
-    expect(clerk.users).toContain('user_clerk_student')
+    expect(clerk.users).toEqual([]) // Reject an unbound account before a provider lookup.
   })
 
   it('does not admit a student by any class, group or seat value in the request', async () => {
@@ -104,20 +103,19 @@ describe('shipped routes, signed in without a reviewed class membership', () => 
   })
 })
 
-describe('shipped routes, teacher (existing admin boundary)', () => {
-  it('lets an admin read answer keys, but finds no class to review because none is attached', async () => {
+describe('shipped routes, an unbound existing admin', () => {
+  it('denies keys and records even when the account is an existing admin', async () => {
     clerk.userId = 'teacher-1'
     const r = await records()
     const k = await keys()
     const keyRes = await read(await k.GET(request('GET', `/api/research-projects/keys?slug=${SLUG}`)))
-    expect(keyRes.status).toBe(200)
-    expect(keyRes.body.role).toBe('teacher')
-    expect(Object.keys(keyRes.body.keys)).toHaveLength(8)
+    expect(keyRes.status).toBe(403)
+    expect(keyRes.body.keys).toBeUndefined()
     const review = await read(await r.GET(request('GET', `${RECORDS}&classId=class-a&scope=group:g1`)))
-    expect(review.status).toBe(409)
-    expect(review.body.code).toBe('no_class_attached')
+    expect(review.status).toBe(403)
+    expect(review.body.code).toBe('not_member')
     const overview = await read(await r.GET(request('GET', `${RECORDS}&classId=class-a`)))
-    expect(overview.body.code).toBe('no_class_attached')
+    expect(overview.body.code).toBe('not_member')
     expect(db.collection.docs.size).toBe(0)
   })
 
@@ -126,7 +124,7 @@ describe('shipped routes, teacher (existing admin boundary)', () => {
     const r = await records()
     const res = await read(await r.PUT(request('PUT', '/api/research-projects/records', { body: { slug: SLUG, viewer: 'x', baseRevision: 0, doc: {} } })))
     expect(res.status).toBe(403)
-    expect(res.body.code).toBe('student_only')
+    expect(res.body.code).toBe('not_member')
     expect(db.collection.docs.size).toBe(0)
   })
 

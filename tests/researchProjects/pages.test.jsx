@@ -30,8 +30,9 @@ const everyProjectText = () => PROJECTS.flatMap(p => [p.title, p.shortTitle, p.s
 describe('signed out', () => {
   it('shows only a sign-in notice on the list page, with no project information', async () => {
     const { container } = await renderList()
-    expect(screen.getByRole('heading', { name: 'Sign in to continue' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/sign-in')
+    expect(screen.getByRole('heading', { name: 'Advanced Classes' })).toBeInTheDocument()
+    expect(screen.getByText('Access restricted. Please email us to enquire about access.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/sign-in?redirect_url=%2Fclass%2Fprojects')
     for (const text of everyProjectText()) expect(container.textContent).not.toContain(text)
     expect(container.querySelectorAll('li').length).toBe(0)
   })
@@ -50,11 +51,11 @@ describe('signed in but not a member', () => {
   it('shows a neutral denial on both pages and no content', async () => {
     world.session.userId = 'someone-with-a-clerk-login'
     const list = await renderList()
-    expect(screen.getByRole('heading', { name: /not available for your account/ })).toBeInTheDocument()
+    expect(screen.getByText('Access restricted. Please email us to enquire about access.')).toBeInTheDocument()
     for (const text of everyProjectText()) expect(list.container.textContent).not.toContain(text)
     cleanup()
     const page = await renderProject(SLUG)
-    expect(screen.getByRole('heading', { name: /not available for your account/ })).toBeInTheDocument()
+    expect(screen.getByText('Access restricted. Please email us to enquire about access.')).toBeInTheDocument()
     expect(page.container.textContent).not.toContain(getProject(SLUG).researchQuestion.slice(0, 30))
     expect(world.calls).toEqual([]) // the client workspace never mounted, so no API call was made
   })
@@ -64,7 +65,7 @@ describe('signed in but not a member', () => {
     holder.deps = w.deps
     w.session.userId = 'stu-a1'
     await renderList()
-    expect(screen.getByRole('heading', { name: /not available for your account/ })).toBeInTheDocument()
+    expect(screen.getByText('Access restricted. Please email us to enquire about access.')).toBeInTheDocument()
   })
 
   it('reports a temporary failure as unavailable, not as access', async () => {
@@ -72,7 +73,7 @@ describe('signed in but not a member', () => {
     world.session.userId = 'stu-a1'
     vi.spyOn(console, 'error').mockImplementation(() => {})
     await renderList()
-    expect(screen.getByRole('heading', { name: /temporarily unavailable/ })).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('We could not check your access just now')
   })
 })
 

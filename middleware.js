@@ -11,6 +11,7 @@ const isServicePage = createRouteMatcher(['/research-fabrication', '/metal-fabri
 const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)'])
 const isSsoCallback = createRouteMatcher(['/sign-up/sso-callback(.*)', '/sign-in/sso-callback(.*)'])
 const isMakerPlayground = createRouteMatcher(['/maker-tools/playground', '/maker-tools/playground/'])
+const isAdvancedClasses = createRouteMatcher(['/class/projects', '/class/projects/(.*)'])
 
 async function handleRequest(auth, req) {
     // API handlers enforce their own authentication/signatures. A browser
@@ -18,6 +19,14 @@ async function handleRequest(auth, req) {
     if (isApiRoute(req)) return NextResponse.next()
     const maintenance = await maintenanceResponse(auth, req)
     if (maintenance) return maintenance
+    // The entry is public; pages and API handlers resolve the exact approved
+    // identities before returning any lesson or record. Preserve maintenance.
+    if (isAdvancedClasses(req)) {
+        const response = NextResponse.next()
+        response.headers.set('Cache-Control', 'private, no-store, max-age=0')
+        response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+        return response
+    }
     // Public learning pages still respect the shared maintenance gate.
     if (isMakerPlayground(req)) return NextResponse.next()
     // Clerk must finish OAuth account linking/session activation before any

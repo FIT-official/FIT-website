@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 import { createOwnerResearchDeps } from '@/lib/advancedClasses/researchAdapter'
 import { BINDINGS, FIT, PERSONAL, OTHER_ADMIN, STRANGER, directory } from './fixtures'
 
-const accessFile = resolve(process.cwd(), '../projects/lib/researchProjects/access.js')
+const accessFile = resolve(process.cwd(), 'lib/researchProjects/access.js')
 const haveAdapter = existsSync(accessFile)
 // Native Node import so the sibling checkout loads untransformed, exactly as it runs in production.
 const nativeImport = new Function('specifier', 'return import(specifier)')
@@ -67,7 +67,7 @@ describe('owner deps for the research project adapter (synthetic)', () => {
       }
       console.log(JSON.stringify(out))`
     const dir = directory()
-    const result = JSON.parse(execFileSync(process.execPath, ['--no-warnings', '--input-type=module', '-e', script, pathToFileURL(accessFile).href, pathToFileURL(resolve(process.cwd(), 'lib/advancedClasses/researchAdapter.js')).href], {
+    const result = JSON.parse(execFileSync(process.execPath, ['--conditions=react-server', '--no-warnings', '--input-type=module', '-e', script, pathToFileURL(accessFile).href, pathToFileURL(resolve(process.cwd(), 'lib/advancedClasses/researchAdapter.js')).href], {
       env: { ...process.env, BINDINGS: JSON.stringify(BINDINGS), USERS: JSON.stringify(dir.users) }, encoding: 'utf8',
     }))
     expect(result['PERSONAL:student']).toEqual({ role: 'student', memberId: 'ac-m-synth-personal', scope: 'member:ac-m-synth-personal' })

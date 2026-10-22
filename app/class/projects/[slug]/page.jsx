@@ -9,12 +9,13 @@ import { getPageAccess } from '@/lib/researchProjects/pageAccess'
 // is the generic layout metadata, so project content cannot leak through static output or metadata.
 export const dynamic = 'force-dynamic'
 
-export default async function ProjectPage({ params }) {
+export default async function ProjectPage({ params, searchParams }) {
   const { slug } = await params
-  const access = await getPageAccess(defaultDeps())
+  const { view } = await searchParams || {}
+  const access = await getPageAccess(defaultDeps({ view }))
   // The same notice is shown for every slug until access passes, so existence is not revealed.
   if (!access.ok) return <AccessNotice status={access.status} />
   const project = getProject(slug)
   if (!project) notFound()
-  return <ProjectWorkspace project={project} role={access.role} viewer={access.viewer} classIds={access.classIds} />
+  return <ProjectWorkspace project={project} role={access.role} viewer={access.viewer} classIds={access.classIds} canReview={access.canReview} />
 }

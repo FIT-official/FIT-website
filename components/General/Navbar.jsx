@@ -32,6 +32,7 @@ const PRIMARY = [
     { key: 'prints', label: 'Prints' },
     { key: 'services', label: 'Services', href: '/research-fabrication', paths: ['/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair'] },
     { key: 'school-programmes', label: 'Programmes', href: '/school-programmes' },
+    { key: 'advanced-classes', label: 'Advanced Classes', href: '/class/projects' },
     { key: 'class', label: 'Class', href: '/class' },
     { key: 'maker-tools', label: 'Maker Tools', href: '/maker-tools' },
     { key: 'community', label: 'Community', href: '/community' },
@@ -217,7 +218,7 @@ function Navbar() {
                         <Logo width={28} height={28} />
                     </Link>
 
-                    <ul className="hidden min-w-0 flex-row items-center gap-3 xl:gap-5 lg:flex">
+                    <ul className="hidden min-w-0 flex-row items-center gap-3 2xl:gap-4 xl:flex">
                         {PRIMARY.map((item) => (
                             <li key={item.key} className="relative flex">
                                 {item.href ? (
@@ -284,11 +285,11 @@ function Navbar() {
                             </>
                         )}
                         {isSignedIn ? (
-                            <div className="hidden lg:flex">
+                            <div className="hidden xl:flex">
                                 <AccountDropdown />
                             </div>
                         ) : (
-                            <div className="hidden items-center gap-5 lg:flex">
+                            <div className="hidden items-center gap-3 xl:flex">
                                 <Link href="/sign-in" className={navItemCls(false)}>
                                     Sign in
                                 </Link>
@@ -306,7 +307,7 @@ function Navbar() {
                             onClick={() => setIsOpen((prev) => !prev)}
                             aria-label="Open menu"
                             aria-expanded={isOpen}
-                            className="flex cursor-pointer text-textColor transition-opacity duration-200 ease-in-out hover:opacity-70 lg:hidden"
+                            className="flex cursor-pointer text-textColor transition-opacity duration-200 ease-in-out hover:opacity-70 xl:hidden"
                         >
                             <IoMenuOutline size={22} aria-hidden="true" />
                         </button>

@@ -23,6 +23,7 @@ import NotificationsBell from '@/components/DashboardComponents/NotificationsBel
 import EventManagement from '@/components/Admin/EventManagement'
 import TeacherClassroom from '@/components/Workshop/GuestTeacherClassroom'
 import Overview from '@/components/Admin/Overview'
+import AdminAccessEntry from '@/components/AdvancedClasses/AdminAccessEntry'
 import OnboardingWizard from '@/components/Admin/OnboardingWizard'
 import { buildSetupChecklist, needsOnboarding } from '@/lib/admin/setupChecklist'
 import { useUser } from '@clerk/nextjs'
@@ -171,6 +172,7 @@ const NAV_GROUPS = [
     {
         title: 'Settings',
         items: [
+            { key: 'advancedClasses', label: 'Advanced Classes access', icon: IoLockClosedOutline, description: 'View approved accounts and current project access.' },
             {
                 key: 'quoting',
                 label: 'Quoting & Pricing',
@@ -194,6 +196,7 @@ const NAV_GROUPS = [
 ]
 
 const PANELS = {
+    advancedClasses: AdminAccessEntry,
     community: CommunityModeration,
     workshop: TeacherClassroom,
     content: ContentManagement,

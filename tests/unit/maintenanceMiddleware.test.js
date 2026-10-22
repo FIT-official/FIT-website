@@ -77,6 +77,28 @@ describe('maintenance routing', () => {
     })
 })
 
+describe('Advanced Classes public entry boundary', () => {
+    it.each(['/class/projects', '/class/projects/', '/class/projects/example'])('keeps %s behind maintenance', async path => {
+        expect((await middleware(auth, request(path))).status).toBe(503)
+    })
+    it.each(['/class/projects', '/class/projects/example'])('lets %s render its server-authorized view with private cache headers', async path => {
+        fetch.mockResolvedValue({ ok: true, json: async () => ({ ...flags, maintenance_page: { ...flags.maintenance_page, enabled: false } }) })
+        auth.mockResolvedValue({ userId: 'unrelated', sessionClaims: {} })
+        const response = await middleware(auth, request(path))
+        expect(response.status).toBe(200)
+        expect(response.headers.get('Cache-Control')).toContain('private, no-store')
+        expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow')
+        expect(response.headers.get('location')).toBeNull()
+    })
+    it('does not exempt a similarly named route from normal onboarding', async () => {
+        fetch.mockResolvedValue({ ok: true, json: async () => ({ ...flags, maintenance_page: { ...flags.maintenance_page, enabled: false } }) })
+        auth.mockResolvedValue({ userId: 'unrelated', sessionClaims: {} })
+        mocks.getUser.mockResolvedValue({ publicMetadata: { role: 'user', onboardingComplete: false } })
+        const response = await middleware(auth, request('/class/projects-private'))
+        expect(response.headers.get('location')).toBe('https://fit.example/onboarding')
+    })
+})
+
 describe('maintenance bypass', () => {
     it('removes every secret parameter, preserves other query values and issues an HMAC cookie', async () => {
         const response = await middleware(auth, request(`/shop?category=parts&maintenance_bypass=${secret}&maintenance_bypass=duplicate`))

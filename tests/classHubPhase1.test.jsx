@@ -30,7 +30,7 @@ describe('hub tabs and teacher entry', () => {
     render(<ClassPage />)
     const tabs = screen.getByRole('navigation', { name: 'Class sections' })
     const links = within(tabs).getAllByRole('link')
-    expect(links.map(a => [a.textContent, a.getAttribute('href')])).toEqual([['Classes', '/class'], ['Simulations', '/class/simulations'], ['Programming', '/class/programming'], ['For teachers', '/class/teachers']])
+    expect(links.map(a => [a.textContent, a.getAttribute('href')])).toEqual([['Classes', '/class'], ['Advanced Classes', '/class/projects'], ['Simulations', '/class/simulations'], ['Programming', '/class/programming'], ['For teachers', '/class/teachers']])
     expect(links[0]).toHaveAttribute('aria-current', 'page'); expect(links.slice(1).every(a => !a.hasAttribute('aria-current'))).toBe(true)
     expect(screen.getAllByRole('link', { name: /For teachers/ }).every(a => a.getAttribute('href') === '/class/teachers')).toBe(true)
     expect(screen.getByRole('main').querySelectorAll('a[href=""], a:not([href])')).toHaveLength(0)

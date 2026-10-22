@@ -477,6 +477,17 @@ describe('Public Class navigation', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
         expect(within(await screen.findByRole('dialog', { name: 'Menu' })).getByRole('link', { name: 'Class' })).toHaveAttribute('aria-current', 'page')
     })
+    it.each(['/class/projects', '/class/projects/holobox-digital-holography'])('shows the public Advanced Classes entry and marks it active for %s', async pathname => {
+        mockPathname = pathname; render(<Navbar />)
+        const primary = within(screen.getByRole('navigation', { name: 'Primary' }))
+        expect(primary.getByRole('link', { name: 'Advanced Classes' })).toHaveAttribute('href', '/class/projects')
+        expect(primary.getByRole('link', { name: 'Advanced Classes' })).toHaveAttribute('aria-current', 'page')
+        expect(primary.getByRole('link', { name: 'Class' })).not.toHaveAttribute('aria-current')
+        fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
+        const sheet = within(await screen.findByRole('dialog', { name: 'Menu' }))
+        expect(sheet.getByRole('link', { name: 'Advanced Classes' })).toHaveAttribute('aria-current', 'page')
+        expect(sheet.getByRole('link', { name: 'Class' })).not.toHaveAttribute('aria-current')
+    })
     it.each(['/class-extra', '/classes'])('does not confuse %s with the Class namespace', async pathname => {
         mockPathname = pathname; render(<Navbar />)
         expect(within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { name: 'Class' })).not.toHaveAttribute('aria-current')

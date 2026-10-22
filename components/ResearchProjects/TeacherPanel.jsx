@@ -1,13 +1,14 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { requestJson, recordsUrl, ACTIONS_ENDPOINT, useRequestGuard, isAbort, NetworkError } from './api'
+import { requestJson as apiRequestJson, recordsUrl, ACTIONS_ENDPOINT, useRequestGuard, isAbort, NetworkError } from './api'
 import { useKeys } from './useProjectRecord'
 import ProjectBody from './ProjectBody'
 import { emptyDocument, STATUS_LABELS } from '@/lib/researchProjects/shared'
 import styles from './ResearchProjects.module.css'
 
 const formatTime = iso => (iso ? new Date(iso).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '')
+const requestJson = (method, url, options) => apiRequestJson(method, `${url}${url.includes('?') ? '&' : '?'}view=review`, options)
 const scopeLabel = scope => (scope.startsWith('group:') ? 'Group ' + scope.slice(6) : 'Individual ' + scope.slice(7))
 
 function FeedbackForm({ project, record, busy, onSend }) {
@@ -211,7 +212,7 @@ export default function TeacherPanel({ project, viewer, classIds, onSelect }) {
 export function TeacherWorkspace({ project, viewer, classIds }) {
   const [record, setRecord] = useState(null)
   const [selectedKey, setSelectedKey] = useState({ query: '' })
-  const keys = useKeys(project.slug, selectedKey.query)
+  const keys = useKeys(project.slug, selectedKey.query + '&view=review')
   const doc = record ? record.doc : emptyDocument()
   const onSelect = useCallback(r => { setRecord(r); setSelectedKey({ query: r ? `&classId=${encodeURIComponent(r.classId)}&scope=${encodeURIComponent(r.scope)}` : '' }) }, [])
   return (

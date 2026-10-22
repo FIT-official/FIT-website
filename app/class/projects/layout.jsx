@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 // Deliberately generic: no project names or descriptions appear in metadata, so nothing about the
 // library is exposed to a visitor who has not been authorised.
 export const metadata = {
-  title: 'Class | FIT Learning Studio',
+  title: 'Advanced Classes | FIT',
   robots: { index: false, follow: false, nocache: true, noarchive: true, nosnippet: true },
 }
 

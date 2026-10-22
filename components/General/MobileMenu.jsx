@@ -340,7 +340,8 @@ function MobileMenu({ open, onClose, triggerRef, shopCategories = [], printCateg
                             <SheetRow href="/research-fabrication" icon={IoConstructOutline} label="Services" active={['/research-fabrication', '/metal-fabrication', '/3d-design-printing', '/electronics-prototyping', '/printer-repair'].some(path => pathname === path || pathname?.startsWith(`${path}/`))} onNavigate={onClose} />
                             <SheetRow href="/school-programmes" icon={IoPeopleOutline} label="School programmes" active={pathname?.startsWith('/school-programmes')} onNavigate={onClose} />
                             <SheetRow href="/company-workshops" icon={IoPeopleOutline} label="Company workshops" active={pathname?.startsWith('/company-workshops')} onNavigate={onClose} />
-                            <SheetRow href="/class" icon={IoGridOutline} label="Class" active={pathname === '/class' || pathname?.startsWith('/class/')} onNavigate={onClose} />
+                            <SheetRow href="/class/projects" icon={IoGridOutline} label="Advanced Classes" active={pathname === '/class/projects' || pathname?.startsWith('/class/projects/')} onNavigate={onClose} />
+                            <SheetRow href="/class" icon={IoGridOutline} label="Class" active={(pathname === '/class' || pathname?.startsWith('/class/')) && !pathname?.startsWith('/class/projects')} onNavigate={onClose} />
                             <SheetRow href="/maker-tools" icon={IoConstructOutline} label="Maker Tools" active={pathname === "/maker-tools"} onNavigate={onClose} />
                             <SheetRow href="/community" icon={IoPeopleOutline} label="Community" active={pathname === "/community" || pathname?.startsWith("/community/")} onNavigate={onClose} />
                             <SheetRow href="/creators" icon={IoPeopleOutline} label="Creators" active={pathname?.startsWith('/creators')} onNavigate={onClose} />
