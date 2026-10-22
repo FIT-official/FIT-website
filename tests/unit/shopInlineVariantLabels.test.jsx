@@ -50,4 +50,17 @@ describe('inline shop variant labels', () => {
     expect(screen.getByRole('combobox', { name: 'Fixture PLA Basic Spool' })).toHaveValue('Jade White (10100)');
     expect(screen.getByRole('combobox', { name: 'Fixture PLA Basic Colour' })).toHaveValue('With Spool');
   });
+  it('shows Cocoa Brown while preserving its inventory value, fee and cart selection', async () => {
+    const product = fixture();
+    product.variantTypes[0].options.push({ name: 'Coca Brown (10802)', stock: 10, additionalFee: 1 });
+    const before = JSON.stringify(product);
+    render(<ShopAddToCart product={product} />);
+    const option = screen.getByRole('option', { name: 'Cocoa Brown (10802) (+S$1.00)' });
+    expect(option).toHaveValue('Coca Brown (10802)');
+    fireEvent.change(screen.getByRole('combobox', { name: 'Fixture PLA Basic Colour' }), { target: { value: option.value } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add to Cart' }));
+    await waitFor(() => expect(addShopItem).toHaveBeenCalledOnce());
+    expect(addShopItem.mock.calls[0][0].selectedVariants.Spool).toBe('Coca Brown (10802)');
+    expect(JSON.stringify(product)).toBe(before);
+  });
 });
