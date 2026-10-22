@@ -1,10 +1,11 @@
-// Source of the 14 original explanatory SVG diagrams in public/research-projects/diagrams.
+// Source of the 14 original explanatory SVG diagrams in content/researchProjects/assets/diagrams.
+// After regenerating run: node scripts/researchProjects/asset-manifest.mjs (refreshes the SHA-256 manifest).
 // They are drawn from scratch here (no third-party artwork, no photographs). To regenerate:
-//   node docs/researchProjects/make-diagrams.mjs public/research-projects/diagrams
+//   node docs/researchProjects/make-diagrams.mjs content/researchProjects/assets/diagrams
 import { writeFileSync, mkdirSync } from 'node:fs'
 import process from 'node:process'
 
-const OUT = (process.argv[2] || 'public/research-projects/diagrams').replace(/[\/]*$/, '/')
+const OUT = (process.argv[2] || 'content/researchProjects/assets/diagrams').replace(/[\/]*$/, '/')
 mkdirSync(OUT, { recursive: true })
 
 const INK = '#1b2a3a', BLUE = '#1f5fa8', ORANGE = '#b45309', GREEN = '#1b7a4b', GREY = '#5b6877', PALE = '#eef3f8', RED = '#b3261e'

@@ -231,3 +231,52 @@ describe('Fourier ptychography model', () => {
     expect(r.warnings.join(' ')).toMatch(/no synthetic aperture/)
   })
 })
+
+describe('projects 08 to 10 models', () => {
+  it('seismometer: more damping means fewer usable peaks, a shorter settling time and a lower resonance gain', () => {
+    const light = runSimulation('seismometer', { dampingRatio: 0.05 })
+    const mid = runSimulation('seismometer', { dampingRatio: 0.2 })
+    const heavy = runSimulation('seismometer', { dampingRatio: 0.6 })
+    expect(out(light, 'usablePeaks')).toBeGreaterThan(out(mid, 'usablePeaks'))
+    expect(out(mid, 'usablePeaks')).toBeGreaterThanOrEqual(out(heavy, 'usablePeaks'))
+    expect(out(light, 'settlingTimeS')).toBeGreaterThan(out(mid, 'settlingTimeS'))
+    expect(out(mid, 'settlingTimeS')).toBeGreaterThan(out(heavy, 'settlingTimeS'))
+    expect(out(light, 'resonanceGain')).toBeGreaterThan(out(heavy, 'resonanceGain'))
+    expect(out(light, 'springNPerM')).toBeCloseTo(0.1 * (2 * Math.PI) ** 2, 9)
+  })
+
+  it('seismometer: recovers the damping ratio from noisy peaks and refuses to when there are no repeated peaks', () => {
+    expect(out(runSimulation('seismometer', { dampingRatio: 0.05 }), 'zetaFromPeaks')).toBeCloseTo(0.05, 1)
+    expect(out(runSimulation('seismometer', { dampingRatio: 0.2 }), 'zetaFromPeaks')).toBeCloseTo(0.2, 1)
+    const critical = runSimulation('seismometer', { dampingRatio: 1.2 })
+    expect(out(critical, 'zetaFromPeaks')).toBeNull()
+    expect(critical.warnings.join(' ')).toMatch(/critical damping/)
+    expect(out(critical, 'dampedPeriodS')).toBeNull()
+  })
+
+  it('spectrometer: a wider slit collects more signal but stops resolving the pair, as in the supplied model', () => {
+    const narrow = runSimulation('spectrometer', { slitMm: 0.1 })
+    const wide = runSimulation('spectrometer', { slitMm: 0.6 })
+    expect(out(wide, 'signalCounts')).toBeGreaterThan(out(narrow, 'signalCounts'))
+    expect(out(narrow, 'resolved')).toBe(1)
+    expect(out(wide, 'resolved')).toBe(0)
+    expect(out(wide, 'fwhmNm')).toBeGreaterThan(out(narrow, 'fwhmNm'))
+    expect(wide.warnings.join(' ')).toMatch(/NOT resolved/)
+    expect(out(runSimulation('spectrometer', { p1: 100, l1: 450, p2: 100, l2: 450 }), 'slopeNmPerPixel')).toBeNull()
+  })
+
+  it('tomography: finds the hidden edge, loses confidence with fewer patterns and more noise, and keeps the edge blinded', () => {
+    const clean = runSimulation('tomography', { hiddenEdge: 3, noiseOhm: 0.5, showTruth: 1 })
+    expect(out(clean, 'bestEdge')).toBe(3)
+    expect(out(clean, 'identified')).toBe(1)
+    expect(out(clean, 'marginRatio')).toBeGreaterThan(100)
+    const blind = runSimulation('tomography', { hiddenEdge: 3 })
+    expect(out(blind, 'identified')).toBeNull()
+    expect(JSON.stringify(blind.outputs.map(o => o.label))).not.toMatch(/hidden edge equals|edge 3/i)
+    const weak = runSimulation('tomography', { hiddenEdge: 3, patterns: 1, noiseOhm: 15, showTruth: 1 })
+    expect(out(weak, 'marginRatio')).toBeLessThan(out(clean, 'marginRatio'))
+    expect(out(weak, 'readings')).toBe(7)
+    // The default case never coincides with the supplied dataset's teacher-only answer.
+    expect(runSimulation('tomography', {}).params.hiddenEdge).not.toBe(7)
+  })
+})
