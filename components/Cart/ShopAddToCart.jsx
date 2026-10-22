@@ -4,7 +4,7 @@ import { ConnectionNotice, useStoreConnection } from './StoreFeedback';
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { getDefaultVariantSelections } from '@/lib/seo/product';
-import { productVariantLabel } from '@/lib/productVariantLabel';
+import { productVariantLabel, productVariantOptionLabel } from '@/lib/productVariantLabel';
 import { defaultCartDelivery } from '@/lib/cartDelivery';
 import ShopQuantity from './ShopQuantity';
 
@@ -35,7 +35,7 @@ export default function ShopAddToCart({ product, onVariantsChange }) {
         {(product.variantTypes || []).map(v => <label key={v.name} className="text-sm">{productVariantLabel(product, v)}
             <select aria-label={`${product.name} ${productVariantLabel(product, v)}`} value={variants[v.name] || ''} disabled={busy}
                 className="border rounded p-2 w-full" onChange={e => { const next = { ...variants, [v.name]: e.target.value }; setVariants(next); onVariantsChange?.(next); setAdded(false); }}>
-                {v.options.map(o => <option key={o.name} value={o.name}>{o.name}{o.additionalFee > 0 ? ` (+S$${o.additionalFee.toFixed(2)})` : ''}</option>)}
+                {v.options.map(o => <option key={o.name} value={o.name}>{productVariantOptionLabel(product, o)}{o.additionalFee > 0 ? ` (+S$${o.additionalFee.toFixed(2)})` : ''}</option>)}
             </select>
         </label>)}
         <ShopQuantity product={product} variants={variants} quantity={quantity} onChange={value => { setQuantity(value); setAdded(false); }} disabled={busy} onAvailability={setAvailability} />
