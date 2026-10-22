@@ -150,6 +150,17 @@ afterEach(() => {
 })
 
 describe('Order detail facts strip', () => {
+    it('corrects the display of a persisted colour on an archived product without changing order values', async () => {
+        const order = { ...baseOrder, productSummary: { _id: '6974d555afadda8ec64083c3', name: 'Archived PLA Basic', images: [] },
+            cartItem: { ...baseOrder.cartItem, productId: '6974d555afadda8ec64083c3', selectedVariants: { Spool: 'Coca Brown (10802)', Colour: 'Without Spool' } } }
+        const before = JSON.stringify(order)
+        stubFetch(order)
+        const originalFetch = global.fetch
+        global.fetch = vi.fn(url => String(url).startsWith('/api/product') ? okJson({ products: [] }) : originalFetch(url))
+        render(<OrderPage orderId={ORDER_ID} />)
+        expect(await screen.findByText('Cocoa Brown (10802), Without Spool, Qty 2')).toBeVisible()
+        expect(JSON.stringify(order)).toBe(before)
+    })
     it('shows order date, order ID with copy, and the Stripe payment method', async () => {
         render(<OrderPage orderId={ORDER_ID} />)
         // 'Order placed' is both the facts-strip label and a step description.
