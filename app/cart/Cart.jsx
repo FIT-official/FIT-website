@@ -647,7 +647,7 @@ export function CartContent({ user, isLoaded = true }) {
                                 }
 
                                 return (
-                                    <div key={index} className='grid grid-cols-1 md:grid-rows-1 md:grid-cols-5 gap-2 md:gap-4 py-8 md:py-6 px-6'>
+                                    <div key={index} className='grid grid-cols-1 lg:grid-rows-1 lg:grid-cols-5 gap-2 md:gap-4 py-8 md:py-6 px-6'>
                                         {isCustomPrint ? (
                                             <React.Fragment>
                                                 {/* custom print display */}
@@ -681,8 +681,8 @@ export function CartContent({ user, isLoaded = true }) {
                                                                 return availableTypes.includes(current) ? current : (availableTypes[0] || '');
                                                             })()}
                                                             onChange={e => handleDeliveryChange(cartItem, e.target.value)}
-                                                            className="py-1 px-2 rounded border border-borderColor bg-background md:text-xs text-lightColor focus:outline-none appearance-none transition-all cursor-pointer"
-                                                            style={{ minWidth: 120, maxWidth: 160 }}
+                                                            className="min-h-11 min-w-11 py-2 px-2 rounded border border-borderColor bg-background md:text-xs text-lightColor focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-textColor appearance-none transition-all cursor-pointer"
+                                                            style={{ width: '100%', maxWidth: 260 }}
                                                             aria-label="Delivery option"
                                                             disabled={loading}
                                                         >
@@ -745,7 +745,7 @@ export function CartContent({ user, isLoaded = true }) {
                                                 </div>
 
                                                 {/* Custom Print Upload/Configure Button */}
-                                                <div className="md:col-span-5 mt-4">
+                                                <div className="lg:col-span-5 mt-4">
                                                     {/* Step-by-step checklist for custom print */}
                                                     <div className="flex flex-col gap-4 p-4 bg-background border border-borderColor rounded-lg mb-4">
                                                         {/* Step 1: Upload Model */}
@@ -853,7 +853,7 @@ export function CartContent({ user, isLoaded = true }) {
                                                     <select
                                                         value={cartItem.chosenDeliveryType}
                                                         onChange={e => handleDeliveryChange(cartItem, e.target.value)}
-                                                        className="py-1 px-2 rounded border border-borderColor bg-background md:text-xs text-lightColor focus:outline-none appearance-none transition-all cursor-pointer"
+                                                        className="min-h-11 min-w-11 py-2 px-2 rounded border border-borderColor bg-background md:text-xs text-lightColor focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-textColor appearance-none transition-all cursor-pointer"
                                                         style={{ width: '100%', maxWidth: 260 }}
                                                         aria-label="Change delivery type"
                                                         disabled={loading}
@@ -875,11 +875,11 @@ export function CartContent({ user, isLoaded = true }) {
                                                 <StockAllocation allocation={breakdownItem?.stockAllocation} />
                                                 {/* quantity */}
                                                 <div className='flex items-center md:justify-center text-sm font-medium '>
-                                                    <div className='flex flex-row rounded border border-borderColor py-1'>
+                                                    <div className='flex flex-row items-center rounded border border-borderColor'>
                                                         <button
                                                             onClick={() => handleChangeQuantity(cartItem, 1)}
                                                             disabled={loading || isCustomPrint || cartItem.chosenDeliveryType === "digital" || cartItem.chosenDeliveryType === "printDelivery"}
-                                                            className="px-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-textColor disabled:opacity-50 disabled:cursor-not-allowed"
                                                             aria-label="Increase quantity"
                                                         >
                                                             +
@@ -890,7 +890,7 @@ export function CartContent({ user, isLoaded = true }) {
                                                         <button
                                                             onClick={() => handleChangeQuantity(cartItem, -1)}
                                                             disabled={loading}
-                                                            className="px-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-textColor disabled:opacity-50 disabled:cursor-not-allowed"
                                                             aria-label="Decrease quantity"
                                                         >
                                                             -
@@ -921,7 +921,7 @@ export function CartContent({ user, isLoaded = true }) {
                                                     const hasConfiguration = typeof window !== 'undefined' && localStorage.getItem(configKey)
 
                                                     return (
-                                                        <div className='flex flex-col md:col-span-5 mt-4 gap-2'>
+                                                        <div className='flex flex-col lg:col-span-5 mt-4 gap-2'>
                                                             {/* Colour + (locked) print settings are chosen in the editor
                                                                 via "Order Print" before the item is added to the cart, so
                                                                 no in-cart configure step is needed. See openspec change
@@ -1063,7 +1063,7 @@ export function CartContent({ user, isLoaded = true }) {
                                                 })()}
 
                                                 {/* order notes */}
-                                                <div className='flex flex-col md:col-span-5 mt-4 gap-2'>
+                                                <div className='flex flex-col lg:col-span-5 mt-4 gap-2'>
                                                     <label className="text-xs font-medium text-textColor">Order Note (optional)</label>
                                                     <textarea
                                                         value={cartItem.orderNote || ""}
@@ -1222,7 +1222,7 @@ export function CartContent({ user, isLoaded = true }) {
                                 } catch (err) { setError(err.message); }
                                 finally { mutationLock.current = false; setCheckoutBusy(false); }
                             }}
-                            className={`formBlackButton mt-4${checkoutDisabled ? " opacity-60 pointer-events-none cursor-not-allowed" : ""}`}
+                            className={`formBlackButton min-h-11 min-w-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-textColor mt-4${checkoutDisabled ? " opacity-60 pointer-events-none cursor-not-allowed" : ""}`}
                             tabIndex={checkoutDisabled ? -1 : 0}
                             aria-disabled={checkoutDisabled}
                         >
