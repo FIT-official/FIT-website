@@ -56,6 +56,17 @@ function fillAddress(address = fullAddress) {
     }
 }
 describe('checkout address and payment contract', () => {
+    it('shows the corrected legacy colour in persisted checkout summaries without changing the quoted data', async () => {
+        state.breakdown = [{ ...shippingLine, productId: '6974d555afadda8ec64083c3', name: 'PLA Basic',
+            price: 21.9, priceBeforeDiscount: 21.9, basePrice: 21.9, deliveryFee: 6.2, total: 28.1,
+            variantInfo: [{ type: 'Spool', option: 'Coca Brown (10802)', additionalFee: 0 }, { type: 'Colour', option: 'Without Spool', additionalFee: 0 }] }]
+        const before = JSON.stringify(state.breakdown)
+        await renderCheckout()
+        expect(screen.getByText(/^Cocoa Brown \(10802\)/)).toBeVisible()
+        expect(screen.getByText('Without Spool')).toBeVisible()
+        expect(screen.getByTestId('order-total')).toHaveTextContent('S$28.10')
+        expect(JSON.stringify(state.breakdown)).toBe(before)
+    })
     it('keeps the quoted summary visible while asking for a complete address', async () => {
         await renderCheckout()
         expect(screen.getByTestId('order-total')).toHaveTextContent('S$22.50')

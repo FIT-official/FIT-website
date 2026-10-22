@@ -954,7 +954,11 @@ const FITCalcX8 = (function () {
         const dx=x2-x1,dy=y2-y1,length=Math.hypot(dx,dy)||1;
         const startX=x1+dx/length*29,startY=y1+dy/length*29;
         const endX=x2-dx/length*31,endY=y2-dy/length*31;
-        const tx=(startX+endX)/2,ty=(startY+endY)/2;
+        // Put diagonal costs beside their own edge. Crossing diagonals share
+        // the same midpoint and hide one another's weight.
+        const labelOffset=dx!==0&&dy!==0?18:0;
+        const tx=(startX+endX)/2-dy/length*labelOffset;
+        const ty=(startY+endY)/2+dx/length*labelOffset;
         return `<path d="M${startX} ${startY}L${endX} ${endY}"
           stroke="#111" stroke-width="2.5" fill="none"
           marker-end="url(#arr)"/>

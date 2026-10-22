@@ -25,6 +25,7 @@ import { ADD_ADDRESS_TO_CHECKOUT, deliveryMismatchReason } from '@/lib/checkoutA
 import { HiCheck, HiExclamationCircle } from 'react-icons/hi';
 import { FaRegCircleCheck } from 'react-icons/fa6';
 import { cartDeliveryLabel } from '@/lib/cartDelivery';
+import { productVariantOptionLabel } from '@/lib/productVariantLabel';
 
 // Public display metadata; delivery fees are calculated by checkout on the server.
 async function fetchDeliveryTypesMeta() {
@@ -831,17 +832,17 @@ export function CartContent({ user, isLoaded = true }) {
                                                         {cartItem.selectedVariants && typeof cartItem.selectedVariants === 'object' && Object.keys(cartItem.selectedVariants).length > 0 ? (
                                                             Object.entries(cartItem.selectedVariants).map(([variantType, selectedOption]) => (
                                                                 <span key={variantType} className="text-xs text-lightColor">
-                                                                    {variantType}: {selectedOption}
+                                                                    {variantType}: {productVariantOptionLabel(product, { name: selectedOption })}
                                                                 </span>
                                                             ))
                                                         ) : (
                                                             /* Fallback to legacy variant system */
                                                             <span className="text-xs text-lightColor">
-                                                                {product.variants && cartItem.variantId
+                                                                {productVariantOptionLabel(product, { name: product.variants && cartItem.variantId
                                                                     ? (product.variants.find(v =>
                                                                         v._id === cartItem.variantId || v._id?.toString() === cartItem.variantId || v === cartItem.variantId // support both object and string
                                                                     )?.name || String(cartItem.variantId))
-                                                                    : "Default"}
+                                                                    : "Default" })}
                                                             </span>
                                                         )}
                                                     </div>

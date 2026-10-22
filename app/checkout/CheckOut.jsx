@@ -1,6 +1,7 @@
 'use client';
 
 import StockAllocation from '@/components/Cart/StockAllocation';
+import { productVariantOptionLabel } from '@/lib/productVariantLabel';
 import { RESTOCKING_DISCLOSURE } from '@/lib/shopBackorders/policy';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -313,7 +314,7 @@ const CartBreakdown = ({ cartBreakdown }) => {
                                 <div className="text-textColor">
                                     {item.variantInfo.map((v, i) => (
                                         <span key={i}>
-                                            {v.option}
+                                            {productVariantOptionLabel(item, { name: v.option })}
                                             {v.additionalFee > 0 &&
                                                 ` (+S$${v.additionalFee.toFixed(2)})`}
                                             {i < item.variantInfo.length - 1 &&

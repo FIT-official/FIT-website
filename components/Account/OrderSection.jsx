@@ -12,6 +12,7 @@
 // unchanged: /api/user/orders then /api/product?ids=; thumbnails resolve S3
 // keys through /api/proxy?key= with a quiet letter/icon tile fallback.
 import StockAllocation from '@/components/Cart/StockAllocation';
+import { productVariantOptionLabel } from '@/lib/productVariantLabel'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
@@ -201,10 +202,10 @@ function OrderSection() {
     }
 
     // One quiet meta line under the item name: variant summary + quantity.
-    const metaLine = (cartItem) => {
+    const metaLine = (cartItem, product) => {
         const variants =
             cartItem.selectedVariants && Object.keys(cartItem.selectedVariants).length > 0
-                ? Object.values(cartItem.selectedVariants).join(', ')
+                ? Object.values(cartItem.selectedVariants).map(name => productVariantOptionLabel({ productId: cartItem.productId, ...product }, { name })).join(', ')
                 : null
         return [variants, `Qty ${cartItem.quantity || 1}`].filter(Boolean).join(', ')
     }
@@ -442,7 +443,7 @@ function OrderSection() {
                                             <div className="min-w-0 flex-1">
                                                 <p className="text-[13px] font-medium truncate">{d.displayTitle}</p>
                                                 <p className="dash-data dash-soft truncate mt-0.5">
-                                                    {metaLine(d.cartItem)}
+                                                    {metaLine(d.cartItem, d.product)}
                                                 </p>
                                             </div>
                                             <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -591,7 +592,7 @@ function OrderSection() {
                                     const fee = variantInfoItem?.additionalFee || 0
                                     return (
                                         <QuietRow key={type} label={type}>
-                                            {option}
+                                            {productVariantOptionLabel({ productId: peek.cartItem.productId, ...peek.product }, { name: option })}
                                             {fee > 0 ? ` (+S$${money(fee)})` : ''}
                                         </QuietRow>
                                     )
@@ -604,7 +605,7 @@ function OrderSection() {
                             peek.cartItem.variantId && (
                                 <section>
                                     <h4 className="dash-label mb-1">Options</h4>
-                                    <QuietRow label="Variant">{peek.cartItem.variantId}</QuietRow>
+                                    <QuietRow label="Variant">{productVariantOptionLabel({ productId: peek.cartItem.productId, ...peek.product }, { name: peek.cartItem.variantId })}</QuietRow>
                                 </section>
                             )}
 

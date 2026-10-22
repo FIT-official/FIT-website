@@ -1,5 +1,6 @@
 'use client'
 import StockAllocation from '@/components/Cart/StockAllocation';
+import { productVariantOptionLabel } from '@/lib/productVariantLabel'
 // Customer order detail on the "Sunlit Paper" language, composed per the
 // reference images (docs/account-ui-reference-images/order-details.png +
 // order-progress.png): a facts strip (Order placed / Delivered / Order ID /
@@ -434,7 +435,7 @@ function OrderPage({ orderId }) {
     // One quiet meta line under the item name: variant summary + quantity.
     const itemMeta = [
         cartItem.selectedVariants && Object.keys(cartItem.selectedVariants).length > 0
-            ? Object.values(cartItem.selectedVariants).join(', ')
+            ? Object.values(cartItem.selectedVariants).map(name => productVariantOptionLabel({ productId: cartItem.productId, ...product }, { name })).join(', ')
             : null,
         `Qty ${cartItem.quantity || 1}`,
     ]

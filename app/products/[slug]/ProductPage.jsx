@@ -20,7 +20,7 @@ import { ConnectionNotice, StoreError, useStoreConnection } from '@/components/C
 import { getDefaultVariantSelections } from '@/lib/seo/product';
 import { publicProductDescription } from '@/lib/productPublicContent';
 import { useInventoryRefresh } from '@/utils/useInventoryRefresh';
-import { productVariantLabel } from '@/lib/productVariantLabel';
+import { productVariantLabel, productVariantOptionLabel } from '@/lib/productVariantLabel';
 import { defaultCartDelivery } from '@/lib/cartDelivery';
 
 const ModelViewer = dynamic(() => import("@/components/3D/ModelViewer"), { ssr: false });
@@ -711,7 +711,7 @@ function ProductPage({ initialProduct = null, initialGlobalDiscountRules = [] })
                                             >
                                                 {variantType.options.map((option) => (
                                                     <option key={option._id} value={option.name}>
-                                                        {option.name} {option.additionalFee > 0 && `(+${product.basePrice?.presentmentCurrency || 'SGD'} ${option.additionalFee.toFixed(2)})`}
+                                                        {productVariantOptionLabel(product, option)} {option.additionalFee > 0 && `(+${product.basePrice?.presentmentCurrency || 'SGD'} ${option.additionalFee.toFixed(2)})`}
                                                     </option>
                                                 ))}
                                             </select>
