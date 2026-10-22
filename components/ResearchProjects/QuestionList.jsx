@@ -38,7 +38,7 @@ export default function QuestionList({ questions, answers, editable, onAnswer, k
           <li key={q.id} id={'question-' + q.id}>
             <div className={styles.qHead}>
               <span className={styles.tag}>{TYPE_LABEL[q.type]}</span>
-              <span className={styles.tag}>{q.marks} marks</span>
+              <span className={styles.tag}>{q.marks === 0 ? 'Not scored' : q.marks + (q.marks === 1 ? ' mark' : ' marks')}</span>
             </div>
             {q.type === 'mcq' ? (
               <fieldset disabled={!editable}>

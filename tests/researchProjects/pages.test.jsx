@@ -15,6 +15,9 @@ import * as layout from '@/app/class/projects/layout'
 import * as listPageModule from '@/app/class/projects/page'
 import * as slugPageModule from '@/app/class/projects/[slug]/page'
 
+// `server-only` throws outside a server bundle. This narrow mock lets server modules load under test.
+vi.mock('server-only', () => ({}))
+
 let world
 beforeEach(() => {
   world = createWorld({ members: WORLD_MEMBERS })
@@ -69,7 +72,7 @@ describe('signed in but not a member', () => {
   })
 
   it('reports a temporary failure as unavailable, not as access', async () => {
-    world.deps.isAdmin = async () => { throw new Error('clerk down') }
+    world.deps.canReview = async () => { throw new Error('clerk down') }
     world.session.userId = 'stu-a1'
     vi.spyOn(console, 'error').mockImplementation(() => {})
     await renderList()
@@ -93,8 +96,8 @@ describe('authorised', () => {
   it('shows teachers the same tiles with a teacher note', async () => {
     world.session.userId = 'teacher-1'
     await renderList()
-    expect(screen.getByText(/Teacher view: you can open any project/)).toBeInTheDocument()
-    expect(screen.getAllByRole('link')).toHaveLength(7)
+    expect(screen.getByText(/Review access: you can see answer keys/)).toBeInTheDocument()
+    expect(screen.getAllByRole('link')).toHaveLength(PROJECTS.length)
   })
 
   it('opens a project for a member, wired to that member’s own scope', async () => {

@@ -1,14 +1,13 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { requestJson as apiRequestJson, recordsUrl, ACTIONS_ENDPOINT, useRequestGuard, isAbort, NetworkError } from './api'
+import { requestJson, recordsUrl, ACTIONS_ENDPOINT, useRequestGuard, isAbort, NetworkError } from './api'
 import { useKeys } from './useProjectRecord'
 import ProjectBody from './ProjectBody'
-import { emptyDocument, STATUS_LABELS } from '@/lib/researchProjects/shared'
+import { emptyDocument, STATUS_LABELS, assetUrl } from '@/lib/researchProjects/shared'
 import styles from './ResearchProjects.module.css'
 
 const formatTime = iso => (iso ? new Date(iso).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '')
-const requestJson = (method, url, options) => apiRequestJson(method, `${url}${url.includes('?') ? '&' : '?'}view=review`, options)
 const scopeLabel = scope => (scope.startsWith('group:') ? 'Group ' + scope.slice(6) : 'Individual ' + scope.slice(7))
 
 function FeedbackForm({ project, record, busy, onSend }) {
@@ -212,7 +211,7 @@ export default function TeacherPanel({ project, viewer, classIds, onSelect }) {
 export function TeacherWorkspace({ project, viewer, classIds }) {
   const [record, setRecord] = useState(null)
   const [selectedKey, setSelectedKey] = useState({ query: '' })
-  const keys = useKeys(project.slug, selectedKey.query + '&view=review')
+  const keys = useKeys(project.slug, selectedKey.query)
   const doc = record ? record.doc : emptyDocument()
   const onSelect = useCallback(r => { setRecord(r); setSelectedKey({ query: r ? `&classId=${encodeURIComponent(r.classId)}&scope=${encodeURIComponent(r.scope)}` : '' }) }, [])
   return (
@@ -233,6 +232,14 @@ export function TeacherWorkspace({ project, viewer, classIds }) {
             {keys.status === 'ready' ? <button type="button" className={styles.secondary} onClick={keys.clear}>Hide answer key in questions</button>
               : <button type="button" className={styles.secondary} onClick={keys.load} disabled={keys.status === 'loading'}>Show answer key in questions</button>}
             {keys.message ? <p role="alert" className={styles.fieldError}>{keys.message}</p> : null}
+            {keys.teacher && (keys.teacher.notes.length || keys.teacher.assets.length) ? (
+              <div className={styles.teacherOnly}>
+                <h3>Teacher-only notes and files</h3>
+                <p className={styles.note}>These reveal answers. Do not show them to students before they commit to their own work.</p>
+                <ul>{keys.teacher.notes.map(n => <li key={n}>{n}</li>)}</ul>
+                <ul>{keys.teacher.assets.map(a => <li key={a.id}><a href={assetUrl(a.id)} download={a.filename}>{a.label}</a></li>)}</ul>
+              </div>
+            ) : null}
           </div>
         )}
       />

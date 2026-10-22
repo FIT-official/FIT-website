@@ -1,9 +1,12 @@
 // @vitest-environment node
 // Static checks on what can reach a browser bundle or a public file, plus the "own paths only" rule.
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs'
 import { join, dirname, resolve, relative } from 'node:path'
 import { ANSWER_KEYS } from '@/lib/researchProjects/answerKeys'
+
+// `server-only` throws outside a server bundle. This narrow mock lets server modules load under test.
+vi.mock('server-only', () => ({}))
 
 const root = resolve(__dirname, '..', '..')
 const rel = p => relative(root, p).replaceAll('\\', '/')
@@ -55,7 +58,7 @@ function closure(entries) {
   return { files: seen, external }
 }
 
-const SERVER_ONLY = ['answerKeys.js', 'service.js', 'http.js', 'store.js', 'access.js', 'membership.js', 'deps.js', 'pageAccess.js', 'schema.js']
+const SERVER_ONLY = ['answerKeys.js', 'answerKeysSupplemental.js', 'service.js', 'http.js', 'store.js', 'access.js', 'membership.js', 'deps.js', 'pageAccess.js', 'schema.js', 'assets.js']
 
 describe('client bundle boundary', () => {
   const componentFiles = walk(join(root, 'components', 'ResearchProjects')).filter(f => /\.(js|jsx)$/.test(f))
@@ -110,7 +113,7 @@ describe('client bundle boundary', () => {
     const importers = walk(join(root, 'lib', 'researchProjects')).concat(walk(join(root, 'app')).filter(f => rel(f).includes('research-projects') || rel(f).includes('class/projects')))
       .filter(f => /\.(js|jsx)$/.test(f) && importsOf(f).some(s => /answerKeys/.test(s)))
       .map(rel)
-    expect(importers).toEqual(['lib/researchProjects/service.js'])
+    expect([...importers].sort()).toEqual(['lib/researchProjects/answerKeys.js', 'lib/researchProjects/service.js'])
   })
 
   it('marks interactive components as client components and never marks a server module as one', () => {
@@ -124,13 +127,19 @@ describe('client bundle boundary', () => {
 })
 
 describe('public files', () => {
-  it('serves only original SVG diagrams from public/research-projects', () => {
-    const files = walk(join(root, 'public', 'research-projects'))
-    expect(files.length).toBe(14)
-    for (const f of files) {
-      expect(f.endsWith('.svg'), f).toBe(true)
-      const svg = readFileSync(f, 'utf8')
-      for (const piece of Object.values(ANSWER_KEYS).flatMap(k => Object.values(k)).flatMap(v => [v.why, v.working]).filter(Boolean)) expect(svg).not.toContain(piece)
+  it('publishes no lesson file: public/research-projects does not exist and assets live in the server-read-only folder', () => {
+    expect(existsSync(join(root, 'public', 'research-projects'))).toBe(false)
+    const files = walk(join(root, 'content', 'researchProjects', 'assets'))
+    expect(files.length).toBeGreaterThan(30)
+    for (const f of files) expect(/.(svg|csv)$/.test(f), f).toBe(true)
+  })
+
+  it('keeps answer-key text out of every protected asset, including the student-role ones', () => {
+    const pieces = Object.values(ANSWER_KEYS).flatMap(k => Object.values(k)).flatMap(v => [v.why, v.working]).filter(s => s && s.length > 30)
+    for (const f of walk(join(root, 'content', 'researchProjects', 'assets'))) {
+      if (f.includes('teacher')) continue
+      const src = readFileSync(f, 'utf8')
+      for (const piece of pieces) expect(src, rel(f)).not.toContain(piece)
     }
   })
 })
@@ -139,12 +148,12 @@ describe('ownership of new files', () => {
   it('adds new source only under the paths this feature owns', () => {
     const owned = [
       'lib/researchProjects/', 'components/ResearchProjects/', 'app/class/projects/', 'app/api/research-projects/',
-      'tests/researchProjects/', 'docs/researchProjects/', 'public/research-projects/diagrams/',
+      'tests/researchProjects/', 'docs/researchProjects/', 'content/researchProjects/assets/', 'scripts/researchProjects/',
     ]
     const all = [
       ...walk(join(root, 'lib', 'researchProjects')), ...walk(join(root, 'components', 'ResearchProjects')),
       ...walk(join(root, 'app', 'class', 'projects')), ...walk(join(root, 'app', 'api', 'research-projects')),
-      ...walk(join(root, 'tests', 'researchProjects')), ...walk(join(root, 'public', 'research-projects')),
+      ...walk(join(root, 'tests', 'researchProjects')), ...walk(join(root, 'content', 'researchProjects')), ...walk(join(root, 'scripts', 'researchProjects')),
     ].map(rel)
     for (const f of all) expect(owned.some(o => f.startsWith(o)), f).toBe(true)
   })
@@ -156,7 +165,8 @@ describe('ownership of new files', () => {
       ...walk(join(root, 'lib', 'researchProjects')), ...walk(join(root, 'components', 'ResearchProjects')),
       ...walk(join(root, 'app', 'class', 'projects')), ...walk(join(root, 'app', 'api', 'research-projects')),
     ].filter(f => /\.(js|jsx)$/.test(f))
-    const builtin = /^(node:|react$|react\/|next\/)/
+    // server-only is the React marker package; Next resolves it, and it is present in the lockfile transitively.
+    const builtin = /^(node:|react$|react\/|next\/|server-only$)/
     for (const f of entries) {
       for (const spec of importsOf(f)) {
         if (spec.startsWith('.') || spec.startsWith('@/')) continue
@@ -165,5 +175,33 @@ describe('ownership of new files', () => {
         expect(known.has(name), `${rel(f)} imports ${spec}`).toBe(true)
       }
     }
+  })
+})
+
+describe('server-only boundary', () => {
+  const lib = join(root, 'lib', 'researchProjects')
+  const marked = f => readFileSync(f, 'utf8').startsWith("import 'server-only'")
+
+  it('marks every server module, every content module and the asset manifest as server-only', () => {
+    const files = [
+      'access.js', 'answerKeys.js', 'answerKeysSupplemental.js', 'assets.js', 'deps.js', 'http.js', 'membership.js', 'pageAccess.js', 'schema.js', 'service.js', 'store.js',
+    ].map(f => join(lib, f))
+    for (const f of walk(join(lib, 'content'))) files.push(f)
+    for (const f of files) expect(marked(f), rel(f)).toBe(true)
+  })
+
+  it('never marks a client-safe module as server-only, and keeps every file a client component reaches unmarked', () => {
+    const clientSafe = ['richText.js', 'shared.js', 'config.js'].map(f => join(lib, f)).concat(walk(join(lib, 'sim')))
+    for (const f of clientSafe) expect(marked(f), rel(f)).toBe(false)
+    const componentFiles = walk(join(root, 'components', 'ResearchProjects')).filter(f => /\.(js|jsx)$/.test(f))
+    const { files } = closure(componentFiles)
+    for (const f of files) expect(marked(f), rel(f)).toBe(false)
+  })
+
+  it('has route handlers and pages that import only through server-marked modules', () => {
+    for (const f of walk(join(root, 'app', 'api', 'research-projects'))) {
+      for (const spec of importsOf(f)) expect(spec).toMatch(/^@\/lib\/researchProjects\/(http|deps)$/)
+    }
+    expect(readFileSync(join(root, 'lib', 'researchProjects', 'store.js'), 'utf8')).not.toMatch(/createIndex/)
   })
 })

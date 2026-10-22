@@ -166,3 +166,10 @@
   .library, .workspace { padding-inline: 4%; }
   .sectionNav { margin: 0 -4%; padding: 0 4%; }
 }
+
+.tileImage { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--borderColor, #e6e6e6); background: #fff; aspect-ratio: 32 / 19; object-fit: contain; }
+.modeSwitch { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.modeSwitch button[aria-pressed='true'] { background: var(--textColor, #111); color: var(--background, #fefefe); border-color: var(--textColor, #111); }
+.downloads { margin-top: 16px; padding: 12px 16px; border: 1px solid var(--borderColor, #e6e6e6); border-radius: 12px; background: #fcfcfb; }
+.downloads ul { padding-left: 20px; line-height: 1.7; }
+.teacherOnly { margin-top: 12px; padding: 12px 16px; border: 2px solid #b45309; border-radius: 12px; background: #fff7ed; }

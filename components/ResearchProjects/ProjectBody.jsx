@@ -11,6 +11,7 @@ import styles from './ResearchProjects.module.css'
 
 const STATUS_NOTE = {
   read: 'opened and read for this library on 22 October 2026',
+  checked: 'link checked by the content owner on 22 October 2026; page text not separately read here',
   reference: 'cited reference for the physics; not opened for this library',
   unavailable: 'could not be loaded when checked; nothing is described from it',
 }
@@ -57,7 +58,7 @@ function Section({ id, title, children }) {
 }
 
 export const SECTIONS = [
-  ['overview', 'Overview'], ['concepts', 'Concepts'], ['build', 'Build steps'], ['safety', 'Equipment and safety'],
+  ['overview', 'Overview'], ['lesson', '60-minute lesson'], ['concepts', 'Concepts'], ['build', 'Build steps'], ['safety', 'Equipment and safety'],
   ['milestones', 'Milestones and tasks'], ['plan', 'Team plan'], ['simulation', 'Simulation'], ['data', 'Data'],
   ['questions', 'Questions'], ['rubric', 'Rubric'], ['sources', 'Sources'],
 ]
@@ -107,10 +108,29 @@ export default function ProjectBody({
             <p><RichText text={project.proposed.text} /></p>
           </div>
         </div>
+        <p className={styles.note}><strong>Readiness.</strong> {project.readiness}</p>
         <h3>Before you start</h3>
         <ul>{project.prerequisites.map(p => <li key={p}><RichText text={p} /></li>)}</ul>
         <h3>Specific cautions</h3>
         <ul className={styles.warnings}>{project.caveats.map(c => <li key={c}><RichText text={c} /></li>)}</ul>
+      </Section>
+
+      <Section id="lesson" title={project.lesson60.title}>
+        <p className={styles.note}>{project.lesson60.intro}</p>
+        <ol className={styles.steps}>
+          {project.todo.filter(t => t.section === 'lesson').map((t, i) => {
+            const step = project.lesson60.steps[i]
+            return (
+              <li key={t.id}>
+                <h3>{step.minutes} min: {step.title}</h3>
+                <p><RichText text={step.body} /></p>
+                <label className={styles.stepDone}>
+                  <input type="checkbox" checked={!!doc.todo[t.id]} disabled={!editable} onChange={() => onToggle(t.id)} /> Mark this part done
+                </label>
+              </li>
+            )
+          })}
+        </ol>
       </Section>
 
       <Section id="concepts" title="Concepts">
@@ -201,6 +221,18 @@ export default function ProjectBody({
       <Section id="data" title="Data table, units and uncertainty">
         <p className={styles.note}>{project.dataset.intro}</p>
         <DataTable columns={project.dataset.columns} rows={doc.dataset} editable={editable} canMeasure={canMeasure} onChange={onDataset} />
+        {project.downloads.length ? (
+          <div className={styles.downloads}>
+            <h3>Downloadable teaching files</h3>
+            <ul>
+              {project.downloads.map(d => (
+                <li key={d.id}>
+                  <a href={d.url} download={d.filename}>{d.label}</a> <span className={styles.unit}>({d.filename}). {d.note}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </Section>
 
       <Section id="questions" title="Questions">

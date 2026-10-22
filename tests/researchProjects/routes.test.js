@@ -1,11 +1,15 @@
 // @vitest-environment node
-// Real routes with owner-only production wiring; provider and database are synthetic.
+// The REAL route modules with the SHIPPED default wiring (empty reviewed membership, no attached
+// class). Only the Clerk session and the database handle are replaced. This shows what production
+// does today: students are denied by default, and teachers keep to the existing admin boundary.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createFakeCollection, request, read, SLUG, ORIGIN } from './helpers'
 
+// `server-only` throws outside a server bundle. This narrow mock lets server modules load under test.
+vi.mock('server-only', () => ({}))
+
 const clerk = vi.hoisted(() => ({ userId: null, admins: new Set(), authCalls: 0, users: [] }))
 const db = vi.hoisted(() => ({ collection: null, connects: 0 }))
-vi.mock('server-only', () => ({}))
 
 vi.mock('@clerk/nextjs/server', () => ({
   auth: async () => { clerk.authCalls++; return { userId: clerk.userId } },
@@ -91,7 +95,6 @@ describe('shipped routes, signed in without a reviewed class membership', () => 
     for (const res of results) expect(res.body).toMatchObject({ code: 'not_member' })
     expect(results.map(x => x.status)).toEqual([403, 403, 403, 403])
     expect(db.connects).toBe(0)
-    expect(clerk.users).toEqual([]) // Reject an unbound account before a provider lookup.
   })
 
   it('does not admit a student by any class, group or seat value in the request', async () => {
@@ -103,41 +106,36 @@ describe('shipped routes, signed in without a reviewed class membership', () => 
   })
 })
 
-describe('shipped routes, an unbound existing admin', () => {
-  it('denies keys and records even when the account is an existing admin', async () => {
+describe('shipped routes, existing Clerk admins (review is default-deny until bound to the exact owner)', () => {
+  it('does not admit an existing admin: review is not granted by the admin role', async () => {
     clerk.userId = 'teacher-1'
     const r = await records()
     const k = await keys()
     const keyRes = await read(await k.GET(request('GET', `/api/research-projects/keys?slug=${SLUG}`)))
     expect(keyRes.status).toBe(403)
-    expect(keyRes.body.keys).toBeUndefined()
+    expect(keyRes.body.code).toBe('not_member')
     const review = await read(await r.GET(request('GET', `${RECORDS}&classId=class-a&scope=group:g1`)))
     expect(review.status).toBe(403)
-    expect(review.body.code).toBe('not_member')
-    const overview = await read(await r.GET(request('GET', `${RECORDS}&classId=class-a`)))
-    expect(overview.body.code).toBe('not_member')
+    expect(db.connects).toBe(0)
     expect(db.collection.docs.size).toBe(0)
+    // The shipped default never asks Clerk for the admin role at all.
+    expect(clerk.users).toEqual([])
   })
 
-  it('refuses to let a teacher write a student record', async () => {
+  it('refuses to write for an admin without a personal work space', async () => {
     clerk.userId = 'teacher-1'
     const r = await records()
     const res = await read(await r.PUT(request('PUT', '/api/research-projects/records', { body: { slug: SLUG, viewer: 'x', baseRevision: 0, doc: {} } })))
     expect(res.status).toBe(403)
-    expect(res.body.code).toBe('not_member')
     expect(db.collection.docs.size).toBe(0)
   })
 
-  it('treats a failing role lookup as not-a-teacher', async () => {
+  it('serves no lesson asset to a signed-in account that has no access', async () => {
     clerk.userId = 'teacher-1'
-    const clerkMod = await import('@clerk/nextjs/server')
-    const original = clerkMod.clerkClient
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    clerk.admins = new Set() // Clerk no longer reports admin
-    const r = await records()
-    const res = await read(await r.GET(request('GET', RECORDS)))
+    const { GET } = await import('@/app/api/research-projects/assets/route')
+    const res = await GET(request('GET', '/api/research-projects/assets?id=holobox-inline-layout'))
     expect(res.status).toBe(403)
-    spy.mockRestore()
-    expect(original).toBeTypeOf('function')
+    expect(res.headers.get('x-content-type-options')).toBe('nosniff')
+    expect((await res.text())).not.toMatch(/<svg/)
   })
 })

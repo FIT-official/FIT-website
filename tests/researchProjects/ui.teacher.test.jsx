@@ -8,6 +8,9 @@ import { getProject } from '@/lib/researchProjects/content'
 import { handleRecordsGet, handleRecordsPut, handleActionsPost, handleKeysGet } from '@/lib/researchProjects/http'
 import { createWorld, WORLD_MEMBERS, installFetch, viewerFor, fullDoc, SLUG, request, read } from './helpers'
 
+// `server-only` throws outside a server bundle. This narrow mock lets server modules load under test.
+vi.mock('server-only', () => ({}))
+
 const project = getProject(SLUG)
 const RECORDS = `/api/research-projects/records?slug=${SLUG}`
 
@@ -36,7 +39,7 @@ async function studentSubmit(w, userId) {
 
 async function openTeacher(w, classIds = ['class-a']) {
   const viewer = await viewerFor(w, 'teacher-1')
-  const utils = render(<ProjectWorkspace project={project} role="teacher" viewer={viewer} classIds={classIds} />)
+  const utils = render(<ProjectWorkspace project={project} canReview viewer={viewer} classIds={classIds} />)
   return { ...utils, viewer, user: userEvent.setup() }
 }
 
@@ -86,8 +89,8 @@ describe('teacher review of team records', () => {
     const g1 = within(table).getByText('Group g1').closest('tr')
     const g2 = within(table).getByText('Group g2').closest('tr')
     expect(within(g1).getByText('Draft')).toBeInTheDocument()
-    expect(within(g1).getByText('5/27')).toBeInTheDocument()
-    expect(within(g2).getByText('0/27')).toBeInTheDocument()
+    expect(within(g1).getByText(`5/${project.todo.length}`)).toBeInTheDocument()
+    expect(within(g2).getByText(`0/${project.todo.length}`)).toBeInTheDocument()
     await user.click(within(g2).getByRole('button', { name: 'Open Group g2' }))
     await screen.findByText(/Group g2 · Draft · revision 1/)
     expect(screen.getByRole('textbox', { name: 'Bounded research question' })).toHaveValue('Group two question statement')
@@ -214,8 +217,8 @@ describe('teacher review of team records', () => {
     await screen.findByRole('region', { name: 'Teams' })
     cleanup()
     w.session.userId = 'stu-a1' // another tab: a student signs in
-    render(<ProjectWorkspace project={project} role="teacher" viewer={viewer} classIds={['class-a']} />)
-    expect(await screen.findByText(/Could not load the class./)).toBeInTheDocument()
+    render(<ProjectWorkspace project={project} canReview viewer={viewer} classIds={['class-a']} />)
+    expect(await screen.findByText(/Review access required./)).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Teams' })).not.toBeInTheDocument()
     expect(document.body.textContent).not.toContain('Group g1')
   })

@@ -1,0 +1,4 @@
+data_origin,role,pixel,reference_wavelength_nm
+SYNTHETIC,fit,100,450
+SYNTHETIC,fit,300,550
+SYNTHETIC,holdout,500,650

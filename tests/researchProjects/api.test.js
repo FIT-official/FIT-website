@@ -10,6 +10,9 @@ import { ANSWER_KEYS } from '@/lib/researchProjects/answerKeys'
 import { LIMITS } from '@/lib/researchProjects/config'
 import { createWorld, WORLD_MEMBERS, request, read, fullDoc, SLUG, ORIGIN } from './helpers'
 
+// `server-only` throws outside a server bundle. This narrow mock lets server modules load under test.
+vi.mock('server-only', () => ({}))
+
 const project = getProject(SLUG)
 const RECORDS = '/api/research-projects/records'
 const call = async (handler, deps, method, path, opts) => read(await handler(request(method, path, opts), deps))
@@ -99,7 +102,11 @@ describe('signed-in but not a member', () => {
     const r = await call(handleRecordsGet, w.deps, 'GET', `${RECORDS}?slug=${SLUG}&classId=class-a&scope=group:g1&role=teacher`, { headers: { 'x-role': 'teacher' } })
     expect(r.status).toBe(403)
     w.as('stu-a1')
-    const own = await call(handleRecordsGet, w.deps, 'GET', `${RECORDS}?slug=${SLUG}&classId=class-b&scope=group:g2`)
+    // A student naming another class or team gets a refusal (review mode), never that team's data.
+    const peek = await call(handleRecordsGet, w.deps, 'GET', `${RECORDS}?slug=${SLUG}&classId=class-b&scope=group:g2`)
+    expect(peek.status).toBe(403)
+    expect(peek.body.code).toBe('teacher_only')
+    const own = await getRecord(w.deps)
     expect(own.status).toBe(200)
     expect(own.body.role).toBe('student')
     // An extra identity field in a body is rejected rather than trusted.
@@ -395,7 +402,7 @@ describe('revisions, races and conflicts', () => {
     w.as('teacher-1')
     const t = await put(w.deps, { slug: SLUG, viewer: open.body.viewer, baseRevision: 0, doc: fullDoc(project) })
     expect(t.status).toBe(403)
-    expect(t.body.code).toBe('student_only')
+    expect(t.body.code).toBe('no_personal_work')
   })
 })
 

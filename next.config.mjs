@@ -8,6 +8,7 @@ const nextConfig = {
     poweredByHeader: false,
     serverExternalPackages: ['libheif-js'],
     outputFileTracingIncludes: {
+        '/api/research-projects/assets': ['./content/researchProjects/assets/**/*'],
         '/simulations/[activity]': ['./content/sims/html/**/*'],
         '/api/printer-repair/photos': ['./lib/printerRepair/photoDecodeWorker.cjs', './node_modules/libheif-js/**/*'],
     },

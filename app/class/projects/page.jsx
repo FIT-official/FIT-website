@@ -11,5 +11,5 @@ export const dynamic = 'force-dynamic'
 export default async function ProjectsPage() {
   const access = await getPageAccess(defaultDeps())
   if (!access.ok) return <AccessNotice status={access.status} />
-  return <Library projects={projectSummaries()} role={access.role} />
+  return <Library projects={projectSummaries()} canReview={access.canReview} />
 }

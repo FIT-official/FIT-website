@@ -1,12 +1,15 @@
 // @vitest-environment node
 // Access adapter tests use SYNTHETIC accounts and an injected membership mapping.
 // They prove the adapter's rules; they do not show that any real class has been connected.
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { resolveAccess, AccessError } from '@/lib/researchProjects/access'
 import { activeMembership, denyAllMembership, createReviewedRegistryMembership, REVIEWED_MEMBERS } from '@/lib/researchProjects/membership'
 import { ATTACHED_CLASS_IDS } from '@/lib/researchProjects/config'
 import { getPageAccess } from '@/lib/researchProjects/pageAccess'
 import { createWorld, WORLD_MEMBERS, reviewed } from './helpers'
+
+// `server-only` throws outside a server bundle. This narrow mock lets server modules load under test.
+vi.mock('server-only', () => ({}))
 
 const fails = async (promise, status, code) => {
   const error = await promise.then(() => null, e => e)
@@ -53,7 +56,7 @@ describe('access adapter', () => {
     const { deps, session } = createWorld({ members: WORLD_MEMBERS })
     session.userId = 'stu-a1'
     const access = await resolveAccess(null, deps)
-    expect(access).toMatchObject({ role: 'student', classId: 'class-a', groupId: 'g1', scope: 'group:g1', memberId: 'm-a1' })
+    expect(access).toMatchObject({ role: 'student', canReview: false, personal: { classId: 'class-a', groupId: 'g1', scope: 'group:g1', memberId: 'm-a1' } })
   })
 
   it('denies a mapped student whose class is not attached to the library', async () => {
@@ -71,7 +74,7 @@ describe('access adapter', () => {
   it('gives an individual scope to a student with no group', async () => {
     const { deps, session } = createWorld({ members: WORLD_MEMBERS })
     session.userId = 'stu-solo'
-    expect((await resolveAccess(null, deps)).scope).toBe('member:m-solo')
+    expect((await resolveAccess(null, deps)).personal.scope).toBe('member:m-solo')
   })
 
   it('gives different viewer keys to different accounts and scopes', async () => {
@@ -123,14 +126,14 @@ describe('page access gate', () => {
     expect(await getPageAccess(deps)).toMatchObject({ ok: false, status: 403, code: 'not_member' })
     session.userId = 'stu-a1'
     const student = await getPageAccess(deps)
-    expect(student).toMatchObject({ ok: true, role: 'student', classIds: null })
+    expect(student).toMatchObject({ ok: true, role: 'student', canReview: false, hasPersonal: true, classIds: null })
     session.userId = 'teacher-1'
     expect(await getPageAccess(deps)).toMatchObject({ ok: true, role: 'teacher', classIds: ['class-a'] })
   })
 
   it('reports an unexpected error as unavailable and never as ok', async () => {
     const { deps } = createWorld()
-    deps.isAdmin = async () => { throw new Error('boom') }
+    deps.canReview = async () => { throw new Error('boom') }
     deps.authenticate = async () => 'someone'
     expect(await getPageAccess(deps)).toMatchObject({ ok: false, status: 503 })
   })

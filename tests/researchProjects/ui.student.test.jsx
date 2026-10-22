@@ -10,6 +10,9 @@ import { runSimulation, SIMULATIONS } from '@/lib/researchProjects/sim'
 import { createWorld, WORLD_MEMBERS, installFetch, viewerFor, fullDoc, SLUG, request, read } from './helpers'
 import { handleRecordsPut, handleActionsPost, handleRecordsGet } from '@/lib/researchProjects/http'
 
+// `server-only` throws outside a server bundle. This narrow mock lets server modules load under test.
+vi.mock('server-only', () => ({}))
+
 const project = getProject(SLUG)
 
 function setup(options = {}) {
@@ -20,7 +23,7 @@ function setup(options = {}) {
 
 async function open(w, userId = 'stu-a1', slug = SLUG) {
   const viewer = await viewerFor(w, userId)
-  const utils = render(<ProjectWorkspace project={getProject(slug)} role="student" viewer={viewer} classIds={null} />)
+  const utils = render(<ProjectWorkspace project={getProject(slug)} hasPersonal viewer={viewer} classIds={null} />)
   await screen.findByRole('region', { name: /save status/i })
   return { ...utils, viewer, user: userEvent.setup() }
 }
@@ -61,7 +64,7 @@ describe('project content as a student sees it', () => {
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'))
     const figures = screen.getAllByAltText(/block diagram|two panels/i)
     expect(figures.length).toBeGreaterThanOrEqual(2)
-    for (const img of figures) expect(img.getAttribute('src')).toMatch(/^\/research-projects\/diagrams\/.+\.svg$/)
+    for (const img of figures) expect(img.getAttribute('src')).toMatch(/^\/api\/research-projects\/assets\?id=[a-z0-9-]+$/)
     expect(screen.getAllByText('Diagram (original, explanatory)').length).toBeGreaterThanOrEqual(2)
     expect(screen.getAllByText(/Original explanatory diagram/).length).toBeGreaterThanOrEqual(2)
   })
@@ -81,20 +84,20 @@ describe('project content as a student sees it', () => {
     expect(visible).not.toMatch(/[\^_]\{/)
   })
 
-  it('keeps every project working: each of the seven mounts with its simulation, data table and questions', async () => {
+  it('keeps every project working: each of the ten mounts with its simulation, data table and questions', async () => {
     const { PROJECTS } = await import('@/lib/researchProjects/content')
     for (const p of PROJECTS) {
       const w = setup()
       const viewer = await viewerFor(w, 'stu-a1')
-      const { unmount, container } = render(<ProjectWorkspace project={p} role="student" viewer={viewer} />)
+      const { unmount, container } = render(<ProjectWorkspace project={p} hasPersonal viewer={viewer} />)
       await screen.findByRole('region', { name: /save status/i })
       expect(screen.getByRole('heading', { level: 1, name: p.title })).toBeInTheDocument()
       expect(screen.getByRole('heading', { level: 3, name: SIMULATIONS[p.simId].title })).toBeInTheDocument()
-      expect(screen.getAllByRole('radio').length).toBe(8)
+      expect(screen.getAllByRole('radio').length).toBe(4 * p.questions.filter(q => q.type === 'mcq').length)
       expect(screen.getByRole('heading', { name: 'Rubric' })).toBeInTheDocument()
       expect(screen.getAllByRole('textbox').length).toBeGreaterThan(8)
       expect(container.querySelectorAll('svg[role="img"]').length).toBeGreaterThan(0)
-      expect(container.querySelectorAll('img').length).toBeGreaterThanOrEqual(2)
+      expect(container.querySelectorAll('img').length).toBeGreaterThanOrEqual(p.diagrams.length)
       unmount()
       cleanup()
     }
@@ -300,7 +303,7 @@ describe('conflicts, offline and errors', () => {
     const w = setup()
     const viewer = await viewerFor(w, 'stu-a1')
     w.hook = async () => { throw new TypeError('Failed to fetch') }
-    render(<ProjectWorkspace project={project} role="student" viewer={viewer} />)
+    render(<ProjectWorkspace project={project} hasPersonal viewer={viewer} />)
     expect(await screen.findByText('Could not load your record')).toBeInTheDocument()
     expect(screen.getByText(/appear to be offline/)).toBeInTheDocument()
     w.hook = null
@@ -311,7 +314,7 @@ describe('conflicts, offline and errors', () => {
     const w2 = setup()
     const v2 = 'x'.repeat(24)
     w2.session.userId = 'someone-else'
-    render(<ProjectWorkspace project={project} role="student" viewer={v2} />)
+    render(<ProjectWorkspace project={project} hasPersonal viewer={v2} />)
     expect(await screen.findByText('Not available')).toBeInTheDocument()
     expect(screen.getByText(/not available for your account/i)).toBeInTheDocument()
     expect(screen.queryByLabelText(/Bounded research question/)).not.toBeInTheDocument()
@@ -335,7 +338,7 @@ describe('account switching and stale responses', () => {
     const w = setup()
     const staleViewer = await viewerFor(w, 'stu-a1')
     w.session.userId = 'stu-a3'
-    render(<ProjectWorkspace project={project} role="student" viewer={staleViewer} />)
+    render(<ProjectWorkspace project={project} hasPersonal viewer={staleViewer} />)
     expect(await screen.findByRole('heading', { name: 'Signed in as a different account' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Reload the page' })).toBeInTheDocument()
     expect(screen.queryByRole('textbox', { name: 'Bounded research question' })).not.toBeInTheDocument()
@@ -365,7 +368,7 @@ describe('account switching and stale responses', () => {
     const gate = new Promise(r => { release = r })
     w.hook = async (method) => { if (method === 'GET') await gate; return undefined }
     const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
-    const { unmount } = render(<ProjectWorkspace project={project} role="student" viewer={viewer} />)
+    const { unmount } = render(<ProjectWorkspace project={project} hasPersonal viewer={viewer} />)
     expect(screen.getByText(/Loading your team’s record/)).toBeInTheDocument()
     unmount()
     release()
@@ -389,10 +392,10 @@ describe('account switching and stale responses', () => {
       if (first) { first = false; await gate; return stale }
       return undefined
     }
-    const { rerender } = render(<ProjectWorkspace project={project} role="student" viewer={viewer} />)
+    const { rerender } = render(<ProjectWorkspace project={project} hasPersonal viewer={viewer} />)
     await waitFor(() => expect(w.calls.filter(c => c.method === 'GET')).toHaveLength(1))
     // The student moves on before the first request answers; a second load for another project finishes first.
-    rerender(<ProjectWorkspace project={other} role="student" viewer={viewer} />)
+    rerender(<ProjectWorkspace project={other} hasPersonal viewer={viewer} />)
     await screen.findByRole('region', { name: /save status/i })
     expect(w.calls.filter(c => c.method === 'GET')).toHaveLength(2)
     expect(w.calls[1].search).toContain(other.slug)
@@ -474,7 +477,7 @@ describe('answer key policy in the student view', () => {
     expect(screen.queryByRole('button', { name: /answer key/i })).not.toBeInTheDocument()
     expect(document.body.textContent).not.toMatch(/Marking points|Correct option/)
     const { PROJECTS } = await import('@/lib/researchProjects/content')
-    expect(PROJECTS.length).toBe(7)
+    expect(PROJECTS.length).toBe(10)
 
     // Make the record complete, submitted and released through the API as a teacher would.
     await teammateSave(w, 'stu-a1', fullDoc(project, { answers: { q1: { choice: 'c' }, q4: { value: '0.2835' } } }))

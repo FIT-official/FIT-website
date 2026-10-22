@@ -284,7 +284,7 @@ export function useProjectRecord({ slug, viewer }) {
 
 // Answer-key fetch, only used when the server says release is allowed (teacher, or released record).
 export function useKeys(slug, query = '') {
-  const [state, setState] = useState({ status: 'idle', keys: null, auto: {}, message: '' })
+  const [state, setState] = useState({ status: 'idle', keys: null, auto: {}, teacher: null, message: '' })
   const epoch = useRef(0)
   const ctl = useRef(null)
   useEffect(() => () => { epoch.current += 1; ctl.current?.abort() }, [])
@@ -292,7 +292,7 @@ export function useKeys(slug, query = '') {
   useEffect(() => {
     epoch.current += 1
     ctl.current?.abort()
-    setState({ status: 'idle', keys: null, auto: {}, message: '' })
+    setState({ status: 'idle', keys: null, auto: {}, teacher: null, message: '' })
   }, [slug, query])
   const load = useCallback(async () => {
     ctl.current?.abort()
@@ -303,13 +303,13 @@ export function useKeys(slug, query = '') {
     try {
       const r = await requestJson('GET', keysUrl(slug, query), { signal: c.signal })
       if (epoch.current !== mine) return
-      if (r.ok) setState({ status: 'ready', keys: r.data.keys, auto: r.data.auto || {}, message: '' })
-      else setState({ status: 'denied', keys: null, auto: {}, message: r.data?.error || 'Answer keys are not available.' })
+      if (r.ok) setState({ status: 'ready', keys: r.data.keys, auto: r.data.auto || {}, teacher: r.data.teacher || null, message: '' })
+      else setState({ status: 'denied', keys: null, auto: {}, teacher: null, message: r.data?.error || 'Answer keys are not available.' })
     } catch (error) {
       if (isAbort(error) || epoch.current !== mine) return
-      setState({ status: 'error', keys: null, auto: {}, message: 'Could not load the answer key. Check your connection and retry.' })
+      setState({ status: 'error', keys: null, auto: {}, teacher: null, message: 'Could not load the answer key. Check your connection and retry.' })
     }
   }, [slug, query])
-  const clear = useCallback(() => { epoch.current += 1; ctl.current?.abort(); setState({ status: 'idle', keys: null, auto: {}, message: '' }) }, [])
+  const clear = useCallback(() => { epoch.current += 1; ctl.current?.abort(); setState({ status: 'idle', keys: null, auto: {}, teacher: null, message: '' }) }, [])
   return { ...state, load, clear }
 }

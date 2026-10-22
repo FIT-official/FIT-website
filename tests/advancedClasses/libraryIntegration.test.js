@@ -33,6 +33,7 @@ import * as records from '@/app/api/research-projects/records/route'
 import * as keys from '@/app/api/research-projects/keys/route'
 import { defaultDeps } from '@/lib/researchProjects/deps'
 import { getPageAccess } from '@/lib/researchProjects/pageAccess'
+import { handleRecordsPut } from '@/lib/researchProjects/http'
 
 const fit = OWNER_BINDINGS.find(b => b.review)
 const personal = OWNER_BINDINGS.find(b => !b.review)
@@ -59,10 +60,11 @@ describe('owner-only production integration', () => {
   })
   it('gives both approved owners separate durable personal work and ignores forged ownership', async () => {
     state.userId = fit.userId
-    const first = await get(); expect(first.body.role).toBe('student')
+    const first = await get(); expect(first.body.role).toBe('teacher')
     expect((await save(first.body.viewer, 0, 'FIT synthetic work')).status).toBe(200)
     state.userId = personal.userId
-    const second = await get(recordPath + `&classId=${fit.workspaceId}&scope=member:${fit.memberScope}`)
+    expect((await get(recordPath + `&classId=${fit.workspaceId}&scope=member:${fit.memberScope}`)).status).toBe(403)
+    const second = await get()
     expect(second.body.record.revision).toBe(0)
     expect(second.body.record.doc.plan.question).toBe('')
     expect((await save(second.body.viewer, 0, 'Personal synthetic work')).status).toBe(200)
@@ -70,10 +72,10 @@ describe('owner-only production integration', () => {
     expect((await get()).body.record.doc.plan.question).toBe('FIT synthetic work')
     expect(state.collection.docs.size).toBe(2)
   })
-  it('requires explicit review mode plus the exact FIT binding and live admin role for keys', async () => {
+  it('requires the exact FIT binding and live admin role for unreleased keys', async () => {
     const path = `/api/research-projects/keys?slug=${SLUG}`
     state.userId = fit.userId
-    expect((await keys.GET(request('GET', path))).status).toBe(403)
+    expect((await keys.GET(request('GET', path))).status).toBe(200)
     const review = await read(await keys.GET(request('GET', path + '&view=review')))
     expect(review.status).toBe(200); expect(review.body.role).toBe('teacher')
     expect(Object.keys(review.body.keys).length).toBeGreaterThan(0)
@@ -85,7 +87,13 @@ describe('owner-only production integration', () => {
   it('conflicts concurrent first saves and stale revisions instead of overwriting', async () => {
     state.userId = personal.userId
     const { body } = await get()
-    const outcomes = await Promise.all(Array.from({ length: 6 }, (_, n) => save(body.viewer, 0, `Concurrent draft ${n}`)))
+    // Exercise the real owner adapter and HTTP/service/store concurrency without
+    // concurrent Vitest dynamic imports of the Mongo transport.
+    const deps = { ...defaultDeps(), authenticate: async () => personal.userId, collection: async () => state.collection }
+    const outcomes = await Promise.all(Array.from({ length: 6 }, (_, n) => {
+      const doc = emptyDocument(); doc.plan.question = `Concurrent draft ${n}`
+      return handleRecordsPut(request('PUT', '/api/research-projects/records', { body: { slug: SLUG, viewer: body.viewer, baseRevision: 0, doc } }), deps).then(read)
+    }))
     expect(outcomes.filter(x => x.status === 200)).toHaveLength(1)
     expect(outcomes.filter(x => x.status === 409)).toHaveLength(5)
     expect((await save(body.viewer, 0, 'Stale overwrite')).status).toBe(409)
@@ -101,13 +109,13 @@ describe('owner-only production integration', () => {
     expect((await get()).status).toBe(403)
     expect(state.collection.docs.size).toBe(0)
   })
-  it('separates personal and review viewers and exposes capability without identities in page props', async () => {
+  it('exposes independent personal/review capabilities without identities in page props', async () => {
     state.userId = fit.userId
     const work = await getPageAccess(defaultDeps())
     const review = await getPageAccess(defaultDeps({ view: 'review' }))
-    expect(work).toMatchObject({ role: 'student', canReview: true })
-    expect(review).toMatchObject({ role: 'teacher', canReview: true })
-    expect(work.viewer).not.toBe(review.viewer)
+    expect(work).toMatchObject({ role: 'teacher', canReview: true, hasPersonal: true })
+    expect(review).toMatchObject({ role: 'teacher', canReview: true, hasPersonal: true })
+    expect(work.viewer).toBe(review.viewer)
     expect(JSON.stringify(work)).not.toContain(fit.userId)
     state.userId = personal.userId
     expect(await getPageAccess(defaultDeps())).toMatchObject({ role: 'student', canReview: false })

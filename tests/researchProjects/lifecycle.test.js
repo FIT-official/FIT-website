@@ -1,10 +1,13 @@
 // @vitest-environment node
 // Lifecycle, teacher boundary and answer-key policy. SYNTHETIC accounts and an in-memory collection.
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { handleRecordsGet, handleRecordsPut, handleActionsPost, handleKeysGet } from '@/lib/researchProjects/http'
 import { getProject } from '@/lib/researchProjects/content'
 import { ANSWER_KEYS } from '@/lib/researchProjects/answerKeys'
 import { createWorld, WORLD_MEMBERS, request, read, fullDoc, SLUG } from './helpers'
+
+// `server-only` throws outside a server bundle. This narrow mock lets server modules load under test.
+vi.mock('server-only', () => ({}))
 
 const project = getProject(SLUG)
 const RECORDS = '/api/research-projects/records'
@@ -180,7 +183,7 @@ describe('review, submit and revise', () => {
     const t = await w.teacher()
     const asTeacher = await act(w.deps, { viewer: t.body.viewer, action: 'submit', baseRevision: 1 })
     expect(asTeacher.status).toBe(403)
-    expect(asTeacher.body.code).toBe('student_only')
+    expect(asTeacher.body.code).toBe('no_personal_work')
     expect([...w.collection.docs.values()][0]).toMatchObject({ status: 'draft', safetyReview: null, keyRelease: null })
   })
 })

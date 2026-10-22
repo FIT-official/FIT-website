@@ -71,7 +71,7 @@ export const ORIGIN = 'https://fit.test'
 
 // session.userId is the currently signed-in synthetic user; null means signed out.
 // Switching it mid-test simulates an account switch in another tab.
-export function createWorld({ admins = ['teacher-1'], members = [], attached = ['class-a'] } = {}) {
+export function createWorld({ admins = ['teacher-1', 'owner-a'], members = [], attached = ['class-a'] } = {}) {
   const session = { userId: null }
   const collection = createFakeCollection()
   let counter = 0
@@ -81,7 +81,7 @@ export function createWorld({ admins = ['teacher-1'], members = [], attached = [
       if (!session.userId) throw Object.assign(new Error('Unauthorized'), { name: 'UnauthorizedError' })
       return session.userId
     },
-    async isAdmin(userId) { return admins.includes(userId) },
+    async canReview(userId) { return admins.includes(userId) },
     membership: createReviewedRegistryMembership(members),
     attachedClassIds: attached,
     collection: async () => collection,
@@ -96,6 +96,9 @@ export const reviewed = (userId, classId, groupId, memberId = userId + '-m', lab
 })
 
 export const WORLD_MEMBERS = [
+  // Two "owner" style accounts: both have personal work; only owner-a can also review (synthetic).
+  reviewed('owner-a', 'class-a', null, 'm-owner-a', 'Owner A'),
+  reviewed('owner-b', 'class-a', null, 'm-owner-b', 'Owner B'),
   reviewed('stu-a1', 'class-a', 'g1', 'm-a1', 'Avery'),
   reviewed('stu-a2', 'class-a', 'g1', 'm-a2', 'Blair'),
   reviewed('stu-a3', 'class-a', 'g2', 'm-a3', 'Casey'),

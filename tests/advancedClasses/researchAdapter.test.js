@@ -9,7 +9,6 @@ import { BINDINGS, FIT, PERSONAL, OTHER_ADMIN, STRANGER, directory } from './fix
 const accessFile = resolve(process.cwd(), 'lib/researchProjects/access.js')
 const haveAdapter = existsSync(accessFile)
 // Native Node import so the sibling checkout loads untransformed, exactly as it runs in production.
-const nativeImport = new Function('specifier', 'return import(specifier)')
 
 const base = { authenticate: async () => { throw new Error('replaced per test') } }
 const deps = (dir, mode) => createOwnerResearchDeps({ baseDeps: base, bindings: BINDINGS, fetchUser: dir.fetchUser, mode })
@@ -62,7 +61,7 @@ describe('owner deps for the research project adapter (synthetic)', () => {
       const out = {}
       for (const id of ['FIT', 'PERSONAL', 'OTHER_ADMIN', 'STRANGER']) for (const mode of ['student', 'teacher']) {
         const deps = { ...createOwnerResearchDeps({ baseDeps: {}, bindings, fetchUser, mode }), authenticate: async () => 'user_SYNTHETIC_' + id }
-        try { const a = await resolveAccess(null, deps); out[id + ':' + mode] = { role: a.role, memberId: a.memberId, scope: a.scope } }
+        try { const a = await resolveAccess(null, deps); out[id + ':' + mode] = { role: a.role, memberId: a.personal?.memberId, scope: a.personal?.scope } }
         catch (e) { out[id + ':' + mode] = e instanceof AccessError ? 'denied' : 'error' }
       }
       console.log(JSON.stringify(out))`
