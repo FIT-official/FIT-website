@@ -12,10 +12,6 @@ import styles from './gallery.module.css'
 const activities = getLiveSims()
 const present = key => activities.some(sim => topicKey(sim) === key)
 const topics = GALLERY_TOPICS.filter(topic => present(topic.key))
-// Badge colour overrides (Minister): Feedback's badge matches its teal art background.
-const BADGE_OVERRIDE = { feedback: { background: '#2EC4A6', color: '#111111' } }
-
-const Star = ({ on = true, size = 15 }) => <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className={on ? styles.starOn : styles.starOff}><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>
 const Check = () => <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
 const TOPIC_ICON = {
   ratio: <g fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="7" cy="13" r="4"/><circle cx="16.5" cy="11" r="5.5"/></g>,
@@ -37,7 +33,7 @@ const TOPIC_ICON = {
 
 function Tile({ sim, hidden, addToClassEnabled }) {
   const levels = simLevels(sim)
-  const stars = GALLERY_DIFFICULTIES.find(d => d.key === difficultyKey(sim))?.stars ?? 2
+  const difficulty = GALLERY_DIFFICULTIES.find(d => d.key === difficultyKey(sim))?.label ?? 'Medium'
   const art = GALLERY_ART[sim.id]
   return <li className={styles.item} hidden={hidden} data-level={levels.join(' ')} data-topic={topicKey(sim)} data-difficulty={difficultyKey(sim)}>
     <Link href={`/class/simulations/${sim.id}`} className={styles.tile}>
@@ -47,8 +43,8 @@ function Tile({ sim, hidden, addToClassEnabled }) {
       <span className={styles.body}>
         <h3>{sim.title}</h3>
         <span className={styles.meta}>
-          <ul className={styles.badges}>{levels.map(key => { const level = GALLERY_LEVELS.find(l => l.key === key); return <li key={key} data-level={key} className={styles.badge} style={BADGE_OVERRIDE[sim.id]}>{level.label}</li> })}</ul>
-          <span className={styles.stars} role="img" aria-label={`Difficulty: ${GALLERY_DIFFICULTIES[stars - 1].label}`}>{[1, 2, 3].map(n => <Star key={n} on={n <= stars} size={18}/>)}</span>
+          <ul className={styles.badges}>{levels.map(key => { const level = GALLERY_LEVELS.find(l => l.key === key); return <li key={key} data-level={key} className={styles.badge}>{level.label}</li> })}</ul>
+          <span className={styles.difficulty} aria-label={`Difficulty: ${difficulty}`}>{difficulty}</span>
         </span>
       </span>
     </Link>
@@ -73,12 +69,11 @@ export default function Library({ addToClassEnabled = false }) {
     <ClassTabs current="simulations" />
     <header className={styles.hero}>
       <h1>Simulations</h1>
-      <svg className={styles.shapes} viewBox="0 0 280 140" aria-hidden="true"><path d="M8 34c14-16 28-16 42 0s28 16 42 0" fill="none" stroke="#6A45F5" strokeWidth="7" strokeLinecap="round"/><circle cx="52" cy="92" r="36" fill="#FFC83D" stroke="#111" strokeWidth="5"/><path d="M128 124 160 58l32 66Z" fill="#FF6B3D" stroke="#111" strokeWidth="5" strokeLinejoin="round"/><rect x="204" y="62" width="58" height="58" rx="14" transform="rotate(12 233 91)" fill="#2EC4A6" stroke="#111" strokeWidth="5"/><circle cx="150" cy="24" r="9" fill="#FF9EC0" stroke="#111" strokeWidth="4"/><circle cx="248" cy="18" r="11" fill="#1F66E5" stroke="#111" strokeWidth="4"/></svg>
     </header>
     <section className={styles.panel} aria-label="Filters">
       <div className={styles.row} role="group" aria-labelledby="filter-level"><h2 id="filter-level">Level</h2><div className={styles.chips}>{GALLERY_LEVELS.map(level => chip('level', level.key, level.label, filters.level.includes(level.key) ? <Check/> : <span className={styles.dot} aria-hidden="true"/>, { 'data-level': level.key }))}</div></div>
       <div className={styles.row} role="group" aria-labelledby="filter-topic"><h2 id="filter-topic">Topic</h2><div className={styles.chips}>{topics.map(topic => chip('topic', topic.key, topic.label, <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" className={styles.icon}>{TOPIC_ICON[topic.key]}</svg>))}</div></div>
-      <div className={styles.row} role="group" aria-labelledby="filter-difficulty"><h2 id="filter-difficulty">Difficulty</h2><div className={styles.chips}>{GALLERY_DIFFICULTIES.map(d => chip('difficulty', d.key, d.label, <span className={styles.chipStars} aria-hidden="true">{Array.from({ length: d.stars }, (_, i) => <Star key={i}/>)}</span>))}<button type="button" className={styles.clear} onClick={clear}>Clear</button></div></div>
+      <div className={styles.row} role="group" aria-labelledby="filter-difficulty"><h2 id="filter-difficulty">Difficulty</h2><div className={styles.chips}>{GALLERY_DIFFICULTIES.map(d => chip('difficulty', d.key, d.label, null))}<button type="button" className={styles.clear} onClick={clear}>Clear</button></div></div>
     </section>
     <p className={styles.srOnly} aria-live="polite">{results.size} {results.size === 1 ? 'simulation' : 'simulations'}</p>
     <ul className={styles.grid}>{activities.map(sim => <Tile key={sim.id} sim={sim} hidden={!results.has(sim.id)} addToClassEnabled={addToClassEnabled}/>)}</ul>
