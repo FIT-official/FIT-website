@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" width="640" height="380" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif">
+<title id="t">Surveyed floor layout (suggested; dimensions to be surveyed)</title>
+<desc id="d">Plan view of a rectangular indoor test floor with a grid of taped marks, a circular lap path of radius R, a start line, an operator station with a kill switch, and a clear safety margin around the area.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1b2a3a"/></marker></defs>
+<rect x="0.75" y="0.75" width="638.5" height="378.5" rx="10" fill="#ffffff" stroke="#5b6877" stroke-width="1.5"/>
+<text x="16" y="24" font-size="11" fill="#5b6877" text-anchor="start" font-weight="700">DIAGRAM · original explanatory illustration, not a photograph</text>
+<text x="16" y="48" font-size="17" fill="#1b2a3a" text-anchor="start" font-weight="700">Surveyed floor layout (suggested; dimensions to be surveyed)</text>
+<rect x="40" y="70" width="440" height="280" rx="6" fill="#ffffff" stroke="#5b6877" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="260" y="88" font-size="12" fill="#5b6877" text-anchor="middle">clear safety margin (no people or obstacles)</text>
+<rect x="70" y="100" width="380" height="220" rx="6" fill="#eef3f8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M96 130 h8 M100 126 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M96 190 h8 M100 186 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M96 250 h8 M100 246 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M96 310 h8 M100 306 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M176 130 h8 M180 126 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M176 190 h8 M180 186 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M176 250 h8 M180 246 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M176 310 h8 M180 306 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M256 130 h8 M260 126 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M256 190 h8 M260 186 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M256 250 h8 M260 246 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M256 310 h8 M260 306 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M336 130 h8 M340 126 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M336 190 h8 M340 186 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M336 250 h8 M340 246 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M336 310 h8 M340 306 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M416 130 h8 M420 126 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M416 190 h8 M420 186 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M416 250 h8 M420 246 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M416 310 h8 M420 306 v8" stroke="#1b2a3a" stroke-width="1.5"/>
+<circle cx="260" cy="210" r="75" fill="none" stroke="#1f5fa8" stroke-width="2.5"/>
+<line x1="260" y1="210" x2="335" y2="210" stroke="#1f5fa8" stroke-width="1.5"/>
+<text x="298" y="204" font-size="13" fill="#1f5fa8" text-anchor="start" font-weight="700">R</text>
+<line x1="250" y1="130" x2="250" y2="150" stroke="#b45309" stroke-width="3"/>
+<text x="205" y="130" font-size="12" fill="#b45309" text-anchor="start">start</text>
+<rect x="500" y="120" width="120" height="60" rx="6" fill="#fff1f0" stroke="#b3261e" stroke-width="1.5"/><text x="560" y="146.5" font-size="13" fill="#1b2a3a" text-anchor="middle">Operator +</text><text x="560" y="161.5" font-size="13" fill="#1b2a3a" text-anchor="middle">kill switch</text>
+<text x="560" y="210" font-size="12" fill="#1b2a3a" text-anchor="middle">speed limit set in</text>
+<text x="560" y="226" font-size="12" fill="#1b2a3a" text-anchor="middle">firmware, agreed with</text>
+<text x="560" y="242" font-size="12" fill="#1b2a3a" text-anchor="middle">your teacher</text>
+<text x="90" y="346" font-size="12" fill="#1b2a3a" text-anchor="start">+ taped marks measured with a tape; record survey uncertainty</text>
+<text x="24" y="372" font-size="12" fill="#5b6877" text-anchor="start">Indoor, low-speed, supervised only.</text>
+</svg>

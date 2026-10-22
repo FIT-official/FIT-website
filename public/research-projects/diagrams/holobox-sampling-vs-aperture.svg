@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" width="640" height="380" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif">
+<title id="t">Sampling limit versus aperture limit</title>
+<desc id="d">Two panels. Left: a row of sensor pixels with a fringe whose period is under two pixels, marked as aliased. Right: a cone from the object to the sensor edge showing the geometric numerical aperture set by the window half-width and the distance z.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1b2a3a"/></marker></defs>
+<rect x="0.75" y="0.75" width="638.5" height="378.5" rx="10" fill="#ffffff" stroke="#5b6877" stroke-width="1.5"/>
+<text x="16" y="24" font-size="11" fill="#5b6877" text-anchor="start" font-weight="700">DIAGRAM · original explanatory illustration, not a photograph</text>
+<text x="16" y="48" font-size="17" fill="#1b2a3a" text-anchor="start" font-weight="700">Sampling limit versus aperture limit</text>
+<text x="20" y="78" font-size="13" fill="#1b2a3a" text-anchor="start" font-weight="700">A. Sampling limit (pixels)</text>
+<rect x="20" y="150" width="28" height="28" rx="0" fill="#ffffff" stroke="#1b2a3a" stroke-width="1.5"/>
+<rect x="48" y="150" width="28" height="28" rx="0" fill="#ffffff" stroke="#1b2a3a" stroke-width="1.5"/>
+<rect x="76" y="150" width="28" height="28" rx="0" fill="#ffffff" stroke="#1b2a3a" stroke-width="1.5"/>
+<rect x="104" y="150" width="28" height="28" rx="0" fill="#ffffff" stroke="#1b2a3a" stroke-width="1.5"/>
+<rect x="132" y="150" width="28" height="28" rx="0" fill="#ffffff" stroke="#1b2a3a" stroke-width="1.5"/>
+<rect x="160" y="150" width="28" height="28" rx="0" fill="#ffffff" stroke="#1b2a3a" stroke-width="1.5"/>
+<rect x="188" y="150" width="28" height="28" rx="0" fill="#ffffff" stroke="#1b2a3a" stroke-width="1.5"/>
+<rect x="216" y="150" width="28" height="28" rx="0" fill="#ffffff" stroke="#1b2a3a" stroke-width="1.5"/>
+<rect x="244" y="150" width="28" height="28" rx="0" fill="#ffffff" stroke="#1b2a3a" stroke-width="1.5"/>
+<rect x="272" y="150" width="28" height="28" rx="0" fill="#ffffff" stroke="#1b2a3a" stroke-width="1.5"/>
+<path d="M20 128 Q34 108 48 128 T76 128 T104 128 T132 128 T160 128 T188 128 T216 128 T244 128 T272 128 T300 128" fill="none" stroke="#b3261e" stroke-width="2"/>
+<text x="150" y="100" font-size="12" fill="#b3261e" text-anchor="middle">fringe period &lt; 2 pixels</text>
+<text x="150" y="205" font-size="12" fill="#b3261e" text-anchor="middle">aliased: cannot be recorded</text>
+<text x="150" y="225" font-size="12" fill="#1b2a3a" text-anchor="middle">Lambda &gt;= 2p  =&gt;  NA(pix) = lambda / 2p</text>
+<line x1="320" y1="70" x2="320" y2="340" stroke="#5b6877" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="340" y="78" font-size="13" fill="#1b2a3a" text-anchor="start" font-weight="700">B. Aperture limit (window)</text>
+<circle cx="360" cy="200" r="5" fill="#1b2a3a" stroke="#1b2a3a" stroke-width="1.5"/>
+<text x="360" y="224" font-size="12" fill="#1b2a3a" text-anchor="middle">object</text>
+<line x1="360" y1="200" x2="560" y2="130" stroke="#1f5fa8" stroke-width="2"/>
+<line x1="360" y1="200" x2="560" y2="270" stroke="#1f5fa8" stroke-width="2"/>
+<rect x="556" y="125" width="12" height="150" rx="6" fill="#1b2a3a" stroke="#1b2a3a" stroke-width="1.5"/>
+<line x1="580" y1="130" x2="580" y2="200" stroke="#1b2a3a" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="580" y1="200" x2="580" y2="130" stroke="#1b2a3a" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="598" y="168" font-size="13" fill="#1b2a3a" text-anchor="start" font-weight="700">W</text>
+<line x1="360" y1="300" x2="560" y2="300" stroke="#1b2a3a" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="560" y1="300" x2="360" y2="300" stroke="#1b2a3a" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="460" y="320" font-size="13" fill="#1b2a3a" text-anchor="middle" font-weight="700">distance z</text>
+<text x="470" y="245" font-size="12" fill="#1f5fa8" text-anchor="middle">NA(geo) = W / sqrt(z^2 + W^2)</text>
+<text x="20" y="360" font-size="12" fill="#5b6877" text-anchor="start">Effective NA is the smaller of the two; smallest period is about lambda / NA.</text>
+</svg>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" width="640" height="380" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif">
+<title id="t">Two opposed emitter caps and the common axis</title>
+<desc id="d">Cross-section: two curved caps of small circles (emitters) face each other above and below a vertical dashed axis. The centre is marked, with the cap radius R and polar angle theta drawn for one emitter. A bead is shown at a pressure node on the axis.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1b2a3a"/></marker></defs>
+<rect x="0.75" y="0.75" width="638.5" height="378.5" rx="10" fill="#ffffff" stroke="#5b6877" stroke-width="1.5"/>
+<text x="16" y="24" font-size="11" fill="#5b6877" text-anchor="start" font-weight="700">DIAGRAM · original explanatory illustration, not a photograph</text>
+<text x="16" y="48" font-size="17" fill="#1b2a3a" text-anchor="start" font-weight="700">Two opposed emitter caps and the common axis</text>
+<line x1="320" y1="66" x2="320" y2="366" stroke="#5b6877" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="332" y="76" font-size="12" fill="#5b6877" text-anchor="start">common axis z</text>
+<path d="M210.60877197497345 144.76070023714183 A130 130 0 0 1 429.3912280250265 144.76070023714183" fill="none" stroke="#5b6877" stroke-width="1.5"/>
+<path d="M210.60877197497345 285.2392997628582 A130 130 0 0 0 429.3912280250265 285.2392997628582" fill="none" stroke="#5b6877" stroke-width="1.5"/>
+<circle cx="218.16750174842716" cy="134.19070412481364" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="246.5964784586454" cy="107.70637006174182" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="281.58237313402583" cy="90.80625641367122" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="320" cy="85" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="358.41762686597417" cy="90.80625641367122" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="393.4035215413546" cy="107.70637006174182" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="421.8324982515728" cy="134.19070412481364" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="218.16750174842716" cy="295.80929587518636" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="246.5964784586454" cy="322.29362993825816" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="281.58237313402583" cy="339.19374358632876" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="320" cy="345" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="358.41762686597417" cy="339.19374358632876" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="393.4035215413546" cy="322.29362993825816" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="421.8324982515728" cy="295.80929587518636" r="7" fill="#b45309" stroke="#1b2a3a" stroke-width="1"/>
+<circle cx="320" cy="215" r="4" fill="#1b2a3a" stroke="#1b2a3a" stroke-width="1.5"/>
+<text x="332" y="231" font-size="12" fill="#1b2a3a" text-anchor="start">centre</text>
+<circle cx="320" cy="195" r="6" fill="#ffffff" stroke="#1f5fa8" stroke-width="2"/>
+<text x="150" y="193" font-size="12" fill="#1f5fa8" text-anchor="start">bead at a pressure node</text>
+<line x1="320" y1="215" x2="421.8324982515728" y2="134.19070412481364" stroke="#1b2a3a" stroke-width="1.5"/>
+<text x="382.9162491257864" y="180.59535206240682" font-size="14" fill="#1b2a3a" text-anchor="start" font-weight="700">R</text>
+<path d="M320 175 A40 40 0 0 1 351.33307638509933 190.13560126917343" fill="none" stroke="#1b7a4b" stroke-width="1.5"/>
+<text x="352" y="165" font-size="12" fill="#1b7a4b" text-anchor="start">theta</text>
+<text x="24" y="120" font-size="12" fill="#1b2a3a" text-anchor="start">upper cap (phase 0)</text>
+<text x="24" y="330" font-size="12" fill="#1b2a3a" text-anchor="start">lower cap (phase offset)</text>
+<text x="24" y="372" font-size="12" fill="#5b6877" text-anchor="start">Axial fields add as phasors; random phase or position errors shift and weaken the node.</text>
+</svg>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" width="640" height="380" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif">
+<title id="t">In-line holography layout (proposed)</title>
+<desc id="d">Left to right: a light source with a pinhole, a collimated beam, an opaque strip object, a gap labelled z, and an image sensor. Light passing around the strip is the reference wave and light scattered by it is the object wave.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1b2a3a"/></marker></defs>
+<rect x="0.75" y="0.75" width="638.5" height="378.5" rx="10" fill="#ffffff" stroke="#5b6877" stroke-width="1.5"/>
+<text x="16" y="24" font-size="11" fill="#5b6877" text-anchor="start" font-weight="700">DIAGRAM · original explanatory illustration, not a photograph</text>
+<text x="16" y="48" font-size="17" fill="#1b2a3a" text-anchor="start" font-weight="700">In-line holography layout (proposed)</text>
+<rect x="24" y="150" width="90" height="70" rx="6" fill="#eef3f8" stroke="#1b2a3a" stroke-width="1.5"/><text x="69" y="181.5" font-size="13" fill="#1b2a3a" text-anchor="middle">Light source</text><text x="69" y="196.5" font-size="13" fill="#1b2a3a" text-anchor="middle">+ pinhole</text>
+<line x1="114" y1="185" x2="230" y2="185" stroke="#b45309" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="172" y="170" font-size="12" fill="#b45309" text-anchor="middle">collimated beam</text>
+<rect x="236" y="150" width="14" height="70" fill="#1b2a3a"/>
+<text x="243" y="240" font-size="12" fill="#1b2a3a" text-anchor="middle">opaque strip</text>
+<text x="243" y="256" font-size="12" fill="#1b2a3a" text-anchor="middle">(width w)</text>
+<line x1="250" y1="168" x2="520" y2="168" stroke="#b45309" stroke-width="1.5" stroke-dasharray="6 4"/>
+<line x1="250" y1="202" x2="520" y2="202" stroke="#b45309" stroke-width="1.5" stroke-dasharray="6 4"/>
+<path d="M250 185 Q380 130 520 150" fill="none" stroke="#1f5fa8" stroke-width="1.5" stroke-dasharray="6 4"/>
+<path d="M250 185 Q380 240 520 220" fill="none" stroke="#1f5fa8" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="380" y="128" font-size="12" fill="#1f5fa8" text-anchor="middle">scattered: object wave</text>
+<text x="380" y="280" font-size="12" fill="#b45309" text-anchor="middle">unscattered: reference wave (orange)</text>
+<rect x="520" y="140" width="18" height="90" rx="6" fill="#1b2a3a" stroke="#1b2a3a" stroke-width="1.5"/>
+<text x="529" y="255" font-size="12" fill="#1b2a3a" text-anchor="middle">image sensor</text>
+<text x="529" y="271" font-size="12" fill="#1b2a3a" text-anchor="middle">(pixel pitch p)</text>
+<line x1="250" y1="310" x2="520" y2="310" stroke="#1b2a3a" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="520" y1="310" x2="250" y2="310" stroke="#1b2a3a" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="385" y="330" font-size="13" fill="#1b2a3a" text-anchor="middle" font-weight="700">distance z (read from the rail scale)</text>
+<text x="24" y="360" font-size="12" fill="#5b6877" text-anchor="start">The sensor records interference intensity only; a computer propagates it numerically.</text>
+</svg>

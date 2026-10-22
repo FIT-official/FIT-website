@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" width="640" height="380" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif">
+<title id="t">Spanwise lift distributions (schematic)</title>
+<desc id="d">Graph with half-span on the horizontal axis and relative loading on the vertical axis. An elliptical curve is drawn solid, and a flatter curve with lower loading near the tip is drawn dashed and labelled with washout.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1b2a3a"/></marker></defs>
+<rect x="0.75" y="0.75" width="638.5" height="378.5" rx="10" fill="#ffffff" stroke="#5b6877" stroke-width="1.5"/>
+<text x="16" y="24" font-size="11" fill="#5b6877" text-anchor="start" font-weight="700">DIAGRAM · original explanatory illustration, not a photograph</text>
+<text x="16" y="48" font-size="17" fill="#1b2a3a" text-anchor="start" font-weight="700">Spanwise lift distributions (schematic)</text>
+<line x1="80" y1="320" x2="580" y2="320" stroke="#5b6877" stroke-width="1.5"/>
+<line x1="80" y1="320" x2="80" y2="90" stroke="#5b6877" stroke-width="1.5"/>
+<text x="330" y="350" font-size="12" fill="#1b2a3a" text-anchor="middle">distance from centreline  (y / semi-span)</text>
+<text x="70" y="86" font-size="12" fill="#1b2a3a" text-anchor="end">load</text>
+<path d="M80 120 A500 200 0 0 1 580 320" fill="none" stroke="#1f5fa8" stroke-width="3"/>
+<path d="M80 140 C200 138 300 160 400 230 C470 280 540 306 580 320" fill="none" stroke="#b45309" stroke-width="3" stroke-dasharray="6 4"/>
+<text x="430" y="150" font-size="13" fill="#1f5fa8" text-anchor="start">elliptical (reference)</text>
+<text x="430" y="200" font-size="13" fill="#b45309" text-anchor="start">with washout: less load at the tip</text>
+<text x="80" y="340" font-size="12" fill="#1b2a3a" text-anchor="middle">0</text>
+<text x="580" y="340" font-size="12" fill="#1b2a3a" text-anchor="middle">1</text>
+<text x="24" y="372" font-size="12" fill="#5b6877" text-anchor="start">Schematic only; use the simulation for numbers.</text>
+</svg>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" width="640" height="380" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif">
+<title id="t">Link budget chain (decibels)</title>
+<desc id="d">Left-to-right chain: transmit power plus can antenna gain, minus free-space path loss, minus pointing loss, plus tracking antenna gain, giving received power. A bar at the end compares received power with receiver sensitivity to show the margin.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1b2a3a"/></marker></defs>
+<rect x="0.75" y="0.75" width="638.5" height="378.5" rx="10" fill="#ffffff" stroke="#5b6877" stroke-width="1.5"/>
+<text x="16" y="24" font-size="11" fill="#5b6877" text-anchor="start" font-weight="700">DIAGRAM · original explanatory illustration, not a photograph</text>
+<text x="16" y="48" font-size="17" fill="#1b2a3a" text-anchor="start" font-weight="700">Link budget chain (decibels)</text>
+<rect x="20" y="110" width="100" height="56" rx="6" fill="#eef3f8" stroke="#1b2a3a" stroke-width="1.5"/><text x="70" y="134.5" font-size="13" fill="#1b2a3a" text-anchor="middle">Transmit power</text><text x="70" y="149.5" font-size="13" fill="#1b2a3a" text-anchor="middle">P(t)</text>
+<rect x="140" y="110" width="100" height="56" rx="6" fill="#ecfdf3" stroke="#1b7a4b" stroke-width="1.5"/><text x="190" y="134.5" font-size="13" fill="#1b2a3a" text-anchor="middle">+ can antenna</text><text x="190" y="149.5" font-size="13" fill="#1b2a3a" text-anchor="middle">gain G(t)</text>
+<rect x="260" y="110" width="110" height="56" rx="6" fill="#fff1f0" stroke="#b3261e" stroke-width="1.5"/><text x="315" y="134.5" font-size="13" fill="#1b2a3a" text-anchor="middle">- free-space</text><text x="315" y="149.5" font-size="13" fill="#1b2a3a" text-anchor="middle">path loss L(fs)</text>
+<rect x="390" y="110" width="100" height="56" rx="6" fill="#fff1f0" stroke="#b3261e" stroke-width="1.5"/><text x="440" y="134.5" font-size="13" fill="#1b2a3a" text-anchor="middle">- pointing</text><text x="440" y="149.5" font-size="13" fill="#1b2a3a" text-anchor="middle">loss L(p)</text>
+<rect x="510" y="110" width="110" height="56" rx="6" fill="#ecfdf3" stroke="#1b7a4b" stroke-width="1.5"/><text x="565" y="134.5" font-size="13" fill="#1b2a3a" text-anchor="middle">+ tracking</text><text x="565" y="149.5" font-size="13" fill="#1b2a3a" text-anchor="middle">antenna gain G(r)</text>
+<line x1="120" y1="138" x2="140" y2="138" stroke="#1b2a3a" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="138" x2="260" y2="138" stroke="#1b2a3a" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="370" y1="138" x2="390" y2="138" stroke="#1b2a3a" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="490" y1="138" x2="510" y2="138" stroke="#1b2a3a" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="200" y="210" width="240" height="44" rx="6" fill="#e8f0fe" stroke="#1f5fa8" stroke-width="1.5"/><text x="320" y="236" font-size="13" fill="#1b2a3a" text-anchor="middle">Received power P(r)  (dBm)</text>
+<line x1="320" y1="166" x2="320" y2="210" stroke="#1b2a3a" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="120" y="290" width="400" height="22" fill="#eef3f8" stroke="#5b6877"/>
+<rect x="120" y="290" width="150" height="22" fill="#fecaca" stroke="#5b6877"/>
+<rect x="270" y="290" width="170" height="22" fill="#bbf7d0" stroke="#5b6877"/>
+<text x="195" y="306" font-size="11" fill="#1b2a3a" text-anchor="middle">below sensitivity</text>
+<text x="355" y="306" font-size="12" fill="#1b2a3a" text-anchor="middle" font-weight="700">margin</text>
+<line x1="270" y1="280" x2="270" y2="322" stroke="#1b2a3a" stroke-width="2"/>
+<text x="270" y="338" font-size="12" fill="#1b2a3a" text-anchor="middle">receiver sensitivity</text>
+<line x1="440" y1="280" x2="440" y2="322" stroke="#1f5fa8" stroke-width="2"/>
+<text x="440" y="338" font-size="12" fill="#1f5fa8" text-anchor="middle">P(r)</text>
+<text x="24" y="372" font-size="12" fill="#5b6877" text-anchor="start">margin = P(r) - sensitivity; free-space loss is optimistic near the ground.</text>
+</svg>

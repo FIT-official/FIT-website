@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" width="640" height="380" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif">
+<title id="t">Effect of phase errors on the axial pressure (schematic)</title>
+<desc id="d">Two sketched curves of squared pressure against height z. The upper curve has deep regular dips at the nodes. The lower curve has shallower, slightly shifted dips, labelled with phase errors.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1b2a3a"/></marker></defs>
+<rect x="0.75" y="0.75" width="638.5" height="378.5" rx="10" fill="#ffffff" stroke="#5b6877" stroke-width="1.5"/>
+<text x="16" y="24" font-size="11" fill="#5b6877" text-anchor="start" font-weight="700">DIAGRAM · original explanatory illustration, not a photograph</text>
+<text x="16" y="48" font-size="17" fill="#1b2a3a" text-anchor="start" font-weight="700">Effect of phase errors on the axial pressure (schematic)</text>
+<text x="24" y="84" font-size="13" fill="#1b7a4b" text-anchor="start" font-weight="700">No errors</text>
+<line x1="60" y1="180" x2="600" y2="180" stroke="#5b6877" stroke-width="1.5"/>
+<line x1="60" y1="100" x2="60" y2="180" stroke="#5b6877" stroke-width="1.5"/>
+<path d="M60 110 C90 110 100 176 120 176 C140 176 150 110 180 110 C210 110 220 176 240 176 C260 176 270 110 300 110 C330 110 340 176 360 176 C380 176 390 110 420 110 C450 110 460 176 480 176 C500 176 510 110 540 110 C570 110 580 176 600 176" fill="none" stroke="#1b7a4b" stroke-width="2.5"/>
+<text x="120" y="196" font-size="12" fill="#1b2a3a" text-anchor="middle">node</text>
+<text x="24" y="234" font-size="13" fill="#b3261e" text-anchor="start" font-weight="700">With phase and position errors</text>
+<line x1="60" y1="330" x2="600" y2="330" stroke="#5b6877" stroke-width="1.5"/>
+<line x1="60" y1="250" x2="60" y2="330" stroke="#5b6877" stroke-width="1.5"/>
+<path d="M60 270 C90 262 102 316 126 312 C146 308 152 274 184 270 C214 266 224 312 246 310 C266 308 272 276 306 268 C336 262 346 310 368 312 C388 314 394 272 426 266 C456 262 466 316 488 314 C508 312 514 276 546 270 C574 266 584 312 600 316" fill="none" stroke="#b3261e" stroke-width="2.5"/>
+<text x="126" y="350" font-size="12" fill="#b3261e" text-anchor="middle">shallower, shifted node</text>
+<text x="600" y="98" font-size="13" fill="#1b2a3a" text-anchor="start" font-weight="700">z</text>
+<text x="600" y="248" font-size="13" fill="#1b2a3a" text-anchor="start" font-weight="700">z</text>
+<text x="24" y="372" font-size="12" fill="#5b6877" text-anchor="start">Schematic only. Run the simulation for numbers.</text>
+</svg>
