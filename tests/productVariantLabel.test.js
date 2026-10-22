@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { productVariantLabel } from '../lib/productVariantLabel'
+import { productVariantLabel, productVariantOptionLabel } from '../lib/productVariantLabel'
 const product={slug:'bambu-lab-3d-printing-filament-1kg-pla-basic'}
 describe('legacy PLA Basic display labels',()=>{
+  it('limits the Cocoa Brown correction to the verified product and exact manufacturer code',()=>{
+    expect(productVariantOptionLabel(product,{name:'Coca Brown (10802)'})).toBe('Cocoa Brown (10802)')
+    expect(productVariantOptionLabel({slug:'another-product'},{name:'Coca Brown (10802)'})).toBe('Coca Brown (10802)')
+    expect(productVariantOptionLabel(product,{name:'Coca Brown (99999)'})).toBe('Coca Brown (99999)')
+  })
   it('corrects the verified swapped groups without modifying stored keys or fees',()=>{
     const colours={name:'Spool',options:[{name:'Jade White (10100)',additionalFee:0},{name:'Black (10101)',additionalFee:0}]}
     const packs={name:'Colour',options:[{name:'With Spool',additionalFee:4},{name:'Without Spool',additionalFee:0}]}

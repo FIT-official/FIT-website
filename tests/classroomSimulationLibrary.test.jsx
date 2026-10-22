@@ -14,7 +14,7 @@ const activities = getLiveSims()
 
 describe('Simulation discovery and classroom embeds', () => {
   const tiles = () => document.querySelectorAll('main > ul > li:not([hidden])')
-  it('renders a tile per live sim with level badges, stars and art, and no helper copy', () => {
+  it('renders a tile per live sim with level badges, explicit difficulty and art', () => {
     render(<Library />)
     expect(screen.getByRole('heading', { level: 1, name: 'Simulations' })).toBeVisible()
     expect(tiles()).toHaveLength(8)
@@ -22,8 +22,8 @@ describe('Simulation discovery and classroom embeds', () => {
     expect(tile).toHaveAttribute('href', '/class/simulations/sampling')
     expect(tile.querySelector('img')).toHaveAttribute('src', '/simulations/art/sampling.svg')
     expect(within(tile).getByText('JC')).toBeVisible()
-    expect(within(tile).getByRole('img', { name: 'Difficulty: Hard' })).toBeVisible()
-    expect(within(screen.getByRole('link', { name: /Feedback Control Lab/ })).getByText('Poly')).toHaveStyle({ background: '#2EC4A6' })
+    expect(within(tile).getByLabelText('Difficulty: Hard')).toHaveTextContent('Hard')
+    expect(within(screen.getByRole('link', { name: /Feedback Control Lab/ })).getByText('Poly')).toBeVisible()
     expect(screen.queryByText(/awaiting curriculum review|Begin with a prediction|Explore independently/)).toBeNull()
     expect(screen.getByText('Original FIT simulations.')).toBeVisible()
   })
